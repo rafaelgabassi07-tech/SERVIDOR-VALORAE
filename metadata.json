@@ -1,0 +1,6 @@
+{
+  "name": "Servidor Valorae",
+  "description": "Proxy de scraping para ativos B3 com monitoramento e cache avançado.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

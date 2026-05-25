@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  /* Material 3 Tonal Palettes (Yellow/Gold Base) - Clean Light Mode */
+  --color-m3-primary: #705D00;
+  --color-m3-on-primary: #FFFFFF;
+  --color-m3-primary-container: #FFDE55;
+  --color-m3-on-primary-container: #221B00;
+  
+  --color-m3-secondary: #655E40;
+  --color-m3-on-secondary: #FFFFFF;
+  --color-m3-secondary-container: #ECE3BD;
+  --color-m3-on-secondary-container: #1F1B05;
+  
+  --color-m3-surface: #FFFBFF;
+  --color-m3-on-surface: #1E1B16;
+  --color-m3-surface-container: #F6F3EB;
+  --color-m3-surface-container-high: #EFEDE4;
+  --color-m3-surface-variant: #EBE2CF;
+  --color-m3-on-surface-variant: #4C4639;
+  
+  --color-m3-outline: #7D7767;
+  --color-m3-outline-variant: #CEC6B4;
+  
+  --color-m3-error: #BA1A1A;
+  --color-m3-success: #006E1C;
+}
+
+@layer base {
+  body {
+    @apply bg-[#FDFCF6] text-m3-on-surface antialiased;
+  }
+}
