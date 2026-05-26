@@ -50,8 +50,35 @@ function walk(dir) {
 for (const file of runtimeFiles) run(`node --check ${file}`, process.execPath, ['--check', file]);
 
 const html = fs.readFileSync('public/index.html', 'utf8');
-for (const needle of ['VALORAE Proxy Observability', '/api/observability', 'id="nav"', 'id="menu-toggle"', 'id="theme-toggle"']) {
+for (const needle of [
+  'VALORAE Proxy Observability',
+  '/api/observability',
+  '/api/health',
+  '/api/ready',
+  'id="nav"',
+  'id="menu-toggle"',
+  'aria-expanded="false"',
+  'id="theme-toggle"',
+  'data-label=',
+  'role="region"',
+  '@media (max-width:640px)',
+  'X-Valorae-Dashboard-Probe',
+  'liveChecks',
+  'delivery',
+  'publicAssets',
+  'Dados, arquivos e bytes enviados aos usuários',
+]) {
   if (!html.includes(needle)) fail(`dashboard incompleto: não encontrei ${needle}`);
 }
+if (html.includes('<b>Health</b><span class="badge ok">OK</span>')) {
+  fail('dashboard não pode exibir Health/Ready como OK fixo; use probes reais.');
+}
+const inlineStart = html.lastIndexOf('<script>');
+const inlineEnd = html.lastIndexOf('</script>');
+if (inlineStart < 0 || inlineEnd <= inlineStart) fail('script inline do dashboard ausente.');
+const tmpInline = '.vercel-inline-dashboard-check.mjs';
+fs.writeFileSync(tmpInline, html.slice(inlineStart + '<script>'.length, inlineEnd));
+run('node --check dashboard inline script', process.execPath, ['--check', tmpInline]);
+fs.rmSync(tmpInline, { force: true });
 
-console.log(`[vercel-build] OK: ${runtimeFiles.length} arquivos JS runtime verificados; public pronto para deploy.`);
+console.log(`[vercel-build] OK: ${runtimeFiles.length} arquivos JS runtime e dashboard responsivo verificados; public pronto para deploy.`);

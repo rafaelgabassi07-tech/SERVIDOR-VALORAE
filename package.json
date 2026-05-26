@@ -22,7 +22,8 @@
     "audit:recommended": "node scripts/audit-recommended-improvements.js",
     "audit:final": "node scripts/audit-final-maturity.js",
     "build:strict": "node scripts/build-free.js",
-    "build:local": "node scripts/build-free.js"
+    "build:local": "node scripts/build-free.js",
+    "audit:observability": "node scripts/audit-observability-harmony.js"
   },
   "engines": {
     "node": "20.x"

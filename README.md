@@ -10,7 +10,7 @@ Proxy HTTP/JSON para dados de investimentos, desenhado para **GitHub + Vercel gr
 
 ## Observabilidade Material Design 3
 
-A página inicial `/` agora é um dashboard de observabilidade baseado em Material Design 3, com menu hambúrguer, navegação por páginas e modo claro/escuro persistente. Ele consome `/api/observability` e mostra métricas reais do Proxy: RPS, latência média/P95/P99, erro, throughput, requests ativos, cache, métodos HTTP, status, CORS, clientes/apps, endpoints, rate limit, segurança, logs e saúde do processo Node. O polling do próprio dashboard não entra no tráfego medido do Proxy.
+A página inicial `/` agora é um dashboard de observabilidade baseado em Material Design 3, com menu hambúrguer, navegação por páginas, modo claro/escuro persistente e página **Entrega**. Ele consome `/api/observability` e mostra métricas reais do Proxy: RPS, latência média/P95/P99, erro, throughput, requests ativos, cache, métodos HTTP, status, CORS, clientes/apps, endpoints, rate limit, segurança, logs, saúde do processo Node, tipos de resposta, bytes enviados por família de API e arquivos públicos entregues pelo servidor local. O polling do próprio dashboard não entra no tráfego medido do Proxy.
 
 A instrumentação fica no roteador interno, sem banco, Redis, KV, storage externo ou dependência paga. Consulte `docs/OBSERVABILITY_DASHBOARD.md`.
 

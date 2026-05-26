@@ -5,7 +5,7 @@ import { extname, join, normalize, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dispatchRoute } from './routes/_router.js';
 import { applySecurityHeaders } from './lib/security/guard.js';
-import { observeServerSocketState } from './lib/observability/metrics.js';
+import { observeServerSocketState, observeStaticAssetRequest } from './lib/observability/metrics.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const PUBLIC_DIR = resolve(__dirname, 'public');
@@ -88,10 +88,16 @@ async function readRequestBody(req) {
 }
 
 function safePublicPath(urlPathname) {
-  const decoded = decodeURIComponent(urlPathname || '/');
+  let decoded;
+  try {
+    decoded = decodeURIComponent(urlPathname || '/');
+  } catch {
+    return null;
+  }
   const target = decoded === '/' ? '/index.html' : decoded;
   const full = resolve(PUBLIC_DIR, normalize(`.${target}`));
-  if (!full.startsWith(PUBLIC_DIR) || relative(PUBLIC_DIR, full).startsWith('..')) return null;
+  const rel = relative(PUBLIC_DIR, full);
+  if (!full.startsWith(PUBLIC_DIR) || rel.startsWith('..') || rel === '..') return null;
   return full;
 }
 
@@ -108,6 +114,7 @@ async function serveStatic(req, res, pathname) {
     res.setHeader('Content-Type', type);
     res.setHeader('Content-Length', String(finalInfo.size));
     res.setHeader('Cache-Control', type.startsWith('text/html') ? 'no-cache' : 'public, max-age=3600');
+    observeStaticAssetRequest(req, res, { pathname, filePath: finalPath, contentType: type, bytes: finalInfo.size });
     if (req.method === 'HEAD') return res.end();
     createReadStream(finalPath).pipe(res);
   } catch {

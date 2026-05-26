@@ -57,3 +57,46 @@ Algumas informações não são fabricadas quando o app não consegue medir com 
 - Fila interna persistente: não existe neste Proxy free-only, então aparece como não medida.
 
 Esses itens são mostrados explicitamente como “não medido” no painel.
+
+## Responsividade mobile/desktop
+
+A interface foi ajustada para funcionar em desktop, tablet e mobile:
+
+- Desktop amplo: grids ampliados para mais cards por linha e largura máxima centralizada.
+- Tablet: drawer vira painel lateral sobreposto com overlay e fechamento por toque fora ou tecla Esc.
+- Mobile: cards em coluna única, gráficos redimensionados, botões com área de toque maior e tabelas convertidas em cartões com rótulos por campo.
+- Telas muito estreitas: o cabeçalho reduz metadados secundários para preservar espaço útil.
+- `prefers-reduced-motion` é respeitado para reduzir animações quando configurado pelo usuário.
+
+## Probes reais sem poluir métricas
+
+A página de Infraestrutura consulta `/api/health` e `/api/ready` com o header `X-Valorae-Dashboard-Probe: 1`. Essas chamadas são reais e verificam as rotas do app, mas são excluídas da contagem de tráfego do Proxy para não distorcer RPS, clientes, endpoints e status HTTP.
+
+O contador `measurement.internalProbeReads` em `/api/observability` registra quantos probes internos do dashboard foram ignorados pela coleta de tráfego.
+
+## Camada de entrega: dados e arquivos
+
+O painel agora inclui a página **Entrega**, dedicada a verificar se o aplicativo trabalha em harmonia com o Proxy como uma extensão de observabilidade:
+
+- Respostas `/api/*` são classificadas por família de rota, bytes enviados, tipo de conteúdo e erro.
+- Arquivos públicos servidos pelo `server.js` local são medidos por caminho, extensão, Content-Type, status, bytes enviados e última atividade.
+- Content-Type de APIs e assets é derivado dos headers reais de resposta.
+- O app não armazena corpo de resposta, conteúdo de arquivos nem IP bruto; guarda apenas metadados técnicos, contadores, bytes e hashes curtos.
+- Em Vercel, assets estáticos de `public/` podem ser entregues diretamente pela plataforma fora do runtime Node. Por isso, essa métrica é marcada como medida apenas quando o arquivo passa pelo `server.js` local.
+
+## Auditoria de harmonia
+
+Use o comando abaixo para validar especificamente a integração entre Proxy, dashboard e observability:
+
+```bash
+npm run audit:observability
+```
+
+Essa auditoria verifica:
+
+- Requisições reais do Proxy aparecem em `/api/observability`.
+- Polling de `/api/observability` não polui o tráfego.
+- Probes internos `health/ready` são contados separadamente.
+- Clientes, CORS, Content-Type, bytes de API e arquivos públicos são medidos.
+- IPs permanecem anonimizados.
+- O painel declara explicitamente que não armazena corpo de resposta.
