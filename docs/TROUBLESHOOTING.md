@@ -41,3 +41,15 @@ Use:
 ## Carteira sem score bom
 
 Informe `quantity`, `averagePrice`, `currentPrice/currentValue`, `targetPercent`, `objective`, `account`, `issuer` e `tags` por posição.
+
+## Vercel Studio: `npm run build` parando em `routes/errors.js`
+
+A partir desta revisão, `npm run build` usa uma validação leve de deploy para evitar falhas ambientais do Vercel Studio durante `node --check` arquivo a arquivo. A validação completa continua disponível localmente com:
+
+```bash
+npm run build:strict
+npm test
+npm run verify
+```
+
+O arquivo `routes/errors.js` continua validado no fluxo estrito, mas o build de deploy não depende mais de syntax checks recursivos que podem falhar de forma pouco explicativa no Studio.

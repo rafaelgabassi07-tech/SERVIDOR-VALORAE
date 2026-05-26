@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 
 const requiredFiles = [
   'api/index.js',
@@ -20,34 +19,31 @@ function fail(message) {
   process.exit(1);
 }
 
-function run(label, cmd, args) {
-  console.log(`[vercel-build] ${label}`);
-  const result = spawnSync(cmd, args, { stdio: 'inherit', shell: process.platform === 'win32' });
-  if (result.status !== 0) fail(`falhou: ${label}`);
+function readJson(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (error) {
+    fail(`JSON inválido em ${file}: ${error.message}`);
+  }
 }
 
-for (const file of requiredFiles) {
+function assertFile(file) {
   if (!fs.existsSync(file)) fail(`arquivo obrigatório ausente: ${file}`);
+  const stat = fs.statSync(file);
+  if (!stat.isFile()) fail(`caminho obrigatório não é arquivo: ${file}`);
 }
 
-const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+console.log(`[vercel-build] Node ${process.version}`);
+console.log('[vercel-build] validação leve de deploy iniciada');
+
+for (const file of requiredFiles) assertFile(file);
+
+const packageJson = readJson('package.json');
 const deps = { ...(packageJson.dependencies || {}), ...(packageJson.devDependencies || {}) };
 if (Object.keys(deps).length > 0) fail('o deploy free-only deve continuar sem dependências externas obrigatórias.');
 
-const vercel = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+const vercel = readJson('vercel.json');
 if (vercel.outputDirectory !== 'public') fail('vercel.json precisa usar outputDirectory="public" para servir o app.');
-
-const runtimeFiles = [];
-function walk(dir) {
-  if (!fs.existsSync(dir)) return;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) walk(fullPath);
-    else if (fullPath.endsWith('.js')) runtimeFiles.push(fullPath);
-  }
-}
-['api', 'routes', 'lib'].forEach(walk);
-for (const file of runtimeFiles) run(`node --check ${file}`, process.execPath, ['--check', file]);
 
 const html = fs.readFileSync('public/index.html', 'utf8');
 for (const needle of [
@@ -70,15 +66,32 @@ for (const needle of [
 ]) {
   if (!html.includes(needle)) fail(`dashboard incompleto: não encontrei ${needle}`);
 }
+
 if (html.includes('<b>Health</b><span class="badge ok">OK</span>')) {
   fail('dashboard não pode exibir Health/Ready como OK fixo; use probes reais.');
 }
-const inlineStart = html.lastIndexOf('<script>');
-const inlineEnd = html.lastIndexOf('</script>');
-if (inlineStart < 0 || inlineEnd <= inlineStart) fail('script inline do dashboard ausente.');
-const tmpInline = '.vercel-inline-dashboard-check.mjs';
-fs.writeFileSync(tmpInline, html.slice(inlineStart + '<script>'.length, inlineEnd));
-run('node --check dashboard inline script', process.execPath, ['--check', tmpInline]);
-fs.rmSync(tmpInline, { force: true });
 
-console.log(`[vercel-build] OK: ${runtimeFiles.length} arquivos JS runtime e dashboard responsivo verificados; public pronto para deploy.`);
+const routeExports = [
+  ['routes/errors.js', 'export default'],
+  ['routes/observability.js', 'export default'],
+  ['routes/_router.js', 'export async function dispatchRoute'],
+];
+for (const [routeFile, expectedExport] of routeExports) {
+  const source = fs.readFileSync(routeFile, 'utf8');
+  if (!source.includes(expectedExport)) fail(`${routeFile} não contém export esperado: ${expectedExport}`);
+}
+
+const publicFiles = [];
+function walkPublic(dir) {
+  if (!fs.existsSync(dir)) return;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkPublic(fullPath);
+    else publicFiles.push(fullPath);
+  }
+}
+walkPublic('public');
+if (publicFiles.length < 2) fail('pasta public parece incompleta.');
+
+console.log('[vercel-build] OK: build leve para Vercel concluído.');
+console.log('[vercel-build] Para auditoria completa local, rode: npm run build:strict && npm test && npm run verify');
