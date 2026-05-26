@@ -5,6 +5,7 @@ interface M3CardProps {
   children: ReactNode;
   className?: string;
   variant?: 'elevated' | 'filled' | 'outlined';
+  key?: any;
 }
 
 export function M3Card({ children, className = '', variant = 'filled' }: M3CardProps) {
@@ -18,7 +19,7 @@ export function M3Card({ children, className = '', variant = 'filled' }: M3CardP
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`${variants[variant]} rounded-[16px] xl:rounded-[20px] p-4 sm:p-6 transition-all duration-300 ${className}`}
+      className={`${variants[variant]} rounded-[24px] p-4 sm:p-6 transition-all duration-300 ${className}`}
     >
       {children}
     </motion.div>

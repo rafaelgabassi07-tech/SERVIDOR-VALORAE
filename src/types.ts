@@ -20,4 +20,6 @@ export interface LogEntry {
   status: 'success' | 'error';
   duration: number;
   source: string;
+  results?: any;
+  metrics?: any;
 }

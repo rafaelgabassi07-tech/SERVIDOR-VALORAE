@@ -1,19 +1,22 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "Node16",
-    "moduleResolution": "node16",
-    "outDir": "./api/lib",
-    "rootDir": "./api/lib",
-    "strict": false,
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "allowJs": true,
     "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
     "esModuleInterop": true,
-    "declaration": false,
-    "removeComments": false,
-    "noEmitOnError": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
     "types": ["node"]
   },
-  "include": ["api/lib/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src", "api", "lib", "server.ts", "vite.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }
