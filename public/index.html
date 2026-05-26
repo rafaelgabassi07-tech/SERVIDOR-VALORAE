@@ -2,7 +2,7 @@
 <html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>VALORAE Proxy Observability v21.5.13</title>
   <meta name="valorae-version" content="21.5.13">
   <meta name="valorae-readiness" content="/api/v1/ready">
@@ -68,6 +68,50 @@
     @media (max-width:430px){.topbar{padding:8px 10px}.top-button{width:34px;height:34px}.segmented{height:34px}.segmented button{padding:0 9px}.status-pill{height:34px;min-width:40px;padding:0 10px}.status-pill span:last-child{display:none}.meta-chip:nth-child(n+3){display:none}.donut-wrap{grid-template-columns:1fr}.donut-wrap svg{justify-self:center}.bar-row{font-size:11.5px}.clock{font-size:22px}}
     @media (pointer:coarse){.top-button{min-width:40px;min-height:40px}.nav button{min-height:44px}.segmented button{min-height:38px}}
     @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+
+
+    /* UI responsiva v21.5.13-r2: corrige header, largura, mobile e desktop */
+    html,body{width:100%;max-width:100%;overflow-x:hidden}
+    body{min-width:320px;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
+    .app{width:100%;max-width:none;overflow-x:clip;align-items:stretch}
+    .content{width:100%;max-width:100%;overflow-x:clip}
+    .main{width:100%;max-width:1680px;margin:0 auto;padding:12px clamp(14px,1.5vw,28px) 36px}
+    .page{width:100%;max-width:100%}
+    .topbar{grid-template-columns:auto minmax(260px,1fr) auto;padding:10px clamp(14px,1.5vw,24px);min-height:62px;gap:12px;background:color-mix(in srgb,var(--background) 92%,transparent)}
+    .title-line{min-width:0}.title h1{font-size:clamp(19px,1.35vw,25px);letter-spacing:-.035em}.compact-subtitle{max-width:38vw}
+    .header-meta{gap:6px;max-width:100%;overflow:hidden}.meta-chip{height:26px;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+    .actions{min-width:0}.segmented{flex:0 0 auto}.status-pill{flex:0 0 auto}.top-button{flex:0 0 auto}
+    .notice{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:12px;border-radius:22px;padding:14px 16px;line-height:1.42}
+    .notice .badge{justify-self:start;white-space:nowrap}.notice b{display:block;font-size:15px;line-height:1.2;margin-bottom:3px}.notice .subtle{display:block;max-width:76ch;overflow-wrap:anywhere}
+    .card{max-width:100%;overflow:hidden}.card-header{min-width:0}.card-header>div{min-width:0}.card h3{line-height:1.18;overflow-wrap:anywhere}.eyebrow{line-height:1.25}.subtle{overflow-wrap:anywhere}.metric{line-height:1.05}.spark svg,.chart svg{display:block;inline-size:100%;block-size:100%}
+    .bar-row span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.legend-item{min-width:0}.legend-item span{min-width:0;overflow:hidden;text-overflow:ellipsis}.event{min-width:0}.event>*{min-width:0}.event b,.event span,.event small{overflow-wrap:anywhere}
+    .table-wrap{overflow-x:auto;max-width:100%}.table{max-width:100%}
+
+    @media (min-width:1281px){.main{padding-top:16px}.kpi-grid{grid-template-columns:repeat(4,minmax(190px,1fr))}.chart-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.three{grid-template-columns:repeat(3,minmax(0,1fr))}.four{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    @media (min-width:1700px){.main{max-width:1800px}.kpi-grid{grid-template-columns:repeat(4,minmax(210px,1fr))}}
+
+    @media (max-width:1100px){
+      .app{display:block;min-height:100dvh}.content{min-height:100dvh}.drawer{top:0;bottom:0}.main{padding-inline:clamp(12px,2.5vw,22px)}
+      .topbar{grid-template-columns:auto minmax(0,1fr) auto;position:sticky;top:0}.compact-subtitle{display:none}.header-meta{overflow-x:auto;scrollbar-width:none}.header-meta::-webkit-scrollbar{display:none}
+    }
+
+    @media (max-width:720px){
+      .topbar{grid-template-columns:42px minmax(0,1fr) 42px;grid-template-areas:"menu title theme" "period period refresh";align-items:center;gap:8px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));min-height:0;border-bottom-color:color-mix(in srgb,var(--outline-variant) 54%,transparent)}
+      #menu-toggle{grid-area:menu}.title{grid-area:title;gap:2px;align-self:center}.title h1{font-size:20px;line-height:1.08;letter-spacing:-.02em}.title-line{display:block}.compact-subtitle{display:none}.header-meta{display:none}
+      .actions{display:contents}.segmented{grid-area:period;width:100%;height:38px;border-radius:15px}.segmented button{min-height:38px;padding:0 10px;font-size:13px}.segmented button:first-child{border-top-left-radius:15px;border-bottom-left-radius:15px}.segmented button:last-child{border-top-right-radius:15px;border-bottom-right-radius:15px}
+      #theme-toggle{grid-area:theme}#refresh{grid-area:refresh}#test-health,.status-pill{display:none!important}.top-button{width:42px;height:42px;border-radius:15px;min-width:42px;min-height:42px}.top-button svg{width:20px;height:20px}
+      .main{padding:12px 12px 24px}.page{gap:12px}.grid{gap:12px}.kpi-grid,.chart-grid,.three,.four,.two-one,.one-two{grid-template-columns:minmax(0,1fr)!important}
+      .notice{display:block;padding:14px;border-radius:22px}.notice .badge{margin-bottom:9px}.notice b{font-size:16px}.notice .subtle{font-size:13px;line-height:1.5}
+      .card{border-radius:22px;padding:14px}.card-header{align-items:flex-start;gap:8px}.card-header .badge{display:none}.metric{font-size:28px}.metric.sm{font-size:23px}.spark{height:34px}.chart{height:190px}.chart.small{height:138px}.icon-badge{width:34px;height:34px;border-radius:13px}
+      .donut-wrap{grid-template-columns:100px minmax(0,1fr);gap:12px}.donut-wrap svg{width:100px;height:100px}.bar-row{grid-template-columns:minmax(0,1fr) auto;gap:7px}.bar-row .bar-track{grid-column:1/-1;grid-row:2}.footer-badges{grid-template-columns:minmax(0,1fr)!important}
+    }
+
+    @media (max-width:480px){
+      body{font-size:13px}.topbar{grid-template-columns:40px minmax(0,1fr) 40px;padding-inline:8px}.title h1{font-size:19px}.top-button{width:40px;height:40px;min-width:40px;min-height:40px}.segmented{height:36px}.segmented button{min-height:36px;font-size:12px}.main{padding:10px 10px 22px}.page{gap:10px}.grid{gap:10px}.card{border-radius:20px;padding:13px}.metric{font-size:26px}.chart{height:172px}.donut-wrap{grid-template-columns:1fr}.donut-wrap svg{justify-self:center}.table td{grid-template-columns:minmax(92px,36%) minmax(0,1fr)}
+    }
+
+    @media (max-width:360px){.title h1{font-size:17px}.main{padding-inline:8px}.card{padding:12px;border-radius:18px}.metric{font-size:24px}.chart{height:160px}.table td{grid-template-columns:1fr;gap:3px}.notice b{font-size:15px}}
 
   </style>
 </head>
@@ -171,7 +215,7 @@
     function dist(d, path, labels){let cur=d;for(const p of path)cur=cur?.[p];const arr=cur||[];return labels?labels.map(l=>arr.find(x=>x.name===l)||{name:l,value:0,percent:0}):arr;}
     function currentSeries(){return latest?.series || []}
     function seriesValues(key){return currentSeries().map(x=>Number(x[key]||0));}
-    function pageNotice(){const m=latest?.measurement||{};return `<div class="notice"><span class="badge ok">Métricas reais</span><div><b>Coleta honesta ativada.</b><br><span class="subtle">${esc(m.proxyTraffic||'Requisições /api/* são medidas em memória.')}</span></div></div>`;}
+    function pageNotice(){return `<div class="notice"><span class="badge ok">Métricas reais</span><div><b>Coleta real ativada</b><span class="subtle">O painel mede requisições <code>/api/*</code> por status, método, bytes, latência e content-type. O polling interno do dashboard é excluído para não poluir o tráfego do Proxy.</span></div></div>`;}
 
     const renderers = {
       overview(d){const s=d.series||[];const req=seriesValues('requests'),err=seriesValues('errorRate'),avg=seriesValues('latencyAvgMs');return `${pageNotice()}<div class="grid kpi-grid">
