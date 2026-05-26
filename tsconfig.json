@@ -1,22 +1,22 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "useDefineForClassFields": true,
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    "checkJs": false,
     "noEmit": true,
-    "jsx": "react-jsx",
-    "types": ["node"]
+    "skipLibCheck": true,
+    "strict": false,
+    "resolveJsonModule": true
   },
-  "include": ["src", "api", "lib", "server.ts", "vite.config.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "api/**/*.js",
+    "routes/**/*.js",
+    "lib/**/*.js",
+    "lib/**/*.d.ts",
+    "lib/**/*.ts",
+    "public/sdk/typescript/**/*.ts"
+  ],
+  "exclude": ["node_modules", ".vercel"]
 }

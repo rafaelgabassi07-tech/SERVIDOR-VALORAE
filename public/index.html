@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VALORAE Proxy Observability v21.5.13</title>
+  <meta name="valorae-version" content="21.5.13">
+  <meta name="valorae-readiness" content="/api/v1/ready">
+  <script>
+    (() => {
+      const saved = localStorage.getItem('valorae-theme');
+      const preferred = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = saved || preferred;
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --primary:#006d3f; --on-primary:#ffffff; --primary-container:#8ff7bd; --on-primary-container:#00210f;
+      --secondary:#4e6354; --secondary-container:#d0e8d5; --tertiary:#38656a; --tertiary-container:#bcebf0;
+      --error:#ba1a1a; --error-container:#ffdad6; --warning:#8a5a00; --warning-container:#ffdf9a;
+      --background:#f8fbf7; --surface:#fbfdf8; --surface-low:#f2f6ef; --surface-container:#edf2eb; --surface-high:#e7ece5;
+      --outline:#727970; --outline-variant:#c2c9bf; --on-surface:#191d19; --on-surface-variant:#424940;
+      --blue:#2368d1; --purple:#7255c7; --teal:#0f7a80; --red:#ba1a1a; --orange:#a05d00; --green:#118847;
+      --drawer:#061c2b; --drawer-2:#08283a; --drawer-text:#e7f7ff; --drawer-muted:#a7c8d9;
+      --shadow-1:0 1px 2px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.05);
+      --shadow-2:0 12px 36px rgba(22,34,26,.12);
+      --radius-xl:28px; --radius-lg:22px; --radius-md:16px; --radius-sm:12px;
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --primary:#73dba2; --on-primary:#00391d; --primary-container:#00522e; --on-primary-container:#8ff7bd;
+      --secondary:#b5ccb9; --secondary-container:#374b3d; --tertiary:#a0cfd4; --tertiary-container:#1f4d52;
+      --error:#ffb4ab; --error-container:#93000a; --warning:#f4bd57; --warning-container:#5a3a00;
+      --background:#10140f; --surface:#191d19; --surface-low:#1f241f; --surface-container:#242a24; --surface-high:#2f352e;
+      --outline:#8c9388; --outline-variant:#424940; --on-surface:#e1e4de; --on-surface-variant:#c2c9bf;
+      --blue:#9bbcff; --purple:#cbbcff; --teal:#8cd5dc; --red:#ffb4ab; --orange:#f4bd57; --green:#73dba2;
+      --drawer:#07151e; --drawer-2:#092637; --drawer-text:#e7f7ff; --drawer-muted:#9fc2d4;
+      --shadow-1:0 1px 2px rgba(0,0,0,.36),0 1px 3px rgba(0,0,0,.28);
+      --shadow-2:0 16px 42px rgba(0,0,0,.38);
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:Inter,Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--background);color:var(--on-surface);font-size:14px;line-height:1.35;overflow-x:hidden}
+    button,input,select{font:inherit;color:inherit}.app{display:grid;grid-template-columns:286px minmax(0,1fr);min-height:100vh;transition:grid-template-columns .22s ease}.drawer{position:sticky;top:0;height:100vh;padding:18px;background:linear-gradient(180deg,var(--drawer),var(--drawer-2) 62%,var(--drawer));color:var(--drawer-text);display:flex;flex-direction:column;gap:16px;box-shadow:8px 0 28px rgba(2,18,28,.22);z-index:20;transition:transform .22s ease,width .22s ease}.brand{display:flex;align-items:center;gap:12px;min-height:56px;padding:2px 8px 12px}.logo{width:42px;height:42px;border-radius:15px;background:linear-gradient(135deg,#00a56a,#4db6ff);display:grid;place-items:center;box-shadow:0 10px 24px rgba(4,164,117,.26);font-weight:950}.brand strong{display:block;font-size:18px;letter-spacing:.08em}.brand span{display:block;color:var(--drawer-muted);font-weight:700;letter-spacing:.02em}.nav{display:grid;gap:6px}.nav button{border:0;width:100%;display:flex;align-items:center;gap:12px;text-align:left;color:var(--drawer-text);background:transparent;border-radius:18px;padding:12px 14px;font-weight:800;cursor:pointer}.nav button:hover{background:rgba(255,255,255,.08)}.nav button.active{background:#0b7bdc;color:#fff;box-shadow:0 10px 26px rgba(11,123,220,.28)}.nav svg,.top-button svg{width:20px;height:20px;flex:0 0 20px}.drawer-spacer{flex:1}.drawer-card{border-radius:22px;background:rgba(255,255,255,.075);padding:14px;display:grid;gap:10px}.drawer-card small{color:var(--drawer-muted)}.user{display:flex;align-items:center;gap:12px;padding:12px 8px}.avatar{width:42px;height:42px;border-radius:50%;background:#f6fbff;color:#0a273b;display:grid;place-items:center;font-weight:950}.user b{display:block}.user small{color:var(--drawer-muted)}
+    .content{min-width:0;display:flex;flex-direction:column}.topbar{position:sticky;top:0;z-index:10;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:18px 24px;background:color-mix(in srgb,var(--background) 86%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid color-mix(in srgb,var(--outline-variant) 68%,transparent)}.title h1{margin:0;font-size:clamp(24px,2vw,34px);line-height:1;letter-spacing:-.045em}.title p{margin:6px 0 0;color:var(--on-surface-variant)}.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}.top-button,.chip,.status-pill,.segmented{border:1px solid var(--outline-variant);background:var(--surface);box-shadow:var(--shadow-1)}.top-button{width:44px;height:44px;border-radius:16px;display:grid;place-items:center;cursor:pointer}.top-button:hover{background:var(--surface-container)}.status-pill{height:44px;border-radius:16px;padding:0 16px;display:flex;align-items:center;gap:10px;font-weight:900}.dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px color-mix(in srgb,var(--green) 16%,transparent)}.dot.warn{background:var(--orange);box-shadow:0 0 0 5px color-mix(in srgb,var(--orange) 18%,transparent)}.dot.err{background:var(--red);box-shadow:0 0 0 5px color-mix(in srgb,var(--red) 18%,transparent)}.segmented{display:flex;overflow:hidden;border-radius:16px}.segmented button{border:0;background:transparent;padding:11px 14px;cursor:pointer;font-weight:850;color:var(--on-surface-variant);border-right:1px solid var(--outline-variant)}.segmented button:last-child{border-right:0}.segmented button.active{background:var(--secondary-container);color:var(--on-surface)}.filters{display:flex;gap:10px;flex-wrap:wrap;padding:0 24px 12px}.chip{height:40px;border-radius:14px;padding:0 13px;display:flex;align-items:center;gap:8px;color:var(--on-surface-variant);font-weight:750}.chip b{color:var(--on-surface)}.main{padding:8px 24px 36px;min-width:0}.page{display:grid;gap:14px}.grid{display:grid;gap:12px}.kpi-grid{grid-template-columns:repeat(4,minmax(170px,1fr))}.chart-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.three{grid-template-columns:repeat(3,minmax(0,1fr))}.four{grid-template-columns:repeat(4,minmax(0,1fr))}.two-one{grid-template-columns:2fr 1fr}.one-two{grid-template-columns:1fr 2fr}.card{position:relative;background:color-mix(in srgb,var(--surface) 86%,transparent);border:1px solid color-mix(in srgb,var(--outline-variant) 78%,transparent);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);padding:16px;overflow:hidden;min-width:0}.card::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,color-mix(in srgb,var(--surface) 46%,transparent),transparent 58%);pointer-events:none}.card>*{position:relative}.card h2,.card h3{margin:0}.card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}.eyebrow{font-size:12px;color:var(--on-surface-variant);font-weight:850;letter-spacing:.02em}.metric{font-size:32px;font-weight:950;letter-spacing:-.045em;margin:8px 0 2px}.metric.sm{font-size:24px}.subtle{color:var(--on-surface-variant)}.change{font-size:12px;font-weight:900}.good{color:var(--green)}.bad{color:var(--red)}.warn-text{color:var(--orange)}.icon-badge{width:36px;height:36px;border-radius:14px;display:grid;place-items:center;background:var(--tertiary-container);color:var(--on-surface)}.icon-badge.blue{background:color-mix(in srgb,var(--blue) 20%,var(--surface));color:var(--blue)}.icon-badge.green{background:color-mix(in srgb,var(--green) 20%,var(--surface));color:var(--green)}.icon-badge.purple{background:color-mix(in srgb,var(--purple) 20%,var(--surface));color:var(--purple)}.icon-badge.red{background:color-mix(in srgb,var(--red) 18%,var(--surface));color:var(--red)}.icon-badge.orange{background:color-mix(in srgb,var(--orange) 20%,var(--surface));color:var(--orange)}.spark{height:38px;margin-top:8px}.chart{height:214px}.chart.small{height:150px}.table-wrap{overflow:auto;border-radius:16px}.table{width:100%;border-collapse:collapse;font-size:12px;min-width:620px}.table th{color:var(--on-surface-variant);font-size:11px;text-align:left;padding:9px 8px;border-bottom:1px solid var(--outline-variant);font-weight:950;white-space:nowrap}.table td{padding:8px;border-bottom:1px solid color-mix(in srgb,var(--outline-variant) 52%,transparent);vertical-align:middle;white-space:nowrap}.table tr:last-child td{border-bottom:0}code{font-family:"SFMono-Regular",Consolas,monospace;background:var(--surface-container);border:1px solid var(--outline-variant);border-radius:8px;padding:2px 6px}.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 8px;font-weight:900;font-size:11px;background:var(--surface-high);color:var(--on-surface-variant);white-space:nowrap}.badge.ok{background:color-mix(in srgb,var(--green) 18%,var(--surface));color:var(--green)}.badge.warn{background:color-mix(in srgb,var(--orange) 20%,var(--surface));color:var(--orange)}.badge.err{background:color-mix(in srgb,var(--red) 18%,var(--surface));color:var(--red)}.bar-row{display:grid;grid-template-columns:minmax(88px,1fr) 2fr auto;gap:10px;align-items:center;margin:9px 0;font-size:12px}.bar-track{height:9px;background:var(--surface-high);border-radius:999px;overflow:hidden}.bar-fill{height:100%;border-radius:inherit;background:var(--blue)}.bar-fill.green{background:var(--green)}.bar-fill.purple{background:var(--purple)}.bar-fill.red{background:var(--red)}.bar-fill.teal{background:var(--teal)}.donut-wrap{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center}.legend{display:grid;gap:8px}.legend-item{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px}.swatch{width:10px;height:10px;border-radius:50%}.mini-list{display:grid;gap:9px}.event{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:start;font-size:12px}.event .level{width:8px;height:8px;border-radius:50%;margin-top:5px;background:var(--green)}.event.warn .level{background:var(--orange)}.event.error .level{background:var(--red)}.empty{border:1px dashed var(--outline-variant);background:var(--surface-low);border-radius:16px;padding:18px;color:var(--on-surface-variant);text-align:center}.notice{display:flex;gap:12px;align-items:flex-start;background:color-mix(in srgb,var(--primary-container) 35%,var(--surface));border:1px solid color-mix(in srgb,var(--primary) 24%,var(--outline-variant));border-radius:20px;padding:14px}.notice.warn{background:color-mix(in srgb,var(--warning-container) 32%,var(--surface));border-color:color-mix(in srgb,var(--warning) 28%,var(--outline-variant))}.footer-badges{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px}.status-tile{border-radius:18px;background:var(--surface);border:1px solid var(--outline-variant);padding:12px 14px;display:grid;gap:4px}.status-tile small{font-weight:900;color:var(--green)}.status-tile.warn small{color:var(--orange)}.clock{font-size:26px;font-weight:950;letter-spacing:-.04em}.overlay{position:fixed;inset:0;background:rgba(0,0,0,.36);opacity:0;pointer-events:none;transition:.22s;z-index:15}.drawer-open .overlay{opacity:1;pointer-events:auto}.drawer-collapsed .app{grid-template-columns:86px minmax(0,1fr)}.drawer-collapsed .brand-text,.drawer-collapsed .nav-label,.drawer-collapsed .drawer-card,.drawer-collapsed .user .user-text{display:none}.drawer-collapsed .drawer{padding-left:12px;padding-right:12px}.drawer-collapsed .brand{justify-content:center;padding-left:0;padding-right:0}.drawer-collapsed .nav button{justify-content:center;padding:13px}
+    @media (max-width:1500px){.kpi-grid{grid-template-columns:repeat(3,minmax(170px,1fr))}.four{grid-template-columns:repeat(2,minmax(0,1fr))}.three{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:1100px){.app{grid-template-columns:1fr}.drawer{position:fixed;left:0;transform:translateX(-105%);width:286px}.drawer-open .drawer{transform:translateX(0)}.drawer-collapsed .app{grid-template-columns:1fr}.drawer-collapsed .brand-text,.drawer-collapsed .nav-label,.drawer-collapsed .drawer-card,.drawer-collapsed .user .user-text{display:block}.topbar{grid-template-columns:auto 1fr;align-items:start}.actions{grid-column:1 / -1;justify-content:flex-start}.chart-grid,.two-one,.one-two,.three,.four{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:700px){.topbar{padding:14px}.filters{padding:0 14px 10px}.main{padding:8px 14px 28px}.kpi-grid{grid-template-columns:1fr}.footer-badges{grid-template-columns:1fr}.donut-wrap{grid-template-columns:1fr}.segmented{width:100%}.segmented button{flex:1}.status-pill{width:100%;justify-content:center}}
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+  <div class="app">
+    <aside class="drawer" id="drawer" aria-label="Menu principal">
+      <div class="brand">
+        <div class="logo">V</div>
+        <div class="brand-text"><strong>VALORAE</strong><span>PROXY</span></div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="drawer-spacer"></div>
+      <div class="drawer-card">
+        <b>Fonte dos dados</b>
+        <small>Dados reais de <code>/api/observability</code>. O polling do painel não entra nas métricas de tráfego do Proxy.</small>
+      </div>
+      <div class="user"><div class="avatar">AD</div><div class="user-text"><b>Admin</b><small>Observability</small></div></div>
+    </aside>
+    <section class="content">
+      <header class="topbar">
+        <button class="top-button" id="menu-toggle" aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        <div class="title"><h1 id="page-title">Visão Geral</h1><p id="page-subtitle">Canal de Proxy para apps terceiros</p></div>
+        <div class="actions">
+          <div class="segmented" aria-label="Período">
+            <button class="period active" data-minutes="60">Última hora</button>
+            <button class="period" data-minutes="1440">24h</button>
+            <button class="period" data-minutes="10080">7 dias</button>
+          </div>
+          <button class="top-button" id="test-health" title="Gerar uma requisição real em /api/health">✓</button>
+          <button class="top-button" id="refresh" aria-label="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+          <button class="top-button" id="theme-toggle" aria-label="Alternar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+          <div class="status-pill" id="status-pill"><span class="dot"></span><span>Carregando</span></div>
+        </div>
+      </header>
+      <div class="filters">
+        <div class="chip">Ambiente <b id="env-chip">Produção/local</b></div>
+        <div class="chip">Janela <b id="window-chip">60 min</b></div>
+        <div class="chip">Atualizado <b id="updated-chip">--</b></div>
+        <div class="chip">Requests <b id="requests-chip">0</b></div>
+      </div>
+      <main class="main"><div class="page" id="page"></div></main>
+    </section>
+  </div>
+  <script>
+  (() => {
+    const $ = id => document.getElementById(id);
+    const icons = {
+      overview:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>',
+      traffic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10"/><path d="M4 12h16"/><path d="M4 17h7"/><path d="m15 6 3 3-3 3"/></svg>',
+      performance:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-4 3 2 4-7"/></svg>',
+      upstreams:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="7" r="3"/><circle cx="18" cy="7" r="3"/><circle cx="12" cy="17" r="3"/><path d="M8.5 9.5 10.5 14M15.5 9.5 13.5 14"/></svg>',
+      clients:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>',
+      security:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
+      ratelimit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="9"/></svg>',
+      infrastructure:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 7h.01M7 17h.01"/></svg>',
+      logs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>'
+    };
+    const pages = [
+      ['overview','Visão Geral','Resumo operacional do canal Proxy'],
+      ['traffic','Tráfego','Requests, métodos, status, payloads e protocolos'],
+      ['performance','Desempenho','Latência, erros, throughput e conexões'],
+      ['upstreams','Upstreams','Rotas, destinos e famílias de endpoints'],
+      ['clients','Clientes','Apps consumidores, tokens e user agents'],
+      ['security','Segurança','CORS, autenticação, bloqueios e IPs anonimizados'],
+      ['ratelimit','Rate Limit','Bloqueios, timeouts e circuit breaker'],
+      ['infrastructure','Infraestrutura','Processo Node, memória, CPU, sockets e saúde'],
+      ['logs','Logs','Stream compacto de eventos capturados']
+    ];
+    let periodMinutes = 60;
+    let currentPage = (location.hash || '#overview').slice(1);
+    if (!pages.some(([id]) => id === currentPage)) currentPage = 'overview';
+    let latest = null;
+    let timer;
+
+    function esc(v){return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function nf(v, compact=true){const n=Number(v||0);return new Intl.NumberFormat('pt-BR',{notation:compact&&Math.abs(n)>=10000?'compact':'standard',maximumFractionDigits:n%1?2:0}).format(n);}
+    function pct(v){if(v===null||v===undefined||Number.isNaN(Number(v)))return 'não medido';return `${Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}%`;}
+    function ms(v){return `${nf(v,false)} ms`;}
+    function bytes(v){let n=Number(v||0),u=['B','KB','MB','GB','TB'],i=0;while(n>=1024&&i<u.length-1){n/=1024;i++;}return `${n>=10||i===0?Math.round(n):n.toFixed(1)} ${u[i]}`;}
+    function bps(v){return `${bytes(v)}/s`;}
+    function timeAgo(iso){if(!iso)return 'nunca';const d=(Date.now()-new Date(iso).getTime())/1000;if(d<60)return `${Math.max(0,Math.round(d))}s atrás`;if(d<3600)return `${Math.round(d/60)}min atrás`;return new Date(iso).toLocaleString('pt-BR');}
+    function valueOrMeasured(v, fmt=nf){return v===null||v===undefined?'não medido':fmt(v);}
+    function statusBadge(v){const n=Number(v||0);return `<span class="badge ${n>=5?'err':n>0?'warn':'ok'}">${pct(n)}</span>`;}
+    function empty(msg='Ainda não há tráfego real capturado nesta janela. Faça uma requisição a /api/health, /api/asset ou outro endpoint para popular a página.'){return `<div class="empty">${esc(msg)}</div>`;}
+    function card(title, subtitle, body, extra=''){return `<section class="card ${extra}"><div class="card-header"><div><h3>${esc(title)}</h3>${subtitle?`<div class="eyebrow">${esc(subtitle)}</div>`:''}</div><span class="badge">real-time</span></div>${body}</section>`;}
+    function metricCard(label, sub, value, iconClass='blue', sparkValues=[], color='var(--blue)', foot='') {return `<section class="card"><div class="card-header"><div><div class="eyebrow">${esc(sub)}</div><h3>${esc(label)}</h3></div><span class="icon-badge ${iconClass}">●</span></div><div class="metric">${value}</div>${foot?`<div class="subtle">${foot}</div>`:''}<div class="spark">${spark(sparkValues,color)}</div></section>`;}
+    function rows(data, cols, emptyMsg){if(!data||!data.length)return empty(emptyMsg);return `<div class="table-wrap"><table class="table"><thead><tr>${cols.map(c=>`<th>${esc(c.label)}</th>`).join('')}</tr></thead><tbody>${data.map(r=>`<tr>${cols.map(c=>`<td>${c.render?c.render(r):esc(r[c.key])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
+    function normalize(values){const nums=(values||[]).map(x=>Number(x||0));const max=Math.max(1,...nums);return nums.map((v,i)=>[i,100-(v/max)*88-6]);}
+    function spark(values,color='var(--blue)'){const pts=normalize(values);if(pts.length<2)pts.push([1,94]);const d=pts.map(([i,y])=>`${i/(Math.max(1,pts.length-1))*100},${y}`).join(' ');return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" width="100%" height="100%"><polyline points="${d}" fill="none" stroke="${color}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M0,100 ${d.split(' ').map((p,i)=>(i?'L':'L')+p).join(' ')} L100,100Z" fill="${color}" opacity=".11"/></svg>`;}
+    function lineChart(series,opts={}){const all=series.flatMap(s=>s.values||[]).map(Number);const max=Math.max(1,...all);const min=Math.min(0,...all);const range=Math.max(1,max-min);const n=Math.max(2,...series.map(s=>(s.values||[]).length));const svgSeries=series.map(s=>{const vals=s.values&&s.values.length?s.values:[0,0];const pts=vals.map((v,i)=>`${40+i/(Math.max(1,vals.length-1))*720},${210-((Number(v)-min)/range)*170}`).join(' ');return `${opts.area?`<path d="M40,220 L${pts.replaceAll(' ',' L')} L760,220 Z" fill="${s.color}" opacity=".10"/>`:''}<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;}).join('');const legend=series.map(s=>`<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join('');return `<div class="chart"><svg viewBox="0 0 800 250" width="100%" height="100%"><defs><pattern id="grid" width="80" height="40" patternUnits="userSpaceOnUse"><path d="M80 0H0V40" fill="none" stroke="currentColor" opacity=".08"/></pattern></defs><rect x="40" y="20" width="720" height="200" rx="10" fill="url(#grid)"/>${svgSeries}</svg></div><div class="eyebrow" style="display:flex;gap:14px;flex-wrap:wrap">${legend.replaceAll('<i','<i style="display:inline-block;width:10px;height:10px;border-radius:99px;margin-right:5px;"')}</div>`;}
+    function donut(items,center){const colors=['var(--green)','var(--blue)','var(--orange)','var(--red)','var(--purple)','var(--teal)'];const total=(items||[]).reduce((s,x)=>s+Number(x.value||0),0);if(!total)return empty('Sem distribuição registrada nesta janela.');let offset=25;const circles=items.map((x,i)=>{const val=Number(x.value||0)/total*100;const c=`<circle cx="60" cy="60" r="44" fill="none" stroke="${colors[i%colors.length]}" stroke-width="18" stroke-dasharray="${val} ${100-val}" stroke-dashoffset="${offset}"/>`;offset-=val;return c;}).join('');return `<div class="donut-wrap"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="44" fill="none" stroke="var(--surface-high)" stroke-width="18"/>${circles}<text x="60" y="56" text-anchor="middle" font-size="12" fill="currentColor" font-weight="900">${esc(center)}</text><text x="60" y="74" text-anchor="middle" font-size="11" fill="currentColor">Total</text></svg><div class="legend">${items.map((x,i)=>`<div class="legend-item"><span class="swatch" style="background:${colors[i%colors.length]}"></span><span>${esc(x.name)}</span><b>${x.percent!==undefined?pct(x.percent):nf(x.value)}</b></div>`).join('')}</div></div>`;}
+    function bars(items,color='blue'){if(!items||!items.length)return empty('Sem dados registrados.');const total=items.reduce((s,x)=>s+Number(x.value||0),0)||1;return items.map(x=>{const p=x.percent!==undefined?Number(x.percent||0):(Number(x.value||0)/total*100);return `<div class="bar-row"><span title="${esc(x.name)}">${esc(x.name)}</span><div class="bar-track"><div class="bar-fill ${color}" style="width:${Math.min(100,p)}%"></div></div><b>${x.percent!==undefined?pct(p):nf(x.value)}</b></div>`;}).join('');}
+    function dist(d, path, labels){let cur=d;for(const p of path)cur=cur?.[p];const arr=cur||[];return labels?labels.map(l=>arr.find(x=>x.name===l)||{name:l,value:0,percent:0}):arr;}
+    function currentSeries(){return latest?.series || []}
+    function seriesValues(key){return currentSeries().map(x=>Number(x[key]||0));}
+    function pageNotice(){const m=latest?.measurement||{};return `<div class="notice"><span class="badge ok">Métricas reais</span><div><b>Coleta honesta ativada.</b><br><span class="subtle">${esc(m.proxyTraffic||'Requisições /api/* são medidas em memória.')}</span></div></div>`;}
+
+    const renderers = {
+      overview(d){const s=d.series||[];const req=seriesValues('requests'),err=seriesValues('errorRate'),avg=seriesValues('latencyAvgMs');return `${pageNotice()}<div class="grid kpi-grid">
+        ${metricCard('RPS','Requisições por segundo',nf(d.current?.rps,false),'blue',req,'var(--blue)',`${nf(d.current?.rpm,false)} req/min`)}
+        ${metricCard('Latência média','Tempo médio observado',ms(d.current?.latencyAvgMs),'green',avg,'var(--green)',`P95 ${ms(d.current?.latencyP95Ms)} · P99 ${ms(d.current?.latencyP99Ms)}`)}
+        ${metricCard('Taxa de erro','Status HTTP >= 400',pct(d.current?.errorRate),'red',err,'var(--red)',`${nf(d.totals?.errors,false)} erros no total`)}
+        ${metricCard('Throughput','Entrada + saída',`${bps((d.current?.throughputInBytesPerSecond||0)+(d.current?.throughputOutBytesPerSecond||0))}`,'purple',seriesValues('outboundBytes'),'var(--purple)',`${bps(d.current?.throughputInBytesPerSecond||0)} in · ${bps(d.current?.throughputOutBytesPerSecond||0)} out`)}
+      </div><div class="grid chart-grid">
+        ${card('Volume de requests','Série temporal real',lineChart([{name:'Requests',values:req,color:'var(--blue)'}],{area:true}))}
+        ${card('Latência','Média, P95 e P99',lineChart([{name:'Média',values:avg,color:'var(--green)'},{name:'P95',values:seriesValues('latencyP95Ms'),color:'var(--purple)'},{name:'P99',values:seriesValues('latencyP99Ms'),color:'var(--orange)'}]))}
+      </div><div class="grid three">
+        ${card('Status geral','Derivado de erros reais',`<div class="metric sm">${esc(d.status||'UNKNOWN')}</div><p class="subtle">Último request: ${timeAgo(d.current?.lastRequestAt)}</p>`)}
+        ${card('Cache','Headers de resposta observados',donut(dist(d,['distributions','cache'],['hit','miss','bypass']).map(x=>({...x,name:{hit:'Hit',miss:'Miss',bypass:'Bypass'}[x.name]||x.name})),`${pct(d.current?.cacheHitRatio)}`))}
+        ${card('Medições não disponíveis','Sem inventar dados',`<div class="mini-list"><div><b>GeoIP</b><br><span class="subtle">${esc(d.measurement?.geolocation?.reason||'não medido')}</span></div><div><b>TLS handshake</b><br><span class="subtle">${esc(d.measurement?.tls?.reason||'não medido')}</span></div><div><b>Fila interna</b><br><span class="subtle">${esc(d.measurement?.queueDepth?.reason||'não há fila')}</span></div></div>`)}
+      </div>`;},
+      traffic(d){return `<div class="grid three">
+        ${card('Códigos HTTP','Distribuição por classe',donut(dist(d,['distributions','status'],['2xx','3xx','4xx','5xx']),nf(d.totals?.completed,false)))}
+        ${card('Métodos HTTP','GET, POST, PUT, PATCH...',bars(dist(d,['distributions','methods'],['GET','POST','PUT','PATCH','DELETE','OPTIONS','HEAD']),'blue'))}
+        ${card('Protocolos observados','httpVersion e x-forwarded-proto',bars(dist(d,['distributions','protocols']),'teal'))}
+      </div><div class="grid chart-grid">
+        ${card('Payload de entrada','Content-Length / corpo lido',bars(dist(d,['distributions','payloadIn'],['0 – 1 KB','1 KB – 10 KB','10 KB – 100 KB','100 KB – 1 MB','> 1 MB']),'purple'))}
+        ${card('Payload de resposta','Bytes escritos pela resposta',bars(dist(d,['distributions','payloadOut'],['0 – 1 KB','1 KB – 10 KB','10 KB – 100 KB','100 KB – 1 MB','> 1 MB']),'green'))}
+      </div><div class="grid two-one">
+        ${card('Série de requests','Volume real ao longo do tempo',lineChart([{name:'Requests',values:seriesValues('requests'),color:'var(--blue)'},{name:'Erros',values:seriesValues('errors'),color:'var(--red)'}],{area:true}))}
+        ${card('CORS - Origens','Header Origin capturado',bars(d.security?.corsOrigins||[],'blue'))}
+      </div>`;},
+      performance(d){return `<div class="grid kpi-grid">
+        ${metricCard('P95','Latência p95',ms(d.current?.latencyP95Ms),'purple',seriesValues('latencyP95Ms'),'var(--purple)')}
+        ${metricCard('P99','Latência p99',ms(d.current?.latencyP99Ms),'orange',seriesValues('latencyP99Ms'),'var(--orange)')}
+        ${metricCard('Erro','Taxa de erro',pct(d.current?.errorRate),'red',seriesValues('errorRate'),'var(--red)')}
+        ${metricCard('Ativas','Requests ativos',nf(d.current?.activeRequests,false),'green',seriesValues('activePeak'),'var(--green)')}
+      </div><div class="grid chart-grid">
+        ${card('Latência ao longo do tempo','Média, P95 e P99',lineChart([{name:'Média',values:seriesValues('latencyAvgMs'),color:'var(--green)'},{name:'P95',values:seriesValues('latencyP95Ms'),color:'var(--purple)'},{name:'P99',values:seriesValues('latencyP99Ms'),color:'var(--orange)'}]))}
+        ${card('Largura de banda','Inbound vs outbound',lineChart([{name:'Inbound',values:seriesValues('inboundBytes'),color:'var(--teal)'},{name:'Outbound',values:seriesValues('outboundBytes'),color:'var(--blue)'}],{area:true}))}
+        ${card('Taxa de erros','Erros percentuais',lineChart([{name:'Erro %',values:seriesValues('errorRate'),color:'var(--red)'}],{area:true}))}
+        ${card('Conexões simultâneas','Pico de requests ativos por minuto',lineChart([{name:'Ativas',values:seriesValues('activePeak'),color:'var(--purple)'}],{area:true}))}
+      </div>`;},
+      upstreams(d){const endpoints=d.top?.endpoints||[], upstreams=d.top?.upstreams||[];return `<div class="grid one-two">
+        ${card('Famílias de upstream','Inferidas pela rota real',rows(upstreams,[{label:'Upstream',render:r=>esc(r.upstream)},{label:'Req.',render:r=>nf(r.requests)},{label:'Latência',render:r=>ms(r.latencyAvgMs)},{label:'Erro',render:r=>statusBadge(r.errorRate)},{label:'Bytes',render:r=>bytes(r.bytes)}]))}
+        ${card('Rotas / endpoints','Endpoints mais chamados',rows(endpoints,[{label:'Rota',render:r=>`<code>${esc(r.route)}</code>`},{label:'Método',render:r=>esc(r.topMethod)},{label:'Status',render:r=>esc(r.topStatus)},{label:'Req.',render:r=>nf(r.requests)},{label:'Latência média',render:r=>ms(r.latencyAvgMs)},{label:'P95',render:r=>ms(r.latencyP95Ms)},{label:'Erro',render:r=>statusBadge(r.errorRate)},{label:'Bytes',render:r=>bytes(r.bytes)},{label:'Última',render:r=>timeAgo(r.lastActivityAt)}]))}
+      </div>`;},
+      clients(d){const clients=d.top?.clients||[];return `<div class="grid two-one">
+        ${card('Clientes / apps consumidores','Headers x-client-id, x-app-id, Origin ou query',rows(clients,[{label:'App',render:r=>esc(r.app)},{label:'Token/ID anonimizado',render:r=>`<code>${esc(r.token)}</code>`},{label:'Req.',render:r=>nf(r.requests)},{label:'Erro',render:r=>statusBadge(r.errorRate)},{label:'Latência',render:r=>ms(r.latencyAvgMs)},{label:'Limite',render:r=>esc(r.limit)},{label:'Última atividade',render:r=>timeAgo(r.lastActivityAt)}]))}
+        ${card('User agents','Top consumidores técnicos',bars(d.top?.userAgents||[],'purple'))}
+      </div><div class="grid three">
+        ${card('Autenticação','Authorization, x-api-key ou admin token',donut(dist(d,['distributions','auth'],['válida','inválida','sem token']).map(x=>({...x,name:x.name==='sem token'?'Sem token':x.name})), 'Auth'))}
+        ${card('Origens HTTP','Origin real enviado pelo navegador/app',bars(d.top?.origins||[],'blue'))}
+        ${card('Últimos clientes','Eventos recentes por client id',rows((d.events||[]).slice(0,6),[{label:'Hora',render:r=>new Date(r.time).toLocaleTimeString('pt-BR')},{label:'Cliente',render:r=>esc(r.client)},{label:'Rota',render:r=>esc(r.route)},{label:'Status',render:r=>esc(r.status)}]))}
+      </div>`;},
+      security(d){return `<div class="grid kpi-grid">
+        ${metricCard('Bloqueadas','401, 403 e 429',nf(d.security?.blockedRequests,false),'red',seriesValues('errors'),'var(--red)')}
+        ${metricCard('Suspeitas','4xx não triviais',nf(d.security?.suspiciousRequests,false),'orange',seriesValues('errors'),'var(--orange)')}
+        ${metricCard('IPs únicos','Hash anônimo de IP',nf((d.top?.ips||[]).length,false),'blue',(d.top?.ips||[]).map(x=>x.value),'var(--blue)')}
+        ${metricCard('Auth inválida','Tokens inválidos',nf((dist(d,['distributions','auth'],['válida','inválida','sem token']).find(x=>x.name==='inválida')||{}).value,false),'purple',seriesValues('errors'),'var(--purple)')}
+      </div><div class="grid three">
+        ${card('CORS - Origens','Headers Origin capturados',bars(d.security?.corsOrigins||[],'blue'))}
+        ${card('Top IPs','Anonimizados por hash SHA-256 curto',bars(d.top?.ips||[],'teal'))}
+        ${card('Geolocalização','Não inventada',`<div class="notice warn"><span class="badge warn">não medido</span><div><b>País/região não é calculado.</b><br><span class="subtle">${esc(d.measurement?.geolocation?.reason||'Sem GeoIP.')}</span></div></div>`)}
+      </div><div class="grid two-one">
+        ${card('Autenticação','Distribuição real por headers/status',donut(dist(d,['distributions','auth'],['válida','inválida','sem token']).map(x=>({...x,name:x.name==='sem token'?'Sem token':x.name})), 'Auth'))}
+        ${card('Eventos de segurança','Warnings e erros recentes',eventList((d.events||[]).filter(e=>e.level!=='INFO').slice(0,10)))}
+      </div>`;},
+      ratelimit(d){const rl=d.reliability?.rateLimit||{};return `<div class="grid three">
+        ${card('Rate limiting','Bloqueios 429 observados',`<div class="metric">${nf(rl.blocked,false)}</div><p class="subtle">Uso relativo: ${pct(rl.usagePercent)}</p><div class="bar-track"><div class="bar-fill purple" style="width:${Math.min(100,Number(rl.usagePercent||0))}%"></div></div>`)}
+        ${card('Timeouts','Status 408 e 504',`<div class="metric">${nf(d.reliability?.timeouts,false)}</div><p class="subtle">Contagem baseada em status HTTP reais.</p>`)}
+        ${card('Circuit breaker','Aberturas instrumentadas',`<div class="metric">${nf(d.reliability?.circuitBreakerOpen,false)}</div><p class="subtle">Permanece zero se nenhuma rota reportar abertura.</p>`)}
+      </div><div class="grid two-one">
+        ${card('Erros ao longo do tempo','Série temporal',lineChart([{name:'Erros',values:seriesValues('errors'),color:'var(--red)'},{name:'Taxa %',values:seriesValues('errorRate'),color:'var(--orange)'}],{area:true}))}
+        ${card('Eventos de limite/erro','Registros recentes',eventList((d.events||[]).filter(e=>e.status===429||e.level!=='INFO').slice(0,12)))}
+      </div>`;},
+      infrastructure(d){const sys=d.system||{};return `<div class="grid kpi-grid">
+        ${metricCard('Uptime','Processo Node',`${nf((sys.uptimeSeconds||0)/3600,false)}h`,'green',[sys.uptimeSeconds||0],'var(--green)',esc(sys.node||''))}
+        ${metricCard('Memória heap','process.memoryUsage()',pct(sys.memory?.heapUsedPercent),'purple',[sys.memory?.heapUsedPercent||0],'var(--purple)',`${bytes(sys.memory?.heapUsed)} / ${bytes(sys.memory?.heapTotal)}`)}
+        ${metricCard('CPU média','process.cpuUsage()',pct(sys.cpu?.averagePercent),'blue',[sys.cpu?.averagePercent||0],'var(--blue)',`${nf(sys.cpu?.cores,false)} cores`)}
+        ${metricCard('Event loop lag','Medição local',ms(sys.eventLoopLagMs||0),'orange',[sys.eventLoopLagMs||0],'var(--orange)')}
+      </div><div class="grid four">
+        ${card('Saúde do serviço','Health e ready',`<div class="mini-list"><div class="event"><span class="level"></span><b>Health</b><span class="badge ok">OK</span></div><div class="event"><span class="level"></span><b>Ready</b><span class="badge ok">OK</span></div><div class="event"><span class="level"></span><b>Status</b><span class="badge ${d.status==='DEGRADED'?'warn':'ok'}">${esc(d.status||'UNKNOWN')}</span></div></div>`)}
+        ${card('Open sockets','Medido pelo server.js local',`<div class="metric sm">${valueOrMeasured(sys.openSockets,n=>nf(n,false))}</div><p class="subtle">${esc(d.measurement?.openSockets?.reason||'')}</p>`)}
+        ${card('Fila interna','Não há fila persistente',`<div class="metric sm">${valueOrMeasured(sys.queueDepth,n=>nf(n,false))}</div><p class="subtle">${esc(d.measurement?.queueDepth?.reason||'')}</p>`)}
+        ${card('Log buffer','Eventos mantidos em memória',`<div class="metric sm">${pct(sys.diskLogBufferPercent)}</div><p class="subtle">${nf((d.events||[]).length,false)} eventos retidos</p>`)}
+      </div><div class="grid three">
+        ${card('Runtime','Ambiente do processo',`<div class="mini-list"><div><b>Platform</b><br><span class="subtle">${esc(sys.platform||'')}</span></div><div><b>Conexões locais totais</b><br><span class="subtle">${nf(sys.serverConnectionsTotal,false)}</span></div><div><b>Requests ativos</b><br><span class="subtle">${nf(sys.activeRequests,false)}</span></div></div>`)}
+        ${card('TLS / HTTPS','Medição por headers encaminhados',`<div class="mini-list"><div><b>HTTPS observado</b><br><span class="subtle">${nf(d.reliability?.tls?.httpsRequests,false)} requests</span></div><div><b>HTTP observado</b><br><span class="subtle">${nf(d.reliability?.tls?.httpRequests,false)} requests</span></div><div class="notice warn"><span class="badge warn">handshake não medido</span><span class="subtle">${esc(d.reliability?.tls?.note||'')}</span></div></div>`)}
+        ${card('Workers / saturação','Aproximação por requests ativos',`<div class="metric sm">${pct(sys.workersSaturationPercent)}</div><div class="bar-track"><div class="bar-fill green" style="width:${Math.min(100,Number(sys.workersSaturationPercent||0))}%"></div></div>`)}
+      </div>`;},
+      logs(d){return `<div class="grid two-one">${card('Log stream - eventos recentes','Capturados pelo Proxy',rows(d.events||[],[{label:'Hora',render:r=>new Date(r.time).toLocaleTimeString('pt-BR')},{label:'Nível',render:r=>`<span class="badge ${r.level==='ERROR'?'err':r.level==='WARN'?'warn':'ok'}">${esc(r.level)}</span>`},{label:'Cliente',render:r=>esc(r.client)},{label:'Método',render:r=>esc(r.method)},{label:'Rota',render:r=>`<code>${esc(r.route)}</code>`},{label:'Status',render:r=>esc(r.status)},{label:'Latência',render:r=>ms(r.latencyMs)},{label:'Bytes',render:r=>bytes(r.bytes)},{label:'Mensagem',render:r=>esc(r.message)}]))}${card('Status badges','Saúde resumida',`<div class="footer-badges">${(d.badges||[]).map(b=>`<div class="status-tile ${b.status==='Operacional'?'':'warn'}"><span>${esc(b.name)}</span><small>${esc(b.status)}</small></div>`).join('')}</div><hr style="border:0;border-top:1px solid var(--outline-variant);margin:16px 0"><div class="clock">${new Date().toLocaleTimeString('pt-BR')}</div><span class="subtle">${new Date().toLocaleDateString('pt-BR')} · local</span>`)}</div>`;}
+    };
+    function eventList(events){if(!events||!events.length)return empty('Nenhum evento de alerta nesta janela.');return `<div class="mini-list">${events.map(e=>`<div class="event ${e.level==='ERROR'?'error':e.level==='WARN'?'warn':''}"><span class="level"></span><div><b>${esc(e.event)}</b><br><span class="subtle">${esc(e.message)}</span></div><small>${new Date(e.time).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</small></div>`).join('')}</div>`;}
+
+    function renderNav(){ $('nav').innerHTML = pages.map(([id,label]) => `<button data-page="${id}" class="${id===currentPage?'active':''}">${icons[id]}<span class="nav-label">${label}</span></button>`).join(''); document.querySelectorAll('#nav button').forEach(btn => btn.onclick = () => setPage(btn.dataset.page)); }
+    function setPage(id){currentPage=id;location.hash=id;renderNav();const p=pages.find(x=>x[0]===id);$('page-title').textContent=p[1];$('page-subtitle').textContent=p[2];document.body.classList.remove('drawer-open');render();}
+    function updateChrome(d){$('window-chip').textContent=`${periodMinutes} min`;$('updated-chip').textContent=d?.generatedAt?new Date(d.generatedAt).toLocaleTimeString('pt-BR'):'--';$('requests-chip').textContent=nf(d?.totals?.completed,false);const ok=d?.status!=='DEGRADED';$('status-pill').innerHTML=`<span class="dot ${ok?'':'warn'}"></span><span>${ok?'Operacional':'Atenção'}</span>`;}
+    function render(data=latest){if(!data){$('page').innerHTML=empty('Carregando métricas reais do Proxy...');return;}latest=data;updateChrome(data);const renderer=renderers[currentPage]||renderers.overview;$('page').innerHTML=renderer(data);}
+    async function load(){try{const res=await fetch(`/api/observability?minutes=${periodMinutes}`,{cache:'no-store',headers:{'X-Valorae-Client-Id':'dashboard-ui'}});const json=await res.json();if(!res.ok)throw new Error(json?.error||res.statusText);render(json);}catch(e){$('status-pill').innerHTML='<span class="dot err"></span><span>Erro</span>';$('page').innerHTML=`<div class="notice warn"><span class="badge err">falha</span><div><b>Não foi possível carregar /api/observability.</b><br><span class="subtle">${esc(e.message)}</span></div></div>`;}}
+
+    renderNav();setPage(currentPage);
+    $('menu-toggle').onclick=()=>{ if (innerWidth <= 1100) document.body.classList.toggle('drawer-open'); else document.body.classList.toggle('drawer-collapsed'); };
+    $('overlay').onclick=()=>document.body.classList.remove('drawer-open');
+    $('theme-toggle').onclick=()=>{const next=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=next;localStorage.setItem('valorae-theme',next);};
+    document.querySelectorAll('.period').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.period').forEach(b=>b.classList.remove('active'));btn.classList.add('active');periodMinutes=Number(btn.dataset.minutes||60);load();});
+    $('refresh').onclick=load;
+    $('test-health').onclick=async()=>{await fetch('/api/health?client=dashboard-manual',{cache:'no-store',headers:{'X-Valorae-Client-Id':'dashboard-manual'}}).catch(()=>{});load();};
+    load(); timer=setInterval(load,5000); addEventListener('beforeunload',()=>clearInterval(timer));
+  })();
+  </script>
+</body>
+</html>
