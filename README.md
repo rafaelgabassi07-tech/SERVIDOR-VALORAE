@@ -1,5 +1,10 @@
 # Valorae Proxy v21.5.13 — Mature Final Release Free
 
+
+### Build no Vercel
+
+Para evitar falhas de deploy por auditorias longas no ambiente serverless, `npm run build` agora executa apenas a validação essencial de runtime e do dashboard público. A validação completa continua disponível em `npm run verify` ou `npm run build:strict` antes de publicar alterações.
+
 Proxy HTTP/JSON para dados de investimentos, desenhado para **GitHub + Vercel gratuito**, com deploy simples, sem banco obrigatório, sem Redis/KV, sem storage externo, sem cron pago, sem WebSocket e sem worker permanente.
 
 
