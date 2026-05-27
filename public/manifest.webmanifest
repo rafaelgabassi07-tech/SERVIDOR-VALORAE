@@ -1,0 +1,58 @@
+{
+  "name": "Valorae Proxy",
+  "short_name": "Valorae",
+  "description": "Painel instalável de observabilidade, teste real e documentação do Valorae Proxy.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f8fcf7",
+  "theme_color": "#2f6f46",
+  "categories": ["finance", "productivity", "utilities", "developer"],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-mark.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Teste Real",
+      "short_name": "Teste",
+      "description": "Executar teste real do servidor Proxy.",
+      "url": "/#selftest",
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tecnologia",
+      "short_name": "Tecnologia",
+      "description": "Abrir documentação de integração e scraping.",
+      "url": "/#technology",
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Configurações",
+      "short_name": "Config",
+      "description": "Abrir preferências e diagnóstico do app.",
+      "url": "/#settings",
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

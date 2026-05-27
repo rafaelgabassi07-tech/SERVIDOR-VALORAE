@@ -1,0 +1,24 @@
+{
+  "product": "Valorae Proxy",
+  "apiBasePlaceholder": "{{VALORAE_PROXY_URL}}/api",
+  "headers": {
+    "Accept": "application/json",
+    "X-Valorae-Client-Id": "nome-estavel-do-app",
+    "Content-Type": "application/json para POST"
+  },
+  "endpoints": {
+    "health": "/api/health",
+    "ready": "/api/ready",
+    "openapi": "/api/openapi",
+    "fields": "/api/fields",
+    "asset": "/api/asset?ticker=PETR4&mode=basic&view=compact",
+    "assets": "/api/assets?tickers=PETR4,VALE3",
+    "portfolioAnalyze": "/api/portfolio/analyze",
+    "observability": "/api/observability?minutes=60"
+  },
+  "observability": {
+    "clientIdHeader": "X-Valorae-Client-Id",
+    "capturedMetadata": ["method", "route", "status", "latency", "bytes", "content-type", "origin", "user-agent", "anonymous-ip-hash"],
+    "bodyStored": false
+  }
+}

@@ -10,6 +10,14 @@ const requiredFiles = [
   'lib/Valorae-engine.js',
   'public/index.html',
   'public/inspector.html',
+  'public/manifest.webmanifest',
+  'public/sw.js',
+  'public/logo-mark.svg',
+  'public/logo.svg',
+  'public/pwa-icon-192.png',
+  'public/pwa-icon-512.png',
+  'public/downloads/valorae-proxy-integration-prompt.md',
+  'public/downloads/valorae-proxy-integration-coordinates.json',
   'vercel.json',
   'package.json',
 ];
@@ -67,6 +75,16 @@ for (const needle of [
   'Tecnologia',
   'Executar teste real agora',
   'X-Valorae-Client-Id',
+  'manifest.webmanifest',
+  'serviceWorker',
+  'beforeinstallprompt',
+  'Tecnologia e Integração',
+  'data-download-id="aiPrompt"',
+  'Copiar prompt completo para IA',
+  'valorae-proxy-integration-prompt.md',
+  'id="open-settings"',
+  'logo-mark.svg',
+  'nav-section',
 ]) {
   if (!html.includes(needle)) fail(`dashboard incompleto: não encontrei ${needle}`);
 }
@@ -74,6 +92,14 @@ for (const needle of [
 if (html.includes('<b>Health</b><span class="badge ok">OK</span>')) {
   fail('dashboard não pode exibir Health/Ready como OK fixo; use probes reais.');
 }
+
+const manifest = readJson('public/manifest.webmanifest');
+if (manifest.name !== 'Valorae Proxy') fail('manifest PWA precisa manter name="Valorae Proxy".');
+if (manifest.display !== 'standalone') fail('manifest PWA precisa usar display="standalone".');
+if (!Array.isArray(manifest.icons) || manifest.icons.length < 2) fail('manifest PWA precisa declarar ícones 192/512.');
+const sw = fs.readFileSync('public/sw.js', 'utf8');
+if (!sw.includes("url.pathname.startsWith('/api/')")) fail('service worker não pode cachear rotas /api/* do Proxy.');
+if (!sw.includes('CACHE_NAME')) fail('service worker precisa usar cache versionado.');
 
 const routeExports = [
   ['routes/errors.js', 'export default'],

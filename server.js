@@ -19,6 +19,7 @@ const MIME_TYPES = {
   '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8',
   '.ts': 'text/plain; charset=utf-8',
   '.java': 'text/plain; charset=utf-8',
@@ -113,7 +114,12 @@ async function serveStatic(req, res, pathname) {
     res.statusCode = 200;
     res.setHeader('Content-Type', type);
     res.setHeader('Content-Length', String(finalInfo.size));
-    res.setHeader('Cache-Control', type.startsWith('text/html') ? 'no-cache' : 'public, max-age=3600');
+    const cacheControl = finalPath.endsWith('sw.js') || finalPath.endsWith('manifest.webmanifest')
+      ? 'no-cache, max-age=0'
+      : type.startsWith('text/html')
+        ? 'no-cache'
+        : 'public, max-age=3600';
+    res.setHeader('Cache-Control', cacheControl);
     observeStaticAssetRequest(req, res, { pathname, filePath: finalPath, contentType: type, bytes: finalInfo.size });
     if (req.method === 'HEAD') return res.end();
     createReadStream(finalPath).pipe(res);
