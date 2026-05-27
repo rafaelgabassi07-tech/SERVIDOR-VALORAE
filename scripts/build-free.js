@@ -39,5 +39,4 @@ run('audit:release', process.execPath, ['scripts/audit-release-readiness.js']);
 run('audit:minutiae', process.execPath, ['scripts/audit-minutiae.js']);
 run('audit:recommended', process.execPath, ['scripts/audit-recommended-improvements.js']);
 run('audit:final', process.execPath, ['scripts/audit-final-maturity.js']);
-run('audit:observability', process.execPath, ['scripts/audit-observability-harmony.js']);
 console.log('\nBuild OK: contrato de lançamento validado sem dependências externas.');

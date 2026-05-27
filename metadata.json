@@ -1,6 +1,8 @@
 {
-  "name": "Servidor Valorae",
-  "description": "Proxy de scraping para ativos B3 com monitoramento e cache avançado.",
+  "name": "VALORAE Proxy Server",
+  "description": "Servidor visual para monitoramento em tempo real do proxy de ativos, carteiras, rankings e consultas financeiras com gráficos e métricas.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

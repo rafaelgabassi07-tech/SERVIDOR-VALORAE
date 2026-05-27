@@ -12,7 +12,6 @@ const commands = [
   ['npm', ['run', 'audit:minutiae']],
   ['npm', ['run', 'audit:recommended']],
   ['npm', ['run', 'audit:final']],
-  ['npm', ['run', 'audit:observability']],
   ['npm', ['run', 'smoke']],
 ];
 

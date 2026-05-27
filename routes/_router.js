@@ -1,7 +1,5 @@
 import { ValoraeEngine } from '../lib/Valorae-engine.js';
 import { sendJson } from '../lib/performance/http.js';
-import { applySecurityHeaders } from '../lib/security/guard.js';
-import { observeProxyRequest } from '../lib/observability/metrics.js';
 
 const ROUTES = {
   '/health': () => import('./health.js'),
@@ -10,6 +8,7 @@ const ROUTES = {
   '/env': () => import('./env.js'),
   '/schema': () => import('./schema.js'),
   '/source/status': () => import('./source/status.js'),
+  '/server/metrics': () => import('./server/metrics.js'),
   '/asset': () => import('./asset.js'),
   '/assets': () => import('./assets.js'),
   '/compare': () => import('./compare.js'),
@@ -21,7 +20,6 @@ const ROUTES = {
   '/openapi': () => import('./openapi.js'),
   '/fields': () => import('./fields.js'),
   '/errors': () => import('./errors.js'),
-  '/observability': () => import('./observability.js'),
   '/asset/history': () => import('./asset/history.js'),
   '/asset/dividends': () => import('./asset/dividends.js'),
   '/asset/next-dividend': () => import('./asset/next-dividend.js'),
@@ -102,15 +100,12 @@ function mergeQuery(req, apiVersion, parsed) {
 
 export async function dispatchRoute(req, res) {
   const { path, apiVersion, parsed } = normalizePath(req);
-  observeProxyRequest(req, res, { path, apiVersion });
   if (path === '/') {
     const mod = await import('../api/index.js');
     return mod.default(req, res);
   }
   const load = ROUTES[path];
   if (!load) {
-    applySecurityHeaders(req, res, { methods: 'GET, POST, HEAD, OPTIONS', cacheControl: 'private, max-age=30' });
-    if (req.method === 'OPTIONS') return res.status(200).end();
     return sendJson(req, res, {
       version: ValoraeEngine.version,
       status: 'NOT_FOUND',

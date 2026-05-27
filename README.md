@@ -1,18 +1,6 @@
 # Valorae Proxy v21.5.13 — Mature Final Release Free
 
-
-### Build no Vercel
-
-Para evitar falhas de deploy por auditorias longas no ambiente serverless, `npm run build` agora executa apenas a validação essencial de runtime e do dashboard público. A validação completa continua disponível em `npm run verify` ou `npm run build:strict` antes de publicar alterações.
-
 Proxy HTTP/JSON para dados de investimentos, desenhado para **GitHub + Vercel gratuito**, com deploy simples, sem banco obrigatório, sem Redis/KV, sem storage externo, sem cron pago, sem WebSocket e sem worker permanente.
-
-
-## Observabilidade Material Design 3
-
-A página inicial `/` agora é um dashboard de observabilidade baseado em Material Design 3, com menu hambúrguer, navegação por páginas, modo claro/escuro persistente e página **Entrega**. Ele consome `/api/observability` e mostra métricas reais do Proxy: RPS, latência média/P95/P99, erro, throughput, requests ativos, cache, métodos HTTP, status, CORS, clientes/apps, endpoints, rate limit, segurança, logs, saúde do processo Node, tipos de resposta, bytes enviados por família de API e arquivos públicos entregues pelo servidor local. O polling do próprio dashboard não entra no tráfego medido do Proxy.
-
-A instrumentação fica no roteador interno, sem banco, Redis, KV, storage externo ou dependência paga. Consulte `docs/OBSERVABILITY_DASHBOARD.md`.
 
 ## Status de lançamento
 
@@ -100,26 +88,6 @@ analysis -> deep
 balanced -> standard
 complete -> deep
 ```
-
-
-## Servidor local Node
-
-Além do deploy serverless na Vercel, este pacote agora inclui um servidor HTTP local sem dependências externas:
-
-```bash
-npm start
-```
-
-Endereços principais:
-
-```text
-http://localhost:3000/
-http://localhost:3000/api
-http://localhost:3000/api/health
-http://localhost:3000/inspector.html
-```
-
-Detalhes em `docs/LOCAL_SERVER.md`. O modo Vercel gratuito continua preservado com apenas `api/index.js` e `api/[...path].js`.
 
 ## Validação local
 

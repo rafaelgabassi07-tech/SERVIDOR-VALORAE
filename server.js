@@ -1,168 +1,126 @@
-import { createServer } from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
-import { createReadStream } from 'node:fs';
-import { extname, join, normalize, relative, resolve } from 'node:path';
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dispatchRoute } from './routes/_router.js';
-import { applySecurityHeaders } from './lib/security/guard.js';
-import { observeServerSocketState, observeStaticAssetRequest } from './lib/observability/metrics.js';
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
-const PUBLIC_DIR = resolve(__dirname, 'public');
-const PORT = Number(process.env.PORT || process.env.VALORAE_PORT || 3000);
-const HOST = process.env.HOST || process.env.VALORAE_HOST || '0.0.0.0';
-const MAX_BODY_BYTES = Number(process.env.VALORAE_SERVER_MAX_BODY_BYTES || 1024 * 1024);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const PORT = 3000;
+const PUBLIC_DIR = path.join(__dirname, 'public');
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
-  '.webmanifest': 'application/manifest+json; charset=utf-8',
-  '.txt': 'text/plain; charset=utf-8',
-  '.ts': 'text/plain; charset=utf-8',
-  '.java': 'text/plain; charset=utf-8',
-  '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.webp': 'image/webp',
-  '.ico': 'image/x-icon',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon'
 };
 
-function asJsonError(res, status, code, message) {
-  const body = JSON.stringify({ status: 'ERROR', code, error: message });
-  res.statusCode = status;
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Content-Length', String(Buffer.byteLength(body)));
-  res.end(body);
-}
-
-function adaptResponse(res) {
-  res.status = function status(code) {
-    res.statusCode = Number(code) || 200;
-    return res;
+const server = http.createServer((req, res) => {
+  // Decorate response with Express/Vercel compat methods used by Valorae performance/http
+  res.status = function(code) {
+    this.statusCode = code;
+    return this;
   };
-  res.send = function send(body = '') {
-    if (res.writableEnded) return res;
-    if (Buffer.isBuffer(body) || typeof body === 'string') return res.end(body);
-    return res.end(String(body));
+  res.send = function(body) {
+    this.end(body);
+    return this;
   };
-  res.json = function json(payload) {
-    const body = JSON.stringify(payload ?? null);
-    if (!res.hasHeader('Content-Type')) res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    if (!res.hasHeader('Content-Length')) res.setHeader('Content-Length', String(Buffer.byteLength(body)));
-    return res.end(body);
-  };
-  return res;
-}
 
-async function readRequestBody(req) {
-  if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') return undefined;
-  const chunks = [];
-  let total = 0;
-  for await (const chunk of req) {
-    total += chunk.length;
-    if (total > MAX_BODY_BYTES) {
-      const err = new Error('Corpo da requisição excede o limite permitido.');
-      err.status = 413;
-      err.code = 'BODY_TOO_LARGE';
-      throw err;
+  const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  const pathname = parsedUrl.pathname;
+
+  // Handle API routing
+  if (pathname.startsWith('/api')) {
+    let bodyData = [];
+    req.on('data', (chunk) => {
+      bodyData.push(chunk);
+    });
+    req.on('end', async () => {
+      const buffer = Buffer.concat(bodyData);
+      const text = buffer.toString('utf8');
+      if (text) {
+        if (req.headers['content-type']?.includes('application/json')) {
+          try {
+            req.body = JSON.parse(text);
+          } catch {
+            req.body = {};
+          }
+        } else {
+          req.body = text;
+        }
+      } else {
+        req.body = {};
+      }
+
+      try {
+        await dispatchRoute(req, res);
+      } catch (err) {
+        console.error('API Error:', err);
+        if (!res.writableEnded) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({
+            status: 'ERROR',
+            error: 'Erro interno no servidor proxy.'
+          }));
+        }
+      }
+    });
+    return;
+  }
+
+  // Handle Static files routing
+  let targetPath = path.join(PUBLIC_DIR, pathname);
+  
+  // Security check to avoid path traversal
+  if (!targetPath.startsWith(PUBLIC_DIR)) {
+    res.statusCode = 403;
+    res.end('Acesso Negado');
+    return;
+  }
+
+  // Check if requested path is a directory, if so default to server.html for the dashboard
+  fs.stat(targetPath, (err, stats) => {
+    if (!err && stats.isDirectory()) {
+      targetPath = path.join(targetPath, 'server.html');
     }
-    chunks.push(chunk);
-  }
-  if (!chunks.length) return undefined;
-  const raw = Buffer.concat(chunks).toString('utf8');
-  req.rawBody = raw;
-  const contentType = String(req.headers['content-type'] || '').toLowerCase();
-  if (contentType.includes('application/json')) {
-    try { return JSON.parse(raw); } catch {
-      const err = new Error('JSON inválido no corpo da requisição.');
-      err.status = 400;
-      err.code = 'INVALID_JSON_BODY';
-      throw err;
-    }
-  }
-  if (contentType.includes('application/x-www-form-urlencoded')) return Object.fromEntries(new URLSearchParams(raw));
-  return raw;
-}
 
-function safePublicPath(urlPathname) {
-  let decoded;
-  try {
-    decoded = decodeURIComponent(urlPathname || '/');
-  } catch {
-    return null;
-  }
-  const target = decoded === '/' ? '/index.html' : decoded;
-  const full = resolve(PUBLIC_DIR, normalize(`.${target}`));
-  const rel = relative(PUBLIC_DIR, full);
-  if (!full.startsWith(PUBLIC_DIR) || rel.startsWith('..') || rel === '..') return null;
-  return full;
-}
+    // Try finding file, or append .html if not found (clean URL support)
+    const tryServeFile = (filePath) => {
+      fs.readFile(filePath, (readFileErr, data) => {
+        if (readFileErr) {
+          // If pathname doesn't have extension and .html exists, try that
+          const ext = path.extname(filePath);
+          if (!ext && !filePath.endsWith('.html')) {
+            return tryServeFile(filePath + '.html');
+          }
+          
+          // File actually not found, serve 404
+          res.statusCode = 404;
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          res.end('Não encontrado');
+          return;
+        }
 
-async function serveStatic(req, res, pathname) {
-  const filePath = safePublicPath(pathname);
-  if (!filePath) return asJsonError(res, 403, 'FORBIDDEN', 'Caminho público inválido.');
-  try {
-    const info = await stat(filePath);
-    const finalPath = info.isDirectory() ? join(filePath, 'index.html') : filePath;
-    const finalInfo = info.isDirectory() ? await stat(finalPath) : info;
-    if (!finalInfo.isFile()) return asJsonError(res, 404, 'NOT_FOUND', 'Arquivo público não encontrado.');
-    const type = MIME_TYPES[extname(finalPath).toLowerCase()] || 'application/octet-stream';
-    res.statusCode = 200;
-    res.setHeader('Content-Type', type);
-    res.setHeader('Content-Length', String(finalInfo.size));
-    const cacheControl = finalPath.endsWith('sw.js') || finalPath.endsWith('manifest.webmanifest')
-      ? 'no-cache, max-age=0'
-      : type.startsWith('text/html')
-        ? 'no-cache'
-        : 'public, max-age=3600';
-    res.setHeader('Cache-Control', cacheControl);
-    observeStaticAssetRequest(req, res, { pathname, filePath: finalPath, contentType: type, bytes: finalInfo.size });
-    if (req.method === 'HEAD') return res.end();
-    createReadStream(finalPath).pipe(res);
-  } catch {
-    return asJsonError(res, 404, 'NOT_FOUND', 'Arquivo público não encontrado.');
-  }
-}
+        const ext = path.extname(filePath).toLowerCase();
+        const mime = MIME_TYPES[ext] || 'application/octet-stream';
+        res.statusCode = 200;
+        res.setHeader('Content-Type', mime);
+        res.end(data);
+      });
+    };
 
-async function handle(req, res) {
-  adaptResponse(res);
-  const parsed = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
-  try {
-    if (parsed.pathname.startsWith('/api')) {
-      req.query = Object.fromEntries(parsed.searchParams.entries());
-      req.body = await readRequestBody(req);
-      return dispatchRoute(req, res);
-    }
-    if (req.method !== 'GET' && req.method !== 'HEAD') {
-      return asJsonError(res, 405, 'METHOD_NOT_ALLOWED', 'Use GET ou HEAD para arquivos públicos.');
-    }
-    return serveStatic(req, res, parsed.pathname);
-  } catch (err) {
-    if (parsed.pathname.startsWith('/api')) applySecurityHeaders(req, res, { methods: 'GET, POST, HEAD, OPTIONS' });
-    return asJsonError(res, Number(err.status || 500), err.code || 'SERVER_ERROR', err.message || 'Erro interno no servidor.');
-  }
-}
-
-const server = createServer(handle);
-const openSockets = new Set();
-
-server.on('connection', socket => {
-  openSockets.add(socket);
-  observeServerSocketState(openSockets.size, 1);
-  socket.on('close', () => {
-    openSockets.delete(socket);
-    observeServerSocketState(openSockets.size, 0);
+    tryServeFile(targetPath);
   });
 });
 
-server.listen(PORT, HOST, () => {
-  const hostLabel = HOST === '0.0.0.0' ? 'localhost' : HOST;
-  console.log(`Valorae Proxy server online: http://${hostLabel}:${PORT}`);
-  console.log(`API: http://${hostLabel}:${PORT}/api`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Valorae Proxy Server running on http://0.0.0.0:${PORT}`);
 });
-
-export { server, handle };

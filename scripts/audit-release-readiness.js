@@ -25,11 +25,7 @@ for (const file of requiredFiles) assert(exists(file), `Arquivo obrigatório de 
 assert(Object.keys(pkg.dependencies || {}).length === 0, 'package.json deve continuar sem dependencies obrigatórias.');
 assert(!pkg.devDependencies || Object.keys(pkg.devDependencies).length === 0, 'package.json deve continuar sem devDependencies obrigatórias para deploy simples.');
 assert(!['preinstall','postinstall','prepare'].some(s => pkg.scripts?.[s]), 'Scripts lifecycle de instalação não devem existir.');
-assert(['node scripts/build-free.js', 'node scripts/build-vercel.js'].includes(String(pkg.scripts?.build || '')), 'build deve usar scripts/build-free.js ou scripts/build-vercel.js.');
-if (String(pkg.scripts?.build || '') === 'node scripts/build-vercel.js') {
-  assert(exists('scripts/build-vercel.js'), 'build-vercel.js deve existir quando usado no script build.');
-  assert(String(pkg.scripts?.['build:strict'] || '') === 'node scripts/build-free.js', 'build:strict deve preservar a validação completa via scripts/build-free.js.');
-}
+assert(String(pkg.scripts?.build || '') === 'node scripts/build-free.js', 'build deve usar scripts/build-free.js.');
 assert(fs.readFileSync('scripts/build-free.js', 'utf8').includes('audit-release-readiness.js'), 'build-free deve executar audit:release.');
 assert(String(pkg.scripts?.verify || '') === 'node scripts/verify-release.js', 'verify deve usar orquestrador Node estável.');
 assert(String(pkg.scripts?.typecheck || '').includes('typecheck-free.js'), 'typecheck deve ser livre de tsc externo.');
