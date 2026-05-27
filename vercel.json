@@ -19,5 +19,6 @@
         }
       ]
     }
-  ]
+  ],
+  "buildCommand": "node scripts/build-vercel-safe.js"
 }
