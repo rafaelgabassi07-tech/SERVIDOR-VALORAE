@@ -1,5 +1,6 @@
 import { ValoraeEngine } from '../lib/Valorae-engine.js';
 import { sendJson } from '../lib/performance/http.js';
+import { attachProxyMetricsInterceptor } from '../lib/observability/server-metrics.js';
 
 const ROUTES = {
   '/health': () => import('./health.js'),
@@ -100,6 +101,8 @@ function mergeQuery(req, apiVersion, parsed) {
 
 export async function dispatchRoute(req, res) {
   const { path, apiVersion, parsed } = normalizePath(req);
+  const metricRoute = path === '/' ? '/api' : `/api${path}`;
+  attachProxyMetricsInterceptor(req, res, { route: metricRoute });
   if (path === '/') {
     const mod = await import('../api/index.js');
     return mod.default(req, res);

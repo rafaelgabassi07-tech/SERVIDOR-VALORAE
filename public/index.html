@@ -1,2 +1,271 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Valorae Proxy v21.5.13</title><style>body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:40px;line-height:1.5;max-width:1040px;color:#172033}code{background:#f3f5f7;padding:2px 6px;border-radius:6px}.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.card{border:1px solid #d8dee8;border-radius:16px;padding:16px;background:#fff}.ok{color:#147a3f}a{color:#174ea6}</style></head><body><h1>Valorae Proxy v21.5.13</h1><p class="ok">Proxy gratuito para GitHub/Vercel, serverless, HTTP/JSON e sem tecnologias pagas/complexas.</p><div class="grid"><section class="card"><h2>Ativos</h2><p><code>/api/v1/asset?ticker=PETR4&view=quote&profile=quote</code></p><p>Aliases públicos agora são funcionais e resolvidos internamente.</p></section><section class="card"><h2>Catálogos</h2><p><code>/api/v1/ready</code> · <code>/api/v1/manifest</code> · <code>/api/fields</code> · <code>/api/errors</code> · <code>/api/openapi</code> · <code>/api/v1/env</code> · <code>/api/v1/schema</code> · <code>/api/v1/source/status</code></p><p>Readiness de lançamento, manifesto de capacidades, contrato Web/APK e tratamento de falhas.</p></section><section class="card"><h2>Inspector</h2><p><a href="/server.html">Abrir VALORAE Proxy Server</a></p><p><a href="/inspector.html">Abrir Valorae Inspector</a></p><p>Painel servidor com gráficos, métricas, eventos em tempo real por polling e auditoria pública de rotas, ETag, payload, GET/POST e schema.</p></section><section class="card"><h2>Payload</h2><p><code>?lean=1&maxItems=20&fields=ticker,normalized</code></p><p>Controle de peso sem Redis, KV, banco, storage ou cron pago.</p></section></div><section><h2>Compatibilidade</h2><p>Sem banco obrigatório, sem Redis, sem Vercel KV, sem storage externo, sem WebSocket e sem worker permanente.</p><p>Versão: <code>21.5.13-mature-final-release-free</code></p></section><section><h2>Auditoria</h2><p><code>npm run verify</code> executa check, testes, typecheck, auditorias e smoke; use npm run build para simular o build Vercel. <code>/api/v2/*</code> ativa o envelope v2.</p></section><section><h2>v21.5.13 Mature Final Release Free</h2><p>Inclui release final madura, readiness, manifesto de capacidades, auditoria minuciosa, matriz de qualidade, healthScore de carteira, source/status, catálogo de env/schema, CORS strict opcional, cache metrics e selectors ricos.</p></section>
-</body></html>
+<!doctype html>
+<html lang="pt-BR" data-theme="auto">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>VALORAE Proxy Server Portal</title>
+  
+  <style>
+    :root {
+      --md-primary: #6750a4;
+      --md-on-primary: #ffffff;
+      --md-primary-container: #eaddff;
+      --md-on-primary-container: #21005d;
+      
+      --md-secondary: #625b71;
+      --md-on-secondary: #ffffff;
+      --md-secondary-container: #e8def8;
+      --md-on-secondary-container: #1d192b;
+      
+      --md-bg: #fef7ff;
+      --md-surface: #fef7ff;
+      --md-surface-variant: #e7e0ec;
+      --md-on-surface: #1d1b20;
+      --md-on-surface-variant: #49454f;
+      
+      --md-surface-container-low: #f7f2fa;
+      --md-surface-container: #f3edf7;
+      --md-surface-container-high: #ece6f0;
+      --md-surface-container-highest: #e6e1e5;
+      
+      --md-outline: #79747e;
+      --md-outline-variant: #cac4d0;
+      
+      --md-success: #2e7d32;
+      --md-on-success: #ffffff;
+      
+      --shadow-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
+      --shadow-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
+      
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 28px;
+      --radius-full: 9999px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --md-primary: #d0bcff;
+        --md-on-primary: #381e72;
+        --md-primary-container: #4f378b;
+        --md-on-primary-container: #eaddff;
+        
+        --md-secondary: #ccc2dc;
+        --md-on-secondary: #332d41;
+        --md-secondary-container: #4a4458;
+        --md-on-secondary-container: #e8def8;
+        
+        --md-bg: #141218;
+        --md-surface: #141218;
+        --md-surface-variant: #49454f;
+        --md-on-surface: #e6e0e9;
+        --md-on-surface-variant: #cac4d0;
+        
+        --md-surface-container-low: #1d1b20;
+        --md-surface-container: #211f26;
+        --md-surface-container-high: #2b2930;
+        --md-surface-container-highest: #36343b;
+        
+        --md-outline: #938f99;
+        --md-outline-variant: #49454f;
+        
+        --md-success: #81c784;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--md-bg);
+      color: var(--md-on-surface);
+      font-family: 'Roboto', 'Inter', system-ui, sans-serif;
+      line-height: 1.5;
+      padding: 40px 24px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-portal {
+      max-width: 800px;
+      width: 100%;
+      background-color: var(--md-surface-container-low);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--md-outline-variant);
+      padding: 40px;
+      box-shadow: var(--shadow-1);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-portal::after {
+      content: "";
+      position: absolute;
+      right: -100px;
+      top: -100px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, var(--md-primary-container) 0%, transparent 70%);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .logo-badge {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--md-primary), #006a6a);
+      display: grid;
+      place-items: center;
+      color: var(--md-on-primary);
+      font-weight: 900;
+      font-size: 1.8rem;
+      box-shadow: var(--shadow-2);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+
+    p.subtitle {
+      font-size: 1.1rem;
+      color: var(--md-on-surface-variant);
+      line-height: 1.45;
+    }
+
+    /* Grid of utilities links */
+    .grid-links {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .grid-links {
+        grid-template-columns: 1fr;
+      }
+      .card-portal {
+        padding: 24px;
+      }
+    }
+
+    .nav-card {
+      background-color: var(--md-surface-container);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      text-decoration: none;
+      color: var(--md-on-surface);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: box-shadow 0.2s, background-color 0.2s, transform 0.15s;
+    }
+
+    .nav-card:hover {
+      background-color: var(--md-surface-container-high);
+      box-shadow: var(--shadow-1);
+      transform: translateY(-2px);
+    }
+
+    .nav-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--md-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-card p {
+      font-size: 0.88rem;
+      color: var(--md-on-surface-variant);
+    }
+
+    .m3-pill {
+      height: 20px;
+      padding: 0 8px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      border-radius: var(--radius-full);
+      background-color: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+      display: inline-flex;
+      align-items: center;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      background-color: var(--md-surface-container-high);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--md-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card-portal">
+    <div class="logo-badge">V</div>
+    
+    <div>
+      <h1>VALORAE Proxy Portal</h1>
+      <p class="subtitle" style="margin-top: 6px;">
+        Servidor de proxy e auditoria de alta integridade para mercados financeiros. Pronto para rodar de forma serverless, com custo zero e persistência em memória.
+      </p>
+    </div>
+
+    <!-- Interface Options -->
+    <div class="grid-links">
+
+      <a href="/api/v1/ready" class="nav-card">
+        <span class="nav-icon">✅</span>
+        <h3>Readiness API</h3>
+        <p>Verifique se o proxy está pronto para alimentar APK, Web e carteiras em produção.</p>
+        <code>/api/v1/ready</code>
+      </a>
+
+      <a href="/server.html" class="nav-card">
+        <h3>
+          <span>🖥️ Dashboard Monitor</span>
+          <span class="m3-pill">ONLINE</span>
+        </h3>
+        <p>Acompanhe requisições de APK/Android, tempos de resposta (latência p95), cache ETag e saúde do sistema com gráficos em tempo real.</p>
+      </a>
+      
+      <a href="/inspector.html" class="nav-card">
+        <h3>
+          <span>⚙️ API Contract Inspector</span>
+          <span class="m3-pill" style="background-color:var(--md-secondary-container); color:var(--md-on-secondary-container)">TESTE</span>
+        </h3>
+        <p>Valide as mais de 15 rotas de cotações, estatísticas de cache, catalogs de erros, OpenAPI e simulações com um clique.</p>
+      </a>
+    </div>
+
+    <!-- Under-the-hood specs -->
+    <div style="border-top: 1px solid var(--md-outline-variant); padding-top: 20px; font-size: 0.85rem; color: var(--md-on-surface-variant); display: flex; flex-direction: column; gap: 8px;">
+      <div>🔌 <b>Endpoint de Integração para a APK:</b> <code style="word-break: break-all;">/api/asset?ticker=PETR4&amp;view=compact</code></div>
+      <div>🛡️ <b>Segurança de Privacidade:</b> Sanitização de logs ativos, bloqueios automáticos e sem persistência de IPs ou tokens dos usuários.</div>
+      <div>📦 <b>Versão do Core:</b> <code>v21.5.13 final-release</code> • Construção em conformidade com Material Design 3.</div>
+    </div>
+  </div>
+
+</body>
+</html>
