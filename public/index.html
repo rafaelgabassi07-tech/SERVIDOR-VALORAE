@@ -6,11 +6,32 @@
   <title>VALORAE Proxy Observability v21.5.13</title>
   <meta name="valorae-version" content="21.5.13">
   <meta name="valorae-readiness" content="/api/v1/ready">
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0">
   <script>
     (() => {
-      const saved = localStorage.getItem('valorae-theme');
-      const preferred = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      document.documentElement.dataset.theme = saved || preferred;
+      const APP_STORAGE_VERSION = '21.5.13-polished-selftest-tech';
+      try {
+        const previous = localStorage.getItem('valorae-app-version');
+        if (previous !== APP_STORAGE_VERSION) {
+          for (const key of Object.keys(localStorage)) {
+            if (key.startsWith('valorae-') && key !== 'valorae-theme') localStorage.removeItem(key);
+          }
+          localStorage.setItem('valorae-app-version', APP_STORAGE_VERSION);
+        }
+        const saved = localStorage.getItem('valorae-theme');
+        const preferred = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const safeTheme = saved === 'dark' || saved === 'light' ? saved : preferred;
+        if (saved && saved !== safeTheme) localStorage.removeItem('valorae-theme');
+        document.documentElement.dataset.theme = safeTheme;
+      } catch {
+        document.documentElement.dataset.theme = 'light';
+      }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations?.().then(items => items.forEach(item => item.unregister())).catch(() => {});
+      }
+      if ('caches' in window) {
+        caches.keys().then(keys => keys.filter(key => /valorae|proxy/i.test(key)).forEach(key => caches.delete(key))).catch(() => {});
+      }
     })();
   </script>
   <style>
@@ -113,6 +134,16 @@
 
     @media (max-width:360px){.title h1{font-size:17px}.main{padding-inline:8px}.card{padding:12px;border-radius:18px}.metric{font-size:24px}.chart{height:160px}.table td{grid-template-columns:1fr;gap:3px}.notice b{font-size:15px}}
 
+
+    /* Polimento v21.5.13-polished: ações reais, tecnologia e teste integrado */
+    .drawer-live-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.drawer-dot{width:12px;height:12px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(115,219,162,.16)}
+    .drawer-dot.warn{background:var(--orange)}.drawer-dot.err{background:var(--red)}.drawer-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.drawer-metrics div{border-radius:16px;background:rgba(255,255,255,.08);padding:10px;min-width:0}.drawer-metrics b{display:block;font-size:15px}.drawer-metrics span{display:block;color:var(--drawer-muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.drawer-actions{display:grid;grid-template-columns:1fr;gap:8px}.drawer-action{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.10);color:var(--drawer-text);border-radius:16px;padding:10px 12px;cursor:pointer;font-weight:900;text-align:left}.drawer-action:hover{background:rgba(255,255,255,.16)}
+    .hero-panel{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr);gap:14px;align-items:stretch}.hero-main{border-radius:30px;padding:24px;background:linear-gradient(135deg,color-mix(in srgb,var(--primary-container) 62%,var(--surface)),color-mix(in srgb,var(--tertiary-container) 38%,var(--surface)) 62%,var(--surface));border:1px solid color-mix(in srgb,var(--primary) 22%,var(--outline-variant));box-shadow:var(--shadow-2);overflow:hidden}.hero-main h2{font-size:clamp(24px,3vw,42px);line-height:.98;margin:0 0 10px;letter-spacing:-.055em}.hero-main p{max-width:78ch;margin:0;color:var(--on-surface-variant);font-size:15px}.hero-side{display:grid;gap:10px}.hero-stat{border-radius:22px;padding:16px;background:var(--surface);border:1px solid var(--outline-variant);box-shadow:var(--shadow-1)}.hero-stat b{display:block;font-size:24px;letter-spacing:-.04em}.hero-stat span{color:var(--on-surface-variant);font-weight:800;font-size:12px}.action-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.md-button{border:0;border-radius:999px;background:var(--primary);color:var(--on-primary);padding:11px 16px;font-weight:950;cursor:pointer;box-shadow:var(--shadow-1);display:inline-flex;align-items:center;gap:8px}.md-button.secondary{background:var(--secondary-container);color:var(--on-surface);border:1px solid color-mix(in srgb,var(--outline-variant) 76%,transparent)}.md-button.ghost{background:var(--surface);color:var(--on-surface);border:1px solid var(--outline-variant)}.md-button:disabled{opacity:.58;cursor:not-allowed}
+    .test-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.test-card{border:1px solid var(--outline-variant);border-radius:20px;background:var(--surface-low);padding:14px;display:grid;gap:7px}.test-card.ok{border-color:color-mix(in srgb,var(--green) 35%,var(--outline-variant));background:color-mix(in srgb,var(--green) 8%,var(--surface))}.test-card.warn{border-color:color-mix(in srgb,var(--orange) 42%,var(--outline-variant));background:color-mix(in srgb,var(--orange) 9%,var(--surface))}.test-card.err{border-color:color-mix(in srgb,var(--red) 42%,var(--outline-variant));background:color-mix(in srgb,var(--red) 8%,var(--surface))}.test-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.test-card code{width:max-content;max-width:100%;overflow:auto}.code-block{border:1px solid var(--outline-variant);background:var(--surface-low);border-radius:22px;overflow:hidden}.copy-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--outline-variant);background:var(--surface)}.copy-row b{font-size:13px}.copy-row button{border:1px solid var(--outline-variant);background:var(--secondary-container);border-radius:999px;padding:7px 12px;font-weight:900;cursor:pointer}.code-block pre{margin:0;padding:14px;overflow:auto;max-height:360px;font-size:12px;line-height:1.55}.code-block pre code{background:transparent;border:0;padding:0;white-space:pre;color:inherit}.tech-list{display:grid;gap:10px}.tech-item{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;border-radius:18px;padding:12px;background:var(--surface-low);border:1px solid color-mix(in srgb,var(--outline-variant) 70%,transparent)}.tech-number{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:var(--on-primary);font-weight:950}.endpoint-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.endpoint-tile{border:1px solid var(--outline-variant);background:var(--surface-low);border-radius:18px;padding:12px}.endpoint-tile code{display:inline-block;margin-bottom:8px}.copy-toast{position:fixed;right:18px;bottom:18px;z-index:80;background:var(--inverse-surface,#273229);color:#fff;border-radius:999px;padding:11px 16px;font-weight:900;box-shadow:var(--shadow-2);opacity:0;transform:translateY(8px);transition:.18s}.copy-toast.show{opacity:1;transform:translateY(0)}
+    @media (max-width:1100px){.hero-panel{grid-template-columns:1fr}.test-grid,.endpoint-grid{grid-template-columns:1fr}.drawer-metrics{grid-template-columns:1fr 1fr}.drawer-actions{grid-template-columns:1fr 1fr}.hero-main{padding:20px;border-radius:26px}}
+    @media (max-width:720px){.hero-main{padding:18px;border-radius:24px}.hero-main h2{font-size:26px}.hero-main p{font-size:14px}.hero-side{grid-template-columns:1fr 1fr}.action-row{display:grid;grid-template-columns:1fr}.md-button{justify-content:center}.test-grid{gap:8px}.drawer-actions{grid-template-columns:1fr}.code-block pre{font-size:11.5px}.copy-row{align-items:flex-start;flex-direction:column}.copy-row button{width:100%}}
+    @media (max-width:430px){.hero-side{grid-template-columns:1fr}.hero-stat b{font-size:20px}.test-card{border-radius:18px;padding:12px}.endpoint-tile{border-radius:16px}}
+
   </style>
 </head>
 <body>
@@ -125,11 +156,19 @@
       </div>
       <nav class="nav" id="nav"></nav>
       <div class="drawer-spacer"></div>
-      <div class="drawer-card">
-        <b>Fonte dos dados</b>
-        <small>Dados reais de <code>/api/observability</code>. O polling do painel não entra nas métricas de tráfego do Proxy.</small>
+      <div class="drawer-card drawer-live" aria-live="polite">
+        <div class="drawer-live-top"><b>Proxy em tempo real</b><span class="drawer-dot" id="drawer-status-dot"></span></div>
+        <small>Extensão visual do Valorae Proxy: observa tráfego, entrega, clientes, erros e saúde usando <code>/api/observability</code>.</small>
+        <div class="drawer-metrics">
+          <div><b id="drawer-requests">0</b><span>requests</span></div>
+          <div><b id="drawer-latency">0 ms</b><span>latência</span></div>
+        </div>
+        <div class="drawer-actions">
+          <button class="drawer-action" id="sidebar-selftest" type="button">Executar teste real</button>
+          <button class="drawer-action" id="sidebar-tech" type="button">Guia de integração</button>
+        </div>
       </div>
-      <div class="user"><div class="avatar">AD</div><div class="user-text"><b>Admin</b><small>Observability</small></div></div>
+      <div class="user"><div class="avatar">VP</div><div class="user-text"><b>Valorae Proxy</b><small id="drawer-version">v21.5.13 · Observability ativa</small></div></div>
     </aside>
     <section class="content">
       <header class="topbar">
@@ -152,7 +191,7 @@
             <button class="period" data-minutes="1440" title="24 horas">24h</button>
             <button class="period" data-minutes="10080" title="7 dias">7d</button>
           </div>
-          <button class="top-button" id="test-health" title="Gerar uma requisição real em /api/health">✓</button>
+          <button class="top-button" id="test-health" title="Executar teste real do Proxy">▶</button>
           <button class="top-button" id="refresh" aria-label="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
           <button class="top-button" id="theme-toggle" aria-label="Alternar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
           <div class="status-pill" id="status-pill"><span class="dot"></span><span>Carregando</span></div>
@@ -174,6 +213,8 @@
       security:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
       ratelimit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="9"/></svg>',
       infrastructure:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 7h.01M7 17h.01"/></svg>',
+      selftest:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-5"/><circle cx="12" cy="12" r="9"/><path d="M12 3v3M21 12h-3M12 21v-3M3 12h3"/></svg>',
+      technology:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9h8M8 13h6M9 18h6"/><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/></svg>',
       logs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>'
     };
     const pages = [
@@ -186,6 +227,8 @@
       ['security','Segurança','CORS, autenticação, bloqueios e IPs anonimizados'],
       ['ratelimit','Rate Limit','Bloqueios, timeouts e circuit breaker'],
       ['infrastructure','Infraestrutura','Processo Node, memória, CPU, sockets e saúde'],
+      ['selftest','Teste Real','Execute chamadas reais contra o servidor e observe as métricas'],
+      ['technology','Tecnologia','Como o Valorae Proxy funciona e como integrar em sites terceiros'],
       ['logs','Logs','Stream compacto de eventos capturados']
     ];
     let periodMinutes = 60;
@@ -193,6 +236,8 @@
     if (!pages.some(([id]) => id === currentPage)) currentPage = 'overview';
     let latest = null;
     let timer;
+    let selfTestState = { running:false, results:[], lastStartedAt:null, lastFinishedAt:null, error:null };
+    let copyToastTimer;
 
     function esc(v){return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
     function nf(v, compact=true){const n=Number(v||0);return new Intl.NumberFormat('pt-BR',{notation:compact&&Math.abs(n)>=10000?'compact':'standard',maximumFractionDigits:n%1?2:0}).format(n);}
@@ -217,6 +262,71 @@
     function seriesValues(key){return currentSeries().map(x=>Number(x[key]||0));}
     function pageNotice(){return `<div class="notice"><span class="badge ok">Métricas reais</span><div><b>Coleta real ativada</b><span class="subtle">O painel mede requisições <code>/api/*</code> por status, método, bytes, latência e content-type. O polling interno do dashboard é excluído para não poluir o tráfego do Proxy.</span></div></div>`;}
 
+    function baseApiUrl(){return `${location.origin}/api`;}
+    function endpointUrl(path){return `${baseApiUrl()}${path}`;}
+    function runButtonLabel(){return selfTestState.running ? 'Executando teste real...' : 'Executar teste real agora';}
+    function selfTestRows(){return selfTestState.results || [];}
+    function selfTestStatusClass(item){if(!item)return ''; if(item.ok)return 'ok'; if(item.statusCode && Number(item.statusCode)<500)return 'warn'; return 'err';}
+    function selfTestSummary(){const rows=selfTestRows();const ok=rows.filter(x=>x.ok).length;const fail=rows.length-ok;return {total:rows.length,ok,fail};}
+    function getSnippet(id){const api=baseApiUrl();const origin=location.origin||'https://seu-projeto.vercel.app';const snippets={
+      javascript:[
+        `const VALORAE_PROXY_URL = '${api}';`,
+        '',
+        'async function consultarAtivo(ticker) {',
+        '  const url = `${VALORAE_PROXY_URL}/asset?ticker=${encodeURIComponent(ticker)}&mode=basic&view=compact`; ',
+        '  const response = await fetch(url, {',
+        '    headers: {',
+        "      'X-Valorae-Client-Id': 'site-terceiro-producao',",
+        "      'Accept': 'application/json'",
+        '    }',
+        '  });',
+        '  if (!response.ok) throw new Error(`Valorae Proxy HTTP ${response.status}`);',
+        '  return response.json();',
+        '}',
+        '',
+        "consultarAtivo('PETR4').then(console.log).catch(console.error);"
+      ].join('\n'),
+      html:[
+        '<div id="cotacao">Carregando...</div>',
+        '<script>',
+        `  const proxy = '${api}';`,
+        "  fetch(`${proxy}/asset?ticker=PETR4&mode=basic&view=compact`, {",
+        "    headers: { 'X-Valorae-Client-Id': 'landing-page' }",
+        '  })',
+        '    .then(r => r.json())',
+        "    .then(data => { document.getElementById('cotacao').textContent = JSON.stringify(data.normalized || data, null, 2); })",
+        "    .catch(() => { document.getElementById('cotacao').textContent = 'Não foi possível carregar os dados.'; });",
+        '<\/script>'
+      ].join('\n'),
+      curl:[
+        `curl '${api}/health' \\`,
+        `  -H 'X-Valorae-Client-Id: teste-terminal' \\`,
+        `  -H 'Accept: application/json'`,
+        '',
+        `curl '${api}/asset?ticker=PETR4&mode=basic&view=compact' \\`,
+        `  -H 'X-Valorae-Client-Id: app-parceiro'`
+      ].join('\n'),
+      env:[
+        '# No site terceiro, salve a URL base do Proxy:',
+        `VALORAE_PROXY_URL=${api}`,
+        '',
+        '# Identifique cada app consumidor para aparecer no dashboard:',
+        'VALORAE_CLIENT_ID=site-terceiro-producao',
+        '',
+        '# O Origin do navegador será capturado automaticamente pelo CORS.'
+      ].join('\n'),
+      endpoints:[
+        `${origin}/api/health`,
+        `${origin}/api/ready`,
+        `${origin}/api/asset?ticker=PETR4&mode=basic`,
+        `${origin}/api/portfolio/analyze`,
+        `${origin}/api/observability?minutes=60`
+      ].join('\n')
+    };return snippets[id]||'';}
+    function techCode(id,title){return `<div class="code-block"><div class="copy-row"><b>${esc(title)}</b><button type="button" data-copy-id="${esc(id)}">Copiar</button></div><pre><code>${esc(getSnippet(id))}</code></pre></div>`;}
+    function toast(message){let el=document.getElementById('copy-toast');if(!el){el=document.createElement('div');el.id='copy-toast';el.className='copy-toast';document.body.appendChild(el);}el.textContent=message;el.classList.add('show');clearTimeout(copyToastTimer);copyToastTimer=setTimeout(()=>el.classList.remove('show'),1800);}
+    async function copySnippet(id){const text=getSnippet(id);try{await navigator.clipboard.writeText(text);toast('Copiado para a área de transferência');}catch{toast('Não foi possível copiar automaticamente');}}
+    function selfTestResults(){const rows=selfTestRows();if(!rows.length)return empty('Nenhum teste executado nesta sessão. Clique em “Executar teste real agora” para gerar tráfego real no servidor.');return `<div class="test-grid">${rows.map(r=>`<div class="test-card ${selfTestStatusClass(r)}"><div class="test-head"><b>${esc(r.label)}</b><span class="badge ${r.ok?'ok':Number(r.statusCode)<500?'warn':'err'}">${esc(r.statusCode||'erro')}</span></div><code>${esc(r.method)} ${esc(r.url)}</code><span class="subtle">${r.ok?'Resposta válida recebida':esc(r.error||'falha')} · ${ms(r.latencyMs||0)} · ${bytes(r.bytes||0)}</span></div>`).join('')}</div>`;}
     const renderers = {
       overview(d){const s=d.series||[];const req=seriesValues('requests'),err=seriesValues('errorRate'),avg=seriesValues('latencyAvgMs');return `${pageNotice()}<div class="grid kpi-grid">
         ${metricCard('RPS','Requisições por segundo',nf(d.current?.rps,false),'blue',req,'var(--blue)',`${nf(d.current?.rpm,false)} req/min`)}
@@ -317,14 +427,26 @@
         ${card('TLS / HTTPS','Medição por headers encaminhados',`<div class="mini-list"><div><b>HTTPS observado</b><br><span class="subtle">${nf(d.reliability?.tls?.httpsRequests,false)} requests</span></div><div><b>HTTP observado</b><br><span class="subtle">${nf(d.reliability?.tls?.httpRequests,false)} requests</span></div><div class="notice warn"><span class="badge warn">handshake não medido</span><span class="subtle">${esc(d.reliability?.tls?.note||'')}</span></div></div>`)}
         ${card('Workers / saturação','Aproximação por requests ativos',`<div class="metric sm">${pct(sys.workersSaturationPercent)}</div><div class="bar-track"><div class="bar-fill green" style="width:${Math.min(100,Number(sys.workersSaturationPercent||0))}%"></div></div>`)}
       </div>`;},
+      selftest(d){const summary=selfTestSummary();return `<div class="hero-panel"><section class="hero-main"><span class="badge ok">Teste real do servidor</span><h2>Execute chamadas reais e veja o Proxy reagir.</h2><p>Este teste chama endpoints públicos do próprio Valorae Proxy implantado, usando um <code>X-Valorae-Client-Id</code> dedicado. As requisições aparecem nas páginas de Tráfego, Clientes, Entrega, Desempenho e Logs.</p><div class="action-row"><button class="md-button" id="run-self-test" type="button" ${selfTestState.running?'disabled':''}>${runButtonLabel()}</button><button class="md-button secondary" id="open-logs" type="button">Ver logs depois do teste</button><button class="md-button ghost" data-copy-id="curl" type="button">Copiar teste cURL</button></div></section><aside class="hero-side"><div class="hero-stat"><b>${nf(summary.ok,false)}/${nf(summary.total,false)}</b><span>checks concluídos</span></div><div class="hero-stat"><b>${selfTestState.lastFinishedAt?new Date(selfTestState.lastFinishedAt).toLocaleTimeString('pt-BR'):'--'}</b><span>última execução</span></div></aside></div><div class="grid three">${card('O que será testado','Fluxo real HTTP/JSON',`<div class="tech-list"><div class="tech-item"><span class="tech-number">1</span><div><b>Saúde e prontidão</b><br><span class="subtle">GET /api/health e GET /api/ready validam o runtime.</span></div></div><div class="tech-item"><span class="tech-number">2</span><div><b>Contrato e catálogo</b><br><span class="subtle">GET /api/fields e GET /api/openapi validam dados técnicos do Proxy.</span></div></div><div class="tech-item"><span class="tech-number">3</span><div><b>Consumo real de dados</b><br><span class="subtle">GET /api/asset e POST /api/portfolio/analyze simulam apps terceiros consumindo dados.</span></div></div></div>`)}${card('Impacto esperado','Onde observar depois',`<div class="mini-list"><div><b>Clientes</b><br><span class="subtle">Aparece como <code>ui-selftest</code>.</span></div><div><b>Tráfego</b><br><span class="subtle">Aumenta métodos, status, content-types e bytes.</span></div><div><b>Logs</b><br><span class="subtle">Cada chamada gera evento com status e latência.</span></div></div>`)}${card('Base atual','Servidor implantado',`<code>${esc(baseApiUrl())}</code><div class="action-row"><button class="md-button secondary" data-copy-id="endpoints" type="button">Copiar URLs principais</button></div>`)} </div>${card('Resultado da última execução','Status, latência e tamanho de resposta',selfTestResults())}`;},
+      technology(d){return `<div class="hero-panel"><section class="hero-main"><span class="badge ok">Valorae Proxy</span><h2>Tecnologia, integração e observabilidade para apps terceiros.</h2><p>O Valorae Proxy funciona como um canal HTTP/JSON entre apps consumidores e o engine de dados. Ele aplica contrato de rotas, CORS, rate limit, cache em memória, normalização de respostas, segurança básica e observability real sem banco externo.</p><div class="action-row"><button class="md-button" id="go-selftest" type="button">Executar teste real</button><button class="md-button secondary" data-copy-id="env" type="button">Copiar configuração</button></div></section><aside class="hero-side"><div class="hero-stat"><b>${nf(d.totals?.completed,false)}</b><span>requests medidos</span></div><div class="hero-stat"><b>${pct(d.current?.errorRate)}</b><span>taxa de erro atual</span></div></aside></div><div class="grid three">${card('Como o Proxy funciona','Fluxo técnico',`<div class="tech-list"><div class="tech-item"><span class="tech-number">1</span><div><b>App terceiro chama <code>/api/*</code></b><br><span class="subtle">O site, app mobile, ERP ou integração envia requisições HTTP para o Valorae Proxy.</span></div></div><div class="tech-item"><span class="tech-number">2</span><div><b>Router valida contrato</b><br><span class="subtle">Método, query, CORS, rate limit e headers são tratados antes do engine.</span></div></div><div class="tech-item"><span class="tech-number">3</span><div><b>Engine processa dados</b><br><span class="subtle">O núcleo <code>Valorae-engine.js</code> permanece central e entrega JSON normalizado.</span></div></div><div class="tech-item"><span class="tech-number">4</span><div><b>Observability mede a entrega</b><br><span class="subtle">Status, latência, bytes, cliente, content-type e origem são registrados em memória.</span></div></div></div>`)}${card('Headers recomendados','Identificação do consumidor',`<div class="mini-list"><div><b><code>X-Valorae-Client-Id</code></b><br><span class="subtle">Nome estável do app consumidor. Ex.: <code>app-mobile-prod</code>.</span></div><div><b><code>Accept: application/json</code></b><br><span class="subtle">Garante contrato JSON.</span></div><div><b><code>Authorization</code> ou <code>X-API-Key</code></b><br><span class="subtle">Opcional, aparece apenas como distribuição de auth, sem armazenar segredo.</span></div></div>`)}${card('Boas práticas','Produção no site terceiro',`<div class="tech-list"><div class="tech-item"><span class="tech-number">✓</span><div><b>Use cache do navegador com cuidado</b><br><span class="subtle">Para dados dinâmicos, prefira query com janela/perfil e trate erro HTTP.</span></div></div><div class="tech-item"><span class="tech-number">✓</span><div><b>Identifique cada canal</b><br><span class="subtle">Use client ids diferentes para web, mobile, BI e parceiros.</span></div></div><div class="tech-item"><span class="tech-number">✓</span><div><b>Observe após integrar</b><br><span class="subtle">Confira Clientes, Tráfego e Entrega para validar consumo real.</span></div></div></div>`)} </div><div class="grid chart-grid">${techCode('javascript','Exemplo JavaScript para site terceiro')}${techCode('html','Exemplo HTML simples')}${techCode('curl','Teste via terminal')}${techCode('env','Variáveis recomendadas no app terceiro')}</div><div class="grid two-one">${card('Endpoints principais','URLs de consumo',`<div class="endpoint-grid"><div class="endpoint-tile"><code>/api/health</code><p class="subtle">Saúde do servidor.</p></div><div class="endpoint-tile"><code>/api/ready</code><p class="subtle">Prontidão operacional.</p></div><div class="endpoint-tile"><code>/api/asset?ticker=PETR4</code><p class="subtle">Consulta de ativo/cotação normalizada.</p></div><div class="endpoint-tile"><code>/api/portfolio/analyze</code><p class="subtle">Análise de carteira via POST.</p></div><div class="endpoint-tile"><code>/api/fields</code><p class="subtle">Catálogo de campos e controles.</p></div><div class="endpoint-tile"><code>/api/openapi</code><p class="subtle">Contrato para integração.</p></div></div>`)}${card('Limites honestos','Modo free-only',`<div class="mini-list"><div><b>Métricas em memória</b><br><span class="subtle">Em Vercel/serverless, reiniciam por instância.</span></div><div><b>Sem GeoIP externo</b><br><span class="subtle">Não calcula país/região sem banco ou serviço externo.</span></div><div><b>Sem TLS handshake real</b><br><span class="subtle">TLS normalmente termina na plataforma antes do Node.</span></div></div>`)}</div>`;},
       logs(d){return `<div class="grid two-one">${card('Log stream - eventos recentes','Capturados pelo Proxy',rows(d.events||[],[{label:'Hora',render:r=>new Date(r.time).toLocaleTimeString('pt-BR')},{label:'Nível',render:r=>`<span class="badge ${r.level==='ERROR'?'err':r.level==='WARN'?'warn':'ok'}">${esc(r.level)}</span>`},{label:'Cliente',render:r=>esc(r.client)},{label:'Método',render:r=>esc(r.method)},{label:'Rota',render:r=>`<code>${esc(r.route)}</code>`},{label:'Status',render:r=>esc(r.status)},{label:'Latência',render:r=>ms(r.latencyMs)},{label:'Bytes',render:r=>bytes(r.bytes)},{label:'Mensagem',render:r=>esc(r.message)}]))}${card('Status badges','Saúde resumida',`<div class="footer-badges">${(d.badges||[]).map(b=>`<div class="status-tile ${b.status==='Operacional'?'':'warn'}"><span>${esc(b.name)}</span><small>${esc(b.status)}</small></div>`).join('')}</div><hr style="border:0;border-top:1px solid var(--outline-variant);margin:16px 0"><div class="clock">${new Date().toLocaleTimeString('pt-BR')}</div><span class="subtle">${new Date().toLocaleDateString('pt-BR')} · local</span>`)}</div>`;}
     };
     function eventList(events){if(!events||!events.length)return empty('Nenhum evento de alerta nesta janela.');return `<div class="mini-list">${events.map(e=>`<div class="event ${e.level==='ERROR'?'error':e.level==='WARN'?'warn':''}"><span class="level"></span><div><b>${esc(e.event)}</b><br><span class="subtle">${esc(e.message)}</span></div><small>${new Date(e.time).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</small></div>`).join('')}</div>`;}
 
     function renderNav(){ $('nav').innerHTML = pages.map(([id,label]) => `<button data-page="${id}" class="${id===currentPage?'active':''}">${icons[id]}<span class="nav-label">${label}</span></button>`).join(''); document.querySelectorAll('#nav button').forEach(btn => btn.onclick = () => setPage(btn.dataset.page)); }
     function setPage(id){currentPage=id;location.hash=id;renderNav();const p=pages.find(x=>x[0]===id);$('page-title').textContent=p[1];$('page-subtitle').textContent=p[2];document.body.classList.remove('drawer-open');render();}
-    function updateChrome(d){const mins=Number(d?.windowMinutes||periodMinutes);$('window-chip').textContent=mins>=1440?`${Math.round(mins/1440)}d`:`${mins} min`;$('updated-chip').textContent=d?.generatedAt?new Date(d.generatedAt).toLocaleTimeString('pt-BR'):'--';$('requests-chip').textContent=nf(d?.totals?.completed,false);const checks=d?.liveChecks||{};const ok=d?.status!=='DEGRADED'&&checks.health?.ok!==false&&checks.ready?.ok!==false;$('status-pill').innerHTML=`<span class="dot ${ok?'':checks.health?.ok===false||checks.ready?.ok===false?'err':'warn'}"></span><span>${ok?'Operacional':'Atenção'}</span>`;}
-    function render(data=latest){if(!data){$('page').innerHTML=empty('Carregando métricas reais do Proxy...');return;}latest=data;updateChrome(data);const renderer=renderers[currentPage]||renderers.overview;$('page').innerHTML=renderer(data);}
+    function updateChrome(d){const mins=Number(d?.windowMinutes||periodMinutes);$('window-chip').textContent=mins>=1440?`${Math.round(mins/1440)}d`:`${mins} min`;$('updated-chip').textContent=d?.generatedAt?new Date(d.generatedAt).toLocaleTimeString('pt-BR'):'--';$('requests-chip').textContent=nf(d?.totals?.completed,false);const checks=d?.liveChecks||{};const ok=d?.status!=='DEGRADED'&&checks.health?.ok!==false&&checks.ready?.ok!==false;$('status-pill').innerHTML=`<span class="dot ${ok?'':checks.health?.ok===false||checks.ready?.ok===false?'err':'warn'}"></span><span>${ok?'Operacional':'Atenção'}</span>`;const ds=$('drawer-status-dot');if(ds)ds.className=`drawer-dot ${ok?'':checks.health?.ok===false||checks.ready?.ok===false?'err':'warn'}`;const dr=$('drawer-requests');if(dr)dr.textContent=nf(d?.totals?.completed,false);const dl=$('drawer-latency');if(dl)dl.textContent=ms(d?.current?.latencyAvgMs||0);const dv=$('drawer-version');if(dv)dv.textContent=`v${esc(d?.version||'21.5.13')} · ${ok?'Operacional':'Atenção'}`;}
+    function bindPageActions(){const run=$('run-self-test');if(run)run.onclick=runSelfTest;const logs=$('open-logs');if(logs)logs.onclick=()=>setPage('logs');const go=$('go-selftest');if(go)go.onclick=()=>setPage('selftest');document.querySelectorAll('[data-copy-id]').forEach(btn=>{btn.onclick=()=>copySnippet(btn.dataset.copyId);});}
+    function render(data=latest){if(!data){$('page').innerHTML=empty('Carregando métricas reais do Proxy...');bindPageActions();return;}latest=data;updateChrome(data);const renderer=renderers[currentPage]||renderers.overview;$('page').innerHTML=renderer(data);bindPageActions();}
+    const SELF_TEST_STEPS=[
+      {label:'Health',method:'GET',url:'/api/health?client=ui-selftest'},
+      {label:'Ready',method:'GET',url:'/api/ready?client=ui-selftest'},
+      {label:'Catálogo de campos',method:'GET',url:'/api/fields?client=ui-selftest'},
+      {label:'Contrato OpenAPI',method:'GET',url:'/api/openapi?client=ui-selftest'},
+      {label:'Consulta de ativo',method:'GET',url:'/api/asset?ticker=PETR4&mode=basic&view=compact&client=ui-selftest'},
+      {label:'Análise de carteira',method:'POST',url:'/api/portfolio/analyze?client=ui-selftest',body:{view:'compact',assetView:'compact',maxConcurrency:1,positions:[{ticker:'PETR4',quantity:1,avgPrice:30},{ticker:'VALE3',quantity:1,avgPrice:60}]}}
+    ];
+    async function runSelfTest(){if(selfTestState.running)return;selfTestState={running:true,results:[],lastStartedAt:new Date().toISOString(),lastFinishedAt:null,error:null};render();for(const step of SELF_TEST_STEPS){const started=performance.now();const url=`${step.url}${step.url.includes('?')?'&':'?'}_selftest=${Date.now()}`;const headers={'X-Valorae-Client-Id':'ui-selftest','X-Valorae-Test-Run':'manual','Accept':'application/json'};const options={method:step.method,cache:'no-store',headers};if(step.body){headers['Content-Type']='application/json';options.body=JSON.stringify(step.body);}try{const res=await fetch(url,options);const text=await res.text();let json=null;try{json=text?JSON.parse(text):null;}catch{};selfTestState.results.push({label:step.label,method:step.method,url:step.url,statusCode:res.status,ok:res.ok,latencyMs:Math.round(performance.now()-started),bytes:typeof text==='string'?text.length:0,error:res.ok?'':(json?.error||json?.message||res.statusText||'HTTP não OK')});}catch(error){selfTestState.results.push({label:step.label,method:step.method,url:step.url,statusCode:'erro',ok:false,latencyMs:Math.round(performance.now()-started),bytes:0,error:error.message});}render();await new Promise(resolve=>setTimeout(resolve,160));}selfTestState={...selfTestState,running:false,lastFinishedAt:new Date().toISOString()};await load();render();}
     async function readJson(url,options={}){const res=await fetch(url,options);const text=await res.text();let json={};try{json=text?JSON.parse(text):{};}catch{json={raw:text.slice(0,240)};}if(!res.ok)throw new Error(json?.error||json?.message||`${url} retornou HTTP ${res.status}`);return {statusCode:res.status,json};}
     async function probe(url){try{const out=await readJson(url,{cache:'no-store',headers:{'X-Valorae-Client-Id':'dashboard-ui','X-Valorae-Dashboard-Probe':'1'}});return {ok:true,statusCode:out.statusCode,payload:out.json};}catch(e){return {ok:false,statusCode:'erro',error:e.message};}}
     let loading=false;
@@ -338,7 +460,9 @@
     $('theme-toggle').onclick=()=>{const next=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=next;localStorage.setItem('valorae-theme',next);};
     document.querySelectorAll('.period').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.period').forEach(b=>b.classList.remove('active'));btn.classList.add('active');periodMinutes=Number(btn.dataset.minutes||60);load();});
     $('refresh').onclick=load;
-    $('test-health').onclick=async()=>{await fetch('/api/health?client=dashboard-manual',{cache:'no-store',headers:{'X-Valorae-Client-Id':'dashboard-manual'}}).catch(()=>{});load();};
+    $('test-health').onclick=()=>{setPage('selftest');runSelfTest();};
+    $('sidebar-selftest').onclick=()=>{setPage('selftest');runSelfTest();};
+    $('sidebar-tech').onclick=()=>setPage('technology');
     addEventListener('keydown',e=>{if(e.key==='Escape')setDrawerOpen(false);});
     addEventListener('resize',()=>{if(!matchMedia('(max-width: 1100px)').matches)setDrawerOpen(false);},{passive:true});
     load(); timer=setInterval(load,5000); addEventListener('beforeunload',()=>clearInterval(timer));

@@ -63,6 +63,10 @@ for (const needle of [
   'delivery',
   'publicAssets',
   'Dados, arquivos e bytes enviados aos usuários',
+  'Teste Real',
+  'Tecnologia',
+  'Executar teste real agora',
+  'X-Valorae-Client-Id',
 ]) {
   if (!html.includes(needle)) fail(`dashboard incompleto: não encontrei ${needle}`);
 }
