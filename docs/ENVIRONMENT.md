@@ -1,4 +1,4 @@
-# Environment — Valorae Proxy v21.11.9
+# Environment — Valorae Proxy v21.12.0
 
 Nenhuma variável é obrigatória para o modo free-only. Use `.env.example` como base local.
 

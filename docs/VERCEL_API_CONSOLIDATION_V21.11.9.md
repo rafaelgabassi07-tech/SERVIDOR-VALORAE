@@ -1,4 +1,4 @@
-# VALORAE Proxy v21.11.9 — Consolidação de API Routes no Vercel
+# VALORAE Proxy v21.12.0 — Consolidação de API Routes no Vercel
 
 ## Motivo
 
@@ -6,11 +6,10 @@ A versão anterior passou a usar várias funções físicas em `api/` para tenta
 
 ## Correção
 
-A versão v21.11.9 volta para uma arquitetura consolidada:
+A versão v21.12.0 volta para uma arquitetura consolidada:
 
 ```txt
-api/index.js
-api/[...path].js
+api/router.js
 ```
 
 Todas as rotas reais continuam existindo, mas são resolvidas pelo roteador interno:
@@ -19,7 +18,7 @@ Todas as rotas reais continuam existindo, mas são resolvidas pelo roteador inte
 routes/_router.js
 ```
 
-Assim, `/api/server/metrics`, `/api/cache/stats`, `/api/source/status`, `/api/server/tests`, `/api/ready`, `/api/deploy/status`, `/api/asset`, `/api/assets`, `/api/scrape` e `/api/batch-scrape` passam pelo catch-all `api/[...path].js`.
+Assim, `/api/server/metrics`, `/api/cache/stats`, `/api/source/status`, `/api/server/tests`, `/api/ready`, `/api/deploy/status`, `/api/asset`, `/api/assets`, `/api/scrape` e `/api/batch-scrape` passam pelo `api/router.js`.
 
 ## Benefícios
 

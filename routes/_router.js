@@ -1,5 +1,6 @@
 import { ValoraeEngine } from '../lib/Valorae-engine.js';
 import { sendJson } from '../lib/performance/http.js';
+import { beginRoute } from '../lib/http/route.js';
 import { attachProxyMetricsInterceptor } from '../lib/observability/server-metrics.js';
 
 const ROUTES = {
@@ -106,8 +107,41 @@ export async function dispatchRoute(req, res) {
   const metricRoute = path === '/' ? '/api' : `/api${path}`;
   attachProxyMetricsInterceptor(req, res, { route: metricRoute });
   if (path === '/') {
-    const mod = await import('../api/index.js');
-    return mod.default(req, res);
+    mergeQuery(req, apiVersion, parsed);
+    const route = beginRoute(req, res, {
+      version: ValoraeEngine.version,
+      methods: ['GET'],
+      route: 'index',
+      rateMax: Number(process.env.VALORAE_RATE_LIMIT_HEALTH_MAX || 180),
+      profile: 'index',
+      cacheControl: 'private, max-age=30',
+    });
+    if (route.done) return;
+    return sendJson(req, res, {
+      name: 'VALORAE Proxy Server API',
+      version: ValoraeEngine.version,
+      status: 'online',
+      compatibility: 'GitHub/Vercel serverless proxy',
+      dashboard: '/server.html',
+      tests: '/server.html#tests',
+      router: { version: 'internal-v1-v2-consolidated', ...routeManifest() },
+      examples: {
+        asset: '/api/asset?ticker=PETR4&mode=super&includeNews=1',
+        assets: '/api/assets?tickers=PETR4,GARE11,VISC11&mode=super',
+        scrape: '/api/scrape?url=https://investidor10.com.br/acoes/petr4/',
+        news: '/api/news?ticker=PETR4',
+        batchScrape: '/api/batch-scrape',
+        health: '/api/health',
+        ready: '/api/ready',
+        metrics: '/api/server/metrics',
+        testsLab: '/api/server/tests?mode=quick',
+        cacheStats: '/api/cache/stats',
+        sourceStatus: '/api/source/status',
+        fields: '/api/fields',
+        errors: '/api/errors',
+        openapi: '/api/openapi',
+      },
+    }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'index', cacheControl: 'private, max-age=30' });
   }
   const load = ROUTES[path];
   if (!load) {
@@ -125,7 +159,7 @@ export async function dispatchRoute(req, res) {
 }
 
 export function routeManifest() {
-  return { routes: Object.keys(ROUTES).sort(), legacyAliases: LEGACY_ALIASES, physicalFunctions: ['api/index.js','api/[...path].js'] };
+  return { routes: Object.keys(ROUTES).sort(), legacyAliases: LEGACY_ALIASES, physicalFunctions: ['api/router.js'] };
 }
 
 export const _test = { parseUrl, queryFromSearchParams, stripApiPrefix };

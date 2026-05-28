@@ -29,6 +29,6 @@ assert.ok(audit.corrections.length >= 4);
 
 assert.equal(yahooSymbol('PETR4'), 'PETR4.SA');
 assert.ok(RANGE_MAP['1Y']);
-assert.ok(marketCacheStats().version.includes('21.11.'));
+assert.ok(marketCacheStats().version.includes('21.12.'));
 
 console.log('Scraper supremacy audit tests OK: seletores customizados, cache de mercado e auditoria passaram.');

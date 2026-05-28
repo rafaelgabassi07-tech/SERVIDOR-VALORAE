@@ -1,4 +1,4 @@
-# VALORAE Engine Performance & Precision — v21.11.9
+# VALORAE Engine Performance & Precision — v21.12.0
 
 Esta versão aprofunda o `Valorae-engine.js` e seus módulos auxiliares sem desmembrar o núcleo central. O foco foi reduzir trabalho repetido, melhorar precisão numérica e deixar os dados mais próprios para gráficos e apps consumidores.
 

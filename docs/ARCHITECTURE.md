@@ -1,7 +1,7 @@
-# Architecture — Valorae Proxy v21.11.9
+# Architecture — Valorae Proxy v21.12.0
 
 ```text
-api/index.js + api/[...path].js
+api/router.js + rewrites /api/:path*
         │
         ▼
 routes/_router.js  ── aliases v1/v2/legados

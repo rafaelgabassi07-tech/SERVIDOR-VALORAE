@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const manifest = routeManifest();
   return sendJson(req, res, {
     version: ValoraeEngine.version,
-    release: '21.11.9',
+    release: '21.12.0',
     codename: 'Mature Final Release Free',
     requestId: route.requestId,
     name: 'Valorae Proxy',

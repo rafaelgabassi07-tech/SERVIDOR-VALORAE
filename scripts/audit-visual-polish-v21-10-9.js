@@ -46,7 +46,7 @@ assert.ok(html.includes('drawer-brand'), 'menu lateral deve carregar identidade 
 assert.ok(html.includes('cacheEfficiencyScore') && html.includes('sourceReliabilityScore'), 'dashboard deve exibir novas métricas de maturidade');
 
 const sw = readFileSync('public/service-worker.js', 'utf8');
-assert.ok((/v21-(10-10|11-[0-9])/.test(sw)), 'service worker deve atualizar cache da release');
+assert.ok((/v21-(10-10|11-[0-9]|12-[0-9])/.test(sw)), 'service worker deve atualizar cache da release');
 assert.ok(sw.includes("url.pathname.startsWith('/api')"), 'service worker não pode interceptar APIs em tempo real');
 
 const svg = readFileSync('public/assets/valorae-logo.svg', 'utf8');
@@ -54,4 +54,4 @@ assert.ok(svg.includes('VALORAE Proxy Server') && svg.includes('linearGradient')
 assert.ok(statSync('public/assets/valorae-icon-192.png').size > 1000, 'ícone 192 PNG deve existir');
 assert.ok(statSync('public/assets/valorae-icon-512.png').size > 3000, 'ícone 512 PNG deve existir');
 
-console.log('Visual polish audit OK: logo clean, PWA v21.11.9, configurações, pausa e métricas de maturidade validados.');
+console.log('Visual polish audit OK: logo clean, PWA v21.12.0, configurações, pausa e métricas de maturidade validados.');

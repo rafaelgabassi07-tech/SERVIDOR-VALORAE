@@ -15,8 +15,8 @@ async function call(handler, url) { const req = mockReq(url); const res = mockRe
 const m = routeManifest();
 assert.ok(m.routes.includes('/ready'));
 assert.ok(m.routes.includes('/manifest'));
-for (const required of ['api/index.js','api/[...path].js']) assert.ok(m.physicalFunctions.includes(required), `manifest sem ${required}`);
-assert.equal(m.physicalFunctions.length, 2);
+assert.ok(m.physicalFunctions.includes('api/router.js'), 'manifest sem api/router.js');
+assert.equal(m.physicalFunctions.length, 1);
 
 const ready = await call(readyHandler, '/api/v1/ready');
 assert.equal(ready.res.statusCode, 200);
@@ -36,4 +36,4 @@ assert.equal(pkg.scripts.typecheck, 'node scripts/typecheck-free.js');
 assert.equal(Object.keys(pkg.dependencies || {}).length, 0);
 assert.equal(Boolean(pkg.devDependencies && Object.keys(pkg.devDependencies).length), false);
 
-console.log('v21.11.9 launch readiness tests OK.');
+console.log('v21.12.0 launch readiness tests OK.');

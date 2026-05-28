@@ -85,7 +85,7 @@ export default async function handler(req, res) {
     info: {
       title: 'Valorae Investment Data API',
       version,
-      description: 'API HTTP/JSON para ativos, mercado, comparação, dividendos, watchlist e carteira. Compatível com GitHub/Vercel gratuito, router interno v1/v2 e apenas duas Functions físicas.'
+      description: 'API HTTP/JSON para ativos, mercado, comparação, dividendos, watchlist e carteira. Compatível com GitHub/Vercel gratuito, router interno v1/v2 e apenas uma Function física.'
     },
     servers: [{ url: process.env.VALORAE_PUBLIC_BASE_URL || 'https://valorae-proxy.vercel.app' }],
     paths,
@@ -109,10 +109,10 @@ export default async function handler(req, res) {
     },
     xValorae: {
       version,
-      audit: 'v21.11.9: launch readiness, ready/manifest endpoints, auditoria sem tsc externo, source reliability, cache metrics, carteira inteligente e OpenAPI ampliado, mantendo free-only.',
+      audit: 'v21.12.0: launch readiness, ready/manifest endpoints, auditoria sem tsc externo, source reliability, cache metrics, carteira inteligente e OpenAPI ampliado, mantendo free-only.',
       vercelCompatible: true,
       freeOnly: true,
-      physicalFunctions: ['api/index.js','api/[...path].js'],
+      physicalFunctions: ['api/router.js'],
       router: 'routes/_router.js',
       inspector: '/inspector.html',
     }

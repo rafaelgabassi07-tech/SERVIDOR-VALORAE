@@ -1,4 +1,4 @@
-# Release Checklist — Valorae Proxy v21.11.9
+# Release Checklist — Valorae Proxy v21.12.0
 
 Use este checklist antes de publicar no GitHub/Vercel.
 
@@ -23,7 +23,7 @@ O comando deve passar em:
 
 ## Estrutura esperada
 
-- Apenas `api/index.js` e `api/[...path].js` como Functions físicas.
+- Apenas `api/router.js` com rewrites `/api` e `/api/:path*` como Functions físicas.
 - Rotas internas em `routes/`.
 - Núcleo preservado em `lib/Valorae-engine.js`.
 - Zero dependências obrigatórias no `package.json`.
@@ -51,6 +51,6 @@ A rota `/api/v1/ready` deve retornar `status: READY`.
 
 Não configure Redis, KV, Supabase, Firebase, MongoDB, Postgres, Prisma, cron pago ou workers permanentes.
 
-## v21.11.9 — Scraper/API otimizado
+## v21.12.0 — Scraper/API otimizado
 
 O VALORAE agora possui cache final de resultado para `/api/scrape` e `/api/batch-scrape`, chave HTML segura contra contaminação por truncamento, batch coalescido por `fetchKey`, fast-path conservador para seletores simples, métricas detalhadas de scraping e controles mobile (`compact=1`, `previewChars` e `fields=`). Tudo permanece free-only, sem dependências obrigatórias e sem desmembrar `lib/Valorae-engine.js`.

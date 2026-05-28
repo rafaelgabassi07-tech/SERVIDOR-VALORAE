@@ -23,6 +23,14 @@
   "buildCommand": "node scripts/build-vercel-safe.js",
   "rewrites": [
     {
+      "source": "/api",
+      "destination": "/api/router?path="
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/router?path=:path*"
+    },
+    {
       "source": "/",
       "destination": "/server.html"
     },

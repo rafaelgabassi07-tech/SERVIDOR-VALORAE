@@ -2,7 +2,7 @@
 
 | Área | Proteção atual | Observação |
 |---|---|---|
-| Vercel Free | 2 Functions físicas | `api/index.js` e `api/[...path].js` |
+| Vercel Free | 1 Function física | `api/router.js` com rewrites `/api` e `/api/:path*` |
 | Dependências | Zero obrigatórias | Sem install complexo |
 | Cache | Memória/LRU/in-flight | Pode zerar em cold start |
 | Scraping | Domínios permitidos | Investidor10, StatusInvest, Yahoo, Google News |

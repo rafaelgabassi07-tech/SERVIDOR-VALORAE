@@ -1,16 +1,26 @@
+# Changelog
 
-## v21.11.9 — Vercel API Routes consolidadas
+## v21.12.0 — Router único Vercel e recuperação de métricas ao vivo
 
-- Consolidou o deploy em apenas `api/index.js` e `api/[...path].js`.
+- Substitui a dependência de `api/[...path].js` por uma Function física única `api/router.js`.
+- Adiciona rewrites `/api` e `/api/:path*` para `/api/router?path=...`, evitando 404 em rotas internas no Vercel.
+- Corrige `/api/server/metrics` para entregar `summary` ao dashboard em produção.
+- Corrige `/api/server/tests?mode=quick` para entregar `benchmark`.
+- Corrige `/api/v1/ready`, `/api/deploy/status`, `/api/cache/stats` e `/api/source/status` via router único.
+- Mantém o VALORAE Proxy Server como app visual único; testes e benchmark ficam dentro de `/server.html#tests`.
+- Atualiza logo, PWA cache, versão runtime e auditorias para `21.12.0`.
+
+
+## v21.12.0 — Vercel API Routes consolidadas
+
+- Consolidou o deploy em apenas `api/router.js` com rewrites `/api` e `/api/:path*`.
 - Removeu Functions físicas extras para evitar limite/alerta de consolidação no Vercel Free/Hobby.
 - Manteve `/api/server/metrics`, `/api/cache/stats`, `/api/source/status`, `/api/server/tests`, `/api/ready` e `/api/deploy/status` via roteador interno.
 - Reforçou `build-vercel-safe.js` para falhar se Functions extras voltarem.
 - Atualizou testes, readiness, release audit e dashboard live audit para a arquitetura consolidada.
 - Preservou o app único VALORAE Proxy Server e a central interna de Testes e benchmark.
 
-# Changelog
-
-## v21.11.9 — Vercel Build Safe Fix
+## v21.12.0 — Vercel Build Safe Fix
 
 - Corrige falha genérica no Vercel ao substituir o build de deploy por `scripts/build-vercel-safe.js`.
 - Mantém `scripts/build-free.js` como build estrito/local em `npm run build:strict`.
@@ -19,7 +29,7 @@
 - Preserva Engine, dashboard, PWA, métricas e compatibilidade com Vercel gratuito.
 
 
-## v21.11.9 — Engine Performance & Precision
+## v21.12.0 — Engine Performance & Precision
 
 - Adicionado normalizador financeiro central em `lib/normalizers/numbers.js`.
 - Adicionada política adaptativa do Engine em `lib/resilience/engine-policy.js`.
@@ -87,14 +97,14 @@
 
 # Changelog — Valorae Proxy
 
-## v21.11.9 — Mature Final Release Free
+## v21.12.0 — Mature Final Release Free
 
 - Adiciona `fieldWarnings` para `fields`/`dataFields` inválidos ou inexistentes, sem vazar payload completo quando todos os campos solicitados são inválidos.
 - Endurece `scrapeUrl` customizado: agora precisa apontar exatamente para `/api/scrape`, evitando caminhos parecidos.
 - Restringe token admin via query em produção; só funciona com override explícito `VALORAE_ADMIN_ALLOW_QUERY_TOKEN_IN_PRODUCTION=1`.
 - Corrige `securityRuntimeStats.rateLimit` para diferenciar `disabledRequested` e `disabledEffective`.
 - Usa `isReadLikeMethod` no limite de body, preservando semântica correta para `GET` e `HEAD`.
-- Adiciona `npm run audit:final` e teste comportamental v21.11.9.
+- Adiciona `npm run audit:final` e teste comportamental v21.12.0.
 
 - Implementa somente melhorias recomendadas/viáveis da auditoria de 190 itens.
 - Adiciona `/api/v1/env`, `/api/v1/schema` e `/api/v1/source/status`.
@@ -102,7 +112,7 @@
 - Adiciona `dataQualityMatrix`, `sourceReliability`, `healthScore`, `incomeStabilityScore` e `dividendCoverage`.
 - Adiciona fixtures extras de Investidor10/Yahoo/Google News para regressão de parser/source drift.
 - Adiciona `.nvmrc`, `.env.example`, `LICENSE`, `SECURITY.md`, `CONTRIBUTING.md`, `docs/ENVIRONMENT.md`, `docs/TROUBLESHOOTING.md`, `docs/ARCHITECTURE.md` e `docs/QUALITY_MATRIX.md`.
-- Mantém 2 Functions físicas, zero dependências obrigatórias e política free-only.
+- Mantém 1 Function física, zero dependências obrigatórias e política free-only.
 
 # CHANGELOG
 
@@ -118,7 +128,7 @@
 - Adiciona `npm run audit:release` e inclui essa auditoria no `build` e no `verify`.
 - Adiciona documentação de operação, matriz de confiabilidade e checklist de lançamento.
 - Atualiza README, página pública, smoke test, OpenAPI e auditorias para lançamento GitHub/Vercel.
-- Mantém 2 Functions físicas, zero dependências obrigatórias e cache memory-only.
+- Mantém 1 Function física, zero dependências obrigatórias e cache memory-only.
 
 ## v21.5.9 — Portfolio Intelligence & Source Reliability
 
@@ -186,7 +196,7 @@
 
 ## v21.5.2 — Router Contract Free
 
-- Consolida o deploy Vercel em duas Functions físicas: `api/index.js` e `api/[...path].js`.
+- Consolida o deploy Vercel em uma Function física: `api/router.js` com rewrites `/api` e `/api/:path*`.
 - Move handlers para `routes/` e suporte compartilhado para `lib/`.
 - Adiciona router interno com aliases legados, prefixos `/api/v1/*` e envelope `/api/v2/*`.
 - Reforça `audit:functions`, `audit:free`, smoke tests e validação de build.
@@ -221,7 +231,7 @@
 - Melhorado readiness, insights e didática para cenários sem tráfego externo real.
 - Atualizado Service Worker para cache v21-10-9, mantendo APIs em tempo real fora do cache.
 
-## v21.11.9 - Otimização profunda Scraper/API
+## v21.12.0 - Otimização profunda Scraper/API
 
 - Implementa chave HTML segura com `maxChars`, provider e headers relevantes para evitar cache contaminado.
 - Adiciona `scrapeResultCache` com `TtlLruCache` para `/api/scrape` e `/api/batch-scrape`.

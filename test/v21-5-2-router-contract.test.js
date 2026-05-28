@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
-import catchAllHandler from '../api/[...path].js';
-import indexHandler from '../api/index.js';
+import routerHandler from '../api/router.js';
 import { routeManifest } from '../routes/_router.js';
 import { transformResponsePayload } from '../lib/contract/response.js';
 import fs from 'node:fs';
@@ -17,19 +16,15 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
   const files = [];
   function walk(d){ for (const e of fs.readdirSync(d,{withFileTypes:true})){ const p=`${d}/${e.name}`; if(e.isDirectory()) walk(p); else if(p.endsWith('.js')) files.push(p); }}
   walk('api');
-  for (const required of ['api/[...path].js','api/index.js']) {
-    assert.ok(files.includes(required), `function física ausente: ${required}`);
-  }
-  const extras = files.filter(f => !['api/[...path].js','api/index.js'].includes(f));
+  assert.ok(files.includes('api/router.js'), 'function física ausente: api/router.js');
+  const extras = files.filter(f => f !== 'api/router.js');
   assert.deepEqual(extras, [], `functions físicas extras devem ficar consolidadas no router interno: ${extras.join(', ')}`);
 }
 
 {
   const manifest = routeManifest();
-  for (const required of ['api/index.js','api/[...path].js']) {
-    assert.ok(manifest.physicalFunctions.includes(required), `manifest sem ${required}`);
-  }
-  assert.equal(manifest.physicalFunctions.length, 2);
+  assert.ok(manifest.physicalFunctions.includes('api/router.js'), 'manifest sem api/router.js');
+  assert.equal(manifest.physicalFunctions.length, 1);
   assert.ok(manifest.routes.includes('/asset'));
   assert.ok(manifest.routes.includes('/server/tests'));
   assert.ok(manifest.routes.includes('/cache/stats'));
@@ -39,19 +34,19 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
 }
 
 {
-  const { res, json } = await call(indexHandler, mockReq('/api'));
+  const { res, json } = await call(routerHandler, mockReq('/api'));
   assert.equal(res.statusCode, 200);
-  assert.equal(json.router.physicalFunctions.length, 2);
+  assert.equal(json.router.physicalFunctions.length, 1);
 }
 
 {
-  const { res, json } = await call(catchAllHandler, mockReq('/api/v1/fields'));
+  const { res, json } = await call(routerHandler, mockReq('/api/v1/fields'));
   assert.equal(res.statusCode, 200);
   assert.equal(json.endpoint, 'fields');
 }
 
 {
-  const { res, json } = await call(catchAllHandler, mockReq('/api/v2/errors'));
+  const { res, json } = await call(routerHandler, mockReq('/api/v2/errors'));
   assert.equal(res.statusCode, 200);
   assert.equal(json.schemaVersion, 'envelope-v2');
   assert.equal(json.meta.apiVersion, 'v2');
@@ -65,9 +60,9 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
 }
 
 {
-  const { res, json } = await call(catchAllHandler, mockReq('/api/unknown-route'));
+  const { res, json } = await call(routerHandler, mockReq('/api/unknown-route'));
   assert.equal(res.statusCode, 404);
   assert.equal(json.status, 'NOT_FOUND');
 }
 
-console.log('v21.11.9 router/contract tests OK.');
+console.log('v21.12.0 router/contract tests OK.');

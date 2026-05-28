@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { dispatchRoute } from '../routes/_router.js';
 import { extractCustomSelectors } from '../lib/scrape/custom-selectors.js';
-import indexHandler from '../api/index.js';
+import routerHandler from '../api/router.js';
 
 function mockRes() {
   return {
@@ -36,16 +36,16 @@ assert.equal(v2.data.routes, undefined);
 
 process.env.VALORAE_CORS_ALLOW_ORIGINS = 'https://app.example.com,https://admin.example.com';
 const resCors = mockRes();
-await indexHandler({ method: 'GET', url: '/api', query: {}, headers: { origin: 'https://admin.example.com' }, socket: {} }, resCors);
+await routerHandler({ method: 'GET', url: '/api', query: {}, headers: { origin: 'https://admin.example.com' }, socket: {} }, resCors);
 assert.equal(resCors.headers['access-control-allow-origin'], 'https://admin.example.com');
 assert.match(resCors.headers.vary, /Origin/);
 delete process.env.VALORAE_CORS_ALLOW_ORIGINS;
 
 const resHead = mockRes();
-await indexHandler({ method: 'HEAD', url: '/api', query: {}, headers: {}, socket: {} }, resHead);
+await routerHandler({ method: 'HEAD', url: '/api', query: {}, headers: {}, socket: {} }, resHead);
 assert.equal(resHead.statusCode, 200);
 assert.equal(resHead.body, '');
 assert.ok(resHead.headers.etag);
 assert.ok(Number(resHead.headers['content-length']) > 0);
 
-console.log('v21.11.9 audit corrections tests OK.');
+console.log('v21.12.0 audit corrections tests OK.');

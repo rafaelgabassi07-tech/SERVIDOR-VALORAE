@@ -30,7 +30,7 @@ const precision = buildExtractionPrecisionReport({ results: fast.results, select
 assert.ok(precision.score >= 80, 'precision score baixo');
 
 const runtime = getValoraeRuntimeStats();
-assert.ok(String(runtime.engineCore.version || '').startsWith('21.11.'), 'engineCore version deve ser 21.11.x');
+assert.ok(String(runtime.engineCore.version || '').startsWith('21.12.'), 'engineCore version deve ser 21.11.x');
 assert.ok(typeof runtime.engineCore.score === 'number');
 
 const serverHtml = fs.readFileSync('public/server.html', 'utf8');

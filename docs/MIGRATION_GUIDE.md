@@ -1,11 +1,11 @@
 # MIGRATION_GUIDE
 
-## v21.4/v21.5 para v21.11.9
+## v21.4/v21.5 para v21.12.0
 
-As URLs públicas continuam válidas. Internamente, o projeto usa apenas duas Functions físicas no Vercel:
+As URLs públicas continuam válidas. Internamente, o projeto usa apenas uma Function física no Vercel:
 
-- `/api` → `api/index.js`
-- `/api/*` → `api/[...path].js`
+- `/api` → `api/router.js`
+- `/api/*` → `api/router.js`
 
 Handlers que antes ficavam em `api/*.js` agora ficam em `routes/`. Código compartilhado fica em `lib/`.
 
@@ -17,7 +17,7 @@ Handlers que antes ficavam em `api/*.js` agora ficam em `routes/`. Código compa
 
 ## Views e profiles
 
-A partir da v21.11.9, os aliases documentados passam a funcionar de verdade:
+A partir da v21.12.0, os aliases documentados passam a funcionar de verdade:
 
 ```text
 view=quote|card|wallet|detail|analysis

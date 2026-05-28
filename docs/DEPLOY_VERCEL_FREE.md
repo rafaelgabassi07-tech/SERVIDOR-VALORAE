@@ -27,7 +27,7 @@ npm run smoke
 npm run build
 ```
 
-O guardrail aceita apenas `api/index.js` e `api/[...path].js` como Functions físicas.
+O guardrail aceita apenas `api/router.js` com rewrites `/api` e `/api/:path*` como Functions físicas.
 
 
 Depois do deploy, valide:
@@ -41,6 +41,6 @@ Depois do deploy, valide:
 
 A build não usa `tsc`, Redis, KV, banco, storage externo ou cron pago.
 
-## v21.11.9 — Scraper/API otimizado
+## v21.12.0 — Scraper/API otimizado
 
 O VALORAE agora possui cache final de resultado para `/api/scrape` e `/api/batch-scrape`, chave HTML segura contra contaminação por truncamento, batch coalescido por `fetchKey`, fast-path conservador para seletores simples, métricas detalhadas de scraping e controles mobile (`compact=1`, `previewChars` e `fields=`). Tudo permanece free-only, sem dependências obrigatórias e sem desmembrar `lib/Valorae-engine.js`.

@@ -1,4 +1,4 @@
-# Valorae Proxy v21.11.9 — Mature Final Release Free
+# Valorae Proxy v21.12.0 — Mature Final Release Free
 
 Proxy HTTP/JSON para dados de investimentos, desenhado para **GitHub + Vercel gratuito**, com deploy simples, sem banco obrigatório, sem Redis/KV, sem storage externo, sem cron pago, sem WebSocket e sem worker permanente.
 
@@ -16,11 +16,10 @@ Esta versão adiciona uma vistoria minuciosa final para publicação no GitHub/V
 
 ## Arquitetura
 
-O VALORAE roda com apenas duas Functions físicas na Vercel:
+O VALORAE roda com apenas uma Function física na Vercel:
 
 ```text
-api/index.js
-api/[...path].js
+api/router.js
 ```
 
 Todo o roteamento real fica em `routes/_router.js`, com handlers internos em `routes/` e módulos auxiliares em `lib/`. O núcleo `lib/Valorae-engine.js` permanece como engine central.
@@ -147,13 +146,13 @@ docs/RELIABILITY_MATRIX.md
 
 ```json
 {
-  "version": "21.11.9",
-  "engine": "21.11.9"
+  "version": "21.12.0",
+  "engine": "21.12.0"
 }
 ```
 
 
-## v21.11.9 — melhorias recomendadas implementadas
+## v21.12.0 — melhorias recomendadas implementadas
 
 Esta versão aplica somente melhorias recomendadas e viáveis para o projeto atual:
 

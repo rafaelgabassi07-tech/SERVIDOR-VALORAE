@@ -1,8 +1,8 @@
-# Auditoria v21.11.9 — Contract Safety Hardening Free
+# Auditoria v21.12.0 — Contract Safety Hardening Free
 
 ## Status
 
-A v21.11.9 aplica a auditoria técnica da v21.5.6 e corrige pontos que ainda estavam documentados, mas não plenamente implementados.
+A v21.12.0 aplica a auditoria técnica da v21.5.6 e corrige pontos que ainda estavam documentados, mas não plenamente implementados.
 
 ## Correções aplicadas
 
@@ -48,7 +48,7 @@ Resultado:
 - `npm run typecheck`: OK.
 - `npm run audit:functions`: OK, 2 Functions físicas.
 - `npm run audit:free`: OK, sem Redis/KV/banco/storage/WebSocket/import complexo.
-- `npm run audit:version`: OK, versão 21.11.9.
+- `npm run audit:version`: OK, versão 21.12.0.
 - `npm run audit:routes`: OK, 32 rotas internas.
 - `npm run smoke`: OK.
 - `npm run build`: OK.

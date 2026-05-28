@@ -4,8 +4,7 @@ import { pathToFileURL } from 'node:url';
 
 const runtimeRoots = ['api', 'routes', 'lib'];
 const requiredFiles = [
-  'api/index.js',
-  'api/[...path].js',
+  'api/router.js',
   'routes/_router.js',
   'routes/server/metrics.js',
   'routes/server/tests.js',
@@ -23,7 +22,7 @@ const requiredFiles = [
   'public/service-worker.js',
 ];
 
-const allowedApiFunctions = new Set(['api/index.js', 'api/[...path].js']);
+const allowedApiFunctions = new Set(['api/router.js']);
 
 function fail(message, error) {
   console.error(`[vercel-build] ${message}`);
@@ -64,7 +63,7 @@ function assertConsolidatedApiFunctions() {
   const extra = apiFiles.filter(f => !allowedApiFunctions.has(f));
   const missing = [...allowedApiFunctions].filter(f => !apiFiles.includes(f));
   if (missing.length) fail(`API Function obrigatória ausente: ${missing.join(', ')}`);
-  if (extra.length) fail(`API Functions físicas extras detectadas (${extra.length}): ${extra.join(', ')}. Consolide via api/[...path].js para evitar limite de Functions no Vercel Free/Hobby.`);
+  if (extra.length) fail(`API Functions físicas extras detectadas (${extra.length}): ${extra.join(', ')}. Consolide via api/router.js + rewrites /api/:path* para evitar limite de Functions no Vercel Free/Hobby.`);
 }
 
 async function importRuntimeFile(file) {
@@ -94,6 +93,9 @@ async function main() {
   }
   const rewriteText = JSON.stringify(vercel.rewrites || []);
   if (!rewriteText.includes('/server.html')) fail('vercel.json deve apontar /, /server, /tests e /inspector para o app principal server.html.');
+  if (!rewriteText.includes('/api/router?path=') || !rewriteText.includes('/api/:path*')) {
+    fail('vercel.json deve reescrever /api e /api/:path* para /api/router para evitar 404 nas rotas internas.');
+  }
 
   const serviceWorker = read('public/service-worker.js');
   if (!/pathname\.startsWith\(['"]\/api['"]\)/.test(serviceWorker) && !serviceWorker.includes('/api')) {
@@ -121,7 +123,7 @@ async function main() {
 
   console.log(`[vercel-build] Pacote ${pkg.name}@${pkg.version}`);
   console.log(`[vercel-build] ${jsFiles.length} arquivos JS runtime importados/validados.`);
-  console.log('[vercel-build] API Functions físicas consolidadas: api/index.js + api/[...path].js.');
+  console.log('[vercel-build] API Functions físicas consolidadas: api/router.js + rewrites /api/:path*.');
   console.log('[vercel-build] Build OK para Vercel.');
 }
 

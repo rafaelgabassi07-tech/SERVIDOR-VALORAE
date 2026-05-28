@@ -1,4 +1,4 @@
-# Valorae v21.11.9 — Scraper 4 Comparison + Portfolio Tech Supremacy
+# Valorae v21.12.0 — Scraper 4 Comparison + Portfolio Tech Supremacy
 
 Esta versão compara o VALORAE com o arquivo `scraper (4).js` e corrige pontos fracos mantendo o projeto **free-only**, serverless e compatível com GitHub/Vercel gratuito.
 

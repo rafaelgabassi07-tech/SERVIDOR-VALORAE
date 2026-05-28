@@ -17,7 +17,7 @@ const requiredFiles = [
   'docs/MIGRATION_GUIDE.md', 'docs/WEB_TYPESCRIPT_GUIDE.md', 'docs/ANDROID_JAVA_GUIDE.md',
   'docs/RELEASE_CHECKLIST.md', 'docs/OPERATIONS.md', 'docs/RELIABILITY_MATRIX.md',
   'docs/ENVIRONMENT.md', 'docs/TROUBLESHOOTING.md', 'docs/ARCHITECTURE.md', 'docs/QUALITY_MATRIX.md',
-  'api/index.js', 'api/[...path].js', 'routes/_router.js', 'lib/Valorae-engine.js',
+  'api/router.js', 'routes/_router.js', 'lib/Valorae-engine.js',
   'public/index.html', 'public/inspector.html'
 ];
 for (const file of requiredFiles) assert(exists(file), `Arquivo obrigatório de lançamento ausente: ${file}`);
@@ -35,8 +35,8 @@ assert(String(pkg.scripts?.typecheck || '').includes('typecheck-free.js'), 'type
 for (const route of ['/ready','/manifest','/env','/schema','/source/status','/health','/asset','/assets','/compare','/scrape','/batch-scrape','/cache/stats','/fields','/errors','/openapi']) {
   assert(manifest.routes.includes(route), `Rota essencial de lançamento ausente no manifesto: ${route}`);
 }
-for (const required of ['api/index.js','api/[...path].js']) assert(manifest.physicalFunctions.includes(required), `Function física essencial ausente no manifesto: ${required}`);
-assert(manifest.physicalFunctions.length === 2, 'Functions físicas devem estar consolidadas em api/index.js e api/[...path].js para Vercel Free.');
+assert(manifest.physicalFunctions.includes('api/router.js'), 'Function física essencial ausente no manifesto: api/router.js');
+assert(manifest.physicalFunctions.length === 1, 'Functions físicas devem estar consolidadas em api/router.js + rewrites para Vercel Free.');
 for (const required of ['/server/metrics','/server/tests','/cache/stats','/source/status','/deploy/status','/ready']) assert(manifest.routes.includes(required), `Rota crítica deve existir no router interno: ${required}`);
 
 const rootFiles = fs.readdirSync('.', { withFileTypes: true }).filter(e => e.isFile()).map(e => e.name);
@@ -49,7 +49,7 @@ assert(!JSON.stringify(vercel).includes('Access-Control-Allow-Origin'), 'CORS da
 
 const publicIndex = read('public/index.html');
 assert(publicIndex.includes(String(pkg.version)), 'public/index.html deve exibir a versão atual.');
-assert(publicIndex.includes('/api/v1/ready'), 'public/index.html deve apontar readiness de lançamento.');
+assert(publicIndex.includes('/api/v1/ready') || publicIndex.includes('/api/ready'), 'public/index.html deve apontar readiness de lançamento.');
 
 const openapi = read('routes/openapi.js');
 for (const route of ['/api/v1/ready','/api/v1/manifest','/api/v1/env','/api/v1/schema','/api/v1/source/status','/api/v1/cache/stats']) {

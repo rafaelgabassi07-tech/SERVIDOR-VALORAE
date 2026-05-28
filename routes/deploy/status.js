@@ -23,8 +23,8 @@ export default async function handler(req, res) {
     routeManifest: routeManifest(),
     build: {
       vercelSafe: true,
-      serverlessFunctions: ['api/index.js', 'api/[...path].js'],
-      note: 'Se /server.html carrega mas /api/server/metrics retorna 404, a function catch-all publicada está desatualizada ou o deploy não publicou o catch-all api/[...path].js.',
+      serverlessFunctions: ['api/router.js'],
+      note: 'Se /server.html carrega mas /api/server/metrics retorna 404, a function router consolidada publicada está desatualizada ou o deploy não publicou o api/router.js.',
     },
     checkedAt: new Date().toISOString(),
   }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'deploy-status', cacheControl: 'private, no-store' });

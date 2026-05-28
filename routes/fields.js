@@ -3,7 +3,7 @@ import { sendJson } from '../lib/performance/http.js';
 import { beginRoute } from '../lib/http/route.js';
 import { VIEW_ALIASES, PROFILE_ALIASES, TTL_MATRIX } from '../lib/catalogs/valorae-catalogs.js';
 
-const FIELD_CATALOG_VERSION = '21.11.9';
+const FIELD_CATALOG_VERSION = '21.12.0';
 
 const stableAssetFields = [
   { path: 'version', type: 'string', description: 'Versão do engine que gerou o payload.' },

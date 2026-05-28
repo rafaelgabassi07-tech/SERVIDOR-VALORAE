@@ -1,10 +1,10 @@
 {
-  "name": "VALORAE Proxy Server v21.11.9",
-  "description": "VALORAE Proxy Server v21.11.9 consolidado em app único e duas API Functions físicas para Vercel Free.",
+  "name": "VALORAE Proxy Server v21.12.0",
+  "description": "VALORAE Proxy Server v21.12.0 consolidado em app único e uma API Function física router para Vercel Free.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
-  "version": "21.11.9",
-  "release": "vercel-api-consolidation"
+  "version": "21.12.0",
+  "release": "vercel-router-rewrite-live-metrics"
 }

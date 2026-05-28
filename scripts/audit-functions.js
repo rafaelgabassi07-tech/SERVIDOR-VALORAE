@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const allowed = new Set(['api/index.js', 'api/[...path].js']);
+const allowed = new Set(['api/router.js']);
 const found = [];
 function walk(dir) {
   if (!fs.existsSync(dir)) return;
@@ -17,7 +17,7 @@ const missing = [...allowed].filter(f => !found.includes(f));
 if (missing.length || extra.length) {
   if (missing.length) console.error('Functions físicas obrigatórias ausentes:', missing.join(', '));
   if (extra.length) console.error('Functions físicas extras detectadas:', extra.join(', '));
-  console.error('O projeto deve permanecer consolidado em no máximo 2 functions físicas para Vercel Hobby/Free. Rotas reais ficam no router interno routes/_router.js.');
+  console.error('O projeto deve permanecer consolidado em 1 function física para Vercel Hobby/Free. Rotas reais ficam no router interno routes/_router.js e vercel.json reescreve /api/:path* para api/router.js.');
   process.exit(1);
 }
 console.log(`Guardrail OK: ${found.length} Functions físicas consolidadas (${found.join(', ')}).`);

@@ -60,4 +60,4 @@ try {
   ValoraeEngine.scrapeUrl = originalScrapeUrl;
 }
 
-console.log('v21.11.9 scraper compatibility hardening tests OK.');
+console.log('v21.12.0 scraper compatibility hardening tests OK.');

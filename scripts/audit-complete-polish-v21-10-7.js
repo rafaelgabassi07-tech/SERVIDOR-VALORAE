@@ -64,7 +64,7 @@ assert.ok(html.includes('X-Valorae-Telemetry'), 'dashboard deve sinalizar pollin
 assert.ok(html.includes('id="anomalyChart"'), 'dashboard deve incluir gráfico de anomalias');
 
 const sw = readFileSync('public/service-worker.js', 'utf8');
-assert.ok(/v21-(10-(7|8|9|10)|11-[0-9])/.test(sw), 'service worker deve trocar cache para a nova versão');
+assert.ok(/v21-(10-(7|8|9|10)|11-[0-9]|12-[0-9])/.test(sw), 'service worker deve trocar cache para a nova versão');
 assert.ok(sw.includes("url.pathname.startsWith('/api')"), 'service worker deve ignorar APIs em tempo real');
 
 console.log('Complete polish audit OK.');
