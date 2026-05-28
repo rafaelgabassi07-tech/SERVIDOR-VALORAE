@@ -50,6 +50,7 @@ const paths = {
   '/api/v1/env': { get: op('Catálogo seguro de variáveis de ambiente e status de configuração', [], undefined, ['System']) },
   '/api/v1/schema': { get: op('Catálogo de schemas estáveis e versões de contrato', [], undefined, ['System']) },
   '/api/v1/source/status': { get: op('Status local de confiabilidade das fontes externas sem chamada de rede', [], undefined, ['System']) },
+  '/api/v1/server/metrics': { get: op('Métricas ao vivo do servidor visual, Vercel Runtime, rotas, eventos, payloads e apps consumidores', [], undefined, ['System']) },
   '/api/v1/asset': { get: op('Dados de ativo sem envelope', assetParams, undefined, ['Assets']), post: op('Dados de ativo via JSON sem envelope', [], postJsonBody, ['Assets']) },
   '/api/v2/asset': { get: op('Dados de ativo com envelope v2', assetParams, undefined, ['Assets']), post: op('Dados de ativo via JSON com envelope v2', [], postJsonBody, ['Assets']) },
   '/api/v1/assets': { get: op('Batch de ativos via router v1', [tickersParam, ...assetParams.filter(p => p.name !== 'ticker')], undefined, ['Assets']), post: op('Batch de ativos via JSON no router v1', [], postJsonBody, ['Assets']) },
@@ -85,7 +86,7 @@ export default async function handler(req, res) {
     info: {
       title: 'Valorae Investment Data API',
       version,
-      description: 'API HTTP/JSON para ativos, mercado, comparação, dividendos, watchlist e carteira. Compatível com GitHub/Vercel gratuito, router interno v1/v2, appPayload anti-tela-vazia, appRenderContract, appDataContract, appSyncEnvelope, appMobileSnapshot, appResponseIntegrity e payloadViewProfile para APK/Web e apenas uma Function física.'
+      description: 'API HTTP/JSON para ativos, mercado, comparação, dividendos, watchlist, carteira e observabilidade do servidor visual. Compatível com GitHub/Vercel gratuito, router interno v1/v2, appPayload anti-tela-vazia, appMobileSnapshot, appResponseIntegrity, payloadViewProfile e vercelRuntime para APK/Web e apenas uma Function física.'
     },
     servers: [{ url: process.env.VALORAE_PUBLIC_BASE_URL || 'https://valorae-proxy.vercel.app' }],
     paths,
@@ -99,6 +100,7 @@ export default async function handler(req, res) {
         PortfolioIntelligence: { type: 'object', properties: { incomeCalendar: { type: 'object' }, incomeCoverage: { type: 'object' }, liquidity: { type: 'array', items: { type: 'object' } }, goalProjection: { type: 'object' }, dataCompleteness: { type: 'object' }, taxPlanner: { type: 'object' }, technologyReadiness: { type: 'object' }, concentrationMap: { type: 'object' }, positionRanking: { type: 'object' }, passiveIncomeProjection: { type: 'object' }, rebalanceRoadmap: { type: 'object' }, objectiveProgress: { type: 'object' }, portfolioNarrative: { type: 'object' }, actionPlan: { type: 'array', items: { type: 'object' } } } },
         SourceDriftReport: { type: 'object', properties: { sourceDrift: { type: 'boolean' }, severity: { type: 'string' }, selectorCoverage: { type: 'number' }, changedSelectors: { type: 'array', items: { type: 'string' } }, recommendation: { type: 'string' } } },
         CacheStats: { type: 'object', properties: { driver: { type: 'object' }, caches: { type: 'object' }, providers: { type: 'object' }, freeOnly: { type: 'boolean' } } },
+        ServerMetrics: { type: 'object', properties: { summary: { type: 'object' }, vercelRuntime: { type: 'object', description: 'Ambiente, região, URL, git, origem Vercel observada e contexto interno isolado do dashboard.' }, deliveryHarmony: { type: 'object' }, payloadIntelligence: { type: 'object' }, distributions: { type: 'object' }, routeDetails: { type: 'array', items: { type: 'object' } }, recentEvents: { type: 'array', items: { type: 'object' } } } },
         Readiness: { type: 'object', properties: { status: { enum: ['READY','NOT_READY'] }, ready: { type: 'boolean' }, checks: { type: 'array', items: { type: 'object' } }, freeOnly: { type: 'boolean' } } },
         ValoraeManifest: { type: 'object', properties: { release: { type: 'string' }, freeOnly: { type: 'boolean' }, physicalFunctions: { type: 'array', items: { type: 'string' } }, routes: { type: 'array', items: { type: 'string' } }, capabilities: { type: 'object' } } },
         EnvCatalog: { type: 'object', properties: { total: { type: 'integer' }, configured: { type: 'integer' }, requiredMissing: { type: 'array', items: { type: 'string' } }, rows: { type: 'array', items: { type: 'object' } } } },

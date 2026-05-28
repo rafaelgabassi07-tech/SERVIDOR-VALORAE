@@ -1,3 +1,22 @@
+## v21.12.17 — Careful review Vercel runtime telemetry
+
+- Revisão cuidadosa das mudanças v21.12.x, com correção de dois pontos que podiam deixar painéis sem dados em produção.
+- Corrigida a captura de Vercel Runtime: o polling interno de `/api/server/metrics` continua isolado dos contadores de usuários, mas agora registra host, região, país e `x-vercel-id` em `vercelRuntime.observed`.
+- Corrigido o dashboard: chamadas internas continuam com `x-valorae-telemetry: dashboard`, mas consultas de dados como `/api/asset` agora usam canal `dashboard-probe` e aparecem nos gráficos/eventos.
+- Dashboard passa a ler países/regiões/hosts também de `vercelRuntime.observed`, evitando painel local/zerado quando ainda não há tráfego externo real.
+- Novo teste `test/careful-review-vercel-runtime-v21-12-17.test.js`.
+
+
+
+## v21.12.16 — Vercel responsive dashboard runtime
+
+- Adicionado painel Vercel Runtime no servidor visual com ambiente, região, host, commit e origem observada.
+- `/api/server/metrics` agora expõe `vercelRuntime` e distribuições `vercelRegions`, `vercelHosts` e `vercelCountries`.
+- Eventos recentes e `routeDetails` agora incluem host/região para confirmar a instância Vercel que entregou dados aos apps.
+- Dashboard web adaptado para mobile, tablet e desktop com novos breakpoints, tabelas roláveis e toolbar responsiva.
+- Adicionado controle `API origem`, com suporte a `?apiBase=` e `localStorage`, para resolver casos em que o painel lê uma origem diferente do deploy Vercel correto.
+- Novo teste `test/vercel-responsive-dashboard-v21-12-16.test.js`.
+
 
 ## v21.12.15 — Vercel App Harmony
 

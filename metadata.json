@@ -1,13 +1,13 @@
 {
   "name": "VALORAE Proxy Server v21.12.0",
-  "description": "Harmonia Vercel ↔ apps consumidores: tudo que sai do proxy para o ecossistema é captado, classificado e exibido no servidor visual.",
+  "description": "Dashboard web responsivo com telemetria Vercel Runtime, regiões, hosts, origem de API configurável e painéis que mostram a distribuição proxy → apps.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
-  "version": "21.12.14",
-  "release": "21.12.15-vercel-app-harmony",
-  "latestInternalPatch": "21.12.13-clean-app-rebuild",
+  "version": "21.12.17",
+  "release": "21.12.17-careful-review-vercel-runtime",
+  "latestInternalPatch": "21.12.17-careful-review-vercel-runtime",
   "features": [
     "clean-financial-app-rebuild",
     "asset-dashboard-no-blank-screen",
@@ -17,8 +17,14 @@
     "vercel_app_harmony",
     "delivery_harmony",
     "consumer_app_telemetry",
-    "app_payload_distribution"
+    "app_payload_distribution",
+    "Dashboard responsivo mobile/desktop",
+    "Painel Vercel Runtime com host/região/commit",
+    "Configuração de origem API via apiBase/localStorage",
+    "Telemetria de x-vercel-id, país, host e região por evento",
+    "Correção da telemetria interna da Vercel sem inflar tráfego",
+    "Separação entre polling do dashboard e consultas reais dashboard-probe"
   ],
-  "codename": "proxy-server-visual-observability",
+  "codename": "careful-review-vercel-runtime",
   "notes": "Servidor visual do proxy com captura estrutural de payloads, eventos, rotas, gráficos e métricas para painéis."
 }

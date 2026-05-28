@@ -92,6 +92,22 @@ const portfolioFields = [
   { path: 'cache.stats', description: 'Métricas em memória: entries, bytes, in-flight, hit/miss e driver free-only.' },
 ];
 
+
+const serverObservabilityFields = [
+  { path: 'vercelRuntime', description: 'Ambiente Vercel/local, URL de deploy, região runtime, git e origem observada pelo painel.' },
+  { path: 'vercelRuntime.observed.regions', description: 'Regiões Vercel observadas por x-vercel-id/x-vercel-region.' },
+  { path: 'vercelRuntime.observed.hosts', description: 'Hosts observados por x-forwarded-host/host para confirmar o deploy que entregou dados.' },
+  { path: 'vercelRuntime.observed.countries', description: 'Países de borda observados por tráfego externo ou polling interno isolado.' },
+  { path: 'vercelRuntime.observed.source', description: 'Origem da leitura Vercel Runtime: external_traffic, dashboard_internal_telemetry ou environment.' },
+  { path: 'vercelRuntime.observed.internalTelemetryRequestsWithVercelHeaders', description: 'Pollings internos que trouxeram headers Vercel sem inflar métricas de usuários.' },
+  { path: 'distributions.vercelRegions', description: 'Distribuição agregada de regiões Vercel por evento externo captado.' },
+  { path: 'distributions.vercelHosts', description: 'Distribuição agregada de hosts/deploys vistos no tráfego real.' },
+  { path: 'distributions.vercelCountries', description: 'Distribuição por país de borda quando x-vercel-ip-country estiver disponível.' },
+  { path: 'routeDetails[].topVercelRegion', description: 'Região Vercel mais frequente por rota.' },
+  { path: 'routeDetails[].topHost', description: 'Host/deploy mais frequente por rota.' },
+  { path: 'recentEvents[].platform', description: 'Contexto de entrega do evento: região, host, país, protocolo e x-vercel-id.' },
+];
+
 const queryControls = [
   { name: 'fields', example: 'ticker,type,status,normalized,quality.score', description: 'Recorta o payload final por caminhos separados por vírgula.' },
   { name: 'dataFields', example: 'ticker,normalized,parserResilience', description: 'Recorta o campo data quando o endpoint usa envelope.' },
@@ -114,6 +130,7 @@ export default async function handler(req, res) {
     normalizedFields,
     portfolioFields,
     appConsumerFields,
+    serverObservabilityFields,
     queryControls,
     financialFieldShape: { display: 'string', value: 'number|null', unit: 'BRL|%|ratio|m2|number', source: 'string', confidence: '0..1' },
     viewAliases: VIEW_ALIASES,
