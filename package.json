@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
-  "version": "21.11.4",
-  "description": "Valorae Proxy v21.11.4 com build Vercel-safe, Engine aprimorado, política adaptativa, failure cache curto, normalização financeira central e séries de gráficos mais precisas.",
+  "version": "21.11.6",
+  "description": "Valorae Proxy v21.11.6 com build Vercel-safe, Engine aprimorado, política adaptativa, failure cache curto, normalização financeira central e séries de gráficos mais precisas.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -35,7 +35,8 @@
     "audit:engine-core": "node scripts/audit-engine-core-v21-11-0.js",
     "audit:engine-modules": "node scripts/audit-engine-modules-v21-11-1.js",
     "audit:engine-performance": "node scripts/audit-engine-performance-v21-11-2.js",
-    "audit:vercel-build": "node scripts/build-vercel-safe.js"
+    "audit:vercel-build": "node scripts/build-vercel-safe.js",
+    "audit:dashboard-live": "node scripts/audit-dashboard-live-contract-v21-11-6.js"
   },
   "engines": {
     "node": "20.x"

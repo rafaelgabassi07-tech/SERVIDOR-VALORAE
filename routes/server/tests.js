@@ -9,7 +9,7 @@ import { buildExtractionPrecisionReport } from '../../lib/quality/extraction-pre
 import { buildChartReadinessReport } from '../../lib/quality/chart-readiness.js';
 import { buildNormalizedChartSeries } from '../../lib/quality/chart-series.js';
 
-const TESTS_VERSION = '21.11.5-realtime-test-lab';
+const TESTS_VERSION = '21.11.6-realtime-test-lab';
 
 function round(value, digits = 3) {
   const factor = 10 ** digits;

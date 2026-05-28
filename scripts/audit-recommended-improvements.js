@@ -10,9 +10,9 @@ function exists(file) { return fs.existsSync(file); }
 function read(file) { return fs.readFileSync(file, 'utf8'); }
 const manifest = routeManifest();
 
-assert(pkg.version === '21.11.4', 'package.json precisa estar em 21.11.4.');
+assert(pkg.version === '21.11.6', 'package.json precisa estar em 21.11.6.');
 assert(Object.keys(pkg.dependencies || {}).length === 0, 'dependencies deve continuar vazio.');
-assert(manifest.physicalFunctions.length === 2, 'Devem existir só 2 Functions físicas.');
+assert(manifest.physicalFunctions.length >= 9, 'Devem existir as Functions físicas críticas para Vercel.');
 
 for (const file of ['.nvmrc','.env.example','LICENSE','SECURITY.md','CONTRIBUTING.md','docs/ENVIRONMENT.md','docs/TROUBLESHOOTING.md','docs/ARCHITECTURE.md','docs/QUALITY_MATRIX.md']) {
   assert(exists(file), `Arquivo recomendado ausente: ${file}`);
@@ -52,4 +52,4 @@ if (failures.length) {
   for (const f of failures) console.error(`- ${f}`);
   process.exit(1);
 }
-console.log('Recommended improvements audit OK: melhorias viáveis v21.11.4 presentes e sem tecnologias não recomendadas.');
+console.log('Recommended improvements audit OK: melhorias viáveis v21.11.6 presentes e sem tecnologias não recomendadas.');

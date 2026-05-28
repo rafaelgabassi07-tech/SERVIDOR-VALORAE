@@ -1,4 +1,4 @@
-# VALORAE v21.11.4 — otimização profunda de Scraper/API
+# VALORAE v21.11.6 — otimização profunda de Scraper/API
 
 Esta versão implementa as fases prioritárias do plano profundo de otimização do VALORAE, mantendo a arquitetura free-only para GitHub/Vercel e preservando `lib/Valorae-engine.js` como núcleo central.
 

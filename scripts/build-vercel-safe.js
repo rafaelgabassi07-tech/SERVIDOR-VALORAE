@@ -25,6 +25,15 @@ function fail(message, error) {
   process.exit(1);
 }
 
+function ensureDashboardEntry() {
+  const indexFile = 'public/index.html';
+  const serverFile = 'public/server.html';
+  if (!fs.existsSync(serverFile) && fs.existsSync(indexFile)) {
+    fs.copyFileSync(indexFile, serverFile);
+    console.log('[vercel-build] public/server.html ausente; gerado a partir de public/index.html para preservar /server.html.');
+  }
+}
+
 function assertFile(file) {
   if (!fs.existsSync(file)) fail(`Arquivo obrigatório ausente: ${file}`);
 }
@@ -51,6 +60,7 @@ async function main() {
   console.log('[vercel-build] VALORAE Proxy: validação serverless gratuita iniciada.');
   console.log(`[vercel-build] Node ${process.version}`);
 
+  ensureDashboardEntry();
   for (const file of requiredFiles) assertFile(file);
 
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));

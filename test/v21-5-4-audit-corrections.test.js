@@ -48,4 +48,4 @@ assert.equal(resHead.body, '');
 assert.ok(resHead.headers.etag);
 assert.ok(Number(resHead.headers['content-length']) > 0);
 
-console.log('v21.11.4 audit corrections tests OK.');
+console.log('v21.11.6 audit corrections tests OK.');

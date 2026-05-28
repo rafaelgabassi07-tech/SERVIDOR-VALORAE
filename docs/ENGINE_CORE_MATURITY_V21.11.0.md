@@ -1,6 +1,6 @@
 # VALORAE Proxy v21.11.0 — Engine Core Maturity
 
-Esta rodada continua a evolução da v21.11.4 com foco no núcleo do `Valorae-engine.js`, performance de scraping, precisão da extração e leitura dos gráficos do painel servidor.
+Esta rodada continua a evolução da v21.11.6 com foco no núcleo do `Valorae-engine.js`, performance de scraping, precisão da extração e leitura dos gráficos do painel servidor.
 
 ## Melhorias aplicadas
 

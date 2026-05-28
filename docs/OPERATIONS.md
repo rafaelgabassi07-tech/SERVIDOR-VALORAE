@@ -38,6 +38,6 @@ Esses campos ajudam o app Web/APK a decidir se deve exibir alerta, fallback ou r
 3. Verifique `/api/v1/ready`.
 4. Confirme `/api/v1/asset?ticker=PETR4&view=quote&profile=quote`.
 
-## v21.11.4 — Scraper/API otimizado
+## v21.11.6 — Scraper/API otimizado
 
 O VALORAE agora possui cache final de resultado para `/api/scrape` e `/api/batch-scrape`, chave HTML segura contra contaminação por truncamento, batch coalescido por `fetchKey`, fast-path conservador para seletores simples, métricas detalhadas de scraping e controles mobile (`compact=1`, `previewChars` e `fields=`). Tudo permanece free-only, sem dependências obrigatórias e sem desmembrar `lib/Valorae-engine.js`.

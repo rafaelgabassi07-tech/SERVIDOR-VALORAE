@@ -54,4 +54,4 @@ assert.ok(svg.includes('VALORAE Proxy Server') && svg.includes('linearGradient')
 assert.ok(statSync('public/assets/valorae-icon-192.png').size > 1000, 'ícone 192 PNG deve existir');
 assert.ok(statSync('public/assets/valorae-icon-512.png').size > 3000, 'ícone 512 PNG deve existir');
 
-console.log('Visual polish audit OK: logo clean, PWA v21.11.4, configurações, pausa e métricas de maturidade validados.');
+console.log('Visual polish audit OK: logo clean, PWA v21.11.6, configurações, pausa e métricas de maturidade validados.');
