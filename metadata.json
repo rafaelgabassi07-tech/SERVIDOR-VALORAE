@@ -1,10 +1,16 @@
 {
   "name": "VALORAE Proxy Server v21.12.0",
-  "description": "VALORAE Proxy Server v21.12.0 consolidado em app único e uma API Function física router para Vercel Free.",
+  "description": "VALORAE Proxy Server v21.12.12 com normalizador de aliases financeiros, views compactas corrigidas para watchlist/list e contratos mobile seguros para Vercel Free.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
   "version": "21.12.0",
-  "release": "vercel-router-rewrite-live-metrics"
+  "release": "field-alias-mobile-compact-v21.12.12",
+  "latestInternalPatch": "21.12.12-field-alias-mobile-compact",
+  "features": [
+    "watchlist-list-compact-fix",
+    "field-alias-normalizer",
+    "mobile-safe-payload-views"
+  ]
 }

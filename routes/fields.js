@@ -21,12 +21,59 @@ const stableAssetFields = [
   { path: 'valoraeScore', type: 'object', description: 'Score analítico derivado para comparação.' },
   { path: 'alerts', type: 'array', description: 'Alertas analíticos e de qualidade.' },
   { path: 'sourceReport', type: 'object', description: 'Fontes usadas/tentadas e fallback.' },
+  { path: 'consumerDiagnostics', type: 'object', description: 'Mapa de consumo do app: caminhos disponíveis, tentativas de fonte, fallback e score de captura.' },
+  { path: 'appPayload', type: 'object', description: 'Payload direto para APK/Web com aliases, painéis, gráficos e blankShield anti-tela-vazia.' },
+  { path: 'appRenderContract', type: 'object', description: 'Contrato de renderização por card/gráfico com estados ready/partial/empty e validações de consistência.' },
+  { path: 'appDataContract', type: 'object', description: 'Validador final do payload consumível: score, cobertura crítica, renderSafe e política de snapshot/cache.' },
+  { path: 'appSyncEnvelope', type: 'object', description: 'Envelope de sincronização para APK/Web: decisão de snapshot, hash estável, first paint, hidratação e política de polling.' },
+  { path: 'appMobileSnapshot', type: 'object', description: 'Snapshot compacto para primeira pintura/cache local do APK/Web, com cotação, métricas, painéis, gráficos amostrados e decisão sync.' },
+  { path: 'appResponseIntegrity', type: 'object', description: 'Auditor final de integridade dos contratos do app: raízes presentes, paridade de métricas/gráficos, sync/hash e orçamento de payload.' },
+  { path: 'payloadViewProfile', type: 'object', description: 'Diagnóstico do view aplicado: compact/standard/full, redução aproximada de bytes e raízes removidas para mobile.' },
   { path: 'performance', type: 'object', description: 'Perfil, timing e política de execução.' }
 ];
 
 const normalizedFields = [
   'precoAtual','variacaoDay','variacao12m','dividendYield','dyMedio5a','pvp','pl','roe','roic','roa','margemLiquida','margemEbitda','payout','valorPatrimonialCota','patrimonioLiquido','valorDeMercado','liquidezMediaDiaria','vacanciaFisica','yield1m','yield3m','yield6m','yield12m'
 ].map(path => ({ path: `normalized.${path}`, shape: 'FinancialField', fields: ['display','value','unit','source','confidence'] }));
+
+
+const appConsumerFields = [
+  { path: 'appPayload.quote', description: 'Card de cotação pronto para APK/Web, com preço, variação, DY e fonte.' },
+  { path: 'appPayload.metrics.canonical', description: 'Índice canônico de métricas financeiras com aliases estáveis para o app.' },
+  { path: 'appPayload.metrics.aliases', description: 'Mapa de aliases: price/currentPrice/dy/p_vp etc apontando para chaves canônicas.' },
+  { path: 'appPayload.panels', description: 'Prontidão por painel em formato simples para renderização segura.' },
+  { path: 'appPayload.charts.series', description: 'Séries de gráficos normalizadas e preferenciais para consumo direto.' },
+  { path: 'appPayload.dividends', description: 'Histórico/resumo de dividendos com fallback e contagem.' },
+  { path: 'appPayload.blankShield', description: 'Contrato anti-tela-vazia com flags canRender*, fallbackOrder e empty state recomendado.' },
+  { path: 'appRenderContract.cards', description: 'Lista de cards do dashboard com estado ready/partial/empty, primaryPath e fallbackPaths.' },
+  { path: 'appRenderContract.metricGroups', description: 'Agrupamento de métricas por quote, valuation, dividends, profitability e liquidity.' },
+  { path: 'appRenderContract.chartTemplates', description: 'Templates de gráfico com tipo recomendado: line, bar ou candlestick.' },
+  { path: 'appRenderContract.consistency', description: 'Validações de divergência entre appPayload, normalized e chartSeries.' },
+  { path: 'appRenderContract.offlinePolicy', description: 'Política para manter dados anteriores, usar cache stale e evitar tela vazia.' },
+  { path: 'appDataContract.score', description: 'Score final de segurança do payload consumível pelo app.' },
+  { path: 'appDataContract.renderSafe', description: 'Indica se o app pode renderizar/substituir tela sem risco crítico.' },
+  { path: 'appDataContract.canReplacePreviousSnapshot', description: 'Indica se pode substituir o último snapshot bom no APK/Web.' },
+  { path: 'appDataContract.coverage', description: 'Cobertura de métricas críticas, cards e gráficos.' },
+  { path: 'appDataContract.fieldMap', description: 'Mapa de campos canônicos com aliases, fonte, confiança e caminhos de fallback.' },
+  { path: 'appDataContract.uiGuards', description: 'Guardrails de UI para evitar tela vazia e dados regressivos.' },
+  { path: 'appSyncEnvelope.identity.payloadHash', description: 'Hash estável para o app decidir se houve mudança real nos dados consumíveis.' },
+  { path: 'appSyncEnvelope.decision', description: 'Ação recomendada: substituir snapshot, mesclar com anterior, manter cache ou mostrar empty state.' },
+  { path: 'appSyncEnvelope.firstPaint', description: 'Checklist dos caminhos mínimos para primeira renderização segura no APK/Web.' },
+  { path: 'appSyncEnvelope.hydration', description: 'Ordem de hidratação incremental e caminhos lazy para reduzir telas em branco.' },
+  { path: 'appSyncEnvelope.transport', description: 'Diagnóstico de cache/fonte/tamanho aproximado para payload mobile.' },
+  { path: 'appMobileSnapshot.quote', description: 'Cotação compacta pronta para card/lista/watchlist mobile.' },
+  { path: 'appMobileSnapshot.metrics', description: 'Métricas financeiras canônicas compactadas para primeira pintura.' },
+  { path: 'appMobileSnapshot.charts', description: 'Até 6 séries amostradas com no máximo 80 pontos por série para renderização rápida.' },
+  { path: 'appMobileSnapshot.sync', description: 'Resumo da decisão de sincronização/cache do appSyncEnvelope.' },
+  { path: 'appMobileSnapshot.snapshotHash', description: 'Hash estável do snapshot compacto para cache local e detecção de mudança real.' },
+  { path: 'appResponseIntegrity.score', description: 'Score final de integridade entre appPayload, contratos, sync e snapshot mobile.' },
+  { path: 'appResponseIntegrity.ok', description: 'Indica se os contratos do app estão consistentes para consumo seguro.' },
+  { path: 'appResponseIntegrity.cacheSafe', description: 'Indica se é seguro substituir o cache/snapshot local do APK/Web.' },
+  { path: 'appResponseIntegrity.sections', description: 'Diagnóstico por raiz, métricas, gráficos, sincronização/hash e orçamento de payload.' },
+  { path: 'appResponseIntegrity.issues', description: 'Lista de inconsistências detectadas com severidade e recomendação de fallback.' },
+  { path: 'payloadViewProfile.reductionPercent', description: 'Percentual aproximado de redução após aplicar view=compact/mobile/standard.' },
+  { path: 'payloadViewProfile.appPreferredFirstPaintRoot', description: 'Raiz recomendada para primeira pintura do app, normalmente appMobileSnapshot no modo compact.' },
+];
 
 const portfolioFields = [
   { path: 'portfolio.summary', description: 'Totais, rentabilidade, contagem e qualidade média.' },
@@ -50,7 +97,7 @@ const queryControls = [
   { name: 'dataFields', example: 'ticker,normalized,parserResilience', description: 'Recorta o campo data quando o endpoint usa envelope.' },
   { name: 'lean', example: '1', description: 'Remove blocos pesados como debug, rawHtml, html e text.' },
   { name: 'maxItems', example: '20', description: 'Limita arrays em todo o payload para reduzir resposta em Web/APK.' },
-  { name: 'view', example: 'instant|ultra|tiny|quote|card|wallet|detail|analysis|compact|standard|full', description: 'Controla o nível de detalhe antes do recorte por fields.' },
+  { name: 'view', example: 'instant|ultra|tiny|quote|card|mobile|snapshot|sync|wallet|portfolio|watchlist|detail|analysis|compact|standard|full', description: 'Controla o nível de detalhe antes do recorte por fields.' },
   { name: 'profile', example: 'instant|quote|card|wallet|analysis|fast|standard|deep|portfolio', description: 'Perfil de performance/completude.' }
 ];
 
@@ -66,6 +113,7 @@ export default async function handler(req, res) {
     stableAssetFields,
     normalizedFields,
     portfolioFields,
+    appConsumerFields,
     queryControls,
     financialFieldShape: { display: 'string', value: 'number|null', unit: 'BRL|%|ratio|m2|number', source: 'string', confidence: '0..1' },
     viewAliases: VIEW_ALIASES,

@@ -1,3 +1,28 @@
+
+## v21.12.10 - App Response Integrity
+
+- Adiciona `lib/quality/app-response-integrity.js`.
+- Adiciona `appResponseIntegrity` ao payload final do engine.
+- Valida presença de `appPayload`, `appRenderContract`, `appDataContract`, `appSyncEnvelope` e `appMobileSnapshot`.
+- Detecta aliases de métricas quebrados, divergência entre `chartSeries` e `appPayload.charts`, overflow de pontos no snapshot mobile e inconsistências de hash/sync.
+- Adiciona `cacheSafe`, `renderSafe`, score final, orçamento de payload e recomendações para manter snapshot anterior.
+- Atualiza OpenAPI, catálogo de campos, tipagens e teste dedicado `app-response-integrity-v21-12-10`.
+
+# v21.12.9 — App Mobile Snapshot
+
+- Adicionado `appMobileSnapshot`, raiz compacta para primeira pintura/cache local do APK/Web.
+- Snapshot inclui cotação, métricas canônicas, painéis, gráficos amostrados, dividendos, fonte/cache e decisão sync.
+- Gráficos do snapshot são limitados para reduzir payload mobile e evitar travamentos em listas/watchlists.
+- Contratos de app agora aceitam métricas normalizadas primitivas como fallback defensivo.
+
+# v21.12.5 — App Consumer Blank Shield
+
+- Adicionado `appPayload` no retorno do engine para consumo direto pelo APK/Web.
+- Incluídos aliases estáveis de métricas (`price`, `currentPrice`, `dy`, `p_vp`, `marketCap`, etc.).
+- Incluído `blankShield` com flags `canRenderDashboard`, `canRenderCharts`, `canRenderDividends` e empty state recomendado.
+- Gráficos e dividendos agora têm contratos diretos em `appPayload.charts` e `appPayload.dividends`.
+- OpenAPI, catálogo `/api/fields`, tipagens e testes atualizados.
+
 # Changelog
 
 ## v21.12.0 — Router único Vercel e recuperação de métricas ao vivo
@@ -252,3 +277,19 @@
 - Melhora parser numérico dos custom selectors para formatos PT-BR e EN.
 - Atualiza painel Engine Core com HTML family hit e score de fontes.
 - Adiciona `npm run audit:engine-modules` e teste `engine-core-modules-v21-11-1`.
+
+## v21.12.11 - Mobile safe payload views
+
+- Corrige o modo `view=compact` para não carregar contratos pesados recém-adicionados em listas, cards e primeira pintura mobile.
+- Adiciona aliases `mobile`, `snapshot`, `sync`, `watchlist` e `list` aos views públicos.
+- Preserva `appMobileSnapshot`, `appSyncEnvelope` e resumo de `appResponseIntegrity` no modo compacto.
+- Reduz `appPayload.charts.series` para `seriesPreview` com até 12 pontos por série no modo compacto, mantendo séries completas disponíveis no `view=full`.
+- Adiciona `payloadViewProfile` com redução aproximada de bytes, roots removidas e raiz recomendada de primeira renderização.
+
+## v21.12.12 - Field alias normalizer e compact fix
+
+- Adiciona normalização defensiva de aliases financeiros para campos vindos de scrapers/APIs com labels PT-BR/EN-US.
+- Reconhece `Preço`, `D.Y`, `P/VP`, `Último Rendimento`, `Patrimônio Líquido`, `Liquidez Média Diária`, `Vacância Física`, `marketCap`, `lastDividend`, `currentPrice` e equivalentes.
+- Usa parser financeiro central no fallback bruto do `appPayload`, melhorando leitura de valores como `R$ 4,2 bi`, `R$ 8,5 mi` e `9,87%`.
+- Corrige `view=watchlist` e `view=list` para resolverem como `compact`, reduzindo payload em listas e primeira pintura mobile.
+- Adiciona teste `field-alias-mobile-compact-v21-12-12`.
