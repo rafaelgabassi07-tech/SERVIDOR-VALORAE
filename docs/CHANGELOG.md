@@ -1,3 +1,13 @@
+
+## 21.12.18 — Proxy Output Server Page
+
+- Refatoração da página web para agir como página-servidor do proxy.
+- Novo `proxyOutputMonitor` em `/api/server/metrics`.
+- Novo feed `proxyOutputMonitor.outputFeed[]` com respostas que saem do proxy para apps/usuários.
+- Matriz `routeOutputs` para rotas que distribuem payloads, métricas, gráficos e dividendos.
+- Página mostra payload selecionado, raízes transformadas, app/canal consumidor, Vercel host/região, status, bytes, fonte/cache e preview do JSON entregue.
+- Mantida compatibilidade com Vercel Free: sem banco, Redis, KV, WebSocket ou dependência paga.
+
 ## v21.12.17 — Careful review Vercel runtime telemetry
 
 - Revisão cuidadosa das mudanças v21.12.x, com correção de dois pontos que podiam deixar painéis sem dados em produção.

@@ -4,9 +4,9 @@ import { resetServerMetricsForTests, recordRequestStart, recordResponse, getServ
 
 const html = fs.readFileSync('public/server.html', 'utf8');
 assert.equal(html, fs.readFileSync('public/index.html', 'utf8'), 'index deve espelhar server visual');
-assert.ok(html.includes('function telemetryHeaders(path)'), 'dashboard deve separar headers internos de chamadas de dados');
-assert.ok(html.includes("internal?'dashboard':'dashboard-probe'"), 'consulta de ativo do painel deve aparecer como dashboard-probe');
-assert.ok(html.includes('names(vr.observed?.countries)'), 'Vercel Runtime deve usar países observados também por telemetria interna');
+assert.ok(html.includes('function headers(path)'), 'dashboard deve separar headers internos de chamadas de dados');
+assert.ok(html.includes('proxy-output-probe'), 'consulta de teste do painel deve aparecer como probe real');
+assert.ok(html.includes('proxyOutputMonitor'), 'página deve renderizar o espelho de saída do proxy');
 
 resetServerMetricsForTests();
 const internalReq = {
@@ -44,7 +44,7 @@ const dataReq = {
     'x-vercel-id': 'gru1::asset123',
     'x-vercel-ip-country': 'BR',
     'x-valorae-app': 'VALORAE Server Visual',
-    'x-valorae-channel': 'dashboard-probe',
+    'x-valorae-channel': 'proxy-output-probe',
     'user-agent': 'Mozilla/5.0 VALORAE Server Visual',
   },
   socket: { remoteAddress: '10.0.0.100' },
@@ -68,9 +68,10 @@ recordResponse(dataReq, res, {
 snap = getServerMetricsSnapshot();
 assert.equal(snap.summary.requests, 1, 'consulta de dados do painel deve alimentar telemetria real');
 assert.equal(snap.distributions.apps[0].name, 'VALORAE Server Visual');
-assert.equal(snap.distributions.channels[0].name, 'dashboard-probe');
+assert.equal(snap.distributions.channels[0].name, 'proxy-output-probe');
 assert.equal(snap.deliveryHarmony.payloadsDelivered, 1);
-assert.equal(snap.recentEvents[0].appChannel, 'dashboard-probe');
+assert.equal(snap.recentEvents[0].appChannel, 'proxy-output-probe');
+assert.equal(snap.proxyOutputMonitor.outputFeed[0].appChannel, 'proxy-output-probe');
 assert.equal(snap.recentEvents[0].payloadSignals.ticker, 'PETR4');
 assert.equal(snap.vercelRuntime.observed.lastHost, 'servidor-valorae.vercel.app');
 assert.equal(snap.vercelRuntime.observed.lastRegion, 'gru1');

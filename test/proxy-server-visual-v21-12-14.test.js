@@ -6,23 +6,19 @@ const html = fs.readFileSync('public/server.html', 'utf8');
 const index = fs.readFileSync('public/index.html', 'utf8');
 
 for (const needle of [
-  'VALORAE Proxy Server',
-  'Servidor visual',
-  'Fluxo vivo do proxy',
-  'Payloads transformados para o app',
-  'Rotas que os usuários estão consumindo',
+  'VALORAE Proxy Output Server',
+  'Espelho de saída do proxy',
+  'Fluxo de saída em tempo real',
+  'Feed de tudo que saiu do proxy',
+  'Rotas distribuindo informações',
+  'Payload selecionado',
+  'proxyOutputMonitor',
   'appMobileSnapshot',
   'appPayload',
   'chartSeries',
   'localStorage',
-  'id="page-tests"',
-  'renderFailure',
-  '/api/server/tests',
-  '/api/cache/stats',
-  '/api/source/status',
-  'engineCoreChart',
-  'engineCoreList',
-  'HTML family hit',
+  '/api/server/metrics',
+  '/api/asset',
 ]) assert.ok(html.includes(needle), `server.html precisa conter ${needle}`);
 assert.equal(html, index, 'index.html deve espelhar server.html');
 assert.ok(html.length < 65000, 'dashboard deve continuar leve para Vercel/mobile');
@@ -55,7 +51,9 @@ assert.ok(snap.payloadIntelligence.totalMetricsObserved >= 3);
 assert.ok(snap.payloadIntelligence.totalChartSeriesObserved >= 1);
 assert.ok(snap.recentEvents[0].payloadRoots.includes('appPayload'));
 assert.equal(snap.recentEvents[0].payloadSignals.ticker, 'GARE11');
-assert.equal(snap.recentEvents[0].payloadKind, 'asset');
+assert.equal(snap.recentEvents[0].payloadKind, 'app_delivery');
+assert.equal(snap.proxyOutputMonitor.outputFeed[0].payloadKind, 'app_delivery');
+assert.equal(snap.proxyOutputMonitor.totals.outboundResponses, 1);
 assert.ok(String(snap.recentEvents[0].payloadPreview).includes('GARE11'));
 
 console.log('proxy-server-visual-v21-12-14 ok');

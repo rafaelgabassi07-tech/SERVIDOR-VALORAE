@@ -106,6 +106,11 @@ const serverObservabilityFields = [
   { path: 'routeDetails[].topVercelRegion', description: 'Região Vercel mais frequente por rota.' },
   { path: 'routeDetails[].topHost', description: 'Host/deploy mais frequente por rota.' },
   { path: 'recentEvents[].platform', description: 'Contexto de entrega do evento: região, host, país, protocolo e x-vercel-id.' },
+  { path: 'proxyOutputMonitor', description: 'Espelho principal da página-servidor: respostas que saíram do proxy para apps/usuários.' },
+  { path: 'proxyOutputMonitor.totals', description: 'Totais de saída: respostas, bytes, payloads, métricas, gráficos, dividendos e snapshots mobile entregues.' },
+  { path: 'proxyOutputMonitor.outputFeed[]', description: 'Feed recente de cada resposta entregue: rota, app, status, bytes, payloadKind, raízes, sinais e preview.' },
+  { path: 'proxyOutputMonitor.routeOutputs[]', description: 'Matriz de rotas que distribuíram informações para usuários, com renderSafe/cacheSafe e dados entregues.' },
+  { path: 'proxyOutputMonitor.rootCoverage', description: 'Contagem das raízes de payload vistas na saída, como appPayload, appMobileSnapshot, normalized, chartSeries e results.' },
 ];
 
 const queryControls = [

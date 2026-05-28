@@ -3,9 +3,10 @@ import fs from 'node:fs';
 import { resetServerMetricsForTests, recordRequestStart, recordResponse, getServerMetricsSnapshot } from '../lib/observability/server-metrics.js';
 
 const html = fs.readFileSync('public/server.html', 'utf8');
-assert.ok(html.includes('Harmonia Vercel ↔ Apps'), 'dashboard deve mostrar harmonia Vercel ↔ Apps');
-assert.ok(html.includes('Pipeline Vercel → Proxy → Engine → Apps'), 'dashboard deve mostrar pipeline de distribuição');
-assert.ok(html.includes('Apps recebendo dados'), 'dashboard deve listar apps consumidores');
+assert.ok(html.includes('VALORAE Proxy Output Server'), 'dashboard deve mostrar página-servidor do proxy');
+assert.ok(html.includes('Pipeline do proxy'), 'dashboard deve mostrar pipeline de distribuição');
+assert.ok(html.includes('Apps e canais'), 'dashboard deve listar apps consumidores');
+assert.ok(html.includes('proxyOutputMonitor'), 'dashboard deve consumir proxyOutputMonitor');
 assert.equal(html, fs.readFileSync('public/index.html', 'utf8'), 'index.html deve espelhar server.html');
 assert.ok(html.length < 72000, 'dashboard deve continuar leve para Vercel Free/mobile');
 
@@ -69,5 +70,7 @@ assert.equal(snap.recentEvents[0].deliveryDecision, 'replace_snapshot');
 assert.equal(snap.recentEvents[0].appName, 'VALORAE Investidor');
 assert.equal(snap.recentEvents[0].payloadSignals.hasAppMobileSnapshot, true);
 assert.equal(snap.recentEvents[0].payloadSignals.hasAppPayload, true);
+assert.equal(snap.proxyOutputMonitor.totals.payloadResponses, 1);
+assert.equal(snap.proxyOutputMonitor.outputFeed[0].appName, 'VALORAE Investidor');
 
 console.log('vercel-app-harmony-v21-12-15 ok');

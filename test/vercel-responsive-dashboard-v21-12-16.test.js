@@ -5,15 +5,14 @@ import { resetServerMetricsForTests, recordRequestStart, recordResponse, getServ
 const html = fs.readFileSync('public/server.html', 'utf8');
 assert.equal(html, fs.readFileSync('public/index.html', 'utf8'), 'index deve espelhar server visual');
 for (const needle of [
-  'Vercel ambiente',
-  'Região runtime',
-  'Host observado',
-  'Commit/deploy',
-  'apiBase',
+  'Vercel host',
+  'Região / ambiente',
   'API origem',
-  '@media(max-width:720px)',
+  'apiBase',
+  'proxyOutputMonitor',
+  '@media(max-width:760px)',
   '@media(max-width:430px)',
-  'grid-template-columns:repeat(2,minmax(0,1fr))',
+  'grid-template-columns:repeat(2,1fr)',
 ]) assert.ok(html.includes(needle), `dashboard precisa conter ${needle}`);
 assert.ok(html.length < 72000, 'dashboard responsivo deve continuar leve para Vercel/mobile');
 
@@ -60,5 +59,7 @@ assert.equal(snap.recentEvents[0].platform.region, 'gru1');
 assert.equal(snap.routeDetails[0].topVercelRegion, 'gru1');
 assert.equal(snap.routeDetails[0].topHost, 'servidor-valorae.vercel.app');
 assert.ok(snap.deliveryHarmony.pipeline.some(x => x.stage === 'vercel_runtime'), 'pipeline deve incluir runtime Vercel');
+assert.equal(snap.proxyOutputMonitor.liveStatus.vercelRegion, 'gru1');
+assert.equal(snap.proxyOutputMonitor.outputFeed[0].platform.host, 'servidor-valorae.vercel.app');
 
 console.log('vercel-responsive-dashboard-v21-12-16 ok');

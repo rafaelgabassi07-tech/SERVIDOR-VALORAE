@@ -1,13 +1,13 @@
 {
   "name": "VALORAE Proxy Server v21.12.0",
-  "description": "Dashboard web responsivo com telemetria Vercel Runtime, regiões, hosts, origem de API configurável e painéis que mostram a distribuição proxy → apps.",
+  "description": "Página-servidor do proxy com feed de saída, payloads entregues, rotas, apps, métricas, gráficos, Vercel Runtime e proxyOutputMonitor.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
-  "version": "21.12.17",
-  "release": "21.12.17-careful-review-vercel-runtime",
-  "latestInternalPatch": "21.12.17-careful-review-vercel-runtime",
+  "version": "21.12.18",
+  "release": "21.12.18-proxy-output-server-page",
+  "latestInternalPatch": "21.12.18-proxy-output-server-page",
   "features": [
     "clean-financial-app-rebuild",
     "asset-dashboard-no-blank-screen",
@@ -23,8 +23,10 @@
     "Configuração de origem API via apiBase/localStorage",
     "Telemetria de x-vercel-id, país, host e região por evento",
     "Correção da telemetria interna da Vercel sem inflar tráfego",
-    "Separação entre polling do dashboard e consultas reais dashboard-probe"
+    "Separação entre polling do dashboard e consultas reais dashboard-probe",
+    "proxyOutputMonitor com feed de tudo que sai do proxy",
+    "Página-servidor focada nas respostas distribuídas aos apps/usuários"
   ],
-  "codename": "careful-review-vercel-runtime",
-  "notes": "Servidor visual do proxy com captura estrutural de payloads, eventos, rotas, gráficos e métricas para painéis."
+  "codename": "proxy-output-server-page",
+  "notes": "Página-servidor do proxy com proxyOutputMonitor, feed de respostas entregues aos apps, payload preview, matriz de rotas e gráficos de distribuição."
 }
