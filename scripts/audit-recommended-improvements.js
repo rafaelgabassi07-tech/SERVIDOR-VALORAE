@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+import pkg from '../package.json' with { type: 'json' };
 import { routeManifest } from '../routes/_router.js';
 import { ENV_CATALOG, ERROR_CATALOG, VIEW_ALIASES, PROFILE_ALIASES, TTL_MATRIX } from '../lib/catalogs/valorae-catalogs.js';
 

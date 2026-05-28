@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+import pkg from '../package.json' with { type: 'json' };
 import { routeManifest } from '../routes/_router.js';
 
 const failures = [];
