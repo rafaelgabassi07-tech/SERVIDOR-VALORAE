@@ -1,4 +1,4 @@
-# Web TypeScript Guide — Valorae v21.11.3
+# Web TypeScript Guide — Valorae v21.11.4
 
 O SDK TypeScript fica em:
 
@@ -38,6 +38,6 @@ const portfolio = await valorae.portfolioAnalyze({
 
 O projeto não depende de `typescript` no `package.json`. O script `npm run typecheck` valida o contrato do `.d.ts` e do SDK com Node puro para manter o deploy simples na Vercel gratuita.
 
-## v21.11.3 — Scraper/API otimizado
+## v21.11.4 — Scraper/API otimizado
 
 O VALORAE agora possui cache final de resultado para `/api/scrape` e `/api/batch-scrape`, chave HTML segura contra contaminação por truncamento, batch coalescido por `fetchKey`, fast-path conservador para seletores simples, métricas detalhadas de scraping e controles mobile (`compact=1`, `previewChars` e `fields=`). Tudo permanece free-only, sem dependências obrigatórias e sem desmembrar `lib/Valorae-engine.js`.

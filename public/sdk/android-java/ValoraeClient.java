@@ -29,7 +29,7 @@ public class ValoraeClient {
         c.setConnectTimeout(connectTimeoutMs);
         c.setReadTimeout(readTimeoutMs);
         c.setRequestProperty("Accept", "application/json");
-        c.setRequestProperty("User-Agent", "ValoraeClient-AndroidJava/21.11.3");
+        c.setRequestProperty("User-Agent", "ValoraeClient-AndroidJava/21.11.4");
         return c;
     }
 

@@ -20,5 +20,5 @@
       ]
     }
   ],
-  "buildCommand": "node scripts/build-free.js"
+  "buildCommand": "node scripts/build-vercel-safe.js"
 }

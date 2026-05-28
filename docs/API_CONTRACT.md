@@ -1,4 +1,4 @@
-# API Contract — Valorae Proxy v21.11.3
+# API Contract — Valorae Proxy v21.11.4
 
 ## Envelope v1
 
@@ -12,7 +12,7 @@ Endpoints `/api/v2/*` ou `?envelope=1` retornam:
 {
   "ok": true,
   "schemaVersion": "envelope-v2",
-  "version": "21.11.3",
+  "version": "21.11.4",
   "requestId": "...",
   "data": {},
   "meta": {
@@ -102,6 +102,6 @@ Campos recomendados para UI Web/APK:
 
 Eles indicam se a resposta está completa, parcial ou com possível mudança de fonte.
 
-## v21.11.3 — Scraper/API otimizado
+## v21.11.4 — Scraper/API otimizado
 
 O VALORAE agora possui cache final de resultado para `/api/scrape` e `/api/batch-scrape`, chave HTML segura contra contaminação por truncamento, batch coalescido por `fetchKey`, fast-path conservador para seletores simples, métricas detalhadas de scraping e controles mobile (`compact=1`, `previewChars` e `fields=`). Tudo permanece free-only, sem dependências obrigatórias e sem desmembrar `lib/Valorae-engine.js`.

@@ -60,4 +60,4 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
   assert.equal(json.status, 'NOT_FOUND');
 }
 
-console.log('v21.11.3 router/contract tests OK.');
+console.log('v21.11.4 router/contract tests OK.');

@@ -1,13 +1,13 @@
 {
   "name": "valorae-proxy",
-  "version": "21.11.3",
-  "description": "Valorae Proxy v21.11.3 com Engine aprimorado, política adaptativa, failure cache curto, normalização financeira central e séries de gráficos mais precisas.",
+  "version": "21.11.4",
+  "description": "Valorae Proxy v21.11.4 com build Vercel-safe, Engine aprimorado, política adaptativa, failure cache curto, normalização financeira central e séries de gráficos mais precisas.",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "node scripts/build-free.js",
+    "build": "node scripts/build-vercel-safe.js",
     "check": "node -e \"const fs=require('fs'),path=require('path');const roots=['api','routes','lib','test','scripts'];const files=[];function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())walk(p);else if(p.endsWith('.js'))files.push(p)}}roots.forEach(r=>fs.existsSync(r)&&walk(r));const cp=require('child_process');for(const f of files){cp.execFileSync(process.execPath,['--check',f],{stdio:'inherit'})}console.log('Checked '+files.length+' JS files')\"",
     "test": "node test/golden.test.js && node test/routes-audit.test.js && node test/scraper-gap.test.js && node test/scraper-supremacy.test.js && node test/v21-5-professional-refinement.test.js && node test/v21-5-1-audit-hardening.test.js && node test/v21-5-2-router-contract.test.js && node test/v21-5-3-scraper-compat-hardening.test.js && node test/v21-5-4-audit-corrections.test.js && node test/v21-5-5-complete-audit-hardening.test.js && node test/v21-5-6-final-review-hardening.test.js && node test/v21-5-7-contract-safety-hardening.test.js && node test/v21-5-8-portfolio-tech-supremacy.test.js && node test/v21-5-9-source-reliability-portfolio.test.js && node test/v21-5-10-launch-readiness.test.js && node test/v21-5-11-final-minute-audit.test.js && node test/v21-5-12-quality-matrix-portfolio-confidence.test.js && node test/v21-5-13-mature-final-release.test.js && node test/scrape-html-cache-key.test.js && node test/scrape-result-cache.test.js && node test/scrape-input-signature.test.js && node test/batch-fetch-grouping.test.js && node test/batch-result-cache.test.js && node test/fast-selectors.test.js && node test/scrape-metrics.test.js && node test/payload-fields-compact.test.js && node test/inflight-dedupe.test.js && node test/extraction-precision-v21-11-0.test.js && node test/engine-core-modules-v21-11-1.test.js && node test/engine-performance-precision-v21-11-2.test.js",
     "audit:functions": "node scripts/audit-functions.js",
@@ -22,7 +22,7 @@
     "audit:recommended": "node scripts/audit-recommended-improvements.js",
     "audit:final": "node scripts/audit-final-maturity.js",
     "build:strict": "node scripts/build-free.js",
-    "vercel-build": "node scripts/build-free.js",
+    "vercel-build": "node scripts/build-vercel-safe.js",
     "audit:self-telemetry": "node scripts/audit-self-telemetry-isolation.js",
     "audit:metrics-integrity": "node scripts/audit-metrics-integrity.js",
     "audit:route-slo": "node scripts/audit-route-slo-maturity.js",
@@ -34,7 +34,8 @@
     "audit:scrape-optimization": "node scripts/audit-scrape-optimization-v21-10-10.js",
     "audit:engine-core": "node scripts/audit-engine-core-v21-11-0.js",
     "audit:engine-modules": "node scripts/audit-engine-modules-v21-11-1.js",
-    "audit:engine-performance": "node scripts/audit-engine-performance-v21-11-2.js"
+    "audit:engine-performance": "node scripts/audit-engine-performance-v21-11-2.js",
+    "audit:vercel-build": "node scripts/build-vercel-safe.js"
   },
   "engines": {
     "node": "20.x"

@@ -1,5 +1,15 @@
+# Changelog
 
-## v21.11.3 — Engine Performance & Precision
+## v21.11.4 — Vercel Build Safe Fix
+
+- Corrige falha genérica no Vercel ao substituir o build de deploy por `scripts/build-vercel-safe.js`.
+- Mantém `scripts/build-free.js` como build estrito/local em `npm run build:strict`.
+- Atualiza `vercel.json` para usar o build seguro do Vercel diretamente.
+- Adiciona documentação de diagnóstico para `Command "node scripts/build-free.js" exited with 1`.
+- Preserva Engine, dashboard, PWA, métricas e compatibilidade com Vercel gratuito.
+
+
+## v21.11.4 — Engine Performance & Precision
 
 - Adicionado normalizador financeiro central em `lib/normalizers/numbers.js`.
 - Adicionada política adaptativa do Engine em `lib/resilience/engine-policy.js`.
@@ -67,14 +77,14 @@
 
 # Changelog — Valorae Proxy
 
-## v21.11.3 — Mature Final Release Free
+## v21.11.4 — Mature Final Release Free
 
 - Adiciona `fieldWarnings` para `fields`/`dataFields` inválidos ou inexistentes, sem vazar payload completo quando todos os campos solicitados são inválidos.
 - Endurece `scrapeUrl` customizado: agora precisa apontar exatamente para `/api/scrape`, evitando caminhos parecidos.
 - Restringe token admin via query em produção; só funciona com override explícito `VALORAE_ADMIN_ALLOW_QUERY_TOKEN_IN_PRODUCTION=1`.
 - Corrige `securityRuntimeStats.rateLimit` para diferenciar `disabledRequested` e `disabledEffective`.
 - Usa `isReadLikeMethod` no limite de body, preservando semântica correta para `GET` e `HEAD`.
-- Adiciona `npm run audit:final` e teste comportamental v21.11.3.
+- Adiciona `npm run audit:final` e teste comportamental v21.11.4.
 
 - Implementa somente melhorias recomendadas/viáveis da auditoria de 190 itens.
 - Adiciona `/api/v1/env`, `/api/v1/schema` e `/api/v1/source/status`.
@@ -201,7 +211,7 @@
 - Melhorado readiness, insights e didática para cenários sem tráfego externo real.
 - Atualizado Service Worker para cache v21-10-9, mantendo APIs em tempo real fora do cache.
 
-## v21.11.3 - Otimização profunda Scraper/API
+## v21.11.4 - Otimização profunda Scraper/API
 
 - Implementa chave HTML segura com `maxChars`, provider e headers relevantes para evitar cache contaminado.
 - Adiciona `scrapeResultCache` com `TtlLruCache` para `/api/scrape` e `/api/batch-scrape`.

@@ -1,8 +1,8 @@
-# Auditoria das 45 melhorias — Valorae Proxy v21.11.3
+# Auditoria das 45 melhorias — Valorae Proxy v21.11.4
 
-Status da verificação feita sobre o pacote v21.5.1 e ajustes aplicados na v21.11.3.
+Status da verificação feita sobre o pacote v21.5.1 e ajustes aplicados na v21.11.4.
 
-Legenda: ✅ implementado / 🟨 reforçado nesta versão / ⚠️ parcial antes da v21.11.3.
+Legenda: ✅ implementado / 🟨 reforçado nesta versão / ⚠️ parcial antes da v21.11.4.
 
 | # | Item | Status | Evidência |
 |---:|---|:---:|---|
@@ -50,8 +50,8 @@ Legenda: ✅ implementado / 🟨 reforçado nesta versão / ⚠️ parcial antes
 | 42 | Melhorias headers/cache-control | ✅ | `sendJson`, ETag, Cache-Control, performance headers. |
 | 43 | Melhorias CORS | ✅ | `vercel.json` e security headers. |
 | 44 | Melhorias build validation | 🟨 | `npm run build` encadeia check + audits. |
-| 45 | Melhorias tests/fixtures | ✅ | Fixtures golden e testes v21.5/v21.5.1/v21.11.3. |
+| 45 | Melhorias tests/fixtures | ✅ | Fixtures golden e testes v21.5/v21.5.1/v21.11.4. |
 
 ## Resultado
 
-A v21.5.1 tinha boa parte das melhorias, mas ainda estava fraca nos itens 1, 2, 3, 7, 15–22, 24–28 e 44. A v21.11.3 corrige esses pontos sem adicionar dependência paga, banco, Redis, KV, storage externo, cron pago, WebSocket ou worker permanente.
+A v21.5.1 tinha boa parte das melhorias, mas ainda estava fraca nos itens 1, 2, 3, 7, 15–22, 24–28 e 44. A v21.11.4 corrige esses pontos sem adicionar dependência paga, banco, Redis, KV, storage externo, cron pago, WebSocket ou worker permanente.

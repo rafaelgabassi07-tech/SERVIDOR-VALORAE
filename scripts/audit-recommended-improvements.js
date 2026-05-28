@@ -10,7 +10,7 @@ function exists(file) { return fs.existsSync(file); }
 function read(file) { return fs.readFileSync(file, 'utf8'); }
 const manifest = routeManifest();
 
-assert(pkg.version === '21.11.3', 'package.json precisa estar em 21.11.3.');
+assert(pkg.version === '21.11.4', 'package.json precisa estar em 21.11.4.');
 assert(Object.keys(pkg.dependencies || {}).length === 0, 'dependencies deve continuar vazio.');
 assert(manifest.physicalFunctions.length === 2, 'Devem existir só 2 Functions físicas.');
 
@@ -52,4 +52,4 @@ if (failures.length) {
   for (const f of failures) console.error(`- ${f}`);
   process.exit(1);
 }
-console.log('Recommended improvements audit OK: melhorias viáveis v21.11.3 presentes e sem tecnologias não recomendadas.');
+console.log('Recommended improvements audit OK: melhorias viáveis v21.11.4 presentes e sem tecnologias não recomendadas.');

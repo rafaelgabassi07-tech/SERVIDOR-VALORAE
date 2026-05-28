@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 const runtimeRoots = ['api', 'routes', 'lib'];
 const requiredFiles = [
@@ -14,13 +14,19 @@ const requiredFiles = [
   'lib/performance/http.js',
   'public/index.html',
   'public/server.html',
+  'public/manifest.webmanifest',
+  'public/service-worker.js',
 ];
 
+function fail(message, error) {
+  console.error(`[vercel-build] ${message}`);
+  if (error?.stack) console.error(error.stack);
+  else if (error) console.error(String(error));
+  process.exit(1);
+}
+
 function assertFile(file) {
-  if (!fs.existsSync(file)) {
-    console.error(`[vercel-build] Arquivo obrigatório ausente: ${file}`);
-    process.exit(1);
-  }
+  if (!fs.existsSync(file)) fail(`Arquivo obrigatório ausente: ${file}`);
 }
 
 function walkJs(dir, out = []) {
@@ -33,25 +39,41 @@ function walkJs(dir, out = []) {
   return out;
 }
 
-function checkJs(file) {
-  const result = spawnSync(process.execPath, ['--check', file], { encoding: 'utf8' });
-  if (result.status !== 0) {
-    console.error(`[vercel-build] Erro de sintaxe em ${file}`);
-    if (result.stdout) console.error(result.stdout);
-    if (result.stderr) console.error(result.stderr);
-    process.exit(result.status || 1);
+async function importRuntimeFile(file) {
+  try {
+    await import(pathToFileURL(path.resolve(file)).href);
+  } catch (error) {
+    fail(`Erro ao validar/importar runtime JS: ${file}`, error);
   }
 }
 
-console.log('[vercel-build] VALORAE Proxy: validação serverless gratuita iniciada.');
-console.log(`[vercel-build] Node ${process.version}`);
+async function main() {
+  console.log('[vercel-build] VALORAE Proxy: validação serverless gratuita iniciada.');
+  console.log(`[vercel-build] Node ${process.version}`);
 
-for (const file of requiredFiles) assertFile(file);
+  for (const file of requiredFiles) assertFile(file);
 
-const jsFiles = runtimeRoots.flatMap((root) => walkJs(root));
-for (const file of jsFiles) checkJs(file);
+  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  if (Object.keys(pkg.dependencies || {}).length > 0) fail('package.json deve continuar sem dependencies obrigatórias.');
+  if (pkg.scripts?.preinstall || pkg.scripts?.postinstall || pkg.scripts?.prepare) fail('Scripts lifecycle de instalação não são permitidos.');
 
-const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-console.log(`[vercel-build] Pacote ${pkg.name}@${pkg.version}`);
-console.log(`[vercel-build] ${jsFiles.length} arquivos JS runtime validados.`);
-console.log('[vercel-build] Build OK para Vercel.');
+  const vercel = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+  if (vercel.crons) fail('vercel.json não deve declarar crons nesta build free-only.');
+  if (String(vercel.buildCommand || '') !== 'node scripts/build-vercel-safe.js') {
+    fail('vercel.json deve usar node scripts/build-vercel-safe.js como buildCommand.');
+  }
+
+  const serviceWorker = fs.readFileSync('public/service-worker.js', 'utf8');
+  if (!/url\.pathname\.startsWith\(['"]\/api['"]\)/.test(serviceWorker) && !serviceWorker.includes('/api')) {
+    fail('service-worker.js deve manter exclusão explícita de /api.');
+  }
+
+  const jsFiles = runtimeRoots.flatMap((root) => walkJs(root));
+  for (const file of jsFiles) await importRuntimeFile(file);
+
+  console.log(`[vercel-build] Pacote ${pkg.name}@${pkg.version}`);
+  console.log(`[vercel-build] ${jsFiles.length} arquivos JS runtime importados/validados.`);
+  console.log('[vercel-build] Build OK para Vercel.');
+}
+
+main();

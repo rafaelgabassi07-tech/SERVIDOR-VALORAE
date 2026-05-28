@@ -81,4 +81,4 @@ const manifest = routeManifest();
 assert.ok(manifest.routes.includes('/health'));
 assert.deepEqual(manifest.physicalFunctions, ['api/index.js', 'api/[...path].js']);
 
-console.log('v21.11.3 complete audit hardening tests OK.');
+console.log('v21.11.4 complete audit hardening tests OK.');

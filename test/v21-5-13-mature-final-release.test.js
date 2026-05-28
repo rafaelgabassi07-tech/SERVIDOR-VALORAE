@@ -20,7 +20,7 @@ function withEnv(patch, fn) {
 }
 
 {
-  const payload = { version: '21.11.3', ticker: 'PETR4', results: { dy: '8%' } };
+  const payload = { version: '21.11.4', ticker: 'PETR4', results: { dy: '8%' } };
   const out = transformResponsePayload(payload, { query: { fields: 'ticker,results.dy,missing,__proto__.x' }, url: '/api/v1/asset' });
   assert.equal(out.ticker, 'PETR4');
   assert.equal(out.results.dy, '8%');
@@ -31,14 +31,14 @@ function withEnv(patch, fn) {
 }
 
 {
-  const payload = { version: '21.11.3', ticker: 'PETR4', results: { dy: '8%' } };
+  const payload = { version: '21.11.4', ticker: 'PETR4', results: { dy: '8%' } };
   const out = transformResponsePayload(payload, { query: { fields: '__proto__.x,constructor.y' }, url: '/api/v1/asset' });
   assert.equal(out.ticker, undefined, 'fields totalmente inválido não deve vazar payload completo');
   assert.ok(out.fieldWarnings?.length >= 2);
 }
 
 {
-  const payload = { version: '21.11.3', requestId: 'r1', ticker: 'PETR4', results: { dy: '8%' } };
+  const payload = { version: '21.11.4', requestId: 'r1', ticker: 'PETR4', results: { dy: '8%' } };
   const out = transformResponsePayload(payload, { query: { apiVersion: 'v2', dataFields: 'ticker,missing,constructor.x' }, url: '/api/v2/asset' });
   assert.equal(out.schemaVersion, 'envelope-v2');
   assert.deepEqual(Object.keys(out.data).sort(), ['ticker']);
@@ -70,4 +70,4 @@ withEnv({ NODE_ENV: 'production', VALORAE_RATE_LIMIT_DISABLED: '1', VALORAE_RATE
   assert.equal(stats.rateLimit.enabled, false);
 });
 
-console.log('v21.11.3 mature final release tests OK.');
+console.log('v21.11.4 mature final release tests OK.');

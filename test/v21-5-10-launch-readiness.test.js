@@ -35,4 +35,4 @@ assert.equal(pkg.scripts.typecheck, 'node scripts/typecheck-free.js');
 assert.equal(Object.keys(pkg.dependencies || {}).length, 0);
 assert.equal(Boolean(pkg.devDependencies && Object.keys(pkg.devDependencies).length), false);
 
-console.log('v21.11.3 launch readiness tests OK.');
+console.log('v21.11.4 launch readiness tests OK.');
