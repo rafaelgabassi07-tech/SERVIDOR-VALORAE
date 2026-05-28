@@ -1,18 +1,24 @@
 {
   "name": "VALORAE Proxy Server v21.12.0",
-  "description": "VALORAE Proxy Server v21.12.13 com app financeiro reconstruído do zero para métricas, gráficos, diagnósticos e fallback anti-tela-vazia.",
+  "description": "Harmonia Vercel ↔ apps consumidores: tudo que sai do proxy para o ecossistema é captado, classificado e exibido no servidor visual.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
-  "version": "21.12.0",
-  "release": "clean-app-rebuild-v21.12.13",
+  "version": "21.12.14",
+  "release": "21.12.15-vercel-app-harmony",
   "latestInternalPatch": "21.12.13-clean-app-rebuild",
   "features": [
     "clean-financial-app-rebuild",
     "asset-dashboard-no-blank-screen",
     "canvas-charts-from-proxy-contracts",
     "local-last-good-snapshot",
-    "internal-tests-center"
-  ]
+    "internal-tests-center",
+    "vercel_app_harmony",
+    "delivery_harmony",
+    "consumer_app_telemetry",
+    "app_payload_distribution"
+  ],
+  "codename": "proxy-server-visual-observability",
+  "notes": "Servidor visual do proxy com captura estrutural de payloads, eventos, rotas, gráficos e métricas para painéis."
 }

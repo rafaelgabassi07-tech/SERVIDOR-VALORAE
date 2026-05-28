@@ -1,4 +1,25 @@
 
+## v21.12.15 — Vercel App Harmony
+
+- Adiciona telemetria de apps consumidores e canais usando headers `x-valorae-app`, `x-valorae-app-version`, `x-valorae-channel`, query params e fallback por User-Agent.
+- Adiciona `deliveryHarmony` em `/api/server/metrics`, medindo o pipeline Vercel Router → Proxy Capture → Engine Transform → App Contract → Dashboard Visibility.
+- Enriquece `routeDetails` com entrega por app/canal, payloads entregues, render/cache safe, métricas, gráficos e dividendos distribuídos.
+- Enriquece eventos recentes com app consumidor, canal, decisão de sync, roots e flags de contrato app-safe.
+- Atualiza o servidor visual para mostrar Harmonia Vercel ↔ Apps, apps recebendo dados e entrega por rota.
+- Adiciona `test/vercel-app-harmony-v21-12-15.test.js`.
+
+
+## v21.12.14 — Proxy Server Visual Observability
+
+- Recria o app visual como painel de servidor do proxy.
+- Adiciona gráficos de fluxo vivo, status HTTP, cache/fonte, latência e Engine Core.
+- Adiciona tabela de rotas consumidas por usuários e timeline de eventos recentes.
+- Adiciona inspetor de payloads transformados com raízes, sinais e preview limitado.
+- Adiciona `payloadIntelligence` em `/api/server/metrics`.
+- Captura sinais de payload também em respostas diretas `res.end` quando JSON pequeno.
+- Mantém compatibilidade com Vercel Free e router único.
+
+
 ## v21.12.10 - App Response Integrity
 
 - Adiciona `lib/quality/app-response-integrity.js`.

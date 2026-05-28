@@ -1,292 +1,41 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0f7b52" />
-  <meta name="valorae-version" content="21.12.0" />
-  <meta name="description" content="VALORAE Proxy Server: app financeiro reconstruído para consumir /api/asset, exibir métricas, gráficos, contratos e diagnósticos sem tela vazia." />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="icon" href="/assets/valorae-logo.svg" type="image/svg+xml" />
-  <title>VALORAE Proxy Server</title>
-  <style>
-    :root{color-scheme:dark;--bg:#07100c;--bg2:#0d1c15;--card:#11241b;--card2:#173124;--line:#244935;--text:#edf8f1;--muted:#a8c2b0;--green:#31d184;--green2:#a7f3c7;--red:#ff8a80;--yellow:#ffd166;--blue:#8ec5ff;--shadow:0 20px 60px rgba(0,0,0,.35);--r:22px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 10% -5%,rgba(49,209,132,.23),transparent 32rem),radial-gradient(circle at 95% 0,rgba(142,197,255,.14),transparent 28rem),var(--bg);color:var(--text);font-family:Inter,Roboto,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}a{color:inherit}.shell{width:min(1240px,calc(100% - 28px));margin:0 auto;padding:18px 0 42px}.top{position:sticky;top:0;z-index:20;margin:-1px -14px 12px;padding:12px 14px;background:rgba(7,16,12,.82);backdrop-filter:blur(18px);border-bottom:1px solid rgba(167,243,199,.08)}.topin{width:min(1240px,100%);margin:0 auto;display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--green),#0e6b45);display:grid;place-items:center;font-weight:950;color:#062014;box-shadow:0 16px 42px rgba(49,209,132,.25)}.brand{min-width:0}.brand h1{font-size:1.02rem;margin:0;letter-spacing:-.03em}.brand p{font-size:.76rem;color:var(--muted);margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.spacer{flex:1}.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;background:rgba(17,36,27,.9);padding:8px 11px;font-weight:800;font-size:.78rem;color:var(--muted)}.dot{width:9px;height:9px;border-radius:99px;background:var(--yellow);box-shadow:0 0 0 4px rgba(255,209,102,.12)}.dot.ok{background:var(--green);box-shadow:0 0 0 4px rgba(49,209,132,.15)}.dot.err{background:var(--red);box-shadow:0 0 0 4px rgba(255,138,128,.15)}.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;align-items:stretch}.card{background:linear-gradient(180deg,rgba(23,49,36,.93),rgba(17,36,27,.96));border:1px solid rgba(167,243,199,.13);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;overflow:hidden}.hero h2{font-size:clamp(1.75rem,5vw,4.1rem);line-height:.96;letter-spacing:-.07em;margin:0 0 12px}.sub{color:var(--muted);line-height:1.5}.search{display:flex;gap:8px;margin-top:16px}.search input{flex:1;min-width:0;border:1px solid var(--line);border-radius:16px;background:#091711;color:var(--text);padding:14px 14px;font-size:1rem;outline:none;text-transform:uppercase}.search button,.btn{border:0;border-radius:16px;background:var(--green);color:#062014;padding:13px 16px;font-weight:950;cursor:pointer;box-shadow:0 12px 24px rgba(49,209,132,.19)}.btn.secondary{background:transparent;color:var(--text);border:1px solid var(--line);box-shadow:none}.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.quick button{background:rgba(167,243,199,.08);border:1px solid var(--line);color:var(--green2);border-radius:999px;padding:8px 10px;font-weight:800;cursor:pointer}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.section{margin-top:14px}.kpi{min-height:112px}.kpi label{font-size:.73rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:900}.kpi .value{font-size:1.75rem;font-weight:950;letter-spacing:-.05em;margin-top:10px;overflow:hidden;text-overflow:ellipsis}.kpi small{display:block;color:var(--muted);margin-top:4px}.status{display:flex;flex-direction:column;gap:9px}.row{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid rgba(167,243,199,.09);padding:9px 0}.row:last-child{border-bottom:0}.row b{font-size:.85rem}.row span{color:var(--muted);text-align:right;word-break:break-word}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.toolbar input,.toolbar select,textarea{border:1px solid var(--line);background:#091711;color:var(--text);border-radius:14px;padding:10px 12px}.chartWrap{height:330px;position:relative}.chartWrap canvas{width:100%;height:100%;display:block}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid rgba(167,243,199,.09);text-align:left;vertical-align:top}.table th{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.badge{display:inline-flex;border-radius:999px;padding:5px 8px;background:rgba(167,243,199,.1);border:1px solid var(--line);font-size:.75rem;font-weight:850;color:var(--green2)}.badge.warn{color:var(--yellow);background:rgba(255,209,102,.1)}.badge.err{color:var(--red);background:rgba(255,138,128,.1)}.json{max-height:360px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#07130e;border:1px solid rgba(167,243,199,.11);border-radius:16px;padding:12px;color:#d6f7e4;font-size:.82rem}.notice{border:1px solid rgba(255,209,102,.28);background:rgba(255,209,102,.08);color:#ffe1a3;border-radius:18px;padding:12px;margin:12px 0}.notice.ok{border-color:rgba(49,209,132,.28);background:rgba(49,209,132,.08);color:#c9f8dd}.notice.err{border-color:rgba(255,138,128,.28);background:rgba(255,138,128,.08);color:#ffd1cc}.hidden{display:none!important}.skeleton{height:14px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,.05),rgba(255,255,255,.12),rgba(255,255,255,.05));background-size:200% 100%;animation:sk 1.3s infinite}@keyframes sk{to{background-position:-200% 0}}footer{margin-top:24px;color:var(--muted);font-size:.85rem}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tabs a{text-decoration:none;border:1px solid var(--line);padding:9px 11px;border-radius:999px;color:var(--muted);font-weight:800}.tabs a:hover{color:var(--green2);background:rgba(167,243,199,.06)}@media(max-width:880px){.hero,.g2,.g3,.g4{grid-template-columns:1fr}.search{flex-direction:column}.topin{gap:9px}.pill.optional{display:none}.chartWrap{height:260px}.kpi .value{font-size:1.45rem}}
-  </style>
-</head>
-<body>
-  <header class="top">
-    <div class="topin">
-      <div class="logo">V</div>
-      <div class="brand"><h1>VALORAE Proxy Server</h1><p>App financeiro reconstruído do zero · métricas, gráficos, cache e diagnósticos</p></div>
-      <div class="spacer"></div>
-      <span class="pill optional"><span id="healthDot" class="dot"></span><span id="healthText">Verificando API</span></span>
-    </div>
-  </header>
-
-  <main class="shell">
-    <section class="hero">
-      <div class="card">
-        <h2>Dashboard que não fica em branco.</h2>
-        <p class="sub">Digite um ativo. O app chama o proxy, lê todos os contratos disponíveis, monta métricas, desenha gráficos no canvas, mostra falhas de fonte e preserva o último snapshot local quando a resposta vem parcial.</p>
-        <div class="search">
-          <input id="tickerInput" value="GARE11" autocomplete="off" placeholder="PETR4, VALE3, GARE11..." />
-          <button id="loadBtn">Carregar ativo</button>
-        </div>
-        <div class="quick" id="quickTickers"></div>
-        <div id="mainNotice" class="notice hidden"></div>
-      </div>
-      <div class="card">
-        <h3 style="margin:0 0 8px">Estado da captura</h3>
-        <div class="status" id="captureStatus">
-          <div class="row"><b>API</b><span class="skeleton" style="width:120px"></span></div>
-          <div class="row"><b>Último ativo</b><span>—</span></div>
-          <div class="row"><b>Fonte/cache</b><span>—</span></div>
-          <div class="row"><b>Renderização</b><span>—</span></div>
-        </div>
-        <div class="tabs">
-          <a href="#ativos">Ativo</a><a href="#graficos">Gráficos</a><a href="#metricas">Métricas</a><a href="#diagnostico">Diagnóstico</a><a href="#page-tests">Testes</a>
-        </div>
-      </div>
-    </section>
-
-    <section id="ativos" class="section grid g4">
-      <div class="card kpi"><label>Preço / Cotação</label><div id="kPrice" class="value">—</div><small id="kPriceSrc">aguardando</small></div>
-      <div class="card kpi"><label>Dividend Yield</label><div id="kDy" class="value">—</div><small id="kDySrc">aguardando</small></div>
-      <div class="card kpi"><label>P/VP</label><div id="kPvp" class="value">—</div><small id="kPvpSrc">aguardando</small></div>
-      <div class="card kpi"><label>Último rendimento</label><div id="kLastDividend" class="value">—</div><small id="kLastDividendSrc">aguardando</small></div>
-    </section>
-
-    <section id="graficos" class="section grid g2">
-      <div class="card">
-        <div class="toolbar" style="justify-content:space-between"><div><h3 style="margin:0">Gráfico principal</h3><p class="sub" style="margin:4px 0 0">Usa appMobileSnapshot, appPayload ou chartSeries. Se não houver série real, mostra o motivo.</p></div><select id="chartSelect"></select></div>
-        <div class="chartWrap"><canvas id="assetChart"></canvas></div>
-        <div id="chartEmpty" class="notice hidden"></div>
-      </div>
-      <div class="card">
-        <h3 style="margin-top:0">Painéis consumíveis</h3>
-        <div id="panelsList" class="status"></div>
-      </div>
-    </section>
-
-    <section id="metricas" class="section grid g2">
-      <div class="card">
-        <h3 style="margin-top:0">Métricas normalizadas</h3>
-        <div style="overflow:auto"><table class="table"><thead><tr><th>Campo</th><th>Valor</th><th>Fonte</th></tr></thead><tbody id="metricRows"></tbody></table></div>
-      </div>
-      <div class="card">
-        <h3 style="margin-top:0">Dividendos / eventos</h3>
-        <div id="dividendList" class="status"></div>
-      </div>
-    </section>
-
-    <section id="diagnostico" class="section grid g2">
-      <div class="card">
-        <h3 style="margin-top:0">Diagnóstico do payload</h3>
-        <div id="diagList" class="status"></div>
-      </div>
-      <div class="card">
-        <h3 style="margin-top:0">JSON bruto útil</h3>
-        <pre id="rawJson" class="json">Carregue um ativo para inspecionar.</pre>
-      </div>
-    </section>
-
-    <section class="section card" id="page-tests">
-      <div class="toolbar" style="justify-content:space-between"><div><h3 style="margin:0">Central interna de testes</h3><p class="sub"><strong>Testes e benchmark</strong> ·  style="margin:4px 0 0">Mantida dentro do app principal para auditorias. Testa health, ready, fields, source/status, cache/stats, server/metrics e asset.</p></div><button class="btn secondary" id="runTestsBtn">Rodar testes</button></div>
-      <div id="testResults" class="status" style="margin-top:10px"></div>
-    </section>
-
-    <section class="section grid g2">
-      <div class="card">
-        <h3 style="margin-top:0">Engine Core</h3>
-        <p class="sub">Compatibilidade de auditoria: Engine Core, HTML family hit, engineCoreChart e engineCoreList permanecem no app.</p>
-        <div class="chartWrap" style="height:180px"><canvas id="engineCoreChart"></canvas></div>
-      </div>
-      <div class="card"><h3 style="margin-top:0">Diagnóstico Engine Core</h3><div id="engineCoreList" class="status"></div></div>
-    </section>
-
-    <footer>VALORAE Proxy Server · reconstrução limpa v21.12.13 · usa somente recursos gratuitos GitHub/Vercel. <span class="hidden">renderFailure /api/server/tests /api/cache/stats /api/source/status</span></footer>
-  </main>
-
-  <script>
-  (() => {
-    'use strict';
-    const $ = (id) => document.getElementById(id);
-    const state = { payload:null, chartSeries:[], activeChart:0, lastGood:null };
-    const quick = ['GARE11','VISC11','MXRF11','PETR4','VALE3','ITUB4','BOVA11'];
-    const fmtBR = new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2});
-    const moneyBR = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2});
-
-    function sanitizeTicker(v){ return String(v || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12); }
-    function isObj(v){ return v && typeof v === 'object' && !Array.isArray(v); }
-    function getPath(obj,path){ return String(path).split('.').reduce((acc,k)=>acc && acc[k] !== undefined ? acc[k] : undefined, obj); }
-    function first(...vals){ return vals.find(v => v !== undefined && v !== null && v !== '' && !(typeof v === 'number' && Number.isNaN(v))); }
-    function parseNum(v){
-      if (typeof v === 'number') return Number.isFinite(v) ? v : null;
-      if (!v && v !== 0) return null;
-      let s = String(v).trim().replace(/R\$|%|\s/g,'').toLowerCase();
-      let mult = 1; if (/(bi|bilh)/.test(s)) mult = 1e9; else if (/(mi|milh)/.test(s)) mult = 1e6; else if (/\bmil\b/.test(s)) mult = 1e3;
-      s = s.replace(/[a-zçãõ]+/g,'');
-      if (s.includes(',') && s.includes('.')) s = s.replace(/\./g,'').replace(',','.'); else if (s.includes(',')) s = s.replace(',','.');
-      const n = Number(s); return Number.isFinite(n) ? n * mult : null;
-    }
-    function display(v, kind){
-      const raw = isObj(v) ? first(v.display, v.formatted, v.value, v.raw) : v;
-      const n = parseNum(raw);
-      if (raw === undefined || raw === null || raw === '') return '—';
-      if (kind === 'money' && n !== null) return moneyBR.format(n);
-      if (kind === 'percent' && n !== null) return fmtBR.format(n) + '%';
-      if (n !== null && Math.abs(n) > 999999) return fmtBR.format(n);
-      return String(raw);
-    }
-    function valueOf(v){ return isObj(v) ? first(v.value, v.raw, v.display, v.formatted) : v; }
-    function sourceOf(v){ return isObj(v) ? first(v.source, v.path, v.confidence) || 'normalizado' : 'detectado'; }
-
-    function extractMetrics(p){
-      const roots = [p?.appPayload?.metrics?.canonical,p?.appPayload?.metrics?.aliases,p?.appMobileSnapshot?.metrics,p?.normalized,p?.results?.indicadores,p?.results].filter(isObj);
-      const aliases = {
-        price:['price','currentPrice','cotacao','preco','valorAtual','lastPrice'], dy:['dy','dividendYield','D.Y','DY','yield','yield12m'],
-        pvp:['p_vp','pvp','P/VP','pvpAtual'], lastDividend:['lastDividend','ultimoRendimento','Último Rendimento','rendimento','dividendo'],
-        marketCap:['marketCap','valorMercado','Patrimônio Líquido','patrimonioLiquido'], liquidity:['dailyLiquidity','liquidezMediaDiaria','Liquidez Média Diária','volume']
-      };
-      const out = {};
-      for (const [canon, names] of Object.entries(aliases)) {
-        for (const root of roots) for (const name of names) if (root[name] !== undefined && out[canon] === undefined) out[canon] = root[name];
-      }
-      for (const root of roots) for (const [k,v] of Object.entries(root)) if (out[k] === undefined && (typeof v !== 'object' || isObj(v))) out[k]=v;
-      return out;
-    }
-    function pointsFromArray(arr){
-      if (!Array.isArray(arr)) return [];
-      return arr.map((p,i)=>{
-        if (Array.isArray(p)) return { x: p[0] ?? i, y: parseNum(p[p.length-1]) };
-        if (isObj(p)) return { x: first(p.x,p.date,p.data,p.period,p.label,p.t,p.time,i), y: parseNum(first(p.y,p.value,p.valor,p.close,p.price,p.preco,p.cotacao)) };
-        return { x:i, y:parseNum(p) };
-      }).filter(p=>p.y!==null);
-    }
-    function normalizeSeries(p){
-      const candidates = [];
-      const add = (name,data,type='line') => { const pts = pointsFromArray(data); if (pts.length) candidates.push({name:name||'Série', type, points:pts}); };
-      const roots = [p?.appMobileSnapshot?.charts,p?.appPayload?.charts,p?.chartSeries,p?.results?.historico,p?.results?.historicoIndicadores,p?.results?.dividendos,p?.results].filter(Boolean);
-      for (const r of roots) {
-        if (Array.isArray(r)) add('Histórico', r);
-        if (isObj(r)) {
-          if (Array.isArray(r.series)) for (const s of r.series) add(s.name || s.label || s.key, s.points || s.data || s.values, s.type);
-          if (Array.isArray(r.seriesPreview)) for (const s of r.seriesPreview) add(s.name || s.label || s.key, s.points || s.data || s.values, s.type);
-          if (Array.isArray(r.points)) add(r.name || 'Série', r.points, r.type);
-          for (const [k,v] of Object.entries(r)) if (Array.isArray(v)) add(k, v);
-        }
-      }
-      const seen = new Set();
-      return candidates.filter(s => { const sig = s.name + ':' + s.points.length + ':' + s.points.slice(-1)[0]?.y; if (seen.has(sig)) return false; seen.add(sig); return true; }).slice(0,12);
-    }
-    function panelRows(p){
-      const panels = first(p?.appPayload?.panels,p?.appMobileSnapshot?.panels,p?.panelReadiness) || {};
-      if (!isObj(panels)) return [];
-      return Object.entries(panels).map(([k,v]) => ({ name:k, ready: isObj(v) ? first(v.ready,v.canRender,v.status) : v, detail:isObj(v)? first(v.completenessPercent,v.state,v.recommendedEmptyState,v.missingPaths?.join?.(', ')) : '' }));
-    }
-    async function api(path, opts={}){
-      const res = await fetch(path, {cache:'no-store', ...opts});
-      let data; const text = await res.text(); try{data = JSON.parse(text)}catch{data={raw:text}};
-      if (!res.ok) throw Object.assign(new Error(data.error || res.statusText || 'Falha HTTP'), {status:res.status, data});
-      return data;
-    }
-    function setNotice(msg,type='warn'){$('mainNotice').className='notice '+(type==='ok'?'ok':type==='err'?'err':'');$('mainNotice').textContent=msg;$('mainNotice').classList.remove('hidden');}
-    function clearNotice(){ $('mainNotice').classList.add('hidden'); }
-    function renderStatus(p){
-      const ok = !p?.error && (p?.status === 'OK' || p?.status === 'PARTIAL' || p?.ticker);
-      $('captureStatus').innerHTML = [
-        ['API', ok ? '<span class="badge">respondeu</span>' : '<span class="badge err">falhou</span>'],
-        ['Último ativo', p?.ticker || '—'], ['Status', p?.status || '—'], ['Fonte/cache', first(p?.cacheStatus,p?.sourceReport?.primarySource,p?.appMobileSnapshot?.source?.cacheStatus,'—')],
-        ['Renderização', first(p?.appResponseIntegrity?.renderSafe,p?.appDataContract?.renderSafe,p?.appMobileSnapshot?.sync?.decision,'avaliar')]
-      ].map(([a,b])=>`<div class="row"><b>${a}</b><span>${b}</span></div>`).join('');
-    }
-    function renderKpis(metrics){
-      const map = [['kPrice','price','money','kPriceSrc'],['kDy','dy','percent','kDySrc'],['kPvp','pvp','number','kPvpSrc'],['kLastDividend','lastDividend','money','kLastDividendSrc']];
-      for (const [id,key,kind,src] of map){ $(id).textContent = display(metrics[key],kind); $(src).textContent = sourceOf(metrics[key]); }
-    }
-    function renderMetrics(metrics){
-      const rows = Object.entries(metrics).filter(([k,v])=>v!==undefined && v!==null && typeof v !== 'function').slice(0,80);
-      $('metricRows').innerHTML = rows.length ? rows.map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(display(v))}</td><td>${escapeHtml(sourceOf(v))}</td></tr>`).join('') : '<tr><td colspan="3">Nenhuma métrica consumível retornada pela fonte. O app não quebrou; mostrou diagnóstico.</td></tr>';
-    }
-    function renderPanels(p){
-      const rows = panelRows(p);
-      $('panelsList').innerHTML = rows.length ? rows.map(r=>`<div class="row"><b>${escapeHtml(r.name)}</b><span><span class="badge ${r.ready===true?'':'warn'}">${escapeHtml(String(r.ready))}</span> ${escapeHtml(String(r.detail||''))}</span></div>`).join('') : '<div class="row"><b>Painéis</b><span>Contrato não retornado</span></div>';
-    }
-    function renderDividends(p){
-      const ds = first(p?.appMobileSnapshot?.dividends?.items,p?.appPayload?.dividends?.items,p?.results?.dividendos?.historico,p?.results?.historicoDividendos,[]);
-      const arr = Array.isArray(ds) ? ds.slice(0,12) : [];
-      $('dividendList').innerHTML = arr.length ? arr.map((d,i)=>`<div class="row"><b>${escapeHtml(first(d.date,d.data,d.competencia,'#'+(i+1)))}</b><span>${escapeHtml(display(first(d.value,d.valor,d.rendimento,d.dividendo,d)))}</span></div>`).join('') : '<div class="row"><b>Dividendos</b><span>Sem série retornada. Verifique diagnóstico da fonte.</span></div>';
-    }
-    function escapeHtml(v){ return String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-    function renderDiag(p){
-      const issues = first(p?.appResponseIntegrity?.issues,p?.warnings,p?.validation?.missing,p?.quality?.missing,[]);
-      const list = [
-        ['Integridade', first(p?.appResponseIntegrity?.score,p?.quality?.score,p?.coverage?.score,'—')],
-        ['Cache seguro', first(p?.appResponseIntegrity?.cacheSafe,p?.appDataContract?.canReplacePreviousSnapshot,p?.appSyncEnvelope?.decision,'—')],
-        ['Fonte primária', first(p?.sourceReport?.primarySource,p?.consumerDiagnostics?.source?.primarySource,'—')],
-        ['Séries de gráfico', String(state.chartSeries.length)],
-        ['Avisos/faltas', Array.isArray(issues) ? issues.slice(0,5).join(' · ') || '—' : String(issues || '—')]
-      ];
-      $('diagList').innerHTML = list.map(([a,b])=>`<div class="row"><b>${a}</b><span>${escapeHtml(String(b))}</span></div>`).join('');
-      $('rawJson').textContent = JSON.stringify({ticker:p?.ticker,status:p?.status,appMobileSnapshot:p?.appMobileSnapshot,appPayload:p?.appPayload,appResponseIntegrity:p?.appResponseIntegrity,warnings:p?.warnings,quality:p?.quality,results:p?.results}, null, 2);
-    }
-    function drawChart(canvas, series){
-      const ctx = canvas.getContext('2d'); const w = canvas.clientWidth || 600, h = canvas.clientHeight || 320; canvas.width = Math.max(320,Math.floor(w*devicePixelRatio)); canvas.height = Math.max(180,Math.floor(h*devicePixelRatio)); ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); ctx.clearRect(0,0,w,h);
-      ctx.fillStyle='rgba(167,243,199,.05)'; ctx.fillRect(0,0,w,h); ctx.strokeStyle='rgba(167,243,199,.12)'; ctx.lineWidth=1; for(let i=0;i<5;i++){const y=20+i*(h-50)/4;ctx.beginPath();ctx.moveTo(38,y);ctx.lineTo(w-12,y);ctx.stroke();}
-      if(!series || !series.points?.length){ ctx.fillStyle='#a8c2b0'; ctx.font='14px system-ui'; ctx.fillText('Sem série numérica real no payload.', 22, 38); return; }
-      const pts = series.points.slice(-220); const ys = pts.map(p=>p.y).filter(Number.isFinite); let min=Math.min(...ys), max=Math.max(...ys); if(min===max){min-=1;max+=1} const pad=24;
-      ctx.strokeStyle='#31d184'; ctx.lineWidth=2.4; ctx.beginPath(); pts.forEach((p,i)=>{const x=42 + i*Math.max(1,(w-62)/(Math.max(1,pts.length-1))); const y=pad + (max-p.y)*(h-pad-32)/(max-min); if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);}); ctx.stroke();
-      ctx.fillStyle='#edf8f1'; ctx.font='800 13px system-ui'; ctx.fillText(series.name || 'Série', 18, 22); ctx.fillStyle='#a8c2b0'; ctx.font='12px system-ui'; ctx.fillText(`${display(min)} – ${display(max)} · ${pts.length} pontos`, 18, h-12);
-    }
-    function renderChartOptions(){
-      $('chartSelect').innerHTML = state.chartSeries.map((s,i)=>`<option value="${i}">${escapeHtml(s.name || 'Série '+(i+1))} · ${s.points.length} pts</option>`).join('');
-      $('chartSelect').disabled = !state.chartSeries.length;
-    }
-    function renderChart(){
-      const s = state.chartSeries[state.activeChart]; drawChart($('assetChart'), s);
-      if (!s) { $('chartEmpty').className='notice'; $('chartEmpty').textContent='A API respondeu, mas não retornou série numérica/histórica suficiente para gráfico. Isso geralmente indica bloqueio/ausência de fonte externa, não erro visual do app.'; } else $('chartEmpty').classList.add('hidden');
-    }
-    function renderAll(p){
-      state.payload = p; state.chartSeries = normalizeSeries(p); state.activeChart = 0;
-      const metrics = extractMetrics(p); renderStatus(p); renderKpis(metrics); renderMetrics(metrics); renderPanels(p); renderDividends(p); renderDiag(p); renderChartOptions(); renderChart();
-      if (p?.status === 'OK' || Object.keys(metrics).length || state.chartSeries.length) { localStorage.setItem('valorae:lastGood', JSON.stringify({time:Date.now(),payload:p})); state.lastGood=p; }
-      if (p?.status === 'PARTIAL') setNotice('A fonte respondeu parcial. O app preservou a tela e mostrou o diagnóstico em vez de ficar em branco.', 'warn'); else clearNotice();
-    }
-    async function loadAsset(){
-      const ticker = sanitizeTicker($('tickerInput').value); if(!ticker) return setNotice('Digite um ticker válido.', 'err');
-      $('loadBtn').disabled = true; $('loadBtn').textContent='Carregando...'; clearNotice();
-      try { const p = await api(`/api/asset?ticker=${encodeURIComponent(ticker)}&mode=super&view=full&includeQuality=1&timeoutMs=12000`); renderAll(p); }
-      catch(err){
-        const cached = state.lastGood || JSON.parse(localStorage.getItem('valorae:lastGood') || 'null')?.payload;
-        if (cached) { renderAll(cached); setNotice(`Falha ao consultar ${ticker}. Mantive o último snapshot bom na tela. Erro: ${err.message}`, 'err'); }
-        else { setNotice(`Falha ao consultar ${ticker}: ${err.message}`, 'err'); renderFailure(err); }
-      } finally { $('loadBtn').disabled = false; $('loadBtn').textContent='Carregar ativo'; }
-    }
-    function renderFailure(err){
-      renderStatus({status:'ERROR',error:err.message}); $('rawJson').textContent = JSON.stringify(err.data || {error:err.message}, null, 2); renderChart();
-    }
-    async function checkHealth(){
-      try { const h = await api('/api/health'); $('healthDot').className='dot ok'; $('healthText').textContent = h.status || 'API online'; }
-      catch { $('healthDot').className='dot err'; $('healthText').textContent='API indisponível'; }
-    }
-    async function runTests(){
-      const tests = ['/api/health','/api/ready','/api/fields','/api/source/status','/api/cache/stats','/api/server/metrics','/api/server/tests?mode=quick','/api/asset?ticker=PETR4&view=compact&timeoutMs=6000'];
-      $('testResults').innerHTML = tests.map(t=>`<div class="row"><b>${t}</b><span>testando...</span></div>`).join('');
-      const rows = [];
-      for (const t of tests){ const started=performance.now(); try{ await api(t); rows.push([t,`OK · ${Math.round(performance.now()-started)}ms`,true]); } catch(e){ rows.push([t,`${e.status||'ERR'} · ${e.message}`,false]); } $('testResults').innerHTML = rows.map(([a,b,ok])=>`<div class="row"><b>${a}</b><span><span class="badge ${ok?'':'err'}">${escapeHtml(b)}</span></span></div>`).join(''); }
-    }
-    function init(){
-      $('quickTickers').innerHTML = quick.map(t=>`<button data-ticker="${t}">${t}</button>`).join('');
-      $('quickTickers').addEventListener('click',e=>{ if(e.target.dataset.ticker){$('tickerInput').value=e.target.dataset.ticker;loadAsset();} });
-      $('loadBtn').addEventListener('click',loadAsset); $('tickerInput').addEventListener('keydown',e=>{if(e.key==='Enter')loadAsset();}); $('chartSelect').addEventListener('change',e=>{state.activeChart=Number(e.target.value)||0;renderChart();}); $('runTestsBtn').addEventListener('click',runTests);
-      try{ state.lastGood = JSON.parse(localStorage.getItem('valorae:lastGood') || 'null')?.payload || null; }catch{}
-      checkHealth(); runTests(); loadAsset(); window.addEventListener('resize',()=>renderChart());
-      if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
-      drawChart($('engineCoreChart'), {name:'Engine Core', points:[31,42,55,61,74,86].map((y,i)=>({x:i,y}))});
-      $('engineCoreList').innerHTML = '<div class="row"><b>HTML family hit</b><span>monitorado</span></div><div class="row"><b>Contratos</b><span>appPayload, appMobileSnapshot, appResponseIntegrity</span></div>';
-    }
-    init();
-  })();
-  </script>
-</body>
-</html>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VALORAE Proxy Server</title><meta name="theme-color" content="#07111f"><link rel="manifest" href="/manifest.webmanifest"><style>
+:root{--bg:#07111f;--card:#0d1a2c;--card2:#102239;--txt:#eaf3ff;--mut:#8fa5bf;--line:#203650;--ok:#38d996;--warn:#ffd166;--err:#ff6b6b;--info:#61a8ff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#12345c 0,#07111f 35%,#050b14 100%);color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}header{position:sticky;top:0;z-index:5;background:rgba(7,17,31,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.bar{max-width:1380px;margin:auto;padding:14px 18px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.brand{display:flex;gap:12px;align-items:center}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#1bffb1,#3478ff);box-shadow:0 0 34px #1bffb144}.brand h1{font-size:18px;margin:0}.brand p{margin:2px 0 0;color:var(--mut);font-size:12px}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}input,select,button{border:1px solid var(--line);background:#09182a;color:var(--txt);border-radius:12px;padding:10px 12px}button{cursor:pointer;font-weight:700;background:linear-gradient(135deg,#174b87,#0c2b4e)}button.secondary{background:#0b1b2e}.pill{border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:var(--mut);font-size:12px}.on{color:var(--ok)}main{max-width:1380px;margin:auto;padding:18px}.notice{padding:12px 14px;border:1px solid #5b4520;background:#271d0d;border-radius:14px;color:#ffe4a3;margin-bottom:14px}.notice.ok{border-color:#1f684d;background:#09251d;color:#b8ffdf}.notice.err{border-color:#702626;background:#2c1010;color:#ffd1d1}.hidden{display:none!important}.grid{display:grid;gap:14px}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}@media(max-width:950px){.g4,.g3,.g2{grid-template-columns:1fr}.bar{align-items:flex-start}.toolbar{width:100%}input,select,button{width:100%}}.card{background:linear-gradient(180deg,rgba(16,34,57,.92),rgba(10,22,38,.92));border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 18px 50px #0005}.k{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}.v{font-size:28px;font-weight:850;margin-top:6px}.sub{color:var(--mut);font-size:12px;margin-top:4px}.section{margin-top:14px}.title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.title h2,.title h3{margin:0}.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid var(--line);padding:4px 8px;font-size:12px;color:var(--mut)}.badge.ok{color:var(--ok);border-color:#23684f}.badge.warn{color:var(--warn);border-color:#725a1d}.badge.err{color:var(--err);border-color:#743838}.row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #1b3048;padding:8px 0}.row:last-child{border-bottom:0}.row span{text-align:right;color:var(--mut)}canvas{width:100%;height:220px;background:#071322;border-radius:14px;border:1px solid #18304a}.big canvas{height:300px}table{width:100%;border-collapse:collapse;overflow:hidden}th,td{text-align:left;border-bottom:1px solid #1b3048;padding:9px 8px;font-size:13px;vertical-align:top}th{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.06em}td small{color:var(--mut)}pre{white-space:pre-wrap;word-break:break-word;max-height:420px;overflow:auto;background:#071322;border:1px solid #18304a;border-radius:14px;padding:12px;color:#cfe4ff}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{padding:8px 11px;border-radius:999px;border:1px solid var(--line);background:#09182a;color:var(--mut);cursor:pointer}.tab.active{color:var(--txt);border-color:#3b82f6}.split{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}@media(max-width:1050px){.split{grid-template-columns:1fr}}footer{color:var(--mut);font-size:12px;padding:28px 0}.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.event{border-left:3px solid var(--info);padding:8px 10px;margin:8px 0;background:#071322;border-radius:10px}.event.err{border-left-color:var(--err)}.event.warn{border-left-color:var(--warn)}
+</style></head><body><header><div class="bar"><div class="brand"><div class="logo"></div><div><h1>VALORAE Proxy Server</h1><p>Servidor visual: Vercel, proxy e apps do ecossistema em harmonia, mostrando tudo que sai do Valorae Engine para os usuários.</p></div></div><div class="toolbar"><span id="liveBadge" class="pill">● aguardando</span><input id="tickerInput" value="PETR4" placeholder="Ticker"><select id="viewSelect"><option value="standard">standard</option><option value="compact">compact</option><option value="super">super</option></select><button id="probeBtn">Consultar ativo</button><button class="secondary" id="refreshBtn">Atualizar servidor</button></div></div></header><main>
+<div id="mainNotice" class="notice hidden"></div>
+<section class="grid g4"><div class="card"><div class="k">Requisições reais</div><div class="v" id="kRequests">—</div><div class="sub" id="kRpm">rpm —</div></div><div class="card"><div class="k">Respostas captadas</div><div class="v" id="kResponses">—</div><div class="sub" id="kCapture">captura —</div></div><div class="card"><div class="k">Saúde / Erro</div><div class="v" id="kHealth">—</div><div class="sub" id="kErrors">erro —</div></div><div class="card"><div class="k">Dados transformados</div><div class="v" id="kData">—</div><div class="sub" id="kDataSub">métricas/gráficos/dividendos</div></div></section>
+<section class="section grid g4"><div class="card"><div class="k">Harmonia Vercel ↔ Apps</div><div class="v" id="kHarmony">—</div><div class="sub" id="kHarmonySub">pipeline</div></div><div class="card"><div class="k">Payloads entregues</div><div class="v" id="kDelivered">—</div><div class="sub" id="kDeliveredSub">render/cache safe</div></div><div class="card"><div class="k">Snapshots mobile</div><div class="v" id="kMobileSnapshots">—</div><div class="sub">primeira pintura/cache local</div></div><div class="card"><div class="k">Apps consumidores</div><div class="v" id="kApps">—</div><div class="sub" id="kAppsSub">canais ativos</div></div></section>
+<section class="section split"><div class="card"><div class="title"><h2>Pipeline Vercel → Proxy → Engine → Apps</h2><span class="badge" id="pipelineScore">—</span></div><div id="pipelineList"></div></div><div class="card"><div class="title"><h2>Apps recebendo dados</h2><span class="badge">x-valorae-app / UA</span></div><div style="overflow:auto"><table><thead><tr><th>App</th><th>Canal</th><th>Resp</th><th>Render</th><th>Métricas</th><th>Gráficos</th></tr></thead><tbody id="appsBody"></tbody></table></div></div></section>
+<section class="section split"><div class="card big"><div class="title"><h2>Fluxo vivo do proxy</h2><span class="badge" id="trafficState">—</span></div><canvas id="trafficChart"></canvas></div><div class="card"><h3 style="margin-top:0">Estado do servidor</h3><div id="serverState"></div></div></section>
+<section class="section grid g3"><div class="card"><div class="title"><h3>Status HTTP</h3></div><canvas id="statusChart"></canvas></div><div class="card"><div class="title"><h3>Cache/Fonte</h3></div><canvas id="cacheChart"></canvas></div><div class="card"><div class="title"><h3>Latência</h3></div><canvas id="latencyChart"></canvas></div></section>
+<section class="section split"><div class="card"><div class="title"><h2>Rotas que os usuários estão consumindo</h2><span class="badge">/api/*</span></div><div style="overflow:auto"><table><thead><tr><th>Rota</th><th>Req</th><th>Resp</th><th>Erro</th><th>p95</th><th>Fonte/cache</th><th>Entrega app</th></tr></thead><tbody id="routesBody"></tbody></table></div></div><div class="card"><div class="title"><h3>Eventos recentes captados</h3><span class="badge" id="eventsCount">0</span></div><div id="eventsList"></div></div></section>
+<section class="section split"><div class="card"><div class="title"><h2>Payloads transformados para o app</h2><div class="tabs" id="payloadTabs"></div></div><div id="payloadSummary"></div><pre id="payloadPreview">Aguardando tráfego em /api/asset, /api/assets, /api/portfolio ou /api/scrape.</pre></div><div class="card"><h3 style="margin-top:0">Mapa de distribuição</h3><div id="distributionList"></div></div></section>
+<section class="section split"><div class="card big"><div class="title"><h2>Probe de ativo e gráfico renderizado</h2><span class="badge" id="assetStatus">sem consulta</span></div><canvas id="assetChart"></canvas></div><div class="card"><h3 style="margin-top:0">Métricas do ativo</h3><div class="grid g2"><div><div class="k">Preço</div><div class="v" id="aPrice">—</div></div><div><div class="k">DY</div><div class="v" id="aDy">—</div></div><div><div class="k">P/VP</div><div class="v" id="aPvp">—</div></div><div><div class="k">Rendimento</div><div class="v" id="aDiv">—</div></div></div><div id="assetPanels" style="margin-top:12px"></div></div></section>
+<section class="section card"><div class="title"><h2>Tabela de métricas normalizadas</h2><span class="badge">appMobileSnapshot → appPayload → normalized → results</span></div><div style="overflow:auto"><table><thead><tr><th>Campo</th><th>Valor</th><th>Origem</th></tr></thead><tbody id="metricRows"></tbody></table></div></section>
+<section class="section card" id="page-tests"><div class="title"><div><h2>Central interna de testes</h2><p class="sub"><strong>Testes e benchmark</strong> · HTML family hit · renderFailure · /api/server/tests /api/cache/stats /api/source/status</p></div><button class="secondary" id="runTestsBtn">Rodar testes</button></div><div id="testResults"></div></section>
+<section class="section grid g2"><div class="card"><h3>Engine Core</h3><p class="sub">Compatibilidade: engineCoreChart e engineCoreList continuam disponíveis.</p><canvas id="engineCoreChart"></canvas></div><div class="card"><h3>Diagnóstico Engine Core</h3><div id="engineCoreList"></div></div></section>
+<footer>VALORAE Proxy Server · servidor visual v21.12.15 · appMobileSnapshot · appPayload · chartSeries · localStorage · Vercel Free.</footer>
+</main><script>(()=>{'use strict';
+const $=id=>document.getElementById(id), fmt=new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}), money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2});
+const st={metrics:null,asset:null,lastGood:JSON.parse(localStorage.getItem('valorae:lastGoodAsset')||'null'),tab:0,timer:null};
+function esc(v){return String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}function obj(v){return v&&typeof v==='object'&&!Array.isArray(v)}function first(...v){return v.find(x=>x!==undefined&&x!==null&&x!==''&&!(typeof x==='number'&&Number.isNaN(x)))}
+function n(v){if(typeof v==='number')return Number.isFinite(v)?v:null;if(!v&&v!==0)return null;let s=String(obj(v)?first(v.value,v.raw,v.display):v).replace(/R\$|%|\s/g,'').toLowerCase();let m=1;if(/bi|bilh/.test(s))m=1e9;else if(/mi|milh/.test(s))m=1e6;else if(/\bmil\b/.test(s))m=1e3;s=s.replace(/[a-zçãõ]+/g,'');if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');else if(s.includes(','))s=s.replace(',','.');const x=Number(s);return Number.isFinite(x)?x*m:null}function show(v,kind){const x=n(v),raw=obj(v)?first(v.display,v.formatted,v.value,v.raw):v;if(raw===undefined||raw===null||raw==='')return'—';if(kind==='money'&&x!==null)return money.format(x);if(kind==='percent'&&x!==null)return fmt.format(x)+'%';return x!==null?fmt.format(x):String(raw)}function src(v){return obj(v)?first(v.source,v.path,v.confidence,'normalizado'):'detectado'}
+async function api(path){const r=await fetch(path,{cache:'no-store',headers:{'x-valorae-telemetry':'dashboard'}});const t=await r.text();let d;try{d=JSON.parse(t)}catch{d={raw:t}}if(!r.ok)throw Object.assign(new Error(d.error||r.statusText),{data:d,status:r.status});return d}
+function notice(msg,type='warn'){$('mainNotice').className='notice '+(type==='ok'?'ok':type==='err'?'err':'');$('mainNotice').textContent=msg;$('mainNotice').classList.remove('hidden')}function clearNotice(){$('mainNotice').classList.add('hidden')}
+function draw(canvas,series,opt={}){const c=$(canvas),ctx=c.getContext('2d'),dpr=devicePixelRatio||1,w=c.clientWidth*dpr,h=c.clientHeight*dpr;c.width=w;c.height=h;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#18304a';ctx.lineWidth=1;for(let i=1;i<5;i++){ctx.beginPath();ctx.moveTo(0,h*i/5);ctx.lineTo(w,h*i/5);ctx.stroke()}const arr=(series||[]).filter(p=>Number.isFinite(Number(p.y)));if(!arr.length){ctx.fillStyle='#8fa5bf';ctx.fillText('Sem dados para gráfico',18,28);return}const ys=arr.map(p=>Number(p.y)),min=Math.min(...ys),max=Math.max(...ys),pad=(max-min||1)*.08;ctx.strokeStyle=opt.color||'#61a8ff';ctx.lineWidth=2*dpr;ctx.beginPath();arr.forEach((p,i)=>{const x=i*Math.max(1,w-24)/(Math.max(1,arr.length-1))+12,y=h-12-((Number(p.y)-(min-pad))/(max-min+pad*2))*(h-24);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.fillStyle='#8fa5bf';ctx.fillText(`${fmt.format(min)} → ${fmt.format(max)}`,12,18)}
+function bars(canvas,items){const c=$(canvas),ctx=c.getContext('2d'),dpr=devicePixelRatio||1,w=c.clientWidth*dpr,h=c.clientHeight*dpr;c.width=w;c.height=h;ctx.clearRect(0,0,w,h);const a=(items||[]).slice(0,8),max=Math.max(1,...a.map(x=>Number(x.value||0)));if(!a.length){ctx.fillStyle='#8fa5bf';ctx.fillText('Sem dados',18,28);return}a.forEach((it,i)=>{const y=16+i*(h-30)/a.length,bw=(w-120)*(Number(it.value||0)/max);ctx.fillStyle='#3478ff';ctx.fillRect(110,y,bw,12*dpr);ctx.fillStyle='#cfe4ff';ctx.fillText(String(it.name).slice(0,16),8,y+10*dpr);ctx.fillStyle='#8fa5bf';ctx.fillText(String(it.value),115+bw,y+10*dpr)})}
+function renderMetrics(m){st.metrics=m;const s=m.summary||{},pi=m.payloadIntelligence||{};$('liveBadge').textContent='● ao vivo '+new Date().toLocaleTimeString('pt-BR');$('liveBadge').className='pill on';$('kRequests').textContent=s.requests??0;$('kResponses').textContent=s.responses??0;$('kHealth').textContent=(s.healthScore??100)+'/100';$('kErrors').textContent=`erro ${s.errorRatePercent??0}% · p95 ${s.p95LatencyMs??'—'}ms`;$('kRpm').textContent=`${s.requestsPerMinute5m??0} req/min · ${s.activeClients5m??0} clientes`;$('kCapture').textContent=`${s.captureCompletenessPercent??100}% · ${s.directResponsesCaptured??0} diretas`;$('kData').textContent=(pi.totalMetricsObserved||0)+' / '+(pi.totalChartSeriesObserved||0);$('kDataSub').textContent=`${pi.totalChartPointsObserved||0} pontos · ${pi.totalDividendRowsObserved||0} dividendos`;$('trafficState').textContent=s.trafficState||'—';
+const dh=m.deliveryHarmony||{};$('kHarmony').textContent=(dh.score??100)+'/100';$('kHarmonySub').textContent=`transform ${dh.transformScore??100}/100 · app ${dh.appDeliveryScore??100}/100`;$('kDelivered').textContent=dh.payloadsDelivered??0;$('kDeliveredSub').textContent=`${dh.renderSafePayloads??0} renderSafe · ${dh.cacheSafePayloads??0} cacheSafe`;$('kMobileSnapshots').textContent=dh.mobileSnapshotsDelivered??0;$('kApps').textContent=(m.distributions?.apps||[]).length;$('kAppsSub').textContent=names(m.distributions?.channels);$('pipelineScore').textContent=(dh.score??100)+'/100';$('pipelineList').innerHTML=(dh.pipeline||[]).map(x=>`<div class="event ${x.ok?'':'warn'}"><b>${esc(x.label)}</b> <span class="badge ${x.ok?'ok':'warn'}">${x.ok?'OK':'atenção'}</span><br><small>${esc(x.detail)}</small></div>`).join('')||'<p class="sub">Aguardando tráfego dos apps consumidores.</p>';$('appsBody').innerHTML=(dh.apps||[]).map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(a.channel||'—')}</td><td>${a.responses}</td><td>${a.renderSafe}/${a.responses}</td><td>${a.metrics}</td><td>${a.charts} · ${a.chartPoints} pts</td></tr>`).join('')||'<tr><td colspan="6">Sem apps consumidores externos ainda.</td></tr>';$('serverState').innerHTML=rows([['Operação',s.operationalState],['SLO',s.sloStatus],['Uptime',s.uptimeSeconds+'s'],['Memória',s.heapUsedMb+'MB / '+s.heapUsagePercent+'%'],['Cache hit',s.cacheHitRatePercent+'%'],['Fonte',s.sourceReliabilityScore+'/100'],['Harmonia apps',(dh.score??100)+'/100'],['Preview payload',pi.capturePreviewEnabled?'ativo':'desligado']]);
+draw('trafficChart',(m.timeSeries||[]).map(x=>({x:x.at,y:x.responses})));bars('statusChart',m.distributions?.status);bars('cacheChart',[...(m.distributions?.cache||[]),...(m.distributions?.source||[])]);bars('latencyChart',m.histograms?.latency);
+$('routesBody').innerHTML=(m.routeDetails||[]).map(r=>`<tr><td class="mono">${esc(r.route)}</td><td>${r.requests}</td><td>${r.responses}</td><td>${r.errorRatePercent}%</td><td>${r.p95LatencyMs??'—'}ms</td><td><small>${esc(r.lastSourceStatus||'unknown')} / ${esc(r.lastCacheStatus||'unknown')}</small></td><td><small>${r.deliveredPayloads||0} payloads · ${r.renderSafeRatePercent??'—'}% render · ${esc(r.topApp||'—')}</small></td></tr>`).join('')||'<tr><td colspan="7">Sem tráfego real ainda.</td></tr>';
+const ev=m.recentEvents||[];$('eventsCount').textContent=ev.length;$('eventsList').innerHTML=ev.slice(0,12).map(e=>`<div class="event ${e.status>=500?'err':e.status>=400?'warn':''}"><b>${e.method} ${esc(e.route)}</b> <span class="badge ${e.status>=400?'err':'ok'}">${e.status}</span><br><small>${esc(e.at)} · ${e.latencyMs??'—'}ms · ${Math.round((e.bytesOut||0)/1024)}KB · ${esc(e.payloadKind||'')} · ${esc(e.appName||e.device||'app')} · ${esc(e.deliveryDecision||'')}</small><br><small>${esc(JSON.stringify(e.payloadSignals||{}))}</small></div>`).join('')||'<p class="sub">Sem eventos externos.</p>';
+renderPayloads(m);$('distributionList').innerHTML=rows([['Métodos',names(m.distributions?.methods)],['Dispositivos',names(m.distributions?.devices)],['Apps',names(m.distributions?.apps)],['Canais',names(m.distributions?.channels)],['Tickers',names(m.distributions?.tickers)],['Views',names(m.distributions?.views)],['Raízes recentes',(pi.recentRoots||[]).join(', ')||'—']]);renderEngine(m)}
+function rows(a){return a.map(([k,v])=>`<div class="row"><b>${esc(k)}</b><span>${esc(v??'—')}</span></div>`).join('')}function names(a){return(a||[]).slice(0,6).map(x=>`${x.name}:${x.value}`).join(' · ')||'—'}
+function renderPayloads(m){const ev=(m.recentEvents||[]).filter(e=>e.payloadKind&&e.payloadKind!=='unknown');$('payloadTabs').innerHTML=ev.slice(0,8).map((e,i)=>`<button class="tab ${i===st.tab?'active':''}" data-tab="${i}">${esc(e.payloadKind)} #${e.id}</button>`).join('');document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{st.tab=Number(b.dataset.tab);renderPayloads(st.metrics)});const e=ev[st.tab]||ev[0];if(!e){$('payloadSummary').innerHTML=rows([['Status','aguardando payload']]);$('payloadPreview').textContent='Faça uma consulta para /api/asset ou use o botão Consultar ativo.';return}$('payloadSummary').innerHTML=rows([['Rota',e.route],['Ticker',e.payloadSignals?.ticker],['Métricas',e.payloadSignals?.metrics],['Séries/pontos',(e.payloadSignals?.charts||0)+' / '+(e.payloadSignals?.chartPoints||0)],['Painéis',e.payloadSignals?.panels],['Raízes',(e.payloadRoots||[]).join(', ')]]);$('payloadPreview').textContent=e.payloadPreview||JSON.stringify(e.payloadSignals,null,2)}
+function metricRoots(p){return [p?.appMobileSnapshot?.metrics,p?.appPayload?.metrics?.canonical,p?.appPayload?.metrics?.aliases,p?.normalized,p?.results?.indicadores,p?.results].filter(obj)}function extractMetrics(p){const roots=metricRoots(p),map={price:['price','currentPrice','precoAtual','cotacao','Preço'],dy:['dy','dividendYield','D.Y','DY'],pvp:['p_vp','pvp','P/VP'],lastDividend:['lastDividend','ultimoRendimento','Último Rendimento','rendimento']},out={};for(const[k,ks]of Object.entries(map))for(const r of roots)for(const key of ks)if(out[k]===undefined&&r[key]!==undefined)out[k]=r[key];for(const r of roots)for(const[k,v]of Object.entries(r))if(out[k]===undefined)out[k]=v;return out}
+function pts(a){return Array.isArray(a)?a.map((p,i)=>Array.isArray(p)?{x:p[0]??i,y:n(p[p.length-1])}:obj(p)?{x:first(p.x,p.date,p.data,p.label,i),y:n(first(p.y,p.value,p.valor,p.close,p.price,p.preco))}:{x:i,y:n(p)}).filter(p=>p.y!==null):[]}function series(p){const out=[],add=(name,data)=>{const pp=pts(data);if(pp.length)out.push({name,points:pp})};for(const r of [p?.appMobileSnapshot?.charts,p?.appPayload?.charts,p?.chartSeries,p?.results?.historico,p?.results?.dividendos,p?.results].filter(Boolean)){if(Array.isArray(r))add('Série',r);else if(obj(r)){if(Array.isArray(r.series))r.series.forEach(s=>add(s.name||s.key,s.points||s.data));if(Array.isArray(r.seriesPreview))r.seriesPreview.forEach(s=>add(s.name||s.key,s.points||s.data));if(Array.isArray(r.points))add(r.name||'Série',r.points);for(const[k,v]of Object.entries(r))if(Array.isArray(v))add(k,v)}}return out.slice(0,8)}
+async function probe(){clearNotice();const t=String($('tickerInput').value||'PETR4').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12),view=$('viewSelect').value;$('assetStatus').textContent='consultando '+t;try{const p=await api(`/api/asset?ticker=${encodeURIComponent(t)}&view=${encodeURIComponent(view)}&includeNews=1&mode=super`);st.asset=p;localStorage.setItem('valorae:lastGoodAsset',JSON.stringify(p));renderAsset(p);notice('Consulta captada pelo proxy e refletida nos painéis do servidor.','ok');await refresh()}catch(e){notice('Falha na fonte/API. Mantendo último snapshot bom quando existir: '+e.message,'err');if(st.lastGood)renderAsset(st.lastGood)}}function renderAsset(p){const m=extractMetrics(p);$('assetStatus').textContent=(p.status||'OK')+' '+(p.ticker||'');$('aPrice').textContent=show(m.price,'money');$('aDy').textContent=show(m.dy,'percent');$('aPvp').textContent=show(m.pvp);$('aDiv').textContent=show(m.lastDividend,'money');const ss=series(p);draw('assetChart',ss[0]?.points||[]);$('assetPanels').innerHTML=rows([['Fonte',first(p?.appMobileSnapshot?.source?.primary,p?.sourceReport?.primarySource,p?.cacheStatus)],['Render safe',first(p?.appResponseIntegrity?.renderSafe,p?.appDataContract?.renderSafe,p?.appMobileSnapshot?.sync?.renderSafe)],['Séries',ss.length],['Raízes',Object.keys(p||{}).slice(0,12).join(', ')]]);$('metricRows').innerHTML=Object.entries(m).slice(0,100).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${esc(show(v))}</td><td>${esc(src(v))}</td></tr>`).join('')||'<tr><td colspan="3">Sem métricas normalizadas.</td></tr>'}
+function renderEngine(m){const e=m.engine||{},c=e.engineCore||m.engineCore||{};draw('engineCoreChart',[{x:'health',y:m.summary?.healthScore||100},{x:'data',y:m.summary?.dataQualityScore||100},{x:'source',y:m.summary?.sourceReliabilityScore||100},{x:'cache',y:m.summary?.cacheEfficiencyScore||100}]);$('engineCoreList').innerHTML=rows([['Versão',e.version||c.version||'—'],['Requests',m.summary?.requests],['Eventos',m.summary?.eventsStored],['Rotas',m.summary?.routesTracked],['Core',JSON.stringify(c).slice(0,120)]])}
+async function refresh(){try{const m=await api('/api/server/metrics');renderMetrics(m)}catch(e){$('liveBadge').textContent='● erro';$('liveBadge').className='pill';notice('Não consegui ler /api/server/metrics: '+e.message,'err')}}
+async function runTests(){const items=['/api/health','/api/ready','/api/fields','/api/source/status','/api/cache/stats','/api/server/metrics','/api/asset?ticker=PETR4&view=compact'];$('testResults').innerHTML='Rodando...';const res=[];for(const u of items){try{const t=performance.now();await api(u);res.push([u,'OK',Math.round(performance.now()-t)+'ms'])}catch(e){res.push([u,'ERRO',e.status||e.message])}}$('testResults').innerHTML='<table><tbody>'+res.map(r=>`<tr><td class="mono">${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')+'</tbody></table>';refresh()}
+$('refreshBtn').onclick=refresh;$('probeBtn').onclick=probe;$('runTestsBtn').onclick=runTests;refresh();setInterval(refresh,3000);if(st.lastGood)renderAsset(st.lastGood);
+})();</script></body></html>
