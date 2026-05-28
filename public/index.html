@@ -1,271 +1,126 @@
 <!doctype html>
-<html lang="pt-BR" data-theme="auto">
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light dark" />
-  <title>VALORAE Proxy Server Portal</title>
-  
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0f7b52" />
+  <meta name="description" content="Servidor visual do VALORAE Proxy com PWA, configurações, métricas em tempo real, observabilidade e integração para apps financeiros." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="VALORAE Server" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/assets/valorae-logo.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/valorae-icon-192.png" />
+  <title>VALORAE Proxy Server</title>
   <style>
-    :root {
-      --md-primary: #6750a4;
-      --md-on-primary: #ffffff;
-      --md-primary-container: #eaddff;
-      --md-on-primary-container: #21005d;
-      
-      --md-secondary: #625b71;
-      --md-on-secondary: #ffffff;
-      --md-secondary-container: #e8def8;
-      --md-on-secondary-container: #1d192b;
-      
-      --md-bg: #fef7ff;
-      --md-surface: #fef7ff;
-      --md-surface-variant: #e7e0ec;
-      --md-on-surface: #1d1b20;
-      --md-on-surface-variant: #49454f;
-      
-      --md-surface-container-low: #f7f2fa;
-      --md-surface-container: #f3edf7;
-      --md-surface-container-high: #ece6f0;
-      --md-surface-container-highest: #e6e1e5;
-      
-      --md-outline: #79747e;
-      --md-outline-variant: #cac4d0;
-      
-      --md-success: #2e7d32;
-      --md-on-success: #ffffff;
-      
-      --shadow-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
-      --shadow-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
-      
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      --radius-xl: 28px;
-      --radius-full: 9999px;
-    }
+    :root{color-scheme:light;--green:#0f7b52;--green-2:#2fbf7a;--green-3:#dff6ea;--green-4:#093b28;--ink:#18201b;--muted:#607168;--bg:#f6f8f6;--surface:#ffffff;--surface-2:#edf3ef;--surface-3:#e2ebe5;--line:#c9d4cc;--danger:#ba1a1a;--warn:#8a6200;--ok:#0f7b52;--chart:#708078;--grid:#dbe6df;--shadow:0 8px 24px rgba(18,32,23,.1);--radius:16px;--top:56px;--drawer:280px;--ease:cubic-bezier(.2,0,0,1)}
+    :root[data-theme=dark]{color-scheme:dark;--green:#8ee0b4;--green-2:#44ce87;--green-3:#0b3a28;--green-4:#dff6ea;--ink:#e6eee8;--muted:#b6c6bc;--bg:#101511;--surface:#171e19;--surface-2:#202821;--surface-3:#29332c;--line:#3e4a42;--danger:#ffb4ab;--warn:#ffd88a;--ok:#8ee0b4;--chart:#a0aca5;--grid:#334139;--shadow:0 22px 60px rgba(0,0,0,.38)}
+    @media(prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--green:#8ee0b4;--green-2:#44ce87;--green-3:#0b3a28;--green-4:#dff6ea;--ink:#e6eee8;--muted:#b6c6bc;--bg:#101511;--surface:#171e19;--surface-2:#202821;--surface-3:#29332c;--line:#3e4a42;--danger:#ffb4ab;--warn:#ffd88a;--ok:#8ee0b4;--chart:#a0aca5;--grid:#334139;--shadow:0 22px 60px rgba(0,0,0,.38)}}
+    *{box-sizing:border-box}::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--muted) 35%,transparent);border-radius:99px;border:2px solid transparent;background-clip:padding-box}::-webkit-scrollbar-thumb:hover{background:var(--muted);border:2px solid transparent;background-clip:padding-box}::-webkit-scrollbar-corner{background:transparent}html{scroll-behavior:smooth;overflow-y:auto;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--muted) 35%,transparent) transparent}body{margin:0;background:radial-gradient(circle at top right,color-mix(in srgb,var(--green) 12%,transparent),transparent 420px),var(--bg);color:var(--ink);font-family:Roboto,Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}a{color:inherit}.top{position:fixed;inset:0 0 auto;z-index:70;height:var(--top);display:flex;align-items:center;gap:8px;padding:6px 12px;background:color-mix(in srgb,var(--surface) 82%,transparent);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);backdrop-filter:blur(18px)}.icon{width:36px;height:36px;border:0;border-radius:12px;background:var(--surface-2);color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:.22s var(--ease)}.icon:hover{transform:translateY(-1px);background:var(--green-3)}.brand{display:flex;align-items:center;gap:8px;min-width:0}.logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--green),#27312b);box-shadow:0 8px 16px color-mix(in srgb,var(--green) 28%,transparent);display:grid;place-items:center;color:#fff;font-weight:950;letter-spacing:-.08em}.brand h1{font-size:.95rem;letter-spacing:-.02em;margin:0}.brand p{font-size:.7rem;color:var(--muted);margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.top-spacer{flex:1}.status-pill{display:inline-flex;align-items:center;gap:6px;min-height:30px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);padding:0 10px;font-weight:850;font-size:.75rem}.dot{width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 3px color-mix(in srgb,var(--warn) 18%,transparent)}.dot.ok{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 18%,transparent)}.dot.err{background:var(--danger);box-shadow:0 0 0 3px color-mix(in srgb,var(--danger) 18%,transparent)}.drawer{position:fixed;z-index:80;top:0;bottom:0;left:0;width:var(--drawer);max-width:92vw;background:var(--surface);border-right:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(-105%);transition:transform .28s var(--ease);display:flex;flex-direction:column}.drawer.open{transform:none}.drawer-head{padding:16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.drawer-head b{font-size:1rem}.drawer nav{padding:8px;overflow:auto}.nav-item{width:100%;border:0;background:transparent;color:var(--ink);border-radius:14px;padding:10px 12px;margin:2px 0;text-align:left;cursor:pointer;font-weight:930;display:grid;gap:2px;transition:.18s var(--ease);font-size:.85rem}.nav-item small{color:var(--muted);font-weight:650;font-size:.7rem}.nav-item:hover{background:var(--surface-2)}.nav-item.active{background:var(--green-3);color:var(--green)}.scrim{position:fixed;inset:0;background:rgba(0,0,0,.34);z-index:75;opacity:0;pointer-events:none;transition:.22s}.scrim.show{opacity:1;pointer-events:auto}.content{max-width:1540px;margin:auto;padding:calc(var(--top) + 12px) 12px 24px}.page{display:none;animation:fadeIn .24s var(--ease)}.page.active{display:block}@keyframes fadeIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}.page-head h2{font-size:clamp(1.3rem,2.2vw,1.9rem);line-height:1;letter-spacing:-.06em;margin:0}.page-head p,.sub{color:var(--muted);line-height:1.4;font-size:.75rem;margin:4px 0 0}.actions{display:flex;gap:6px;flex-wrap:wrap}.btn{min-height:34px;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);color:var(--ink);font-weight:930;padding:0 12px;cursor:pointer;font-size:.85rem;transition:.18s var(--ease)}.btn:hover{transform:translateY(-1px);box-shadow:0 8px 16px rgba(0,0,0,.06)}.btn.primary{background:var(--green);border-color:transparent;color:#fff}.btn.ghost{background:transparent}.grid{display:grid;gap:10px}.two{grid-template-columns:1.15fr .85fr}.three{grid-template-columns:repeat(3,1fr)}.four{grid-template-columns:repeat(4,1fr)}.card{background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 96%,var(--green) 4%),var(--surface));border:1px solid color-mix(in srgb,var(--line) 88%,transparent);border-radius:var(--radius);box-shadow:0 2px 8px rgba(0,0,0,.04);padding:12px;min-width:0}.card h3{font-size:.8rem;letter-spacing:-.01em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:10px}.hero-card{position:relative;overflow:hidden;border-radius:20px;padding:16px;background:linear-gradient(135deg,#0f7b52 0%,#26322b 72%);color:#fff;box-shadow:var(--shadow)}.hero-card:before{content:"";position:absolute;right:-60px;top:-80px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.12)}.hero-card h2{font-size:clamp(1.4rem,2.2vw,2.2rem);line-height:.92;letter-spacing:-.06em;margin:0 0 8px;max-width:980px}.hero-card p{max-width:980px;line-height:1.5;font-size:.8rem;margin:0}.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.flow-step{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.13);border-radius:12px;padding:8px;display:flex;flex-direction:column;justify-content:center}.flow-step b{display:block;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.flow-step span{font-size:.72rem;opacity:.82;line-height:1.2;margin-top:2px}.kpi{display:flex;flex-direction:column;justify-content:center;padding:12px}.kpi label{display:block;color:var(--muted);font-weight:850;font-size:.8rem}.kpi .value{font-size:clamp(1.3rem,2.2vw,1.8rem);font-weight:950;letter-spacing:-.07em;margin:2px 0}.kpi small{color:var(--muted);font-size:.72rem;line-height:1.1}.trend{font-size:.7rem;font-weight:900;border-radius:999px;padding:2px 6px;background:var(--surface-2);color:var(--muted)}.badge{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:22px;border-radius:999px;padding:2px 8px;border:1px solid var(--line);background:var(--surface-2);font-size:.7rem;font-weight:920;white-space:nowrap}.badge.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}.badge.warn{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}.badge.err{background:color-mix(in srgb,var(--danger) 18%,transparent);color:var(--danger)}.chart{height:220px}.chart.small{height:180px}.chart.tall{height:250px}canvas{width:100%;height:100%;display:block}.list{display:grid;gap:4px}.line-item{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 66%,transparent)}.line-item:last-child{border-bottom:0}.bar{height:5px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:4px}.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--green),var(--chart))}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}table{width:100%;border-collapse:collapse;min-width:700px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);font-size:.75rem;vertical-align:top;white-space:nowrap}th{position:sticky;top:0;background:var(--surface-2);color:var(--muted);z-index:1}code,pre{background:var(--surface-2);border:1px solid color-mix(in srgb,var(--line) 75%,transparent);border-radius:8px}code{padding:2px 4px}pre{padding:8px;overflow:auto;line-height:1.35;font-size:.75rem}.copy{user-select:all}.tech-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.tech{display:grid;grid-template-columns:28px 1fr;gap:6px;align-items:start;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.tech .ico{width:28px;height:28px;border-radius:8px;background:var(--green-3);display:grid;place-items:center;font-weight:950;color:var(--green);font-size:.65rem}.tech p.sub{margin-top:2px;font-size:.65rem;line-height:1.3}.notice{border:1px dashed var(--line);background:var(--surface-2);color:var(--muted);border-radius:12px;padding:8px}.toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.select,input{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;min-height:30px;padding:0 10px;font-weight:800;font-size:.8rem}.toast{position:fixed;right:12px;bottom:12px;background:#26312b;color:#fff;border-radius:999px;padding:10px 16px;font-size:.8rem;box-shadow:var(--shadow);opacity:0;transform:translateY(14px);transition:.2s;z-index:90}.toast.show{opacity:1;transform:none}.skeleton{min-height:46px;border-radius:14px;background:linear-gradient(90deg,var(--surface-2),var(--surface-3),var(--surface-2));background-size:200% 100%;animation:shimmer 1.2s linear infinite}@keyframes shimmer{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}@media(max-width:1150px){.tech-grid{grid-template-columns:repeat(2,1fr)}.three{grid-template-columns:repeat(3,1fr)}.two{grid-template-columns:1fr}.hero{grid-template-columns:1fr}}@media(max-width:960px){.brand p,.hide-mobile{display:none}.page-head{display:block}.content{padding-left:8px;padding-right:8px}.chart.tall{height:200px}.three,.four{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.three,.flow,.tech-grid{grid-template-columns:1fr}.four{grid-template-columns:repeat(2,1fr)}}
 
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --md-primary: #d0bcff;
-        --md-on-primary: #381e72;
-        --md-primary-container: #4f378b;
-        --md-on-primary-container: #eaddff;
-        
-        --md-secondary: #ccc2dc;
-        --md-on-secondary: #332d41;
-        --md-secondary-container: #4a4458;
-        --md-on-secondary-container: #e8def8;
-        
-        --md-bg: #141218;
-        --md-surface: #141218;
-        --md-surface-variant: #49454f;
-        --md-on-surface: #e6e0e9;
-        --md-on-surface-variant: #cac4d0;
-        
-        --md-surface-container-low: #1d1b20;
-        --md-surface-container: #211f26;
-        --md-surface-container-high: #2b2930;
-        --md-surface-container-highest: #36343b;
-        
-        --md-outline: #938f99;
-        --md-outline-variant: #49454f;
-        
-        --md-success: #81c784;
-      }
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background-color: var(--md-bg);
-      color: var(--md-on-surface);
-      font-family: 'Roboto', 'Inter', system-ui, sans-serif;
-      line-height: 1.5;
-      padding: 20px 12px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card-portal {
-      max-width: 800px;
-      width: 100%;
-      background-color: var(--md-surface-container-low);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--md-outline-variant);
-      padding: 24px;
-      box-shadow: var(--shadow-1);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card-portal::after {
-      content: "";
-      position: absolute;
-      right: -100px;
-      top: -100px;
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, var(--md-primary-container) 0%, transparent 70%);
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    .logo-badge {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--md-primary), #006a6a);
-      display: grid;
-      place-items: center;
-      color: var(--md-on-primary);
-      font-weight: 900;
-      font-size: 1.4rem;
-      box-shadow: var(--shadow-2);
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-    }
-
-    p.subtitle {
-      font-size: 1rem;
-      color: var(--md-on-surface-variant);
-      line-height: 1.4;
-    }
-
-    /* Grid of utilities links */
-    .grid-links {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    @media (max-width: 600px) {
-      .grid-links {
-        grid-template-columns: 1fr;
-      }
-      .card-portal {
-        padding: 16px;
-      }
-    }
-
-    .nav-card {
-      background-color: var(--md-surface-container);
-      border: 1px solid var(--md-outline-variant);
-      border-radius: var(--radius-md);
-      padding: 14px;
-      text-decoration: none;
-      color: var(--md-on-surface);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      transition: box-shadow 0.2s, background-color 0.2s, transform 0.15s;
-    }
-
-    .nav-card:hover {
-      background-color: var(--md-surface-container-high);
-      box-shadow: var(--shadow-1);
-      transform: translateY(-1px);
-    }
-
-    .nav-card h3 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--md-primary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .nav-card p {
-      font-size: 0.8rem;
-      color: var(--md-on-surface-variant);
-    }
-
-    .m3-pill {
-      height: 20px;
-      padding: 0 8px;
-      font-size: 0.7rem;
-      font-weight: 800;
-      border-radius: var(--radius-full);
-      background-color: var(--md-primary-container);
-      color: var(--md-on-primary-container);
-      display: inline-flex;
-      align-items: center;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    code {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      background-color: var(--md-surface-container-high);
-      padding: 2px 6px;
-      border-radius: 4px;
-      color: var(--md-primary);
-    }
+    .brand-logo{width:36px;height:36px;border-radius:13px;box-shadow:0 10px 22px color-mix(in srgb,var(--green) 25%,transparent);background:var(--surface-2);object-fit:cover}.drawer-brand{display:flex;align-items:center;gap:10px}.drawer-brand img{width:34px;height:34px;border-radius:12px}
+    .nav-section{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:950;margin:22px 10px 8px;display:flex;align-items:center;gap:10px}
+    .nav-section:first-of-type{margin-top:10px}
+    .nav-section::after{content:"";flex:1;height:1px;background:color-mix(in srgb,var(--line) 45%,transparent)}
+    .nav-divider{height:1px;background:var(--line);margin:8px}
+    .settings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}:root[data-density=compact]{--radius:12px}.content.compact,.compact .content{padding-top:calc(var(--top) + 8px)}:root[data-density=compact] .card{padding:9px}:root[data-density=compact] .kpi{padding:9px}:root[data-density=compact] .chart{height:190px}:root[data-density=compact] .chart.small{height:150px}:root[data-density=compact] .nav-item{padding:8px 10px}
+    .setting-card{border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:12px;display:grid;gap:6px}
+    .segmented{display:flex;gap:4px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px;width:max-content;max-width:100%}
+    .segmented .btn{min-height:30px;border:0;background:transparent;padding:0 10px}.segmented .btn.active{background:var(--green);color:#fff}
+    .logo-showcase{display:grid;grid-template-columns:80px 1fr;gap:12px;align-items:center}.logo-showcase img{width:80px;height:80px;border-radius:20px;box-shadow:var(--shadow)}
+    .pwa-status{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.mini{font-size:.75rem;color:var(--muted);line-height:1.4}
+    .category-chip{display:inline-flex;border-radius:999px;background:var(--green-3);color:var(--green);padding:4px 8px;font-weight:950;font-size:.7rem;margin-bottom:6px}
+    .metric-explain{border-left:4px solid var(--green);padding:10px 12px;background:var(--surface-2);border-radius:14px;color:var(--muted);font-size:.78rem;line-height:1.45}
+    .score-ring{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) calc(var(--score,0)*1%),var(--surface-3) 0);font-weight:950;color:var(--ink);box-shadow:inset 0 0 0 10px var(--surface)}
+    @media(max-width:1060px){.settings-grid,.logo-showcase{grid-template-columns:1fr}}
+    .valorae-tooltip{position:fixed;background:color-mix(in srgb,var(--surface) 85%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--line);border-radius:14px;padding:12px 16px;pointer-events:none;box-shadow:0 12px 34px rgba(0,0,0,.15);font-size:.85rem;z-index:9999;opacity:0;visibility:hidden;transition:opacity .15s, transform .15s var(--ease);transform:translateY(4px) scale(0.98);display:flex;flex-direction:column;gap:8px;color:var(--ink);width:max-content;min-width:160px}
+    .valorae-tooltip.show{opacity:1;visibility:visible;transform:none}
+    .tooltip-title{font-weight:900;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:2px}
+    .tooltip-wrapper{display:flex;flex-direction:column;gap:6px}
+    .tooltip-row{display:flex;align-items:center;justify-content:space-between;gap:22px}
+    .tooltip-label{display:flex;align-items:center;gap:8px;font-weight:700}
+    .tooltip-dot{width:10px;height:10px;border-radius:50%;display:inline-block;box-shadow:0 0 0 2px color-mix(in srgb, currentColor 20%, transparent)}
+    .tooltip-val{font-weight:950;font-variant-numeric:tabular-nums;font-size:.9rem}
   </style>
 </head>
 <body>
+  <header class="top"><button class="icon" id="menuBtn" aria-label="Abrir menu">☰</button><div class="brand"><img class="brand-logo" src="/assets/valorae-logo.svg" alt="VALORAE" /><div><h1>VALORAE Proxy Server</h1><p>Command Center PWA, integração, SLO e diagnóstico em tempo real</p></div></div><div class="top-spacer"></div><button class="icon" id="themeToggleBtn" aria-label="Alternar tema"><span id="themeIcon" style="font-size:1.25rem">🌙</span></button></header>
+  <aside class="drawer" id="drawer" aria-label="Menu lateral"><div class="drawer-head"><div class="drawer-brand"><img src="/assets/valorae-logo.svg" alt="" /><b>Servidor Proxy</b></div><button class="icon" id="closeBtn">×</button></div><nav>
+    <div class="nav-section">Operação</div>
+    <button class="nav-item active" data-page="overview">Visão geral<small>saúde, KPIs e fluxo</small></button>
+    <button class="nav-item" data-page="realtime">Tempo real<small>tráfego, latência e cache</small></button>
+    <button class="nav-item" data-page="performance">Performance e SLO<small>Apdex, histogramas e janelas</small></button>
+    <div class="nav-section">Tráfego do Proxy</div>
+    <button class="nav-item" data-page="routes">Rotas e fontes<small>endpoints, cache e origem</small></button>
+    <button class="nav-item" data-page="devices">Dispositivos<small>APK, Web e clientes</small></button>
+    <button class="nav-item" data-page="events">Eventos<small>respostas interceptadas</small></button>
+    <button class="nav-item" data-page="insights">Insights<small>alertas e explicações</small></button>
+    <button class="nav-item" data-page="quality">Qualidade dos dados<small>contrato, payload e anomalias</small></button>
+    <div class="nav-section">Tecnologia</div>
+    <button class="nav-item" data-page="engine">VALORAE Engine<small>tecnologia e capacidades</small></button>
+    <button class="nav-item" data-page="integrations">Integração terceiro<small>contratos, downloads e prompts</small></button>
+    <div class="nav-section">Sistema</div>
+    <button class="nav-item" data-page="settings">Configurações<small>tema, PWA e preferências</small></button>
+    <button class="nav-item" data-page="diagnostics">Diagnóstico<small>instância e harmonia</small></button>
+  </nav></aside><div class="scrim" id="scrim"></div>
+  <main class="content">
+    <section class="page active" id="page-overview"><div class="hero"><div class="hero-card"><h2>Servidor visual para controlar o Proxy que alimenta carteiras em tempo real.</h2><p>O painel acompanha chamadas reais dos endpoints de dados em <code>/api</code>, mede resposta, status, latência, cache, fonte e consumidor, e exclui a própria telemetria <code>/api/server/metrics</code> para não inflar os gráficos.</p><div class="flow"><div class="flow-step"><b>1. Cliente</b><span>APK, Web, backend ou automação</span></div><div class="flow-step"><b>2. Proxy</b><span>roteador serverless no Vercel</span></div><div class="flow-step"><b>3. Engine</b><span>normaliza, valida, cacheia e consulta fontes</span></div><div class="flow-step"><b>4. Carteira</b><span>JSON entregue para apps consumidores</span></div></div></div><div class="card"><h3>Saúde operacional</h3><div class="chart small"><canvas id="healthChart"></canvas></div><p class="sub">Score considera erro, latência p95, respostas lentas e chamadas em voo.</p><span class="badge" id="healthBadge">calculando</span></div></div><div class="grid four" style="margin-top:10px"><div class="card kpi"><label>Requisições</label><div class="value" id="kRequests">0</div><small>tráfego externo real</small></div><div class="card kpi"><label>Respostas</label><div class="value" id="kResponses">0</div><small>sem auto-polling do painel</small></div><div class="card kpi"><label>Latência p95</label><div class="value" id="kP95">—</div><small>experiência do pior grupo</small></div><div class="card kpi"><label>Sucesso</label><div class="value" id="kSuccess">—</div><small>respostas 2xx/3xx</small></div></div><div class="grid two" style="margin-top:10px"><div class="card"><h3>Tráfego resumido</h3><p class="sub">Visão geral do tráfego real dos endpoints de dados; consultas internas do painel são isoladas.</p><div class="chart"><canvas id="overviewTraffic"></canvas></div></div><div class="card"><h3>Leitura didática</h3><div id="teaching" class="list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px"><div class="skeleton"></div></div></div></div></section>
+    <section class="page" id="page-engine"><div class="page-head"><div><h2>VALORAE Engine</h2><p>Núcleo do Proxy: recebe requisições financeiras, normaliza fontes, aplica cache flexível e protege o app consumidor.</p></div><div class="actions"><a class="btn primary" href="/api/openapi" target="_blank">OpenAPI</a><a class="btn" href="/api/fields" target="_blank">Campos</a></div></div><div class="grid two"><div class="card"><h3>O que ele faz</h3><p class="sub">O Engine preserva compatibilidade entre versões, transforma dados de ativos, carteiras, notícias, rankings, índices e dividendos em respostas consumíveis, e protege o app consumidor de variações de fontes externas.</p><pre class="copy">Cliente terceiro → /api → Router → VALORAE Engine → Contrato JSON → App</pre></div><div class="card"><h3>Tecnologias do projeto</h3><div class="tech-grid"><div class="tech"><div class="ico">ESM</div><div><b>JavaScript ES Modules</b><p class="sub">Runtime leve, sem dependências obrigatórias.</p></div></div><div class="tech"><div class="ico">V</div><div><b>Vercel Serverless</b><p class="sub">Deploy gratuito com duas funções físicas.</p></div></div><div class="tech"><div class="ico">MD3</div><div><b>Material Design 3</b><p class="sub">UI limpa, responsiva e acessível.</p></div></div><div class="tech"><div class="ico">OBS</div><div><b>Observabilidade em memória</b><p class="sub">Métricas reais por instância, sem serviços pagos.</p></div></div></div></div></div><div class="grid two" style="margin-top:10px"><div class="card"><h3>Engine Core em tempo real</h3><p class="sub">Mostra maturidade do núcleo: cache HTML, cache de resultado, fontes degradadas e in-flight dedupe.</p><div class="chart small"><canvas id="engineCoreChart"></canvas></div></div><div class="card"><h3>Diagnóstico do Engine</h3><div id="engineCoreList" class="list"><div class="skeleton"></div></div></div></div><div class="grid three" style="margin-top:10px"><div class="card"><h3>Dados financeiros</h3><p class="sub">Ativos, lote de ativos, FIIs, ações, índices, IPCA, rankings, notícias, histórico, dividendos e próximos pagamentos.</p></div><div class="card"><h3>Carteiras</h3><p class="sub">Resumo, alocação, risco, renda, eventos, rebalanceamento, histórico, transações e análise consolidada.</p></div><div class="card"><h3>Proteções</h3><p class="sub">Rate limit, CORS, contratos estáveis, ETag, cache, fallback, normalizadores, auditoria de rotas e detecção de fontes parciais.</p></div></div></section>
+    <section class="page" id="page-realtime"><div class="page-head"><div><h2>Tempo real</h2><p>Observe gráficos ao vivo do volume direcional de entrada, sucessos de processamento, performance de cache e taxa de latência.</p></div><div class="toolbar"><button class="btn" id="refreshBtn">Atualizar agora</button><button class="btn" id="pauseBtn">Pausar</button></div></div><div class="grid two"><div class="card"><h3>Volume de processamento</h3><p class="sub">Acompanha o volume de entrada e a taxa de sucesso ou erro do roteador.</p><div class="chart tall"><canvas id="trafficChart"></canvas></div></div><div class="card"><h3>Latência média por minuto</h3><p class="sub">Mede o tempo de resposta do servidor da recepção até a devolução do JSON.</p><div class="chart tall"><canvas id="latencyChart"></canvas></div></div></div><div class="grid three" style="margin-top:10px"><div class="card"><h3>Status HTTP</h3><p class="sub">Distribuição dos códigos de retorno das requisições recentes.</p><div class="chart small"><canvas id="statusChart"></canvas></div></div><div class="card"><h3>Cache vs Fonte</h3><p class="sub">Eficiência das respostas em memória vs idas à fonte externa.</p><div class="chart small"><canvas id="cacheChart"></canvas></div></div><div class="card"><h3>Interceptadores</h3><p class="sub">Módulos acionados no ciclo de requisição.</p><div id="interceptorsList" class="list"></div></div></div></section>
+    <section class="page" id="page-performance"><div class="page-head"><div><h2>Performance & SLO</h2><p>Observe histogramas aprofundados, Apdex de satisfação e janelas operacionais que detectam eventuais gargalos de proxy.</p></div></div><div class="grid two"><div class="card kpi" style="background:var(--surface-2);border-radius:24px"><label>Disponibilidade do Serviço</label><div class="value" id="kAvail" style="font-size:2.4rem;color:var(--ok)">—</div><small>respostas não-5xx</small></div><div class="grid two"><div class="card kpi"><label>Apdex (Saúde)</label><div class="value" id="kApdexPerf">—</div><small>qualidade percebida</small></div><div class="card kpi"><label>Conclusão</label><div class="value" id="kCompletion">—</div><small>req x resp</small></div><div class="card kpi"><label>Custo de Payload</label><div class="value" id="kPayload">—</div><small>bytes médios transferidos por chamada externa</small></div><div class="card kpi"><label>Orçamento SLO</label><div class="value" id="kErrorBudget">—</div><small>erro consumido nesta instância</small></div></div></div><div class="grid two" style="margin-top:10px"><div class="card"><h3>Histograma de Latência (ms)</h3><p class="sub">Disposição estatística de tempo de processamento em faixas logarítmicas.</p><div class="chart tall"><canvas id="latencyHistChart"></canvas></div></div><div class="card"><h3>Tamanho Transportado (bytes)</h3><p class="sub">Distribuição de payloads recebidos por volume. Fatias massivas oneram o cliente.</p><div class="chart tall"><canvas id="payloadHistChart"></canvas></div></div></div><div class="card" style="margin-top:10px"><h3>Operação Histórica (Janelas)</h3><p class="sub">Janelas computadas em memória; contadores do próprio painel, PWA e telemetria interna permanecem fora dos totais externos.</p><div id="windowsList" class="list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div></div><div class="grid two" style="margin-top:10px"><div class="card"><h3>Rotas mais lentas</h3><div id="slowRoutesList" class="list"><div class="skeleton"></div></div></div><div class="card"><h3>Rotas com erro</h3><div id="errorRoutesList" class="list"><div class="skeleton"></div></div></div></div></section>
+    <section class="page" id="page-routes"><div class="page-head"><div><h2>Rotas & Origens</h2><p>Identifique os endpoints mais quentes e a taxa de utilização da memória vs consumo na fonte de dados.</p></div><a class="btn" href="/api/server/metrics" target="_blank">JSON bruto</a></div><div class="grid two"><div class="card"><h3>Rotas mais usadas</h3><p class="sub">Quais caminhos de dados concentram o maior tráfego. A rota interna /api/server/metrics não entra nesta conta.</p><div id="routesList" class="list"><div class="skeleton"></div></div></div><div class="card"><h3>Fontes e cache</h3><p class="sub">Proporção apenas de respostas com cache/fonte declarados. Chamadas internas e respostas sem classificação não poluem este gráfico.</p><div id="sourceList" class="list"><div class="skeleton"></div></div></div></div><div class="card" style="margin-top:10px"><h3>Detalhamento por rota</h3><p class="sub">Lista expandida com desempenho, latências e sucessos individuais.</p><div class="table-wrap"><table><thead><tr><th>Rota</th><th>Req.</th><th>Resp.</th><th>Sucesso</th><th>Erro</th><th>Latência média</th><th>p95</th><th>Máx.</th><th>Payload médio</th><th>Status</th><th>Cache</th></tr></thead><tbody id="routeRows"></tbody></table></div></div></section>
+    <section class="page" id="page-devices"><div class="page-head"><div><h2>Acessos & Clientela</h2><p>Análise do comportamento dos pacotes HTTP: hashes sanitizados e agentes identificados de maneira respeitosa.</p></div></div><div class="grid two"><div class="card"><h3>Tipos de dispositivo</h3><p class="sub">Segmentação do log de tráfego através dos clientes web/app reportados.</p><div class="chart small"><canvas id="devicesChart"></canvas></div></div><div class="card"><h3>Ativos e parâmetros</h3><p class="sub">Entidades e regras de negócio mais demandadas (tickers, IDs).</p><div id="assetsList" class="list"><div class="skeleton"></div></div></div></div><div class="card" style="margin-top:10px"><h3>Clientes recentes</h3><p class="sub">Amostragem ativa cruzada por cliente sem exposição direta de sessão.</p><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Dispositivo</th><th>Req.</th><th>Resp.</th><th>Erros</th><th>Última rota</th><th>Status</th></tr></thead><tbody id="clientRows"></tbody></table></div></div></section>
+    <section class="page" id="page-events"><div class="page-head"><div><h2>Log de Interceptação</h2><p>Amostragem histórica recente das operações cursadas pelo roteador serverless, com rastreio de payload e timing.</p></div><div class="toolbar"><input id="eventFilter" placeholder="Filtrar rota/status" /><button class="btn" id="copyReportBtn">Copiar relatório</button><a class="btn" href="/api/server/metrics" target="_blank">Exportar JSON</a></div></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Horário</th><th>Método</th><th>Rota</th><th>Status</th><th>Latência</th><th>Bytes</th><th>Cache</th><th>Fonte</th><th>Dispositivo</th></tr></thead><tbody id="eventRows"></tbody></table></div></div></section>
+    <section class="page" id="page-integrations"><div class="page-head"><div><h2>Integração & Consumidores</h2><p>Conecte APK, Web App, backend ou ferramentas customizadas ao Proxy e automatize tarefas.</p></div><div class="actions"><a class="btn primary" download href="/downloads/README_INTEGRACAO.md">Baixar guia</a><a class="btn" download href="/downloads/VALORAE_INTEGRATION_PROMPT.md">Baixar prompt</a></div></div><div class="grid three"><div class="card"><h3>1. URL base</h3><pre class="copy">https://servidor-valorae.vercel.app</pre><p class="sub">Use seu domínio Vercel final em produção.</p></div><div class="card"><h3>2. Endpoints</h3><pre class="copy">GET /api/asset?ticker=PETR4
+GET /api/assets?tickers=PETR4,GARE11
+POST /api/portfolio/analyze</pre></div><div class="card"><h3>3. Estados obrigatórios</h3><p class="sub">Carregando, online, parcial, erro, fonte indisponível, rate limit e sem dados. Nunca atualize carteira com contrato inválido.</p></div></div><div class="grid two" style="margin-top:10px"><div class="card"><h3>Downloads técnicos</h3><div class="list"><a class="btn" download href="/downloads/valorae-client-web.js">Cliente Web JavaScript</a><a class="btn" download href="/downloads/valorae-android-kotlin.kt">Cliente Android Kotlin</a><a class="btn" download href="/downloads/valorae-api-contract.json">Contrato JSON</a><a class="btn" href="/api/openapi" target="_blank">OpenAPI online</a></div></div><div class="card"><h3>Prompt pronto</h3><pre class="copy" id="integrationPrompt">Integre meu app ao VALORAE Proxy.
+Base URL: https://servidor-valorae.vercel.app
+Use /api/asset, /api/assets e /api/portfolio/analyze.
+Implemente loading, erro, partial, cacheStatus, sourceStatus, rate limit e validação de contrato antes de atualizar a carteira.</pre><button class="btn primary" id="copyPrompt">Copiar prompt</button></div></div></section>
+    <section class="page" id="page-insights"><div class="page-head"><div><h2>Insights Automáticos</h2><p>Alertas diretos para decidir se otimiza processos do Engine ou mitiga requisições dos consumidores finais.</p></div></div><div id="insightsList" class="grid three"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div></section>
 
-  <div class="card-portal">
-    <div class="logo-badge">V</div>
-    
-    <div>
-      <h1>VALORAE Proxy Portal</h1>
-      <p class="subtitle" style="margin-top: 6px;">
-        Servidor de proxy e auditoria de alta integridade para mercados financeiros. Pronto para rodar de forma serverless, com custo zero e persistência em memória.
-      </p>
-    </div>
 
-    <!-- Interface Options -->
-    <div class="grid-links">
+    <section class="page" id="page-quality"><div class="page-head"><div><h2>Qualidade dos Dados</h2><p>Mostra se o Proxy está entregando dados confiáveis, leves e próprios para alimentar carteiras sem ruído operacional.</p></div></div><div class="grid four"><div class="card kpi"><label>Score de qualidade</label><div class="value" id="kDataQuality">—</div><small>erro, fonte, cache e parcialidade</small></div><div class="card kpi"><label>Score de contrato</label><div class="value" id="kContract">—</div><small>respostas consistentes para terceiros</small></div><div class="card kpi"><label>Score de carga</label><div class="value" id="kLoad">—</div><small>latência e concorrência da instância</small></div><div class="card kpi"><label>P95 de payload</label><div class="value" id="kP95Payload">—</div><small>peso das maiores respostas</small></div></div><div class="grid two" style="margin-top:10px"><div class="card"><h3>Anomalias Operacionais</h3><p class="sub">Valores acima de zero apontam onde investigar primeiro: erros HTTP, respostas lentas, fontes bloqueadas, drift e conexões fechadas.</p><div class="chart tall"><canvas id="anomalyChart"></canvas></div></div><div class="card"><h3>Resumo didático</h3><div id="qualityList" class="list"><div class="skeleton"></div></div></div></div><div class="card" style="margin-top:10px"><h3>Leitura recomendada</h3><p class="metric-explain">Para alimentar APKs e apps Web, priorize score de qualidade acima de 85, contrato acima de 90, payload p95 baixo e ausência de 5xx. O painel continua consultando <code>/api/server/metrics</code>, mas essa telemetria é isolada e não entra como tráfego externo real.</p></div></section>
 
-      <a href="/api/v1/ready" class="nav-card">
-        <span class="nav-icon">✅</span>
-        <h3>Readiness API</h3>
-        <p>Verifique se o proxy está pronto para alimentar APK, Web e carteiras em produção.</p>
-        <code>/api/v1/ready</code>
-      </a>
-
-      <a href="/server.html" class="nav-card">
-        <h3>
-          <span>🖥️ Dashboard Monitor</span>
-          <span class="m3-pill">ONLINE</span>
-        </h3>
-        <p>Acompanhe requisições de APK/Android, tempos de resposta (latência p95), cache ETag e saúde do sistema com gráficos em tempo real.</p>
-      </a>
-      
-      <a href="/inspector.html" class="nav-card">
-        <h3>
-          <span>⚙️ API Contract Inspector</span>
-          <span class="m3-pill" style="background-color:var(--md-secondary-container); color:var(--md-on-secondary-container)">TESTE</span>
-        </h3>
-        <p>Valide as mais de 15 rotas de cotações, estatísticas de cache, catalogs de erros, OpenAPI e simulações com um clique.</p>
-      </a>
-    </div>
-
-    <!-- Under-the-hood specs -->
-    <div style="border-top: 1px solid var(--md-outline-variant); padding-top: 20px; font-size: 0.85rem; color: var(--md-on-surface-variant); display: flex; flex-direction: column; gap: 8px;">
-      <div>🔌 <b>Endpoint de Integração para a APK:</b> <code style="word-break: break-all;">/api/asset?ticker=PETR4&amp;view=compact</code></div>
-      <div>🛡️ <b>Segurança de Privacidade:</b> Sanitização de logs ativos, bloqueios automáticos e sem persistência de IPs ou tokens dos usuários.</div>
-      <div>📦 <b>Versão do Core:</b> <code>v21.11.4 vercel-build-safe</code> • Construção em conformidade com Material Design 3.</div>
-    </div>
-  </div>
-
+    <section class="page" id="page-settings"><div class="page-head"><div><h2>Configurações do Servidor</h2><p>Personalize controles visuais, ajustes de exibição e defina a telemetria desejada de forma local.</p></div><div class="actions"><button class="btn primary" id="installPwaBtn">Instalar app</button><button class="btn" id="resetPrefsBtn">Restaurar padrão</button></div></div><div class="grid two"><div class="card"><span class="category-chip">Identidade visual</span><div class="logo-showcase"><img src="/assets/valorae-logo.svg" alt="Logotipo VALORAE" /><div><h3>VALORAE Proxy Server</h3><p class="sub">Logotipo clean e moderno com símbolo em V, nós de dados e leitura de servidor. A marca usa verde operacional, grafite e superfícies claras para reforçar confiança, monitoramento e tecnologia.</p><div class="actions"><a class="btn" download href="/assets/valorae-logo.svg">Baixar SVG</a><a class="btn" download href="/assets/valorae-icon-512.png">Baixar PNG</a></div></div></div></div><div class="card"><span class="category-chip">Tema</span><h3>Modo claro e escuro</h3><p class="sub">Escolha manualmente o tema ou deixe automático para seguir o sistema do dispositivo. A preferência fica salva no navegador.</p><div class="segmented" role="group" aria-label="Tema do painel"><button class="btn" id="themeAuto" data-theme-option="auto">Automático</button><button class="btn" id="themeLight" data-theme-option="light">Claro</button><button class="btn" id="themeDark" data-theme-option="dark">Escuro</button></div></div></div><div class="settings-grid" style="margin-top:10px"><div class="setting-card"><span class="category-chip">PWA</span><h3>Instalação</h3><p class="mini">O painel pode ser instalado como app no Android, desktop ou navegador compatível. Inclui manifest, ícones e service worker.</p><div class="pwa-status"><span class="badge" id="pwaBadge">verificando</span><span class="mini" id="pwaStatus">Checando suporte do navegador.</span></div></div><div class="setting-card"><span class="category-chip">Tempo real</span><h3>Atualização</h3><p class="mini">Defina o intervalo de consulta ao endpoint <code>/api/server/metrics</code>. Intervalos maiores reduzem consumo no mobile.</p><select class="select" id="intervalSelect" aria-label="Intervalo de atualização"><option value="1500">1,5 segundos</option><option value="2500">2,5 segundos</option><option value="5000">5 segundos</option><option value="10000">10 segundos</option></select></div><div class="setting-card"><span class="category-chip">Densidade</span><h3>Modo visual</h3><p class="mini">Alterne entre leitura confortável e modo compacto para telas pequenas, suporte técnico ou monitoramento contínuo.</p><button class="btn" id="densityToggleBtn">Densidade: confortável</button></div><div class="setting-card"><span class="category-chip">Privacidade</span><h3>Dados exibidos</h3><p class="mini">Clientes são exibidos por hash sanitizado. O painel foi desenhado para mostrar operação, rotas e saúde sem expor IP bruto.</p><a class="btn" href="/api/server/metrics" target="_blank">Ver JSON de métricas</a></div></div><div class="card" style="margin-top:10px"><h3>Checklist PWA</h3><div class="list"><div class="line-item"><span>Manifest Web App</span><span class="badge ok">/manifest.webmanifest</span></div><div class="line-item"><span>Service Worker</span><span class="badge ok">/service-worker.js</span></div><div class="line-item"><span>Ícones Android/Desktop</span><span class="badge ok">192px e 512px</span></div><div class="line-item"><span>Tema persistente</span><span class="badge ok">localStorage</span></div><div class="line-item"><span>Compatível com Vercel gratuito</span><span class="badge ok">v21.11.4</span></div></div></div></section>
+    <section class="page" id="page-diagnostics"><div class="page-head"><div><h2>Diagnóstico Cloud</h2><p>Avaliação instantânea da JVM na Vercel: latências em voo, recursos e estabilidade em runtime.</p></div><div class="actions"><a class="btn" href="/api/health" target="_blank">Health</a><a class="btn" href="/api/v1/ready" target="_blank">Ready</a></div></div><div class="grid four"><div class="card kpi"><label>Em voo</label><div class="value" id="kInFlight">0</div><small>requisições abertas</small></div><div class="card kpi"><label>Clientes 5 min</label><div class="value" id="kClients">0</div><small>consumidores recentes</small></div><div class="card kpi"><label>Memória RSS</label><div class="value" id="kMem">—</div><small>uso da instância</small></div><div class="card kpi"><label>Bytes entrada</label><div class="value" id="kBytesIn">—</div><small>payload recebido</small></div><div class="card kpi"><label>Sem tráfego real</label><div class="value" id="kQuiet">—</div><small>tempo desde último evento externo</small></div></div><div class="grid two" style="margin-top:10px"><div class="card"><h3>Instância</h3><div id="instanceList" class="list"><div class="skeleton"></div></div></div><div class="card"><h3>Checklist de servidor completo</h3><div id="readinessList" class="list"><div class="skeleton"></div></div></div></div><div class="grid two" style="margin-top:10px"><div class="card"><h3>Pressão de runtime</h3><p class="sub">Leitura da instância serverless: memória, heap, tráfego interno isolado e idade da chamada mais antiga.</p><div id="runtimeList" class="list"><div class="skeleton"></div></div></div><div class="card"><h3>Runbook automático</h3><p class="sub">Ações sugeridas quando houver erro, payload pesado, latência ou pressão operacional.</p><div id="runbookList" class="list"><div class="skeleton"></div></div></div></div></section>
+  </main><div class="toast" id="toast">Copiado</div>
+  <script>
+    const $=id=>document.getElementById(id), fmt=n=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:1}).format(Number(n||0));
+    const pct=n=>(Number.isFinite(Number(n))?fmt(n):'—')+'%'; const ms=n=>n==null?'—':fmt(n)+'ms'; const bytes=n=>{n=Number(n||0); if(n>=1048576)return fmt(n/1048576)+'MB'; if(n>=1024)return fmt(n/1024)+'KB'; return fmt(n)+'B'}; const time=s=>s?new Date(s).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—'; const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    let last=null, timer=null, manualPaused=false, hiddenPaused=false; const drawer=$('drawer'), scrim=$('scrim');function isPaused(){return manualPaused||hiddenPaused}function syncPauseButton(){if($('pauseBtn'))$('pauseBtn').textContent=isPaused()?'Retomar':'Pausar'}
+    function openDrawer(){drawer.classList.add('open');scrim.classList.add('show');document.body.classList.add('drawer-open')} function closeDrawer(){drawer.classList.remove('open');scrim.classList.remove('show');document.body.classList.remove('drawer-open')}
+    const pageScrolls={};
+    $('menuBtn').onclick=openDrawer;$('closeBtn').onclick=closeDrawer;scrim.onclick=closeDrawer;document.querySelectorAll('.nav-item').forEach(b=>b.onclick=()=>showPage(b.dataset.page));function showPage(p){const curActive=document.querySelector('.page.active');if(curActive)pageScrolls[curActive.id]=window.scrollY||document.documentElement.scrollTop;document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id==='page-'+p));document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.page===p));location.hash=p;closeDrawer();const savedScroll=pageScrolls['page-'+p]||0;const orgSmooth=document.documentElement.style.scrollBehavior;document.documentElement.style.scrollBehavior='auto';window.scrollTo(0,savedScroll);document.documentElement.style.scrollBehavior=orgSmooth;requestAnimationFrame(()=>{drawAll();setTimeout(drawAll,50);setTimeout(drawAll,150)})}
+    const themes=['auto','light','dark'];let theme=localStorage.valoraeTheme||'auto';let refreshMs=Number(localStorage.valoraeRefreshMs||2500);let deferredInstallPrompt=null;let density=localStorage.valoraeDensity||'comfortable';function applyDensity(){document.documentElement.dataset.density=density==='compact'?'compact':'';if($('densityToggleBtn'))$('densityToggleBtn').textContent='Densidade: '+(density==='compact'?'compacta':'confortável')}function themeLabel(v){return v==='light'?'claro':v==='dark'?'escuro':'auto'}function applyTheme(){document.documentElement.dataset.theme=theme==='auto'?'':theme;document.querySelector('meta[name=theme-color]')?.setAttribute('content',theme==='dark'?'#101511':'#0f7b52');if($('themeBtn'))$('themeBtn').textContent='Tema: '+themeLabel(theme);const isDark=theme==='dark'||(theme==='auto'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if($('themeIcon'))$('themeIcon').textContent=isDark?'☀️':'🌙';document.querySelectorAll('[data-theme-option]').forEach(b=>b.classList.toggle('active',b.dataset.themeOption===theme));}function setTheme(v){theme=themes.includes(v)?v:'auto';localStorage.valoraeTheme=theme;applyTheme();drawAll();}applyTheme();applyDensity();if($('themeBtn'))$('themeBtn').onclick=()=>setTheme(themes[(themes.indexOf(theme)+1)%themes.length]);if($('themeToggleBtn'))$('themeToggleBtn').onclick=()=>{const isDark=document.documentElement.dataset.theme==='dark'||(theme==='auto'&&window.matchMedia('(prefers-color-scheme: dark)').matches);setTheme(isDark?'light':'dark');};document.querySelectorAll('[data-theme-option]').forEach(b=>b.onclick=()=>setTheme(b.dataset.themeOption));
+    const tt=document.createElement('div');tt.className='valorae-tooltip';document.body.appendChild(tt);
+    function showTT(e,html){if(!html){tt.classList.remove('show');return}tt.innerHTML=html;tt.classList.add('show');const cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;let tx=cx+16,ty=cy+16;const r=tt.getBoundingClientRect();if(tx+r.width>window.innerWidth)tx=cx-r.width-16;if(ty+r.height>window.innerHeight)ty=cy-r.height-16;tt.style.left=tx+'px';tt.style.top=ty+'px';}
+    function ttHTML(name,rows){return '<div class="tooltip-title">'+name+'</div><div class="tooltip-wrapper">'+rows.map(r=>'<div class="tooltip-row"><div class="tooltip-label"><span class="tooltip-dot" style="background:'+r.c+';color:'+r.c+'"></span><span>'+r.n+'</span></div><span class="tooltip-val">'+r.v+'</span></div>').join('')+'</div>'}
+    function setupI(c,onA){if(c._setup)return;c._setup=true;const onM=e=>{c._ev=e;onA(e)};c.addEventListener('mousemove',onM);c.addEventListener('touchmove',onM,{passive:true});['mouseleave','touchend'].forEach(ev=>c.addEventListener(ev,()=>{c._ev=null;onA(null);showTT()}))}
+    function hexToRgba(h){if(!h.startsWith('#'))return h;let c=h.substring(1).split('');if(c.length===3)c=[c[0],c[0],c[1],c[1],c[2],c[2]];c='0x'+c.join('');return 'rgba('+[(c>>16)&255,(c>>8)&255,c&255].join(',')+',.25)'}
+    function clear(c){const dpr=devicePixelRatio||1,w=c.clientWidth*dpr,h=c.clientHeight*dpr;c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.clearRect(0,0,w,h);ctx.scale(dpr,dpr);return{ctx,w:c.clientWidth,h:c.clientHeight,dpr}}
+    function lineChart(id,series){const c=$(id);if(!c)return;const green=css('--green'),gray=css('--chart'),danger=css('--danger'),grid=css('--line'),muted=css('--muted'),surf=css('--surface');const cols=[green,gray,danger];c._d=series;setupI(c,e=>{c._ev=e;requestAnimationFrame(()=>drawLC(c,green,gray,danger,grid,muted,surf,cols))});drawLC(c,green,gray,danger,grid,muted,surf,cols)}
+    function drawLC(c,green,gray,danger,grid,muted,surf,cols){const {ctx,w,h,dpr}=clear(c);if(w<=0||h<=0)return;const pad=26,ev=c._ev,bx=ev?(ev.touches?ev.touches[0].clientX:ev.clientX)-c.getBoundingClientRect().left:-1;const series=c._d,all=series.flatMap(s=>s.data.map(x=>Number(x)||0)),max=Math.max(1,...all),count=series[0]?.data.length||0;const pW=w-pad*2,pH=h-pad*2;ctx.lineWidth=1;ctx.font='10px system-ui';ctx.fillStyle=muted;ctx.textAlign='left';for(let i=0;i<4;i++){const y=pad+pH*i/3;ctx.strokeStyle=grid;ctx.lineWidth=0.75;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();ctx.fillText(Math.round(max*(1-i/3)),2,y+4)}let cid=-1;if(bx>=pad&&bx<=w-pad&&count>1)cid=Math.round(((bx-pad)/pW)*(count-1));series.forEach((s,si)=>{const col=s.color||cols[si%3];ctx.strokeStyle=col;ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();let pts=[];s.data.forEach((v,i)=>{const x=pad+pW*(i/Math.max(1,count-1)),y=h-pad-pH*(Number(v)||0)/max;pts.push({x,y});if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y)});ctx.stroke();if(pts.length>0){ctx.lineTo(pts[pts.length-1].x,h-pad);ctx.lineTo(pts[0].x,h-pad);const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,hexToRgba(col));g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fill()}ctx.fillStyle=col;ctx.font=`800 11px system-ui`;const lastVal=s.data.length?s.data[s.data.length-1]:0;const legSpacing=Math.max(80,Math.min(130,(w-pad*2)/series.length));ctx.fillText(`${s.name} ${fmt(lastVal)}`,pad+si*legSpacing,12);if(cid!==-1&&pts[cid]){ctx.beginPath();ctx.arc(pts[cid].x,pts[cid].y,4,0,Math.PI*2);ctx.fillStyle=surf;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=col;ctx.stroke()}});if(cid!==-1){ctx.strokeStyle=muted;ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();const hLoc=pad+(cid/Math.max(1,count-1))*pW;ctx.moveTo(hLoc,pad);ctx.lineTo(hLoc,h-pad);ctx.stroke();ctx.setLineDash([]);if(ev)showTT(ev,ttHTML('T-'+Math.max(0,count-1-cid)+' min',series.map((s,si)=>({n:s.name,v:fmt(s.data[cid]),c:s.color||cols[si%3]}))))}}
+    function bars(id,items,center){const c=$(id);if(!c)return;const green=css('--green'),gray=css('--chart'),muted=css('--muted');c._d=items;c._cn=center;setupI(c,e=>{c._ev=e;requestAnimationFrame(()=>drawB(c,green,gray,muted))});drawB(c,green,gray,muted)}
+    function drawB(c,green,gray,muted){const {ctx,w,h,dpr}=clear(c);if(w<=0||h<=0)return;const items=c._d||[],center=c._cn,ev=c._ev;const total=Math.max(1,...items.map(x=>Number(x.value)||0));const n=Math.min(8,items.length);const startY=center?44:14;const availH=h-startY-12;const step=n>0?availH/n:0;let mid=-1;if(ev){const ty=(ev.touches?ev.touches[0].clientY:ev.clientY)-c.getBoundingClientRect().top;mid=Math.floor((ty-startY)/step);if(mid<0||mid>=n)mid=-1}ctx.font='10px system-ui';let maxLabelW=24;items.slice(0,8).forEach(it=>{maxLabelW=Math.max(maxLabelW,ctx.measureText(it.name).width)});const labelW=Math.min(100,Math.ceil(maxLabelW+8));const barStartX=16+labelW;const barEndX=w-60;const maxBarW=Math.max(20,barEndX-barStartX);const barH=8;if(center){ctx.fillStyle=green;ctx.font=`900 18px system-ui`;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(center,16,12)}items.slice(0,8).forEach((it,i)=>{const itemY=startY+i*step+step/2;const bw=Math.max(4,maxBarW*(Number(it.value)||0)/total);const col=i%2?gray:green;const colEnd=i%2?css('--line'):css('--green-2');ctx.textBaseline='middle';if(mid!==-1&&mid!==i)ctx.globalAlpha=0.35;ctx.fillStyle=css('--ink');ctx.font='600 11px system-ui';ctx.textAlign='left';ctx.fillText(it.name,16,itemY);ctx.fillStyle=css('--surface-3');ctx.beginPath();ctx.roundRect(barStartX,itemY-barH/2,maxBarW,barH,barH/2);ctx.fill();const grad=ctx.createLinearGradient(barStartX,0,barStartX+bw,0);grad.addColorStop(0,col);grad.addColorStop(1,colEnd);ctx.fillStyle=grad;ctx.beginPath();ctx.roundRect(barStartX,itemY-barH/2,bw,barH,barH/2);ctx.fill();ctx.fillStyle=muted;ctx.font='700 10px monospace';ctx.textAlign='right';ctx.fillText(fmt(it.value),w-16,itemY);ctx.globalAlpha=1;if(mid===i&&ev)showTT(ev,ttHTML('Detalhe',[{n:it.name,v:fmt(it.value),c:col}]))})}
+    function gauge(id,value){const c=$(id);if(!c)return;const green=css('--green'),grid=css('--line'),ink=css('--ink'),muted=css('--muted');c._d=value;setupI(c,e=>{c._ev=e;if(e)showTT(e,ttHTML('Saúde',[{n:'Health Score',v:(c._d||0)+'/100',c:(c._d>=85?green:(c._d>=65?css('--warn'):css('--danger')))}]));requestAnimationFrame(()=>drawG(c,green,grid,ink,muted))});drawG(c,green,grid,ink,muted)}
+    function drawG(c,green,grid,ink,muted){const {ctx,w,h,dpr}=clear(c);if(w<=0||h<=0)return;const value=c._d,ev=c._ev;const scoreColor=value>=85?green:(value>=65?css('--warn'):css('--danger'));const cx=w/2,cy=h*.72,r=Math.min(w,h)*.40;ctx.lineWidth=12;ctx.lineCap='round';ctx.strokeStyle=grid;ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,0);ctx.stroke();const grad=ctx.createLinearGradient(cx-r,0,cx+r,0);grad.addColorStop(0,scoreColor);grad.addColorStop(1,css('--green-2'));ctx.strokeStyle=grad;if(ev){ctx.shadowColor=scoreColor;ctx.shadowBlur=10}ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,Math.PI+(Math.max(0,Math.min(100,value))/100)*Math.PI);ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle=scoreColor;ctx.font=`900 28px system-ui`;ctx.textAlign='center';ctx.fillText(Math.round(value||0),cx,cy-5);ctx.fillStyle=muted;ctx.font=`700 11px system-ui`;ctx.fillText('health score',cx,cy+14);ctx.textAlign='left'}
+    function esc(v){return String(v??'').replace(/[&<>'\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[ch]||ch))}function item(name,value,max){const v=Number(value||0),m=Math.max(1,Number(max||v));return `<div class="line-item" style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;flex-direction:column;flex:1;min-width:0;margin-right:8px"><b style="font-size:0.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(name)}</b><div class="bar" style="width:100%"><i style="width:${Math.min(100,v/m*100)}%"></i></div></div><b style="font-size:0.8rem">${fmt(v)}</b></div>`} function badge(v){const n=Number(v);let c=n>=500?'err':n>=400?'warn':'ok';return `<span class="badge ${c}">${esc(v||'—')}</span>`}function known(v){return !v||v==='unknown'?'—':v}
+    function render(m){last=m;const s=m.summary||{},d=m.distributions||{};$('kRequests').textContent=fmt(s.requests);$('kResponses').textContent=fmt(s.responses);$('kP95').textContent=ms(s.p95LatencyMs);$('kSuccess').textContent=pct(s.successRatePercent);$('kInFlight').textContent=fmt(s.inFlight);$('kClients').textContent=fmt(s.activeClients5m);$('kMem').textContent=bytes(m.instance?.memory?.rss);$('kBytesIn').textContent=bytes(s.bytesIn);$('kApdexPerf').textContent=fmt(s.apdexScore);$('kAvail').textContent=pct(s.availabilityPercent);$('kCompletion').textContent=pct(s.completionRatePercent);$('kPayload').textContent=bytes(s.avgBytesOut);if($('kErrorBudget'))$('kErrorBudget').textContent=pct(s.errorBudgetUsedPercent);if($('kQuiet'))$('kQuiet').textContent=fmt(s.quietForSeconds)+'s';if($('kDataQuality'))$('kDataQuality').textContent=fmt(s.dataQualityScore);if($('kContract'))$('kContract').textContent=fmt(s.contractScore);if($('kLoad'))$('kLoad').textContent=fmt(s.loadScore);if($('kP95Payload'))$('kP95Payload').textContent=bytes(s.payloadP95BytesOut);$('healthBadge').className='badge '+(s.healthScore>=85?'ok':s.healthScore>=65?'warn':'err');$('healthBadge').textContent=(s.healthScore||0)+' / 100';
+      $('teaching').innerHTML=[`<div class="card" style="padding:10px;background:var(--surface-2);border-radius:12px;border:none"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><b style="font-size:0.8rem">Tráfego total</b><span class="badge ok">realtime</span></div><span style="font-size:0.75rem;color:var(--muted)">O proxy processou <b>${fmt(s.requests)}</b> solicitações reais e entregou <b>${fmt(s.responses)}</b> respostas reais, com telemetria interna isolada, sem contar o polling do painel.</span></div>`,`<div class="card" style="padding:10px;background:var(--surface-2);border-radius:12px;border:none"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><b style="font-size:0.8rem">Latência p95</b><span style="font-size:0.8rem;font-weight:900;color:var(--ink)">${ms(s.p95LatencyMs)}</span></div><span style="font-size:0.75rem;color:var(--muted)">A latência percebida pelo pior grupo de usuários (5% das respostas mais lentas).</span></div>`,`<div class="card" style="padding:10px;background:var(--surface-2);border-radius:12px;border:none"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><b style="font-size:0.8rem">Economia de Rede</b><span style="font-size:0.8rem;font-weight:900;color:var(--ink)">${pct(s.cacheHitRatePercent)}</span></div><span style="font-size:0.75rem;color:var(--muted)">Respostas servidas pelo cache em memória, evitam chamadas em fontes externas.</span></div>`].join('');
+      $('routesList').innerHTML=(d.routes||[]).map(x=>item(x.name,x.value,(d.routes||[])[0]?.value)).join('')||'<div class="notice">Aguardando chamadas de rotas.</div>';$('sourceList').innerHTML=[...(d.cache||[]).map(x=>item('Cache '+x.name,x.value)),...(d.source||[]).map(x=>item('Fonte '+x.name,x.value))].join('')||'<div class="notice">Sem dados de cache/fonte ainda.</div>';$('interceptorsList').innerHTML=(d.interceptors||[]).map(x=>item(x.name,x.value,(d.interceptors||[])[0]?.value)).join('')||'<div class="notice">Aguardando respostas.</div>';$('assetsList').innerHTML=[...(d.tickers||[]).map(x=>item('Ativo '+x.name,x.value)),...(d.views||[]).map(x=>item('Modo '+x.name,x.value))].join('')||'<div class="notice">Nenhum ticker/modo detectado.</div>';
+      $('routeRows').innerHTML=(m.routeDetails||[]).map(r=>`<tr><td><code>${esc(r.route)}</code></td><td>${fmt(r.requests)}</td><td>${fmt(r.responses)}</td><td>${pct(r.successRatePercent)}</td><td>${pct(r.errorRatePercent)}</td><td>${ms(r.avgLatencyMs)}</td><td>${ms(r.p95LatencyMs)}</td><td>${ms(r.maxLatencyMs)}</td><td>${bytes(r.avgBytesOut)}</td><td>${badge(r.lastStatus)}</td><td>${esc(known(r.lastCacheStatus))}</td></tr>`).join('')||'<tr><td colspan="11">Aguardando tráfego.</td></tr>';
+      $('clientRows').innerHTML=(m.clientSample||[]).map(c=>`<tr><td><code>${esc(c.id)}</code></td><td>${esc(c.device)}</td><td>${fmt(c.requests)}</td><td>${fmt(c.responses)}</td><td>${fmt(c.errors)}</td><td><code>${esc(c.lastRoute||'—')}</code></td><td>${badge(c.lastStatus)}</td></tr>`).join('')||'<tr><td colspan="7">Nenhum cliente observado.</td></tr>';
+      const q=($('eventFilter').value||'').toLowerCase();$('eventRows').innerHTML=(m.recentEvents||[]).filter(e=>!q||JSON.stringify(e).toLowerCase().includes(q)).slice(0,120).map(e=>`<tr><td>${time(e.at)}</td><td>${esc(e.method)}</td><td><code>${esc(e.route)}</code></td><td>${badge(e.status)}</td><td>${ms(e.latencyMs)}</td><td>${bytes(e.bytesOut)}</td><td>${esc(known(e.cacheStatus))}</td><td>${esc(known(e.sourceStatus))}</td><td>${esc(e.device||'—')}</td></tr>`).join('')||'<tr><td colspan="9">Sem eventos para o filtro.</td></tr>';
+      $('insightsList').innerHTML=(m.insights||[]).map(i=>`<div class="card"><span class="badge ${i.level==='error'?'err':i.level==='warn'?'warn':'ok'}">${i.level}</span><h3>${esc(i.title)}</h3><p class="sub">${esc(i.description)}</p></div>`).join('');
+      $('instanceList').innerHTML=[['ID',m.instance?.id],['Boot',m.instance?.bootedAt],['Uptime',fmt(m.instance?.uptimeSeconds)+'s'],['Node',m.instance?.node],['Modo',m.serverless?.mode],['Transporte',m.serverless?.realtimeTransport],['Último evento real',s.lastExternalEventAt||'sem tráfego'],['SLO disponibilidade',pct(s.sloAvailabilityTargetPercent)],['SLO p95',ms(s.sloP95TargetMs)]].map(([a,b])=>`<div class="line-item"><span>${a}</span><b>${esc(b||'—')}</b></div>`).join('');
+      $('readinessList').innerHTML=(m.readiness||[]).map(x=>`<div class="line-item"><span><b>${esc(x.name)}</b><br><small class="sub">${esc(x.detail)}</small></span><span class="badge ${x.ok?'ok':'warn'}">${x.ok?'ok':'atenção'}</span></div>`).join('');if($('runtimeList'))$('runtimeList').innerHTML=[['Pressão runtime',fmt(s.runtimePressureScore)+'/100'],['Heap usado',fmt(s.heapUsagePercent)+'%'],['Memória RSS',fmt(s.memoryRssMb)+'MB'],['Heap',fmt(s.heapUsedMb)+'MB / '+fmt(s.heapTotalMb)+'MB'],['Telemetria interna isolada',fmt(s.internalTelemetryRequests)],['Estado tráfego',s.trafficState||'—'],['Score painel',fmt(s.dashboardIntegrityScore)+'/100'],['Rotas rastreadas',fmt(s.routesTracked)],['Eventos em memória',fmt(s.eventsStored)],['Chamada mais antiga',ms(s.activeRequestMaxAgeMs)]].map(([a,b])=>`<div class="line-item"><span>${esc(a)}</span><b>${esc(b)}</b></div>`).join('');if($('runbookList'))$('runbookList').innerHTML=(m.operations?.runbook||[]).map(x=>`<div class="line-item"><span><b>${esc(x.action)}</b><br><small class="sub">${esc(x.detail)}</small></span><span class="badge ${x.level==='error'?'err':x.level==='warn'?'warn':'ok'}">${esc(x.level)}</span></div>`).join('')||'<div class="notice">Sem ações recomendadas.</div>';if($('slowRoutesList'))$('slowRoutesList').innerHTML=(m.operations?.slowRoutes||[]).map(r=>`<div class="line-item"><span><code>${esc(r.route)}</code><br><small class="sub">p95 ${ms(r.p95LatencyMs)} · média ${ms(r.avgLatencyMs)}</small></span><b>${fmt(r.responses)} resp.</b></div>`).join('')||'<div class="notice">Sem rotas lentas medidas.</div>';if($('errorRoutesList'))$('errorRoutesList').innerHTML=(m.operations?.errorRoutes||[]).map(r=>`<div class="line-item"><span><code>${esc(r.route)}</code><br><small class="sub">${pct(r.errorRatePercent)} erro · ${fmt(r.errors)} falha(s)</small></span><b>${badge(r.lastStatus)}</b></div>`).join('')||'<div class="notice">Sem erro por rota.</div>';
+      const win=m.windows||{};$('windowsList').innerHTML=Object.values(win).map(w=>`<div class="line-item"><span><b>Últimos ${w.minutes} min</b><br><small class="sub">${fmt(w.requests)} req · ${fmt(w.responses)} resp · ${pct(w.errorRatePercent)} erro · ${bytes(w.bytesOut)} saída</small></span><b>${fmt(w.responsesPerMinute)}/min</b></div>`).join('')||'<div class="notice">Aguardando janelas.</div>'; if($('qualityList'))$('qualityList').innerHTML=[['Estado operacional',s.operationalState||'sem tráfego'],['Estado do tráfego',s.trafficState||'sem_trafego_real'],['Qualidade',fmt(s.dataQualityScore)+'/100'],['Contrato',fmt(s.contractScore)+'/100'],['Carga',fmt(s.loadScore)+'/100'],['Cache eficiente',fmt(s.cacheEfficiencyScore)+'/100'],['Fontes confiáveis',fmt(s.sourceReliabilityScore)+'/100'],['Cobertura de rotas',fmt(s.routeCoverageScore)+'/100'],['Integridade do painel',fmt(s.dashboardIntegrityScore)+'/100'],['Req 1 min',fmt(s.requestsPerMinute1m)+'/min'],['Req 15 min',fmt(s.requestsPerMinute15m)+'/min'],['Payload p99',bytes(s.payloadP99BytesOut)],['Payload máximo',bytes(s.payloadMaxBytesOut)],['SLO',s.sloStatus||'—'],['Orçamento restante',pct(s.errorBudgetRemainingPercent)],['Tendência req 1m/15m',pct(s.requestsTrend1mVs15mPercent)],['Tendência erro 1m/15m',pct(s.errorTrend1mVs15mPercent)],['Runtime',fmt(s.runtimePressureScore)+'/100']].map(([a,b])=>`<div class="line-item"><span>${esc(a)}</span><b>${esc(b)}</b></div>`).join(''); const ec=m.engineCore||m.engine?.engineCore||{}; if($('engineCoreList'))$('engineCoreList').innerHTML=[['Score Core',fmt(ec.score)+'/100'],['Estado',ec.state||'—'],['HTML cache hit',pct(ec.htmlCacheHitRatePercent)],['HTML family hit',pct(ec.htmlFamilyHitRatePercent)],['Result cache hit',pct(ec.scrapeResultHitRatePercent)],['Failure cache',ec.cachePolicy?.failureCacheEnabled?'ativo':'inativo'],['Política Engine',ec.cachePolicy?.enginePolicy||'—'],['Score fontes',fmt(ec.providerScore)+'/100'],['In-flight',fmt(ec.inflight?.size||0)],['Fontes degradadas',(ec.degradedProviders||[]).length],['Recomendações',(ec.recommendations||[]).join(' · ')||'Sem ações recomendadas']].map(([a,b])=>`<div class="line-item"><span>${esc(a)}</span><b>${esc(b)}</b></div>`).join(''); drawAll(); }
+    function drawAll(){if(!last)return;const s=last.summary||{},d=last.distributions||{},ts=last.timeSeries||[];gauge('healthChart',s.healthScore);gauge('engineCoreChart',(last.engineCore||last.engine?.engineCore||{}).score);lineChart('overviewTraffic',[{name:'requests',data:ts.map(x=>x.requests)},{name:'responses',data:ts.map(x=>x.responses)},{name:'erros',data:ts.map(x=>x.errors)}]);lineChart('trafficChart',[{name:'requests',data:ts.map(x=>x.requests)},{name:'responses',data:ts.map(x=>x.responses)},{name:'erros',data:ts.map(x=>x.errors)}]);lineChart('latencyChart',[{name:'latência média',data:ts.map(x=>x.avgLatencyMs||0)}]);bars('statusChart',d.status||[],fmt(s.responses));bars('cacheChart',d.cache||[],pct(s.cacheHitRatePercent));bars('devicesChart',d.devices||[],fmt(s.activeClients5m));bars('latencyHistChart',last.histograms?.latency||[],ms(s.p95LatencyMs));bars('payloadHistChart',last.histograms?.payloadBytesOut||[],bytes(s.avgBytesOut));bars('anomalyChart',last.anomalies||[],s.operationalState||'—');}
+    async function load(force=false){if(isPaused()&&!force)return;try{const r=await fetch('/api/server/metrics?ts='+Date.now(),{cache:'no-store',headers:{'X-Valorae-Telemetry':'dashboard'}});const data=await r.json();const ld=$('liveDot'),ll=$('liveLabel');if(ld)ld.className='dot ok';if(ll)ll.textContent='online';render(data)}catch(e){const ld=$('liveDot'),ll=$('liveLabel');if(ld)ld.className='dot err';if(ll)ll.textContent='offline';console.error(e)}}
+    $('refreshBtn').onclick=()=>load(true);$('pauseBtn').onclick=()=>{manualPaused=!manualPaused;syncPauseButton()};$('eventFilter').oninput=()=>last&&render(last);$('copyPrompt').onclick=()=>navigator.clipboard?.writeText($('integrationPrompt').textContent).then(()=>{const t=$('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)});if($('copyReportBtn'))$('copyReportBtn').onclick=()=>{if(!last)return;navigator.clipboard?.writeText(JSON.stringify(last,null,2)).then(()=>{const t=$('toast');t.textContent='Relatório copiado';t.classList.add('show');setTimeout(()=>{t.classList.remove('show');t.textContent='Copiado'},1500)})};
+    document.addEventListener('visibilitychange',()=>{hiddenPaused=document.hidden;syncPauseButton()}); const initial=(location.hash||'#overview').slice(1);if($('page-'+initial))showPage(initial);load(true);function restartTimer(){clearInterval(timer);timer=setInterval(()=>load(false),refreshMs)}if($('intervalSelect')){$('intervalSelect').value=String(refreshMs);$('intervalSelect').onchange=()=>{refreshMs=Number($('intervalSelect').value||2500);localStorage.valoraeRefreshMs=refreshMs;restartTimer();}}if($('densityToggleBtn'))$('densityToggleBtn').onclick=()=>{density=density==='compact'?'comfortable':'compact';localStorage.valoraeDensity=density;applyDensity();drawAll();};if($('resetPrefsBtn'))$('resetPrefsBtn').onclick=()=>{localStorage.removeItem('valoraeTheme');localStorage.removeItem('valoraeRefreshMs');localStorage.removeItem('valoraeDensity');density='comfortable';applyDensity();setTheme('auto');refreshMs=2500;if($('intervalSelect'))$('intervalSelect').value='2500';restartTimer();};if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js').then(()=>{if($('pwaBadge')){$('pwaBadge').className='badge ok';$('pwaBadge').textContent='ativo'}if($('pwaStatus'))$('pwaStatus').textContent='PWA pronto para uso offline básico e instalação.'}).catch(()=>{if($('pwaBadge')){$('pwaBadge').className='badge warn';$('pwaBadge').textContent='limitado'}if($('pwaStatus'))$('pwaStatus').textContent='Service worker não foi registrado neste navegador.'})}else{if($('pwaBadge')){$('pwaBadge').className='badge warn';$('pwaBadge').textContent='sem suporte'}if($('pwaStatus'))$('pwaStatus').textContent='Este navegador não oferece suporte completo a PWA.'}window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;if($('installPwaBtn'))$('installPwaBtn').disabled=false;if($('pwaStatus'))$('pwaStatus').textContent='Instalação disponível neste dispositivo.'});if($('installPwaBtn'))$('installPwaBtn').onclick=async()=>{if(!deferredInstallPrompt){if($('pwaStatus'))$('pwaStatus').textContent='Use o menu do navegador para instalar quando o botão nativo não estiver disponível.';return}deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null};restartTimer();addEventListener('resize',()=>requestAnimationFrame(drawAll));
+  </script>
 </body>
 </html>

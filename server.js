@@ -94,7 +94,7 @@ const server = http.createServer((req, res) => {
   // Check if requested path is a directory, if so default to server.html for the dashboard
   fs.stat(targetPath, (err, stats) => {
     if (!err && stats.isDirectory()) {
-      targetPath = path.join(targetPath, 'server.html');
+      targetPath = path.join(targetPath, 'index.html');
     }
 
     // Try finding file, or append .html if not found (clean URL support)
