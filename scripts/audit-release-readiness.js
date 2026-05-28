@@ -17,7 +17,7 @@ const requiredFiles = [
   'docs/MIGRATION_GUIDE.md', 'docs/WEB_TYPESCRIPT_GUIDE.md', 'docs/ANDROID_JAVA_GUIDE.md',
   'docs/RELEASE_CHECKLIST.md', 'docs/OPERATIONS.md', 'docs/RELIABILITY_MATRIX.md',
   'docs/ENVIRONMENT.md', 'docs/TROUBLESHOOTING.md', 'docs/ARCHITECTURE.md', 'docs/QUALITY_MATRIX.md',
-  'api/index.js', 'api/[...path].js', 'api/server/metrics.js', 'api/server/tests.js', 'api/cache/stats.js', 'api/source/status.js', 'api/ready.js', 'api/deploy/status.js', 'routes/_router.js', 'lib/Valorae-engine.js',
+  'api/index.js', 'api/[...path].js', 'routes/_router.js', 'lib/Valorae-engine.js',
   'public/index.html', 'public/inspector.html'
 ];
 for (const file of requiredFiles) assert(exists(file), `Arquivo obrigatório de lançamento ausente: ${file}`);
@@ -35,7 +35,9 @@ assert(String(pkg.scripts?.typecheck || '').includes('typecheck-free.js'), 'type
 for (const route of ['/ready','/manifest','/env','/schema','/source/status','/health','/asset','/assets','/compare','/scrape','/batch-scrape','/cache/stats','/fields','/errors','/openapi']) {
   assert(manifest.routes.includes(route), `Rota essencial de lançamento ausente no manifesto: ${route}`);
 }
-for (const required of ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/cache/stats.js','api/source/status.js','api/ready.js','api/deploy/status.js']) assert(manifest.physicalFunctions.includes(required), `Function física essencial ausente no manifesto: ${required}`);
+for (const required of ['api/index.js','api/[...path].js']) assert(manifest.physicalFunctions.includes(required), `Function física essencial ausente no manifesto: ${required}`);
+assert(manifest.physicalFunctions.length === 2, 'Functions físicas devem estar consolidadas em api/index.js e api/[...path].js para Vercel Free.');
+for (const required of ['/server/metrics','/server/tests','/cache/stats','/source/status','/deploy/status','/ready']) assert(manifest.routes.includes(required), `Rota crítica deve existir no router interno: ${required}`);
 
 const rootFiles = fs.readdirSync('.', { withFileTypes: true }).filter(e => e.isFile()).map(e => e.name);
 const legacyRootDocs = rootFiles.filter(name => /^(AUDITORIA|COMPARATIVO|SCRAPER_|SECURITY_|QUALITY_|PERFORMANCE_|MARKET_|INVESTMENT_|SCHEMA_|PROFESSIONAL_)/.test(name));
@@ -64,4 +66,4 @@ if (failures.length) {
   process.exit(1);
 }
 for (const w of warnings) console.warn(`Release readiness warning: ${w}`);
-console.log(`Release readiness OK: ${pkg.version}, ${manifest.routes.length} rotas internas, ${manifest.physicalFunctions.length} Functions físicas críticas, sem dependências obrigatórias.`);
+console.log(`Release readiness OK: ${pkg.version}, ${manifest.routes.length} rotas internas, ${manifest.physicalFunctions.length} Functions físicas consolidadas, sem dependências obrigatórias.`);

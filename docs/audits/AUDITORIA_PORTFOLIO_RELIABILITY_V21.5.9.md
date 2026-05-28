@@ -1,4 +1,4 @@
-# Valorae v21.11.8 — Portfolio Intelligence & Source Reliability
+# Valorae v21.11.9 — Portfolio Intelligence & Source Reliability
 
 Esta versão aplica as melhorias solicitadas exceto a sugestão nº 4 de renda fixa avançada. O projeto permanece free-only, sem dependências obrigatórias, sem Redis/KV, sem banco/storage externo, sem cron pago, sem WebSocket e com apenas duas Functions físicas para GitHub/Vercel gratuito.
 

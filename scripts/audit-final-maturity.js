@@ -7,9 +7,9 @@ const failures = [];
 function check(condition, message) { if (!condition) failures.push(message); }
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-check(pkg.version === '21.11.8', 'package.json precisa estar em 21.11.8.');
+check(pkg.version === '21.11.9', 'package.json precisa estar em 21.11.9.');
 check(Object.keys(pkg.dependencies || {}).length === 0, 'dependencies precisa continuar vazio.');
-check(routeManifest().physicalFunctions.length >= 8, 'precisa manter Functions físicas críticas para evitar 404 no Vercel.');
+check(routeManifest().physicalFunctions.length === 2, 'precisa manter API Routes consolidadas em 2 functions físicas para Vercel Free.');
 
 const invalid = responseTest.parseFieldsDetailed('__proto__.x,ticker,constructor.y');
 check(invalid.fields.includes('ticker'), 'fields válido deve continuar aceito.');
@@ -25,7 +25,7 @@ check(guardSource.includes('VALORAE_ADMIN_ALLOW_QUERY_TOKEN_IN_PRODUCTION'), 'to
 
 const catalogs = fs.readFileSync('lib/catalogs/valorae-catalogs.js', 'utf8');
 check(catalogs.includes('VALORAE_ADMIN_ALLOW_QUERY_TOKEN_IN_PRODUCTION'), 'catálogo de envs precisa documentar override admin query em produção.');
-check(catalogs.includes('21.11.8'), 'catálogos precisam referenciar 21.11.8.');
+check(catalogs.includes('21.11.9'), 'catálogos precisam referenciar 21.11.9.');
 
 assert.equal(failures.length, 0, failures.join('\n'));
 console.log('Final maturity audit OK: fields warnings, scrapeUrl exato, admin query token e rate limit efetivo verificados.');

@@ -6,17 +6,13 @@ const runtimeRoots = ['api', 'routes', 'lib'];
 const requiredFiles = [
   'api/index.js',
   'api/[...path].js',
-  'api/server/metrics.js',
-  'api/server/tests.js',
-  'api/cache/stats.js',
-  'api/source/status.js',
-  'api/ready.js',
-  'api/deploy/status.js',
   'routes/_router.js',
   'routes/server/metrics.js',
   'routes/server/tests.js',
   'routes/cache/stats.js',
   'routes/source/status.js',
+  'routes/deploy/status.js',
+  'routes/ready.js',
   'lib/Valorae-engine.js',
   'lib/http/route.js',
   'lib/observability/server-metrics.js',
@@ -26,6 +22,8 @@ const requiredFiles = [
   'public/manifest.webmanifest',
   'public/service-worker.js',
 ];
+
+const allowedApiFunctions = new Set(['api/index.js', 'api/[...path].js']);
 
 function fail(message, error) {
   console.error(`[vercel-build] ${message}`);
@@ -54,9 +52,19 @@ function walkJs(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const file = path.join(dir, entry.name);
     if (entry.isDirectory()) walkJs(file, out);
-    else if (file.endsWith('.js')) out.push(file);
+    else if (file.endsWith('.js')) out.push(file.replace(/\\/g, '/'));
   }
   return out;
+}
+
+function read(file) { return fs.readFileSync(file, 'utf8'); }
+
+function assertConsolidatedApiFunctions() {
+  const apiFiles = walkJs('api').sort();
+  const extra = apiFiles.filter(f => !allowedApiFunctions.has(f));
+  const missing = [...allowedApiFunctions].filter(f => !apiFiles.includes(f));
+  if (missing.length) fail(`API Function obrigatória ausente: ${missing.join(', ')}`);
+  if (extra.length) fail(`API Functions físicas extras detectadas (${extra.length}): ${extra.join(', ')}. Consolide via api/[...path].js para evitar limite de Functions no Vercel Free/Hobby.`);
 }
 
 async function importRuntimeFile(file) {
@@ -67,14 +75,13 @@ async function importRuntimeFile(file) {
   }
 }
 
-function read(file) { return fs.readFileSync(file, 'utf8'); }
-
 async function main() {
   console.log('[vercel-build] VALORAE Proxy: validação serverless gratuita iniciada.');
   console.log(`[vercel-build] Node ${process.version}`);
 
   ensureServerEntrypoint();
   for (const file of requiredFiles) assertFile(file);
+  assertConsolidatedApiFunctions();
 
   const pkg = JSON.parse(read('package.json'));
   if (Object.keys(pkg.dependencies || {}).length > 0) fail('package.json deve continuar sem dependencies obrigatórias.');
@@ -86,7 +93,7 @@ async function main() {
     fail('vercel.json deve usar node scripts/build-vercel-safe.js como buildCommand.');
   }
   const rewriteText = JSON.stringify(vercel.rewrites || []);
-  if (!rewriteText.includes('/server.html')) fail('vercel.json deve apontar /, /server ou /tests para o app principal server.html.');
+  if (!rewriteText.includes('/server.html')) fail('vercel.json deve apontar /, /server, /tests e /inspector para o app principal server.html.');
 
   const serviceWorker = read('public/service-worker.js');
   if (!/pathname\.startsWith\(['"]\/api['"]\)/.test(serviceWorker) && !serviceWorker.includes('/api')) {
@@ -114,6 +121,7 @@ async function main() {
 
   console.log(`[vercel-build] Pacote ${pkg.name}@${pkg.version}`);
   console.log(`[vercel-build] ${jsFiles.length} arquivos JS runtime importados/validados.`);
+  console.log('[vercel-build] API Functions físicas consolidadas: api/index.js + api/[...path].js.');
   console.log('[vercel-build] Build OK para Vercel.');
 }
 

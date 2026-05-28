@@ -125,7 +125,7 @@ export async function dispatchRoute(req, res) {
 }
 
 export function routeManifest() {
-  return { routes: Object.keys(ROUTES).sort(), legacyAliases: LEGACY_ALIASES, physicalFunctions: ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/cache/stats.js','api/source/status.js','api/ready.js','api/deploy/status.js'] };
+  return { routes: Object.keys(ROUTES).sort(), legacyAliases: LEGACY_ALIASES, physicalFunctions: ['api/index.js','api/[...path].js'] };
 }
 
 export const _test = { parseUrl, queryFromSearchParams, stripApiPrefix };

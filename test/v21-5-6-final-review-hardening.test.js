@@ -34,7 +34,7 @@ assert.equal(syncPayload.status, 'DISABLED');
 assert.equal(syncPayload.code, 'SYNC_DISABLED_FREE_ONLY');
 
 const openapi = fs.readFileSync('routes/openapi.js', 'utf8');
-assert.ok(openapi.includes('v21.11.8: launch readiness'));
+assert.ok(openapi.includes('v21.11.9: launch readiness'));
 assert.equal(openapi.includes('v20.8 reforça fraquezas'), false);
 
-console.log('v21.11.8 final review hardening tests OK.');
+console.log('v21.11.9 final review hardening tests OK.');

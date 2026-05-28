@@ -17,16 +17,19 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
   const files = [];
   function walk(d){ for (const e of fs.readdirSync(d,{withFileTypes:true})){ const p=`${d}/${e.name}`; if(e.isDirectory()) walk(p); else if(p.endsWith('.js')) files.push(p); }}
   walk('api');
-  for (const required of ['api/[...path].js','api/index.js','api/server/metrics.js','api/server/tests.js','api/cache/stats.js','api/source/status.js','api/ready.js','api/deploy/status.js']) {
+  for (const required of ['api/[...path].js','api/index.js']) {
     assert.ok(files.includes(required), `function física ausente: ${required}`);
   }
+  const extras = files.filter(f => !['api/[...path].js','api/index.js'].includes(f));
+  assert.deepEqual(extras, [], `functions físicas extras devem ficar consolidadas no router interno: ${extras.join(', ')}`);
 }
 
 {
   const manifest = routeManifest();
-  for (const required of ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/cache/stats.js','api/source/status.js','api/ready.js','api/deploy/status.js']) {
+  for (const required of ['api/index.js','api/[...path].js']) {
     assert.ok(manifest.physicalFunctions.includes(required), `manifest sem ${required}`);
   }
+  assert.equal(manifest.physicalFunctions.length, 2);
   assert.ok(manifest.routes.includes('/asset'));
   assert.ok(manifest.routes.includes('/server/tests'));
   assert.ok(manifest.routes.includes('/cache/stats'));
@@ -38,7 +41,7 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
 {
   const { res, json } = await call(indexHandler, mockReq('/api'));
   assert.equal(res.statusCode, 200);
-  assert.ok(json.router.physicalFunctions.length >= 8);
+  assert.equal(json.router.physicalFunctions.length, 2);
 }
 
 {
@@ -67,4 +70,4 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
   assert.equal(json.status, 'NOT_FOUND');
 }
 
-console.log('v21.11.8 router/contract tests OK.');
+console.log('v21.11.9 router/contract tests OK.');

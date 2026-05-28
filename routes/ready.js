@@ -4,14 +4,14 @@ import { sendJson } from '../lib/performance/http.js';
 import { beginRoute } from '../lib/http/route.js';
 import { routeManifest } from './_router.js';
 
-const version = '21.11.8';
+const version = '21.11.9';
 
 function buildReadiness() {
   const manifest = routeManifest();
   const runtime = getValoraeRuntimeStats();
   const checks = [
     { name: 'freeOnly', ok: true, detail: 'Sem Redis/KV/banco/storage externo obrigatório.' },
-    { name: 'physicalFunctions', ok: ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/cache/stats.js','api/source/status.js','api/ready.js','api/deploy/status.js'].every(fn => manifest.physicalFunctions.includes(fn)), detail: manifest.physicalFunctions.join(', ') },
+    { name: 'physicalFunctions', ok: ['api/index.js','api/[...path].js'].every(fn => manifest.physicalFunctions.includes(fn)) && manifest.physicalFunctions.length <= 2, detail: `consolidado: ${manifest.physicalFunctions.join(', ')}` },
     { name: 'router', ok: manifest.routes.includes('/asset') && manifest.routes.includes('/ready'), detail: `${manifest.routes.length} rotas internas` },
     { name: 'cacheDriver', ok: cacheDriverInfo().driver === 'memory', detail: 'memory' },
     { name: 'engineVersion', ok: ValoraeEngine.version.includes(version), detail: ValoraeEngine.version },

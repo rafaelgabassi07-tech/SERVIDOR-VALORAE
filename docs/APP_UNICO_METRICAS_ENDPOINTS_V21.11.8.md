@@ -1,4 +1,4 @@
-# VALORAE Proxy Server v21.11.8 — App único, métricas e endpoints Vercel
+# VALORAE Proxy Server v21.11.9 — App único, métricas e endpoints Vercel
 
 ## Problema corrigido
 
@@ -29,7 +29,7 @@ O deploy publicado podia carregar o HTML do painel, mas deixar gráficos, métri
 
 ## Como validar no Vercel
 
-Após subir a v21.11.8, abra:
+Após subir a v21.11.9, abra:
 
 ```txt
 https://servidor-valorae.vercel.app/

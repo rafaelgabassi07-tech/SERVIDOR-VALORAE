@@ -1,6 +1,16 @@
+
+## v21.11.9 — Vercel API Routes consolidadas
+
+- Consolidou o deploy em apenas `api/index.js` e `api/[...path].js`.
+- Removeu Functions físicas extras para evitar limite/alerta de consolidação no Vercel Free/Hobby.
+- Manteve `/api/server/metrics`, `/api/cache/stats`, `/api/source/status`, `/api/server/tests`, `/api/ready` e `/api/deploy/status` via roteador interno.
+- Reforçou `build-vercel-safe.js` para falhar se Functions extras voltarem.
+- Atualizou testes, readiness, release audit e dashboard live audit para a arquitetura consolidada.
+- Preservou o app único VALORAE Proxy Server e a central interna de Testes e benchmark.
+
 # Changelog
 
-## v21.11.8 — Vercel Build Safe Fix
+## v21.11.9 — Vercel Build Safe Fix
 
 - Corrige falha genérica no Vercel ao substituir o build de deploy por `scripts/build-vercel-safe.js`.
 - Mantém `scripts/build-free.js` como build estrito/local em `npm run build:strict`.
@@ -9,7 +19,7 @@
 - Preserva Engine, dashboard, PWA, métricas e compatibilidade com Vercel gratuito.
 
 
-## v21.11.8 — Engine Performance & Precision
+## v21.11.9 — Engine Performance & Precision
 
 - Adicionado normalizador financeiro central em `lib/normalizers/numbers.js`.
 - Adicionada política adaptativa do Engine em `lib/resilience/engine-policy.js`.
@@ -77,14 +87,14 @@
 
 # Changelog — Valorae Proxy
 
-## v21.11.8 — Mature Final Release Free
+## v21.11.9 — Mature Final Release Free
 
 - Adiciona `fieldWarnings` para `fields`/`dataFields` inválidos ou inexistentes, sem vazar payload completo quando todos os campos solicitados são inválidos.
 - Endurece `scrapeUrl` customizado: agora precisa apontar exatamente para `/api/scrape`, evitando caminhos parecidos.
 - Restringe token admin via query em produção; só funciona com override explícito `VALORAE_ADMIN_ALLOW_QUERY_TOKEN_IN_PRODUCTION=1`.
 - Corrige `securityRuntimeStats.rateLimit` para diferenciar `disabledRequested` e `disabledEffective`.
 - Usa `isReadLikeMethod` no limite de body, preservando semântica correta para `GET` e `HEAD`.
-- Adiciona `npm run audit:final` e teste comportamental v21.11.8.
+- Adiciona `npm run audit:final` e teste comportamental v21.11.9.
 
 - Implementa somente melhorias recomendadas/viáveis da auditoria de 190 itens.
 - Adiciona `/api/v1/env`, `/api/v1/schema` e `/api/v1/source/status`.
@@ -211,7 +221,7 @@
 - Melhorado readiness, insights e didática para cenários sem tráfego externo real.
 - Atualizado Service Worker para cache v21-10-9, mantendo APIs em tempo real fora do cache.
 
-## v21.11.8 - Otimização profunda Scraper/API
+## v21.11.9 - Otimização profunda Scraper/API
 
 - Implementa chave HTML segura com `maxChars`, provider e headers relevantes para evitar cache contaminado.
 - Adiciona `scrapeResultCache` com `TtlLruCache` para `/api/scrape` e `/api/batch-scrape`.

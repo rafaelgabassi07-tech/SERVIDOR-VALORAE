@@ -45,4 +45,4 @@ assert.ok(portfolio.intelligence.portfolioNarrative.summary);
 assert.ok(portfolio.intelligence.passiveIncomeProjection.rows.length > 0);
 assert.ok(portfolio.intelligence.rebalanceRoadmap.suggestedOrder);
 
-console.log('v21.11.8 source reliability and portfolio intelligence tests OK');
+console.log('v21.11.9 source reliability and portfolio intelligence tests OK');

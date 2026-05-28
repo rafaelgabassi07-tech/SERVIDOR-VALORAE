@@ -20,7 +20,7 @@ async function call(method, url, body = undefined) {
   return res;
 }
 
-assert.equal(ValoraeEngine.version, '21.11.8');
+assert.equal(ValoraeEngine.version, '21.11.9');
 assert.equal(isReadLikeMethod('HEAD'), true);
 assert.equal(getInput({ method: 'HEAD', query: { ticker: 'PETR4' }, body: { ticker: 'ERR' } }).ticker, 'PETR4');
 assert.equal(routerTest.stripApiPrefix('/api/v1/ready'), '/v1/ready');
@@ -35,4 +35,4 @@ const apiary = await call('GET', '/apiary/ready');
 assert.equal(apiary.statusCode, 404);
 assert.ok(apiary.body.includes('/apiary/ready'), 'Caminhos similares a /api não devem ser truncados para /ary');
 
-console.log('v21.11.8 final minute audit tests OK.');
+console.log('v21.11.9 final minute audit tests OK.');

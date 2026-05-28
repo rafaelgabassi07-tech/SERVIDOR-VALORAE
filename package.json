@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
-  "version": "21.11.8",
-  "description": "Valorae Proxy Server v21.11.8 com app único, funções Vercel físicas para métricas/cache/source, testes integrados, gráficos em tempo real e build seguro.",
+  "version": "21.11.9",
+  "description": "Valorae Proxy v21.11.9 com API Routes consolidadas em uma function catch-all, app único, métricas ao vivo e Engine aprimorado para Vercel Free.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -36,9 +36,10 @@
     "audit:engine-modules": "node scripts/audit-engine-modules-v21-11-1.js",
     "audit:engine-performance": "node scripts/audit-engine-performance-v21-11-2.js",
     "audit:vercel-build": "node scripts/build-vercel-safe.js",
-    "audit:single-app": "node scripts/audit-single-app-unification-v21-11-8.js",
-    "audit:dashboard-live": "node scripts/audit-dashboard-live-contract-v21-11-8.js",
-    "audit:live-endpoints": "node scripts/audit-live-endpoints-v21-11-8.js"
+    "audit:single-app": "node scripts/audit-single-app-unification-v21-11-9.js",
+    "audit:dashboard-live": "node scripts/audit-dashboard-live-contract-v21-11-9.js",
+    "audit:live-endpoints": "node scripts/audit-live-endpoints-v21-11-9.js",
+    "audit:vercel-api": "node scripts/audit-vercel-api-consolidation-v21-11-9.js"
   },
   "engines": {
     "node": "20.x"

@@ -79,6 +79,7 @@ try {
 
 const manifest = routeManifest();
 assert.ok(manifest.routes.includes('/health'));
-for (const required of ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/cache/stats.js','api/source/status.js','api/ready.js','api/deploy/status.js']) assert.ok(manifest.physicalFunctions.includes(required), `manifest sem ${required}`);
+for (const required of ['api/index.js','api/[...path].js']) assert.ok(manifest.physicalFunctions.includes(required), `manifest sem ${required}`);
+assert.equal(manifest.physicalFunctions.length, 2);
 
-console.log('v21.11.8 complete audit hardening tests OK.');
+console.log('v21.11.9 complete audit hardening tests OK.');
