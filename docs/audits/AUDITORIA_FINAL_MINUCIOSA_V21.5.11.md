@@ -1,4 +1,4 @@
-# Valorae v21.11.6 — Auditoria Final Minuciosa Free
+# Valorae v21.11.7 — Auditoria Final Minuciosa Free
 
 Esta revisão foi feita sobre a v21.5.10 com foco em bugs pequenos que poderiam passar em auditorias estruturais, mas aparecer em uso HTTP real.
 

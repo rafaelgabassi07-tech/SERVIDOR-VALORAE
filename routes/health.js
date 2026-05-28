@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     endpoints: [
       '/api/fields',
       '/api/errors',
-      '/inspector.html',
+      '/server.html#tests',
       '/api/asset?ticker=PETR4&view=compact&profile=fast',
       '/api/asset?ticker=PETR4&mode=super&includeNews=1&debug=1',
       '/api/assets?tickers=PETR4,GARE11&view=compact',

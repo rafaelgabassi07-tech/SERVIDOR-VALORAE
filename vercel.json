@@ -22,8 +22,21 @@
   ],
   "buildCommand": "node scripts/build-vercel-safe.js",
   "rewrites": [
-    { "source": "/", "destination": "/server.html" },
-    { "source": "/server", "destination": "/server.html" },
-    { "source": "/tests", "destination": "/tests.html" }
+    {
+      "source": "/",
+      "destination": "/server.html"
+    },
+    {
+      "source": "/server",
+      "destination": "/server.html"
+    },
+    {
+      "source": "/tests",
+      "destination": "/server.html"
+    },
+    {
+      "source": "/inspector",
+      "destination": "/server.html"
+    }
   ]
 }

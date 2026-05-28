@@ -1,4 +1,4 @@
-# Android Java Guide — Valorae v21.11.6
+# Android Java Guide — Valorae v21.11.7
 
 O cliente Java puro fica em:
 
@@ -36,6 +36,6 @@ String carteira = client.portfolioAnalyzeJson("{\"positions\":[{\"ticker\":\"PET
 - `cacheStatsJson()`
 - `openApiJson()`
 
-## v21.11.6 — Scraper/API otimizado
+## v21.11.7 — Scraper/API otimizado
 
 O VALORAE agora possui cache final de resultado para `/api/scrape` e `/api/batch-scrape`, chave HTML segura contra contaminação por truncamento, batch coalescido por `fetchKey`, fast-path conservador para seletores simples, métricas detalhadas de scraping e controles mobile (`compact=1`, `previewChars` e `fields=`). Tudo permanece free-only, sem dependências obrigatórias e sem desmembrar `lib/Valorae-engine.js`.

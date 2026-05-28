@@ -19,11 +19,11 @@ export default async function handler(req, res) {
     version: ValoraeEngine.version,
     expectedDashboardMetrics: '/api/server/metrics',
     ready: '/api/ready',
-    tests: '/tests.html',
+    tests: '/server.html#tests',
     routeManifest: routeManifest(),
     build: {
       vercelSafe: true,
-      serverlessFunctions: ['api/[...path].js', 'api/server/metrics.js', 'api/ready.js', 'api/deploy/status.js'],
+      serverlessFunctions: ['api/[...path].js', 'api/server/metrics.js', 'api/server/tests.js', 'api/ready.js', 'api/deploy/status.js'],
       note: 'Se /server.html carrega mas /api/server/metrics retorna 404, a função serverless publicada está desatualizada ou o deploy não publicou a pasta api completa.',
     },
     checkedAt: new Date().toISOString(),

@@ -80,6 +80,7 @@ const server = http.createServer((req, res) => {
   // Handle Static files routing
   let decodedPathname = pathname;
   try { decodedPathname = decodeURIComponent(pathname); } catch { decodedPathname = pathname; }
+  if (decodedPathname === '/tests' || decodedPathname === '/inspector') decodedPathname = '/server.html';
   let targetPath = path.normalize(path.join(PUBLIC_DIR, decodedPathname));
 
   // Security check to avoid path traversal and prefix tricks such as /public-evil.

@@ -1,4 +1,4 @@
-# Valorae Proxy v21.11.6 — Mature Final Release Free
+# Valorae Proxy v21.11.7 — Mature Final Release Free
 
 Proxy HTTP/JSON para dados de investimentos, desenhado para **GitHub + Vercel gratuito**, com deploy simples, sem banco obrigatório, sem Redis/KV, sem storage externo, sem cron pago, sem WebSocket e sem worker permanente.
 
@@ -147,13 +147,13 @@ docs/RELIABILITY_MATRIX.md
 
 ```json
 {
-  "version": "21.11.6",
-  "engine": "21.11.6"
+  "version": "21.11.7",
+  "engine": "21.11.7"
 }
 ```
 
 
-## v21.11.6 — melhorias recomendadas implementadas
+## v21.11.7 — melhorias recomendadas implementadas
 
 Esta versão aplica somente melhorias recomendadas e viáveis para o projeto atual:
 

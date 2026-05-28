@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       fields: '/api/fields',
       errors: '/api/errors',
       openapi: '/api/openapi',
-      inspector: '/inspector.html',
+      inspector: '/server.html#tests',
     },
   }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'index', cacheControl: 'private, max-age=30' });
 }

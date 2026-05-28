@@ -11,7 +11,7 @@ const required = [
   ['lib/quality/chart-readiness.js', 'buildChartReadinessReport'],
   ['lib/quality/extraction-precision.js', 'chart-aware'],
   ['public/server.html', 'HTML family hit'],
-  ['public/service-worker.js', 'v21-11-6'],
+  ['public/service-worker.js', 'v21-11-7'],
 ];
 for (const [file, needle] of required) {
   const text = fs.readFileSync(file, 'utf8');

@@ -109,12 +109,12 @@ export default async function handler(req, res) {
     },
     xValorae: {
       version,
-      audit: 'v21.11.6: launch readiness, ready/manifest endpoints, auditoria sem tsc externo, source reliability, cache metrics, carteira inteligente e OpenAPI ampliado, mantendo free-only.',
+      audit: 'v21.11.7: launch readiness, ready/manifest endpoints, auditoria sem tsc externo, source reliability, cache metrics, carteira inteligente e OpenAPI ampliado, mantendo free-only.',
       vercelCompatible: true,
       freeOnly: true,
       physicalFunctions: ['api/index.js','api/[...path].js'],
       router: 'routes/_router.js',
-      inspector: '/inspector.html',
+      inspector: '/server.html#tests',
     }
   }, { status: 200, engineVersion: version, profile: 'openapi', cachePolicy: 'etag', cacheControl: 'private, max-age=60' });
 }

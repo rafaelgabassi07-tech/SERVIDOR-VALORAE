@@ -10,7 +10,7 @@ function exists(file) { return fs.existsSync(file); }
 function read(file) { return fs.readFileSync(file, 'utf8'); }
 const manifest = routeManifest();
 
-assert(pkg.version === '21.11.6', 'package.json precisa estar em 21.11.6.');
+assert(pkg.version === '21.11.7', 'package.json precisa estar em 21.11.7.');
 assert(Object.keys(pkg.dependencies || {}).length === 0, 'dependencies deve continuar vazio.');
 assert(manifest.physicalFunctions.length >= 9, 'Devem existir as Functions físicas críticas para Vercel.');
 
@@ -52,4 +52,4 @@ if (failures.length) {
   for (const f of failures) console.error(`- ${f}`);
   process.exit(1);
 }
-console.log('Recommended improvements audit OK: melhorias viáveis v21.11.6 presentes e sem tecnologias não recomendadas.');
+console.log('Recommended improvements audit OK: melhorias viáveis v21.11.7 presentes e sem tecnologias não recomendadas.');

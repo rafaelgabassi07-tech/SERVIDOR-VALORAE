@@ -1,4 +1,4 @@
-# VALORAE Proxy v21.11.6 — Correção de entrada do app e build Vercel
+# VALORAE Proxy v21.11.7 — Correção de entrada do app e build Vercel
 
 ## Causa encontrada
 
@@ -15,7 +15,7 @@ A alteração feita para remover a antiga página “VALORAE Proxy Portal” nã
 - `public/server.html` foi restaurado como o mesmo app do `public/index.html`.
 - `/`, `/server` e `/server.html` continuam abrindo o VALORAE Proxy Server.
 - `scripts/build-vercel-safe.js` agora gera `public/server.html` a partir de `public/index.html` se alguém remover o arquivo novamente por engano.
-- Versões do projeto foram alinhadas para `21.11.6` para reduzir conflito visual/API/docs.
+- Versões do projeto foram alinhadas para `21.11.7` para reduzir conflito visual/API/docs.
 - `.gradle` foi adicionado ao `.gitignore` e `.vercelignore`.
 
 ## Garantia

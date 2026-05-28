@@ -79,6 +79,6 @@ try {
 
 const manifest = routeManifest();
 assert.ok(manifest.routes.includes('/health'));
-assert.deepEqual(manifest.physicalFunctions, ['api/index.js','api/[...path].js','api/server/metrics.js','api/v1/server/metrics.js','api/v2/server/metrics.js','api/ready.js','api/v1/ready.js','api/v2/ready.js','api/deploy/status.js']);
+assert.deepEqual(manifest.physicalFunctions, ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/v1/server/metrics.js','api/v2/server/metrics.js','api/ready.js','api/v1/ready.js','api/v2/ready.js','api/deploy/status.js']);
 
-console.log('v21.11.6 complete audit hardening tests OK.');
+console.log('v21.11.7 complete audit hardening tests OK.');

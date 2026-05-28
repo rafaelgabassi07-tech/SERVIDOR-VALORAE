@@ -1,9 +1,9 @@
 {
-  "name": "VALORAE Proxy Server v21.11.6",
+  "name": "VALORAE Proxy Server",
   "description": "Engine com política adaptativa, normalização financeira central, precisão de séries e build Vercel-safe para deploy gratuito.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
-  "version": "21.11.6"
+  "version": "21.11.7"
 }

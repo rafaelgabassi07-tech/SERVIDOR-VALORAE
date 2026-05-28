@@ -17,12 +17,12 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
   const files = [];
   function walk(d){ for (const e of fs.readdirSync(d,{withFileTypes:true})){ const p=`${d}/${e.name}`; if(e.isDirectory()) walk(p); else if(p.endsWith('.js')) files.push(p); }}
   walk('api');
-  assert.deepEqual(files.sort(), ['api/index.js','api/[...path].js','api/server/metrics.js','api/v1/server/metrics.js','api/v2/server/metrics.js','api/ready.js','api/v1/ready.js','api/v2/ready.js','api/deploy/status.js'].sort());
+  assert.deepEqual(files.sort(), ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/v1/server/metrics.js','api/v2/server/metrics.js','api/ready.js','api/v1/ready.js','api/v2/ready.js','api/deploy/status.js'].sort());
 }
 
 {
   const manifest = routeManifest();
-  assert.deepEqual(manifest.physicalFunctions, ['api/index.js','api/[...path].js','api/server/metrics.js','api/v1/server/metrics.js','api/v2/server/metrics.js','api/ready.js','api/v1/ready.js','api/v2/ready.js','api/deploy/status.js']);
+  assert.deepEqual(manifest.physicalFunctions, ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/v1/server/metrics.js','api/v2/server/metrics.js','api/ready.js','api/v1/ready.js','api/v2/ready.js','api/deploy/status.js']);
   assert.ok(manifest.routes.includes('/asset'));
   assert.equal(manifest.legacyAliases['/ativo'], '/asset');
   assert.equal(manifest.legacyAliases['/scraper'], '/compat/scraper4');
@@ -31,7 +31,7 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
 {
   const { res, json } = await call(indexHandler, mockReq('/api'));
   assert.equal(res.statusCode, 200);
-  assert.equal(json.router.physicalFunctions.length, 9);
+  assert.equal(json.router.physicalFunctions.length, 10);
 }
 
 {
@@ -60,4 +60,4 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
   assert.equal(json.status, 'NOT_FOUND');
 }
 
-console.log('v21.11.6 router/contract tests OK.');
+console.log('v21.11.7 router/contract tests OK.');
