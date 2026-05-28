@@ -32,7 +32,7 @@ async function call(handler, { method = 'GET', url = '/api/v1/test', query = {},
   return { req, res, json };
 }
 
-assert.equal(ValoraeEngine.version, '21.5.13-mature-final-release-free');
+assert.equal(ValoraeEngine.version, '21.11.3');
 assert.equal(VIEW_ALIASES.tiny, 'compact');
 assert.equal(PROFILE_ALIASES.tiny, 'instant');
 assert.ok(TTL_MATRIX.staticCatalog.cacheControl.includes('max-age'));
@@ -48,7 +48,7 @@ const sampleAsset = {
 const matrix = buildAssetDataQualityMatrix(sampleAsset);
 assert.ok(matrix.score >= 70);
 assert.ok(matrix.fields.some(f => f.field === 'precoAtual'));
-assert.ok(schemaCatalog().schemas.asset.version.includes('21.5.13'));
+assert.ok(schemaCatalog().schemas.asset.version.includes('21.11.3'));
 
 const portfolio = await analyzePortfolio({
   positions: [
@@ -88,4 +88,4 @@ for (const fixture of ['investidor10-acao-sample.html','investidor10-etf-sample.
   assert.ok(fs.existsSync(`test/fixtures/source/${fixture}`), `fixture ausente: ${fixture}`);
 }
 
-console.log('v21.5.13 mature final release tests OK.');
+console.log('v21.11.3 mature final release tests OK.');

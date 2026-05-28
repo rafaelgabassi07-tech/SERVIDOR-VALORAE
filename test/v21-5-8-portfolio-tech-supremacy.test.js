@@ -18,7 +18,7 @@ const portfolio = await analyzePortfolio({
 }, { enrich: false, view: 'full' });
 
 assert.equal(portfolio.status, 'OK');
-assert.equal(portfolio.schemaVersion, 'portfolio-2026-05-26-v21.5.13-quality-matrix');
+assert.equal(portfolio.schemaVersion, 'portfolio-2026-05-26-v21.11.3-quality-matrix');
 assert.ok(portfolio.positions.some(p => p.type === 'RENDA_FIXA' && p.annualRatePercent === 11.5));
 assert.ok(portfolio.allocation.byType.some(x => x.key === 'RENDA_FIXA'));
 assert.ok(portfolio.intelligence?.incomeCalendar?.rows?.length >= 12);
@@ -42,4 +42,4 @@ assert.ok(compat.includes('payload.fiiList'));
 assert.ok(compat.includes('dividendHistoryFromAsset'));
 assert.ok(compat.includes("mode === 'historico_12m'"));
 
-console.log('v21.5.13 portfolio tech supremacy tests OK.');
+console.log('v21.11.3 portfolio tech supremacy tests OK.');

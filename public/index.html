@@ -85,7 +85,7 @@
       color: var(--md-on-surface);
       font-family: 'Roboto', 'Inter', system-ui, sans-serif;
       line-height: 1.5;
-      padding: 40px 24px;
+      padding: 20px 12px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -97,13 +97,13 @@
       max-width: 800px;
       width: 100%;
       background-color: var(--md-surface-container-low);
-      border-radius: var(--radius-xl);
+      border-radius: var(--radius-lg);
       border: 1px solid var(--md-outline-variant);
-      padding: 40px;
+      padding: 24px;
       box-shadow: var(--shadow-1);
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 16px;
       position: relative;
       overflow: hidden;
     }
@@ -113,45 +113,45 @@
       position: absolute;
       right: -100px;
       top: -100px;
-      width: 300px;
-      height: 300px;
+      width: 200px;
+      height: 200px;
       background: radial-gradient(circle, var(--md-primary-container) 0%, transparent 70%);
       opacity: 0.5;
       pointer-events: none;
     }
 
     .logo-badge {
-      width: 56px;
-      height: 56px;
-      border-radius: var(--radius-lg);
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
       background: linear-gradient(135deg, var(--md-primary), #006a6a);
       display: grid;
       place-items: center;
       color: var(--md-on-primary);
       font-weight: 900;
-      font-size: 1.8rem;
+      font-size: 1.4rem;
       box-shadow: var(--shadow-2);
     }
 
     h1 {
-      font-size: 2.2rem;
+      font-size: 1.8rem;
       font-weight: 800;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.02em;
       line-height: 1.15;
     }
 
     p.subtitle {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: var(--md-on-surface-variant);
-      line-height: 1.45;
+      line-height: 1.4;
     }
 
     /* Grid of utilities links */
     .grid-links {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin-top: 12px;
+      gap: 10px;
+      margin-top: 8px;
     }
 
     @media (max-width: 600px) {
@@ -159,31 +159,31 @@
         grid-template-columns: 1fr;
       }
       .card-portal {
-        padding: 24px;
+        padding: 16px;
       }
     }
 
     .nav-card {
       background-color: var(--md-surface-container);
       border: 1px solid var(--md-outline-variant);
-      border-radius: var(--radius-lg);
-      padding: 20px;
+      border-radius: var(--radius-md);
+      padding: 14px;
       text-decoration: none;
       color: var(--md-on-surface);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
       transition: box-shadow 0.2s, background-color 0.2s, transform 0.15s;
     }
 
     .nav-card:hover {
       background-color: var(--md-surface-container-high);
       box-shadow: var(--shadow-1);
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
 
     .nav-card h3 {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: var(--md-primary);
       display: flex;
@@ -192,7 +192,7 @@
     }
 
     .nav-card p {
-      font-size: 0.88rem;
+      font-size: 0.8rem;
       color: var(--md-on-surface-variant);
     }
 
@@ -263,7 +263,7 @@
     <div style="border-top: 1px solid var(--md-outline-variant); padding-top: 20px; font-size: 0.85rem; color: var(--md-on-surface-variant); display: flex; flex-direction: column; gap: 8px;">
       <div>🔌 <b>Endpoint de Integração para a APK:</b> <code style="word-break: break-all;">/api/asset?ticker=PETR4&amp;view=compact</code></div>
       <div>🛡️ <b>Segurança de Privacidade:</b> Sanitização de logs ativos, bloqueios automáticos e sem persistência de IPs ou tokens dos usuários.</div>
-      <div>📦 <b>Versão do Core:</b> <code>v21.5.13 final-release</code> • Construção em conformidade com Material Design 3.</div>
+      <div>📦 <b>Versão do Core:</b> <code>v21.11.3 final-release</code> • Construção em conformidade com Material Design 3.</div>
     </div>
   </div>
 

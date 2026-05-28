@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { startScrapeMetrics, markMetric, finishScrapeMetrics } from '../lib/performance/scrape-metrics.js';
+const m = startScrapeMetrics();
+markMetric(m, 'fetchStart');
+markMetric(m, 'fetchEnd');
+markMetric(m, 'extractStart');
+markMetric(m, 'extractEnd');
+markMetric(m, 'serializeStart');
+const out = finishScrapeMetrics(m, { htmlLength: 2048, selectorCount: 2, resultKeys: 2, parseStrategy: 'single-pass', cacheStatus: 'MISS' });
+assert.equal(out.htmlSizeKb, 2);
+assert.equal(out.selectorCount, 2);
+assert.equal(out.parseStrategy, 'single-pass');
+assert.equal(out.cacheStatus, 'MISS');
+console.log('scrape metrics tests OK.');

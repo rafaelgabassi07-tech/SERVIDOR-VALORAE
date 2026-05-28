@@ -7,7 +7,7 @@ import { dispatchRoute } from './routes/_router.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 const MIME_TYPES = {
@@ -15,6 +15,7 @@ const MIME_TYPES = {
   '.css': 'text/css; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.gif': 'image/gif',
@@ -77,11 +78,15 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle Static files routing
-  let targetPath = path.join(PUBLIC_DIR, pathname);
-  
-  // Security check to avoid path traversal
-  if (!targetPath.startsWith(PUBLIC_DIR)) {
+  let decodedPathname = pathname;
+  try { decodedPathname = decodeURIComponent(pathname); } catch { decodedPathname = pathname; }
+  let targetPath = path.normalize(path.join(PUBLIC_DIR, decodedPathname));
+
+  // Security check to avoid path traversal and prefix tricks such as /public-evil.
+  const relativeToPublic = path.relative(PUBLIC_DIR, targetPath);
+  if (relativeToPublic.startsWith('..') || path.isAbsolute(relativeToPublic)) {
     res.statusCode = 403;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.end('Acesso Negado');
     return;
   }

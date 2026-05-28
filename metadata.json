@@ -1,8 +1,9 @@
 {
-  "name": "VALORAE Proxy Server",
-  "description": "Servidor visual para monitoramento em tempo real do proxy de ativos, carteiras, rankings e consultas financeiras com gráficos e métricas.",
+  "name": "VALORAE Proxy Server v21.11.3",
+  "description": "Engine com política adaptativa, failure cache curto, normalização financeira central e precisão de séries para gráficos.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  ],
+  "version": "21.11.3"
 }

@@ -4,7 +4,7 @@ import { sendJson } from '../lib/performance/http.js';
 import { beginRoute } from '../lib/http/route.js';
 import { routeManifest } from './_router.js';
 
-const version = '21.5.13';
+const version = '21.11.3';
 
 function buildReadiness() {
   const manifest = routeManifest();

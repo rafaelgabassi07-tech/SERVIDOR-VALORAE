@@ -109,7 +109,7 @@ export default async function handler(req, res) {
     },
     xValorae: {
       version,
-      audit: 'v21.5.13: launch readiness, ready/manifest endpoints, auditoria sem tsc externo, source reliability, cache metrics, carteira inteligente e OpenAPI ampliado, mantendo free-only.',
+      audit: 'v21.11.3: launch readiness, ready/manifest endpoints, auditoria sem tsc externo, source reliability, cache metrics, carteira inteligente e OpenAPI ampliado, mantendo free-only.',
       vercelCompatible: true,
       freeOnly: true,
       physicalFunctions: ['api/index.js','api/[...path].js'],

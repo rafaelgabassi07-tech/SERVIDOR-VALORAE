@@ -1,4 +1,4 @@
-# Architecture — Valorae Proxy v21.5.13
+# Architecture — Valorae Proxy v21.11.3
 
 ```text
 api/index.js + api/[...path].js

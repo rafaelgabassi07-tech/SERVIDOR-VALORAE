@@ -65,4 +65,4 @@ assert.equal(pkg.scripts.typecheck, 'node scripts/typecheck-free.js');
 assert.equal(pkg.scripts.verify, 'node scripts/verify-release.js');
 assert.ok(fs.readFileSync('scripts/verify-release.js', 'utf8').includes("['npm', ['run', 'typecheck']]"));
 
-console.log('v21.5.13 contract safety hardening tests OK.');
+console.log('v21.11.3 contract safety hardening tests OK.');

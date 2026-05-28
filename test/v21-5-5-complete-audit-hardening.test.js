@@ -69,8 +69,10 @@ try {
   }, res);
   const json = JSON.parse(res.body);
   assert.equal(res.statusCode, 200);
-  assert.equal(calls, 2);
+  assert.equal(calls, 1);
   assert.equal(json.uniqueCount, 2);
+  assert.equal(json.batchMetrics.fetchGroups, 1);
+  assert.equal(json.batchMetrics.coalescedByUrl, true);
 } finally {
   ValoraeEngine.scrapeUrl = originalScrapeUrl;
 }
@@ -79,4 +81,4 @@ const manifest = routeManifest();
 assert.ok(manifest.routes.includes('/health'));
 assert.deepEqual(manifest.physicalFunctions, ['api/index.js', 'api/[...path].js']);
 
-console.log('v21.5.13 complete audit hardening tests OK.');
+console.log('v21.11.3 complete audit hardening tests OK.');

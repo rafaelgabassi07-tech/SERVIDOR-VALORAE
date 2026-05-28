@@ -1,4 +1,4 @@
-# Valorae v21.5.13 — Auditoria Completa e Hardening Free
+# Valorae v21.11.3 — Auditoria Completa e Hardening Free
 
 Auditoria feita sobre a v21.5.4 com foco em correções, robustez para GitHub/Vercel gratuito e compatibilidade com o `scraper (4).js`.
 
@@ -41,4 +41,4 @@ Resultado: todas as validações passaram.
 
 ## Resultado
 
-A v21.5.13 mantém o projeto como proxy gratuito para GitHub/Vercel e melhora a previsibilidade operacional sem quebrar o núcleo `lib/Valorae-engine.js`.
+A v21.11.3 mantém o projeto como proxy gratuito para GitHub/Vercel e melhora a previsibilidade operacional sem quebrar o núcleo `lib/Valorae-engine.js`.

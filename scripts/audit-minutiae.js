@@ -66,11 +66,11 @@ assert(routerTest.stripApiPrefix('/api/v1/ready') === '/v1/ready', 'stripApiPref
 assert(routerTest.stripApiPrefix('/apiary/ready') === '/apiary/ready', 'stripApiPrefix não deve alterar caminhos parecidos com /apiary.');
 
 // 5) Contrato de lançamento público.
-assert(pkg.version === '21.5.13', 'package.json deve estar na versão 21.5.13.');
-assert(read('lib/Valorae-engine.js').includes('21.5.13-mature-final-release-free'), 'Engine deve expor versão 21.5.13-mature-final-release-free.');
-assert(read('public/index.html').includes('21.5.13'), 'public/index.html deve exibir versão 21.5.13.');
-assert(read('routes/ready.js').includes("const version = '21.5.13'"), 'ready.js deve declarar release 21.5.13.');
-assert(read('routes/manifest.js').includes("release: '21.5.13'"), 'manifest.js deve declarar release 21.5.13.');
+assert(pkg.version === '21.11.3', 'package.json deve estar na versão 21.11.3.');
+assert(read('lib/Valorae-engine.js').includes('21.11.3'), 'Engine deve expor versão 21.11.3.');
+assert(read('public/index.html').includes('21.11.3'), 'public/index.html deve exibir versão 21.11.3.');
+assert(read('routes/ready.js').includes("const version = '21.11.3'"), 'ready.js deve declarar release 21.11.3.');
+assert(read('routes/manifest.js').includes("release: '21.11.3'"), 'manifest.js deve declarar release 21.11.3.');
 
 // 6) Guardrails de deploy simples.
 assert(Object.keys(pkg.dependencies || {}).length === 0, 'dependencies precisa continuar vazio.');

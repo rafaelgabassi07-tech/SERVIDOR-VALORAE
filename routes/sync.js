@@ -1,5 +1,5 @@
 // Endpoint legado mantido apenas para compatibilidade de URL.
-// A v21.5.13 remove qualquer ponte para banco/storage externo para preservar o modo free-only puro.
+// A v21.11.3 remove qualquer ponte para banco/storage externo para preservar o modo free-only puro.
 
 import { sendJson } from '../lib/performance/http.js';
 import { beginRoute } from '../lib/http/route.js';
