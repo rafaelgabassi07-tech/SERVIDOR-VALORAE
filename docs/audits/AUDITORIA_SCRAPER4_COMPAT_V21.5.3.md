@@ -1,4 +1,4 @@
-# Auditoria comparativa Scraper (4) → Valorae v21.11.7
+# Auditoria comparativa Scraper (4) → Valorae v21.11.8
 
 Esta rodada comparou o Valorae v21.5.2 contra o arquivo `scraper (4).js`, usado como referência de robustez operacional para scraping em Vercel.
 

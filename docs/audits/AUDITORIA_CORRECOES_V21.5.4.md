@@ -1,4 +1,4 @@
-# Valorae v21.11.7 — Auditoria de Correções Free
+# Valorae v21.11.8 — Auditoria de Correções Free
 
 Auditoria realizada sobre o pacote v21.5.3 com foco em correções defensivas, previsibilidade do proxy GitHub/Vercel gratuito e compatibilidade com o scraper de referência.
 

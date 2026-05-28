@@ -1,4 +1,4 @@
-# Valorae v21.11.7 — Revisão Final e Correções Free-only
+# Valorae v21.11.8 — Revisão Final e Correções Free-only
 
 Esta revisão verificou o pacote v21.5.5 arquivo por arquivo e corrigiu inconsistências que não apareciam nos testes automatizados básicos.
 
@@ -6,7 +6,7 @@ Esta revisão verificou o pacote v21.5.5 arquivo por arquivo e corrigiu inconsis
 
 1. `vercel.json` não define mais CORS para `/api/*`; o CORS da API fica exclusivamente no runtime (`lib/security/guard.js`), evitando conflito entre wildcard `*` e allowlist refletida.
 2. `/api/sync` foi preservado como URL legada, mas todo código de ponte para banco/storage externo foi removido. A rota agora responde `DISABLED_FREE_ONLY` e recomenda alternativas sem persistência externa.
-3. OpenAPI deixou de carregar texto antigo de auditoria v20.8 e passa a declarar a revisão v21.11.7.
+3. OpenAPI deixou de carregar texto antigo de auditoria v20.8 e passa a declarar a revisão v21.11.8.
 4. Auditoria free-only foi ampliada para bloquear referências a serviços externos complexos no código de runtime.
 5. Auditoria de rotas passou a validar que `vercel.json` não injeta CORS amplo nas Functions.
 

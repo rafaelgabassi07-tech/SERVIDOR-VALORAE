@@ -7,7 +7,7 @@ import { compareAssets } from '../lib/market/compare.js';
 import { buildPortfolioReturnSeries, buildContributionSimulation } from '../lib/portfolio/returns-advanced.js';
 import { ValoraeEngine } from '../lib/Valorae-engine.js';
 
-assert.equal(ValoraeEngine.version, '21.11.7');
+assert.equal(ValoraeEngine.version, '21.11.8');
 
 const normalized = buildUniversalNormalized({ results: { cotacao: { precoAtual: 'R$ 32,10' }, indicadores: { dividendYield: '8,5%', pvp: '0,92' } } });
 assert.equal(normalized.precoAtual.unit, 'BRL');

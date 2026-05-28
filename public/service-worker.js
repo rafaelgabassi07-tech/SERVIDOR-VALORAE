@@ -1,5 +1,5 @@
 // Compat: supersedes v21-11-3
-const CACHE_NAME = 'valorae-proxy-server-v21-11-7';
+const CACHE_NAME = 'valorae-proxy-server-v21-11-4';
 const STATIC_ASSETS = [
   '/server.html',
   '/index.html',

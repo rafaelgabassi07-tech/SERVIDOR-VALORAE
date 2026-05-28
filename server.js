@@ -77,10 +77,20 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Keep VALORAE Proxy Server as the single visual app.
+  // Clean routes open the main app; legacy .html files only redirect for compatibility.
+  const singleAppPaths = new Set(['/', '/server', '/tests', '/inspector']);
+  if (singleAppPaths.has(pathname)) {
+    const data = fs.readFileSync(path.join(PUBLIC_DIR, 'server.html'));
+    res.statusCode = 200;
+    res.setHeader('Content-Type', MIME_TYPES['.html']);
+    res.end(data);
+    return;
+  }
+
   // Handle Static files routing
   let decodedPathname = pathname;
   try { decodedPathname = decodeURIComponent(pathname); } catch { decodedPathname = pathname; }
-  if (decodedPathname === '/tests' || decodedPathname === '/inspector') decodedPathname = '/server.html';
   let targetPath = path.normalize(path.join(PUBLIC_DIR, decodedPathname));
 
   // Security check to avoid path traversal and prefix tricks such as /public-evil.

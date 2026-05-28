@@ -13,5 +13,3 @@ docs/audits
 docs/reference
 
 .gradle/
-.gradle
-reports/

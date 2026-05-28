@@ -6,8 +6,17 @@ const runtimeRoots = ['api', 'routes', 'lib'];
 const requiredFiles = [
   'api/index.js',
   'api/[...path].js',
+  'api/server/metrics.js',
+  'api/server/tests.js',
+  'api/cache/stats.js',
+  'api/source/status.js',
+  'api/ready.js',
+  'api/deploy/status.js',
   'routes/_router.js',
   'routes/server/metrics.js',
+  'routes/server/tests.js',
+  'routes/cache/stats.js',
+  'routes/source/status.js',
   'lib/Valorae-engine.js',
   'lib/http/route.js',
   'lib/observability/server-metrics.js',
@@ -25,12 +34,14 @@ function fail(message, error) {
   process.exit(1);
 }
 
-function ensureDashboardEntry() {
-  const indexFile = 'public/index.html';
-  const serverFile = 'public/server.html';
-  if (!fs.existsSync(serverFile) && fs.existsSync(indexFile)) {
-    fs.copyFileSync(indexFile, serverFile);
-    console.log('[vercel-build] public/server.html ausente; gerado a partir de public/index.html para preservar /server.html.');
+function ensureServerEntrypoint() {
+  if (!fs.existsSync('public/server.html') && fs.existsSync('public/index.html')) {
+    fs.copyFileSync('public/index.html', 'public/server.html');
+    console.log('[vercel-build] public/server.html recriado a partir de public/index.html.');
+  }
+  if (!fs.existsSync('public/index.html') && fs.existsSync('public/server.html')) {
+    fs.copyFileSync('public/server.html', 'public/index.html');
+    console.log('[vercel-build] public/index.html recriado a partir de public/server.html.');
   }
 }
 
@@ -56,26 +67,46 @@ async function importRuntimeFile(file) {
   }
 }
 
+function read(file) { return fs.readFileSync(file, 'utf8'); }
+
 async function main() {
   console.log('[vercel-build] VALORAE Proxy: validação serverless gratuita iniciada.');
   console.log(`[vercel-build] Node ${process.version}`);
 
-  ensureDashboardEntry();
+  ensureServerEntrypoint();
   for (const file of requiredFiles) assertFile(file);
 
-  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  const pkg = JSON.parse(read('package.json'));
   if (Object.keys(pkg.dependencies || {}).length > 0) fail('package.json deve continuar sem dependencies obrigatórias.');
   if (pkg.scripts?.preinstall || pkg.scripts?.postinstall || pkg.scripts?.prepare) fail('Scripts lifecycle de instalação não são permitidos.');
 
-  const vercel = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+  const vercel = JSON.parse(read('vercel.json'));
   if (vercel.crons) fail('vercel.json não deve declarar crons nesta build free-only.');
   if (String(vercel.buildCommand || '') !== 'node scripts/build-vercel-safe.js') {
     fail('vercel.json deve usar node scripts/build-vercel-safe.js como buildCommand.');
   }
+  const rewriteText = JSON.stringify(vercel.rewrites || []);
+  if (!rewriteText.includes('/server.html')) fail('vercel.json deve apontar /, /server ou /tests para o app principal server.html.');
 
-  const serviceWorker = fs.readFileSync('public/service-worker.js', 'utf8');
-  if (!/url\.pathname\.startsWith\(['"]\/api['"]\)/.test(serviceWorker) && !serviceWorker.includes('/api')) {
+  const serviceWorker = read('public/service-worker.js');
+  if (!/pathname\.startsWith\(['"]\/api['"]\)/.test(serviceWorker) && !serviceWorker.includes('/api')) {
     fail('service-worker.js deve manter exclusão explícita de /api.');
+  }
+
+  const serverHtml = read('public/server.html');
+  if (!serverHtml.includes('VALORAE Proxy Server') || !serverHtml.includes('id="page-tests"')) {
+    fail('public/server.html deve ser o app principal com central interna de testes.');
+  }
+  if (serverHtml.includes('/tests.html')) fail('O app principal não deve abrir /tests.html como experiência separada.');
+
+  const metrics = read('lib/observability/server-metrics.js');
+  for (const route of ['/api/server/metrics','/api/server/tests','/api/cache/stats','/api/source/status','/api/deploy/status']) {
+    if (!metrics.includes(route)) fail(`Métricas internas precisam isolar ${route}.`);
+  }
+
+  const router = read('routes/_router.js');
+  for (const route of ["'/server/metrics'", "'/server/tests'", "'/cache/stats'", "'/source/status'", "'/deploy/status'"]) {
+    if (!router.includes(route)) fail(`Router interno precisa expor ${route}.`);
   }
 
   const jsFiles = runtimeRoots.flatMap((root) => walkJs(root));

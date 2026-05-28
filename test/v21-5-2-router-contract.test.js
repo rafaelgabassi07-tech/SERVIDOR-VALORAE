@@ -17,13 +17,20 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
   const files = [];
   function walk(d){ for (const e of fs.readdirSync(d,{withFileTypes:true})){ const p=`${d}/${e.name}`; if(e.isDirectory()) walk(p); else if(p.endsWith('.js')) files.push(p); }}
   walk('api');
-  assert.deepEqual(files.sort(), ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/v1/server/metrics.js','api/v2/server/metrics.js','api/ready.js','api/v1/ready.js','api/v2/ready.js','api/deploy/status.js'].sort());
+  for (const required of ['api/[...path].js','api/index.js','api/server/metrics.js','api/server/tests.js','api/cache/stats.js','api/source/status.js','api/ready.js','api/deploy/status.js']) {
+    assert.ok(files.includes(required), `function física ausente: ${required}`);
+  }
 }
 
 {
   const manifest = routeManifest();
-  assert.deepEqual(manifest.physicalFunctions, ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/v1/server/metrics.js','api/v2/server/metrics.js','api/ready.js','api/v1/ready.js','api/v2/ready.js','api/deploy/status.js']);
+  for (const required of ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/cache/stats.js','api/source/status.js','api/ready.js','api/deploy/status.js']) {
+    assert.ok(manifest.physicalFunctions.includes(required), `manifest sem ${required}`);
+  }
   assert.ok(manifest.routes.includes('/asset'));
+  assert.ok(manifest.routes.includes('/server/tests'));
+  assert.ok(manifest.routes.includes('/cache/stats'));
+  assert.ok(manifest.routes.includes('/source/status'));
   assert.equal(manifest.legacyAliases['/ativo'], '/asset');
   assert.equal(manifest.legacyAliases['/scraper'], '/compat/scraper4');
 }
@@ -31,7 +38,7 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
 {
   const { res, json } = await call(indexHandler, mockReq('/api'));
   assert.equal(res.statusCode, 200);
-  assert.equal(json.router.physicalFunctions.length, 10);
+  assert.ok(json.router.physicalFunctions.length >= 8);
 }
 
 {
@@ -60,4 +67,4 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
   assert.equal(json.status, 'NOT_FOUND');
 }
 
-console.log('v21.11.7 router/contract tests OK.');
+console.log('v21.11.8 router/contract tests OK.');

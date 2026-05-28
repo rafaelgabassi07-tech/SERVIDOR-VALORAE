@@ -1,4 +1,4 @@
-# VALORAE Proxy v21.11.7 — Correção de dashboard sem métricas no Vercel
+# VALORAE Proxy v21.11.5 — Correção de dashboard sem métricas no Vercel
 
 ## Diagnóstico observado
 
@@ -36,7 +36,7 @@ https://servidor-valorae.vercel.app/tests.html
 Critérios mínimos:
 
 - `/api/server/metrics` deve retornar 200 JSON.
-- `/api/health` deve mostrar versão 21.11.7.
+- `/api/health` deve mostrar versão 21.11.5.
 - `/api/deploy/status` deve retornar 200 JSON.
 - `/server.html` deve sair do estado de skeleton.
 

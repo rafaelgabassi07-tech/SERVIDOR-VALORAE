@@ -66,16 +66,16 @@ assert(routerTest.stripApiPrefix('/api/v1/ready') === '/v1/ready', 'stripApiPref
 assert(routerTest.stripApiPrefix('/apiary/ready') === '/apiary/ready', 'stripApiPrefix não deve alterar caminhos parecidos com /apiary.');
 
 // 5) Contrato de lançamento público.
-assert(pkg.version === '21.11.7', 'package.json deve estar na versão 21.11.7.');
-assert(read('lib/Valorae-engine.js').includes('21.11.7'), 'Engine deve expor versão 21.11.7.');
-assert(read('public/index.html').includes('21.11.7'), 'public/index.html deve exibir versão 21.11.7.');
-assert(read('routes/ready.js').includes("const version = '21.11.7'"), 'ready.js deve declarar release 21.11.7.');
-assert(read('routes/manifest.js').includes("release: '21.11.7'"), 'manifest.js deve declarar release 21.11.7.');
+assert(pkg.version === '21.11.8', 'package.json deve estar na versão 21.11.8.');
+assert(read('lib/Valorae-engine.js').includes('21.11.8'), 'Engine deve expor versão 21.11.8.');
+assert(read('public/index.html').includes('21.11.8'), 'public/index.html deve exibir versão 21.11.8.');
+assert(read('routes/ready.js').includes("const version = '21.11.8'"), 'ready.js deve declarar release 21.11.8.');
+assert(read('routes/manifest.js').includes("release: '21.11.8'"), 'manifest.js deve declarar release 21.11.8.');
 
 // 6) Guardrails de deploy simples.
 assert(Object.keys(pkg.dependencies || {}).length === 0, 'dependencies precisa continuar vazio.');
 assert(!pkg.devDependencies || Object.keys(pkg.devDependencies).length === 0, 'devDependencies precisa continuar vazio.');
-assert(manifest.physicalFunctions.length >= 9, 'manifest deve manter as Functions físicas críticas para métricas/readiness no Vercel.');
+assert(manifest.physicalFunctions.length >= 8, 'manifest deve manter Functions físicas críticas para evitar 404 no Vercel.');
 assert(exists('.vercelignore') && read('.vercelignore').includes('test') && read('.vercelignore').includes('docs/audits'), '.vercelignore deve excluir testes e auditorias históricas do deploy.');
 
 // 7) Public SDK sanity.

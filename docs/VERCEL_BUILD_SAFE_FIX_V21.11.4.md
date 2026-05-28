@@ -1,4 +1,4 @@
-# Correção de build Vercel — v21.11.7
+# Correção de build Vercel — v21.11.8
 
 ## Problema
 
@@ -12,7 +12,7 @@ O `build-free.js` executa uma validação estrita e várias auditorias de releas
 
 ## Correção
 
-A versão v21.11.7 passa a usar no deploy:
+A versão v21.11.8 passa a usar no deploy:
 
 ```txt
 node scripts/build-vercel-safe.js

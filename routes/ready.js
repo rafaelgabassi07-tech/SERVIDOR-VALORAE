@@ -4,14 +4,14 @@ import { sendJson } from '../lib/performance/http.js';
 import { beginRoute } from '../lib/http/route.js';
 import { routeManifest } from './_router.js';
 
-const version = '21.11.7';
+const version = '21.11.8';
 
 function buildReadiness() {
   const manifest = routeManifest();
   const runtime = getValoraeRuntimeStats();
   const checks = [
     { name: 'freeOnly', ok: true, detail: 'Sem Redis/KV/banco/storage externo obrigatório.' },
-    { name: 'physicalFunctions', ok: manifest.physicalFunctions.length >= 9 && manifest.physicalFunctions.includes('api/server/metrics.js'), detail: manifest.physicalFunctions.join(', ') },
+    { name: 'physicalFunctions', ok: ['api/index.js','api/[...path].js','api/server/metrics.js','api/server/tests.js','api/cache/stats.js','api/source/status.js','api/ready.js','api/deploy/status.js'].every(fn => manifest.physicalFunctions.includes(fn)), detail: manifest.physicalFunctions.join(', ') },
     { name: 'router', ok: manifest.routes.includes('/asset') && manifest.routes.includes('/ready'), detail: `${manifest.routes.length} rotas internas` },
     { name: 'cacheDriver', ok: cacheDriverInfo().driver === 'memory', detail: 'memory' },
     { name: 'engineVersion', ok: ValoraeEngine.version.includes(version), detail: ValoraeEngine.version },
@@ -21,6 +21,7 @@ function buildReadiness() {
 }
 
 export default async function handler(req, res) {
+  req.__valoraeInternalTelemetry = true;
   const route = beginRoute(req, res, { version: ValoraeEngine.version, methods: ['GET'], route: 'ready', rateMax: Number(process.env.VALORAE_RATE_LIMIT_HEALTH_MAX || 180), profile: 'ready', cacheControl: 'private, max-age=10' });
   if (route.done) return;
   const readiness = buildReadiness();

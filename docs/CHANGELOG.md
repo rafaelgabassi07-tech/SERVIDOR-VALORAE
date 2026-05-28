@@ -1,28 +1,6 @@
 # Changelog
 
-## v21.11.7 — App único e central interna de testes
-
-- Unifica testes, benchmark, avaliação de rede e inspector de API dentro do VALORAE Proxy Server.
-- Adiciona página interna `#tests` no menu lateral do app principal.
-- Remove links do dashboard para `/tests.html` como página separada.
-- `/tests.html` e `/inspector.html` ficam apenas como redirects de compatibilidade para `/server.html#tests`.
-- Adiciona API interna `/api/server/tests` e function física `api/server/tests.js` para Vercel.
-- Isola probes de testes com `X-Valorae-Telemetry: dashboard-test`, evitando inflar métricas reais.
-- Atualiza auditorias `audit:single-app` e `audit:dashboard-live`.
-
-
-## v21.11.7 — Vercel Entrypoint, Dashboard Server e Metrics Recovery
-
-- Corrige falha de build no Vercel causada pela ausência de `public/server.html` após a tentativa de deixar apenas o app único.
-- Mantém o app único “VALORAE Proxy Server”: `public/index.html` e `public/server.html` agora apontam para a mesma interface, sem restaurar a antiga tela “VALORAE Proxy Portal”.
-- `scripts/build-vercel-safe.js` passa a recriar `public/server.html` a partir de `public/index.html` caso o arquivo seja removido por engano.
-- Atualiza a versão do projeto para `21.11.7` em pacote, Engine, scripts, docs e validações para reduzir conflito entre painel/API.
-- Atualiza guardrails para as Functions físicas críticas do Vercel: catch-all, métricas, readiness e deploy status.
-- Adiciona `/deploy/status` ao roteador interno, permitindo diagnóstico local em `/api/deploy/status`.
-- O dashboard passa a ter estado de falha explícito quando `/api/server/metrics` não responde e aponta para `/tests.html`.
-- `.gradle` foi ignorado no Git/Vercel para evitar upload de cache local.
-
-## v21.11.7 — Vercel Build Safe Fix
+## v21.11.8 — Vercel Build Safe Fix
 
 - Corrige falha genérica no Vercel ao substituir o build de deploy por `scripts/build-vercel-safe.js`.
 - Mantém `scripts/build-free.js` como build estrito/local em `npm run build:strict`.
@@ -31,7 +9,7 @@
 - Preserva Engine, dashboard, PWA, métricas e compatibilidade com Vercel gratuito.
 
 
-## v21.11.7 — Engine Performance & Precision
+## v21.11.8 — Engine Performance & Precision
 
 - Adicionado normalizador financeiro central em `lib/normalizers/numbers.js`.
 - Adicionada política adaptativa do Engine em `lib/resilience/engine-policy.js`.
@@ -99,14 +77,14 @@
 
 # Changelog — Valorae Proxy
 
-## v21.11.7 — Mature Final Release Free
+## v21.11.8 — Mature Final Release Free
 
 - Adiciona `fieldWarnings` para `fields`/`dataFields` inválidos ou inexistentes, sem vazar payload completo quando todos os campos solicitados são inválidos.
 - Endurece `scrapeUrl` customizado: agora precisa apontar exatamente para `/api/scrape`, evitando caminhos parecidos.
 - Restringe token admin via query em produção; só funciona com override explícito `VALORAE_ADMIN_ALLOW_QUERY_TOKEN_IN_PRODUCTION=1`.
 - Corrige `securityRuntimeStats.rateLimit` para diferenciar `disabledRequested` e `disabledEffective`.
 - Usa `isReadLikeMethod` no limite de body, preservando semântica correta para `GET` e `HEAD`.
-- Adiciona `npm run audit:final` e teste comportamental v21.11.7.
+- Adiciona `npm run audit:final` e teste comportamental v21.11.8.
 
 - Implementa somente melhorias recomendadas/viáveis da auditoria de 190 itens.
 - Adiciona `/api/v1/env`, `/api/v1/schema` e `/api/v1/source/status`.
@@ -233,7 +211,7 @@
 - Melhorado readiness, insights e didática para cenários sem tráfego externo real.
 - Atualizado Service Worker para cache v21-10-9, mantendo APIs em tempo real fora do cache.
 
-## v21.11.7 - Otimização profunda Scraper/API
+## v21.11.8 - Otimização profunda Scraper/API
 
 - Implementa chave HTML segura com `maxChars`, provider e headers relevantes para evitar cache contaminado.
 - Adiciona `scrapeResultCache` com `TtlLruCache` para `/api/scrape` e `/api/batch-scrape`.

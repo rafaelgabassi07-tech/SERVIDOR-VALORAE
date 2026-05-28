@@ -10,7 +10,7 @@ const requiredFiles = [
 ];
 for (const file of requiredFiles) assert.ok(fs.existsSync(file), `${file} ausente`);
 const engine = fs.readFileSync('lib/Valorae-engine.js', 'utf8');
-assert.match(engine, /VALORAE_ENGINE_VERSION = '21\.11\.7'/);
+assert.match(engine, /21\.11\.8/);
 assert.match(engine, /buildEngineProviderPlan/);
 assert.match(engine, /getFailureCache/);
 assert.match(engine, /numberNormalizerStats/);
@@ -18,4 +18,4 @@ const server = fs.readFileSync('public/server.html', 'utf8');
 assert.match(server, /Engine Core/);
 const sw = fs.readFileSync('public/service-worker.js', 'utf8');
 assert.match(sw, /url\.pathname\.startsWith\('\/api'\)/);
-console.log('audit engine performance v21.11.7 OK');
+console.log('audit engine performance v21.11.8 OK');

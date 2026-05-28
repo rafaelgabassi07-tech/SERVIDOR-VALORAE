@@ -20,4 +20,4 @@ assert.ok(batch.includes('batchMetrics'), 'batch precisa expor métricas de coal
 const engine = fs.readFileSync('lib/Valorae-engine.js', 'utf8');
 assert.ok(engine.includes('buildHtmlCacheKey'), 'Engine precisa usar cache HTML seguro');
 assert.ok(engine.includes('STALE_HIT'), 'Engine precisa contemplar stale hit seguro');
-console.log('Scrape optimization audit v21.11.7 OK.');
+console.log('Scrape optimization audit v21.11.8 OK.');
