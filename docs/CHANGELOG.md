@@ -293,3 +293,10 @@
 - Usa parser financeiro central no fallback bruto do `appPayload`, melhorando leitura de valores como `R$ 4,2 bi`, `R$ 8,5 mi` e `9,87%`.
 - Corrige `view=watchlist` e `view=list` para resolverem como `compact`, reduzindo payload em listas e primeira pintura mobile.
 - Adiciona teste `field-alias-mobile-compact-v21-12-12`.
+
+## v21.12.13 — clean app rebuild
+
+- Reconstruído `public/server.html` e `public/index.html` do zero.
+- Novo dashboard financeiro focado em `/api/asset`, métricas, gráficos canvas, diagnósticos e fallback local.
+- Corrige o problema visual de tela vazia quando as fontes retornam payload parcial.
+- Mantém compatibilidade com auditorias e Vercel Free.

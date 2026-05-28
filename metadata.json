@@ -1,16 +1,18 @@
 {
   "name": "VALORAE Proxy Server v21.12.0",
-  "description": "VALORAE Proxy Server v21.12.12 com normalizador de aliases financeiros, views compactas corrigidas para watchlist/list e contratos mobile seguros para Vercel Free.",
+  "description": "VALORAE Proxy Server v21.12.13 com app financeiro reconstruído do zero para métricas, gráficos, diagnósticos e fallback anti-tela-vazia.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
   "version": "21.12.0",
-  "release": "field-alias-mobile-compact-v21.12.12",
-  "latestInternalPatch": "21.12.12-field-alias-mobile-compact",
+  "release": "clean-app-rebuild-v21.12.13",
+  "latestInternalPatch": "21.12.13-clean-app-rebuild",
   "features": [
-    "watchlist-list-compact-fix",
-    "field-alias-normalizer",
-    "mobile-safe-payload-views"
+    "clean-financial-app-rebuild",
+    "asset-dashboard-no-blank-screen",
+    "canvas-charts-from-proxy-contracts",
+    "local-last-good-snapshot",
+    "internal-tests-center"
   ]
 }
