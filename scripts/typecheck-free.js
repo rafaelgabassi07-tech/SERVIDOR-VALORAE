@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import pkg from '../package.json' with { type: 'json' };
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
 const failures = [];
 function read(file) { return fs.readFileSync(file, 'utf8'); }

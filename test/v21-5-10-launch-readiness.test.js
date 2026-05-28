@@ -1,8 +1,9 @@
+import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { routeManifest } from '../routes/_router.js';
 import readyHandler from '../routes/ready.js';
 import manifestHandler from '../routes/manifest.js';
-import pkg from '../package.json' with { type: 'json' };
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
 function mockReq(url, method = 'GET') {
   return { method, url, query: {}, headers: { host: 'example.vercel.app', 'x-forwarded-proto': 'https', 'x-forwarded-for': '127.0.0.1' }, socket: { remoteAddress: '127.0.0.1' } };

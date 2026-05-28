@@ -3,7 +3,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { routeManifest, _test as routerTest } from '../routes/_router.js';
 import { getInput, isReadLikeMethod } from '../lib/http/route.js';
-import pkg from '../package.json' with { type: 'json' };
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
 const failures = [];
 const warnings = [];
