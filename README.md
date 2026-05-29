@@ -1,13 +1,24 @@
-# VALORAE Proxy / Engine v21.12.34 — Audited Launch Candidate
+# VALORAE Proxy / Engine v21.12.35 — Monitor Data Fill
 
 O VALORAE Engine é um **Proxy + Engine de normalização + API + Monitor de saída** para uso pessoal e pessoas próximas. Ele foi desenhado para rodar em GitHub/Vercel gratuito, sem banco obrigatório, Redis/KV, storage externo, cron pago ou WebSocket.
 
-> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`.
+> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`.
 
 ## Objetivo desta versão
 
-Esta rodada aprofunda a maturidade operacional do VALORAE para uso pessoal e pessoas próximas: adiciona profiler de runtime por etapa, gate final de lançamento pessoal, endpoint dedicado de performance e sincronização do contrato `view=app`, mantendo simplicidade, Vercel Free e compatibilidade com Web/APK.
+Esta rodada corrige a experiência funcional do monitor antes do lançamento pessoal: a página **Integração e guia** passa a ler dados reais dos endpoints de integração; **Benchmark e diagnóstico** passa a executar checagem automática; e o monitor diferencia melhor ausência de tráfego real de falha do proxy, mantendo simplicidade, Vercel Free e compatibilidade com Web/APK.
 
+
+
+
+### Novidades v21.12.35
+
+- **Integração e guia** agora é alimentada por endpoints reais: `/api/v1/integration/manifest`, `/api/v1/integration/sdk`, `/api/v1/integration/prompts`, `/api/v1/release/readiness` e `/api/source/status`.
+- **Benchmark e diagnóstico** passou a preencher automaticamente o health check dos endpoints do plano e executa `quick benchmark` uma vez ao abrir o monitor.
+- Corrige o SDK JavaScript gerado em `/api/v1/integration/sdk`, preservando a regex válida `replace(/\/$/, '')` para remover barra final da `baseUrl`.
+- Endpoints de integração chamados pelo próprio painel foram classificados como telemetria interna, evitando inflar o feed de respostas reais do proxy.
+- O monitor agora exibe estados explícitos de “sem tráfego real”, “lendo endpoints” e “fallback estático”, reduzindo a sensação de tela vazia em instâncias novas da Vercel.
+- Nova auditoria `docs/AUDITORIA_MONITOR_DATA_FILL_V21.12.35.md` com diagnóstico das páginas e testes aplicados.
 
 
 

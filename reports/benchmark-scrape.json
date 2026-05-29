@@ -1,35 +1,35 @@
 {
-  "generatedAt": "2026-05-29T13:03:26.423Z",
+  "generatedAt": "2026-05-29T16:16:20.792Z",
   "network": "mocked/local-only",
   "htmlBytes": 37462,
   "cases": [
     {
       "name": "fast-selectors-single-pass",
       "loops": 120,
-      "avgMs": 1.45,
-      "medianMs": 1.278,
+      "avgMs": 1.461,
+      "medianMs": 1.301,
       "p95Ms": 2.104
     },
     {
       "name": "custom-selectors-css-lite",
       "loops": 120,
-      "avgMs": 2.321,
-      "medianMs": 2.189,
-      "p95Ms": 3.129
+      "avgMs": 2.433,
+      "medianMs": 2.28,
+      "p95Ms": 3.56
     },
     {
       "name": "signature-result-key",
       "loops": 500,
       "avgMs": 0.024,
       "medianMs": 0.018,
-      "p95Ms": 0.036
+      "p95Ms": 0.03
     },
     {
       "name": "signature-fetch-key",
       "loops": 500,
-      "avgMs": 0.006,
-      "medianMs": 0.004,
-      "p95Ms": 0.009
+      "avgMs": 0.007,
+      "medianMs": 0.005,
+      "p95Ms": 0.01
     }
   ]
 }

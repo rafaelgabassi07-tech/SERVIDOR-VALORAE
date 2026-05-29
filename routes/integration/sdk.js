@@ -3,7 +3,7 @@ import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute } from '../../lib/http/route.js';
 
 const jsClient = `export async function getValoraeAsset(ticker, options = {}) {
-  const baseUrl = (options.baseUrl || 'https://servidor-valorae.vercel.app').replace(/\/$/, '');
+  const baseUrl = (options.baseUrl || 'https://servidor-valorae.vercel.app').replace(/\\/$/, '');
   const url = new URL(baseUrl + '/api/v1/asset');
   const controller = new AbortController();
   const timeoutMs = Math.max(1500, Math.min(Number(options.timeoutMs || 12000), 30000));

@@ -1,3 +1,13 @@
+# v21.12.35 — Monitor Data Fill
+
+- Corrige a sensação de páginas vazias no Monitor Proxy sem inflar tráfego real.
+- Página **Integração e guia** passa a consumir endpoints reais de manifesto, SDK, prompts, readiness e fontes.
+- Página **Benchmark e diagnóstico** passa a executar health check automático dos endpoints do plano e benchmark quick na abertura.
+- Corrige SDK JavaScript retornado por `/api/v1/integration/sdk`, preservando `replace(/\/$/, '')`.
+- Classifica endpoints de integração como telemetria interna quando usados pelo próprio painel.
+- Adiciona teste `monitor-data-fill-v21-12-35.test.js` e auditoria `docs/AUDITORIA_MONITOR_DATA_FILL_V21.12.35.md`.
+- Mantém `lib/Valorae-engine.js` como núcleo central e contrato público `VALORAE_ENGINE_VERSION = 21.12.0`.
+
 # v21.12.34 — Audited Launch Candidate
 
 - Corrige marcador legado não visual `Engine Core` no painel para restaurar compatibilidade com auditoria `audit:engine-performance`.
