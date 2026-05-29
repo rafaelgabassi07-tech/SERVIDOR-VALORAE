@@ -52,7 +52,37 @@
   color: var(--warn) !important;
   border-color: rgba(226,179,64,0.4) !important;
 }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+.modal-overlay.hidden {
+  display: none !important;
+  opacity: 0;
+}
+.modal-content {
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 24px;
+  width: 90%;
+  max-width: 440px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.6);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-content h3 { margin: 0 0 8px; font-size: 18px; letter-spacing: -0.02em; }
+.modal-content .sub { font-size: 14px; line-height: 1.5; }
 </style>
+
 
 </head>
 <body>
@@ -203,7 +233,24 @@ document.addEventListener('click', (e) => {
   }
 });
 
-$('apiBaseBtn').onclick=()=>{const cur=apiBase()||location.origin,v=prompt('Origem da API/Vercel que esta página deve monitorar:',cur);if(v!==null){localStorage.setItem('valorae:apiBase',String(v).replace(/\/$/,''));refresh({force:true})}};
+
+$('apiBaseBtn').onclick=()=>{
+  const cur = apiBase() || location.origin;
+  $('apiBaseInput').value = cur;
+  $('apiConfigModal').classList.remove('hidden');
+  $('actionMenu').classList.remove('show');
+};
+$('apiConfigCancel').onclick=()=>{
+  $('apiConfigModal').classList.add('hidden');
+};
+$('apiConfigSave').onclick=()=>{
+  const v = $('apiBaseInput').value.trim();
+  if(v) {
+    localStorage.setItem('valorae:apiBase', String(v).replace(/\/$/, ''));
+    refresh({force:true});
+  }
+  $('apiConfigModal').classList.add('hidden');
+};
 $('refreshBtn').onclick=()=>{
        $('actionMenu').classList.remove('show');
        $('refreshBtn').classList.add('active-state');
@@ -224,5 +271,20 @@ window.addEventListener('resize',()=>state.metrics&&drawAll(derive(state.metrics
 const initial=(location.hash||'').replace('#','')||localStorage.getItem('valorae:monitorPage');go(initial||'command');refresh({silent:true});state.timer=setInterval(()=>refresh({silent:true}),3000);
 })();
 </script>
+
+<div id="apiConfigModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <h3>Configurar Origem da API</h3>
+    <p class="sub">Qual origem da API/Vercel esta página deve monitorar?</p>
+    <div style="margin: 16px 0;">
+      <input type="text" id="apiBaseInput" class="input" style="width: 100%;" placeholder="https://seu-app.vercel.app">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap: 12px;">
+      <button class="btn" id="apiConfigCancel">Cancelar</button>
+      <button class="btn primary" id="apiConfigSave">Salvar e Atualizar</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
