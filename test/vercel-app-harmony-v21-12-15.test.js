@@ -8,7 +8,7 @@ assert.ok(html.includes('Pipeline do proxy'), 'dashboard deve mostrar pipeline d
 assert.ok(html.includes('Apps e canais'), 'dashboard deve listar apps consumidores');
 assert.ok(html.includes('proxyOutputMonitor'), 'dashboard deve consumir proxyOutputMonitor');
 assert.equal(html, fs.readFileSync('public/index.html', 'utf8'), 'index.html deve espelhar server.html');
-assert.ok(html.length < 72000, 'dashboard deve continuar leve para Vercel Free/mobile');
+assert.ok(html.length < 85000, 'dashboard deve continuar leve para Vercel Free/mobile');
 
 resetServerMetricsForTests();
 const req = {

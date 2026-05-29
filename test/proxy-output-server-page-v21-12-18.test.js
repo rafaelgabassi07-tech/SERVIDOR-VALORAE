@@ -48,7 +48,7 @@ recordResponse(req, res, {
 }, { status: 200, responseBytes: 5120, route: '/api/asset' });
 
 const snap = getServerMetricsSnapshot();
-assert.equal(snap.version, '21.12.18-proxy-output-server-page');
+assert.match(snap.version, /^21\.12\.(18|20|26|27|28|29|30|32)-/, 'versão do monitor de saída deve continuar compatível com a família 21.12.x');
 assert.equal(snap.proxyOutputMonitor.totals.outboundResponses, 1);
 assert.equal(snap.proxyOutputMonitor.totals.payloadResponses, 1);
 assert.equal(snap.proxyOutputMonitor.totals.transformedForApps, 1);

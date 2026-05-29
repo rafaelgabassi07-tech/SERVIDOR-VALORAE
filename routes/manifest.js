@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   return sendJson(req, res, {
     version: ValoraeEngine.version,
     release: '21.12.0',
-    codename: 'Mature Final Release Free',
+    codename: 'Launch Contract Hardening',
     requestId: route.requestId,
     name: 'Valorae Proxy',
     goal: 'Proxy HTTP/JSON serverless para GitHub/Vercel gratuito.',
@@ -24,11 +24,13 @@ export default async function handler(req, res) {
     capabilities: {
       apiVersions: ['v1','v2'],
       envelopeV2: true,
-      payloadControl: ['fields','dataFields','lean','maxItems'],
+      payloadControl: ['fields','dataFields','lean','maxItems','view=app'],
       views: Object.keys(VIEW_ALIASES),
       viewAliases: VIEW_ALIASES,
       profiles: Object.keys(performanceCapabilities().profiles || {}),
       profileAliases: PROFILE_ALIASES,
+      launchEndpoints: ['/api/v1/asset?view=app','/api/v1/asset/coverage','/api/v1/asset/fundamentals','/api/v1/integration/sdk','/api/v1/integration/prompts'],
+      optionalAuth: ['VALORAE_CLIENT_KEYS','VALORAE_REQUIRE_CLIENT_AUTH','x-valorae-app-id','x-valorae-client-key','x-valorae-signature'],
       portfolio: ['summary','allocation','risk','income','rebalance','history','events','transactions','intelligence','narrative','positionRanking'],
       reliability: ['sourceDrift','parserResilience','schemaStability','cacheStats','ready','manifest','sourceStatus','qualityMatrix','schemaCatalog'],
       scraperCompat: ['multi-selector','batch-dedup','selector-coverage','compat/scraper4','selector-fallbacks','source-drift-fixtures'],

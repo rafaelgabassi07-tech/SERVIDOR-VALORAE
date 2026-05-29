@@ -1,3 +1,77 @@
+# v21.12.32 — Launch Performance Optimizer
+
+- Adiciona `engineRuntimeProfiler`, medindo fontes, fallback, montagem de contratos, guardrails, payload/view e gargalos por resposta.
+- Adiciona `engineLaunchGate`, gate final para lançamento pessoal com score, decisão, bloqueios, checklist e regras anti-tela-vazia.
+- Cria `/api/v1/engine/performance` para auditar runtime e payload por ticker sem ferramentas pagas.
+- Atualiza `view=app` para preservar `engineRuntimeProfiler` e `engineLaunchGate` compactos no contrato oficial Web/APK.
+- Atualiza `/api/server/metrics`, OpenAPI, Fields, Manifesto de integração, metadata e teste `launch-performance-optimizer-v21-12-32`.
+- Mantém `lib/Valorae-engine.js` como núcleo central e preserva `VALORAE_ENGINE_VERSION = 21.12.0`.
+
+# v21.12.31 — Monitor Experience Redesign
+
+- Reformula o Monitor Proxy como cockpit executivo de 6 áreas principais, reduzindo páginas visíveis e poluição visual.
+- Consolida páginas antigas em blocos claros: operação, saída, performance/Vercel, qualidade, integração/guia e diagnóstico/benchmark.
+- Mantém compatibilidade com hashes antigos por aliases internos, sem expor dezenas de páginas no menu.
+- Preserva feed fiel de saída do proxy com rota, app, canal, status, bytes, roots, métricas, gráficos, dividendos e preview do payload.
+- Atualiza PWA metadata, service worker, README e teste `monitor-experience-redesign-v21-12-31`.
+
+# v21.12.30 — Final Personal Launch Cleanup
+
+- Corrige a limpeza final para lançamento pessoal controlado: `.gitignore`, marcador explícito de readiness em `public/index.html` e `audit:release` válido.
+- Define `view=app` como padrão real de `/api/asset` e `/api/assets`, reduzindo payload e alinhando Web/APK ao contrato oficial.
+- Atualiza `VALORAE_SERVER_METRICS_VERSION` para `21.12.30-final-personal-launch-monitor` e readiness pessoal para `21.12.30-final-personal-launch-cleanup`.
+- Sincroniza metadata, manifest PWA, service worker, README, OpenAPI/Fields via contratos já existentes e teste `final-personal-launch-cleanup-v21-12-30`.
+- Mantém `lib/Valorae-engine.js` como núcleo central e preserva `VALORAE_ENGINE_VERSION = 21.12.0`.
+
+# v21.12.29 — Operational Resilience Suite
+
+- Adiciona `fieldConsistencyGuard` para auditar consistência de campos financeiros, valores fora de escala e sinais suspeitos por payload.
+- Adiciona `payloadBudget` para medir peso por raiz e orientar `view=app`, `compact`, `standard` e `full`.
+- Adiciona `assetActionPlan` para orientar renderização, cache, banner e próximos endpoints no app.
+- Cria endpoints `/api/v1/asset/quality`, `/api/v1/asset/action-plan` e `/api/v1/integration/manifest`.
+- Atualiza o monitor com páginas Consistência de campos, Orçamento de payload, Plano de ação e Manifesto de integração.
+- Atualiza `/api/server/metrics` para capturar sinais novos em `proxyOutputMonitor.outputFeed[]`.
+- Mantém `lib/Valorae-engine.js` como núcleo central e preserva `VALORAE_ENGINE_VERSION = 21.12.0`.
+
+
+## v21.12.28 — Engine Maturity Performance Suite
+
+- Adicionado `assetIndicatorCoverage`: taxonomia oficial de indicadores por classe de ativo, com campos críticos/importantes/opcionais e cobertura por grupo.
+- Adicionado `engineMaturityBooster`: score de performance, precisão, confiabilidade e appSync por payload.
+- Criados endpoints `/api/v1/asset/indicators`, `/api/v1/fii/indicators` e `/api/v1/engine/maturity`.
+- Adicionado cache LRU no parser numérico central para acelerar normalização repetida de valores brasileiros.
+- Monitor do proxy ganhou páginas de Maturidade do Engine, Performance e Taxonomia de Indicadores.
+- Telemetria agora detecta `assetIndicatorCoverage` e `engineMaturityBooster` no feed de saída.
+- Mantido `lib/Valorae-engine.js` como núcleo central, sem desmembramento.
+
+
+## 21.12.21 — Proxy Monitor profissional
+
+- Interface totalmente repaginada em tons de verde e cinza.
+- Cabeçalho operacional sem teste de ticker.
+- Menu hambúrguer lateral organizado por categorias.
+- Novas páginas: Centro de comando, Feed, Gráficos, Rotas/apps, Pipeline, Vercel Runtime, Qualidade/cache, Benchmark/testes, Integração e Diagnóstico bruto.
+- Cada página recebeu dois blocos explicativos para orientar leitura dos dados.
+- Benchmark movido para página própria e ampliado com quick/deep, probes de rede e relatório interpretável.
+- Novo logotipo SVG/PWA alinhado à proposta de proxy e distribuição.
+
+## 21.12.20 — Proxy Output Real Capture
+
+- Corrige a causa de o painel mostrar saídas apenas quando a busca de teste era feita dentro do app.
+- Rotas de dados agora nunca são ignoradas por `x-valorae-telemetry: dashboard/test/probe`; somente rotas internas/admin são isoladas.
+- Garante que cada resposta de dados enviada pelo proxy vire item em `proxyOutputMonitor.outputFeed[]` com rota, app, canal, status, bytes, raízes JSON, métricas, gráficos, dividendos e preview.
+- Atualiza logotipo visual e ícones PWA para azul.
+- Adiciona `test/proxy-output-real-capture-v21-12-20.test.js` e relatório `docs/AUDITORIA_PROXY_OUTPUT_REAL_CAPTURE_V21.12.20.md`.
+
+
+## 21.12.19 — Proxy Output Hamburger Pages
+
+- Reorganiza a página-servidor do proxy em menu hambúrguer lateral com páginas internas para visão geral, feed, gráficos, rotas/apps, pipeline e diagnóstico.
+- Reforça `refresh()` com timeout, fallback em `localStorage`, modo pausado e polling silencioso.
+- Reforça `probe()` para gerar saída real em `/api/asset` com canal `proxy-output-probe` e diagnóstico de raízes retornadas.
+- Adiciona filtros do feed por texto, status, raiz de payload e ordenação por recente/bytes/latência.
+- Adiciona ferramentas de exportação JSON/CSV e limpeza de filtros.
+
 
 ## 21.12.18 — Proxy Output Server Page
 
@@ -74,6 +148,19 @@
 - OpenAPI, catálogo `/api/fields`, tipagens e testes atualizados.
 
 # Changelog
+
+## v21.12.27 — Investidor10 Asset Class Contracts
+
+- Adicionado `assetClassContract` ao payload do Engine.
+- Ações agora têm grupos especializados: perfil, cotação, valuation, rentabilidade, dívida, dividendos, demonstrações e pares.
+- FIIs agora têm grupos especializados: perfil, rendimentos, patrimonial, portfólio, vacância, cotistas, comunicados, checklist e pares.
+- Adicionado `fieldConfidence` por campo com valor, unidade, fonte, path, confiança e cross-check.
+- Criados endpoints dedicados de Ação e FII para integração Web/APK.
+- Ampliado o normalizador universal para aliases de indicadores financeiros do Investidor10.
+- Monitor ganhou páginas: Contrato Ação/FII, Páginas de Ação, Páginas de FII e Fonte por campo.
+- `/api/server/metrics` agora detecta `hasAssetClassContract`, `assetClassScore`, `assetClassState`, grupos e campos especializados.
+- OpenAPI, Fields, README, metadata, manifest e service worker sincronizados.
+
 
 ## v21.12.0 — Router único Vercel e recuperação de métricas ao vivo
 
@@ -350,3 +437,53 @@
 - Novo dashboard financeiro focado em `/api/asset`, métricas, gráficos canvas, diagnósticos e fallback local.
 - Corrige o problema visual de tela vazia quando as fontes retornam payload parcial.
 - Mantém compatibilidade com auditorias e Vercel Free.
+
+## v21.12.22 - Visual polish e engine performance
+
+- Reduz altura e poluição visual do cabeçalho do monitor.
+- Reorganiza o visual com uma hierarquia mais limpa em verde/cinza.
+- Mantém o teste de ticker apenas na página Benchmark e testes.
+- Adiciona pausa automática de polling quando a aba está oculta.
+- Otimiza o `Valorae-engine.js` com empacotamento de cache em passagem única.
+- Adiciona orçamento de séries de gráficos por perfil/view para acelerar respostas compactas/mobile.
+- Registra `metrics.engineOptimizations` e `performance.optimizations` para auditoria do engine.
+- Adiciona documentação `AUDITORIA_VISUAL_ENGINE_PERFORMANCE_V21.12.22.md`.
+
+
+## v21.12.23 - Engine assembly sync
+
+- Adiciona plano interno `metrics.engineAssembly` no Valorae Engine.
+- Otimiza montagem de payload para `compact/mobile/watchlist/list/fast/portfolio`, evitando contratos pesados que seriam removidos depois.
+- Preserva sempre `appPayload`, `appSyncEnvelope`, `appMobileSnapshot` e `appResponseIntegrity` para evitar quebra no app.
+- Adiciona contratos leves sincronizados para renderização e diagnóstico em modo mobile.
+- Atualiza monitor web para mostrar política de performance e sincronização do engine na página Qualidade e cache.
+- Adiciona teste `engine-assembly-sync-v21-12-23`.
+
+## v21.12.24 - Efficiency precision ecosystem
+
+- Adiciona `lib/quality/engine-efficiency.js` com auditoria leve de eficiência, precisão, confiabilidade, entrega e árvore resumida do ecossistema.
+- Integra `engineEfficiency` ao payload do Valorae Engine sem desmembrar `lib/Valorae-engine.js`.
+- Otimiza o engine com cache memoizado de plano de montagem e snapshot único de runtime stats por resposta.
+- Mantém `appPayload`, `appSyncEnvelope`, `appMobileSnapshot` e `appResponseIntegrity` sincronizados para evitar quebras no app.
+- Repagina o monitor como documentação viva do proxy, adicionando páginas de Prompts prontos para IA, Funcionalidades, Tecnologias e Árvore de módulos.
+- Mantém a página-servidor fiel ao `proxyOutputMonitor.outputFeed[]`, exibindo respostas que saem do proxy para apps/usuários.
+- Atualiza catálogo de campos, OpenAPI, PWA cache, metadata e teste de regressão `engine-ecosystem-surprise-v21-12-24`.
+
+## 21.12.25 — Launch hardening
+
+- Adicionado `view=app` como contrato oficial enxuto para Web/APK.
+- Adicionados `/api/v1/asset/coverage` e `/api/v1/asset/fundamentals`.
+- Adicionados `/api/v1/integration/sdk` e `/api/v1/integration/prompts`.
+- Adicionada autenticação leve opcional por app/cliente, sem quebrar deploy aberto.
+- Monitor atualizado com página de prontidão de lançamento e instruções de integração.
+
+## v21.12.26 — Personal Maturity Controlled Release
+
+- Adicionado `personalReleaseReadiness` em `/api/server/metrics`.
+- Criado `/api/v1/release/readiness` e alias `/api/v1/personal/readiness`.
+- Criada página `Maturidade pessoal` no monitor do proxy.
+- Atualizado `VALORAE_SERVER_METRICS_VERSION` para `21.12.26-personal-maturity-monitor`.
+- README/metadata/manifest/OpenAPI/fields sincronizados para uso pessoal e pessoas próximas.
+- Adicionadas variáveis `VALORAE_DEFAULT_ASSET_VIEW` e `VALORAE_DEFAULT_ASSETS_VIEW`.
+- Mantido contrato público do engine em `21.12.0` para compatibilidade.
+

@@ -2,6 +2,7 @@ import { ValoraeEngine, getValoraeRuntimeStats } from '../../lib/Valorae-engine.
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute } from '../../lib/http/route.js';
 import { buildSourceReliabilityMatrix } from '../../lib/quality/data-quality.js';
+import { buildPersonalReleaseReadiness } from '../../lib/release/personal-maturity.js';
 
 export default async function handler(req, res) {
   req.__valoraeInternalTelemetry = true;
@@ -10,6 +11,22 @@ export default async function handler(req, res) {
   const runtime = getValoraeRuntimeStats();
   const providers = buildSourceReliabilityMatrix(runtime);
   const degraded = providers.filter(p => ['cooldown','degraded'].includes(p.status));
+  const classes = {
+    api: providers.filter(p => /Yahoo|BCB|BancoCentral|GoogleNews/i.test(p.name || p.provider || '')).map(p => p.name || p.provider),
+    scrape: providers.filter(p => /Investidor|StatusInvest|ValoraeScrape/i.test(p.name || p.provider || '')).map(p => p.name || p.provider),
+    fallback: ['YahooChart', 'cached_stale_if_error', 'failure_cache'],
+    experimental: ['HTML selectors', 'internal Investidor10 APIs quando disponíveis'],
+  };
+  const personalReleaseReadiness = buildPersonalReleaseReadiness({ runtime, providers });
+  const launchReadiness = {
+    status: degraded.length ? 'attention' : 'ready',
+    freeOnly: true,
+    persistence: 'memory_per_serverless_instance',
+    auth: process.env.VALORAE_CLIENT_KEYS ? 'optional_keys_configured' : 'open_no_keys_configured',
+    recommendedProductionView: 'app',
+    requiredAppHeaders: ['x-valorae-app', 'x-valorae-channel', 'x-valorae-app-version'],
+    hardenedEndpoints: ['/api/v1/asset?view=app', '/api/v1/asset/coverage', '/api/v1/asset/fundamentals', '/api/v1/source/status'],
+  };
   return sendJson(req, res, {
     version: ValoraeEngine.version,
     requestId: route.requestId,
@@ -17,6 +34,9 @@ export default async function handler(req, res) {
     freeOnly: true,
     checkedAt: new Date().toISOString(),
     providers,
+    sourceClasses: classes,
+    launchReadiness,
+    personalReleaseReadiness,
     sourceReliability: {
       okCount: providers.filter(p => !['cooldown','degraded'].includes(p.status)).length,
       degradedCount: degraded.length,

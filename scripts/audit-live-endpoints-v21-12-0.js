@@ -17,7 +17,7 @@ for (const route of ["'/cache/stats'", "'/source/status'", "'/server/tests'", "'
 }
 check('metrics isolates cache stats', has('lib/observability/server-metrics.js', '/api/cache/stats') && has('lib/observability/server-metrics.js', '/api/v1/cache/stats'), 'cache/stats não entra como tráfego real.');
 check('metrics isolates source status', has('lib/observability/server-metrics.js', '/api/source/status') && has('lib/observability/server-metrics.js', '/api/v1/source/status'), 'source/status não entra como tráfego real.');
-check('metrics isolates test header', has('lib/observability/server-metrics.js', 'x-valorae-telemetry') && has('lib/observability/server-metrics.js', 'dashboard|internal|test'), 'Probes do dashboard são ignorados.');
+check('metrics captures data routes even with telemetry header', has('lib/observability/server-metrics.js', 'Rotas de dados nunca são ignoradas') && has('lib/observability/server-metrics.js', 'isInternalTelemetryRoute(route)'), 'Somente rotas internas são isoladas; respostas de dados continuam aparecendo no feed mesmo com header dashboard/test/probe.');
 check('single app has test center', has('public/server.html', 'id="page-tests"') && has('public/server.html', '/api/cache/stats') && has('public/server.html', '/api/source/status'), 'Testes ficam dentro do app principal.');
 check('legacy tests redirect only', has('public/tests.html', '/server.html#tests') && fs.readFileSync('public/tests.html','utf8').length < 1000, '/tests.html não é app separado.');
 

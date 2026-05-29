@@ -55,7 +55,7 @@ export default async function handler(req, res) {
       valoraeScrapeUrl: resolveSelfScrapeUrl(req, input),
       cache: !(boolParam(input.nocache || input.refresh) || falseParam(input.cache)),
       bypassCache: boolParam(input.nocache || input.refresh),
-      view: input.view || 'compact',
+      view: input.view || process.env.VALORAE_DEFAULT_ASSETS_VIEW || 'app',
       includeQuality: input.includeQuality === undefined ? true : boolParam(input.includeQuality, true),
       profile: input.profile || input.performance,
     }, { endpoint: 'assets', batchSize: valid.length });

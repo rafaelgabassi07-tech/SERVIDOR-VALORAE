@@ -121,6 +121,52 @@ function buildProbePlan(baseUrl) {
   ].map(item => ({ ...item, absoluteUrl: `${baseUrl}${item.url}` }));
 }
 
+
+function buildBenchmarkReport({ bench = {}, checks = [], score = 0, durationMs = 0, runtime = {}, mode = 'quick' } = {}) {
+  const b = bench.benchmark || {};
+  const cases = Object.values(b).map(item => ({
+    name: item.name,
+    p95Ms: item.p95Ms,
+    avgMs: item.avgMs,
+    targetMs: item.name?.includes('selector') ? 8 : item.name?.includes('normalizador') ? 3 : 6,
+    status: Number(item.p95Ms || 0) <= (item.name?.includes('selector') ? 8 : item.name?.includes('normalizador') ? 3 : 6) ? 'ok' : 'attention',
+  }));
+  const slowest = [...cases].sort((a, b) => Number(b.p95Ms || 0) - Number(a.p95Ms || 0))[0] || null;
+  const failedChecks = checks.filter(c => !c.ok).map(c => ({ id: c.id, label: c.label, value: c.value || null }));
+  return {
+    mode,
+    score,
+    durationMs,
+    generatedAt: new Date().toISOString(),
+    health: score >= 85 ? 'healthy' : score >= 70 ? 'attention' : 'critical',
+    summary: {
+      totalCases: cases.length,
+      okCases: cases.filter(c => c.status === 'ok').length,
+      attentionCases: cases.filter(c => c.status !== 'ok').length,
+      failedChecks: failedChecks.length,
+      slowestCase: slowest,
+    },
+    targets: {
+      fastSelectorsP95Ms: 8,
+      normalizerP95Ms: 3,
+      chartSeriesP95Ms: 6,
+      expectedScore: 80,
+    },
+    cases,
+    failedChecks,
+    runtimeHints: {
+      engineState: runtime?.engineCore?.state || 'unknown',
+      cacheHitRatePercent: runtime?.engineCore?.scrapeResultHitRatePercent ?? runtime?.engineCore?.cacheHitRatePercent ?? null,
+      providersTracked: Array.isArray(runtime?.providers) ? runtime.providers.length : Object.keys(runtime?.providers || {}).length,
+    },
+    interpretation: [
+      'Use o modo quick para checagem operacional frequente dentro do monitor.',
+      'Use o modo deep antes de publicar deploys ou após mudanças em extratores/normalizadores.',
+      'P95 acima do alvo indica risco de UI lenta, payload atrasado ou maior consumo em serverless.',
+    ],
+  };
+}
+
 function recommendations({ checks = [], benchmark = {}, runtime = {} } = {}) {
   const out = [];
   if (checks.some(c => !c.ok)) out.push({ level: 'warn', title: 'Corrigir checks com atenção', detail: 'Execute a suíte novamente após corrigir os itens marcados em amarelo ou vermelho.' });
@@ -162,6 +208,7 @@ export default async function handler(req, res) {
   ];
   const score = scoreFromChecks(checks);
   const durationMs = round(performance.now() - started);
+  const benchmarkReport = buildBenchmarkReport({ bench, checks, score, durationMs, runtime, mode });
 
   return sendJson(req, res, {
     version: ValoraeEngine.version,
@@ -174,6 +221,7 @@ export default async function handler(req, res) {
     durationMs,
     checks,
     benchmark: bench.benchmark,
+    benchmarkReport,
     samples: bench.samples,
     network: {
       baseUrl,

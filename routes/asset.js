@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     }
 
     const type = input.type || inferAssetType(ticker);
-    const view = input.view || 'full';
+    const view = input.view || process.env.VALORAE_DEFAULT_ASSET_VIEW || 'app';
     const perfOptions = resolvePerformanceOptions({
       mode: input.mode || 'super',
       includeNews: boolParam(input.includeNews ?? input.news, false),

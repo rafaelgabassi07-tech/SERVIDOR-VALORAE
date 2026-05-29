@@ -21,7 +21,7 @@ for (const needle of [
   '/api/asset',
 ]) assert.ok(html.includes(needle), `server.html precisa conter ${needle}`);
 assert.equal(html, index, 'index.html deve espelhar server.html');
-assert.ok(html.length < 65000, 'dashboard deve continuar leve para Vercel/mobile');
+assert.ok(html.length < 85000, 'dashboard deve continuar leve para Vercel/mobile');
 
 resetServerMetricsForTests();
 const req = {

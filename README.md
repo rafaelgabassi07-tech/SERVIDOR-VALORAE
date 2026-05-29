@@ -1,170 +1,222 @@
-# Valorae Proxy v21.12.0 — Mature Final Release Free
+# VALORAE Proxy / Engine v21.12.32 — Launch Performance Optimizer
 
-Proxy HTTP/JSON para dados de investimentos, desenhado para **GitHub + Vercel gratuito**, com deploy simples, sem banco obrigatório, sem Redis/KV, sem storage externo, sem cron pago, sem WebSocket e sem worker permanente.
+O VALORAE Engine é um **Proxy + Engine de normalização + API + Monitor de saída** para uso pessoal e pessoas próximas. Ele foi desenhado para rodar em GitHub/Vercel gratuito, sem banco obrigatório, Redis/KV, storage externo, cron pago ou WebSocket.
 
-## Status de lançamento
+> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`.
 
-Esta versão adiciona uma vistoria minuciosa final para publicação no GitHub/Vercel hoje:
+## Objetivo desta versão
 
-- `npm run verify` valida sintaxe, testes, contrato TypeScript/SDK sem `tsc`, guardrails free-only, rotas, versão, release readiness, auditoria minuciosa e smoke.
-- `npm run build` simula separadamente o build Vercel sem dependências externas obrigatórias.
-- `/api/v1/ready` informa se o deploy está pronto sem chamar fontes externas.
-- `/api/v1/manifest` expõe capacidades, rotas, aliases, política free-only e recursos de carteira.
-- `npm run audit:release` verifica arquivos essenciais, ausência de dependências obrigatórias e contrato de publicação.
-- `npm run audit:minutiae` valida detalhes que costumam passar batido: imports locais, handlers default, `HEAD`/query e normalização de path.
-- `npm run audit:final` valida maturidade final: `fields/dataFields` com warnings, `scrapeUrl` exato, token admin via query restrito e rate limit efetivo em produção.
+Esta rodada aprofunda a maturidade operacional do VALORAE para uso pessoal e pessoas próximas: adiciona profiler de runtime por etapa, gate final de lançamento pessoal, endpoint dedicado de performance e sincronização do contrato `view=app`, mantendo simplicidade, Vercel Free e compatibilidade com Web/APK.
 
-## Arquitetura
 
-O VALORAE roda com apenas uma Function física na Vercel:
+
+### Novidades v21.12.32
+
+- Novo `engineRuntimeProfiler`: mede fontes, fallbacks, pós-processamento, notícias, montagem base, contratos, guardrails e view aplicada.
+- Novo `engineLaunchGate`: consolida runtime, maturidade, integridade, consistência, orçamento de payload e plano de ação em uma decisão simples para o app.
+- Novo endpoint `/api/v1/engine/performance?ticker=PETR4&view=app` para localizar gargalos antes de liberar telas no Web/APK.
+- `view=app` agora preserva `engineRuntimeProfiler` e `engineLaunchGate` em formato compacto.
+- `/api/server/metrics` passa a detectar `engineRuntimeScore`, `engineLaunchGateScore`, decisão do gate e payloads prontos para uso pessoal.
+- Manifesto de integração atualizado para orientar apps a verificar `engineLaunchGate.decision` antes de substituir cache local.
+
+
+### Novidades v21.12.31
+
+- Monitor Proxy reformulado em **6 áreas principais**: Centro de comando, Saída do proxy, Performance e Vercel, Qualidade dos dados, Integração e guia, Benchmark e diagnóstico.
+- Redução de páginas visíveis e consolidação de informações antes espalhadas em várias telas.
+- Cabeçalho mais compacto, menu lateral mais limpo, hierarquia visual mais profissional e cards/gráficos com menos poluição.
+- Feed de saída preservado como fonte fiel: cada resposta do proxy continua mostrando rota, app, canal, status, bytes, roots, métricas, gráficos, dividendos e preview.
+- Páginas antigas continuam suportadas por aliases de hash para não quebrar atalhos: `#overview`, `#feed`, `#vercel`, `#maturity`, `#manifest`, `#tests` etc.
+- Integração, prompts para IA, funcionalidades, tecnologias e árvore de módulos foram condensados em uma página única de guia.
+
+
+### Novidades v21.12.30
+
+- Limpeza final para lançamento pessoal controlado: `npm run audit:release` passa junto com build, smoke, typecheck e auditorias free/Vercel.
+- `.gitignore` adicionado para impedir envio de `.env`, `.vercel`, builds, caches e material local de assinatura.
+- `public/index.html` agora aponta explicitamente `/api/ready` e `/api/v1/release/readiness`.
+- `view=app` virou o padrão real para `/api/asset` e `/api/assets` quando nenhuma view é informada.
+- Monitor, metadata, manifest, service worker e readiness pessoal sincronizados com o patch `21.12.30-final-personal-launch-cleanup`.
+- Mensagem operacional recomendada: para uso pessoal/pessoas próximas, mantenha `VALORAE_PERSONAL_MODE=true`, configure `VALORAE_PUBLIC_BASE_URL` e use client keys se compartilhar fora de rede confiável.
+
+### Novidades v21.12.29
+
+- Novo `fieldConsistencyGuard` no payload: detecta valores financeiros suspeitos, percentuais fora de escala, P/VP extremo e divergências sem apagar rastreabilidade.
+- Novo `payloadBudget`: mede peso aproximado por raiz, sugere `view=app`, `compact`, `standard` ou `full` conforme uso e ajuda a reduzir latência no APK/Web.
+- Novo `assetActionPlan`: transforma cobertura, precisão, integridade e cache em decisão simples para o app renderizar, manter snapshot ou mostrar aviso.
+- Novos endpoints:
+  - `/api/v1/asset/quality?ticker=PETR4`
+  - `/api/v1/asset/action-plan?ticker=PETR4`
+  - `/api/v1/integration/manifest`
+- Monitor ganhou páginas novas: **Consistência de campos**, **Orçamento de payload**, **Plano de ação** e **Manifesto de integração**.
+- `/api/server/metrics` agora detecta e distribui sinais de consistência, orçamento e decisão de ação no `proxyOutputMonitor.outputFeed[]`.
+- `view=app` passa a incluir, de forma compacta, `fieldConsistencyGuard`, `payloadBudget` e `assetActionPlan`.
+
+### Novidades v21.12.28
+
+- Nova taxonomia oficial de indicadores por classe de ativo em `assetIndicatorCoverage`.
+- Novo auditor `engineMaturityBooster` com scores de performance, precisão, confiabilidade e sincronização do app.
+- Novos endpoints:
+  - `/api/v1/asset/indicators?ticker=PETR4`
+  - `/api/v1/fii/indicators?ticker=HGLG11`
+  - `/api/v1/engine/maturity?ticker=PETR4`
+- Parser numérico com LRU interno para acelerar leituras repetidas de valores brasileiros como `R$ 4,2 bi`, `8,5 mi` e `9,87%`.
+- Monitor profissional com páginas novas: **Maturidade do Engine**, **Performance e processamento** e **Taxonomia de indicadores**.
+- `view=app` continua sendo a integração recomendada para Web/APK; `full/debug` fica reservado para auditoria.
+
+### Novidades v21.12.27
+
+- Novo `assetClassContract` no payload do Engine, com grupos especializados por classe de ativo.
+- Ações agora são organizadas como empresa: perfil, cotação, valuation, rentabilidade, dívida, dividendos, demonstrações e pares.
+- FIIs agora são organizados como fundo imobiliário: perfil, rendimentos, patrimonial, portfólio, vacância, cotistas, comunicados e checklist.
+- Novo mapa `fieldConfidence` por campo: valor, unidade, fonte, path, confiança e cross-check.
+- Novos endpoints de Ação:
+  - `/api/v1/asset/profile`
+  - `/api/v1/asset/valuation`
+  - `/api/v1/asset/profitability`
+  - `/api/v1/asset/debt`
+  - `/api/v1/asset/statements`
+  - `/api/v1/asset/peers`
+  - `/api/v1/asset/source-map`
+- Novos endpoints de FII:
+  - `/api/v1/fii/profile`
+  - `/api/v1/fii/income`
+  - `/api/v1/fii/patrimonial`
+  - `/api/v1/fii/portfolio`
+  - `/api/v1/fii/vacancy`
+  - `/api/v1/fii/communications`
+  - `/api/v1/fii/checklist`
+- Normalizador universal ampliado para nomes heterogêneos de indicadores, fundamentos, vacância, patrimônio, cotistas, ABL, dívida, margens e CAGR.
+- Monitor visual ganhou páginas de dados financeiros: contrato Ação/FII, páginas de Ação, páginas de FII e fonte por campo.
+
+### Mantido da v21.12.26
+
+- Endpoint de maturidade pessoal: `/api/v1/release/readiness`.
+- Alias: `/api/v1/personal/readiness`.
+- `/api/server/metrics` agora inclui `personalReleaseReadiness`.
+- `/api/v1/source/status` também expõe `personalReleaseReadiness`.
+- Monitor visual ganhou página **Maturidade pessoal**.
+- Versão interna do monitor corrigida para `21.12.26-personal-maturity-monitor`.
+- `README`, `metadata`, `manifest`, `.env.example`, OpenAPI e Fields sincronizados.
+- `VALORAE_DEFAULT_ASSET_VIEW` e `VALORAE_DEFAULT_ASSETS_VIEW` permitem escolher payload padrão sem quebrar compatibilidade.
+- SDK/prompts apontam para o novo checklist de maturidade.
+
+## Como integrar no Web/APK
+
+Use o contrato oficial:
 
 ```text
-api/router.js
+GET /api/v1/asset?ticker=PETR4&view=app
 ```
 
-Todo o roteamento real fica em `routes/_router.js`, com handlers internos em `routes/` e módulos auxiliares em `lib/`. O núcleo `lib/Valorae-engine.js` permanece como engine central.
+Fluxo recomendado no app:
 
-## Recursos principais
+1. Renderize primeiro `appMobileSnapshot`.
+2. Hidrate a tela com `appPayload`.
+3. Use `appSyncEnvelope` para decidir cache/snapshot.
+4. Use `appResponseIntegrity` para evitar tela vazia ou dados regressivos.
+5. Nunca apague o último snapshot bom quando `status=PARTIAL`, `renderSafe=false` ou `cacheSafe=false`.
 
-- Router interno `/api`, `/api/v1/*` e `/api/v2/*`.
-- Compatibilidade com URLs antigas via aliases.
-- Envelope v2 em `/api/v2/*` ou `?envelope=1`.
-- `/api/fields`, `/api/errors`, `/api/openapi`, `/api/v1/ready` e `/api/v1/manifest`.
-- `fields=`, `dataFields=`, `lean=1` e `maxItems=`, com `fieldWarnings` para campos inválidos ou inexistentes.
-- Views públicas: `instant`, `ultra`, `quote`, `card`, `wallet`, `detail`, `analysis`.
-- Profiles públicos: `instant`, `ultra`, `quote`, `card`, `wallet`, `analysis`.
-- Normalização financeira em `display/value/unit/source/confidence`.
-- Parser resilience, source drift detection, schema stability, quality, confidence e source report.
-- Compare intelligence com perfis `dividendos`, `conservador`, `crescimento`, `valor` e `rendaFii`.
-- Carteira com análise, risco, renda, rebalanceamento, histórico, transações, ranking, narrativa, metas e simulação de aporte.
-- Inspector gratuito em `/inspector.html`.
-- SDK TypeScript e SDK Android Java em `public/sdk/`.
-- Auditorias locais para free-only, functions físicas, rotas, versão, release readiness e smoke.
-
-## Endpoints essenciais
+Headers recomendados para o monitor:
 
 ```text
-/api/health
-/api/v1/ready
-/api/v1/manifest
-/api/v1/asset?ticker=PETR4&view=quote&profile=quote
-/api/v2/asset?ticker=PETR4&dataFields=ticker,normalized,quality
-/api/v1/assets?tickers=PETR4,GARE11&view=card&profile=card
-/api/v1/compare?tickers=PETR4,VALE3,PRIO3
-/api/v1/market/rankings?type=ACAO
-/api/v1/portfolio/analyze
-/api/v1/cache/stats
-/api/v1/scrape
-/api/v1/batch-scrape
-/api/fields
-/api/errors
-/api/openapi
+x-valorae-app: Meu App
+x-valorae-channel: android|web|watchlist|portfolio
+x-valorae-app-version: 1.0.0
+x-valorae-build: debug|release
 ```
 
-## Views e profiles
-
-Aliases públicos de `view`:
+## Endpoints principais
 
 ```text
-instant -> compact
-ultra -> compact
-quote -> compact
-card -> compact
-wallet -> standard
-detail -> full
-analysis -> full
+/api/v1/asset?ticker=PETR4&view=app
+/api/v1/assets?tickers=PETR4,GARE11&view=app
+/api/v1/asset/coverage?ticker=PETR4
+/api/v1/asset/fundamentals?ticker=PETR4
+/api/v1/asset/source-map?ticker=PETR4
+/api/v1/asset/valuation?ticker=PETR4
+/api/v1/fii/income?ticker=HGLG11
+/api/v1/fii/patrimonial?ticker=HGLG11
+/api/v1/fii/checklist?ticker=HGLG11
+/api/v1/source/status
+/api/v1/release/readiness
+/api/v1/integration/sdk
+/api/v1/integration/prompts
+/api/server/metrics
+/server.html
 ```
 
-Aliases públicos de `profile`:
+## Segurança para uso pessoal
+
+Por padrão, o projeto pode rodar aberto para rede confiável. Para compartilhar fora do seu círculo próximo, configure chaves:
+
+```env
+VALORAE_CLIENT_KEYS=meu-app:minha-chave-forte
+VALORAE_REQUIRE_CLIENT_AUTH=1
+```
+
+O app deve enviar:
 
 ```text
-instant -> instant
-ultra -> instant
-quote -> fast
-card -> fast
-wallet -> portfolio
-analysis -> deep
-balanced -> standard
-complete -> deep
+x-valorae-app-id: meu-app
+x-valorae-client-key: minha-chave-forte
 ```
+
+Também existe assinatura HMAC opcional via `x-valorae-signature` + `x-valorae-timestamp`.
+
+## Variáveis úteis
+
+```env
+VALORAE_PUBLIC_BASE_URL=https://servidor-valorae.vercel.app
+VALORAE_PERSONAL_MODE=true
+VALORAE_DEFAULT_ASSET_VIEW=app
+VALORAE_DEFAULT_ASSETS_VIEW=app
+VALORAE_CLIENT_KEYS=
+VALORAE_REQUIRE_CLIENT_AUTH=false
+```
+
+Se quiser compatibilidade máxima com debug antigo, deixe `VALORAE_DEFAULT_ASSET_VIEW` vazio e peça `view=app` explicitamente nos apps.
+
+## Monitor do proxy
+
+Abra:
+
+```text
+/server.html
+```
+
+O painel mostra o que sai do proxy para os apps/usuários via:
+
+```text
+proxyOutputMonitor.outputFeed[]
+```
+
+Cada item mostra rota, app, canal, status, bytes, latência, raízes do JSON, métricas, gráficos, dividendos e preview limitado do payload entregue.
+
+Limitação honesta: no Vercel Free, o histórico do monitor é em memória por instância serverless. Se a função esfriar ou outra instância atender, o histórico pode reiniciar. Isso é aceitável para uso pessoal, mas não é telemetria comercial persistente.
 
 ## Validação local
 
 ```bash
-npm run verify
+npm run check
+npm test
+npm run build
+npm run audit:free
+npm run audit:version
+npm run typecheck
+npm run smoke
 ```
 
-O `verify` executa:
+Teste novo desta rodada:
 
-```text
-check -> test -> typecheck -> audit:functions -> audit:free -> audit:version -> audit:routes -> audit:release -> smoke -> build
+```bash
+node test/investidor10-class-contract-v21-12-27.test.js
+node test/engine-performance-maturity-v21-12-28.test.js
+node test/operational-resilience-suite-v21-12-29.test.js
+node test/final-personal-launch-cleanup-v21-12-30.test.js
+node test/personal-maturity-v21-12-26.test.js
 ```
 
-O `typecheck` é intencionalmente livre de dependência externa: valida contrato `.d.ts` e SDK TypeScript com script Node próprio, para evitar falha de build em Vercel limpa sem `typescript` instalado.
+## Classificação atual
 
-## Política free-only
-
-Esta build não usa dependências externas obrigatórias no `package.json` e evita tecnologias pagas/complexas no runtime:
-
-```text
-sem Redis
-sem Vercel KV
-sem banco obrigatório
-sem Supabase/Firebase/Mongo/Postgres/Prisma
-sem storage externo obrigatório
-sem cron pago
-sem WebSocket
-sem worker permanente
-```
-
-O cache padrão é em memória, limitado e compatível com instâncias serverless quentes.
-
-## Deploy Vercel
-
-1. Suba o repositório no GitHub.
-2. Importe na Vercel.
-3. Use Node.js 20+.
-4. Não configure banco, Redis, KV ou storage.
-5. Configure `VALORAE_PUBLIC_BASE_URL` somente se quiser URL pública fixa para self-scrape/links.
-6. Rode `/api/v1/ready` após o deploy.
-
-## Documentação
-
-```text
-docs/CHANGELOG.md
-docs/API_CONTRACT.md
-docs/DEPLOY_VERCEL_FREE.md
-docs/MIGRATION_GUIDE.md
-docs/WEB_TYPESCRIPT_GUIDE.md
-docs/ANDROID_JAVA_GUIDE.md
-docs/RELEASE_CHECKLIST.md
-docs/OPERATIONS.md
-docs/RELIABILITY_MATRIX.md
-```
-
-## Versão
-
-```json
-{
-  "version": "21.12.0",
-  "engine": "21.12.0"
-}
-```
-
-
-## v21.12.0 — melhorias recomendadas implementadas
-
-Esta versão aplica somente melhorias recomendadas e viáveis para o projeto atual:
-
-- catálogo seguro de ambiente em `/api/v1/env`;
-- catálogo de schemas em `/api/v1/schema`;
-- status local de fontes em `/api/v1/source/status`;
-- CORS strict opcional via `VALORAE_CORS_STRICT=1`;
-- limites de URL/query para evitar abuso em serverless;
-- matriz de qualidade por ativo (`dataQualityMatrix`);
-- `sourceReliability` por provider;
-- carteira com `healthScore`, `incomeStabilityScore` e `dividendCoverage`;
-- fixtures extras para ação, ETF, BDR, fonte bloqueada, Yahoo parcial/vazio/429 e Google News vazio/malformado;
-- docs de ambiente, troubleshooting, arquitetura, security e contributing.
-
-Continuam fora por decisão de arquitetura: banco, Redis/KV, storage externo, cron pago, WebSocket, worker permanente, frameworks pesados e renda fixa avançada.
+Para o objetivo real — uso pessoal e pessoas próximas — o projeto está em **Release Candidate maduro com fundamentos mais profundos**. A maior evolução desta versão é estrutural: o Engine deixa de tratar todos os ativos como uma massa genérica e passa a entregar contratos coerentes para Ação e FII.
