@@ -1,3 +1,20 @@
+# v21.12.34 — Audited Launch Candidate
+
+- Corrige marcador legado não visual `Engine Core` no painel para restaurar compatibilidade com auditoria `audit:engine-performance`.
+- Mantém `public/index.html` e `public/server.html` espelhados.
+- Adiciona auditoria final de lançamento pessoal com resultados de testes, auditorias e benchmarks.
+- Adiciona benchmark local de endpoints em `reports/benchmark-endpoints-v21.12.34.json`.
+- Mantém contrato público `VALORAE_ENGINE_VERSION = 21.12.0` e compatibilidade com Vercel Free.
+
+# v21.12.33 — Personal Launch Polish
+
+- Refina CORS para integração Web/APK com headers oficiais `x-valorae-*` sem exigir infraestrutura paga.
+- Expõe headers operacionais importantes ao navegador: cache, auth mode, bytes, source status, rate limit e versão do engine.
+- Endurece `server.js` para validação local com limite de corpo em streaming, erro claro de JSON inválido e headers estáticos de segurança.
+- Atualiza `/api/v1/integration/sdk` com timeout, `profile=fast`, headers de versão/build e helper de cache seguro.
+- Adiciona auditoria `docs/AUDITORIA_PERSONAL_LAUNCH_POLISH_V21.12.33.md` com diagnóstico de fase final e checklist de lançamento hoje.
+- Mantém contrato público `VALORAE_ENGINE_VERSION = 21.12.0` e patch runtime v21.12.32 para compatibilidade.
+
 # v21.12.32 — Launch Performance Optimizer
 
 - Adiciona `engineRuntimeProfiler`, medindo fontes, fallback, montagem de contratos, guardrails, payload/view e gargalos por resposta.

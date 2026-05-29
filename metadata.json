@@ -1,13 +1,13 @@
 {
-  "name": "VALORAE Proxy Server v21.12.0",
+  "name": "VALORAE Proxy Server v21.12.34",
   "description": "Otimização profunda do Valorae-engine.js para lançamento pessoal: profiler por etapa, gate final de lançamento, performance monitorada e app/monitor sincronizados.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
-  "version": "21.12.32",
-  "release": "21.12.32-launch-performance-optimizer",
-  "latestInternalPatch": "21.12.32-launch-performance-optimizer",
+  "version": "21.12.34",
+  "release": "21.12.34-audited-launch-candidate",
+  "latestInternalPatch": "21.12.34-audited-launch-candidate",
   "features": [
     "engine runtime recommendations",
     "performance bottleneck detection",
@@ -92,12 +92,16 @@
     "readiness marker in index",
     "gitignore release hygiene",
     "personal launch checklist",
-    "partial data guidance"
+    "partial data guidance",
+    "audited-launch-candidate",
+    "engine-core-compatibility-marker",
+    "final-benchmark-report",
+    "release-gate-passed"
   ],
-  "codename": "launch-performance-optimizer",
-  "notes": "Adiciona engineRuntimeProfiler, engineLaunchGate, endpoint /api/v1/engine/performance e sincronização do contrato view=app com métricas de runtime e gate de lançamento pessoal.",
-  "generatedAt": "2026-05-28T21:35:29.471Z",
-  "versionLabel": "21.12.32-launch-performance-optimizer",
+  "codename": "audited-launch-candidate",
+  "notes": "Auditoria final de lançamento pessoal: 63/63 testes, build strict, smoke, auditorias complementares e benchmarks locais aprovados após correção de marcador legado Engine Core no painel.",
+  "generatedAt": "2026-05-29T13:04:00.000Z",
+  "versionLabel": "21.12.34-audited-launch-candidate",
   "tags": [
     "ai-prompts",
     "app-sync-preserved",
@@ -132,14 +136,19 @@
     "launch-gate",
     "engine-performance",
     "release-today",
-    "bottleneck-detection"
+    "bottleneck-detection",
+    "audited-rc",
+    "benchmark",
+    "launch-today",
+    "engine-core-marker"
   ],
-  "patch": "21.12.32-launch-performance-optimizer",
+  "patch": "21.12.34-audited-launch-candidate",
   "highlights": [
     "Novo engineRuntimeProfiler mede fontes, fallback, montagem de contratos, guardrails e peso final por resposta.",
     "Novo engineLaunchGate consolida integridade, consistência, payload, maturidade e runtime em decisão única para o app.",
     "Novo endpoint /api/v1/engine/performance expõe gargalos e recomendações sem exigir ferramentas pagas.",
     "view=app preserva profiler e gate compactos para Web/APK e Monitor Proxy.",
     "Monitor/server metrics passam a reconhecer runtime score, launch gate score e payloads prontos para lançamento pessoal."
-  ]
+  ],
+  "publicEngineContract": "21.12.0"
 }

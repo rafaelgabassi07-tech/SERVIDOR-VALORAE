@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const PORT = Number(process.env.PORT || 3000);
 const PUBLIC_DIR = path.join(__dirname, 'public');
+const MAX_LOCAL_BODY_BYTES = Number(process.env.VALORAE_MAX_BODY_BYTES || 512 * 1024);
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -22,6 +23,20 @@ const MIME_TYPES = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon'
 };
+
+function applyStaticSecurityHeaders(res, cacheControl = 'public, max-age=300') {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.setHeader('Cache-Control', cacheControl);
+}
+
+function sendText(res, statusCode, text) {
+  res.statusCode = statusCode;
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  applyStaticSecurityHeaders(res, 'no-store');
+  res.end(text);
+}
 
 const server = http.createServer((req, res) => {
   // Decorate response with Express/Vercel compat methods used by Valorae performance/http
@@ -40,10 +55,25 @@ const server = http.createServer((req, res) => {
   // Handle API routing
   if (pathname.startsWith('/api')) {
     let bodyData = [];
+    let bodyBytes = 0;
+    let rejectedBody = false;
     req.on('data', (chunk) => {
+      bodyBytes += chunk.length;
+      if (bodyBytes > MAX_LOCAL_BODY_BYTES) {
+        rejectedBody = true;
+        bodyData = [];
+        req.pause();
+        if (!res.writableEnded) {
+          res.statusCode = 413;
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.end(JSON.stringify({ status: 'ERROR', code: 'PAYLOAD_TOO_LARGE', error: `Payload muito grande. Limite local: ${MAX_LOCAL_BODY_BYTES} bytes.` }));
+        }
+        return;
+      }
       bodyData.push(chunk);
     });
     req.on('end', async () => {
+      if (rejectedBody) return;
       const buffer = Buffer.concat(bodyData);
       const text = buffer.toString('utf8');
       if (text) {
@@ -51,7 +81,10 @@ const server = http.createServer((req, res) => {
           try {
             req.body = JSON.parse(text);
           } catch {
-            req.body = {};
+            res.statusCode = 400;
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            res.end(JSON.stringify({ status: 'ERROR', code: 'INVALID_JSON', error: 'JSON inválido no corpo da requisição.' }));
+            return;
           }
         } else {
           req.body = text;
@@ -84,6 +117,7 @@ const server = http.createServer((req, res) => {
     const data = fs.readFileSync(path.join(PUBLIC_DIR, 'server.html'));
     res.statusCode = 200;
     res.setHeader('Content-Type', MIME_TYPES['.html']);
+    applyStaticSecurityHeaders(res, 'public, max-age=60');
     res.end(data);
     return;
   }
@@ -96,9 +130,7 @@ const server = http.createServer((req, res) => {
   // Security check to avoid path traversal and prefix tricks such as /public-evil.
   const relativeToPublic = path.relative(PUBLIC_DIR, targetPath);
   if (relativeToPublic.startsWith('..') || path.isAbsolute(relativeToPublic)) {
-    res.statusCode = 403;
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.end('Acesso Negado');
+    sendText(res, 403, 'Acesso Negado');
     return;
   }
 
@@ -119,9 +151,7 @@ const server = http.createServer((req, res) => {
           }
           
           // File actually not found, serve 404
-          res.statusCode = 404;
-          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-          res.end('Não encontrado');
+          sendText(res, 404, 'Não encontrado');
           return;
         }
 
@@ -129,6 +159,7 @@ const server = http.createServer((req, res) => {
         const mime = MIME_TYPES[ext] || 'application/octet-stream';
         res.statusCode = 200;
         res.setHeader('Content-Type', mime);
+        applyStaticSecurityHeaders(res, ext === '.html' ? 'public, max-age=60' : 'public, max-age=300');
         res.end(data);
       });
     };

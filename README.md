@@ -1,14 +1,31 @@
-# VALORAE Proxy / Engine v21.12.32 — Launch Performance Optimizer
+# VALORAE Proxy / Engine v21.12.34 — Audited Launch Candidate
 
 O VALORAE Engine é um **Proxy + Engine de normalização + API + Monitor de saída** para uso pessoal e pessoas próximas. Ele foi desenhado para rodar em GitHub/Vercel gratuito, sem banco obrigatório, Redis/KV, storage externo, cron pago ou WebSocket.
 
-> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`.
+> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`.
 
 ## Objetivo desta versão
 
 Esta rodada aprofunda a maturidade operacional do VALORAE para uso pessoal e pessoas próximas: adiciona profiler de runtime por etapa, gate final de lançamento pessoal, endpoint dedicado de performance e sincronização do contrato `view=app`, mantendo simplicidade, Vercel Free e compatibilidade com Web/APK.
 
 
+
+
+### Auditoria v21.12.34
+
+- Corrige marcador legado não visual `Engine Core` no painel sem alterar o contrato público do engine.
+- Preserva espelhamento `public/index.html` = `public/server.html`.
+- Adiciona relatório final `docs/AUDITORIA_FINAL_LANCAMENTO_PESSOAL_V21.12.34.md`.
+- Adiciona benchmark de endpoints `reports/benchmark-endpoints-v21.12.34.json`.
+- Resultado final: aprovado para lançamento pessoal após deploy e validação no domínio Vercel.
+
+### Novidades v21.12.33
+
+- CORS refinado para Web/APK: os headers `x-valorae-app`, `x-valorae-channel`, `x-valorae-app-version`, `x-valorae-build`, `x-valorae-app-id`, `x-valorae-client-key`, `x-valorae-signature` e `x-valorae-timestamp` agora ficam liberados por padrão para reduzir atrito na integração.
+- Headers operacionais expostos ao navegador: versão do engine, cache, política de cache, status de fonte, bytes de resposta, modo de autenticação e rate limit.
+- `server.js` endurecido para testes locais antes do deploy: limite de corpo em streaming, erro claro de JSON inválido e headers estáticos de segurança/cache.
+- `/api/v1/integration/sdk` atualizado com exemplo Web usando timeout, `profile=fast`, headers de versão/build e helper para manter o último snapshot bom quando o gate recomendar.
+- Nova auditoria `docs/AUDITORIA_PERSONAL_LAUNCH_POLISH_V21.12.33.md` com checklist objetivo para lançamento pessoal hoje.
 
 ### Novidades v21.12.32
 
@@ -219,4 +236,4 @@ node test/personal-maturity-v21-12-26.test.js
 
 ## Classificação atual
 
-Para o objetivo real — uso pessoal e pessoas próximas — o projeto está em **Release Candidate maduro com fundamentos mais profundos**. A maior evolução desta versão é estrutural: o Engine deixa de tratar todos os ativos como uma massa genérica e passa a entregar contratos coerentes para Ação e FII.
+Para o objetivo real — uso pessoal e pessoas próximas — o projeto está em **fase final de lançamento / Release Candidate maduro**. A versão atual já passou nas validações locais de sintaxe, testes, build, auditorias free-only, rota única Vercel, smoke e build estrito. O que ainda falta para lançar hoje é operacional: configurar variáveis mínimas no Vercel, publicar, abrir os endpoints de readiness no domínio final e testar dois tickers reais no ambiente publicado.

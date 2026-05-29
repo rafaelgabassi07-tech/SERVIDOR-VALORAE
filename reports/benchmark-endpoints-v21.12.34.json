@@ -1,0 +1,97 @@
+{
+  "generatedAt": "2026-05-29T13:03:58.790Z",
+  "mode": "local in-memory router benchmark; no HTTP/TLS overhead; source fetch may vary on deploy",
+  "results": [
+    {
+      "name": "ready",
+      "loops": 120,
+      "statusCodes": [
+        200
+      ],
+      "avgMs": 0.374,
+      "medianMs": 0.269,
+      "p95Ms": 0.979,
+      "minMs": 0.202,
+      "maxMs": 2.697,
+      "avgBytes": 719
+    },
+    {
+      "name": "release-readiness",
+      "loops": 80,
+      "statusCodes": [
+        200
+      ],
+      "avgMs": 1.074,
+      "medianMs": 0.98,
+      "p95Ms": 1.752,
+      "minMs": 0.677,
+      "maxMs": 3.78,
+      "avgBytes": 5103
+    },
+    {
+      "name": "source-status",
+      "loops": 80,
+      "statusCodes": [
+        200
+      ],
+      "avgMs": 0.461,
+      "medianMs": 0.404,
+      "p95Ms": 0.886,
+      "minMs": 0.322,
+      "maxMs": 1.43,
+      "avgBytes": 7418
+    },
+    {
+      "name": "manifest",
+      "loops": 80,
+      "statusCodes": [
+        200
+      ],
+      "avgMs": 0.319,
+      "medianMs": 0.294,
+      "p95Ms": 0.421,
+      "minMs": 0.242,
+      "maxMs": 1.141,
+      "avgBytes": 5671
+    },
+    {
+      "name": "server-metrics",
+      "loops": 80,
+      "statusCodes": [
+        200
+      ],
+      "avgMs": 1.085,
+      "medianMs": 1.037,
+      "p95Ms": 1.442,
+      "minMs": 0.819,
+      "maxMs": 1.888,
+      "avgBytes": 38814
+    },
+    {
+      "name": "engine-performance-petr4-fast",
+      "loops": 5,
+      "statusCodes": [
+        200
+      ],
+      "avgMs": 1.625,
+      "medianMs": 1.52,
+      "p95Ms": 2.118,
+      "minMs": 1.285,
+      "maxMs": 2.118,
+      "avgBytes": 7174
+    },
+    {
+      "name": "asset-petr4-app-fast",
+      "loops": 5,
+      "statusCodes": [
+        200
+      ],
+      "avgMs": 2.093,
+      "medianMs": 1.866,
+      "p95Ms": 2.958,
+      "minMs": 1.697,
+      "maxMs": 2.958,
+      "avgBytes": 31658
+    }
+  ]
+}
