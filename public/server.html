@@ -17,13 +17,49 @@
 /* legacy test tokens kept as non-visual compatibility markers: --top:58px; @media(max-width:760px); @media(max-width:430px); grid-template-columns:repeat(2,1fr); */
 
 /* legacy compatibility marker: Engine Core */
+
+.menu-popup {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 10px;
+  min-width: 170px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.menu-popup.show {
+  display: flex;
+}
+.menu-popup .btn {
+  width: 100%;
+  justify-content: flex-start;
+}
+.btn.active-state {
+  background: rgba(34,199,124,0.15) !important;
+  color: var(--green) !important;
+  border-color: rgba(34,199,124,0.4) !important;
+}
+.btn.paused-state {
+  background: rgba(226,179,64,0.15) !important;
+  color: var(--warn) !important;
+  border-color: rgba(226,179,64,0.4) !important;
+}
 </style>
+
 </head>
 <body>
 <header class="top">
   <button class="hamburger" id="menuBtn" aria-label="Menu lateral de páginas">☰</button>
   <div class="brand"><div class="logo" aria-label="Logotipo VALORAE Proxy">V</div><div><h1>VALORAE Proxy Monitor</h1><small>Monitor profissional do Valorae Engine · cockpit do proxy</small></div></div>
-  <div class="topActions"><span id="liveBadge" class="pill">● conectando</span><button class="btn" id="apiBaseBtn">API origem</button><button class="btn" id="refreshBtn">Atualizar</button><button class="btn" id="pauseBtn">Pausar</button></div>
+  <div class="topActions"><span id="liveBadge" class="pill">● conectando</span><div class="action-dropdown" id="topActionsContainer" style="position:relative"><button class="btn" id="menuToggleBtn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> Opções</button><div id="actionMenu" class="menu-popup"><button class="btn" id="apiBaseBtn">API origem</button><button class="btn" id="refreshBtn">Atualizar</button><button class="btn" id="pauseBtn">Pausar</button></div></div></div>
   <span class="hidden">Monitor profissional do Valorae Engine · VALORAE Proxy Server · 21.12.30-final-personal-launch-cleanup</span><span id="releaseReadinessMarker" class="hidden" data-readiness="/api/v1/release/readiness" data-ready="/api/ready">/api/ready · /api/v1/release/readiness</span>
 </header>
 <div class="mobileOverlay" id="overlay"></div>
@@ -156,8 +192,33 @@ async function runNetworkProbes(){if(!state.lastBench)await runBenchmark('quick'
 function exportJson(){const data=JSON.stringify(state.metrics||{},null,2);navigator.clipboard?.writeText(data);notice('JSON atual copiado para a área de transferência.','ok')}
 function exportCsv(){const header=['at','route','status','app','channel','ticker','bytesOut','latencyMs','payloadKind'];const lines=[header.join(',')].concat((state.filtered||state.feed).map(e=>header.map(k=>'"'+String(e[k]??(k==='app'?e.appName:k==='channel'?e.appChannel:'' )).replace(/"/g,'""')+'"').join(',')));navigator.clipboard?.writeText(lines.join('\n'));notice('CSV do feed copiado para a área de transferência.','ok')}
 function clearFilters(){['feedSearch','feedStatus','feedPayload'].forEach(id=>{if($(id))$(id).value=''});if($('feedSort'))$('feedSort').value='recent';applyFilters()}
+
+$('menuToggleBtn').onclick = (e) => {
+  e.stopPropagation();
+  $('actionMenu').classList.toggle('show');
+};
+document.addEventListener('click', (e) => {
+  if (!$('topActionsContainer').contains(e.target)) {
+    $('actionMenu').classList.remove('show');
+  }
+});
+
 $('apiBaseBtn').onclick=()=>{const cur=apiBase()||location.origin,v=prompt('Origem da API/Vercel que esta página deve monitorar:',cur);if(v!==null){localStorage.setItem('valorae:apiBase',String(v).replace(/\/$/,''));refresh({force:true})}};
-$('refreshBtn').onclick=()=>refresh({force:true});$('pauseBtn').onclick=()=>{state.paused=!state.paused;$('pauseBtn').textContent=state.paused?'Retomar':'Pausar';refresh({force:true})};
+$('refreshBtn').onclick=()=>{
+       $('actionMenu').classList.remove('show');
+       $('refreshBtn').classList.add('active-state');
+       setTimeout(()=>$('refreshBtn').classList.remove('active-state'), 400);
+       refresh({force:true});
+    };$('pauseBtn').onclick=()=>{
+      state.paused=!state.paused;
+      $('pauseBtn').textContent=state.paused?'Retomar':'Pausar';
+      if(state.paused) {
+        $('pauseBtn').classList.add('paused-state');
+      } else {
+        $('pauseBtn').classList.remove('paused-state');
+      }
+      refresh({force:true});
+    };
 $('probeBtn').onclick=probe;$('benchQuickBtn').onclick=()=>runBenchmark('quick');$('benchDeepBtn').onclick=()=>runBenchmark('deep');$('networkProbeBtn').onclick=runNetworkProbes;$('exportJsonBtn').onclick=exportJson;$('exportCsvBtn').onclick=exportCsv;$('clearFiltersBtn').onclick=clearFilters;
 window.addEventListener('resize',()=>state.metrics&&drawAll(derive(state.metrics)));document.addEventListener('visibilitychange',()=>{state.hidden=document.hidden;if(!state.hidden)refresh({force:true,silent:true})});
 const initial=(location.hash||'').replace('#','')||localStorage.getItem('valorae:monitorPage');go(initial||'command');refresh({silent:true});state.timer=setInterval(()=>refresh({silent:true}),3000);
