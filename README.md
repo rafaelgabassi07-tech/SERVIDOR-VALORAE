@@ -1,8 +1,8 @@
-# VALORAE Proxy / Engine v21.12.35 — Monitor Data Fill
+# VALORAE Proxy / Engine v21.12.36 — Monitor Scope Fix
 
 O VALORAE Engine é um **Proxy + Engine de normalização + API + Monitor de saída** para uso pessoal e pessoas próximas. Ele foi desenhado para rodar em GitHub/Vercel gratuito, sem banco obrigatório, Redis/KV, storage externo, cron pago ou WebSocket.
 
-> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`.
+> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`. Correção de escopo do painel: `21.12.36-monitor-scope-fix`.
 
 ## Objetivo desta versão
 
@@ -10,6 +10,13 @@ Esta rodada corrige a experiência funcional do monitor antes do lançamento pes
 
 
 
+
+### Novidades v21.12.36
+
+- Corrige falso erro `Não consegui ler /api/server/metrics: state is not defined`.
+- O endpoint de métricas estava saudável; a falha vinha de helpers visuais de filtros/selects fora do escopo do monitor.
+- Adiciona ponte segura `window.valoraeMonitorState`/`window.valoraeMonitorApplyFilters` sem expor ou alterar o engine.
+- Mantém `public/index.html` e `public/server.html` espelhados.
 
 ### Novidades v21.12.35
 

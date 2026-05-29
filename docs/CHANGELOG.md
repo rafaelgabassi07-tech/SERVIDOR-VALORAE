@@ -1,3 +1,10 @@
+# v21.12.36 — Monitor Scope Fix
+
+- Corrige falso erro recorrente `Não consegui ler /api/server/metrics: state is not defined`.
+- Causa raiz: helper visual de selects/filtros executava fora da closure principal do monitor e tentava ler `state` sem ponte explícita.
+- Solução: ponte segura `window.valoraeMonitorState` e `window.valoraeMonitorApplyFilters`; `updateFilterOptions()` passa a usar essa ponte.
+- Preserva `lib/Valorae-engine.js`, router único e compatibilidade Vercel Free.
+
 # v21.12.35 — Monitor Data Fill
 
 - Corrige a sensação de páginas vazias no Monitor Proxy sem inflar tráfego real.

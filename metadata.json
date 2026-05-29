@@ -1,13 +1,13 @@
 {
-  "name": "VALORAE Proxy Server v21.12.35",
-  "description": "Auditoria funcional do monitor: integração viva via API, diagnóstico automático de endpoints, benchmark quick autoexecutado e correção do SDK JavaScript.",
+  "name": "VALORAE Proxy Server v21.12.36",
+  "description": "Correção do bug de escopo do painel que causava falso erro state is not defined ao renderizar /api/server/metrics.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
-  "version": "21.12.35",
-  "release": "21.12.35-monitor-data-fill",
-  "latestInternalPatch": "21.12.35-monitor-data-fill",
+  "version": "21.12.36",
+  "release": "21.12.36-monitor-scope-fix",
+  "latestInternalPatch": "21.12.36-monitor-scope-fix",
   "features": [
     "Captura real de rotas de dados mesmo com x-valorae-telemetry dashboard/test/probe",
     "Configuração de origem API via apiBase/localStorage",
@@ -103,12 +103,16 @@
     "vercel_app_harmony",
     "version cleanup README metadata metrics",
     "view-aware-chart-series-budget",
-    "view=app official launch contract"
+    "view=app official launch contract",
+    "monitor-scope-fix",
+    "no-false-metrics-read-error",
+    "custom-select-scope-bridge",
+    "state-defined-ui-bridge"
   ],
-  "codename": "monitor-data-fill",
-  "notes": "Correção das páginas que pareciam vazias: Integração e guia agora consome manifesto/SDK/prompts/readiness/fontes; Benchmark e diagnóstico executa health check e benchmark quick automaticamente; endpoints de integração do próprio painel são isolados da telemetria real.",
-  "generatedAt": "2026-05-29T13:35:00.000Z",
-  "versionLabel": "21.12.35-monitor-data-fill",
+  "codename": "monitor-scope-fix",
+  "notes": "Corrige helper visual de selects/filtros que acessava state fora do escopo principal do monitor. O endpoint /api/server/metrics estava saudável; o erro era de renderização da UI e gerava mensagem falsa de leitura do endpoint.",
+  "generatedAt": "2026-05-29T16:50:00.000Z",
+  "versionLabel": "21.12.36-monitor-scope-fix",
   "tags": [
     "ai-prompts",
     "app-sync-preserved",
@@ -153,18 +157,25 @@
     "stock-contract",
     "ui-no-blank",
     "v21.12.35",
-    "version-cleanup"
+    "version-cleanup",
+    "monitor-scope-fix",
+    "state-defined-fix",
+    "ui-scope-bridge",
+    "v21.12.36"
   ],
-  "patch": "21.12.35-monitor-data-fill",
+  "patch": "21.12.36-monitor-scope-fix",
   "highlights": [
+    "Corrige falso erro “Não consegui ler /api/server/metrics: state is not defined” causado por helper visual fora do escopo do monitor.",
+    "Cria ponte explícita e estreita window.valoraeMonitorState/window.valoraeMonitorApplyFilters para helpers pós-carregamento.",
+    "Mantém /api/server/metrics saudável e sem inflar telemetria interna.",
+    "Preserva public/index.html e public/server.html espelhados.",
+    "Preserva lib/Valorae-engine.js como núcleo central.",
     "Integração e guia deixa de ser apenas estática: lê /api/v1/integration/manifest, /sdk, /prompts, release readiness e source status.",
     "Benchmark e diagnóstico passa a preencher automaticamente health check de endpoints e benchmark quick ao abrir o monitor.",
     "Corrige geração do SDK JavaScript para preservar replace(/\\/$/, '') válido no JSON.",
     "Novo engineRuntimeProfiler mede fontes, fallback, montagem de contratos, guardrails e peso final por resposta.",
     "Novo engineLaunchGate consolida integridade, consistência, payload, maturidade e runtime em decisão única para o app.",
-    "Novo endpoint /api/v1/engine/performance expõe gargalos e recomendações sem exigir ferramentas pagas.",
-    "view=app preserva profiler e gate compactos para Web/APK e Monitor Proxy.",
-    "Monitor/server metrics passam a reconhecer runtime score, launch gate score e payloads prontos para lançamento pessoal."
+    "Novo endpoint /api/v1/engine/performance expõe gargalos e recomendações sem exigir ferramentas pagas."
   ],
   "publicEngineContract": "21.12.0"
 }
