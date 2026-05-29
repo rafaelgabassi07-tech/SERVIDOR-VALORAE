@@ -2,6 +2,7 @@ import { ValoraeEngine, canonicalizeTicker, inferAssetType, validarTicker } from
 import { resolvePerformanceOptions } from '../lib/performance/profile.js';
 import { sendJson } from '../lib/performance/http.js';
 import { beginRoute, boolParam, falseParam, clampNumber, resolveSelfScrapeUrl, sendRouteError } from '../lib/http/route.js';
+import { attachPartialDataGuidance } from '../lib/quality/partial-data-guidance.js';
 
 export default async function handler(req, res) {
   const route = beginRoute(req, res, {
@@ -44,7 +45,7 @@ export default async function handler(req, res) {
       profile: input.profile || input.performance,
     }, { endpoint: 'asset', ticker, type });
 
-    const payload = await ValoraeEngine.fetchAtivo(ticker, type, perfOptions);
+    const payload = attachPartialDataGuidance(await ValoraeEngine.fetchAtivo(ticker, type, perfOptions), { endpoint: 'asset', ticker, view });
     return sendJson(req, res, payload, {
       status: 200,
       engineVersion: ValoraeEngine.version,

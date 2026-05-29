@@ -48,8 +48,13 @@ export default async function handler(req, res) {
     if (!normalized.url) {
       return sendJson(req, res, {
         version: ValoraeEngine.version,
+        status: 'ERROR',
         requestId: route.requestId,
+        code: 'MISSING_TARGET_URL',
         error: 'Envie uma URL HTTPS permitida.',
+        expectedValidationError: true,
+        benchmarkMeaning: 'expected-client-validation',
+        allowedByDefault: ['investidor10.com.br', 'www.investidor10.com.br', 'statusinvest.com.br', 'www.statusinvest.com.br'],
         example: '/api/scrape?url=https://investidor10.com.br/acoes/petr4/&includeHtml=0',
       }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'scrape' });
     }

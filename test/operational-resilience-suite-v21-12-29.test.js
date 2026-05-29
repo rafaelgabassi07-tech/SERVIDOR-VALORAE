@@ -59,7 +59,7 @@ assert.equal(self.checks.some(c => c.name === 'payload-budget-module'), true);
 assert.equal(self.checks.some(c => c.name === 'asset-action-plan-module'), true);
 
 const manifest = await call(manifestHandler, '/api/v1/integration/manifest');
-assert.equal(/21\.12\.(29|30|32)/.test(manifest.json.contractVersion), true);
+assert.equal(/21\.12\.(29|30|32|35|36|37|38|39)/.test(manifest.json.contractVersion), true);
 assert.equal(manifest.json.stableRoots.quality, 'fieldConsistencyGuard');
 assert.equal(manifest.json.stableRoots.action, 'assetActionPlan');
 

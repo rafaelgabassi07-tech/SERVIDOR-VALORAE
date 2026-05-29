@@ -1,3 +1,20 @@
+## v21.12.39 - Full project audit hardening
+
+- Sincroniza release atual em metadata, PWA, Service Worker, painel, métricas e manifesto de integração.
+- Atualiza cache PWA para `valorae-proxy-server-v21-12-39` para evitar shell antigo após deploy.
+- Limpa resíduos de patch/build do ZIP final e adiciona auditoria regressiva `full-project-audit-v21-12-39`.
+- Atualiza auditorias legadas para aceitarem patches posteriores da família 21.12.x sem falso negativo.
+- Mantém `/api/scrape` sem URL e com HTTP como `400` esperado e didático, não como falha do proxy.
+
+## v21.12.38 - Failure audit hardening
+
+- Corrige falhas confirmadas no relatório v21.12.37: auditorias legadas, `/api/scrape` didático, dados financeiros `PARTIAL`, metadata free-only, Gradle fora do pacote proxy e router local.
+- `/api/scrape` agora retorna `400` para URL ausente/protocolo inválido e `403 SCRAPE_HOST_NOT_ALLOWED` para domínio não permitido.
+- Adiciona `lib/quality/partial-data-guidance.js` e injeta `partialDataGuidance` em `/api/asset` e endpoints especializados quando a fonte externa retornar dados parciais.
+- `metadata.json` agora separa `coreVersion: 21.12.0` de `releasePatch: 21.12.38-failure-audit-hardening` e não declara capabilities pagas.
+- Remove `build.gradle`, `settings.gradle` e `.gradle` do ZIP final do proxy.
+- Adiciona teste `failure-audit-v21-12-38.test.js` e benchmark `reports/benchmark-failure-audit-v21.12.38.json`.
+
 # v21.12.37 — Proxy Output Filter Restore
 
 - Restaura opções completas nos botões da página Saída do Proxy: Status HTTP, Raiz do payload e Mais recentes.

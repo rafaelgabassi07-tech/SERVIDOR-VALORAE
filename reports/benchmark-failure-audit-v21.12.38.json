@@ -1,0 +1,130 @@
+{
+  "generatedAt": "2026-05-29T19:45:48Z",
+  "network": "local-http; financial source may be external/partial",
+  "cases": [
+    {
+      "name": "ready",
+      "path": "/api/v1/ready",
+      "loops": 20,
+      "statusSet": [
+        200
+      ],
+      "codeSet": [
+        "READY"
+      ],
+      "avgMs": 2.916,
+      "medianMs": 1.529,
+      "p95Ms": 2.802,
+      "partialSeen": false,
+      "partialGuidanceSeen": false
+    },
+    {
+      "name": "metrics",
+      "path": "/api/server/metrics",
+      "loops": 20,
+      "statusSet": [
+        200
+      ],
+      "codeSet": [],
+      "avgMs": 2.295,
+      "medianMs": 1.96,
+      "p95Ms": 2.995,
+      "partialSeen": false,
+      "partialGuidanceSeen": false
+    },
+    {
+      "name": "router-query-metrics",
+      "path": "/api/router?path=server/metrics",
+      "loops": 20,
+      "statusSet": [
+        200
+      ],
+      "codeSet": [],
+      "avgMs": 1.833,
+      "medianMs": 1.781,
+      "p95Ms": 2.144,
+      "partialSeen": false,
+      "partialGuidanceSeen": false
+    },
+    {
+      "name": "scrape-missing-url",
+      "path": "/api/scrape",
+      "loops": 10,
+      "statusSet": [
+        400
+      ],
+      "codeSet": [
+        "MISSING_TARGET_URL"
+      ],
+      "avgMs": 2.431,
+      "medianMs": 1.573,
+      "p95Ms": 2.03,
+      "partialSeen": false,
+      "partialGuidanceSeen": false
+    },
+    {
+      "name": "scrape-http-protocol",
+      "path": "/api/scrape?url=http%3A%2F%2Fexample.com&selector=h1&timeoutMs=500",
+      "loops": 10,
+      "statusSet": [
+        400
+      ],
+      "codeSet": [
+        "INVALID_TARGET_URL_PROTOCOL"
+      ],
+      "avgMs": 1.558,
+      "medianMs": 1.457,
+      "p95Ms": 1.699,
+      "partialSeen": false,
+      "partialGuidanceSeen": false
+    },
+    {
+      "name": "scrape-host-not-allowed",
+      "path": "/api/scrape?url=https%3A%2F%2Fexample.com&selector=h1&timeoutMs=500",
+      "loops": 10,
+      "statusSet": [
+        403
+      ],
+      "codeSet": [
+        "SCRAPE_HOST_NOT_ALLOWED"
+      ],
+      "avgMs": 1.529,
+      "medianMs": 1.519,
+      "p95Ms": 1.744,
+      "partialSeen": false,
+      "partialGuidanceSeen": false
+    },
+    {
+      "name": "asset-petr4-fast",
+      "path": "/api/asset?ticker=PETR4&view=app&profile=fast&timeoutMs=1000",
+      "loops": 5,
+      "statusSet": [
+        200
+      ],
+      "codeSet": [
+        "PARTIAL"
+      ],
+      "avgMs": 475.418,
+      "medianMs": 3.188,
+      "p95Ms": 3.547,
+      "partialSeen": true,
+      "partialGuidanceSeen": true
+    },
+    {
+      "name": "asset-profile-petr4-fast",
+      "path": "/api/v1/asset/profile?ticker=PETR4&profile=fast&timeoutMs=1000",
+      "loops": 5,
+      "statusSet": [
+        200
+      ],
+      "codeSet": [
+        "PARTIAL"
+      ],
+      "avgMs": 1007.886,
+      "medianMs": 3.201,
+      "p95Ms": 4.358,
+      "partialSeen": true,
+      "partialGuidanceSeen": true
+    }
+  ]
+}

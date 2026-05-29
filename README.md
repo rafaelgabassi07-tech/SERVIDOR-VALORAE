@@ -1,8 +1,26 @@
-# VALORAE Proxy / Engine v21.12.37 — Proxy Output Filter Restore
+# VALORAE Proxy / Engine v21.12.39 — Full Project Audit Hardening
 
 O VALORAE Engine é um **Proxy + Engine de normalização + API + Monitor de saída** para uso pessoal e pessoas próximas. Ele foi desenhado para rodar em GitHub/Vercel gratuito, sem banco obrigatório, Redis/KV, storage externo, cron pago ou WebSocket.
 
-> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`. Correção de escopo do painel: `21.12.36-monitor-scope-fix`. Restauração dos filtros da Saída do Proxy: `21.12.37-proxy-output-filter-restore`.
+> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`. Correção de escopo do painel: `21.12.36-monitor-scope-fix`. Restauração dos filtros da Saída do Proxy: `21.12.37-proxy-output-filter-restore`. Correções do relatório de falhas: `21.12.38-failure-audit-hardening`. Auditoria completa final: `21.12.39-full-project-audit-hardening`.
+
+
+### Novidades v21.12.39
+
+- Auditoria completa do projeto com foco em correções finais para lançamento pessoal.
+- Sincroniza rótulos vivos de release em metadata, PWA, Service Worker, painel, métricas e manifesto de integração.
+- Remove resíduos locais de patch/build do ZIP final: `fix_modal.cjs`, `update.cjs`, `update_menu.cjs`, `head.html`, `formatted.css`, `ui-styles.css` e `test.js`.
+- Adiciona teste de higiene final `test/full-project-audit-v21-12-39.test.js`.
+- Mantém `package.version` como core `21.12.0` e usa `releasePatch` para o patch interno `21.12.39-full-project-audit-hardening`.
+
+### Novidades v21.12.38
+
+- Corrige `/api/scrape` para retornar erros didáticos: `400 MISSING_TARGET_URL`, `400 INVALID_TARGET_URL_PROTOCOL` e `403 SCRAPE_HOST_NOT_ALLOWED`, em vez de `500 INTERNAL_ERROR`.
+- Adiciona `partialDataGuidance` em respostas financeiras `PARTIAL`, orientando Web/APK a manter o último snapshot bom e renderizar campos disponíveis.
+- Restaura compatibilidade das auditorias legadas `audit:complete-polish`, `audit:visual-polish`, `audit:engine-core` e `audit:engine-modules` sem alterar a UI principal.
+- Separa explicitamente `coreVersion`/`package.version` (`21.12.0`) de `releasePatch` (`21.12.38-failure-audit-hardening`).
+- Remove capability Gemini do `metadata.json` e limpa artefatos Gradle do pacote final do proxy.
+- Adiciona compatibilidade local para `/api/router?path=server/metrics`.
 
 ## Objetivo desta versão
 

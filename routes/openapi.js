@@ -141,7 +141,7 @@ export default async function handler(req, res) {
       version,
       launchContract: 'view=app + assetClassContract + assetIndicatorCoverage + engineMaturityBooster + engineRuntimeProfiler + engineLaunchGate + endpoints especializados de Ação/FII',
       optionalClientAuth: 'VALORAE_CLIENT_KEYS + x-valorae-app-id/x-valorae-client-key ou HMAC',
-      audit: 'v21.12.29: guardião de consistência, orçamento de payload, plano de ação e manifesto de integração; v21.12.28: taxonomia de indicadores, maturidade do engine, cache numérico LRU e endpoints indicators/maturity; v21.12.27: contratos especializados Ação/FII inspirados no Investidor10; v21.12.26: personal readiness, versão limpa, monitor com maturidade; v21.12.0: launch readiness, ready/manifest endpoints, auditoria sem tsc externo, source reliability, cache metrics, carteira inteligente e OpenAPI ampliado, mantendo free-only.',
+      audit: 'v21.12.39: auditoria completa de lançamento, release sync e higiene de pacote; v21.12.38: hardening do relatório de falhas; v21.12.29: guardião de consistência, orçamento de payload, plano de ação e manifesto de integração; v21.12.28: taxonomia de indicadores, maturidade do engine, cache numérico LRU e endpoints indicators/maturity; v21.12.27: contratos especializados Ação/FII inspirados no Investidor10; v21.12.26: personal readiness, versão limpa, monitor com maturidade; v21.12.0: launch readiness, ready/manifest endpoints, auditoria sem tsc externo, source reliability, cache metrics, carteira inteligente e OpenAPI ampliado, mantendo free-only.',
       vercelCompatible: true,
       freeOnly: true,
       physicalFunctions: ['api/router.js'],

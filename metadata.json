@@ -1,13 +1,11 @@
 {
-  "name": "VALORAE Proxy Server v21.12.37",
-  "description": "Restauração dos filtros completos da página Saída do Proxy: Status HTTP, Raiz do payload e ordenação Mais recentes com opções avançadas e persistentes mesmo sem feed cheio.",
+  "name": "VALORAE Proxy Server v21.12.39",
+  "description": "Auditoria completa do projeto com foco em correções: sincronização de release, limpeza de artefatos do ZIP, PWA/Service Worker atualizado, métricas/integração coerentes e hardening final para lançamento pessoal.",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ],
-  "version": "21.12.37",
-  "release": "21.12.37-proxy-output-filter-restore",
-  "latestInternalPatch": "21.12.37-proxy-output-filter-restore",
+  "majorCapabilities": [],
+  "version": "21.12.0",
+  "release": "21.12.39-full-project-audit-hardening",
+  "latestInternalPatch": "21.12.39-full-project-audit-hardening",
   "features": [
     "Captura real de rotas de dados mesmo com x-valorae-telemetry dashboard/test/probe",
     "Configuração de origem API via apiBase/localStorage",
@@ -103,7 +101,7 @@
     "vercel_app_harmony",
     "version cleanup README metadata metrics",
     "view-aware-chart-series-budget",
-    "view=app official launch contract",
+    "view=app official lalaunchunch contract",
     "monitor-scope-fix",
     "no-false-metrics-read-error",
     "custom-select-scope-bridge",
@@ -112,12 +110,20 @@
     "status-http-family-filters",
     "payload-root-group-filters",
     "advanced-feed-sorting",
-    "dynamic-filter-options-preserve-baseline"
+    "dynamic-filter-options-preserve-baseline",
+    "failure-audit-hardening",
+    "partial-data-guidance",
+    "scrape-host-not-allowed-403",
+    "local-router-query-path",
+    "free-only-metadata-cleanup",
+    "gradle-artifacts-removed",
+    "legacy-audits-compat",
+    "full-project-audit-hardening"
   ],
-  "codename": "proxy-output-filter-restore",
-  "notes": "Restaura os filtros completos da página Saída do Proxy. A reconstrução dinâmica dos botões agora preserva catálogo base e adiciona opções vistas no feed, sem voltar a causar state is not defined.",
-  "generatedAt": "2026-05-29T16:50:00.000Z",
-  "versionLabel": "21.12.37-proxy-output-filter-restore",
+  "codename": "full-project-audit-hardening",
+  "notes": "Auditoria completa pós-v21.12.38, corrigindo inconsistências de rótulo/manifest/cache e removendo resíduos de patch sem adicionar recursos pagos.",
+  "generatedAt": "2026-05-29T19:40:00.000Z",
+  "versionLabel": "core 21.12.0 · release 21.12.39-full-project-audit-hardening",
   "tags": [
     "ai-prompts",
     "app-sync-preserved",
@@ -168,17 +174,26 @@
     "ui-scope-bridge",
     "v21.12.36",
     "v21.12.37",
-    "proxy-output-filters"
+    "proxy-output-filters",
+    "failure-audit-hardening",
+    "partial-data-guidance",
+    "scrape-host-not-allowed-403",
+    "local-router-query-path",
+    "free-only-metadata-cleanup",
+    "gradle-artifacts-removed",
+    "legacy-audits-compat",
+    "21.12.39-full-project-audit-hardening"
   ],
-  "patch": "21.12.37-proxy-output-filter-restore",
+  "patch": "21.12.39-full-project-audit-hardening",
   "highlights": [
-    "Restaura filtros completos de Status HTTP, Raiz do payload e ordenação Mais recentes na Saída do Proxy.",
-    "Mantém catálogo fixo mesmo com feed vazio ou com poucos eventos.",
-    "Adiciona filtros por famílias HTTP, grupos de payload e ordenações avançadas.",
-    "Soma status e raízes dinâmicas vistas no feed sem remover opções base.",
-    "Mantém a correção state is not defined da v21.12.36.",
-    "Preserva public/index.html e public/server.html espelhados.",
-    "Preserva lib/Valorae-engine.js como núcleo central."
+    "Corrige /api/scrape para retornar 400/403 didático em URL inválida, protocolo HTTP ou domínio não permitido.",
+    "Adiciona partialDataGuidance para respostas financeiras PARTIAL, orientando o app a manter o último snapshot bom.",
+    "Restaura compatibilidade das auditorias legadas sem alterar a experiência visual atual.",
+    "Remove capability Gemini do metadata e limpa artefatos Gradle do pacote final do proxy.",
+    "Adiciona compatibilidade local para /api/router?path=server/metrics.",
+    "Separa explicitamente coreVersion 21.12.0 de releasePatch 21.12.39."
   ],
-  "publicEngineContract": "21.12.0"
+  "publicEngineContract": "21.12.0",
+  "coreVersion": "21.12.0",
+  "releasePatch": "21.12.39-full-project-audit-hardening"
 }

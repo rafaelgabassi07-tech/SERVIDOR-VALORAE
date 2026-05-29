@@ -1,12 +1,19 @@
 import fs from 'node:fs';
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const metadata = fs.existsSync('metadata.json') ? JSON.parse(fs.readFileSync('metadata.json', 'utf8')) : {};
 const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
 const forbiddenDeps = [
   'redis', '@vercel/kv', '@upstash/redis', 'ioredis', 'ws', 'bullmq',
   '@supabase/supabase-js', 'firebase', 'mongodb', 'mongoose', 'pg', 'mysql2', 'prisma'
 ];
 const badDeps = forbiddenDeps.filter(d => Object.prototype.hasOwnProperty.call(deps, d));
+const forbiddenCapabilities = ['MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API'];
+const badCapabilities = (metadata.majorCapabilities || []).filter(c => forbiddenCapabilities.includes(c));
+if (badCapabilities.length) {
+  console.error('Capabilities pagas/externas não permitidas no metadata:', badCapabilities.join(', '));
+  process.exit(1);
+}
 if (badDeps.length) {
   console.error('Dependências externas/pagas/complexas não permitidas:', badDeps.join(', '));
   process.exit(1);

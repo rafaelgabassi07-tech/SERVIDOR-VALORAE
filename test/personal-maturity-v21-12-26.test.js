@@ -16,11 +16,11 @@ assert.ok(readiness.score >= 75, 'readiness pessoal deve ser bom para cenário c
 assert.ok(readiness.categories.some(c => c.key === 'auth'));
 assert.ok(readiness.categories.some(c => c.key === 'persistence'));
 assert.ok(readiness.launchChecklist.length >= 5);
-assert.ok(readiness.nextMilestones.some(x => /21\.12\.(27|28|30)/.test(x)));
+assert.ok(readiness.nextMilestones.some(x => /21\.12\.(27|28|30|35|36|37|38|39)/.test(x)));
 
-assert.match(VALORAE_SERVER_METRICS_VERSION, /^21\.12\.(28|29|30|32)-/);
+assert.match(VALORAE_SERVER_METRICS_VERSION, /^21\.12\.(28|29|30|32|35|36|37|38|39)-/);
 const snap = getServerMetricsSnapshot();
-assert.match(snap.version, /^21\.12\.(28|29|30|32)-/);
+assert.match(snap.version, /^21\.12\.(28|29|30|32|35|36|37|38|39)-/);
 assert.ok(snap.personalReleaseReadiness, 'server metrics deve expor readiness pessoal');
 assert.ok(snap.personalReleaseReadiness.categories.some(c => c.key === 'observability'));
 

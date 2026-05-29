@@ -4,6 +4,7 @@ import { beginRoute, boolParam, clampNumber, resolveSelfScrapeUrl, sendRouteErro
 import { resolvePerformanceOptions } from '../../lib/performance/profile.js';
 import { buildAssetGroupView, buildAssetSourceMapView, buildFiiChecklistView } from '../../lib/quality/asset-class-contract.js';
 import { buildIndicatorEndpointView } from '../../lib/quality/asset-indicator-taxonomy.js';
+import { attachPartialDataGuidance } from '../../lib/quality/partial-data-guidance.js';
 
 const FII_GROUP_ALIASES = {
   profile: 'profile', income: 'income', patrimonial: 'patrimonial', portfolio: 'portfolio', vacancy: 'vacancy', communications: 'communications', checklist: 'checklist', indicators: 'indicators', peers: 'peers'
@@ -44,7 +45,7 @@ export async function handleAssetGroup(req, res, config = {}) {
       profile: input.profile || 'fast',
       contracts: 'lite',
     }, { endpoint: routeName, ticker, type });
-    const payload = await ValoraeEngine.fetchAtivo(ticker, type, perfOptions);
+    const payload = attachPartialDataGuidance(await ValoraeEngine.fetchAtivo(ticker, type, perfOptions), { endpoint: routeName, ticker, view: 'standard' });
     let view;
     if (config.kind === 'source-map') view = buildAssetSourceMapView(payload);
     else if (config.kind === 'fii-checklist') view = buildFiiChecklistView(payload);
@@ -56,6 +57,7 @@ export async function handleAssetGroup(req, res, config = {}) {
       endpoint: routeName,
       ...view,
       links: buildLinks(ticker, payload.type),
+      partialDataGuidance: payload.partialDataGuidance,
       integrationHint: 'Use estes endpoints especializados para telas específicas; para tela principal continue usando /api/v1/asset?ticker=...&view=app.',
     }, { status: 200, engineVersion: ValoraeEngine.version, profile: routeName, cacheControl: 'private, max-age=30, stale-while-revalidate=180' });
   } catch (err) {

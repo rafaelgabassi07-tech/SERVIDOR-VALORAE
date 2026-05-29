@@ -31,6 +31,26 @@ function applyStaticSecurityHeaders(res, cacheControl = 'public, max-age=300') {
   res.setHeader('Cache-Control', cacheControl);
 }
 
+
+function normalizeLocalRouterPath(rawPath = '') {
+  let value = Array.isArray(rawPath) ? rawPath.join('/') : String(rawPath || '');
+  try { value = decodeURIComponent(value); } catch {}
+  value = value.replace(/^\/+/, '').replace(/\/+/g, '/');
+  if (value.startsWith('api/')) value = value.slice(4);
+  if (value === 'router') value = '';
+  return value;
+}
+
+function rewriteLocalRouterQuery(req, parsedUrl) {
+  if (parsedUrl.pathname !== '/api/router') return;
+  const proxyPath = normalizeLocalRouterPath(parsedUrl.searchParams.get('path') || '');
+  if (!proxyPath) return;
+  parsedUrl.searchParams.delete('path');
+  const query = parsedUrl.searchParams.toString();
+  req.__valoraeOriginalUrl = req.url;
+  req.url = `/api/${proxyPath}${query ? `?${query}` : ''}`;
+}
+
 function sendText(res, statusCode, text) {
   res.statusCode = statusCode;
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -54,6 +74,7 @@ const server = http.createServer((req, res) => {
 
   // Handle API routing
   if (pathname.startsWith('/api')) {
+    rewriteLocalRouterQuery(req, parsedUrl);
     let bodyData = [];
     let bodyBytes = 0;
     let rejectedBody = false;
@@ -98,11 +119,13 @@ const server = http.createServer((req, res) => {
       } catch (err) {
         console.error('API Error:', err);
         if (!res.writableEnded) {
-          res.statusCode = 500;
-          res.setHeader('Content-Type', 'application/json');
+          const status = Number(err?.status || 500);
+          res.statusCode = Number.isFinite(status) ? status : 500;
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
           res.end(JSON.stringify({
             status: 'ERROR',
-            error: 'Erro interno no servidor proxy.'
+            code: err?.code || (res.statusCode >= 500 ? 'INTERNAL_ERROR' : 'REQUEST_ERROR'),
+            error: res.statusCode >= 500 ? 'Erro interno no servidor proxy.' : (err?.message || 'Erro ao processar a requisição.')
           }));
         }
       }
