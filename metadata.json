@@ -1,13 +1,13 @@
 {
-  "name": "VALORAE Proxy Server v21.12.36",
-  "description": "Correção do bug de escopo do painel que causava falso erro state is not defined ao renderizar /api/server/metrics.",
+  "name": "VALORAE Proxy Server v21.12.37",
+  "description": "Restauração dos filtros completos da página Saída do Proxy: Status HTTP, Raiz do payload e ordenação Mais recentes com opções avançadas e persistentes mesmo sem feed cheio.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
-  "version": "21.12.36",
-  "release": "21.12.36-monitor-scope-fix",
-  "latestInternalPatch": "21.12.36-monitor-scope-fix",
+  "version": "21.12.37",
+  "release": "21.12.37-proxy-output-filter-restore",
+  "latestInternalPatch": "21.12.37-proxy-output-filter-restore",
   "features": [
     "Captura real de rotas de dados mesmo com x-valorae-telemetry dashboard/test/probe",
     "Configuração de origem API via apiBase/localStorage",
@@ -107,12 +107,17 @@
     "monitor-scope-fix",
     "no-false-metrics-read-error",
     "custom-select-scope-bridge",
-    "state-defined-ui-bridge"
+    "state-defined-ui-bridge",
+    "proxy-output-filter-restore",
+    "status-http-family-filters",
+    "payload-root-group-filters",
+    "advanced-feed-sorting",
+    "dynamic-filter-options-preserve-baseline"
   ],
-  "codename": "monitor-scope-fix",
-  "notes": "Corrige helper visual de selects/filtros que acessava state fora do escopo principal do monitor. O endpoint /api/server/metrics estava saudável; o erro era de renderização da UI e gerava mensagem falsa de leitura do endpoint.",
+  "codename": "proxy-output-filter-restore",
+  "notes": "Restaura os filtros completos da página Saída do Proxy. A reconstrução dinâmica dos botões agora preserva catálogo base e adiciona opções vistas no feed, sem voltar a causar state is not defined.",
   "generatedAt": "2026-05-29T16:50:00.000Z",
-  "versionLabel": "21.12.36-monitor-scope-fix",
+  "versionLabel": "21.12.37-proxy-output-filter-restore",
   "tags": [
     "ai-prompts",
     "app-sync-preserved",
@@ -161,21 +166,19 @@
     "monitor-scope-fix",
     "state-defined-fix",
     "ui-scope-bridge",
-    "v21.12.36"
+    "v21.12.36",
+    "v21.12.37",
+    "proxy-output-filters"
   ],
-  "patch": "21.12.36-monitor-scope-fix",
+  "patch": "21.12.37-proxy-output-filter-restore",
   "highlights": [
-    "Corrige falso erro “Não consegui ler /api/server/metrics: state is not defined” causado por helper visual fora do escopo do monitor.",
-    "Cria ponte explícita e estreita window.valoraeMonitorState/window.valoraeMonitorApplyFilters para helpers pós-carregamento.",
-    "Mantém /api/server/metrics saudável e sem inflar telemetria interna.",
+    "Restaura filtros completos de Status HTTP, Raiz do payload e ordenação Mais recentes na Saída do Proxy.",
+    "Mantém catálogo fixo mesmo com feed vazio ou com poucos eventos.",
+    "Adiciona filtros por famílias HTTP, grupos de payload e ordenações avançadas.",
+    "Soma status e raízes dinâmicas vistas no feed sem remover opções base.",
+    "Mantém a correção state is not defined da v21.12.36.",
     "Preserva public/index.html e public/server.html espelhados.",
-    "Preserva lib/Valorae-engine.js como núcleo central.",
-    "Integração e guia deixa de ser apenas estática: lê /api/v1/integration/manifest, /sdk, /prompts, release readiness e source status.",
-    "Benchmark e diagnóstico passa a preencher automaticamente health check de endpoints e benchmark quick ao abrir o monitor.",
-    "Corrige geração do SDK JavaScript para preservar replace(/\\/$/, '') válido no JSON.",
-    "Novo engineRuntimeProfiler mede fontes, fallback, montagem de contratos, guardrails e peso final por resposta.",
-    "Novo engineLaunchGate consolida integridade, consistência, payload, maturidade e runtime em decisão única para o app.",
-    "Novo endpoint /api/v1/engine/performance expõe gargalos e recomendações sem exigir ferramentas pagas."
+    "Preserva lib/Valorae-engine.js como núcleo central."
   ],
   "publicEngineContract": "21.12.0"
 }

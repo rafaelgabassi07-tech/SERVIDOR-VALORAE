@@ -1,3 +1,11 @@
+# v21.12.37 — Proxy Output Filter Restore
+
+- Restaura opções completas nos botões da página Saída do Proxy: Status HTTP, Raiz do payload e Mais recentes.
+- Mantém catálogo fixo de filtros mesmo quando o feed está vazio ou com poucos eventos.
+- Soma opções dinâmicas vistas no feed sem apagar as opções base.
+- Adiciona filtros por família HTTP, grupos de payload, ordenações avançadas e teste `proxy-output-filters-v21-12-37`.
+- Preserva a correção `state is not defined` da v21.12.36 e mantém `public/index.html` espelhado com `public/server.html`.
+
 # v21.12.36 — Monitor Scope Fix
 
 - Corrige falso erro recorrente `Não consegui ler /api/server/metrics: state is not defined`.

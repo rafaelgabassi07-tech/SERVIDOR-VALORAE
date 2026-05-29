@@ -1,7 +1,7 @@
 {
   "name": "VALORAE Proxy Monitor",
   "short_name": "VALORAE Monitor",
-  "description": "Cockpit profissional do VALORAE Proxy/Engine com saída do proxy, performance, qualidade, integração, runtime profiler e gate de lançamento pessoal, integração viva e diagnóstico automático.",
+  "description": "Cockpit profissional do VALORAE Proxy/Engine com saída do proxy, performance, qualidade, integração, runtime profiler e gate de lançamento pessoal, integração viva, diagnóstico automático e filtros completos na Saída do Proxy.",
   "id": "/server.html",
   "start_url": "/server.html#command",
   "scope": "/",
@@ -61,5 +61,5 @@
       "url": "/server.html#integration"
     }
   ],
-  "version": "21.12.35"
+  "version": "21.12.37"
 }

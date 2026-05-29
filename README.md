@@ -1,15 +1,23 @@
-# VALORAE Proxy / Engine v21.12.36 — Monitor Scope Fix
+# VALORAE Proxy / Engine v21.12.37 — Proxy Output Filter Restore
 
 O VALORAE Engine é um **Proxy + Engine de normalização + API + Monitor de saída** para uso pessoal e pessoas próximas. Ele foi desenhado para rodar em GitHub/Vercel gratuito, sem banco obrigatório, Redis/KV, storage externo, cron pago ou WebSocket.
 
-> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`. Correção de escopo do painel: `21.12.36-monitor-scope-fix`.
+> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`. Correção de escopo do painel: `21.12.36-monitor-scope-fix`. Restauração dos filtros da Saída do Proxy: `21.12.37-proxy-output-filter-restore`.
 
 ## Objetivo desta versão
 
-Esta rodada corrige a experiência funcional do monitor antes do lançamento pessoal: a página **Integração e guia** passa a ler dados reais dos endpoints de integração; **Benchmark e diagnóstico** passa a executar checagem automática; e o monitor diferencia melhor ausência de tráfego real de falha do proxy, mantendo simplicidade, Vercel Free e compatibilidade com Web/APK.
+Esta rodada restaura e amplia os filtros da página **Saída do Proxy**: os botões de `Status HTTP`, `Raiz do payload` e `Mais recentes` voltam a ter opções completas mesmo quando o feed ainda está vazio ou com poucos eventos. A correção mantém integração viva, diagnóstico automático, simplicidade, Vercel Free e compatibilidade com Web/APK.
 
 
 
+### Novidades v21.12.37
+
+- Restaura opções completas nos botões `Status HTTP`, `Raiz do payload` e `Mais recentes` da página **Saída do Proxy**.
+- Mantém catálogo fixo de filtros mesmo quando o feed está vazio ou com poucos eventos.
+- Soma status e raízes encontrados dinamicamente no feed sem apagar as opções base.
+- Adiciona filtros por famílias HTTP, grupos de payload, ordenação por menor/maior latência, bytes, status, rota, ticker, app/canal, raízes JSON, gráficos, dividendos e alertas.
+- O botão `Limpar filtros` também sincroniza o texto dos botões customizados.
+- Mantém `public/index.html` e `public/server.html` espelhados e preserva o núcleo `lib/Valorae-engine.js`.
 
 ### Novidades v21.12.36
 
