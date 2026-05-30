@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     version: ValoraeEngine.version,
     requestId: route.requestId,
     endpoint: 'release/readiness',
-    releasePatch: '21.12.49-extreme-audit-logo-standard',
+    releasePatch: '21.12.51-post-benchmark-performance-hardening',
     status: readiness.status,
     readiness,
   }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'release-readiness', cacheControl: 'private, max-age=10' });

@@ -17,6 +17,43 @@ function selectorKeys(results = {}) {
   return Object.keys(results || {}).filter(k => Array.isArray(results[k]) ? results[k].length > 0 : results[k]);
 }
 
+function lightPrecisionReport({ results = {}, selectors = {}, htmlLength = 0, strategy = 'unknown', warnings = [], sourceDrift = null } = {}) {
+  const expected = selectors && typeof selectors === 'object' ? Object.keys(selectors).length : Object.keys(results || {}).length;
+  const matched = Object.keys(results || {}).filter(k => {
+    const v = results[k];
+    if (Array.isArray(v)) return v.some(x => x !== undefined && x !== null && String(x).trim() !== '');
+    return v !== undefined && v !== null && String(v).trim() !== '';
+  }).length;
+  const coverageRatio = expected ? matched / expected : 1;
+  const coveragePercent = Math.max(0, Math.min(100, Math.round(coverageRatio * 10000) / 100));
+  const score = Math.max(0, Math.min(100, Math.round(coveragePercent - Math.min(20, (warnings || []).length * 4) - (sourceDrift?.sourceDrift ? 15 : 0))));
+  return {
+    version: '21.12.51-light-precision-batch-fast',
+    score,
+    level: score >= 85 ? 'high' : score >= 70 ? 'medium' : score >= 50 ? 'low' : 'critical',
+    coveragePercent,
+    coverageRatio: Math.round(coverageRatio * 10000) / 10000,
+    expectedKeys: expected,
+    matchedKeys: matched,
+    emptyKeys: [],
+    numericScore: 100,
+    shapeConsistencyScore: 100,
+    numericFields: 0,
+    suspicious: [],
+    parseStrategy: strategy,
+    chartReadiness: { ready: false, numericPoints: 0, score: 0, recommendations: ['batchProfile=fast não calcula gráficos por padrão.'] },
+    warnings: (warnings || []).slice(0, 4),
+    sourceDrift: Boolean(sourceDrift?.sourceDrift),
+    confidence: Math.round((score / 100) * 1000) / 1000,
+    recommendations: [],
+    lightweight: true,
+  };
+}
+
+function batchProfile(input = {}) {
+  return String(input.batchProfile || input.profile || 'app').trim().toLowerCase() || 'app';
+}
+
 function buildExtraction(html, selectors, normalized, result) {
   if (!selectors) return { results: result.selectorResults || {}, warnings: [], sourceDrift: undefined, metrics: { selectorTimeMs: 0, nodesFound: 0, parseStrategy: 'none' }, strategy: 'none' };
   if (canUseFastSelectors(selectors, normalized)) {
@@ -74,6 +111,11 @@ export default async function handler(req, res) {
     const concurrency = Math.max(1, Math.min(Number(input.concurrency || MAX_CONCURRENCY), MAX_CONCURRENCY, jobs.length));
     const results = new Array(jobs.length);
     const pending = [];
+    const logicalResultKeys = [];
+    const logicalFetchKeys = [];
+    const logicalErrors = [];
+    const profile = batchProfile(input);
+    const lightweightProfile = ['fast', 'scrape-fast', 'batch-fast'].includes(profile);
     let resultCacheHits = 0;
     let resultCacheMisses = 0;
 
@@ -83,15 +125,18 @@ export default async function handler(req, res) {
         const normalized = normalizeScrapeInput({ ...input, ...job, selectors }, input);
         if (!normalized.url) throw new Error('Job sem URL válida.');
         const resultKey = buildResultKey(normalized);
+        logicalResultKeys[index] = resultKey;
+        logicalFetchKeys[index] = buildFetchKey(normalized);
         const cached = normalized.cache ? getScrapeResult(resultKey) : null;
         if (cached) {
           resultCacheHits += 1;
           results[index] = { ...shapeScrapeResultCacheHit(cached, { requestId: route.requestId, elapsedMs: 0 }), id: job.id || String(index) };
         } else {
           resultCacheMisses += 1;
-          pending.push({ index, id: job.id || String(index), job, selectors, normalized, fetchKey: buildFetchKey(normalized), resultKey });
+          pending.push({ index, id: job.id || String(index), job, selectors, normalized, fetchKey: logicalFetchKeys[index], resultKey });
         }
       } catch (err) {
+        logicalErrors.push({ index, id: job.id || String(index), error: err?.message || 'Job inválido.' });
         results[index] = { id: job.id || String(index), ok: false, error: err?.message || 'Job inválido.' };
       }
     });
@@ -141,15 +186,16 @@ export default async function handler(req, res) {
         selectorRuns += 1;
         const mergedResults = item.selectors ? { ...(fetched.selectorResults || {}), ...extraction.results } : (fetched.selectorResults || {});
         const keys = selectorKeys(mergedResults);
-        const precision = buildExtractionPrecisionReport({
+        const precisionInput = {
           results: mergedResults,
           selectors: item.selectors || {},
           htmlLength: fetched.htmlLength,
           strategy: extraction.strategy,
           warnings: extraction.warnings || [],
           sourceDrift: extraction.sourceDrift,
-        });
-        const chartSeries = buildNormalizedChartSeries(mergedResults);
+        };
+        const precision = item.normalized.includeDiagnostics === false || lightweightProfile ? lightPrecisionReport(precisionInput) : buildExtractionPrecisionReport(precisionInput);
+        const chartSeries = item.normalized.includeCharts === false || lightweightProfile ? { count: 0 } : buildNormalizedChartSeries(mergedResults);
         markMetric(metric, 'serializeStart');
         const metrics = item.normalized.metrics ? finishScrapeMetrics(metric, {
           ...mergeFetchMetrics(metric, fetched),
@@ -200,34 +246,66 @@ export default async function handler(req, res) {
       }
     });
 
-    const uniqueResultKeys = new Set(pending.map(x => x.resultKey));
+    const logicalValidKeys = logicalResultKeys.filter(Boolean);
+    const logicalUniqueResultKeys = new Set(logicalValidKeys);
+    const logicalUniqueFetchKeys = new Set(logicalFetchKeys.filter(Boolean));
+    const executionUniqueResultKeys = new Set(pending.map(x => x.resultKey));
+    const totalTimeMs = Math.round(performance.now() - batchStart);
+    const logical = {
+      inputCount: jobs.length,
+      validJobs: logicalValidKeys.length,
+      invalidJobs: logicalErrors.length,
+      uniqueRequestKeys: logicalUniqueResultKeys.size,
+      uniqueFetchKeys: logicalUniqueFetchKeys.size,
+      dedupedCount: Math.max(0, logicalValidKeys.length - logicalUniqueResultKeys.size),
+    };
+    const execution = {
+      networkFetches,
+      htmlCacheHits,
+      resultCacheHits,
+      resultCacheMisses,
+      parseRuns,
+      selectorRuns,
+      resultCacheHitRatePercent: logicalValidKeys.length ? Math.round((resultCacheHits / logicalValidKeys.length) * 10000) / 100 : 0,
+    };
+    const coalescing = {
+      byUrl: logicalUniqueFetchKeys.size < logicalValidKeys.length,
+      byResultKey: logicalUniqueResultKeys.size < logicalValidKeys.length,
+      servedFromCache: resultCacheHits > 0 && resultCacheMisses === 0,
+    };
     const payload = {
       version: ValoraeEngine.version,
       requestId: route.requestId,
       ok: results.some(r => r?.ok),
       count: results.length,
-      uniqueCount: uniqueResultKeys.size + resultCacheHits,
-      dedupedCount: Math.max(0, results.length - uniqueResultKeys.size - resultCacheHits),
+      uniqueCount: logical.uniqueRequestKeys,
+      dedupedCount: logical.dedupedCount,
       concurrency,
-      coalesced: pending.length > 0,
+      coalesced: coalescing.byUrl || coalescing.byResultKey,
       resultCacheHits,
       resultCacheMisses,
       htmlCacheHits,
       networkFetches,
+      logical,
+      execution,
+      coalescing,
       batchMetrics: {
-        totalTimeMs: Math.round(performance.now() - batchStart),
+        totalTimeMs,
+        logical,
+        execution,
+        coalescing,
         fetchGroups: fetchGroups.size,
-        resultGroups: uniqueResultKeys.size,
+        resultGroups: executionUniqueResultKeys.size,
         parseRuns,
         selectorRuns,
         maxGroupSize,
-        coalescedByUrl: fetchGroups.size < pending.length,
-        coalescedByResult: uniqueResultKeys.size < pending.length,
+        coalescedByUrl: coalescing.byUrl,
+        coalescedByResult: coalescing.byResultKey,
       },
       results,
     };
 
-    return sendJson(req, res, shapeResponsePayload(payload, input), { status: 200, engineVersion: ValoraeEngine.version, profile: 'batch-scrape', cacheControl: 'private, max-age=10, stale-while-revalidate=60' });
+    return sendJson(req, res, shapeResponsePayload(payload, input), { status: 200, engineVersion: ValoraeEngine.version, profile: `batch-scrape-${profile}`, cacheControl: 'private, max-age=10, stale-while-revalidate=60' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'batch-scrape' });
   }

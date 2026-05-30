@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-05-30T00:55:48.196Z",
+  "generatedAt": "2026-05-30T02:29:05.253Z",
   "network": "mocked/local-only",
   "version": "21.12.51-post-benchmark-performance-hardening",
   "cases": [
     {
       "name": "cold-fresh-fill",
       "loops": 1,
-      "avgMs": 99.581,
-      "medianMs": 99.581,
-      "p95Ms": 99.581,
+      "avgMs": 104.088,
+      "medianMs": 104.088,
+      "p95Ms": 104.088,
       "lastCacheStatus": "RESULT_CACHE_MISS",
       "lastStatus": "OK",
       "lastPartial": false
@@ -16,9 +16,9 @@
     {
       "name": "stale-while-revalidate-low-latency",
       "loops": 30,
-      "avgMs": 2.175,
-      "medianMs": 0.733,
-      "p95Ms": 13.154,
+      "avgMs": 2.363,
+      "medianMs": 0.738,
+      "p95Ms": 16.861,
       "lastCacheStatus": "RESULT_CACHE_HIT",
       "lastStatus": "OK",
       "lastPartial": false
@@ -28,7 +28,7 @@
   "runtimeCacheStats": {
     "enabled": true,
     "entries": 1,
-    "bytes": 43091,
+    "bytes": 43156,
     "ttlMs": 300000,
     "metrics": {
       "hits": 24,

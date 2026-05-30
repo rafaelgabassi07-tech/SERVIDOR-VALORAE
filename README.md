@@ -1,22 +1,20 @@
-# VALORAE Proxy / Engine v21.12.49 — Extreme Audit Logo Standard
+# VALORAE Proxy / Engine v21.12.51 — Correction Focused Audit
 
 O VALORAE Engine é um **Proxy + Engine de normalização + API + Monitor de saída** para uso pessoal e pessoas próximas. Ele foi desenhado para rodar em GitHub/Vercel gratuito, sem banco obrigatório, Redis/KV, storage externo, cron pago ou WebSocket.
 
-> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`. Correção de escopo do painel: `21.12.36-monitor-scope-fix`. Restauração dos filtros da Saída do Proxy: `21.12.37-proxy-output-filter-restore`. Correções do relatório de falhas: `21.12.38-failure-audit-hardening`. Auditoria completa final: `21.12.40-extraction-completion-speed`. Extração turbo atual: `21.12.48-monitor-responsive-settings-theme`. Auditoria extrema/logotipo atual: `21.12.49-extreme-audit-logo-standard`.
+> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`. Correção de escopo do painel: `21.12.36-monitor-scope-fix`. Restauração dos filtros da Saída do Proxy: `21.12.37-proxy-output-filter-restore`. Correções do relatório de falhas: `21.12.38-failure-audit-hardening`. Auditoria completa final: `21.12.40-extraction-completion-speed`. Extração turbo atual: `21.12.48-monitor-responsive-settings-theme`. Auditoria extrema/logotipo atual: `21.12.51-post-benchmark-performance-hardening`.
 
 
 
-### Novidades v21.12.49
+### Novidades v21.12.51
 
-- Corrige os filtros da página **Saída do Proxy** para abrir em dropdown flutuante preso ao viewport, sem opções cortadas no desktop ou mobile.
-- Adiciona página dedicada **Configurações** com origem da API, preferências visuais, estado do polling e diagnóstico de responsividade.
-- Adiciona suporte a **modo claro/escuro** com botão no cabeçalho e preferência salva no navegador.
-- Melhora a adaptação automática para mobile/tablet/desktop: drawer, grades fluidas, filtros em largura total no celular e cards legíveis.
-- Substitui ícones simples do menu lateral por ícones SVG lineares e consistentes com o ecossistema VALORAE.
-- Preserva a Canonical Data Reliability Layer, Investidor10/StatusInvest, gráficos, rankings, dividendos e toda a estratégia anti-PARTIAL anterior.
-- Adiciona teste regressivo `test/monitor-responsive-settings-theme-v21-12-48.test.js`.
+- Corrige divergência entre `public/index.html` e `public/server.html`, garantindo a mesma experiência do Monitor em `/`, `/index.html` e `/server.html`.
+- Remove artefatos Gradle e resíduos auxiliares de patch do topo do ZIP final do proxy.
+- Atualiza PWA/Service Worker para `21.12.51` e cache `valorae-proxy-server-v21-12-50`, evitando shell antigo após deploy.
+- Mantém logotipo padronizado, modo claro/escuro, responsividade mobile/desktop, filtros flutuantes, gráficos, camada canônica e fontes ricas Investidor10/StatusInvest.
+- Adiciona teste regressivo `test/post-benchmark-performance-hardening-v21-12-50.test.js`.
 
-A v21.12.49 preserva as melhorias anteriores: camada canônica, `profile=turbo`/`max`, score de completude, StatusInvest complementar, hedge, batch dedupe, gráficos resilientes e Monitor integrado ao ecossistema VALORAE.
+A v21.12.51 preserva as melhorias anteriores: camada canônica, `profile=turbo`/`max`, score de completude, StatusInvest complementar, hedge, batch dedupe, gráficos resilientes e Monitor integrado ao ecossistema VALORAE.
 
 Uso recomendado para máxima completude:
 
@@ -32,7 +30,7 @@ Uso recomendado para máxima completude:
 - Sincroniza rótulos vivos de release em metadata, PWA, Service Worker, painel, métricas e manifesto de integração.
 - Remove resíduos locais de patch/build do ZIP final: `fix_modal.cjs`, `update.cjs`, `update_menu.cjs`, `head.html`, `formatted.css`, `ui-styles.css` e `test.js`.
 - Adiciona teste de higiene final `test/full-project-audit-v21-12-39.test.js`.
-- Mantém `package.version` como core `21.12.0` e usa `releasePatch` para o patch interno `21.12.49-extreme-audit-logo-standard`.
+- Mantém `package.version` como core `21.12.0` e usa `releasePatch` para o patch interno `21.12.51-post-benchmark-performance-hardening`.
 
 ### Novidades v21.12.38
 
@@ -310,3 +308,14 @@ Para o objetivo real — uso pessoal e pessoas próximas — o projeto está em 
 - Logotipo interno redesenhado e padronizado no cabeçalho, drawer lateral, PWA manifest e ícones PNG.
 - Mantém Monitor responsivo, tema claro/escuro, filtros flutuantes, camada canônica e fontes ricas Investidor10/StatusInvest.
 - Adiciona teste regressivo `extreme-audit-logo-standard-v21-12-49`.
+
+
+## 21.12.51-post-benchmark-performance-hardening
+
+Auditoria focada em correções antes da integração do app de carteira:
+
+- Restaura espelhamento exato entre `public/index.html` e `public/server.html`.
+- Remove novamente resíduos Gradle e arquivos auxiliares de patch do ZIP final do proxy.
+- Atualiza PWA/Service Worker para cache `valorae-proxy-server-v21-12-50`.
+- Adiciona teste regressivo `post-benchmark-performance-hardening-v21-12-50`.
+

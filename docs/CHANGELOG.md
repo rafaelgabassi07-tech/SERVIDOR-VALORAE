@@ -1,3 +1,18 @@
+## v21.12.51 - Post Benchmark Performance Hardening
+
+- Implementa response cache serializado para `/api/scrape`, com fast-path `RESULT_RESPONSE_HIT` e retorno quente abaixo de 3 ms no benchmark controlado.
+- Adiciona `profile=scrape-fast`, sem gráficos/diagnóstico pesado por padrão, preservando métricas essenciais e payload enxuto.
+- Adiciona coalescing de fetch concorrente na rota `/api/scrape`, garantindo 25 chamadas simultâneas idênticas com 1 fetch real no teste regressivo.
+- Corrige métricas do `/api/batch-scrape`, separando `logical`, `execution` e `coalescing` para cold/hot cache.
+- Limita `extractionCoveragePercent` a 0–100 e adiciona `coverageRatio` para informar excedente sem quebrar semântica de porcentagem.
+- Adiciona métricas de rota `validationMs`, `cacheLookupMs`, `engineTimeMs`, `shapeTimeMs`, `serializeTimeMs`, `handlerTotalMs` e `responseBytes`.
+- Adiciona `test/post-benchmark-hardening-v21-12-51.test.js` e `npm run bench:post-benchmark`.
+
+- Corrige divergência entre `public/index.html` e `public/server.html`, garantindo uma única experiência do Monitor.
+- Remove artefatos Gradle e resíduos de patch do topo do pacote final do proxy.
+- Atualiza manifest/service worker para `21.12.51` e cache `valorae-proxy-server-v21-12-51`.
+- Adiciona teste regressivo de higiene de pacote e espelhamento HTML.
+
 ## v21.12.48 - Monitor Responsive Settings Theme
 
 - Corrige filtros da página Saída do Proxy com dropdown flutuante, quebra de linha e proteção contra corte no viewport.
@@ -598,9 +613,9 @@
 
 
 
-## 21.12.49-extreme-audit-logo-standard
+## 21.12.51-post-benchmark-performance-hardening
 
 - Auditoria extrema pré-integração do app de carteira de investimentos.
 - Logotipo interno redesenhado e padronizado no cabeçalho, drawer lateral, PWA manifest e ícones PNG.
 - Mantém Monitor responsivo, tema claro/escuro, filtros flutuantes, camada canônica e fontes ricas Investidor10/StatusInvest.
-- Adiciona teste regressivo `extreme-audit-logo-standard-v21-12-49`.
+- Adiciona teste regressivo `extreme-audit-logo-standard-v21-12-51`.

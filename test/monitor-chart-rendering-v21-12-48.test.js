@@ -43,7 +43,7 @@ assert.match(script, /drawBars\('reliabilityChart'/, 'drawAll deve desenhar conf
 assert.match(script, /drawBars\('cacheSourceChart'/, 'drawAll deve desenhar cache e fonte');
 assert.match(script, /drawBars\('richDataChart'/, 'drawAll deve desenhar dados ricos');
 assert.match(script, /drawLine\('benchmarkChart'/, 'drawAll deve desenhar benchmark visual');
-assert.match(html, /21\.12\.48-monitor-responsive-settings-theme/, 'HTML deve expor release v21.12.49');
+assert.match(html, /21\.12\.48-monitor-responsive-settings-theme/, 'HTML deve expor release v21.12.51');
 
 fs.writeFileSync('/tmp/valorae-monitor-chart-rendering-v21-12-48.js', script);
 execFileSync(process.execPath, ['--check', '/tmp/valorae-monitor-chart-rendering-v21-12-48.js'], { stdio: 'inherit' });

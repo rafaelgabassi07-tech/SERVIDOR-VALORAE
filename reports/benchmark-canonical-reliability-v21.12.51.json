@@ -1,13 +1,13 @@
 {
   "version": "21.12.51-post-benchmark-performance-hardening",
-  "generatedAt": "2026-05-30T00:55:48.899Z",
+  "generatedAt": "2026-05-30T02:29:05.962Z",
   "cases": [
     {
       "label": "canonical-layer-cold-low-data-live-source",
       "iterations": 12,
-      "avgMs": 16.974,
-      "medianMs": 10.909,
-      "p95Ms": 82.307,
+      "avgMs": 17.575,
+      "medianMs": 11.615,
+      "p95Ms": 83.621,
       "status": "OK",
       "partial": false,
       "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",
@@ -16,9 +16,9 @@
     {
       "label": "canonical-layer-result-cache",
       "iterations": 26,
-      "avgMs": 1.028,
-      "medianMs": 0.518,
-      "p95Ms": 1.428,
+      "avgMs": 1.136,
+      "medianMs": 0.554,
+      "p95Ms": 1.713,
       "status": "OK",
       "partial": false,
       "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",

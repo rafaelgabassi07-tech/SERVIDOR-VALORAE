@@ -1,0 +1,64 @@
+{
+  "version": "21.12.51-post-benchmark-performance-hardening",
+  "generatedAt": "2026-05-30T02:26:49.100Z",
+  "scrapeFastCold": {
+    "ms": 27.581,
+    "status": 200,
+    "cache": "MISS",
+    "ok": true,
+    "responseBytes": 5881,
+    "coveragePercent": 100
+  },
+  "scrapeFastHot": {
+    "avg": 0.646,
+    "median": 0.31,
+    "p95": 2.104,
+    "min": 0.257,
+    "max": 3.784
+  },
+  "concurrent25SameUrl": {
+    "ms": 77.987,
+    "ok": 25,
+    "fetches": 1
+  },
+  "batch20DuplicatedCold": {
+    "ms": 10.673,
+    "logical": {
+      "inputCount": 20,
+      "validJobs": 20,
+      "invalidJobs": 0,
+      "uniqueRequestKeys": 1,
+      "uniqueFetchKeys": 1,
+      "dedupedCount": 19
+    },
+    "execution": {
+      "networkFetches": 1,
+      "htmlCacheHits": 0,
+      "resultCacheHits": 0,
+      "resultCacheMisses": 20,
+      "parseRuns": 0,
+      "selectorRuns": 1,
+      "resultCacheHitRatePercent": 0
+    }
+  },
+  "batch20DuplicatedHot": {
+    "ms": 6.253,
+    "logical": {
+      "inputCount": 20,
+      "validJobs": 20,
+      "invalidJobs": 0,
+      "uniqueRequestKeys": 1,
+      "uniqueFetchKeys": 1,
+      "dedupedCount": 19
+    },
+    "execution": {
+      "networkFetches": 0,
+      "htmlCacheHits": 0,
+      "resultCacheHits": 20,
+      "resultCacheMisses": 0,
+      "parseRuns": 0,
+      "selectorRuns": 0,
+      "resultCacheHitRatePercent": 100
+    }
+  }
+}
