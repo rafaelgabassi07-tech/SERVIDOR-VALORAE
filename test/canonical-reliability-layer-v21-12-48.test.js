@@ -51,11 +51,11 @@ try {
 
   assert.equal(payload.status, 'OK', 'payload renderizável por blocos não deve virar PARTIAL global quando há base canônica + quote mínima');
   assert.equal(payload.partial, false);
-  assert.equal(payload.dataReliability.version, '21.12.51-post-benchmark-performance-hardening');
+  assert.equal(payload.dataReliability.version, '21.12.52-news-reliability-upgrade');
   assert.equal(payload.dataReliability.providerStrategy.richProvidersPreserved, true);
   assert.ok(payload.dataReliability.blocks.identity.status === 'OK');
   assert.ok(['PARTIAL', 'OK'].includes(payload.dataReliability.blocks.quote.status));
-  assert.match(payload.extractionCompleteness.canonicalReliability.version, /21\.12\.(48|49|50|51)/);
+  assert.match(payload.extractionCompleteness.canonicalReliability.version, /21\.12\.(48|49|50|51|52)/);
   assert.ok(payload.extractionCompleteness.canonicalReliability.used);
   assert.ok(payload.warnings.some(w => /Camada canônica CVM/.test(w)));
 

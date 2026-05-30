@@ -7,7 +7,7 @@ const index = fs.readFileSync('public/index.html', 'utf8');
 const script = html.slice(html.indexOf('<script>') + '<script>'.length, html.lastIndexOf('</script>'));
 
 assert.equal(html, index, 'index.html deve espelhar server.html');
-assert.match(html, /21\.12\.48-monitor-responsive-settings-theme/, 'release v21.12.51 deve estar exposta');
+assert.match(html, /21\.12\.48-monitor-responsive-settings-theme/, 'release v21.12.52 deve estar exposta');
 
 for (const token of [
   'id="page-settings"',
@@ -24,7 +24,7 @@ for (const token of [
   'position:fixed',
   'window._positionOpenCustomSelect',
 ]) {
-  assert.ok(html.includes(token), `Monitor v21.12.51 deve conter ${token}`);
+  assert.ok(html.includes(token), `Monitor v21.12.52 deve conter ${token}`);
 }
 
 assert.match(html, /\.cs-opt\{[^}]*white-space:normal/s, 'opções dos filtros devem quebrar linha em vez de cortar texto');

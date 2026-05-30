@@ -43,7 +43,7 @@ try {
   const batchHot = await time(async()=>{ const r=mockRes(); await batchScrapeHandler(req({ method:'POST', url:'/api/batch-scrape', body: batchBody }), r); return parse(r); });
 
   const report = {
-    version: '21.12.51-post-benchmark-performance-hardening',
+    version: '21.12.52-news-reliability-upgrade',
     generatedAt: new Date().toISOString(),
     scrapeFastCold: { ms:+cold.ms.toFixed(3), status:cold.value.status, cache:cold.value.cache, ok:cold.value.body.ok, responseBytes:Number(cold.value.body.metrics?.responseBytes || 0), coveragePercent:cold.value.body.precision?.coveragePercent },
     scrapeFastHot: hotStats,
@@ -52,7 +52,7 @@ try {
     batch20DuplicatedHot: { ms:+batchHot.ms.toFixed(3), logical:batchHot.value.logical, execution:batchHot.value.execution },
   };
   fs.mkdirSync('reports', { recursive:true });
-  fs.writeFileSync('reports/benchmark-post-benchmark-v21.12.51.json', JSON.stringify(report, null, 2));
+  fs.writeFileSync('reports/benchmark-post-benchmark-v21.12.52.json', JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {
   ValoraeEngine.scrapeUrl = original;

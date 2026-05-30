@@ -1,5 +1,13 @@
 ## v21.12.51 - Post Benchmark Performance Hardening
 
+## 21.12.52-news-reliability-upgrade
+
+- Reforça `/api/news` e `includeNews=1` para integração segura do APK.
+- RSS vazio/malformado agora retorna `ok=false` com `GOOGLE_NEWS_EMPTY`, nunca sucesso falso.
+- Adiciona cache/stale de notícias, política `shouldKeepPreviousNews` e `canReplacePreviousNews`.
+- Preserva `news` e `newsStatus` no `view=app`.
+- Adiciona `test/news-reliability-v21-12-52.test.js` e `npm run bench:news`.
+
 - Implementa response cache serializado para `/api/scrape`, com fast-path `RESULT_RESPONSE_HIT` e retorno quente abaixo de 3 ms no benchmark controlado.
 - Adiciona `profile=scrape-fast`, sem gráficos/diagnóstico pesado por padrão, preservando métricas essenciais e payload enxuto.
 - Adiciona coalescing de fetch concorrente na rota `/api/scrape`, garantindo 25 chamadas simultâneas idênticas com 1 fetch real no teste regressivo.

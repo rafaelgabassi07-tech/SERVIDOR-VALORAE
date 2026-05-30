@@ -35,11 +35,11 @@ assert.ok(!html.includes('<input id="tickerInput" value="PETR4" placeholder="Tic
 assert.ok(html.length < 110000, 'cockpit redesenhado deve continuar leve para mobile/Vercel Free com gráficos resilientes');
 
 const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
-assert.match(manifest.version, /^21\.12\.(31|32|35|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51)$/);
+assert.match(manifest.version, /^21\.12\.(31|32|35|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52)$/);
 assert.equal(manifest.start_url, '/server.html#command');
 
 const sw = fs.readFileSync('public/service-worker.js', 'utf8');
-assert.ok(sw.includes('v21-12-31') || sw.includes('v21-12-32') || sw.includes('v21-12-35') || sw.includes('v21-12-37') || sw.includes('v21-12-38') || sw.includes('v21-12-39') || sw.includes('v21-12-40') || sw.includes('v21-12-41') || sw.includes('v21-12-42') || sw.includes('v21-12-45') || sw.includes('v21-12-48') || sw.includes('v21-12-51'), 'service worker deve usar cache novo do redesign/performance');
+assert.ok(sw.includes('v21-12-31') || sw.includes('v21-12-32') || sw.includes('v21-12-35') || sw.includes('v21-12-37') || sw.includes('v21-12-38') || sw.includes('v21-12-39') || sw.includes('v21-12-40') || sw.includes('v21-12-41') || sw.includes('v21-12-42') || sw.includes('v21-12-45') || sw.includes('v21-12-48') || sw.includes('v21-12-52'), 'service worker deve usar cache novo do redesign/performance');
 assert.ok(sw.includes("pathname.startsWith('/api')") || sw.includes('pathname.startsWith("/api")'), 'service worker não deve cachear API');
 
 const readme = fs.readFileSync('README.md', 'utf8');

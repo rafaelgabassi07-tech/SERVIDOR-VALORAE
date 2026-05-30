@@ -70,13 +70,13 @@ try {
   const report = {
     generatedAt: new Date().toISOString(),
     network: 'mocked/local-only',
-    version: '21.12.51-post-benchmark-performance-hardening',
+    version: '21.12.52-news-reliability-upgrade',
     baseline: { firstStatus: first.status, firstPartial: first.partial, firstScore: first.metrics?.extractionCompleteness?.score },
     cases: [turboNoResultCache, turboResultCacheHit],
     cacheStats: ValoraeEngine.cacheStats().caches,
   };
   fs.mkdirSync('reports', { recursive: true });
-  fs.writeFileSync('reports/benchmark-extraction-turbo-v21.12.51.json', JSON.stringify(report, null, 2));
+  fs.writeFileSync('reports/benchmark-extraction-turbo-v21.12.52.json', JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {
   globalThis.fetch = originalFetch;

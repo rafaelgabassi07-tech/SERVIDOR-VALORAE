@@ -53,13 +53,13 @@ try {
   clearValoraeCaches('all');
   const warm = await measure('canonical-layer-result-cache', () => ValoraeEngine.fetchAtivo('PETR4', 'ACAO', { profile: 'fast', view: 'app', cache: true, useYahooFallback: true, statusInvestComplement: false, canonicalData: true }), 26);
   const report = {
-    version: '21.12.51-post-benchmark-performance-hardening',
+    version: '21.12.52-news-reliability-upgrade',
     generatedAt: new Date().toISOString(),
     cases: [cold, warm],
     conclusion: 'Camada canônica CVM reduz PARTIAL estrutural e preserva fontes ricas sem sobrescrever dados vivos.',
   };
   fs.mkdirSync('reports', { recursive: true });
-  fs.writeFileSync('reports/benchmark-canonical-reliability-v21.12.51.json', JSON.stringify(report, null, 2));
+  fs.writeFileSync('reports/benchmark-canonical-reliability-v21.12.52.json', JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {
   if (originalEnv === undefined) delete process.env.VALORAE_CANONICAL_REGISTRY_JSON;

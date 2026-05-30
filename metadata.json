@@ -1,11 +1,11 @@
 {
-  "name": "VALORAE Proxy Server v21.12.51",
-  "description": "VALORAE Proxy Server v21.12.51 com hardening pós-benchmark de performance, HTML espelhado, limpeza de artefatos do ZIP, Monitor responsivo, camada canônica e fontes ricas preservadas.",
+  "name": "VALORAE Proxy Server v21.12.52",
+  "description": "VALORAE Proxy Server v21.12.52 com hardening pós-benchmark de performance, HTML espelhado, limpeza de artefatos do ZIP, Monitor responsivo, camada canônica e fontes ricas preservadas.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
-  "release": "21.12.51-post-benchmark-performance-hardening",
-  "latestInternalPatch": "21.12.51-post-benchmark-performance-hardening",
+  "release": "21.12.52-news-reliability-upgrade",
+  "latestInternalPatch": "21.12.52-news-reliability-upgrade",
   "features": [
     "top-level-patch-artifacts-removed",
     "gradle-artifacts-removed-again",
@@ -102,7 +102,7 @@
     "personal release readiness endpoint",
     "personalReleaseReadiness in server metrics",
     "precision-reliability-scores",
-    "professional-informatprofessional-information-architectureion-architecture",
+    "professional-information-architecture",
     "proxyOutputMonitor com feed de tudo que sai do proxy",
     "readiness marker in index",
     "reduced-page-count",
@@ -153,7 +153,7 @@
   "codename": "post-benchmark-performance-hardening",
   "notes": "Auditoria focada em correções: restaura espelhamento index/server do Monitor, remove resíduos Gradle/patch do pacote do proxy e reforça testes de higiene antes da integração do app de carteira.",
   "generatedAt": "2026-05-29T19:40:00.000Z",
-  "versionLabel": "core 21.12.0 · release 21.12.51-post-benchmark-performance-hardening",
+  "versionLabel": "core 21.12.0 · release 21.12.52-news-reliability-upgrade",
   "tags": [
     "ai-prompts",
     "app-sync-preserved",
@@ -213,7 +213,7 @@
     "gradle-artifacts-removed",
     "legacy-audits-compat",
     "21.12.40-extraction-completion-speed",
-    "v21.12.51",
+    "v21.12.52",
     "final-audit-corrections",
     "assets-batch-duplicates",
     "release-harmony",
@@ -221,23 +221,23 @@
     "html-mirror",
     "zip-hygiene"
   ],
-  "patch": "21.12.51-post-benchmark-performance-hardening",
+  "patch": "21.12.52-news-reliability-upgrade",
   "highlights": [
     "Restaura espelhamento exato entre public/index.html e public/server.html para uma única experiência do Monitor.",
     "Remove resíduos de patch e artefatos Gradle do ZIP final do proxy.",
-    "Adiciona teste regressivo v21.12.51 para bloquear retorno de HTML divergente e arquivos de patch no topo do pacote.",
-    "Monitor v21.12.51 desenha gráficos resilientes com estado vazio informativo e séries agregadas/fallback.",
+    "Adiciona teste regressivo v21.12.52 para bloquear retorno de HTML divergente e arquivos de patch no topo do pacote.",
+    "Monitor v21.12.52 desenha gráficos resilientes com estado vazio informativo e séries agregadas/fallback.",
     "Corrige /api/assets para preservar duplicatas solicitadas, mantendo a ordem esperada por carteiras e listas do app.",
     "Mantém dedupe interno de extração para não buscar o mesmo ticker repetidas vezes.",
-    "Sincroniza labels públicos da release v21.12.51 em Monitor, manifestos, readiness, OpenAPI e metadata.",
+    "Sincroniza labels públicos da release v21.12.52 em Monitor, manifestos, readiness, OpenAPI e metadata.",
     "Preserva as melhorias v21.12.44: stale-while-revalidate, orçamento de timeout e baixa latência para app/carteira.",
     "Adiciona teste de regressão específico para batch com tickers duplicados."
   ],
   "publicEngineContract": "21.12.0",
   "coreVersion": "21.12.0",
-  "releasePatch": "21.12.51-post-benchmark-performance-hardening",
+  "releasePatch": "21.12.52-news-reliability-upgrade",
   "releaseHistory": [
-    "21.12.51-post-benchmark-performance-hardening",
+    "21.12.52-news-reliability-upgrade",
     "21.12.44-stale-budget-performance-boost"
   ],
   "improvements": null

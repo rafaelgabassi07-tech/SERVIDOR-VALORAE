@@ -78,13 +78,13 @@ try {
   const report = {
     generatedAt: new Date().toISOString(),
     network: 'mocked/local-only',
-    version: '21.12.51-post-benchmark-performance-hardening',
+    version: '21.12.52-news-reliability-upgrade',
     cases: [cold, stale],
     sourceCallsDuringStaleBench: liveCalls - beforeStaleCalls,
     runtimeCacheStats: getValoraeRuntimeStats().caches.assetResult,
   };
   fs.mkdirSync('reports', { recursive: true });
-  fs.writeFileSync('reports/benchmark-stale-budget-v21.12.51.json', JSON.stringify(report, null, 2));
+  fs.writeFileSync('reports/benchmark-stale-budget-v21.12.52.json', JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {
   globalThis.fetch = originalFetch;

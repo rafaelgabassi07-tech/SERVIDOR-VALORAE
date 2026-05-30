@@ -114,4 +114,4 @@ try {
   clearScrapeResultCache();
 }
 
-console.log('post-benchmark-hardening-v21-12-51 OK');
+console.log('post-benchmark-hardening-v21-12-52 OK');

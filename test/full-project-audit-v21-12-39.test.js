@@ -4,7 +4,7 @@ import path from 'node:path';
 import { getServerMetricsSnapshot } from '../lib/observability/server-metrics.js';
 import { routeManifest } from '../routes/_router.js';
 
-const RELEASE = '21.12.51-post-benchmark-performance-hardening';
+const RELEASE = '21.12.52-news-reliability-upgrade';
 const forbiddenTopLevelArtifacts = ['fix_modal.cjs','update.cjs','update_menu.cjs','head.html','formatted.css','ui-styles.css','test.js'];
 
 for (const file of forbiddenTopLevelArtifacts) {
@@ -23,13 +23,13 @@ assert.equal(pkg.version, '21.12.0', 'package.version remains stable core semver
 assert.equal(pkg.valorae.releasePatch, RELEASE);
 assert.equal(metadata.releasePatch, RELEASE);
 assert.equal(metadata.latestInternalPatch, RELEASE);
-assert.equal(manifest.version, '21.12.51');
-assert.match(sw, /valorae-proxy-server-v21-12-51/);
+assert.equal(manifest.version, '21.12.52');
+assert.match(sw, /valorae-proxy-server-v21-12-52/);
 assert.match(serverHtml, /21\.12\.48-monitor-responsive-settings-theme/);
 assert.match(indexHtml, /21\.12\.48-monitor-responsive-settings-theme/);
-assert.match(serverHtml, /v21\.12\.51 UI/);
-assert.match(integrationManifestRoute, /21\.12\.51-post-benchmark-performance-hardening-integration-manifest/);
-assert.match(integrationManifestRoute, /releasePatch: '21\.12\.51-post-benchmark-performance-hardening'/);
+assert.match(serverHtml, /v21\.12\.52 UI/);
+assert.match(integrationManifestRoute, /21\.12\.52-news-reliability-upgrade-integration-manifest/);
+assert.match(integrationManifestRoute, /releasePatch: '21\.12\.52-news-reliability-upgrade'/);
 
 const combined = [JSON.stringify(metadata), sw, serverHtml, indexHtml].join('\n');
 assert.doesNotMatch(combined, /MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API/);
@@ -43,6 +43,6 @@ for (const required of ['/server/metrics', '/server/tests', '/integration/manife
 
 const metrics = getServerMetricsSnapshot();
 assert.equal(metrics.releasePatch, RELEASE);
-assert.match(metrics.version, /21\.12\.(40|41|42|43|44|45|46|47|48|49|50|51)/);
+assert.match(metrics.version, /21\.12\.(40|41|42|43|44|45|46|47|48|49|50|51|52)/);
 
 console.log('full-project-audit-v21-12-39/42 OK');

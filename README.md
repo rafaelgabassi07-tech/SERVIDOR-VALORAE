@@ -1,20 +1,22 @@
-# VALORAE Proxy / Engine v21.12.51 — Correction Focused Audit
+# VALORAE Proxy / Engine v21.12.52 — News Reliability Upgrade
 
 O VALORAE Engine é um **Proxy + Engine de normalização + API + Monitor de saída** para uso pessoal e pessoas próximas. Ele foi desenhado para rodar em GitHub/Vercel gratuito, sem banco obrigatório, Redis/KV, storage externo, cron pago ou WebSocket.
 
-> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`. Correção de escopo do painel: `21.12.36-monitor-scope-fix`. Restauração dos filtros da Saída do Proxy: `21.12.37-proxy-output-filter-restore`. Correções do relatório de falhas: `21.12.38-failure-audit-hardening`. Auditoria completa final: `21.12.40-extraction-completion-speed`. Extração turbo atual: `21.12.48-monitor-responsive-settings-theme`. Auditoria extrema/logotipo atual: `21.12.51-post-benchmark-performance-hardening`.
+> Contrato público do núcleo preservado: `VALORAE_ENGINE_VERSION = 21.12.0`. Patch interno de release preservado: `21.12.30-final-personal-launch-cleanup`. Patch visual atual: `21.12.31-monitor-experience-redesign`. Patch de performance atual: `21.12.32-launch-performance-optimizer`. Polimento final de lançamento: `21.12.33-personal-launch-polish`. Auditoria final: `21.12.34-audited-launch-candidate`. Correção funcional do monitor: `21.12.35-monitor-data-fill`. Correção de escopo do painel: `21.12.36-monitor-scope-fix`. Restauração dos filtros da Saída do Proxy: `21.12.37-proxy-output-filter-restore`. Correções do relatório de falhas: `21.12.38-failure-audit-hardening`. Auditoria completa final: `21.12.40-extraction-completion-speed`. Extração turbo atual: `21.12.48-monitor-responsive-settings-theme`. Auditoria extrema/logotipo atual: `21.12.52-news-reliability-upgrade`.
 
 
 
-### Novidades v21.12.51
+### Novidades v21.12.52
 
-- Corrige divergência entre `public/index.html` e `public/server.html`, garantindo a mesma experiência do Monitor em `/`, `/index.html` e `/server.html`.
-- Remove artefatos Gradle e resíduos auxiliares de patch do topo do ZIP final do proxy.
-- Atualiza PWA/Service Worker para `21.12.51` e cache `valorae-proxy-server-v21-12-50`, evitando shell antigo após deploy.
-- Mantém logotipo padronizado, modo claro/escuro, responsividade mobile/desktop, filtros flutuantes, gráficos, camada canônica e fontes ricas Investidor10/StatusInvest.
-- Adiciona teste regressivo `test/post-benchmark-performance-hardening-v21-12-50.test.js`.
+- Reforça a camada de notícias (`/api/news` e `includeNews=1`) para uso seguro no APK.
+- RSS vazio, malformado ou sem notícia relevante agora retorna `ok=false`, `empty=true` e código didático; não aparece mais como sucesso falso.
+- Adiciona cache de notícias com TTL, janela stale e política explícita para o app manter a última lista boa.
+- Expõe `news`, `newsStatus`, `appPolicy` e `reliability` no contrato `view=app`.
+- Propaga `newsTimeoutMs`/`timeoutMs` para notícia direta, ativo individual e lote de ativos.
+- Atualiza PWA/Service Worker para `21.12.52` e cache `valorae-proxy-server-v21-12-52`.
+- Adiciona teste regressivo `test/news-reliability-v21-12-52.test.js` e benchmark `npm run bench:news`.
 
-A v21.12.51 preserva as melhorias anteriores: camada canônica, `profile=turbo`/`max`, score de completude, StatusInvest complementar, hedge, batch dedupe, gráficos resilientes e Monitor integrado ao ecossistema VALORAE.
+A v21.12.52 preserva as melhorias anteriores: cache ultrarrápido de `/api/scrape`, camada canônica, `profile=turbo`/`max`, StatusInvest/Investidor10 como fontes ricas, batch eficiente, gráficos resilientes e Monitor integrado ao ecossistema VALORAE.
 
 Uso recomendado para máxima completude:
 
@@ -30,7 +32,7 @@ Uso recomendado para máxima completude:
 - Sincroniza rótulos vivos de release em metadata, PWA, Service Worker, painel, métricas e manifesto de integração.
 - Remove resíduos locais de patch/build do ZIP final: `fix_modal.cjs`, `update.cjs`, `update_menu.cjs`, `head.html`, `formatted.css`, `ui-styles.css` e `test.js`.
 - Adiciona teste de higiene final `test/full-project-audit-v21-12-39.test.js`.
-- Mantém `package.version` como core `21.12.0` e usa `releasePatch` para o patch interno `21.12.51-post-benchmark-performance-hardening`.
+- Mantém `package.version` como core `21.12.0` e usa `releasePatch` para o patch interno `21.12.52-news-reliability-upgrade`.
 
 ### Novidades v21.12.38
 
@@ -310,7 +312,7 @@ Para o objetivo real — uso pessoal e pessoas próximas — o projeto está em 
 - Adiciona teste regressivo `extreme-audit-logo-standard-v21-12-49`.
 
 
-## 21.12.51-post-benchmark-performance-hardening
+## 21.12.52-news-reliability-upgrade
 
 Auditoria focada em correções antes da integração do app de carteira:
 

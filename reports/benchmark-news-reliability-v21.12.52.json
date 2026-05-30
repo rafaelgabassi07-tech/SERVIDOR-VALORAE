@@ -1,0 +1,25 @@
+{
+  "version": "21.12.52-news-reliability-upgrade",
+  "fetchCount": 6,
+  "cold": {
+    "avg": 5.805,
+    "median": 5.124,
+    "p95": 9.043,
+    "min": 4.718,
+    "max": 9.043
+  },
+  "hot": {
+    "avg": 0.019,
+    "median": 0.011,
+    "p95": 0.06,
+    "min": 0.006,
+    "max": 0.195
+  },
+  "hotCacheStatus": "NEWS_CACHE_HIT",
+  "emptySemantics": {
+    "ok": false,
+    "code": "GOOGLE_NEWS_EMPTY",
+    "shouldKeepPreviousNews": true
+  },
+  "generatedAt": "2026-05-30T04:46:17.028Z"
+}

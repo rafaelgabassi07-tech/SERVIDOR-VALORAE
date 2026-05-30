@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import assets from '../routes/assets.js';
 import { clearValoraeCaches } from '../lib/Valorae-engine.js';
 
-const RELEASE = '21.12.51-post-benchmark-performance-hardening';
+const RELEASE = '21.12.52-news-reliability-upgrade';
 const originalFetch = globalThis.fetch;
 
 function mockReq(url, query = {}) {
@@ -79,8 +79,8 @@ try {
   const openapi = fs.readFileSync('routes/openapi.js', 'utf8');
   assert.equal(pkg.valorae.releasePatch, RELEASE);
   assert.equal(metadata.releasePatch, RELEASE);
-  assert.equal(manifest.version, '21.12.51');
-  assert.match(sw, /valorae-proxy-server-v21-12-51/);
+  assert.equal(manifest.version, '21.12.52');
+  assert.match(sw, /valorae-proxy-server-v21-12-52/);
   assert.match(html, /21\.12\.48-monitor-responsive-settings-theme/);
   assert.match(openapi, /v21\.12\.48: Monitor Chart Rendering Boost/);
 } finally {
@@ -88,4 +88,4 @@ try {
   clearValoraeCaches('all');
 }
 
-console.log('final-audit-corrections-v21-12-51 OK');
+console.log('final-audit-corrections-v21-12-52 OK');

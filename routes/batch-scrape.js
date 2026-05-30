@@ -28,7 +28,7 @@ function lightPrecisionReport({ results = {}, selectors = {}, htmlLength = 0, st
   const coveragePercent = Math.max(0, Math.min(100, Math.round(coverageRatio * 10000) / 100));
   const score = Math.max(0, Math.min(100, Math.round(coveragePercent - Math.min(20, (warnings || []).length * 4) - (sourceDrift?.sourceDrift ? 15 : 0))));
   return {
-    version: '21.12.51-light-precision-batch-fast',
+    version: '21.12.52-light-precision-batch-fast',
     score,
     level: score >= 85 ? 'high' : score >= 70 ? 'medium' : score >= 50 ? 'low' : 'critical',
     coveragePercent,

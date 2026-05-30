@@ -43,6 +43,7 @@ export default async function handler(req, res) {
     }
 
     const requestedTimeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 500, 20000) : undefined;
+    const requestedNewsTimeoutMs = input.newsTimeoutMs ? clampNumber(input.newsTimeoutMs, undefined, 350, 12000) : requestedTimeoutMs;
     const lowLatencyBudget = requestedTimeoutMs !== undefined
       && requestedTimeoutMs <= 1000
       && input.complete === undefined
@@ -57,6 +58,7 @@ export default async function handler(req, res) {
       adaptiveCompletionTimeoutMs: input.adaptiveCompletionTimeoutMs ? clampNumber(input.adaptiveCompletionTimeoutMs, undefined, 500, 12000) : requestedTimeoutMs,
       valoraeScrapeTimeoutMs: requestedTimeoutMs,
       internalApiTimeoutMs: requestedTimeoutMs,
+      newsTimeoutMs: requestedNewsTimeoutMs,
       statusInvestTimeoutMs: requestedTimeoutMs,
       statusInvestComplement: lowLatencyBudget ? false : (input.statusInvestComplement === undefined ? undefined : boolParam(input.statusInvestComplement, true)),
       returnHtml: lowLatencyBudget ? false : undefined,

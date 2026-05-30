@@ -36,6 +36,9 @@ export default async function handler(req, res) {
     const requestedAdaptiveTimeoutMs = input.adaptiveCompletionTimeoutMs
       ? clampNumber(input.adaptiveCompletionTimeoutMs, undefined, 500, 12000)
       : requestedTimeoutMs;
+    const requestedNewsTimeoutMs = input.newsTimeoutMs
+      ? clampNumber(input.newsTimeoutMs, undefined, 350, 12000)
+      : requestedTimeoutMs;
 
     const hasExplicitScrapeUrl = Boolean(input.valoraeScrapeUrl || input.scrapeUrl);
     const lowLatencyBudget = requestedTimeoutMs !== undefined
@@ -52,6 +55,7 @@ export default async function handler(req, res) {
       adaptiveCompletionTimeoutMs: requestedAdaptiveTimeoutMs,
       valoraeScrapeTimeoutMs: requestedScrapeTimeoutMs,
       internalApiTimeoutMs: requestedTimeoutMs,
+      newsTimeoutMs: requestedNewsTimeoutMs,
       statusInvestTimeoutMs: requestedTimeoutMs,
       statusInvestComplement: lowLatencyBudget ? false : (input.statusInvestComplement === undefined ? undefined : boolParam(input.statusInvestComplement, true)),
       returnHtml: lowLatencyBudget ? false : undefined,
