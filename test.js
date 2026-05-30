@@ -1,5 +1,10 @@
 
 (()=>{
+const _origHtml = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+Object.defineProperty(Element.prototype, 'innerHTML', {
+  get: function() { return _origHtml.get.call(this); },
+  set: function(val) { if (this.__rawHtml === val) return; this.__rawHtml = val; _origHtml.set.call(this, val); }
+});
 const $=id=>document.getElementById(id), q=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const state={metrics:null,feed:[],filtered:[],selected:null,paused:false,timer:null,lastBench:null,hidden:false,launchPatch:'21.12.31-monitor-experience-redesign'};
 const pageAliases={overview:'command',feed:'output',charts:'performance',routes:'performance',pipeline:'performance',vercel:'performance',performance:'performance',quality:'quality',fieldguard:'quality',payloadbudget:'quality',actionplan:'quality',enginematurity:'quality',launch:'quality',maturity:'quality',integration:'integration',manifest:'integration',prompts:'integration',features:'integration',technology:'integration',modules:'integration',benchmark:'diagnostics',diagnostics:'diagnostics',tests:'diagnostics'};
