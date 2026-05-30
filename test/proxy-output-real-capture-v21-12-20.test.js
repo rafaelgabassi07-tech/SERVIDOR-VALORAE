@@ -85,7 +85,7 @@ recordResponse(externalReq, res(200), {
 }, { status: 200, responseBytes: 4096, route: '/api/portfolio/analyze', cacheStatus: 'memory-miss', sourceStatus: 'ok' });
 
 const snap = getServerMetricsSnapshot();
-assert.match(snap.version, /^21\.12\.(20|26|27|28|29|30|32|35|36|37|38|39)-/);
+assert.match(snap.version, /^21\.12\.(20|26|27|28|29|30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49)-/);
 assert.equal(snap.summary.requests, 2, 'somente as duas rotas de dados devem contar como tráfego real');
 assert.equal(snap.summary.responses, 2);
 assert.equal(snap.proxyOutputMonitor.totals.outboundResponses, 2);

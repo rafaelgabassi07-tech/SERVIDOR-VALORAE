@@ -1,10 +1,10 @@
 # Benchmark scraping VALORAE
 
-Gerado em 2026-05-29T20:04:14.480Z. Rede: mocked/local-only.
+Gerado em 2026-05-30T00:55:46.009Z. Rede: mocked/local-only.
 
 | Caso | loops | média ms | mediana ms | p95 ms |
 |---|---:|---:|---:|---:|
-| fast-selectors-single-pass | 120 | 1.092 | 0.948 | 1.784 |
-| custom-selectors-css-lite | 120 | 1.686 | 1.598 | 2.011 |
-| signature-result-key | 500 | 0.017 | 0.013 | 0.023 |
-| signature-fetch-key | 500 | 0.005 | 0.003 | 0.007 |
+| fast-selectors-single-pass | 120 | 1.419 | 1.239 | 2.191 |
+| custom-selectors-css-lite | 120 | 2.386 | 2.236 | 3.286 |
+| signature-result-key | 500 | 0.024 | 0.018 | 0.033 |
+| signature-fetch-key | 500 | 0.007 | 0.004 | 0.007 |

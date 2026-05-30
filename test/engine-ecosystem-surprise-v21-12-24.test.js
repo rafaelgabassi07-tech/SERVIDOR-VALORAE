@@ -54,7 +54,7 @@ for (const needle of [
   '21.12.24-efficiency-precision-ecosystem',
 ]) assert.ok(html.includes(needle), `monitor deve conter ${needle}`);
 assert.ok((html.match(/class="explain-grid"/g) || []).length >= 14, 'novas páginas devem ter duas explicações claras');
-assert.ok(html.length < 85000, 'monitor deve continuar leve');
+assert.ok(html.length < 110000, 'monitor deve continuar leve com gráficos resilientes');
 
 const fields = fs.readFileSync('routes/fields.js', 'utf8');
 assert.ok(fields.includes('engineEfficiency.scores'));

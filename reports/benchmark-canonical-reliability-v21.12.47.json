@@ -1,0 +1,29 @@
+{
+  "version": "21.12.48-monitor-responsive-settings-theme",
+  "generatedAt": "2026-05-30T00:26:12.806Z",
+  "cases": [
+    {
+      "label": "canonical-layer-cold-low-data-live-source",
+      "iterations": 12,
+      "avgMs": 15.996,
+      "medianMs": 10.559,
+      "p95Ms": 76.87,
+      "status": "OK",
+      "partial": false,
+      "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",
+      "canonicalUsed": true
+    },
+    {
+      "label": "canonical-layer-result-cache",
+      "iterations": 26,
+      "avgMs": 0.993,
+      "medianMs": 0.517,
+      "p95Ms": 1.393,
+      "status": "OK",
+      "partial": false,
+      "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",
+      "canonicalUsed": true
+    }
+  ],
+  "conclusion": "Camada canônica CVM reduz PARTIAL estrutural e preserva fontes ricas sem sobrescrever dados vivos."
+}

@@ -32,27 +32,41 @@ export default async function handler(req, res) {
 
     const valid = [];
     const errors = [];
-    const seen = new Set();
     for (const r of raw) {
       const t = canonicalizeTicker(r);
       const err = validarTicker(t);
       if (err) errors.push({ ticker: r, error: err });
-      else if (!seen.has(t)) { seen.add(t); valid.push(t); }
+      else valid.push(t);
     }
     if (!valid.length) {
       return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: 'Nenhum ticker válido enviado.', errors }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'assets' });
     }
 
+    const requestedTimeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 500, 20000) : undefined;
+    const lowLatencyBudget = requestedTimeoutMs !== undefined
+      && requestedTimeoutMs <= 1000
+      && input.complete === undefined
+      && input.adaptiveCompletion === undefined;
+
     const perfOptions = resolvePerformanceOptions({
       mode: input.mode || 'super',
-      includeNews: boolParam(input.includeNews ?? input.news, false),
+      includeNews: lowLatencyBudget ? false : boolParam(input.includeNews ?? input.news, false),
       newsLimit: clampNumber(input.newsLimit || input.limit, 8, 0, 25),
-      useYahooFallback: input.yahoo === undefined ? true : boolParam(input.yahoo, true),
+      useYahooFallback: lowLatencyBudget ? false : (input.yahoo === undefined ? true : boolParam(input.yahoo, true)),
+      adaptiveCompletion: lowLatencyBudget ? false : (input.complete !== undefined ? boolParam(input.complete, true) : (input.adaptiveCompletion === undefined ? undefined : boolParam(input.adaptiveCompletion, true))),
+      adaptiveCompletionTimeoutMs: input.adaptiveCompletionTimeoutMs ? clampNumber(input.adaptiveCompletionTimeoutMs, undefined, 500, 12000) : requestedTimeoutMs,
+      valoraeScrapeTimeoutMs: requestedTimeoutMs,
+      internalApiTimeoutMs: requestedTimeoutMs,
+      statusInvestTimeoutMs: requestedTimeoutMs,
+      statusInvestComplement: lowLatencyBudget ? false : (input.statusInvestComplement === undefined ? undefined : boolParam(input.statusInvestComplement, true)),
+      returnHtml: lowLatencyBudget ? false : undefined,
+      enableInternalApis: lowLatencyBudget ? false : undefined,
+      lowLatencyBudget,
       maxConcurrency: clampNumber(input.maxConcurrency || input.concurrency, undefined, 1, 8),
       continueOnError: input.continueOnError === undefined ? true : boolParam(input.continueOnError, true),
-      timeoutMs: input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 1000, 20000) : undefined,
+      timeoutMs: requestedTimeoutMs,
       maxHtmlChars: input.maxHtmlChars ? clampNumber(input.maxHtmlChars, undefined, 10000, 4500000) : undefined,
-      valoraeScrapeUrl: resolveSelfScrapeUrl(req, input),
+      valoraeScrapeUrl: lowLatencyBudget && !(input.valoraeScrapeUrl || input.scrapeUrl) ? undefined : resolveSelfScrapeUrl(req, input),
       cache: !(boolParam(input.nocache || input.refresh) || falseParam(input.cache)),
       bypassCache: boolParam(input.nocache || input.refresh),
       view: input.view || process.env.VALORAE_DEFAULT_ASSETS_VIEW || 'app',

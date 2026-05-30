@@ -44,7 +44,7 @@ assert.ok(view.coverage.summary.present >= 4);
 assert.ok(view.nextBestEndpoints.includes('/api/v1/asset/valuation'));
 
 const maturity = buildEngineMaturityBooster(payload, { resolvedView: 'app', mode: 'app-production-optimized' }, {}, { view: 'app' });
-assert.ok(/21\.12\.(28|29|30|32|35|36|37|38|39)/.test(maturity.version));
+assert.ok(/21\.12\.(28|29|30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49)/.test(maturity.version));
 assert.ok(maturity.scores.overall >= 60);
 assert.equal(maturity.processingPlan.paidDependencies, false);
 
@@ -56,7 +56,7 @@ const manifest = routeManifest();
 assert.ok(manifest.routes.includes('/asset/indicators'));
 assert.ok(manifest.routes.includes('/fii/indicators'));
 assert.ok(manifest.routes.includes('/engine/maturity'));
-assert.match(VALORAE_SERVER_METRICS_VERSION, /^21\.12\.(30|32|35|36|37|38|39)-/);
+assert.match(VALORAE_SERVER_METRICS_VERSION, /^21\.12\.(30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49)-/);
 
 const html = fs.readFileSync('public/server.html', 'utf8');
 assert.ok(html.includes('Maturidade do Engine'));

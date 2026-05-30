@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-05-30T00:55:48.196Z",
+  "network": "mocked/local-only",
+  "version": "21.12.49-extreme-audit-logo-standard",
+  "cases": [
+    {
+      "name": "cold-fresh-fill",
+      "loops": 1,
+      "avgMs": 99.581,
+      "medianMs": 99.581,
+      "p95Ms": 99.581,
+      "lastCacheStatus": "RESULT_CACHE_MISS",
+      "lastStatus": "OK",
+      "lastPartial": false
+    },
+    {
+      "name": "stale-while-revalidate-low-latency",
+      "loops": 30,
+      "avgMs": 2.175,
+      "medianMs": 0.733,
+      "p95Ms": 13.154,
+      "lastCacheStatus": "RESULT_CACHE_HIT",
+      "lastStatus": "OK",
+      "lastPartial": false
+    }
+  ],
+  "sourceCallsDuringStaleBench": 0,
+  "runtimeCacheStats": {
+    "enabled": true,
+    "entries": 1,
+    "bytes": 43091,
+    "ttlMs": 300000,
+    "metrics": {
+      "hits": 24,
+      "misses": 8,
+      "staleHits": 6,
+      "sets": 3,
+      "evictions": 0,
+      "inflightJoins": 4
+    },
+    "hitRate": 75
+  }
+}

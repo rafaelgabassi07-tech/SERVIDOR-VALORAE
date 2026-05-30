@@ -29,6 +29,6 @@ for (const needle of [
   'Gerar saída teste',
   'proxy-output-probe',
 ]) assert.ok(html.includes(needle), `server.html precisa conter ${needle}`);
-assert.ok(html.length < 85000, 'página com menu lateral deve continuar leve para Vercel Free/mobile');
+assert.ok(html.length < 110000, 'página com menu lateral deve continuar leve para Vercel Free/mobile com gráficos resilientes');
 
 console.log('proxy-output-hamburger-pages-v21-12-19 ok');

@@ -1,7 +1,57 @@
+## v21.12.48 - Monitor Responsive Settings Theme
+
+- Corrige filtros da página Saída do Proxy com dropdown flutuante, quebra de linha e proteção contra corte no viewport.
+- Adiciona página Configurações para tema, origem da API, polling e diagnóstico de responsividade.
+- Adiciona botão de modo claro/escuro no cabeçalho, com persistência em localStorage e suporte a preferência do sistema.
+- Reforça adaptação mobile/tablet/desktop com breakpoints dedicados, drawer e filtros em largura total no celular.
+- Substitui ícones simples do menu lateral por ícones SVG lineares.
+- Preserva camadas de extração, fontes ricas, gráficos, rankings e dados da v21.12.47.
+
+## v21.12.48 - Canonical Data Reliability Layer
+
+- Adiciona `lib/canonical/cvm-reliability-layer.js` para preencher campos lentos ausentes com política fill-missing-only.
+- Preserva Investidor10 e StatusInvest como fontes ricas de gráficos, rankings, dividendos, descrições e indicadores.
+- Adiciona raiz `dataReliability` com status por bloco: identity, quote, fundamentals, dividends, charts e rankings.
+- Expõe sinais de canonical reliability no Monitor, em `extractionCompleteness` e no manifesto de integração.
+- Adiciona `VALORAE_CANONICAL_DATA_ENABLED`, `VALORAE_CANONICAL_SEED_ENABLED` e `VALORAE_CANONICAL_REGISTRY_JSON`.
+- Adiciona teste `canonical-reliability-layer-v21-12-48.test.js` e benchmark `bench:canonical`.
+
+## v21.12.45 - Final audit corrections
+
+- Corrige `/api/assets` para preservar duplicatas solicitadas, mantendo ordem e quantidade original no payload entregue ao app.
+- Mantém dedupe interno de extração para evitar trabalho repetido quando a carteira/lista contém tickers iguais.
+- Harmoniza labels de release no Monitor, OpenAPI, manifestos, readiness, metadata e PWA.
+- Preserva melhorias v21.12.44 de stale-while-revalidate, `timeoutMs` propagado e baixa latência.
+- Adiciona teste `final-audit-corrections-v21-12-45.test.js`.
+
+## v21.12.44 - Stale budget performance boost
+
+- Corrige `stale-if-error` do cache final: a entrada stale agora sobrevive até `staleUntil` e pode realmente proteger o app quando a fonte falha.
+- Adiciona `stale-while-revalidate` para baixa latência, retornando o último payload bom rapidamente enquanto a instância tenta atualização best-effort.
+- Propaga `timeoutMs` para Yahoo, Google News, ValoraeScrape, DirectFetch, APIs internas e complementos, evitando chamadas frias longas com orçamento curto.
+- Desativa retries e sleeps pesados em `lowLatencyBudget`, reduzindo latência percebida para cards, listas e carteira.
+- Aplica orçamento de baixa latência também em `/api/assets`.
+- Adiciona `bench:stale-budget`/`bench:latency` e teste regressivo `timeout-performance-guard-v21-12-44`.
+
+## v21.12.42 - Performance harmony boost
+
+- Adiciona hedge StatusInvest para `profile=turbo`/`deep`, reduzindo latência quando a extração principal vem pobre.
+- Deduplica tickers repetidos em batch/carteira sem alterar a ordem esperada pelo app.
+- Expõe completude, perfil, hedge, snapshot e complementos no Monitor do Proxy.
+- Adiciona teste `extraction-performance-harmony-v21-12-42`.
+
+## v21.12.41 - Turbo extraction max
+
+- Adiciona perfil `turbo`/`max` para máxima completude com cache forte.
+- Introduz score de completude por campos críticos para reduzir `PARTIAL` falso e acionar fallbacks com mais precisão.
+- Aciona StatusInvest como complemento sob demanda quando a extração principal continua pobre.
+- Corrige chave do cache final para separar chamadas `complete`, snapshot e complemento de fonte.
+- Adiciona teste `extraction-turbo-v21-12-41`.
+
 ## v21.12.39 - Full project audit hardening
 
 - Sincroniza release atual em metadata, PWA, Service Worker, painel, métricas e manifesto de integração.
-- Atualiza cache PWA para `valorae-proxy-server-v21-12-39` para evitar shell antigo após deploy.
+- Atualiza cache PWA para `valorae-proxy-server-v21-12-40` para evitar shell antigo após deploy.
 - Limpa resíduos de patch/build do ZIP final e adiciona auditoria regressiva `full-project-audit-v21-12-39`.
 - Atualiza auditorias legadas para aceitarem patches posteriores da família 21.12.x sem falso negativo.
 - Mantém `/api/scrape` sem URL e com HTTP como `400` esperado e didático, não como falha do proxy.
@@ -68,7 +118,7 @@
 
 # v21.12.31 — Monitor Experience Redesign
 
-- Reformula o Monitor Proxy como cockpit executivo de 6 áreas principais, reduzindo páginas visíveis e poluição visual.
+- Reformula o Monitor Proxy como cockpit executivo de 7 áreas principais, reduzindo páginas visíveis e poluição visual.
 - Consolida páginas antigas em blocos claros: operação, saída, performance/Vercel, qualidade, integração/guia e diagnóstico/benchmark.
 - Mantém compatibilidade com hashes antigos por aliases internos, sem expor dezenas de páginas no menu.
 - Preserva feed fiel de saída do proxy com rota, app, canal, status, bytes, roots, métricas, gráficos, dividendos e preview do payload.
@@ -546,3 +596,11 @@
 - Adicionadas variáveis `VALORAE_DEFAULT_ASSET_VIEW` e `VALORAE_DEFAULT_ASSETS_VIEW`.
 - Mantido contrato público do engine em `21.12.0` para compatibilidade.
 
+
+
+## 21.12.49-extreme-audit-logo-standard
+
+- Auditoria extrema pré-integração do app de carteira de investimentos.
+- Logotipo interno redesenhado e padronizado no cabeçalho, drawer lateral, PWA manifest e ícones PNG.
+- Mantém Monitor responsivo, tema claro/escuro, filtros flutuantes, camada canônica e fontes ricas Investidor10/StatusInvest.
+- Adiciona teste regressivo `extreme-audit-logo-standard-v21-12-49`.

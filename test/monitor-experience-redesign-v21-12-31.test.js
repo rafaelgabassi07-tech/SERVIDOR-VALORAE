@@ -29,21 +29,21 @@ for (const needle of [
 ]) assert.ok(html.includes(needle), `monitor redesenhado deve conter ${needle}`);
 
 const visibleNavButtons = [...html.matchAll(/<button data-page="([^"]+)"/g)].map(m => m[1]);
-assert.deepEqual(visibleNavButtons, ['command', 'output', 'performance', 'quality', 'integration', 'diagnostics'], 'menu visível deve ter 6 áreas principais');
+assert.deepEqual(visibleNavButtons, ['command', 'output', 'performance', 'quality', 'integration', 'diagnostics', 'settings'], 'menu visível deve ter 7 áreas principais');
 assert.ok((html.match(/class="explain-grid"/g) || []).length >= 6, 'cada área principal mantém duas explicações claras');
 assert.ok(!html.includes('<input id="tickerInput" value="PETR4" placeholder="Ticker">'), 'ticker não deve voltar ao cabeçalho antigo');
-assert.ok(html.length < 85000, 'cockpit redesenhado deve continuar leve para mobile/Vercel Free');
+assert.ok(html.length < 110000, 'cockpit redesenhado deve continuar leve para mobile/Vercel Free com gráficos resilientes');
 
 const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
-assert.match(manifest.version, /^21\.12\.(31|32|35|37|38|39)$/);
+assert.match(manifest.version, /^21\.12\.(31|32|35|37|38|39|40|41|42|43|44|45|46|47|48|49)$/);
 assert.equal(manifest.start_url, '/server.html#command');
 
 const sw = fs.readFileSync('public/service-worker.js', 'utf8');
-assert.ok(sw.includes('v21-12-31') || sw.includes('v21-12-32') || sw.includes('v21-12-35') || sw.includes('v21-12-37') || sw.includes('v21-12-38') || sw.includes('v21-12-39'), 'service worker deve usar cache novo do redesign/performance');
+assert.ok(sw.includes('v21-12-31') || sw.includes('v21-12-32') || sw.includes('v21-12-35') || sw.includes('v21-12-37') || sw.includes('v21-12-38') || sw.includes('v21-12-39') || sw.includes('v21-12-40') || sw.includes('v21-12-41') || sw.includes('v21-12-42') || sw.includes('v21-12-45') || sw.includes('v21-12-48') || sw.includes('v21-12-49'), 'service worker deve usar cache novo do redesign/performance');
 assert.ok(sw.includes("pathname.startsWith('/api')") || sw.includes('pathname.startsWith("/api")'), 'service worker não deve cachear API');
 
 const readme = fs.readFileSync('README.md', 'utf8');
 assert.ok(readme.includes('v21.12.31') && readme.includes('v21.12.32') && readme.includes('v21.12.35'));
-assert.ok(readme.includes('6 áreas principais'));
+assert.ok(readme.includes('7 áreas principais'));
 
 console.log('monitor-experience-redesign-v21-12-31 ok');

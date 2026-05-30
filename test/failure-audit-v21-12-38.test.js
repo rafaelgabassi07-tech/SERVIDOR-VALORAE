@@ -53,7 +53,7 @@ async function call(url) {
   const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
   assert.deepEqual(metadata.majorCapabilities || [], []);
   assert.equal(metadata.version, '21.12.0');
-  assert.match(metadata.releasePatch, /^21\.12\.(38|39)-/);
+  assert.match(metadata.releasePatch, /^21\.12\.(38|39|40|41|42|43|44|45|46|47|48|49)-/);
   assert.equal(fs.existsSync('build.gradle'), false);
   assert.equal(fs.existsSync('settings.gradle'), false);
   assert.equal(fs.existsSync('.gradle'), false);

@@ -40,6 +40,6 @@ for (const needle of [
 assert.ok(!html.includes('<input id="tickerInput" value="PETR4" placeholder="Ticker">'), 'ticker não deve ficar no cabeçalho antigo');
 assert.ok(html.includes('background:linear-gradient(135deg,#0f3d2e,#23c983 56%,#a7f36f)'), 'logo visual deve usar tons verdes alinhados ao monitor');
 assert.ok((html.match(/class="explain-grid"/g) || []).length >= 10, 'cada página principal deve ter duas explicações');
-assert.ok(html.length < 85000, 'monitor profissional deve continuar leve para Vercel Free/mobile');
+assert.ok(html.length < 110000, 'monitor profissional deve continuar leve para Vercel Free/mobile com gráficos resilientes');
 
 console.log('proxy-monitor-professional-ui-v21-12-21 ok');

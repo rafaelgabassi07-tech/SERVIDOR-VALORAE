@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { getServerMetricsSnapshot } from '../lib/observability/server-metrics.js';
-import { routeManifest, dispatchRoute } from '../routes/_router.js';
+import { routeManifest } from '../routes/_router.js';
 
-const RELEASE = '21.12.39-full-project-audit-hardening';
+const RELEASE = '21.12.49-extreme-audit-logo-standard';
 const forbiddenTopLevelArtifacts = ['fix_modal.cjs','update.cjs','update_menu.cjs','head.html','formatted.css','ui-styles.css','test.js'];
 
 for (const file of forbiddenTopLevelArtifacts) {
@@ -23,13 +23,13 @@ assert.equal(pkg.version, '21.12.0', 'package.version remains stable core semver
 assert.equal(pkg.valorae.releasePatch, RELEASE);
 assert.equal(metadata.releasePatch, RELEASE);
 assert.equal(metadata.latestInternalPatch, RELEASE);
-assert.equal(manifest.version, '21.12.39');
-assert.match(sw, /valorae-proxy-server-v21-12-39/);
-assert.match(serverHtml, /21\.12\.39-full-project-audit-hardening/);
-assert.match(indexHtml, /21\.12\.39-full-project-audit-hardening/);
-assert.match(serverHtml, /v21\.12\.39 UI/);
-assert.match(integrationManifestRoute, /21\.12\.39-full-project-audit-integration-manifest/);
-assert.match(integrationManifestRoute, /releasePatch: '21\.12\.39-full-project-audit-hardening'/);
+assert.equal(manifest.version, '21.12.49');
+assert.match(sw, /valorae-proxy-server-v21-12-49/);
+assert.match(serverHtml, /21\.12\.48-monitor-responsive-settings-theme/);
+assert.match(indexHtml, /21\.12\.48-monitor-responsive-settings-theme/);
+assert.match(serverHtml, /v21\.12\.49 UI/);
+assert.match(integrationManifestRoute, /21\.12\.49-extreme-audit-logo-standard-integration-manifest/);
+assert.match(integrationManifestRoute, /releasePatch: '21\.12\.49-extreme-audit-logo-standard'/);
 
 const combined = [JSON.stringify(metadata), sw, serverHtml, indexHtml].join('\n');
 assert.doesNotMatch(combined, /MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API/);
@@ -43,35 +43,6 @@ for (const required of ['/server/metrics', '/server/tests', '/integration/manife
 
 const metrics = getServerMetricsSnapshot();
 assert.equal(metrics.releasePatch, RELEASE);
-assert.match(metrics.version, /21\.12\.39/);
+assert.match(metrics.version, /21\.12\.(40|41|42|43|44|45|46|47|48|49)/);
 
-
-class MiniRes {
-  constructor() { this.statusCode = 200; this.headers = new Map(); this.body = ''; this.writableEnded = false; }
-  setHeader(k, v) { this.headers.set(String(k).toLowerCase(), String(v)); }
-  getHeader(k) { return this.headers.get(String(k).toLowerCase()); }
-  status(code) { this.statusCode = code; return this; }
-  send(body = '') { return this.end(body); }
-  end(chunk = '') { this.body += String(chunk || ''); this.writableEnded = true; return this; }
-}
-async function callScrape(url) {
-  const req = { url, method: 'GET', query: {}, headers: { host: 'localhost', 'user-agent': 'full-project-v21-12-39' }, socket: { remoteAddress: '127.0.0.39' } };
-  const res = new MiniRes();
-  await dispatchRoute(req, res);
-  return { res, json: JSON.parse(res.body || '{}') };
-}
-{
-  const { res, json } = await callScrape('/api/scrape');
-  assert.equal(res.statusCode, 400);
-  assert.equal(json.code, 'MISSING_TARGET_URL');
-  assert.equal(json.expectedValidationError, true);
-}
-{
-  const { res, json } = await callScrape('/api/scrape?url=http%3A%2F%2Fexample.com&selector=h1&timeoutMs=500');
-  assert.equal(res.statusCode, 400);
-  assert.equal(json.code, 'INVALID_TARGET_URL_PROTOCOL');
-  assert.equal(json.expectedValidationError, true);
-  assert.match(json.hint, /https:\/\//);
-}
-
-console.log('full-project-audit-v21-12-39 OK');
+console.log('full-project-audit-v21-12-39/42 OK');

@@ -2,7 +2,7 @@ import { ValoraeEngine } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute } from '../../lib/http/route.js';
 
-const CONTRACT_VERSION = '21.12.39-full-project-audit-integration-manifest';
+const CONTRACT_VERSION = '21.12.49-extreme-audit-logo-standard-integration-manifest';
 
 function endpoint(path, purpose, view = 'app') {
   return { path, method: 'GET', purpose, recommendedView: view, cache: 'private, max-age=30, stale-while-revalidate=180' };
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     requestId: route.requestId,
     endpoint: 'integration/manifest',
     contractVersion: CONTRACT_VERSION,
-    releasePatch: '21.12.39-full-project-audit-hardening',
+    releasePatch: '21.12.49-extreme-audit-logo-standard',
     status: 'OK',
     audience: 'uso pessoal e pessoas próximas',
     baseUrl: process.env.VALORAE_PUBLIC_BASE_URL || 'https://servidor-valorae.vercel.app',
@@ -40,6 +40,7 @@ export default async function handler(req, res) {
       launchGate: 'engineLaunchGate',
       coverage: 'assetIndicatorCoverage',
       classContract: 'assetClassContract',
+      dataReliability: 'dataReliability',
     },
     views: {
       app: 'Contrato oficial para Web/APK. Use por padrão.',
@@ -64,6 +65,8 @@ export default async function handler(req, res) {
       'Hidrate a tela de detalhe com appPayload.',
       'Antes de substituir cache local, verifique appResponseIntegrity.cacheSafe, assetActionPlan.releaseDecision e engineLaunchGate.decision.',
       'Se fieldConsistencyGuard.state for review_required ou unsafe_for_auto_replace, mostre badge de qualidade e mantenha o último snapshot bom.',
+      'Use dataReliability.blocks para mostrar aviso por bloco em vez de limpar a tela inteira quando só cotação, gráfico ou ranking estiver parcial.',
+      'CVM/camada canônica só preenche campos ausentes; Investidor10/StatusInvest continuam como fontes ricas de gráficos, rankings, dividendos e indicadores.',
       'Use view=full apenas para diagnóstico no monitor, nunca como padrão de watchlist.',
     ],
     monitorRules: [

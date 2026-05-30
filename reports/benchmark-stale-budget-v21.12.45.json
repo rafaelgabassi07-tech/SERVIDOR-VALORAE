@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-05-29T23:47:33.321Z",
+  "network": "mocked/local-only",
+  "version": "21.12.45-final-audit-corrections",
+  "cases": [
+    {
+      "name": "cold-fresh-fill",
+      "loops": 1,
+      "avgMs": 95.745,
+      "medianMs": 95.745,
+      "p95Ms": 95.745,
+      "lastCacheStatus": "RESULT_CACHE_MISS",
+      "lastStatus": "OK",
+      "lastPartial": false
+    },
+    {
+      "name": "stale-while-revalidate-low-latency",
+      "loops": 30,
+      "avgMs": 1.875,
+      "medianMs": 0.662,
+      "p95Ms": 12.786,
+      "lastCacheStatus": "RESULT_CACHE_HIT",
+      "lastStatus": "OK",
+      "lastPartial": false
+    }
+  ],
+  "sourceCallsDuringStaleBench": 0,
+  "runtimeCacheStats": {
+    "enabled": true,
+    "entries": 1,
+    "bytes": 39785,
+    "ttlMs": 300000,
+    "metrics": {
+      "hits": 24,
+      "misses": 8,
+      "staleHits": 6,
+      "sets": 3,
+      "evictions": 0,
+      "inflightJoins": 4
+    },
+    "hitRate": 75
+  }
+}

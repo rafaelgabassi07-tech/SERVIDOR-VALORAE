@@ -20,4 +20,12 @@ Principais variáveis:
 | `VALORAE_ADMIN_ALLOW_QUERY_TOKEN` | Permite token admin via query apenas fora de produção | `0` |
 | `VALORAE_ADMIN_ALLOW_QUERY_TOKEN_IN_PRODUCTION` | Override explícito e não recomendado para query token em produção | `0` |
 
+| `VALORAE_ADAPTIVE_COMPLETION_ENABLED` | Liga complemento HTML sob demanda para reduzir PARTIAL | `1` |
+| `VALORAE_ADAPTIVE_COMPLETION_TIMEOUT_MS` | Orçamento do complemento adaptativo | `4500` |
+| `VALORAE_STATUSINVEST_COMPLEMENT_ENABLED` | Liga complemento StatusInvest quando campos críticos ficarem ausentes | `1` |
+| `VALORAE_STATUSINVEST_COMPLEMENT_TIMEOUT_MS` | Timeout curto do complemento StatusInvest | `2800` |
+| `VALORAE_COMPLETENESS_THRESHOLD_ACAO` | Score mínimo para considerar ação completa | `65` |
+| `VALORAE_COMPLETENESS_THRESHOLD_FII` | Score mínimo para considerar FII completo | `60` |
+| `VALORAE_BEST_SNAPSHOT_STALE_MS` | Validade do último snapshot real em memória | `21600000` |
+
 Consulte também `/api/v1/env`, que expõe o catálogo sem revelar valores completos.

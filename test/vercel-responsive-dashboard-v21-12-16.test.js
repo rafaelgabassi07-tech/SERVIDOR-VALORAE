@@ -14,7 +14,7 @@ for (const needle of [
   '@media(max-width:430px)',
   'grid-template-columns:repeat(2,1fr)',
 ]) assert.ok(html.includes(needle), `dashboard precisa conter ${needle}`);
-assert.ok(html.length < 85000, 'dashboard responsivo deve continuar leve para Vercel/mobile');
+assert.ok(html.length < 110000, 'dashboard responsivo deve continuar leve para Vercel/mobile com gráficos resilientes');
 
 resetServerMetricsForTests();
 const req = {

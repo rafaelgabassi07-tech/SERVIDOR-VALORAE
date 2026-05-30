@@ -1,0 +1,29 @@
+{
+  "version": "21.12.49-extreme-audit-logo-standard",
+  "generatedAt": "2026-05-30T00:55:48.899Z",
+  "cases": [
+    {
+      "label": "canonical-layer-cold-low-data-live-source",
+      "iterations": 12,
+      "avgMs": 16.974,
+      "medianMs": 10.909,
+      "p95Ms": 82.307,
+      "status": "OK",
+      "partial": false,
+      "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",
+      "canonicalUsed": true
+    },
+    {
+      "label": "canonical-layer-result-cache",
+      "iterations": 26,
+      "avgMs": 1.028,
+      "medianMs": 0.518,
+      "p95Ms": 1.428,
+      "status": "OK",
+      "partial": false,
+      "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",
+      "canonicalUsed": true
+    }
+  ],
+  "conclusion": "Camada canônica CVM reduz PARTIAL estrutural e preserva fontes ricas sem sobrescrever dados vivos."
+}

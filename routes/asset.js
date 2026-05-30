@@ -29,14 +29,37 @@ export default async function handler(req, res) {
 
     const type = input.type || inferAssetType(ticker);
     const view = input.view || process.env.VALORAE_DEFAULT_ASSET_VIEW || 'app';
+    const requestedTimeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 500, 20000) : undefined;
+    const requestedScrapeTimeoutMs = input.valoraeScrapeTimeoutMs
+      ? clampNumber(input.valoraeScrapeTimeoutMs, undefined, 500, 20000)
+      : requestedTimeoutMs;
+    const requestedAdaptiveTimeoutMs = input.adaptiveCompletionTimeoutMs
+      ? clampNumber(input.adaptiveCompletionTimeoutMs, undefined, 500, 12000)
+      : requestedTimeoutMs;
+
+    const hasExplicitScrapeUrl = Boolean(input.valoraeScrapeUrl || input.scrapeUrl);
+    const lowLatencyBudget = requestedTimeoutMs !== undefined
+      && requestedTimeoutMs <= 1000
+      && input.complete === undefined
+      && input.adaptiveCompletion === undefined;
+
     const perfOptions = resolvePerformanceOptions({
       mode: input.mode || 'super',
       includeNews: boolParam(input.includeNews ?? input.news, false),
       newsLimit: clampNumber(input.newsLimit || input.limit, 8, 0, 25),
-      useYahooFallback: input.yahoo === undefined ? true : boolParam(input.yahoo, true),
-      timeoutMs: input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 1000, 20000) : undefined,
+      useYahooFallback: lowLatencyBudget ? false : (input.yahoo === undefined ? true : boolParam(input.yahoo, true)),
+      adaptiveCompletion: lowLatencyBudget ? false : (input.complete !== undefined ? boolParam(input.complete, true) : (input.adaptiveCompletion === undefined ? undefined : boolParam(input.adaptiveCompletion, true))),
+      adaptiveCompletionTimeoutMs: requestedAdaptiveTimeoutMs,
+      valoraeScrapeTimeoutMs: requestedScrapeTimeoutMs,
+      internalApiTimeoutMs: requestedTimeoutMs,
+      statusInvestTimeoutMs: requestedTimeoutMs,
+      statusInvestComplement: lowLatencyBudget ? false : (input.statusInvestComplement === undefined ? undefined : boolParam(input.statusInvestComplement, true)),
+      returnHtml: lowLatencyBudget ? false : undefined,
+      enableInternalApis: lowLatencyBudget ? false : undefined,
+      lowLatencyBudget,
+      timeoutMs: requestedTimeoutMs,
       maxHtmlChars: input.maxHtmlChars ? clampNumber(input.maxHtmlChars, undefined, 10000, 4500000) : undefined,
-      valoraeScrapeUrl: resolveSelfScrapeUrl(req, input),
+      valoraeScrapeUrl: lowLatencyBudget && !hasExplicitScrapeUrl ? undefined : resolveSelfScrapeUrl(req, input),
       cache: !(boolParam(input.nocache || input.refresh) || falseParam(input.cache)),
       bypassCache: boolParam(input.nocache || input.refresh),
       debug: boolParam(input.debug),

@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     api: providers.filter(p => /Yahoo|BCB|BancoCentral|GoogleNews/i.test(p.name || p.provider || '')).map(p => p.name || p.provider),
     scrape: providers.filter(p => /Investidor|StatusInvest|ValoraeScrape/i.test(p.name || p.provider || '')).map(p => p.name || p.provider),
     fallback: ['YahooChart', 'cached_stale_if_error', 'failure_cache'],
+    canonical: runtime.canonicalReliability ? ['CVM/OpenData canonical cache'] : [],
     experimental: ['HTML selectors', 'internal Investidor10 APIs quando disponíveis'],
   };
   const personalReleaseReadiness = buildPersonalReleaseReadiness({ runtime, providers });
@@ -25,6 +26,7 @@ export default async function handler(req, res) {
     auth: process.env.VALORAE_CLIENT_KEYS ? 'optional_keys_configured' : 'open_no_keys_configured',
     recommendedProductionView: 'app',
     requiredAppHeaders: ['x-valorae-app', 'x-valorae-channel', 'x-valorae-app-version'],
+    canonicalReliability: runtime.canonicalReliability,
     hardenedEndpoints: ['/api/v1/asset?view=app', '/api/v1/asset/coverage', '/api/v1/asset/fundamentals', '/api/v1/source/status'],
   };
   return sendJson(req, res, {

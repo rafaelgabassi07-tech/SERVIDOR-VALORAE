@@ -27,7 +27,7 @@ for (const needle of [
 assert.ok(!html.includes('<input id="tickerInput" value="PETR4" placeholder="Ticker">'), 'ticker não deve voltar para o cabeçalho antigo');
 assert.ok(html.includes('background:linear-gradient(135deg,#0f3d2e,#23c983 56%,#a7f36f)'), 'logo deve preservar identidade verde/cinza');
 assert.ok((html.match(/class="explain-grid"/g) || []).length >= 10, 'páginas devem continuar explicativas');
-assert.ok(html.length < 85000, 'HTML polido deve continuar leve para mobile/Vercel Free');
+assert.ok(html.length < 110000, 'HTML polido deve continuar leve para mobile/Vercel Free com gráficos resilientes');
 
 const engine = fs.readFileSync('lib/Valorae-engine.js', 'utf8');
 for (const needle of [

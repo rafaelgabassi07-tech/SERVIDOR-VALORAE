@@ -6,7 +6,7 @@ Reduzir a poluição visual do Monitor Proxy, diminuir a quantidade de páginas 
 
 ## Mudanças principais
 
-- Menu lateral reformulado em 6 áreas principais:
+- Menu lateral reformulado em 7 áreas principais:
   - Centro de comando
   - Saída do proxy
   - Performance e Vercel
