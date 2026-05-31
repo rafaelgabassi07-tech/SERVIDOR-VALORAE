@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-31T01:49:27.412Z",
+  "generatedAt": "2026-05-31T03:08:00.478Z",
   "network": "mocked/local-only",
   "version": "21.12.49-extreme-audit-logo-standard",
   "baseline": {
@@ -11,9 +11,9 @@
     {
       "name": "turbo-complement-no-result-cache",
       "loops": 25,
-      "avgMs": 33.008,
-      "medianMs": 26.724,
-      "p95Ms": 44.202,
+      "avgMs": 26.283,
+      "medianMs": 20.025,
+      "p95Ms": 30.876,
       "lastStatus": "OK",
       "lastPartial": false,
       "lastScore": 86,
@@ -22,9 +22,9 @@
     {
       "name": "turbo-result-cache-hit",
       "loops": 50,
-      "avgMs": 1.509,
-      "medianMs": 1.434,
-      "p95Ms": 2.205,
+      "avgMs": 0.976,
+      "medianMs": 0.956,
+      "p95Ms": 1.351,
       "lastStatus": "OK",
       "lastPartial": false,
       "lastScore": 86,
@@ -35,7 +35,7 @@
     "assetResult": {
       "enabled": true,
       "entries": 1,
-      "bytes": 57200,
+      "bytes": 57198,
       "ttlMs": 300000,
       "metrics": {
         "hits": 50,

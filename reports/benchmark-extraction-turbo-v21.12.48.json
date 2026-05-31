@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-31T01:49:24.964Z",
+  "generatedAt": "2026-05-31T03:07:58.732Z",
   "network": "mocked/local-only",
   "version": "21.12.48-monitor-responsive-settings-theme",
   "baseline": {
@@ -11,9 +11,9 @@
     {
       "name": "turbo-complement-no-result-cache",
       "loops": 25,
-      "avgMs": 34.675,
-      "medianMs": 28.094,
-      "p95Ms": 44.789,
+      "avgMs": 27.649,
+      "medianMs": 20.794,
+      "p95Ms": 33.17,
       "lastStatus": "OK",
       "lastPartial": false,
       "lastScore": 86,
@@ -22,9 +22,9 @@
     {
       "name": "turbo-result-cache-hit",
       "loops": 50,
-      "avgMs": 1.382,
-      "medianMs": 1.219,
-      "p95Ms": 2.761,
+      "avgMs": 0.892,
+      "medianMs": 0.918,
+      "p95Ms": 1.164,
       "lastStatus": "OK",
       "lastPartial": false,
       "lastScore": 86,

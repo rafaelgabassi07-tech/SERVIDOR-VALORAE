@@ -1,13 +1,13 @@
 {
   "version": "21.12.49-extreme-audit-logo-standard",
-  "generatedAt": "2026-05-31T01:49:20.580Z",
+  "generatedAt": "2026-05-31T03:07:55.566Z",
   "cases": [
     {
       "label": "canonical-layer-cold-low-data-live-source",
       "iterations": 12,
-      "avgMs": 24.72,
-      "medianMs": 14.718,
-      "p95Ms": 125.415,
+      "avgMs": 21.048,
+      "medianMs": 11.231,
+      "p95Ms": 131.983,
       "status": "OK",
       "partial": false,
       "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",
@@ -16,9 +16,9 @@
     {
       "label": "canonical-layer-result-cache",
       "iterations": 26,
-      "avgMs": 1.857,
-      "medianMs": 0.885,
-      "p95Ms": 2.262,
+      "avgMs": 1.008,
+      "medianMs": 0.568,
+      "p95Ms": 1.404,
       "status": "OK",
       "partial": false,
       "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",

@@ -1,8 +1,8 @@
 {
   "version": "21.12.52-news-reliability-upgrade",
-  "generatedAt": "2026-05-31T01:49:29.531Z",
+  "generatedAt": "2026-05-31T03:08:01.893Z",
   "scrapeFastCold": {
-    "ms": 33.352,
+    "ms": 23.766,
     "status": 200,
     "cache": "MISS",
     "ok": true,
@@ -10,19 +10,19 @@
     "coveragePercent": 100
   },
   "scrapeFastHot": {
-    "avg": 1.069,
-    "median": 0.611,
-    "p95": 3.135,
-    "min": 0.459,
-    "max": 4.971
+    "avg": 0.643,
+    "median": 0.532,
+    "p95": 1.864,
+    "min": 0.296,
+    "max": 2.419
   },
   "concurrent25SameUrl": {
-    "ms": 110.878,
+    "ms": 92.391,
     "ok": 25,
     "fetches": 1
   },
   "batch20DuplicatedCold": {
-    "ms": 11.999,
+    "ms": 10.271,
     "logical": {
       "inputCount": 20,
       "validJobs": 20,
@@ -42,7 +42,7 @@
     }
   },
   "batch20DuplicatedHot": {
-    "ms": 7.737,
+    "ms": 5.156,
     "logical": {
       "inputCount": 20,
       "validJobs": 20,

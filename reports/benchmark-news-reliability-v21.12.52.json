@@ -2,18 +2,18 @@
   "version": "21.12.52-news-reliability-upgrade",
   "fetchCount": 6,
   "cold": {
-    "avg": 7.115,
-    "median": 6.087,
-    "p95": 11.755,
-    "min": 5.246,
-    "max": 11.755
+    "avg": 5.952,
+    "median": 5.256,
+    "p95": 9.269,
+    "min": 4.493,
+    "max": 9.269
   },
   "hot": {
-    "avg": 0.029,
-    "median": 0.017,
-    "p95": 0.08,
-    "min": 0.011,
-    "max": 0.271
+    "avg": 0.017,
+    "median": 0.007,
+    "p95": 0.069,
+    "min": 0.006,
+    "max": 0.168
   },
   "hotCacheStatus": "NEWS_CACHE_HIT",
   "emptySemantics": {
@@ -21,5 +21,5 @@
     "code": "GOOGLE_NEWS_EMPTY",
     "shouldKeepPreviousNews": true
   },
-  "generatedAt": "2026-05-31T01:49:29.028Z"
+  "generatedAt": "2026-05-31T03:08:01.578Z"
 }

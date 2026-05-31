@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-05-31T01:49:31.619Z",
+  "generatedAt": "2026-05-31T03:08:03.246Z",
   "network": "mocked/local-only",
   "version": "21.12.48-monitor-responsive-settings-theme",
   "cases": [
     {
       "name": "cold-fresh-fill",
       "loops": 1,
-      "avgMs": 147.96,
-      "medianMs": 147.96,
-      "p95Ms": 147.96,
+      "avgMs": 157.667,
+      "medianMs": 157.667,
+      "p95Ms": 157.667,
       "lastCacheStatus": "RESULT_CACHE_MISS",
       "lastStatus": "OK",
       "lastPartial": false
@@ -16,10 +16,10 @@
     {
       "name": "stale-while-revalidate-low-latency",
       "loops": 30,
-      "avgMs": 4.749,
-      "medianMs": 1.404,
-      "p95Ms": 19.841,
-      "lastCacheStatus": "RESULT_CACHE_STALE_WHILE_REVALIDATE",
+      "avgMs": 2.865,
+      "medianMs": 0.939,
+      "p95Ms": 15.196,
+      "lastCacheStatus": "RESULT_CACHE_HIT",
       "lastStatus": "OK",
       "lastPartial": false
     }
@@ -28,16 +28,16 @@
   "runtimeCacheStats": {
     "enabled": true,
     "entries": 1,
-    "bytes": 51911,
+    "bytes": 51910,
     "ttlMs": 300000,
     "metrics": {
-      "hits": 19,
-      "misses": 13,
-      "staleHits": 11,
-      "sets": 5,
+      "hits": 21,
+      "misses": 11,
+      "staleHits": 9,
+      "sets": 4,
       "evictions": 0,
-      "inflightJoins": 7
+      "inflightJoins": 6
     },
-    "hitRate": 59.38
+    "hitRate": 65.63
   }
 }

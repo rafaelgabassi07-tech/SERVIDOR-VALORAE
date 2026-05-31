@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-31T01:49:23.709Z",
+  "generatedAt": "2026-05-31T03:07:57.818Z",
   "network": "mocked/local-only",
   "version": "21.12.45-final-audit-corrections",
   "baseline": {
@@ -11,9 +11,9 @@
     {
       "name": "turbo-complement-no-result-cache",
       "loops": 25,
-      "avgMs": 34.791,
-      "medianMs": 29.722,
-      "p95Ms": 44.936,
+      "avgMs": 27.762,
+      "medianMs": 20.424,
+      "p95Ms": 32.138,
       "lastStatus": "OK",
       "lastPartial": false,
       "lastScore": 86,
@@ -22,9 +22,9 @@
     {
       "name": "turbo-result-cache-hit",
       "loops": 50,
-      "avgMs": 1.371,
-      "medianMs": 1.271,
-      "p95Ms": 2.172,
+      "avgMs": 0.933,
+      "medianMs": 0.922,
+      "p95Ms": 1.137,
       "lastStatus": "OK",
       "lastPartial": false,
       "lastScore": 86,

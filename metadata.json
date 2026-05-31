@@ -1,12 +1,16 @@
 {
-  "name": "VALORAE Proxy Server v21.12.56",
-  "description": "VALORAE Proxy Server v21.12.56 com auditoria completa, benchmarks e compatibilidade reforçada APK/Proxy.",
+  "name": "VALORAE Proxy Server v21.12.57",
+  "description": "VALORAE Proxy Server v21.12.57 com correções minuciosas de IFIX, rankings, dividendos e compatibilidade APK/Proxy.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
-  "release": "21.12.56-full-audit-benchmark-apk-compat",
-  "latestInternalPatch": "21.12.56-full-audit-benchmark-apk-compat",
+  "release": "21.12.57-user-points-apk-compat",
+  "latestInternalPatch": "21.12.57-user-points-apk-compat",
   "features": [
+    "apk-user-points-compat",
+    "portfolio-dividends-events-contract",
+    "ifix-history-alias",
+    "v21.12.57",
     "benchmark-suite-validated",
     "apk-proxy-route-contract-audit",
     "dynamic-test-runner",
@@ -164,10 +168,10 @@
     "android-safe-financial-summary-aliases",
     "v21.12.54"
   ],
-  "codename": "full-audit-benchmark-apk-compat",
-  "notes": "Integração total APK VALORAE: valida todos os testes e benchmarks existentes, mantém contrato appPayload/appMobileSnapshot/results/normalized e garante blocos opcionais news/history não fatais para o Android.",
+  "codename": "user-points-apk-compat",
+  "notes": "Correções dos 12 pontos do APK: comparação IFIX, métricas de segmento de FIIs, rankings clicáveis, movimentos do dia, proventos reais/futuros, IPCA e limpeza visual.",
   "generatedAt": "2026-05-30T22:30:00.000-03:00",
-  "versionLabel": "core 21.12.0 · release 21.12.56-full-audit-benchmark-apk-compat",
+  "versionLabel": "core 21.12.0 · release 21.12.57-user-points-apk-compat",
   "tags": [
     "ai-prompts",
     "app-sync-preserved",
@@ -235,8 +239,9 @@
     "html-mirror",
     "zip-hygiene"
   ],
-  "patch": "21.12.56-full-audit-benchmark-apk-compat",
+  "patch": "21.12.57-user-points-apk-compat",
   "highlights": [
+    "Corrige contrato para o APK receber eventos reais de dividendos históricos/futuros, IFIX e rankings com preço/variação sem simulação.",
     "Adiciona auditoria v21.12.56 para executar todos os testes existentes de forma dinâmica, incluindo testes novos que antes ficavam fora do npm test.",
     "Adiciona runner de benchmarks para todos os scripts benchmark*.js e consolida logs de performance local/mock.",
     "Atualiza testes legados para validar a release atual sem perder checks históricos de UI, PWA, Vercel Free e contrato APK/Proxy.",
@@ -257,7 +262,7 @@
   ],
   "publicEngineContract": "21.12.0",
   "coreVersion": "21.12.0",
-  "releasePatch": "21.12.56-full-audit-benchmark-apk-compat",
+  "releasePatch": "21.12.57-user-points-apk-compat",
   "releaseHistory": [
     "21.12.56-full-audit-benchmark-apk-compat",
     "21.12.55-apk-optional-block-contract",

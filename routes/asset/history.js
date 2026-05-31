@@ -3,13 +3,21 @@ import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../../lib/Valo
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute, clampNumber, sendRouteError } from '../../lib/http/route.js';
 
+function normalizeHistoryTicker(raw = '') {
+  const t = String(raw || '').trim().toUpperCase().replace(/\.SA$/i, '');
+  if (['IFIX', '^IFIX', 'IFIX_PROXY', 'XFIX11'].includes(t)) return 'IFIX_PROXY';
+  if (['IBOV', 'IBOVESPA', '^BVSP'].includes(t)) return '^BVSP';
+  return canonicalizeTicker(t);
+}
+
 export default async function handler(req, res) {
   const route = beginRoute(req, res, { version: ValoraeEngine.version, methods: ['GET', 'POST'], route: 'asset-history', rateMax: Number(process.env.VALORAE_RATE_LIMIT_HISTORY_MAX || 90), profile: 'history' });
   if (route.done) return;
   try {
     const q = route.input;
-    const ticker = canonicalizeTicker(q.ticker);
-    const err = validarTicker(ticker);
+    const ticker = normalizeHistoryTicker(q.ticker);
+    const isIndexAlias = ['IFIX_PROXY', '^BVSP'].includes(ticker);
+    const err = isIndexAlias ? null : validarTicker(ticker);
     if (err) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: err }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'history' });
     const data = await fetchYahooHistory(ticker, { range: q.range || '1Y', interval: q.interval, timeoutMs: clampNumber(q.timeoutMs, 9000, 1000, 20000) });
     const payload = data.ok ? data : {

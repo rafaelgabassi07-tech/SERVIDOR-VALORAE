@@ -1,13 +1,13 @@
 {
   "version": "21.12.52-news-reliability-upgrade",
-  "generatedAt": "2026-05-31T01:49:21.222Z",
+  "generatedAt": "2026-05-31T03:07:56.004Z",
   "cases": [
     {
       "label": "canonical-layer-cold-low-data-live-source",
       "iterations": 12,
-      "avgMs": 27.797,
-      "medianMs": 19.037,
-      "p95Ms": 135.047,
+      "avgMs": 22.416,
+      "medianMs": 13.007,
+      "p95Ms": 129.091,
       "status": "OK",
       "partial": false,
       "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",
@@ -16,9 +16,9 @@
     {
       "label": "canonical-layer-result-cache",
       "iterations": 26,
-      "avgMs": 1.509,
-      "medianMs": 0.915,
-      "p95Ms": 2.331,
+      "avgMs": 1.138,
+      "medianMs": 0.661,
+      "p95Ms": 1.328,
       "status": "OK",
       "partial": false,
       "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",

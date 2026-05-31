@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-05-31T01:49:32.835Z",
+  "generatedAt": "2026-05-31T03:08:04.054Z",
   "network": "mocked/local-only",
   "version": "21.12.49-extreme-audit-logo-standard",
   "cases": [
     {
       "name": "cold-fresh-fill",
       "loops": 1,
-      "avgMs": 162.062,
-      "medianMs": 162.062,
-      "p95Ms": 162.062,
+      "avgMs": 156.819,
+      "medianMs": 156.819,
+      "p95Ms": 156.819,
       "lastCacheStatus": "RESULT_CACHE_MISS",
       "lastStatus": "OK",
       "lastPartial": false
@@ -16,9 +16,9 @@
     {
       "name": "stale-while-revalidate-low-latency",
       "loops": 30,
-      "avgMs": 3.783,
-      "medianMs": 1.202,
-      "p95Ms": 19.714,
+      "avgMs": 2.801,
+      "medianMs": 0.928,
+      "p95Ms": 15.418,
       "lastCacheStatus": "RESULT_CACHE_HIT",
       "lastStatus": "OK",
       "lastPartial": false
@@ -28,7 +28,7 @@
   "runtimeCacheStats": {
     "enabled": true,
     "entries": 1,
-    "bytes": 51911,
+    "bytes": 51910,
     "ttlMs": 300000,
     "metrics": {
       "hits": 21,

@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-05-31T01:49:31.041Z",
+  "generatedAt": "2026-05-31T03:08:02.842Z",
   "network": "mocked/local-only",
   "version": "21.12.45-final-audit-corrections",
   "cases": [
     {
       "name": "cold-fresh-fill",
       "loops": 1,
-      "avgMs": 167.49,
-      "medianMs": 167.49,
-      "p95Ms": 167.49,
+      "avgMs": 157.626,
+      "medianMs": 157.626,
+      "p95Ms": 157.626,
       "lastCacheStatus": "RESULT_CACHE_MISS",
       "lastStatus": "OK",
       "lastPartial": false
@@ -16,9 +16,9 @@
     {
       "name": "stale-while-revalidate-low-latency",
       "loops": 30,
-      "avgMs": 3.85,
-      "medianMs": 1.522,
-      "p95Ms": 17.709,
+      "avgMs": 2.869,
+      "medianMs": 0.93,
+      "p95Ms": 16.224,
       "lastCacheStatus": "RESULT_CACHE_STALE_WHILE_REVALIDATE",
       "lastStatus": "OK",
       "lastPartial": false
@@ -28,16 +28,16 @@
   "runtimeCacheStats": {
     "enabled": true,
     "entries": 1,
-    "bytes": 51910,
+    "bytes": 51909,
     "ttlMs": 300000,
     "metrics": {
-      "hits": 20,
-      "misses": 12,
-      "staleHits": 10,
+      "hits": 21,
+      "misses": 11,
+      "staleHits": 9,
       "sets": 4,
       "evictions": 0,
       "inflightJoins": 6
     },
-    "hitRate": 62.5
+    "hitRate": 65.63
   }
 }
