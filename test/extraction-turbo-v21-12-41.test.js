@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { ValoraeEngine, clearValoraeCaches } from '../lib/Valorae-engine.js';
+import { resetProviderHealth } from '../lib/resilience/circuit-breaker.js';
 
 const originalFetch = globalThis.fetch;
 
@@ -29,6 +30,7 @@ function richStatusInvestHtml() {
 
 try {
   clearValoraeCaches('all');
+  resetProviderHealth();
   const calls = [];
   globalThis.fetch = async (url, init = {}) => {
     const u = String(url);
