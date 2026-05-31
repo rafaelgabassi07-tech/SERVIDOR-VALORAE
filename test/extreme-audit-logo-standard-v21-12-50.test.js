@@ -9,7 +9,7 @@ const manifest = fs.readFileSync('public/manifest.webmanifest', 'utf8');
 const sw = fs.readFileSync('public/service-worker.js', 'utf8');
 
 assert.equal(html, index, 'index.html deve espelhar server.html');
-assert.match(html, /21\.12\.52-news-reliability-upgrade/, 'release v21.12.52 deve estar exposta');
+assert.match(html, /21\.12\.(54-total-apk-proxy-contract|56-full-audit-benchmark-apk-compat)/, 'release atual deve estar exposta');
 assert.match(html, /<div class="logo logo--header"[^>]*><img src="\/assets\/valorae-logo\.svg"/, 'logo do cabeçalho deve usar ativo SVG padronizado');
 assert.match(html, /<div class="logo logo--drawer"[^>]*><img src="\/assets\/valorae-logo\.svg"/, 'logo do drawer deve usar o mesmo ativo SVG');
 assert.doesNotMatch(html, /<div class="logo"[^>]*>V<\/div>/, 'logo antigo com letra V não deve voltar');
@@ -23,11 +23,11 @@ assert.match(svg, /<linearGradient id="mark"/, 'logo SVG deve ter marca vetorial
 assert.match(svg, /M110 132h94l56 151/, 'logo SVG deve conter V geométrico do VALORAE');
 assert.ok(fs.statSync('public/assets/valorae-icon-192.png').size > 1000, 'ícone PWA 192 precisa existir e não estar vazio');
 assert.ok(fs.statSync('public/assets/valorae-icon-512.png').size > 3000, 'ícone PWA 512 precisa existir e não estar vazio');
-assert.match(manifest, /21\.12\.52/, 'manifest PWA deve expor v21.12.52');
-assert.match(sw, /valorae-proxy-server-v21-12-52/, 'service worker deve usar cache novo v21.12.52');
+assert.match(manifest, /21\.12\.(54|56)/, 'manifest PWA deve expor a release atual');
+assert.match(sw, /valorae-proxy-server-v21-12-(54|56)/, 'service worker deve usar cache novo da release atual');
 
 const script = html.slice(html.indexOf('<script>') + '<script>'.length, html.lastIndexOf('</script>'));
-fs.writeFileSync('/tmp/valorae-extreme-audit-logo-standard-v21-12-52.js', script);
-execFileSync(process.execPath, ['--check', '/tmp/valorae-extreme-audit-logo-standard-v21-12-52.js'], { stdio: 'inherit' });
+fs.writeFileSync('/tmp/valorae-extreme-audit-logo-standard-v21-12-54.js', script);
+execFileSync(process.execPath, ['--check', '/tmp/valorae-extreme-audit-logo-standard-v21-12-54.js'], { stdio: 'inherit' });
 
-console.log('extreme-audit-logo-standard-v21-12-52 OK');
+console.log('extreme-audit-logo-standard-v21-12-54 OK');

@@ -36,7 +36,7 @@ for (const needle of [
 ]) assert.ok(html.includes(needle), `UI deve conter ${needle}`);
 
 const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
-assert.match(manifest.version, /^21\.12\.(35|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52)$/);
+assert.match(manifest.version, /^21\.12\.(35|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56)$/);
 
 for (const route of ['/api/integration/manifest', '/api/integration/sdk', '/api/integration/prompts', '/api/v1/integration/manifest', '/api/v1/integration/sdk', '/api/v1/integration/prompts', '/api/release/readiness', '/api/v1/release/readiness']) {
   assert.equal(metricsTest.isInternalTelemetryRoute(route), true, `${route} deve ser telemetria interna quando chamado pelo monitor`);

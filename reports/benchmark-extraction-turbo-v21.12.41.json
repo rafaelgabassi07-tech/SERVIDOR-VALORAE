@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-05-31T01:49:28.665Z",
+  "generatedAt": "2026-05-31T01:49:22.464Z",
   "network": "mocked/local-only",
-  "version": "21.12.52-news-reliability-upgrade",
+  "version": "21.12.41-turbo-extraction-max",
   "baseline": {
     "firstStatus": "OK",
     "firstPartial": false,
@@ -11,9 +11,9 @@
     {
       "name": "turbo-complement-no-result-cache",
       "loops": 25,
-      "avgMs": 35.312,
-      "medianMs": 28.874,
-      "p95Ms": 43.592,
+      "avgMs": 34.851,
+      "medianMs": 29.021,
+      "p95Ms": 42.203,
       "lastStatus": "OK",
       "lastPartial": false,
       "lastScore": 86,
@@ -22,9 +22,9 @@
     {
       "name": "turbo-result-cache-hit",
       "loops": 50,
-      "avgMs": 1.271,
-      "medianMs": 1.23,
-      "p95Ms": 1.534,
+      "avgMs": 1.308,
+      "medianMs": 1.178,
+      "p95Ms": 2.646,
       "lastStatus": "OK",
       "lastPartial": false,
       "lastScore": 86,

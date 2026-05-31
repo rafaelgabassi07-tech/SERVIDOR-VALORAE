@@ -49,8 +49,11 @@ assert.ok(appView.appPayload, 'view=app preserva appPayload');
 assert.ok(appView.appSyncEnvelope, 'view=app preserva appSyncEnvelope');
 assert.ok(appView.appResponseIntegrity, 'view=app preserva appResponseIntegrity');
 assert.ok(appView.endpointCoverage?.blocks?.quote, 'view=app expõe cobertura oficial');
-assert.ok(!('results' in appView), 'view=app remove results bruto do contrato público');
+assert.ok(appView.results?.indicadores, 'view=app espelha results compatível para o APK sem expor results bruto');
+assert.ok(appView.normalized?.precoAtual, 'view=app espelha normalized compatível para o APK');
+assert.ok(appView.legacyAppCompat?.mirroredRoots?.includes('results'), 'view=app declara roots espelhadas para compatibilidade APK');
 assert.ok(appView.payloadViewProfile.removedRoots.includes('results'));
+assert.ok(appView.payloadViewProfile.legacyMirroredRoots.includes('results'));
 
 const fundamentals = buildFundamentalsView(sample);
 assert.equal(fundamentals.ticker, 'PETR4');

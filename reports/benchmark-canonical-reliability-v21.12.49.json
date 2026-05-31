@@ -1,13 +1,13 @@
 {
-  "version": "21.12.51-post-benchmark-performance-hardening",
-  "generatedAt": "2026-05-30T00:55:48.899Z",
+  "version": "21.12.49-extreme-audit-logo-standard",
+  "generatedAt": "2026-05-31T01:49:20.580Z",
   "cases": [
     {
       "label": "canonical-layer-cold-low-data-live-source",
       "iterations": 12,
-      "avgMs": 16.974,
-      "medianMs": 10.909,
-      "p95Ms": 82.307,
+      "avgMs": 24.72,
+      "medianMs": 14.718,
+      "p95Ms": 125.415,
       "status": "OK",
       "partial": false,
       "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",
@@ -16,9 +16,9 @@
     {
       "label": "canonical-layer-result-cache",
       "iterations": 26,
-      "avgMs": 1.028,
-      "medianMs": 0.518,
-      "p95Ms": 1.428,
+      "avgMs": 1.857,
+      "medianMs": 0.885,
+      "p95Ms": 2.262,
       "status": "OK",
       "partial": false,
       "dataReliability": "RENDERABLE_WITH_BLOCK_STATUS",

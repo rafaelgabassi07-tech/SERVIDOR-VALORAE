@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-05-30T04:46:20.507Z",
+  "generatedAt": "2026-05-31T01:49:33.534Z",
   "network": "mocked/local-only",
   "version": "21.12.52-news-reliability-upgrade",
   "cases": [
     {
       "name": "cold-fresh-fill",
       "loops": 1,
-      "avgMs": 110.298,
-      "medianMs": 110.298,
-      "p95Ms": 110.298,
+      "avgMs": 182.565,
+      "medianMs": 182.565,
+      "p95Ms": 182.565,
       "lastCacheStatus": "RESULT_CACHE_MISS",
       "lastStatus": "OK",
       "lastPartial": false
@@ -16,9 +16,9 @@
     {
       "name": "stale-while-revalidate-low-latency",
       "loops": 30,
-      "avgMs": 2.062,
-      "medianMs": 0.694,
-      "p95Ms": 13.15,
+      "avgMs": 3.983,
+      "medianMs": 1.191,
+      "p95Ms": 19.612,
       "lastCacheStatus": "RESULT_CACHE_HIT",
       "lastStatus": "OK",
       "lastPartial": false
@@ -28,16 +28,16 @@
   "runtimeCacheStats": {
     "enabled": true,
     "entries": 1,
-    "bytes": 43088,
+    "bytes": 51911,
     "ttlMs": 300000,
     "metrics": {
-      "hits": 24,
-      "misses": 8,
-      "staleHits": 6,
-      "sets": 3,
+      "hits": 21,
+      "misses": 11,
+      "staleHits": 9,
+      "sets": 4,
       "evictions": 0,
-      "inflightJoins": 4
+      "inflightJoins": 6
     },
-    "hitRate": 75
+    "hitRate": 65.63
   }
 }

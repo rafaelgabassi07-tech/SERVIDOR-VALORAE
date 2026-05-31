@@ -12,7 +12,28 @@ export default async function handler(req, res) {
     const err = validarTicker(ticker);
     if (err) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: err }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'history' });
     const data = await fetchYahooHistory(ticker, { range: q.range || '1Y', interval: q.interval, timeoutMs: clampNumber(q.timeoutMs, 9000, 1000, 20000) });
-    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, endpoint: 'asset-history', ...data }, { status: data.ok ? 200 : 502, engineVersion: ValoraeEngine.version, profile: 'history', cacheControl: data.ok ? 'private, max-age=60, stale-while-revalidate=300' : 'no-store' });
+    const payload = data.ok ? data : {
+      ...data,
+      ok: false,
+      empty: true,
+      fallbackUsed: true,
+      warning: data.error || 'Histórico temporariamente indisponível.',
+      message: 'Histórico é bloco opcional: o APK deve manter gráfico/cache local ou tentar appPayload.charts.',
+      appPolicy: {
+        optionalBlock: true,
+        canReplacePreviousHistory: false,
+        shouldKeepPreviousHistory: true,
+        fallbackRoots: ['appPayload.charts', 'appMobileSnapshot.charts', 'cache local do APK'],
+      },
+      reliability: {
+        source: data.source || 'YahooChart',
+        state: 'UNAVAILABLE_OPTIONAL',
+        optionalBlock: true,
+        shouldKeepPreviousHistory: true,
+      },
+    };
+    delete payload.error;
+    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, endpoint: 'asset-history', ...payload }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'history', cacheControl: data.ok ? 'private, max-age=60, stale-while-revalidate=300' : 'private, max-age=15, stale-while-revalidate=120' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'history' });
   }

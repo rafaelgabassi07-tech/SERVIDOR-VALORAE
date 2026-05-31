@@ -3,7 +3,9 @@ import fs from 'node:fs';
 import assets from '../routes/assets.js';
 import { clearValoraeCaches } from '../lib/Valorae-engine.js';
 
-const RELEASE = '21.12.52-news-reliability-upgrade';
+const RELEASE = JSON.parse(fs.readFileSync('metadata.json', 'utf8')).releasePatch;
+const PUBLIC_VERSION = RELEASE.match(/^21\.12\.\d+/)?.[0] || '21.12.56';
+const CACHE_VERSION = PUBLIC_VERSION.replaceAll('.', '-');
 const originalFetch = globalThis.fetch;
 
 function mockReq(url, query = {}) {
@@ -79,8 +81,8 @@ try {
   const openapi = fs.readFileSync('routes/openapi.js', 'utf8');
   assert.equal(pkg.valorae.releasePatch, RELEASE);
   assert.equal(metadata.releasePatch, RELEASE);
-  assert.equal(manifest.version, '21.12.52');
-  assert.match(sw, /valorae-proxy-server-v21-12-52/);
+  assert.equal(manifest.version, PUBLIC_VERSION);
+  assert.ok(sw.includes(`valorae-proxy-server-v${CACHE_VERSION}`));
   assert.match(html, /21\.12\.48-monitor-responsive-settings-theme/);
   assert.match(openapi, /v21\.12\.48: Monitor Chart Rendering Boost/);
 } finally {
@@ -88,4 +90,4 @@ try {
   clearValoraeCaches('all');
 }
 
-console.log('final-audit-corrections-v21-12-52 OK');
+console.log('final-audit-corrections-current-release OK');

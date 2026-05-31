@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-05-29T23:47:33.321Z",
+  "generatedAt": "2026-05-31T01:49:31.041Z",
   "network": "mocked/local-only",
   "version": "21.12.45-final-audit-corrections",
   "cases": [
     {
       "name": "cold-fresh-fill",
       "loops": 1,
-      "avgMs": 95.745,
-      "medianMs": 95.745,
-      "p95Ms": 95.745,
+      "avgMs": 167.49,
+      "medianMs": 167.49,
+      "p95Ms": 167.49,
       "lastCacheStatus": "RESULT_CACHE_MISS",
       "lastStatus": "OK",
       "lastPartial": false
@@ -16,10 +16,10 @@
     {
       "name": "stale-while-revalidate-low-latency",
       "loops": 30,
-      "avgMs": 1.875,
-      "medianMs": 0.662,
-      "p95Ms": 12.786,
-      "lastCacheStatus": "RESULT_CACHE_HIT",
+      "avgMs": 3.85,
+      "medianMs": 1.522,
+      "p95Ms": 17.709,
+      "lastCacheStatus": "RESULT_CACHE_STALE_WHILE_REVALIDATE",
       "lastStatus": "OK",
       "lastPartial": false
     }
@@ -28,16 +28,16 @@
   "runtimeCacheStats": {
     "enabled": true,
     "entries": 1,
-    "bytes": 39785,
+    "bytes": 51910,
     "ttlMs": 300000,
     "metrics": {
-      "hits": 24,
-      "misses": 8,
-      "staleHits": 6,
-      "sets": 3,
+      "hits": 20,
+      "misses": 12,
+      "staleHits": 10,
+      "sets": 4,
       "evictions": 0,
-      "inflightJoins": 4
+      "inflightJoins": 6
     },
-    "hitRate": 75
+    "hitRate": 62.5
   }
 }

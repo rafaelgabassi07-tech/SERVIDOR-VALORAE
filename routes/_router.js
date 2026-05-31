@@ -14,6 +14,7 @@ const ROUTES = {
   '/personal/readiness': () => import('./release/readiness.js'),
   '/cache/stats': () => import('./cache/stats.js'),
   '/server/metrics': () => import('./server/metrics.js'),
+  '/observability': () => import('./server/metrics.js'),
   '/server/tests': () => import('./server/tests.js'),
   '/deploy/status': () => import('./deploy/status.js'),
   '/asset': () => import('./asset.js'),
