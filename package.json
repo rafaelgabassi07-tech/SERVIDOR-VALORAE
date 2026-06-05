@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy v21.12.58: faturamento por negócio/região exposto ao APK via appPayload/appMobileSnapshot/assetClassContract, mantendo compatibilidade Vercel Free.",
+  "description": "Valorae Proxy v21.12.58: faturamento por negócio/região e contratos de gráficos financeiros reforçados para APK, mantendo compatibilidade Vercel Free.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -57,6 +57,6 @@
     "coreVersion": "21.12.0",
     "releasePatch": "21.12.58-revenue-breakdowns-app-contract",
     "freeOnly": true,
-    "notes": "package.version permanece como core 21.12.0; releasePatch indica v21.12.58 com mapeamento de faturamento por negócio/região para APK e contrato Proxy, mantendo Vercel Free."
+    "notes": "package.version permanece como core 21.12.0; releasePatch v21.12.58 preservado com reforço de aliases para DRE, lucro x cotação, balanço, payout, rentabilidade e faturamento negócio/região."
   }
 }
