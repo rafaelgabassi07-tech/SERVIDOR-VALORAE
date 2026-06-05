@@ -9,7 +9,7 @@ const dividends = read('routes/portfolio/dividends.js');
 const nextDividends = read('routes/portfolio/next-dividends.js');
 const pkg = JSON.parse(read('package.json'));
 
-assert.equal(pkg.valorae.releasePatch, '21.12.57-user-points-apk-compat');
+assert.equal(pkg.valorae.releasePatch, '21.12.58-revenue-breakdowns-app-contract');
 assert.match(yahoo, /IFIX_PROXY/);
 assert.match(yahoo, /XFIX11\.SA/);
 assert.match(history, /normalizeHistoryTicker/);
@@ -25,4 +25,4 @@ assert.match(nextDividends, /upcomingEvents/);
 assert.match(nextDividends, /historyEvents/);
 assert.match(nextDividends, /nextDividend/);
 assert.doesNotMatch(nextDividends, /root error/i);
-console.log('apk-user-points-v21-12-57 OK');
+console.log('apk-user-points-v21-12-57|58 OK');

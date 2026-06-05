@@ -175,7 +175,7 @@
   "codename": "user-points-apk-compat",
   "notes": "Correções dos 12 pontos do APK: comparação IFIX, métricas de segmento de FIIs, rankings clicáveis, movimentos do dia, proventos reais/futuros, IPCA e limpeza visual.",
   "generatedAt": "2026-05-30T22:30:00.000-03:00",
-  "versionLabel": "core 21.12.0 · release 21.12.57-user-points-apk-compat",
+  "versionLabel": "core 21.12.0 · release 21.12.58-revenue-breakdowns-app-contract",
   "tags": [
     "ai-prompts",
     "app-sync-preserved",
@@ -243,7 +243,7 @@
     "html-mirror",
     "zip-hygiene"
   ],
-  "patch": "21.12.57-user-points-apk-compat",
+  "patch": "21.12.58-revenue-breakdowns-app-contract",
   "highlights": [
     "Corrige contrato para o APK receber eventos reais de dividendos históricos/futuros, IFIX e rankings com preço/variação sem simulação.",
     "Adiciona auditoria v21.12.56 para executar todos os testes existentes de forma dinâmica, incluindo testes novos que antes ficavam fora do npm test.",
@@ -266,7 +266,7 @@
   ],
   "publicEngineContract": "21.12.0",
   "coreVersion": "21.12.0",
-  "releasePatch": "21.12.57-user-points-apk-compat",
+  "releasePatch": "21.12.58-revenue-breakdowns-app-contract",
   "releaseHistory": [
     "21.12.56-full-audit-benchmark-apk-compat",
     "21.12.55-apk-optional-block-contract",
