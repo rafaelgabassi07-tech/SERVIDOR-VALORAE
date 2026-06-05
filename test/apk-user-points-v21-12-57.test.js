@@ -25,4 +25,4 @@ assert.match(nextDividends, /upcomingEvents/);
 assert.match(nextDividends, /historyEvents/);
 assert.match(nextDividends, /nextDividend/);
 assert.doesNotMatch(nextDividends, /root error/i);
-console.log('apk-user-points-v21-12-57|58 OK');
+console.log('apk-user-points-v21-12-57 OK');

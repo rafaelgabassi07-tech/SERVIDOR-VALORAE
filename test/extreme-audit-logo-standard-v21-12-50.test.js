@@ -9,7 +9,7 @@ const manifest = fs.readFileSync('public/manifest.webmanifest', 'utf8');
 const sw = fs.readFileSync('public/service-worker.js', 'utf8');
 
 assert.equal(html, index, 'index.html deve espelhar server.html');
-assert.match(html, /21\.12\.(54|56|57|58)/, 'release atual deve estar exposta');
+assert.match(html, /21\.12\.(54-total-apk-proxy-contract|56-full-audit-benchmark-apk-compat|57-user-points-apk-compat|58-revenue-breakdowns-app-contract)/, 'release atual deve estar exposta');
 assert.match(html, /<div class="logo logo--header"[^>]*><img src="\/assets\/valorae-logo\.svg"/, 'logo do cabeçalho deve usar ativo SVG padronizado');
 assert.match(html, /<div class="logo logo--drawer"[^>]*><img src="\/assets\/valorae-logo\.svg"/, 'logo do drawer deve usar o mesmo ativo SVG');
 assert.doesNotMatch(html, /<div class="logo"[^>]*>V<\/div>/, 'logo antigo com letra V não deve voltar');
