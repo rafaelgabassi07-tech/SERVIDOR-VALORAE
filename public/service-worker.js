@@ -1,5 +1,5 @@
-// Compat: supersedes v21-12-0; UI patch v21-12-58; compat legacy v21-12-48
-const CACHE_NAME = 'valorae-proxy-server-v21-12-58';// Compat: v21-12-0; patch v21-12-58
+// Compat: supersedes v21-12-0; UI patch v21-12-59; compat legacy v21-12-48
+const CACHE_NAME = 'valorae-proxy-server-v21-12-59';// Compat: v21-12-0; patch v21-12-59
 const STATIC_ASSETS = [
   '/server.html',
   '/index.html',

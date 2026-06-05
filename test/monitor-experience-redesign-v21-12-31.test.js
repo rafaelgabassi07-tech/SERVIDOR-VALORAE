@@ -35,7 +35,7 @@ assert.ok(!html.includes('<input id="tickerInput" value="PETR4" placeholder="Tic
 assert.ok(html.length < 110000, 'cockpit redesenhado deve continuar leve para mobile/Vercel Free com gráficos resilientes');
 
 const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
-assert.match(manifest.version, /^21\.12\.(31|32|35|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58)$/);
+assert.match(manifest.version, /^21\.12\.(31|32|35|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59)$/);
 assert.equal(manifest.start_url, '/server.html#command');
 
 const sw = fs.readFileSync('public/service-worker.js', 'utf8');

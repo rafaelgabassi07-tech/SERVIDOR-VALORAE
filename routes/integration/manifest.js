@@ -2,7 +2,7 @@ import { ValoraeEngine } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute } from '../../lib/http/route.js';
 
-const CONTRACT_VERSION = '21.12.58-revenue-breakdowns-app-contract-integration-manifest';
+const CONTRACT_VERSION = '21.12.59-valorae-i10-rankings-complete-integration-manifest';
 
 function endpoint(path, purpose, view = 'app') {
   return { path, method: 'GET', purpose, recommendedView: view, cache: 'private, max-age=30, stale-while-revalidate=180' };
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     requestId: route.requestId,
     endpoint: 'integration/manifest',
     contractVersion: CONTRACT_VERSION,
-    releasePatch: '21.12.58-revenue-breakdowns-app-contract',
+    releasePatch: '21.12.59-valorae-i10-rankings-complete',
     status: 'OK',
     audience: 'uso pessoal e pessoas próximas',
     baseUrl: process.env.VALORAE_PUBLIC_BASE_URL || 'https://servidor-valorae.vercel.app',

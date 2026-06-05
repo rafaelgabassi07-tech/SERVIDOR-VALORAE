@@ -55,7 +55,7 @@ try {
   assert.equal(payload.dataReliability.providerStrategy.richProvidersPreserved, true);
   assert.ok(payload.dataReliability.blocks.identity.status === 'OK');
   assert.ok(['PARTIAL', 'OK'].includes(payload.dataReliability.blocks.quote.status));
-  assert.match(payload.extractionCompleteness.canonicalReliability.version, /21\.12\.(48|49|50|51|52|54|55|56|57|58)/);
+  assert.match(payload.extractionCompleteness.canonicalReliability.version, /21\.12\.(48|49|50|51|52|54|55|56|57|58|59)/);
   assert.ok(payload.extractionCompleteness.canonicalReliability.used);
   assert.ok(payload.warnings.some(w => /Camada canônica CVM/.test(w)));
 

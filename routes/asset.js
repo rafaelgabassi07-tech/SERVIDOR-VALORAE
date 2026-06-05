@@ -28,14 +28,15 @@ export default async function handler(req, res) {
     }
 
     const type = input.type || inferAssetType(ticker);
-    const view = input.view || process.env.VALORAE_DEFAULT_ASSET_VIEW || 'app';
-    const requestedTimeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 500, 20000) : undefined;
+    const completeRequested = boolParam(input.complete || input.full || input.fullCapture || input.precise) || ['complete','full','deep','precise','max'].includes(String(input.mode || input.captureMode || input.profile || input.performance || '').toLowerCase());
+    const view = input.view || (completeRequested ? 'full' : (process.env.VALORAE_DEFAULT_ASSET_VIEW || 'app'));
+    const requestedTimeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 500, 25000) : (completeRequested ? 18000 : undefined);
     const requestedScrapeTimeoutMs = input.valoraeScrapeTimeoutMs
-      ? clampNumber(input.valoraeScrapeTimeoutMs, undefined, 500, 20000)
+      ? clampNumber(input.valoraeScrapeTimeoutMs, undefined, 500, 25000)
       : requestedTimeoutMs;
     const requestedAdaptiveTimeoutMs = input.adaptiveCompletionTimeoutMs
-      ? clampNumber(input.adaptiveCompletionTimeoutMs, undefined, 500, 12000)
-      : requestedTimeoutMs;
+      ? clampNumber(input.adaptiveCompletionTimeoutMs, undefined, 500, 16000)
+      : (completeRequested ? 12000 : requestedTimeoutMs);
     const requestedNewsTimeoutMs = input.newsTimeoutMs
       ? clampNumber(input.newsTimeoutMs, undefined, 350, 12000)
       : requestedTimeoutMs;
@@ -51,25 +52,27 @@ export default async function handler(req, res) {
       includeNews: boolParam(input.includeNews ?? input.news, false),
       newsLimit: clampNumber(input.newsLimit || input.limit, 8, 0, 25),
       useYahooFallback: lowLatencyBudget ? false : (input.yahoo === undefined ? true : boolParam(input.yahoo, true)),
-      adaptiveCompletion: lowLatencyBudget ? false : (input.complete !== undefined ? boolParam(input.complete, true) : (input.adaptiveCompletion === undefined ? undefined : boolParam(input.adaptiveCompletion, true))),
+      adaptiveCompletion: completeRequested ? true : (lowLatencyBudget ? false : (input.complete !== undefined ? boolParam(input.complete, true) : (input.adaptiveCompletion === undefined ? undefined : boolParam(input.adaptiveCompletion, true)))),
       adaptiveCompletionTimeoutMs: requestedAdaptiveTimeoutMs,
       valoraeScrapeTimeoutMs: requestedScrapeTimeoutMs,
       internalApiTimeoutMs: requestedTimeoutMs,
       newsTimeoutMs: requestedNewsTimeoutMs,
       statusInvestTimeoutMs: requestedTimeoutMs,
-      statusInvestComplement: lowLatencyBudget ? false : (input.statusInvestComplement === undefined ? undefined : boolParam(input.statusInvestComplement, true)),
-      returnHtml: lowLatencyBudget ? false : undefined,
-      enableInternalApis: lowLatencyBudget ? false : undefined,
+      statusInvestComplement: completeRequested ? true : (lowLatencyBudget ? false : (input.statusInvestComplement === undefined ? undefined : boolParam(input.statusInvestComplement, true))),
+      returnHtml: completeRequested ? true : (lowLatencyBudget ? false : undefined),
+      enableInternalApis: completeRequested ? true : (lowLatencyBudget ? false : undefined),
       lowLatencyBudget,
       timeoutMs: requestedTimeoutMs,
-      maxHtmlChars: input.maxHtmlChars ? clampNumber(input.maxHtmlChars, undefined, 10000, 4500000) : undefined,
+      maxHtmlChars: input.maxHtmlChars ? clampNumber(input.maxHtmlChars, undefined, 10000, 4500000) : (completeRequested ? 4500000 : undefined),
       valoraeScrapeUrl: lowLatencyBudget && !hasExplicitScrapeUrl ? undefined : resolveSelfScrapeUrl(req, input),
       cache: !(boolParam(input.nocache || input.refresh) || falseParam(input.cache)),
       bypassCache: boolParam(input.nocache || input.refresh),
       debug: boolParam(input.debug),
       view,
       includeQuality: input.includeQuality === undefined ? true : boolParam(input.includeQuality, true),
-      profile: input.profile || input.performance,
+      complete: completeRequested,
+      fullCapture: completeRequested,
+      profile: input.profile || input.performance || (completeRequested ? 'deep' : undefined),
     }, { endpoint: 'asset', ticker, type });
 
     const payload = attachPartialDataGuidance(await ValoraeEngine.fetchAtivo(ticker, type, perfOptions), { endpoint: 'asset', ticker, view });

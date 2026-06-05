@@ -42,7 +42,8 @@ export default async function handler(req, res) {
       return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: 'Nenhum ticker válido enviado.', errors }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'assets' });
     }
 
-    const requestedTimeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 500, 20000) : undefined;
+    const completeRequested = boolParam(input.complete || input.full || input.fullCapture || input.precise) || ['complete','full','deep','precise','max'].includes(String(input.mode || input.captureMode || input.profile || input.performance || '').toLowerCase());
+    const requestedTimeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 500, 25000) : (completeRequested ? 18000 : undefined);
     const requestedNewsTimeoutMs = input.newsTimeoutMs ? clampNumber(input.newsTimeoutMs, undefined, 350, 12000) : requestedTimeoutMs;
     const lowLatencyBudget = requestedTimeoutMs !== undefined
       && requestedTimeoutMs <= 1000
@@ -54,26 +55,28 @@ export default async function handler(req, res) {
       includeNews: lowLatencyBudget ? false : boolParam(input.includeNews ?? input.news, false),
       newsLimit: clampNumber(input.newsLimit || input.limit, 8, 0, 25),
       useYahooFallback: lowLatencyBudget ? false : (input.yahoo === undefined ? true : boolParam(input.yahoo, true)),
-      adaptiveCompletion: lowLatencyBudget ? false : (input.complete !== undefined ? boolParam(input.complete, true) : (input.adaptiveCompletion === undefined ? undefined : boolParam(input.adaptiveCompletion, true))),
+      adaptiveCompletion: completeRequested ? true : (lowLatencyBudget ? false : (input.complete !== undefined ? boolParam(input.complete, true) : (input.adaptiveCompletion === undefined ? undefined : boolParam(input.adaptiveCompletion, true)))),
       adaptiveCompletionTimeoutMs: input.adaptiveCompletionTimeoutMs ? clampNumber(input.adaptiveCompletionTimeoutMs, undefined, 500, 12000) : requestedTimeoutMs,
       valoraeScrapeTimeoutMs: requestedTimeoutMs,
       internalApiTimeoutMs: requestedTimeoutMs,
       newsTimeoutMs: requestedNewsTimeoutMs,
       statusInvestTimeoutMs: requestedTimeoutMs,
-      statusInvestComplement: lowLatencyBudget ? false : (input.statusInvestComplement === undefined ? undefined : boolParam(input.statusInvestComplement, true)),
-      returnHtml: lowLatencyBudget ? false : undefined,
-      enableInternalApis: lowLatencyBudget ? false : undefined,
+      statusInvestComplement: completeRequested ? true : (lowLatencyBudget ? false : (input.statusInvestComplement === undefined ? undefined : boolParam(input.statusInvestComplement, true))),
+      returnHtml: completeRequested ? true : (lowLatencyBudget ? false : undefined),
+      enableInternalApis: completeRequested ? true : (lowLatencyBudget ? false : undefined),
       lowLatencyBudget,
-      maxConcurrency: clampNumber(input.maxConcurrency || input.concurrency, undefined, 1, 8),
+      maxConcurrency: completeRequested ? clampNumber(input.maxConcurrency || input.concurrency, 2, 1, 4) : clampNumber(input.maxConcurrency || input.concurrency, undefined, 1, 8),
       continueOnError: input.continueOnError === undefined ? true : boolParam(input.continueOnError, true),
       timeoutMs: requestedTimeoutMs,
-      maxHtmlChars: input.maxHtmlChars ? clampNumber(input.maxHtmlChars, undefined, 10000, 4500000) : undefined,
+      maxHtmlChars: input.maxHtmlChars ? clampNumber(input.maxHtmlChars, undefined, 10000, 4500000) : (completeRequested ? 4500000 : undefined),
       valoraeScrapeUrl: lowLatencyBudget && !(input.valoraeScrapeUrl || input.scrapeUrl) ? undefined : resolveSelfScrapeUrl(req, input),
       cache: !(boolParam(input.nocache || input.refresh) || falseParam(input.cache)),
       bypassCache: boolParam(input.nocache || input.refresh),
-      view: input.view || process.env.VALORAE_DEFAULT_ASSETS_VIEW || 'app',
+      view: input.view || (completeRequested ? 'full' : (process.env.VALORAE_DEFAULT_ASSETS_VIEW || 'app')),
       includeQuality: input.includeQuality === undefined ? true : boolParam(input.includeQuality, true),
-      profile: input.profile || input.performance,
+      complete: completeRequested,
+      fullCapture: completeRequested,
+      profile: input.profile || input.performance || (completeRequested ? 'deep' : undefined),
     }, { endpoint: 'assets', batchSize: valid.length });
 
     const batch = await ValoraeEngine.fetchAtivosBatch(valid, perfOptions);

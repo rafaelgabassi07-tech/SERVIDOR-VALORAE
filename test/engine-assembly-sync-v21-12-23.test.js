@@ -33,7 +33,7 @@ for (const needle of ['Engine e sincronização', 'performancePolicyBox', 'engin
 }
 
 const caps = performanceCapabilities();
-assert.match(caps.version, /21\.12\.(23|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58)-/);
+assert.match(caps.version, /21\.12\.(23|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59)-/);
 assert.ok(caps.queryParams.some(x => x.includes('contracts=full|lite|auto')), 'capabilities devem documentar contracts');
 
 const self = runValoraeSelfTest();
