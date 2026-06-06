@@ -24,18 +24,46 @@ function firstNumber(...values) {
   }
   return 0;
 }
+function parseBRDate(d) {
+  const s = String(d || '').trim();
+  const br = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})/);
+  if (br) {
+    const y = String(br[3]).length === 2 ? `20${br[3]}` : br[3];
+    return new Date(`${y}-${String(br[2]).padStart(2, '0')}-${String(br[1]).padStart(2, '0')}T00:00:00Z`);
+  }
+  const iso = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00Z`);
+  return null;
+}
+function splitDividendEvents(events = []) {
+  const today = new Date(); today.setUTCHours(0, 0, 0, 0);
+  const decorated = (events || []).map(e => ({ ...e, _pag: parseBRDate(e.paymentDate || e.dataPagamento), _com: parseBRDate(e.dateCom || e.dataCom) }));
+  const upcomingEvents = decorated
+    .filter(e => (e._pag && e._pag >= today) || (!e._pag && e._com && e._com >= today))
+    .sort((a, b) => (a._pag || a._com || 0) - (b._pag || b._com || 0))
+    .map(({ _pag, _com, ...e }) => ({ ...e, status: String(firstText(e.status, 'previsto')).toLowerCase() }));
+  const historyEvents = decorated
+    .filter(e => !((e._pag && e._pag >= today) || (!e._pag && e._com && e._com >= today)))
+    .sort((a, b) => (b._pag || b._com || 0) - (a._pag || a._com || 0))
+    .map(({ _pag, _com, ...e }) => ({ ...e, status: String(firstText(e.status, 'pago')).toLowerCase() }));
+  return { upcomingEvents, historyEvents, agendaEvents: [...upcomingEvents, ...historyEvents] };
+}
 const dateToIso = (d) => { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})/); if(!m) return ''; const y = String(m[3]).length===2? `20${m[3]}`:m[3]; return `${y}-${m[2]}-${m[1]}`; };
 
 function normalizeDividendEvent(row = {}, ticker = '', status = '') {
   const valuePerShare = firstNumber(row.valuePerShare, row.valorPorCota, row.valorPorAcao, row.valor, row.value, row.amount, row.dividend, row.rendimento, row.provento, row.cashAmount);
-  const type = firstText(row.type, row.tipo, row.kind, 'Provento');
-  
+  const type = firstText(row.type, row.tipo, row.kind, row.eventType, 'Provento');
   const paymentDate = firstText(row.paymentDate, row.payDate, row.dataPagamento, row.dataPagamentoPrevista, row.dataPagto, row.date, row.data);
   const dateCom = firstText(row.dateCom, row.comDate, row.dataCom, row.recordDate, row.dataBase);
-
+  const t = firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase();
+  const assetType = row.assetType || row.assetClass || inferAssetType(t) || 'ACAO';
   return {
-    ticker: firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase(),
-    assetType: row.assetType || row.assetClass || inferAssetType(ticker) || 'ACAO',
+    ticker: t,
+    symbol: t,
+    assetType,
+    type,
+    tipo: type,
+    eventType: type,
     dateCom,
     dataCom: dateCom,
     dataComIso: dateToIso(dateCom),
@@ -45,14 +73,12 @@ function normalizeDividendEvent(row = {}, ticker = '', status = '') {
     valuePerShare,
     valor: valuePerShare,
     value: valuePerShare,
+    amount: valuePerShare,
     valueFormatted: `R$ ${valuePerShare.toFixed(2).replace('.', ',')}`,
     currency: 'BRL',
-    type,
-    tipo: type,
-    eventType: type,
-    status: firstText(row.status, status),
+    status: String(firstText(row.status, status)).toLowerCase(),
     source: firstText(row.source, 'investidor10'),
-    sourceUrl: row.sourceUrl || `https://investidor10.com.br/`
+    sourceUrl: row.sourceUrl || `https://investidor10.com.br/${assetType.toLowerCase()==='fii'?'fiis':'acoes'}/${t.toLowerCase()}/`
   };
 }
 function dividendHistoryFromAsset(asset = {}) {
@@ -109,6 +135,7 @@ export default async function handler(req, res) {
         quality: a.quality?.score,
       };
     });
+    const { upcomingEvents, historyEvents, agendaEvents } = splitDividendEvents(events);
     return sendJson(req, res, {
       version: ValoraeEngine.version,
       requestId: route.requestId,
@@ -117,7 +144,13 @@ export default async function handler(req, res) {
       items,
       events,
       dividends: events,
+      dividendos: events,
       proventos: events,
+      agendaEvents,
+      upcomingEvents,
+      historyEvents,
+      upcomingCount: upcomingEvents.length,
+      historyCount: historyEvents.length,
       agendaDiagnostics: agenda.diagnostics || [],
       stats: batch.stats,
       errors: [...errors, ...batch.errors],

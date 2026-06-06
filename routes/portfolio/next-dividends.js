@@ -6,8 +6,11 @@ import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, se
 const MAX_TICKERS = Number(process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 30);
 function parseBRDate(d) {
   const s = String(d || '').trim();
-  const br = s.match(/(\d{2})\/(\d{2})\/(\d{2}|\d{4})/);
-  if (br) { const y = String(br[3]).length === 2 ? `20${br[3]}` : br[3]; return new Date(`${y}-${br[2]}-${br[1]}T00:00:00Z`); }
+  const br = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})/);
+  if (br) {
+    const y = String(br[3]).length === 2 ? `20${br[3]}` : br[3];
+    return new Date(`${y}-${String(br[2]).padStart(2, '0')}-${String(br[1]).padStart(2, '0')}T00:00:00Z`);
+  }
   const iso = s.match(/(\d{4})-(\d{2})-(\d{2})/);
   if (iso) return new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00Z`);
   return null;
@@ -31,18 +34,35 @@ function firstNumber(...values) {
   }
   return 0;
 }
+function splitDividendEvents(events = []) {
+  const today = new Date(); today.setUTCHours(0, 0, 0, 0);
+  const decorated = (events || []).map(e => ({ ...e, _pag: parseBRDate(e.paymentDate || e.dataPagamento), _com: parseBRDate(e.dateCom || e.dataCom) }));
+  const upcomingEvents = decorated
+    .filter(e => (e._pag && e._pag >= today) || (!e._pag && e._com && e._com >= today))
+    .sort((a, b) => (a._pag || a._com || 0) - (b._pag || b._com || 0))
+    .map(({ _pag, _com, ...e }) => ({ ...e, status: String(firstText(e.status, 'previsto')).toLowerCase() }));
+  const historyEvents = decorated
+    .filter(e => !((e._pag && e._pag >= today) || (!e._pag && e._com && e._com >= today)))
+    .sort((a, b) => (b._pag || b._com || 0) - (a._pag || a._com || 0))
+    .map(({ _pag, _com, ...e }) => ({ ...e, status: String(firstText(e.status, 'pago')).toLowerCase() }));
+  return { upcomingEvents, historyEvents, agendaEvents: [...upcomingEvents, ...historyEvents] };
+}
 const dateToIso = (d) => { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})/); if(!m) return ''; const y = String(m[3]).length===2? `20${m[3]}`:m[3]; return `${y}-${m[2]}-${m[1]}`; };
 
 function normalizeDividendEvent(row = {}, ticker = '', status = '') {
   const valuePerShare = firstNumber(row.valuePerShare, row.valorPorCota, row.valorPorAcao, row.valor, row.value, row.amount, row.dividend, row.rendimento, row.provento, row.cashAmount);
-  const type = firstText(row.type, row.tipo, row.kind, 'Provento');
-  
+  const type = firstText(row.type, row.tipo, row.kind, row.eventType, 'Provento');
   const paymentDate = firstText(row.paymentDate, row.payDate, row.dataPagamento, row.dataPagamentoPrevista, row.dataPagto, row.date, row.data);
   const dateCom = firstText(row.dateCom, row.comDate, row.dataCom, row.recordDate, row.dataBase);
-
+  const t = firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase();
+  const assetType = row.assetType || row.assetClass || inferAssetType(t) || 'ACAO';
   return {
-    ticker: firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase(),
-    assetType: row.assetType || row.assetClass || inferAssetType(ticker) || 'ACAO',
+    ticker: t,
+    symbol: t,
+    assetType,
+    type,
+    tipo: type,
+    eventType: type,
     dateCom,
     dataCom: dateCom,
     dataComIso: dateToIso(dateCom),
@@ -52,14 +72,12 @@ function normalizeDividendEvent(row = {}, ticker = '', status = '') {
     valuePerShare,
     valor: valuePerShare,
     value: valuePerShare,
+    amount: valuePerShare,
     valueFormatted: `R$ ${valuePerShare.toFixed(2).replace('.', ',')}`,
     currency: 'BRL',
-    type,
-    tipo: type,
-    eventType: type,
-    status: firstText(row.status, status),
+    status: String(firstText(row.status, status)).toLowerCase(),
     source: firstText(row.source, 'investidor10'),
-    sourceUrl: row.sourceUrl || `https://investidor10.com.br/`
+    sourceUrl: row.sourceUrl || `https://investidor10.com.br/${assetType.toLowerCase()==='fii'?'fiis':'acoes'}/${t.toLowerCase()}/`
   };
 }
 function dividendHistoryFromAsset(asset = {}) {
@@ -96,52 +114,46 @@ export default async function handler(req, res) {
     }
     const today = new Date(); today.setUTCHours(0, 0, 0, 0);
     const events = [];
-    const upcomingEvents = [];
-    const historyEvents = [];
     const items = batch.assets.map(a => {
-      const historico = dividendHistoryFromAsset(a).map(row => normalizeDividendEvent(row, a.ticker, 'Recebido')).filter(e => e.valuePerShare > 0 || e.paymentDate || e.dateCom);
+      const historico = dividendHistoryFromAsset(a).map(row => normalizeDividendEvent(row, a.ticker, 'recebido')).filter(e => e.valuePerShare > 0 || e.paymentDate || e.dateCom);
       const merged = [...(agendaByTicker.get(a.ticker) || []), ...historico]
         .filter((e, idx, arr) => arr.findIndex(x => [x.ticker, x.dateCom, x.paymentDate, x.type, x.valuePerShare].join('|') === [e.ticker, e.dateCom, e.paymentDate, e.type, e.valuePerShare].join('|')) === idx);
-      const upcoming = merged
-        .map(x => ({ ...x, _pag: parseBRDate(x.paymentDate), _com: parseBRDate(x.dateCom) }))
-        .filter(x => x._pag && x._pag >= today)
-        .sort((x, y) => x._pag - y._pag)
-        .map(({ _pag, _com, ...x }) => ({ ...x, status: firstText(x.status, 'Previsto') }));
-      const history = merged
-        .map(x => ({ ...x, _pag: parseBRDate(x.paymentDate), _com: parseBRDate(x.dateCom) }))
-        .filter(x => !x._pag || x._pag < today)
-        .sort((x, y) => (y._pag || 0) - (x._pag || 0))
-        .map(({ _pag, _com, ...x }) => x);
-      const next = upcoming[0] || null;
-      events.push(...upcoming, ...history);
-      upcomingEvents.push(...upcoming);
-      historyEvents.push(...history);
+      
+      const parts = splitDividendEvents(merged);
+      events.push(...parts.agendaEvents);
+      
+      const next = parts.upcomingEvents[0] || null;
       return {
         ticker: a.ticker,
         type: a.type,
         nextDividend: next,
         upcoming: next,
-        lastDividend: history[0] || historico[0] || null,
-        historico: merged,
-        events: merged,
-        upcomingEvents: upcoming,
-        historyEvents: history,
-        upcomingCount: upcoming.length,
-        historicoCount: historico.length,
+        lastDividend: parts.historyEvents[0] || historico[0] || null,
+        historico: parts.agendaEvents,
+        events: parts.agendaEvents,
+        upcomingEvents: parts.upcomingEvents,
+        historyEvents: parts.historyEvents,
+        upcomingCount: parts.upcomingEvents.length,
+        historicoCount: parts.historyEvents.length,
         quality: a.quality?.score,
       };
     });
+    const parsedAll = splitDividendEvents(events);
     return sendJson(req, res, {
       version: ValoraeEngine.version,
       requestId: route.requestId,
       endpoint: 'portfolio-next-dividends',
-      count: items.length,
+      count: parsedAll.upcomingEvents.length,
       items,
-      events,
-      dividends: events,
-      proventos: events,
-      upcomingEvents,
-      historyEvents,
+      events: parsedAll.agendaEvents,
+      dividends: parsedAll.agendaEvents,
+      dividendos: parsedAll.agendaEvents,
+      proventos: parsedAll.agendaEvents,
+      upcomingEvents: parsedAll.upcomingEvents,
+      historyEvents: parsedAll.historyEvents,
+      agendaEvents: parsedAll.agendaEvents,
+      upcomingCount: parsedAll.upcomingEvents.length,
+      historyCount: parsedAll.historyEvents.length,
       agendaDiagnostics: agenda.diagnostics || [],
       stats: batch.stats,
       errors: [...inputErrors, ...batch.errors],
