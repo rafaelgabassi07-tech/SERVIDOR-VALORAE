@@ -1,3 +1,11 @@
+# v21.12.60 — Rankings da Home Investidor10 sincronizados ao APK
+
+- Corrige a fonte padrão de `Maiores Altas` e `Maiores Baixas` para a Home do Investidor10, evitando divergência com páginas dedicadas ou fallback de comparação.
+- Adiciona `source=home` em `/api/v1/market/rankings` para o APK VALORAE.
+- Desativa fallback de comparação/cesta fixa para rankings ao vivo sem tickers, impedindo ativos fora da Home do Investidor10.
+- Parser agora ignora menus/rankings genéricos e exige ticker, preço e variação nos blocos capturados.
+- Páginas dedicadas continuam opcionais via `source=dedicated`/`source=pages`.
+
 # v21.12.59 — Rankings Investidor10 próprios e captura completa
 
 - Substitui o mecanismo simples de rankings por um extrator próprio do VALORAE Proxy, baseado nas mesmas páginas que o AeroScraper usa no Investidor10: `maiores-altas` e `maiores-baixas`.

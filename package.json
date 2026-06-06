@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy v21.12.59: mecanismo próprio de rankings Investidor10 e captura completa para APK VALORAE Carteira, preservando Vercel Free.",
+  "description": "Valorae Proxy v21.12.60: rankings sincronizados com a Home do Investidor10 para APK VALORAE, preservando Vercel Free.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -55,8 +55,8 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.59-valorae-i10-rankings-complete",
+    "releasePatch": "21.12.60-valorae-i10-home-rankings-sync",
     "freeOnly": true,
-    "notes": "package.version permanece como core 21.12.0; releasePatch v21.12.59 adiciona rankings Investidor10 dedicados, aliases Android e modo complete/fullCapture sem dividir Valorae-engine.js."
+    "notes": "package.version permanece como core 21.12.0; releasePatch v21.12.60 sincroniza Maiores Altas/Baixas com a Home do Investidor10, desativa fallback de comparação para rankings ao vivo sem tickers e mantém Valorae-engine.js intacto."
   }
 }

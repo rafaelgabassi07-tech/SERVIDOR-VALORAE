@@ -19,9 +19,11 @@ export default async function handler(req, res) {
     const requestedLimit = clampNumber(q.limit || q.max || q.maxItems, 15, 1, 30);
     const minRows = clampNumber(q.minRows || q.completeMinRows, Math.min(6, requestedLimit), 1, requestedLimit);
     const source = parseList(q.tickers).map(x => String(x).trim()).filter(Boolean);
-    // Fraqueza antiga do Valorae: ranking por cesta fixa.
-    // Agora tenta ranking ao vivo do Investidor10 e cai para comparação por fundamentos se houver WAF/bloqueio.
+    // Para a Home do APK, a fonte canônica é a própria Home do Investidor10.
+    // Não usar fallback de cesta fixa/comparação quando não há tickers, para evitar mostrar ativos
+    // que não aparecem em Maiores Altas/Baixas do Investidor10.
     if (!source.length && kind === 'ACAO' && sourceMode !== 'compare') {
+      const preferredSource = ['dedicated','pages','ranking-pages'].includes(sourceMode) ? 'dedicated' : 'home';
       const live = await fetchInvestidor10Rankings({
         bypassCache: boolParam(q.nocache || q.refresh),
         timeoutMs: clampNumber(q.timeoutMs, completeMode ? 14000 : 9000, 1000, 25000),
@@ -29,22 +31,21 @@ export default async function handler(req, res) {
         requireComplete: completeMode && boolParam(q.strict, false),
         limit: requestedLimit,
         minRows,
+        preferredSource,
       });
-      if (live.ok && (live.rankings?.altas?.length || live.rankings?.baixas?.length)) {
-        return sendJson(req, res, {
-          version: ValoraeEngine.version,
-          requestId: route.requestId,
-          endpoint: 'market-rankings',
-          type: kind,
-          rankingSource: completeMode ? 'investidor10-live-complete' : 'investidor10-live',
-          fallbackUsed: false,
-          captureMode: rankingMode,
-          ...live,
-        }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'market', cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
-      }
-      if (sourceMode === 'live') {
-        return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, endpoint: 'market-rankings', type: kind, rankingSource: completeMode ? 'investidor10-live-complete' : 'investidor10-live', fallbackUsed: false, captureMode: rankingMode, ...live }, { status: 502, engineVersion: ValoraeEngine.version, profile: 'market', cacheControl: 'no-store' });
-      }
+      return sendJson(req, res, {
+        version: ValoraeEngine.version,
+        requestId: route.requestId,
+        endpoint: 'market-rankings',
+        type: kind,
+        rankingSource: preferredSource === 'home'
+          ? (completeMode ? 'investidor10-home-live-complete' : 'investidor10-home-live')
+          : (completeMode ? 'investidor10-dedicated-live-complete' : 'investidor10-dedicated-live'),
+        fallbackUsed: false,
+        fallbackPolicy: 'disabled-for-live-investidor10-rankings',
+        captureMode: rankingMode,
+        ...live,
+      }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'market', cacheControl: live.ok ? 'private, max-age=60, stale-while-revalidate=300' : 'no-store' });
     }
     const raw = source.length ? source : (DEFAULTS[kind] || DEFAULTS.ACAO);
     if (raw.length > MAX_RANKING) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: `Máximo de ${MAX_RANKING} tickers no ranking.` }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'market' });
