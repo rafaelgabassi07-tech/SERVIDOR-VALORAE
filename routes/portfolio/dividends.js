@@ -41,44 +41,26 @@ function splitDividendEvents(events = []) {
   const upcomingEvents = decorated
     .filter(e => (e._pag && e._pag >= today) || (!e._pag && e._com && e._com >= today))
     .sort((a, b) => (a._pag || a._com || 0) - (b._pag || b._com || 0))
-    .map(({ _pag, _com, ...e }) => ({ ...e, status: String(firstText(e.status, 'previsto')).toLowerCase() }));
+    .map(({ _pag, _com, ...e }) => ({ ...e, status: firstText(e.status, 'Previsto') }));
   const historyEvents = decorated
     .filter(e => !((e._pag && e._pag >= today) || (!e._pag && e._com && e._com >= today)))
     .sort((a, b) => (b._pag || b._com || 0) - (a._pag || a._com || 0))
-    .map(({ _pag, _com, ...e }) => ({ ...e, status: String(firstText(e.status, 'pago')).toLowerCase() }));
+    .map(({ _pag, _com, ...e }) => e);
   return { upcomingEvents, historyEvents, agendaEvents: [...upcomingEvents, ...historyEvents] };
 }
-const dateToIso = (d) => { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})/); if(!m) return ''; const y = String(m[3]).length===2? `20${m[3]}`:m[3]; return `${y}-${m[2]}-${m[1]}`; };
-
 function normalizeDividendEvent(row = {}, ticker = '', status = '') {
   const valuePerShare = firstNumber(row.valuePerShare, row.valorPorCota, row.valorPorAcao, row.valor, row.value, row.amount, row.dividend, row.rendimento, row.provento, row.cashAmount);
-  const type = firstText(row.type, row.tipo, row.kind, row.eventType, 'Provento');
-  const paymentDate = firstText(row.paymentDate, row.payDate, row.dataPagamento, row.dataPagamentoPrevista, row.dataPagto, row.date, row.data);
-  const dateCom = firstText(row.dateCom, row.comDate, row.dataCom, row.recordDate, row.dataBase);
-  const t = firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase();
-  const assetType = row.assetType || row.assetClass || inferAssetType(t) || 'ACAO';
+  const type = firstText(row.type, row.tipo, row.kind, 'Provento');
   return {
-    ticker: t,
-    symbol: t,
-    assetType,
-    type,
-    tipo: type,
-    eventType: type,
-    dateCom,
-    dataCom: dateCom,
-    dataComIso: dateToIso(dateCom),
-    paymentDate,
-    dataPagamento: paymentDate,
-    paymentDateIso: dateToIso(paymentDate),
+    ticker: firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase(),
+    dateCom: firstText(row.dateCom, row.comDate, row.dataCom, row.recordDate, row.dataBase),
+    paymentDate: firstText(row.paymentDate, row.payDate, row.dataPagamento, row.dataPagamentoPrevista, row.dataPagto, row.date, row.data),
     valuePerShare,
     valor: valuePerShare,
-    value: valuePerShare,
-    amount: valuePerShare,
-    valueFormatted: `R$ ${valuePerShare.toFixed(2).replace('.', ',')}`,
-    currency: 'BRL',
-    status: String(firstText(row.status, status)).toLowerCase(),
-    source: firstText(row.source, 'investidor10'),
-    sourceUrl: row.sourceUrl || `https://investidor10.com.br/${assetType.toLowerCase()==='fii'?'fiis':'acoes'}/${t.toLowerCase()}/`
+    type,
+    tipo: type,
+    status: firstText(row.status, status),
+    source: firstText(row.source, 'Investidor10/VALORAE'),
   };
 }
 function dividendHistoryFromAsset(asset = {}) {

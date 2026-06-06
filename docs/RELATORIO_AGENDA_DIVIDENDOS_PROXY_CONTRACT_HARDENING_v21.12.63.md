@@ -1,4 +1,4 @@
-# Relatório — Hardening do contrato Agenda de Dividendos — VALORAE Proxy v21.12.63
+# Relatório — Hardening do contrato Agenda de Dividendos — VALORAE Proxy v21.12.65
 
 ## Objetivo
 
@@ -51,7 +51,7 @@ A separação de eventos futuros/históricos agora aceita também ano curto de d
 O identificador `releasePatch` foi mantido como:
 
 ```text
-21.12.63-valorae-i10-dividend-agenda-sync
+21.12.65-valorae-i10-dividend-agenda-parser-boundary-fix
 ```
 
 Isso preserva os testes e contratos existentes do Proxy, mas com hardening adicional de resposta.

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { parseInvestidor10DividendAgendaHtml, normalizeAgendaDate, VALORAE_I10_DIVIDEND_AGENDA_VERSION } from '../lib/market/investidor10-dividend-agenda.js';
 
-assert.equal(VALORAE_I10_DIVIDEND_AGENDA_VERSION, '21.12.63-i10-dividend-agenda-sync');
+assert.equal(VALORAE_I10_DIVIDEND_AGENDA_VERSION, '21.12.65-i10-dividend-agenda-parser-boundary-fix');
 assert.equal(normalizeAgendaDate('01/06/26'), '01/06/2026');
 assert.equal(normalizeAgendaDate('29/05/2026'), '29/05/2026');
 
@@ -29,3 +29,13 @@ assert.equal(hgic11.dateCom, '05/06/2026');
 assert.equal(hgic11.paymentDate, '12/06/2026');
 
 console.log('investidor10-dividend-agenda-v21-12-63 OK');
+
+const compactAdjacentHtml = `<a>FISC11 Sc 401</a> Data Com 05/06/26 Pgto 15/06/26 Dividendos Dividendos R$ 0,62 <a>FATN11 Athena I</a> Data Com 05/06/26 Pgto 15/06/26 Dividendos Dividendos R$ 0,80`;
+const compactAdjacent = parseInvestidor10DividendAgendaHtml(compactAdjacentHtml, { assetClass: 'FII' });
+assert.equal(compactAdjacent.filter(e => e.ticker === 'FISC11' && e.valuePerShare === 0.62).length, 1, 'FISC11 deve manter seu próprio valor');
+assert.equal(compactAdjacent.filter(e => e.ticker === 'FATN11' && e.valuePerShare === 0.80).length, 1, 'FATN11 deve manter seu próprio valor');
+assert.equal(compactAdjacent.filter(e => e.ticker === 'FATN11' && e.valuePerShare === 0.62).length, 0, 'valor de FISC11 não pode vazar para FATN11');
+
+const provisionedHtml = `<article><h3>ABEV3</h3><span>Data Com 22/06/26</span><span>Pgto Provisionado JSCP</span><strong>R$ 0,04</strong></article>`;
+const provisioned = parseInvestidor10DividendAgendaHtml(provisionedHtml, { assetClass: 'ACAO' });
+assert.ok(provisioned.find(e => e.ticker === 'ABEV3' && e.dateCom === '22/06/2026' && e.type === 'JSCP' && e.valuePerShare === 0.04), 'provento provisionado sem data de pagamento explícita deve ser preservado');

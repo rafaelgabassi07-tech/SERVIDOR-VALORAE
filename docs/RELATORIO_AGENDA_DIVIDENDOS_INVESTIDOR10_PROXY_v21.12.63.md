@@ -1,4 +1,4 @@
-# RELATÓRIO — Agenda de Dividendos Investidor10 no VALORAE Proxy v21.12.63
+# RELATÓRIO — Agenda de Dividendos Investidor10 no VALORAE Proxy v21.12.65
 
 ## Objetivo
 Corrigir a ausência de eventos no modal Agenda de Dividendos do APK VALORAE, garantindo que o Proxy entregue eventos futuros e históricos reais de ações e FIIs a partir do Investidor10.
@@ -97,4 +97,4 @@ VALORAE test runner: 91 arquivos executados; falhas=0; lentos=nenhum
 ```
 
 ## Versão final
-`21.12.63-valorae-i10-dividend-agenda-sync`
+`21.12.65-valorae-i10-dividend-agenda-parser-boundary-fix`
