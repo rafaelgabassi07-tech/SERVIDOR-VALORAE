@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     version: ValoraeEngine.version,
     requestId: route.requestId,
     endpoint: 'release/readiness',
-    releasePatch: '21.12.62-valorae-i10-complete-asset-charts',
+    releasePatch: '21.12.63-valorae-i10-dividend-agenda-sync',
     status: readiness.status,
     readiness,
   }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'release-readiness', cacheControl: 'private, max-age=10' });

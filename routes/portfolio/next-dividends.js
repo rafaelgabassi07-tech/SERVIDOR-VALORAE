@@ -1,12 +1,13 @@
-import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../../lib/Valorae-engine.js';
+import { ValoraeEngine, canonicalizeTicker, validarTicker, inferAssetType } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
+import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-dividend-agenda.js';
 import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError } from '../../lib/http/route.js';
 
 const MAX_TICKERS = Number(process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 30);
 function parseBRDate(d) {
   const s = String(d || '').trim();
-  const br = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-  if (br) return new Date(`${br[3]}-${br[2]}-${br[1]}T00:00:00Z`);
+  const br = s.match(/(\d{2})\/(\d{2})\/(\d{2}|\d{4})/);
+  if (br) { const y = String(br[3]).length === 2 ? `20${br[3]}` : br[3]; return new Date(`${y}-${br[2]}-${br[1]}T00:00:00Z`); }
   const iso = s.match(/(\d{4})-(\d{2})-(\d{2})/);
   if (iso) return new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00Z`);
   return null;
@@ -68,18 +69,29 @@ export default async function handler(req, res) {
       if (err) inputErrors.push({ ticker: item, error: err }); else tickers.push(t);
     }
     const batch = await ValoraeEngine.fetchAtivosBatch(tickers, { mode: q.mode || 'super', includeNews: false, view: 'full', maxConcurrency: clampNumber(q.maxConcurrency || q.concurrency, 4, 1, 6), cache: !boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'portfolio' });
+    const agenda = boolParam(q.includeUpcoming || q.complete || q.upcoming, true)
+      ? await fetchInvestidor10DividendAgenda(tickers, { timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000) })
+      : { events: [], diagnostics: [] };
+    const agendaByTicker = new Map();
+    for (const ev of agenda.events || []) {
+      const k = canonicalizeTicker(ev.ticker);
+      if (!agendaByTicker.has(k)) agendaByTicker.set(k, []);
+      agendaByTicker.get(k).push(normalizeDividendEvent(ev, k, 'Previsto'));
+    }
     const today = new Date(); today.setUTCHours(0, 0, 0, 0);
     const events = [];
     const upcomingEvents = [];
     const historyEvents = [];
     const items = batch.assets.map(a => {
       const historico = dividendHistoryFromAsset(a).map(row => normalizeDividendEvent(row, a.ticker, 'Recebido')).filter(e => e.valuePerShare > 0 || e.paymentDate || e.dateCom);
-      const upcoming = historico
+      const merged = [...(agendaByTicker.get(a.ticker) || []), ...historico]
+        .filter((e, idx, arr) => arr.findIndex(x => [x.ticker, x.dateCom, x.paymentDate, x.type, x.valuePerShare].join('|') === [e.ticker, e.dateCom, e.paymentDate, e.type, e.valuePerShare].join('|')) === idx);
+      const upcoming = merged
         .map(x => ({ ...x, _pag: parseBRDate(x.paymentDate), _com: parseBRDate(x.dateCom) }))
         .filter(x => x._pag && x._pag >= today)
         .sort((x, y) => x._pag - y._pag)
         .map(({ _pag, _com, ...x }) => ({ ...x, status: firstText(x.status, 'Previsto') }));
-      const history = historico
+      const history = merged
         .map(x => ({ ...x, _pag: parseBRDate(x.paymentDate), _com: parseBRDate(x.dateCom) }))
         .filter(x => !x._pag || x._pag < today)
         .sort((x, y) => (y._pag || 0) - (x._pag || 0))
@@ -94,8 +106,8 @@ export default async function handler(req, res) {
         nextDividend: next,
         upcoming: next,
         lastDividend: history[0] || historico[0] || null,
-        historico,
-        events: historico,
+        historico: merged,
+        events: merged,
         upcomingEvents: upcoming,
         historyEvents: history,
         upcomingCount: upcoming.length,
@@ -114,6 +126,7 @@ export default async function handler(req, res) {
       proventos: events,
       upcomingEvents,
       historyEvents,
+      agendaDiagnostics: agenda.diagnostics || [],
       stats: batch.stats,
       errors: [...inputErrors, ...batch.errors],
     }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'portfolio', cacheControl: 'private, max-age=30, stale-while-revalidate=300' });

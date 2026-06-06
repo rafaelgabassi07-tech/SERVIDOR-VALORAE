@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy v21.12.62: gráficos completos/canônicos do Investidor10 para ações/FIIs no APK VALORAE, preservando Vercel Free.",
+  "description": "Valorae Proxy v21.12.63: agenda de dividendos do Investidor10 sincronizada para ações/FIIs e APK VALORAE.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -55,8 +55,8 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.62-valorae-i10-complete-asset-charts",
+    "releasePatch": "21.12.63-valorae-i10-dividend-agenda-sync",
     "freeOnly": true,
-    "notes": "package.version permanece como core 21.12.0; releasePatch v21.12.62 adiciona extração canônica de gráficos do Investidor10 para ações/FIIs: comparação com índices, rentabilidade nominal x real, lucro x cotação, balanço patrimonial e payout histórico, mantendo Valorae-engine.js como núcleo."
+    "notes": "package.version permanece como core 21.12.0; releasePatch v21.12.63 adiciona captura canônica da Agenda de Dividendos do Investidor10 para ações/FIIs, com aliases upcomingEvents/events/historico consumidos pelo APK."
   }
 }

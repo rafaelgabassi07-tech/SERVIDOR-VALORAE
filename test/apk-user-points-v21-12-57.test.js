@@ -9,7 +9,7 @@ const dividends = read('routes/portfolio/dividends.js');
 const nextDividends = read('routes/portfolio/next-dividends.js');
 const pkg = JSON.parse(read('package.json'));
 
-assert.match(pkg.valorae.releasePatch, /^21\.12\.(60-valorae-i10-home-rankings-sync|61-valorae-i10-complete-asset-charts|62-valorae-i10-complete-asset-charts)$/);
+assert.match(pkg.valorae.releasePatch, /^21\.12\.(60-valorae-i10-home-rankings-sync|61-valorae-i10-complete-asset-charts|62-valorae-i10-complete-asset-charts|63-valorae-i10-dividend-agenda-sync)$/);
 assert.match(yahoo, /IFIX_PROXY/);
 assert.match(yahoo, /XFIX11\.SA/);
 assert.match(history, /normalizeHistoryTicker/);
