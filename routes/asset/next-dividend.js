@@ -16,8 +16,38 @@ export default async function handler(req, res) {
     const data = await ValoraeEngine.fetchAtivo(ticker, inferAssetType(ticker), { mode: q.mode || 'super', includeNews: false, view: 'full', cache: !boolParam(q.nocache || q.refresh), bypassCache: boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'standard' });
     const today = new Date(); today.setUTCHours(0, 0, 0, 0);
     const historico = data.results?.dividendos?.historico || data.results?.historicoDividendos || [];
+    const dateToIso = (d) => { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})/); if(!m) return ''; const y = String(m[3]).length===2? `20${m[3]}`:m[3]; return `${y}-${m[2]}-${m[1]}`; };
+    
+    const normalizedHistory = historico.map(row => {
+      const paymentDate = row.paymentDate || row.dataPagamento || '';
+      const dateCom = row.dateCom || row.dataCom || '';
+      const v = Number(row.valuePerShare ?? row.valor ?? row.value ?? 0) || 0;
+      const t = row.type || row.tipo || 'Provento';
+      return {
+        ...row,
+        ticker,
+        assetType: data.type || inferAssetType(ticker) || 'ACAO',
+        valuePerShare: v,
+        valor: v,
+        value: v,
+        valueFormatted: `R$ ${v.toFixed(2).replace('.', ',')}`,
+        currency: 'BRL',
+        type: t,
+        tipo: t,
+        eventType: t,
+        paymentDate,
+        dataPagamento: paymentDate,
+        paymentDateIso: dateToIso(paymentDate),
+        dateCom,
+        dataCom: dateCom,
+        dataComIso: dateToIso(dateCom),
+        status: row.status || 'Recebido',
+        source: row.source || 'investidor10',
+        sourceUrl: row.sourceUrl || `https://investidor10.com.br/${String(data.type).toLowerCase()==='fii'?'fiis':'acoes'}/${String(ticker).toLowerCase()}/`
+      };
+    });
     const agenda = await fetchInvestidor10DividendAgenda([ticker], { assetClass: data.type === 'FII' ? 'FII' : 'ACAO', timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000) });
-    const events = [...(agenda.events || []), ...historico.map(x => ({ ...x, ticker, status: 'Recebido', source: x.source || 'Investidor10 Página do Ativo' }))];
+    const events = [...(agenda.events || []), ...normalizedHistory];
     const upcoming = events.map(x => ({ ...x, _pag: parseBRDate(x.paymentDate || x.dataPagamento), _com: parseBRDate(x.dateCom || x.dataCom) })).filter(x => (x._pag && x._pag >= today) || (!x._pag && x._com && x._com >= today)).sort((a, b) => (a._pag || a._com) - (b._pag || b._com));
     const history = events.map(x => ({ ...x, _pag: parseBRDate(x.paymentDate || x.dataPagamento), _com: parseBRDate(x.dateCom || x.dataCom) })).filter(x => !((x._pag && x._pag >= today) || (!x._pag && x._com && x._com >= today))).sort((a, b) => (b._pag || b._com || 0) - (a._pag || a._com || 0));
     const last = history[0] || historico[0] || null;

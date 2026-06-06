@@ -31,19 +31,35 @@ function firstNumber(...values) {
   }
   return 0;
 }
+const dateToIso = (d) => { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})/); if(!m) return ''; const y = String(m[3]).length===2? `20${m[3]}`:m[3]; return `${y}-${m[2]}-${m[1]}`; };
+
 function normalizeDividendEvent(row = {}, ticker = '', status = '') {
   const valuePerShare = firstNumber(row.valuePerShare, row.valorPorCota, row.valorPorAcao, row.valor, row.value, row.amount, row.dividend, row.rendimento, row.provento, row.cashAmount);
   const type = firstText(row.type, row.tipo, row.kind, 'Provento');
+  
+  const paymentDate = firstText(row.paymentDate, row.payDate, row.dataPagamento, row.dataPagamentoPrevista, row.dataPagto, row.date, row.data);
+  const dateCom = firstText(row.dateCom, row.comDate, row.dataCom, row.recordDate, row.dataBase);
+
   return {
     ticker: firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase(),
-    dateCom: firstText(row.dateCom, row.comDate, row.dataCom, row.recordDate, row.dataBase),
-    paymentDate: firstText(row.paymentDate, row.payDate, row.dataPagamento, row.dataPagamentoPrevista, row.dataPagto, row.date, row.data),
+    assetType: row.assetType || row.assetClass || inferAssetType(ticker) || 'ACAO',
+    dateCom,
+    dataCom: dateCom,
+    dataComIso: dateToIso(dateCom),
+    paymentDate,
+    dataPagamento: paymentDate,
+    paymentDateIso: dateToIso(paymentDate),
     valuePerShare,
     valor: valuePerShare,
+    value: valuePerShare,
+    valueFormatted: `R$ ${valuePerShare.toFixed(2).replace('.', ',')}`,
+    currency: 'BRL',
     type,
     tipo: type,
+    eventType: type,
     status: firstText(row.status, status),
-    source: firstText(row.source, 'Investidor10/VALORAE'),
+    source: firstText(row.source, 'investidor10'),
+    sourceUrl: row.sourceUrl || `https://investidor10.com.br/`
   };
 }
 function dividendHistoryFromAsset(asset = {}) {

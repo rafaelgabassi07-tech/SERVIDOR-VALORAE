@@ -23,21 +23,37 @@ export default async function handler(req, res) {
       agendaDiagnostics = agenda.diagnostics || [];
     }
     const today = new Date(); today.setUTCHours(0, 0, 0, 0);
-    const parseDate = (d) => { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{4})/); return m ? new Date(`${m[3]}-${m[2]}-${m[1]}T00:00:00Z`) : null; };
-    const normalizedHistory = historico.map(row => ({
-      ...row,
-      ticker,
-      valuePerShare: Number(row.valuePerShare ?? row.valor ?? row.value ?? 0) || 0,
-      valor: Number(row.valor ?? row.valuePerShare ?? row.value ?? 0) || 0,
-      type: row.type || row.tipo || 'Provento',
-      tipo: row.tipo || row.type || 'Provento',
-      paymentDate: row.paymentDate || row.dataPagamento || '',
-      dataPagamento: row.dataPagamento || row.paymentDate || '',
-      dateCom: row.dateCom || row.dataCom || '',
-      dataCom: row.dataCom || row.dateCom || '',
-      status: row.status || 'Recebido',
-      source: row.source || 'Investidor10 Página do Ativo'
-    }));
+    const parseDate = (d) => { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})/); if(!m) return null; const y = String(m[3]).length===2? `20${m[3]}`:m[3]; return new Date(`${y}-${m[2]}-${m[1]}T00:00:00Z`); };
+    const dateToIso = (d) => { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})/); if(!m) return ''; const y = String(m[3]).length===2? `20${m[3]}`:m[3]; return `${y}-${m[2]}-${m[1]}`; };
+    
+    const normalizedHistory = historico.map(row => {
+      const paymentDate = row.paymentDate || row.dataPagamento || '';
+      const dateCom = row.dateCom || row.dataCom || '';
+      const v = Number(row.valuePerShare ?? row.valor ?? row.value ?? 0) || 0;
+      const t = row.type || row.tipo || 'Provento';
+      return {
+        ...row,
+        ticker,
+        assetType: type,
+        valuePerShare: v,
+        valor: v,
+        value: v,
+        valueFormatted: `R$ ${v.toFixed(2).replace('.', ',')}`,
+        currency: 'BRL',
+        type: t,
+        tipo: t,
+        eventType: t,
+        paymentDate,
+        dataPagamento: paymentDate,
+        paymentDateIso: dateToIso(paymentDate),
+        dateCom,
+        dataCom: dateCom,
+        dataComIso: dateToIso(dateCom),
+        status: row.status || 'Recebido',
+        source: row.source || 'investidor10',
+        sourceUrl: row.sourceUrl || `https://investidor10.com.br/${String(type).toLowerCase()==='fii'?'fiis':'acoes'}/${String(ticker).toLowerCase()}/`
+      };
+    });
     const events = [...agendaEvents, ...normalizedHistory];
     const upcomingEvents = events.filter(e => { const d = parseDate(e.paymentDate || e.dataPagamento || e.dateCom || e.dataCom); return d && d >= today; });
     const historyEvents = events.filter(e => { const d = parseDate(e.paymentDate || e.dataPagamento || e.dateCom || e.dataCom); return !d || d < today; });
