@@ -1,4 +1,4 @@
-# RELATÓRIO — VALORAE Proxy v21.12.70 — Financial Charts Deep Fix
+# RELATÓRIO — VALORAE Proxy v21.12.71 — Financial Charts Deep Fix
 
 ## Objetivo
 
@@ -29,7 +29,7 @@ Corrigir a extração e o contrato dos gráficos de ativos usados pelo APK VALOR
 - `public/manifest.webmanifest`
 - `public/service-worker.js`
 - `test/investidor10-complete-asset-charts-v21-12-62.test.js`
-- testes de release/regex atualizados para aceitar patch `21.12.70`
+- testes de release/regex atualizados para aceitar patch `21.12.71`
 
 ## Correções técnicas
 
@@ -112,11 +112,11 @@ npm test -- --runInBand
 Resultado:
 
 ```text
-Version consistency OK: core 21.12.0; release 21.12.70-valorae-financial-charts-deep-fix.
+Version consistency OK: core 21.12.0; release 21.12.71-valorae-financial-charts-audit-e2e-fix.
 VALORAE test runner: 91 arquivos executados; falhas=0; lentos=nenhum
 ```
 
 ## Versão
 
 - Core mantido: `21.12.0`
-- Release patch: `21.12.70-valorae-financial-charts-deep-fix`
+- Release patch: `21.12.71-valorae-financial-charts-audit-e2e-fix`

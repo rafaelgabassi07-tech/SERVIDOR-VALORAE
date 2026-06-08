@@ -1,4 +1,4 @@
-# RELATÓRIO — Financial Charts Deep Fix v21.12.70
+# RELATÓRIO — Financial Charts Deep Fix v21.12.71
 
 ## Objetivo
 
@@ -74,7 +74,7 @@ Isso favorece resposta rápida em app mobile e WebView sem comprometer endpoints
 Release patch:
 
 ```text
-21.12.70-valorae-financial-charts-deep-fix
+21.12.71-valorae-financial-charts-audit-e2e-fix
 ```
 
 Também foram atualizados manifesto, service worker, readiness, métricas e testes de release.
@@ -96,7 +96,7 @@ npm test -- --runInBand
 Resultado:
 
 ```text
-Version consistency OK: core 21.12.0; release 21.12.70-valorae-financial-charts-deep-fix.
+Version consistency OK: core 21.12.0; release 21.12.71-valorae-financial-charts-audit-e2e-fix.
 Checked 291 JS files
 VALORAE test runner: 91 arquivos executados; falhas=0; lentos=nenhum
 ```

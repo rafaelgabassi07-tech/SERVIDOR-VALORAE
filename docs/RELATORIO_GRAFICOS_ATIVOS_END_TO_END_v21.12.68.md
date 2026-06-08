@@ -1,4 +1,4 @@
-# RELATÓRIO — Gráficos de Ativos End-to-End v21.12.70
+# RELATÓRIO — Gráficos de Ativos End-to-End v21.12.71
 
 ## Objetivo
 Corrigir o fluxo completo dos gráficos das telas de Detalhes do Ativo e Análise no VALORAE, tratando a origem dos dados no Investidor10, o contrato do Proxy e o consumo pelo APK.
