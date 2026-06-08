@@ -81,7 +81,7 @@ export default async function handler(req, res) {
       engineVersion: ValoraeEngine.version,
       profile: payload?.performance?.profile || perfOptions.performanceProfile,
       cachePolicy: perfOptions.cachePolicy,
-      cacheControl: perfOptions.performanceProfile === 'fast' || view === 'compact'
+      cacheControl: ['fast','chartfast','portfolio'].includes(perfOptions.performanceProfile) || view === 'compact'
         ? 'private, max-age=15, stale-while-revalidate=60'
         : 'no-store, no-cache, max-age=0, must-revalidate',
     });

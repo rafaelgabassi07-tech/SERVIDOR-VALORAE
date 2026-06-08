@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     version: ValoraeEngine.version,
     requestId: route.requestId,
     endpoint: 'release/readiness',
-    releasePatch: '21.12.68-valorae-i10-asset-charts-end-to-end-fix',
+    releasePatch: '21.12.69-valorae-asset-charts-performance-web-index',
     status: readiness.status,
     readiness,
   }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'release-readiness', cacheControl: 'private, max-age=10' });

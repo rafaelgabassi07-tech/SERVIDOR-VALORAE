@@ -28,7 +28,7 @@ const html = `
 </body></html>`;
 
 const profitability = extractProfitabilityFromHtml(html);
-assert.equal(VALORAE_I10_CHART_EXTRACTOR_VERSION, '21.12.68-i10-asset-charts-end-to-end-fix');
+assert.equal(VALORAE_I10_CHART_EXTRACTOR_VERSION, '21.12.69-asset-charts-performance-web-index');
 assert.equal(profitability.nominal.length, 6);
 assert.equal(profitability.real.length, 6);
 assert.equal(profitability.nominal.find(x => x.period === '1 ano').valuePercent, 47.78);

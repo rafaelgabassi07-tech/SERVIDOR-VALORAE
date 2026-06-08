@@ -32,13 +32,13 @@ const assetsRoute = fs.readFileSync('routes/assets.js', 'utf8');
 assert.ok(assetsRoute.includes("VALORAE_DEFAULT_ASSETS_VIEW || 'app'"), 'assets deve usar view=app como fallback padrão');
 
 assert.equal(VALORAE_PERSONAL_MATURITY_VERSION, '21.12.30-final-personal-launch-cleanup');
-assert.match(VALORAE_SERVER_METRICS_VERSION, /^21\.12\.(30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|68)-/);
+assert.match(VALORAE_SERVER_METRICS_VERSION, /^21\.12\.(30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|69)-/);
 const readiness = buildPersonalReleaseReadiness({ providers: [{ status: 'healthy' }], metrics: { eventsStored: 1, deliveryHarmony: { payloadsDelivered: 1 } } });
 assert.equal(readiness.defaultView, 'app');
 assert.ok(readiness.launchChecklist.some(x => x.item.includes('view=app')));
 
 const snap = getServerMetricsSnapshot();
-assert.match(snap.version, /^21\.12\.(30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|68)-/);
+assert.match(snap.version, /^21\.12\.(30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|69)-/);
 assert.ok(snap.personalReleaseReadiness?.version.includes('21.12.30'));
 
 const manifest = routeManifest();
@@ -51,6 +51,6 @@ assert.ok(rel.json.readiness.version.includes('21.12.30'));
 
 const integration = await call('/api/v1/integration/manifest');
 assert.equal(integration.res.statusCode, 200);
-assert.ok(/21\.12\.(30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|68)/.test(integration.json.contractVersion));
+assert.ok(/21\.12\.(30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|69)/.test(integration.json.contractVersion));
 
 console.log('final-personal-launch-cleanup-v21-12-30 ok');

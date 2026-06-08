@@ -45,6 +45,6 @@ for (const required of ['/server/metrics', '/server/tests', '/integration/manife
 
 const metrics = getServerMetricsSnapshot();
 assert.equal(metrics.releasePatch, RELEASE);
-assert.match(metrics.version, /21\.12\.(40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|68)/);
+assert.match(metrics.version, /21\.12\.(40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|69)/);
 
 console.log('full-project-audit-v21-12-39/42 OK');
