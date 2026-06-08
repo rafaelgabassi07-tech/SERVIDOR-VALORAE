@@ -51,18 +51,54 @@ function splitDividendEvents(events = []) {
 function normalizeDividendEvent(row = {}, ticker = '', status = '') {
   const valuePerShare = firstNumber(row.valuePerShare, row.valorPorCota, row.valorPorAcao, row.valor, row.value, row.amount, row.dividend, row.rendimento, row.provento, row.cashAmount);
   const type = firstText(row.type, row.tipo, row.kind, 'Provento');
+  const tickerOut = firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase();
+  const dateCom = firstText(row.dateCom, row.comDate, row.dataCom, row.recordDate, row.dataBase);
+  const paymentDate = firstText(row.paymentDate, row.payDate, row.dataPagamento, row.dataPagamentoPrevista, row.dataPagto, row.date, row.data);
+  const confirmed = Boolean(paymentDate);
+  const provisioned = !confirmed && /provision|anunci|jscp|jcp|dividend|rendimento|amort/i.test(firstText(row.paymentStatus, row.status, type));
+  const finalStatus = firstText(row.status, status, confirmed ? 'Confirmado' : provisioned ? 'Anunciado/Provisionado' : 'Anunciado');
   return {
-    ticker: firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase(),
-    dateCom: firstText(row.dateCom, row.comDate, row.dataCom, row.recordDate, row.dataBase),
-    paymentDate: firstText(row.paymentDate, row.payDate, row.dataPagamento, row.dataPagamentoPrevista, row.dataPagto, row.date, row.data),
+    ticker: tickerOut,
+    asset: tickerOut,
+    symbol: tickerOut,
+    codigo: tickerOut,
+    dateCom,
+    dataCom: dateCom,
+    comDate: dateCom,
+    recordDate: dateCom,
+    paymentDate,
+    payDate: paymentDate,
+    dataPagamento: paymentDate,
     valuePerShare,
+    value: valuePerShare,
+    amount: valuePerShare,
     valor: valuePerShare,
     type,
+    kind: type,
     tipo: type,
-    status: firstText(row.status, status),
+    dividendType: type,
+    status: finalStatus,
+    paymentStatus: confirmed ? 'CONFIRMED' : provisioned ? 'PROVISIONED' : 'ANNOUNCED',
+    announcementStatus: 'ANNOUNCED',
+    announced: Boolean(dateCom || valuePerShare > 0),
+    confirmed,
+    provisioned,
     source: firstText(row.source, 'Investidor10/VALORAE'),
   };
 }
+
+function normalizeAgendaAssetClass(value = '') {
+  const s = String(value || '').trim().toUpperCase();
+  if (/FII|FUNDO|IMOB/.test(s)) return 'FII';
+  if (/ACAO|AÇÃO|ACOES|AÇÕES|STOCK|ON|PN|UNIT/.test(s)) return 'ACAO';
+  return '';
+}
+function assetClassFromPositions(positions = []) {
+  if (!Array.isArray(positions)) return '';
+  const classes = new Set(positions.map(p => normalizeAgendaAssetClass(p?.type || p?.assetClass || p?.classe || p?.category)).filter(Boolean));
+  return classes.size === 1 ? Array.from(classes)[0] : '';
+}
+
 function dividendHistoryFromAsset(asset = {}) {
   const r = asset.results || {};
   const divs = r.dividendos || r.dividends || r.proventos || {};
@@ -87,15 +123,23 @@ export default async function handler(req, res) {
       else tickers.push(t);
     }
     if (!tickers.length) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: 'Nenhum ticker válido enviado.', errors }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'portfolio' });
-    let batch = { assets: [], stats: { degraded: true }, errors: [] };
+    let batch = { assets: [], stats: {}, errors: [] };
     try {
       batch = await ValoraeEngine.fetchAtivosBatch(tickers, { mode: q.mode || 'super', includeNews: false, view: 'compact', maxConcurrency: clampNumber(q.maxConcurrency || q.concurrency, 4, 1, 6), cache: !boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'portfolio' });
     } catch (err) {
-      batch = { assets: [], stats: { degraded: true, reason: 'asset-batch-failed' }, errors: [{ source: 'ValoraeEngine.fetchAtivosBatch', error: err?.message || String(err) }] };
+      batch.errors = [{ scope: 'fetchAtivosBatch', error: err?.message || String(err) }];
     }
+    const agendaOptions = {
+      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000),
+      historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, 36, 0, 72),
+      futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, 18, 0, 72),
+      startDate: q.startDate || q.portfolioCreatedAt || q.createdAt,
+      concurrency: clampNumber(q.agendaConcurrency || q.concurrency, 4, 1, 8),
+      assetClass: normalizeAgendaAssetClass(q.assetClass || q.type || q.classe) || assetClassFromPositions(q.positions),
+    };
     const agenda = boolParam(q.includeUpcoming || q.complete || q.upcoming, true)
-      ? await fetchInvestidor10DividendAgenda(tickers, { timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000) })
-      : { events: [], diagnostics: [] };
+      ? await fetchInvestidor10DividendAgenda(tickers, agendaOptions)
+      : { events: [], diagnostics: [], range: agendaOptions };
     const agendaByTicker = new Map();
     for (const ev of agenda.events || []) {
       const k = canonicalizeTicker(ev.ticker);
@@ -103,9 +147,9 @@ export default async function handler(req, res) {
       agendaByTicker.get(k).push(normalizeDividendEvent(ev, k, 'Previsto'));
     }
     const events = [];
-    const batchByTicker = new Map((batch.assets || []).map(a => [canonicalizeTicker(a.ticker), a]));
-    const requestedAssets = tickers.map(t => batchByTicker.get(t) || { ticker: t, type: inferAssetType(t), results: {}, quality: { score: 0 }, synthetic: true });
-    const items = requestedAssets.map(a => {
+    const assetByTicker = new Map((batch.assets || []).map(a => [canonicalizeTicker(a.ticker), a]));
+    const itemAssets = tickers.map(t => assetByTicker.get(t) || { ticker: t, type: inferAssetType(t), results: {}, quality: null });
+    const items = itemAssets.map(a => {
       const h = [
         ...(agendaByTicker.get(a.ticker) || []),
         ...dividendHistoryFromAsset(a).map(row => normalizeDividendEvent(row, a.ticker, 'Recebido'))
@@ -141,6 +185,7 @@ export default async function handler(req, res) {
       upcomingCount: upcomingEvents.length,
       historyCount: historyEvents.length,
       agendaDiagnostics: agenda.diagnostics || [],
+      agendaRange: agenda.range || agendaOptions,
       stats: batch.stats,
       errors: [...errors, ...batch.errors],
     }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'portfolio', cacheControl: 'private, max-age=30, stale-while-revalidate=300' });

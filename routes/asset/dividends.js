@@ -11,20 +11,14 @@ export default async function handler(req, res) {
     const ticker = canonicalizeTicker(q.ticker);
     const err = validarTicker(ticker);
     if (err) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: err }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'dividends' });
-    let data = { ticker, type: inferAssetType(ticker), results: {}, quality: { score: 0 }, errors: [] };
-    try {
-      data = await ValoraeEngine.fetchAtivo(ticker, inferAssetType(ticker), { mode: q.mode || 'super', includeNews: false, view: 'full', cache: !boolParam(q.nocache || q.refresh), bypassCache: boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'standard' });
-    } catch (assetErr) {
-      data.errors = [{ source: 'ValoraeEngine.fetchAtivo', error: assetErr?.message || String(assetErr) }];
-      data.degraded = true;
-    }
+    const data = await ValoraeEngine.fetchAtivo(ticker, inferAssetType(ticker), { mode: q.mode || 'super', includeNews: false, view: 'full', cache: !boolParam(q.nocache || q.refresh), bypassCache: boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'standard' });
     const type = data.type || inferAssetType(ticker);
     const historico = data.results?.dividendos?.historico || data.results?.dividends?.history || data.results?.historicoDividendos || [];
     const wantsUpcoming = boolParam(q.includeUpcoming || q.upcoming || q.complete, String(q.mode || '').toLowerCase() === 'complete');
     let agendaEvents = [];
     let agendaDiagnostics = [];
     if (wantsUpcoming) {
-      const agenda = await fetchInvestidor10DividendAgenda([ticker], { assetClass: type === 'FII' ? 'FII' : 'ACAO', timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000) });
+      const agenda = await fetchInvestidor10DividendAgenda([ticker], { assetClass: type === 'FII' ? 'FII' : 'ACAO', timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000), historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, 36, 0, 72), futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, 18, 0, 72), startDate: q.startDate || q.portfolioCreatedAt || q.createdAt, concurrency: clampNumber(q.agendaConcurrency || q.concurrency, 4, 1, 8) });
       agendaEvents = agenda.events || [];
       agendaDiagnostics = agenda.diagnostics || [];
     }
