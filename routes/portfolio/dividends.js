@@ -87,7 +87,12 @@ export default async function handler(req, res) {
       else tickers.push(t);
     }
     if (!tickers.length) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: 'Nenhum ticker válido enviado.', errors }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'portfolio' });
-    const batch = await ValoraeEngine.fetchAtivosBatch(tickers, { mode: q.mode || 'super', includeNews: false, view: 'compact', maxConcurrency: clampNumber(q.maxConcurrency || q.concurrency, 4, 1, 6), cache: !boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'portfolio' });
+    let batch = { assets: [], stats: { degraded: true }, errors: [] };
+    try {
+      batch = await ValoraeEngine.fetchAtivosBatch(tickers, { mode: q.mode || 'super', includeNews: false, view: 'compact', maxConcurrency: clampNumber(q.maxConcurrency || q.concurrency, 4, 1, 6), cache: !boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'portfolio' });
+    } catch (err) {
+      batch = { assets: [], stats: { degraded: true, reason: 'asset-batch-failed' }, errors: [{ source: 'ValoraeEngine.fetchAtivosBatch', error: err?.message || String(err) }] };
+    }
     const agenda = boolParam(q.includeUpcoming || q.complete || q.upcoming, true)
       ? await fetchInvestidor10DividendAgenda(tickers, { timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000) })
       : { events: [], diagnostics: [] };
@@ -98,7 +103,9 @@ export default async function handler(req, res) {
       agendaByTicker.get(k).push(normalizeDividendEvent(ev, k, 'Previsto'));
     }
     const events = [];
-    const items = batch.assets.map(a => {
+    const batchByTicker = new Map((batch.assets || []).map(a => [canonicalizeTicker(a.ticker), a]));
+    const requestedAssets = tickers.map(t => batchByTicker.get(t) || { ticker: t, type: inferAssetType(t), results: {}, quality: { score: 0 }, synthetic: true });
+    const items = requestedAssets.map(a => {
       const h = [
         ...(agendaByTicker.get(a.ticker) || []),
         ...dividendHistoryFromAsset(a).map(row => normalizeDividendEvent(row, a.ticker, 'Recebido'))

@@ -68,7 +68,12 @@ export default async function handler(req, res) {
       const err = validarTicker(t);
       if (err) inputErrors.push({ ticker: item, error: err }); else tickers.push(t);
     }
-    const batch = await ValoraeEngine.fetchAtivosBatch(tickers, { mode: q.mode || 'super', includeNews: false, view: 'full', maxConcurrency: clampNumber(q.maxConcurrency || q.concurrency, 4, 1, 6), cache: !boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'portfolio' });
+    let batch = { assets: [], stats: { degraded: true }, errors: [] };
+    try {
+      batch = await ValoraeEngine.fetchAtivosBatch(tickers, { mode: q.mode || 'super', includeNews: false, view: 'full', maxConcurrency: clampNumber(q.maxConcurrency || q.concurrency, 4, 1, 6), cache: !boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'portfolio' });
+    } catch (err) {
+      batch = { assets: [], stats: { degraded: true, reason: 'asset-batch-failed' }, errors: [{ source: 'ValoraeEngine.fetchAtivosBatch', error: err?.message || String(err) }] };
+    }
     const agenda = boolParam(q.includeUpcoming || q.complete || q.upcoming, true)
       ? await fetchInvestidor10DividendAgenda(tickers, { timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000) })
       : { events: [], diagnostics: [] };
@@ -82,7 +87,9 @@ export default async function handler(req, res) {
     const events = [];
     const upcomingEvents = [];
     const historyEvents = [];
-    const items = batch.assets.map(a => {
+    const batchByTicker = new Map((batch.assets || []).map(a => [canonicalizeTicker(a.ticker), a]));
+    const requestedAssets = tickers.map(t => batchByTicker.get(t) || { ticker: t, type: inferAssetType(t), results: {}, quality: { score: 0 }, synthetic: true });
+    const items = requestedAssets.map(a => {
       const historico = dividendHistoryFromAsset(a).map(row => normalizeDividendEvent(row, a.ticker, 'Recebido')).filter(e => e.valuePerShare > 0 || e.paymentDate || e.dateCom);
       const merged = [...(agendaByTicker.get(a.ticker) || []), ...historico]
         .filter((e, idx, arr) => arr.findIndex(x => [x.ticker, x.dateCom, x.paymentDate, x.type, x.valuePerShare].join('|') === [e.ticker, e.dateCom, e.paymentDate, e.type, e.valuePerShare].join('|')) === idx);

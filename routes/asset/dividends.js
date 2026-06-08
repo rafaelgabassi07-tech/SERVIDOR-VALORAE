@@ -11,7 +11,13 @@ export default async function handler(req, res) {
     const ticker = canonicalizeTicker(q.ticker);
     const err = validarTicker(ticker);
     if (err) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: err }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'dividends' });
-    const data = await ValoraeEngine.fetchAtivo(ticker, inferAssetType(ticker), { mode: q.mode || 'super', includeNews: false, view: 'full', cache: !boolParam(q.nocache || q.refresh), bypassCache: boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'standard' });
+    let data = { ticker, type: inferAssetType(ticker), results: {}, quality: { score: 0 }, errors: [] };
+    try {
+      data = await ValoraeEngine.fetchAtivo(ticker, inferAssetType(ticker), { mode: q.mode || 'super', includeNews: false, view: 'full', cache: !boolParam(q.nocache || q.refresh), bypassCache: boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'standard' });
+    } catch (assetErr) {
+      data.errors = [{ source: 'ValoraeEngine.fetchAtivo', error: assetErr?.message || String(assetErr) }];
+      data.degraded = true;
+    }
     const type = data.type || inferAssetType(ticker);
     const historico = data.results?.dividendos?.historico || data.results?.dividends?.history || data.results?.historicoDividendos || [];
     const wantsUpcoming = boolParam(q.includeUpcoming || q.upcoming || q.complete, String(q.mode || '').toLowerCase() === 'complete');
