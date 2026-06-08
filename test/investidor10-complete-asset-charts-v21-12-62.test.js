@@ -28,7 +28,7 @@ const html = `
 </body></html>`;
 
 const profitability = extractProfitabilityFromHtml(html);
-assert.equal(VALORAE_I10_CHART_EXTRACTOR_VERSION, '21.12.69-asset-charts-performance-web-index');
+assert.equal(VALORAE_I10_CHART_EXTRACTOR_VERSION, '21.12.70-asset-financial-charts-deep-fix');
 assert.equal(profitability.nominal.length, 6);
 assert.equal(profitability.real.length, 6);
 assert.equal(profitability.nominal.find(x => x.period === '1 ano').valuePercent, 47.78);
@@ -94,3 +94,38 @@ assert.ok(canonical.indexComparison.some(s => s.name === 'PETR4'));
 assert.ok(canonical.financial.balanceSheet[0].totalAssets > 0);
 
 console.log('investidor10-complete-asset-charts-v21-12-62 OK');
+
+const canonicalSingular = buildInvestidor10CanonicalCharts({
+  ticker: 'PETR4',
+  type: 'ACAO',
+  html: '<html><body><h2>Regiões onde Petrobras gera receita</h2><h2>negócios que geram receita para Petrobras</h2><h2>BALANÇO PATRIMONIAL Petrobras</h2></body></html>',
+  apiExtras: {
+    chartsFinanceiros: {
+      evolucaoPatrimonio: {
+        categories: ['2023', '2024'],
+        series: [
+          { name: 'Ativo', data: [990, 1200] },
+          { name: 'Patrimônio Líquido', data: [440, 500] },
+          { name: 'Passivo', data: [550, 700] },
+        ],
+      },
+      balancoPatrimonial: {
+        labels: ['2023', '2024'],
+        ativo: [990, 1200],
+        patrimonio: [440, 500],
+        passivo: [550, 700],
+      },
+    },
+    embedded: {
+      revenueGeography: { '2024': [{ name: 'Brasil', value: 62.5 }, { name: 'Exterior', value: 37.5 }] },
+      revenueSegment: { '2024': [{ name: 'Refino', value: 54.2 }, { name: 'Exploração', value: 45.8 }] },
+    },
+  },
+});
+
+assert.equal(canonicalSingular.financial.balanceSheet.length, 2);
+assert.equal(canonicalSingular.financial.balanceSheet[0].totalAssets, 990);
+assert.equal(canonicalSingular.financial.balanceSheet[0].netWorth, 440);
+assert.equal(canonicalSingular.financial.balanceSheet[0].totalLiabilities, 550);
+assert.equal(canonicalSingular.revenueBreakdowns.geography['2024'][0].name, 'Brasil');
+assert.equal(canonicalSingular.revenueBreakdowns.business['2024'][0].name, 'Refino');
