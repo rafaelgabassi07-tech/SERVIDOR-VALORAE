@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy v21.12.74: bootstrap mobile resiliente, fallback por bloco e hints para app cache-first sem telas vazias.",
+  "description": "Valorae Proxy v21.12.75: agenda/proventos mobile com deadline, lote truncado seguro e priorização ações+FIIs.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -55,8 +55,8 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.74-mobile-bootstrap-safe-ui",
+    "releasePatch": "21.12.75-dividend-agenda-performance",
     "freeOnly": true,
-    "notes": "package.version permanece como core 21.12.0; releasePatch v21.12.74 endurece o bootstrap mobile para nunca derrubar a rota por falha isolada de ativos/notícias e envia hints de UI cache-first ao APK."
+    "notes": "package.version permanece como core 21.12.0; releasePatch v21.12.75 corrige gargalos de agenda/proventos em carteiras grandes, evita expansão histórica excessiva por startDate e prioriza ações/FIIs sob deadline mobile."
   }
 }

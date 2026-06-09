@@ -111,9 +111,13 @@ export default async function handler(req, res) {
   try {
     const q = route.input;
     const positionTickers = Array.isArray(q.positions) ? q.positions.map(p => p?.ticker).filter(Boolean) : [];
-    const raw = parseList(q.tickers || q.ticker || positionTickers.join(',')).map(String).map(s => s.trim()).filter(Boolean);
+    let raw = parseList(q.tickers || q.ticker || positionTickers.join(',')).map(String).map(s => s.trim()).filter(Boolean);
     if (!raw.length) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: 'Envie tickers=PETR4,GARE11' }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'portfolio' });
-    if (raw.length > MAX_TICKERS) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: `Máximo de ${MAX_TICKERS} tickers.` }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'portfolio' });
+    const warnings = [];
+    if (raw.length > MAX_TICKERS) {
+      warnings.push({ scope: 'portfolio-dividends', message: `Carteira com ${raw.length} tickers; processando lote móvel de ${MAX_TICKERS} para preservar deadline.` });
+      raw = raw.slice(0, MAX_TICKERS);
+    }
     const tickers = [];
     const errors = [];
     for (const item of raw) {
@@ -137,8 +141,8 @@ export default async function handler(req, res) {
     }
     const agendaOptions = {
       timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, compactMode ? 4200 : 6500, 1000, 18000),
-      historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, 36, 0, 72),
-      futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, 18, 0, 72),
+      historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, compactMode ? 12 : 36, 0, 72),
+      futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, compactMode ? 12 : 18, 0, 72),
       startDate: q.startDate || q.portfolioCreatedAt || q.createdAt,
       concurrency: clampNumber(q.agendaConcurrency || q.concurrency, 4, 1, 8),
       assetClass: normalizeAgendaAssetClass(q.assetClass || q.type || q.classe) || assetClassFromPositions(q.positions),
@@ -194,7 +198,8 @@ export default async function handler(req, res) {
       historyEvents,
       upcomingCount: upcomingEvents.length,
       historyCount: historyEvents.length,
-      agendaDiagnostics: agenda.diagnostics || [],
+      agendaDiagnostics: [...warnings, ...(agenda.diagnostics || [])],
+      warnings,
       agendaRange: agenda.range || agendaOptions,
       partial: !!agenda.partial || !!batch.stats?.partial,
       deadlineMs: routeDeadlineMs,
