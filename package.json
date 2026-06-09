@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy v21.12.75: agenda/proventos mobile com deadline, lote truncado seguro e priorização ações+FIIs.",
+  "description": "Valorae Proxy v21.12.76: ponte opcional Supabase para snapshots/cache de carteira, sem dependência paga obrigatória.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -55,8 +55,8 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.75-dividend-agenda-performance",
+    "releasePatch": "21.12.76-supabase-sync",
     "freeOnly": true,
-    "notes": "package.version permanece como core 21.12.0; releasePatch v21.12.75 corrige gargalos de agenda/proventos em carteiras grandes, evita expansão histórica excessiva por startDate e prioriza ações/FIIs sob deadline mobile."
+    "notes": "Adiciona /api/sync opcional para salvar/ler snapshots no Supabase via PostgREST, com token de escrita e compatibilidade com plano gratuito; package.version permanece core 21.12.0."
   }
 }
