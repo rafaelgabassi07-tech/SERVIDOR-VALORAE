@@ -1,7 +1,7 @@
 {
   "name": "VALORAE Proxy Monitor",
   "short_name": "VALORAE Monitor",
-  "description": "Cockpit profissional do VALORAE Proxy/Engine com monitor, benchmark, integração, rankings Home Investidor10 sincronizados, captura completa, camada canônica CVM e correções v21.12.71.",
+  "description": "Cockpit profissional do VALORAE Proxy/Engine com monitor, benchmark, integração, rankings Home Investidor10 sincronizados, captura completa, camada canônica CVM e correções v21.12.72.",
   "id": "/server.html",
   "start_url": "/server.html#command",
   "scope": "/",
@@ -61,5 +61,5 @@
       "url": "/server.html#integration"
     }
   ],
-  "version": "21.12.71"
+  "version": "21.12.72"
 }

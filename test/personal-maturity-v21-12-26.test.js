@@ -18,9 +18,9 @@ assert.ok(readiness.categories.some(c => c.key === 'persistence'));
 assert.ok(readiness.launchChecklist.length >= 5);
 assert.ok(readiness.nextMilestones.some(x => /21\.12\.(27|28|30|35|36|37|38|39|40|41|42|43|44)/.test(x)));
 
-assert.match(VALORAE_SERVER_METRICS_VERSION, /^21\.12\.(28|29|30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|69|70|71)-/);
+assert.match(VALORAE_SERVER_METRICS_VERSION, /^21\.12\.(28|29|30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|69|70|71|72)-/);
 const snap = getServerMetricsSnapshot();
-assert.match(snap.version, /^21\.12\.(28|29|30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|69|70|71)-/);
+assert.match(snap.version, /^21\.12\.(28|29|30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|69|70|71|72)-/);
 assert.ok(snap.personalReleaseReadiness, 'server metrics deve expor readiness pessoal');
 assert.ok(snap.personalReleaseReadiness.categories.some(c => c.key === 'observability'));
 

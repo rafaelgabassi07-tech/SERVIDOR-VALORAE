@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     version: ValoraeEngine.version,
     requestId: route.requestId,
     endpoint: 'release/readiness',
-    releasePatch: '21.12.71-valorae-financial-charts-audit-e2e-fix',
+    releasePatch: '21.12.72-valorae-final-ui-charts-news-backup-fix',
     status: readiness.status,
     readiness,
   }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'release-readiness', cacheControl: 'private, max-age=10' });

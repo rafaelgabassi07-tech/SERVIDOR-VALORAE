@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy v21.12.71: gráficos de ativos Investidor10 com extração end-to-end de proventos históricos, indicadores e fallback HTML para APK VALORAE.",
+  "description": "Valorae Proxy v21.12.72: gráficos de ativos Investidor10 com extração end-to-end de proventos históricos, indicadores e fallback HTML para APK VALORAE.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -55,8 +55,8 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.71-valorae-financial-charts-audit-e2e-fix",
+    "releasePatch": "21.12.72-valorae-final-ui-charts-news-backup-fix",
     "freeOnly": true,
-    "notes": "package.version permanece como core 21.12.0; releasePatch v21.12.71 mantém agenda de dividendos Investidor10 e adiciona hardening de contrato para APK sem trocar o identificador de release."
+    "notes": "package.version permanece como core 21.12.0; releasePatch v21.12.72 mantém agenda de dividendos Investidor10 e adiciona hardening de contrato para APK sem trocar o identificador de release."
   }
 }

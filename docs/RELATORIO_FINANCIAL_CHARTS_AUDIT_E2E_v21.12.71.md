@@ -1,4 +1,4 @@
-# VALORAE Proxy v21.12.71 — Auditoria E2E dos Gráficos Financeiros
+# VALORAE Proxy v21.12.72 — Auditoria E2E dos Gráficos Financeiros
 
 ## Problema auditado
 Os gráficos das abas **Desempenho & Índices** e **Finanças & Balanço** continuavam vazios ou parciais no APK, mesmo após correções anteriores.
@@ -18,7 +18,7 @@ Os gráficos das abas **Desempenho & Índices** e **Finanças & Balanço** conti
 - Payout Histórico passou a mesclar todas as fontes disponíveis.
 - Balanço/Evolução Patrimonial agora preservam Ativo, PL e Passivo quando vêm em fontes separadas.
 - Faturamento por região/negócio ganhou classificação própria: `revenueRegion` e `revenueBusiness`.
-- Testes atualizados para aceitar a release `21.12.71`.
+- Testes atualizados para aceitar a release `21.12.72`.
 
 ## Validação
 Comando executado:
@@ -39,4 +39,4 @@ VALORAE test runner: 91 arquivos executados; falhas=0; lentos=nenhum
 
 ## Versão
 - Core: `21.12.0`
-- Release: `21.12.71-valorae-financial-charts-audit-e2e-fix`
+- Release: `21.12.72-valorae-final-ui-charts-news-backup-fix`

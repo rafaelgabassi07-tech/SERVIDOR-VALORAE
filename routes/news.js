@@ -8,7 +8,11 @@ export default async function handler(req, res) {
   try {
     const input = route.input;
     const ticker = canonicalizeTicker(input.ticker);
-    const validation = validarTicker(ticker);
+    // Notícias globais da página "Notícias" do APK chegam sem ticker.
+    // Antes essa rota validava string vazia como ticker inválido e devolvia 400,
+    // fazendo o APK parecer incompatível com o Proxy. Valide apenas quando o
+    // usuário pediu notícia de um ativo específico.
+    const validation = ticker ? validarTicker(ticker) : null;
     if (validation) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: validation }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'news' });
     const aliases = typeof input.aliases === 'string' ? input.aliases.split(',').map(s => s.trim()).filter(Boolean).slice(0, 8) : [];
     const timeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 350, 12000) : undefined;
