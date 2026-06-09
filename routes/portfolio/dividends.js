@@ -1,7 +1,7 @@
 import { ValoraeEngine, canonicalizeTicker, validarTicker, inferAssetType } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-dividend-agenda.js';
-import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError } from '../../lib/http/route.js';
+import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../../lib/http/route.js';
 
 const MAX_TICKERS = Number(process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 30);
 
@@ -123,14 +123,20 @@ export default async function handler(req, res) {
       else tickers.push(t);
     }
     if (!tickers.length) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: 'Nenhum ticker válido enviado.', errors }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'portfolio' });
+    const compactMode = ['compact','boot','fast','mobile'].includes(String(q.mode || q.profile || '').toLowerCase());
+    const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, compactMode ? 5200 : 8200, 1000, 18000);
     let batch = { assets: [], stats: {}, errors: [] };
     try {
-      batch = await ValoraeEngine.fetchAtivosBatch(tickers, { mode: q.mode || 'super', includeNews: false, view: 'compact', maxConcurrency: clampNumber(q.maxConcurrency || q.concurrency, 4, 1, 6), cache: !boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'portfolio' });
+      batch = await withRouteDeadline(
+        () => ValoraeEngine.fetchAtivosBatch(tickers, { mode: compactMode ? 'turbo' : (q.mode || 'super'), includeNews: false, view: 'compact', maxConcurrency: clampNumber(q.maxConcurrency || q.concurrency, compactMode ? 3 : 4, 1, 6), cache: !boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || (compactMode ? 'fast' : 'portfolio'), timeoutMs: compactMode ? 2200 : clampNumber(q.timeoutMs, 4500, 1000, 12000) }),
+        Math.max(900, Math.min(routeDeadlineMs - 800, compactMode ? 2600 : 4500)),
+        () => ({ assets: [], stats: { partial: true, timeout: true, scope: 'fetchAtivosBatch' }, errors: [{ scope: 'fetchAtivosBatch', error: 'Deadline parcial atingido; continuando com agenda e cache.' }] })
+      );
     } catch (err) {
       batch.errors = [{ scope: 'fetchAtivosBatch', error: err?.message || String(err) }];
     }
     const agendaOptions = {
-      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000),
+      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, compactMode ? 4200 : 6500, 1000, 18000),
       historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, 36, 0, 72),
       futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, 18, 0, 72),
       startDate: q.startDate || q.portfolioCreatedAt || q.createdAt,
@@ -138,7 +144,11 @@ export default async function handler(req, res) {
       assetClass: normalizeAgendaAssetClass(q.assetClass || q.type || q.classe) || assetClassFromPositions(q.positions),
     };
     const agenda = boolParam(q.includeUpcoming || q.complete || q.upcoming, true)
-      ? await fetchInvestidor10DividendAgenda(tickers, agendaOptions)
+      ? await withRouteDeadline(
+          () => fetchInvestidor10DividendAgenda(tickers, agendaOptions),
+          Math.max(900, routeDeadlineMs - 500),
+          () => ({ events: [], diagnostics: [{ level: 'warning', message: `Agenda excedeu deadline de ${routeDeadlineMs}ms; retornando payload parcial/cacheável.` }], range: agendaOptions, partial: true })
+        )
       : { events: [], diagnostics: [], range: agendaOptions };
     const agendaByTicker = new Map();
     for (const ev of agenda.events || []) {
@@ -186,8 +196,10 @@ export default async function handler(req, res) {
       historyCount: historyEvents.length,
       agendaDiagnostics: agenda.diagnostics || [],
       agendaRange: agenda.range || agendaOptions,
+      partial: !!agenda.partial || !!batch.stats?.partial,
+      deadlineMs: routeDeadlineMs,
       stats: batch.stats,
-      errors: [...errors, ...batch.errors],
+      errors: [...errors, ...(batch.errors || [])],
     }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'portfolio', cacheControl: 'private, max-age=30, stale-while-revalidate=300' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'portfolio' });

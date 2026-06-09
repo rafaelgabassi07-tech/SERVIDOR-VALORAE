@@ -2,7 +2,7 @@ import { fetchAndCompareTickers } from '../../lib/market/compare.js';
 import { fetchInvestidor10Rankings } from '../../lib/market/rankings-i10.js';
 import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
-import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError } from '../../lib/http/route.js';
+import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../../lib/http/route.js';
 
 const DEFAULTS = { ACAO: ['PETR4','VALE3','ITUB4','BBAS3','PRIO3','WEGE3'], FII: ['GARE11','HGLG11','TRXF11','MXRF11','KNRI11','VISC11'] };
 const MAX_RANKING = Number(process.env.VALORAE_RANKING_MAX_TICKERS || 15);
@@ -24,15 +24,20 @@ export default async function handler(req, res) {
     // que não aparecem em Maiores Altas/Baixas do Investidor10.
     if (!source.length && kind === 'ACAO' && sourceMode !== 'compare') {
       const preferredSource = ['dedicated','pages','ranking-pages'].includes(sourceMode) ? 'dedicated' : 'home';
-      const live = await fetchInvestidor10Rankings({
-        bypassCache: boolParam(q.nocache || q.refresh),
-        timeoutMs: clampNumber(q.timeoutMs, completeMode ? 14000 : 9000, 1000, 25000),
-        mode: rankingMode,
-        requireComplete: completeMode && boolParam(q.strict, false),
-        limit: requestedLimit,
-        minRows,
-        preferredSource,
-      });
+      const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, completeMode ? 15000 : 5200, 1000, 25000);
+      const live = await withRouteDeadline(
+        () => fetchInvestidor10Rankings({
+          bypassCache: boolParam(q.nocache || q.refresh),
+          timeoutMs: clampNumber(q.timeoutMs, completeMode ? 14000 : 4200, 1000, 25000),
+          mode: rankingMode,
+          requireComplete: completeMode && boolParam(q.strict, false),
+          limit: requestedLimit,
+          minRows,
+          preferredSource,
+        }),
+        routeDeadlineMs,
+        () => ({ ok: false, highs: [], lows: [], score: [], warnings: [`Ranking excedeu deadline de ${routeDeadlineMs}ms; APK deve preservar último ranking/cache.`], partial: true })
+      );
       return sendJson(req, res, {
         version: ValoraeEngine.version,
         requestId: route.requestId,
@@ -57,20 +62,25 @@ export default async function handler(req, res) {
       if (err) errors.push({ ticker: item, error: err });
       else list.push(t);
     }
-    const data = await fetchAndCompareTickers(list, {
-      view: completeMode ? (q.view || 'full') : 'compact',
-      maxConcurrency: clampNumber(q.maxConcurrency, completeMode ? 2 : 4, 1, 6),
-      cache: !boolParam(q.nocache || q.refresh),
-      valoraeScrapeUrl: resolveSelfScrapeUrl(req, q),
-      profile: q.profile || (completeMode ? 'deep' : 'portfolio'),
-      complete: completeMode,
-      adaptiveCompletion: completeMode ? true : undefined,
-      statusInvestComplement: completeMode ? true : undefined,
-      returnHtml: completeMode ? true : undefined,
-      enableInternalApis: completeMode ? true : undefined,
-      timeoutMs: completeMode ? clampNumber(q.timeoutMs, 18000, 1000, 25000) : clampNumber(q.timeoutMs, undefined, 500, 20000),
-      maxHtmlChars: completeMode ? clampNumber(q.maxHtmlChars, 4500000, 10000, 4500000) : undefined,
-    });
+    const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, completeMode ? 19000 : 5200, 1000, 25000);
+    const data = await withRouteDeadline(
+      () => fetchAndCompareTickers(list, {
+        view: completeMode ? (q.view || 'full') : 'compact',
+        maxConcurrency: clampNumber(q.maxConcurrency, completeMode ? 2 : 4, 1, 6),
+        cache: !boolParam(q.nocache || q.refresh),
+        valoraeScrapeUrl: resolveSelfScrapeUrl(req, q),
+        profile: q.profile || (completeMode ? 'deep' : 'portfolio'),
+        complete: completeMode,
+        adaptiveCompletion: completeMode ? true : undefined,
+        statusInvestComplement: completeMode ? true : undefined,
+        returnHtml: completeMode ? true : undefined,
+        enableInternalApis: completeMode ? true : undefined,
+        timeoutMs: completeMode ? clampNumber(q.timeoutMs, 18000, 1000, 25000) : clampNumber(q.timeoutMs, 4200, 500, 20000),
+        maxHtmlChars: completeMode ? clampNumber(q.maxHtmlChars, 4500000, 10000, 4500000) : undefined,
+      }),
+      routeDeadlineMs,
+      () => ({ highs: [], lows: [], score: [], warnings: [`Ranking comparativo excedeu deadline de ${routeDeadlineMs}ms; resposta parcial para preservar fluidez mobile.`], partial: true, errors: list.map(ticker => ({ ticker, error: 'deadline' })) })
+    );
     return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, endpoint: 'market-rankings', type: kind, rankingSource: completeMode ? 'valorae-compare-complete' : 'valorae-compare-fallback', fallbackUsed: !source.length && sourceMode !== 'compare', captureMode: rankingMode, inputErrors: errors, ...data }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'market', cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'market' });

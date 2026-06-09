@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     const validation = ticker ? validarTicker(ticker) : null;
     if (validation) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: validation }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'news' });
     const aliases = typeof input.aliases === 'string' ? input.aliases.split(',').map(s => s.trim()).filter(Boolean).slice(0, 8) : [];
-    const timeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 350, 12000) : undefined;
+    const timeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 350, 12000) : 3000;
     const newsTimeoutMs = input.newsTimeoutMs ? clampNumber(input.newsTimeoutMs, undefined, 350, 12000) : timeoutMs;
     const news = await ValoraeEngine.fetchNews(ticker, aliases, {
       limit: clampNumber(input.limit || input.newsLimit, 8, 1, 25),

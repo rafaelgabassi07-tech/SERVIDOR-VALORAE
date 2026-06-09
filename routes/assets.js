@@ -1,7 +1,7 @@
 import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../lib/Valorae-engine.js';
 import { resolvePerformanceOptions } from '../lib/performance/profile.js';
 import { sendJson } from '../lib/performance/http.js';
-import { beginRoute, boolParam, falseParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError } from '../lib/http/route.js';
+import { beginRoute, boolParam, falseParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../lib/http/route.js';
 
 const MAX_TICKERS = Number(process.env.MAX_TICKERS_PER_REQUEST || 20);
 
@@ -79,14 +79,35 @@ export default async function handler(req, res) {
       profile: input.profile || input.performance || (completeRequested ? 'deep' : undefined),
     }, { endpoint: 'assets', batchSize: valid.length });
 
-    const batch = await ValoraeEngine.fetchAtivosBatch(valid, perfOptions);
+    const routeDeadlineMs = clampNumber(
+      input.routeDeadlineMs || input.deadlineMs,
+      completeRequested ? 19_000 : 3_200,
+      750,
+      completeRequested ? 26_000 : 8_000
+    );
+    const batch = await withRouteDeadline(
+      () => ValoraeEngine.fetchAtivosBatch(valid, perfOptions),
+      routeDeadlineMs,
+      () => ({
+        assets: [],
+        stats: {
+          partial: true,
+          timeout: true,
+          routeDeadlineMs,
+          message: 'Deadline mobile atingido; o APK deve preservar snapshot/cache local e revalidar em background.',
+        },
+        errors: valid.map(ticker => ({ ticker, error: `Deadline da rota assets atingido em ${routeDeadlineMs}ms.` })),
+      })
+    );
     return sendJson(req, res, {
       version: ValoraeEngine.version,
       requestId: route.requestId,
-      count: batch.assets.length,
-      stats: batch.stats,
-      assets: batch.assets,
-      errors: [...errors, ...batch.errors],
+      count: (batch.assets || []).length,
+      partial: !!batch.stats?.partial,
+      deadlineMs: routeDeadlineMs,
+      stats: batch.stats || {},
+      assets: batch.assets || [],
+      errors: [...errors, ...(batch.errors || [])],
     }, { status: 200, engineVersion: ValoraeEngine.version, profile: perfOptions.performanceProfile, cachePolicy: perfOptions.cachePolicy, cacheControl: 'private, max-age=15, stale-while-revalidate=60' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'assets' });
