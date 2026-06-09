@@ -105,7 +105,7 @@ const paths = {
   '/api/v1/errors': { get: op('Catálogo de erros', [], undefined, ['System']) },
   '/api/v1/openapi': { get: op('Especificação OpenAPI', [], undefined, ['System']) },
   '/api/compat/scraper4': { get: op('Compatibilidade com Scraper (4).js via query string', [], undefined, ['Compat']), post: op('Compatibilidade com Scraper (4).js via JSON', [], postJsonBody, ['Compat']) },
-  '/api/sync': { get: op('Endpoint legado desativado na build free-only', [], undefined, ['Compat']), post: op('Endpoint legado desativado na build free-only', [], postJsonBody, ['Compat']) },
+  '/api/sync': { get: op('Sincronização Supabase Auth: health, get_snapshot, get_transactions e get_dividend_events', [], undefined, ['Sync']), post: op('Sincronização Supabase Auth: upsert_snapshot, upsert_transactions, upsert_dividend_events e delete_user_data', [], postJsonBody, ['Sync']) },
 };
 
 export default async function handler(req, res) {

@@ -55,8 +55,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.76-supabase-sync",
+    "releasePatch": "21.12.78-supabase-auth-fullsync",
     "freeOnly": true,
-    "notes": "Adiciona /api/sync opcional para salvar/ler snapshots no Supabase via PostgREST, com token de escrita e compatibilidade com plano gratuito; package.version permanece core 21.12.0."
-  }
+    "notes": "Supabase Auth com e-mail/senha, JWT validado no Proxy, e persistência de transações, proventos e snapshots."
+  },
+  "notes": "Supabase Auth com e-mail/senha, sincronização recuperável por conta e persistência de transações, proventos e snapshots."
 }
