@@ -4,6 +4,7 @@ import { beginRoute } from '../../lib/http/route.js';
 import { buildSourceReliabilityMatrix } from '../../lib/quality/data-quality.js';
 import { getServerMetricsSnapshot } from '../../lib/observability/server-metrics.js';
 import { buildPersonalReleaseReadiness } from '../../lib/release/personal-maturity.js';
+import { VALORAE_RELEASE_PATCH } from '../../lib/release/current.js';
 
 export default async function handler(req, res) {
   req.__valoraeInternalTelemetry = true;
@@ -24,7 +25,7 @@ export default async function handler(req, res) {
     version: ValoraeEngine.version,
     requestId: route.requestId,
     endpoint: 'release/readiness',
-    releasePatch: '21.12.72-valorae-final-ui-charts-news-backup-fix',
+    releasePatch: VALORAE_RELEASE_PATCH,
     status: readiness.status,
     readiness,
   }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'release-readiness', cacheControl: 'private, max-age=10' });

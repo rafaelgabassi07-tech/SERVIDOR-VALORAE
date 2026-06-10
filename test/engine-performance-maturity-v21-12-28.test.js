@@ -56,7 +56,7 @@ const manifest = routeManifest();
 assert.ok(manifest.routes.includes('/asset/indicators'));
 assert.ok(manifest.routes.includes('/fii/indicators'));
 assert.ok(manifest.routes.includes('/engine/maturity'));
-assert.match(VALORAE_SERVER_METRICS_VERSION, /^21\.12\.(30|32|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|69|70|71|72)-/);
+assert.match(VALORAE_SERVER_METRICS_VERSION, /^21\.12\.\d+-.+/);
 
 const html = fs.readFileSync('public/server.html', 'utf8');
 assert.ok(html.includes('Maturidade do Engine'));

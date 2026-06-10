@@ -24,14 +24,15 @@ const hasApiCorsWildcard = (vercel.headers || []).some(entry =>
 assert.equal(hasApiCorsWildcard, false, 'vercel.json não deve sobrescrever CORS runtime da API');
 
 const syncSource = fs.readFileSync('routes/sync.js', 'utf8');
-assert.equal(/SUPABASE_|supabase/i.test(syncSource), false, 'sync legado não deve conter ponte para banco/storage externo');
+assert.ok(syncSource.includes('supabase_email_password'), 'sync atual deve documentar o modo Supabase Auth sem expor segredo.');
+assert.equal(/SERVICE_ROLE_KEY\s*=|SUPABASE_SERVICE_ROLE_KEY\s*=/.test(syncSource), false, 'sync não deve embutir service_role literal, apenas ler ambiente.');
 
 const syncRes = mockRes();
 await dispatchRoute({ method: 'GET', url: '/api/sync', query: {}, headers: {}, socket: {} }, syncRes);
 const syncPayload = JSON.parse(syncRes.body);
-assert.equal(syncRes.statusCode, 410);
-assert.equal(syncPayload.status, 'DISABLED');
-assert.equal(syncPayload.code, 'SYNC_DISABLED_FREE_ONLY');
+assert.equal(syncRes.statusCode, 200);
+assert.equal(syncPayload.route, '/api/sync');
+assert.equal(syncPayload.supabase?.authMode, 'supabase_email_password');
 
 const openapi = fs.readFileSync('routes/openapi.js', 'utf8');
 assert.ok(openapi.includes('v21.12.0: launch readiness'));

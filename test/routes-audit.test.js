@@ -66,8 +66,9 @@ const oldKey = process.env.SUPABASE_ANON_KEY;
 delete process.env.SUPABASE_URL;
 delete process.env.SUPABASE_ANON_KEY;
 const r6 = await call(sync, req('GET'));
-assert.equal(r6.statusCode, 410);
-assert.equal(parseBody(r6).status, 'DISABLED');
+assert.equal(r6.statusCode, 200);
+assert.equal(parseBody(r6).route, '/api/sync');
+assert.equal(parseBody(r6).supabase?.authMode, 'supabase_email_password');
 if (oldUrl !== undefined) process.env.SUPABASE_URL = oldUrl;
 if (oldKey !== undefined) process.env.SUPABASE_ANON_KEY = oldKey;
 

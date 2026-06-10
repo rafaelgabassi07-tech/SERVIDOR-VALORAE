@@ -1,12 +1,21 @@
 {
-  "name": "VALORAE Proxy Server v21.12.84",
-  "description": "VALORAE Proxy Server v21.12.84 com contrato canônico de gráficos para Detalhes do Ativo e Análise.",
+  "name": "VALORAE Proxy Server v21.12.86",
+  "description": "VALORAE Proxy Server v21.12.86 com limpeza de código, contratos consistentes, testes atualizados e compatibilidade APK/Proxy preservada.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
-  "release": "21.12.84-asset-chart-flow-deep-fix",
-  "latestInternalPatch": "21.12.84-asset-chart-flow-deep-fix",
+  "release": "21.12.86-code-cleanup-contract-hygiene",
+  "latestInternalPatch": "21.12.86-code-cleanup-contract-hygiene",
   "features": [
+    "apk-proxy-contract-cleanup",
+    "proxy-test-suite-hygiene",
+    "release-single-source-of-truth",
+    "code-cleanup-contract-hygiene",
+    "v21.12.86",
+    "proventos-agenda-ipca-rankings-performance",
+    "single-request-portfolio-flow",
+    "portfolio-insights-bundle",
+    "v21.12.85",
     "fii-deep-chart-refresh",
     "details-analysis-chart-flow",
     "asset-chart-bundle-mobile",
@@ -215,9 +224,9 @@
     "v21.12.54"
   ],
   "codename": "valorae-i10-rankings-complete",
-  "notes": "Adiciona Conta VALORAE com login/senha via Supabase Auth, sincronização recuperável por usuário e persistência de transações, proventos e snapshots.",
+  "notes": "Adiciona rota agregada /api/v1/portfolio/insights-bundle para reduzir chamadas duplicadas e preservar montagem stale-first no APK.",
   "generatedAt": "2026-05-30T22:30:00.000-03:00",
-  "versionLabel": "core 21.12.0 · release 21.12.79-real-dividends-insights",
+  "versionLabel": "core 21.12.0 · release 21.12.85-insights-bundle-performance-proventos-ipca-rankings",
   "tags": [
     "ai-prompts",
     "app-sync-preserved",
@@ -297,7 +306,7 @@
     "dividends-cloud",
     "recoverable-account-sync"
   ],
-  "patch": "21.12.79-real-dividends-insights",
+  "patch": "21.12.85-insights-bundle-performance-proventos-ipca-rankings",
   "highlights": [
     "Adiciona Conta VALORAE com e-mail/senha pelo Supabase Auth e recuperação da carteira em outro smartphone.",
     "Persiste transações, proventos futuros/recebidos e snapshots completos em tabelas Supabase próprias.",
@@ -327,8 +336,9 @@
   ],
   "publicEngineContract": "21.12.0",
   "coreVersion": "21.12.0",
-  "releasePatch": "21.12.79-real-dividends-insights",
+  "releasePatch": "21.12.86-code-cleanup-contract-hygiene",
   "releaseHistory": [
+    "21.12.85-insights-bundle-performance-proventos-ipca-rankings",
     "21.12.79-real-dividends-insights",
     "21.12.77-supabase-multiuser-auto",
     "21.12.75-dividend-agenda-performance",

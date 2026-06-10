@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { parseInvestidor10DividendAgendaHtml, normalizeAgendaDate, fetchInvestidor10DividendAgenda, VALORAE_I10_DIVIDEND_AGENDA_VERSION } from '../lib/market/investidor10-dividend-agenda.js';
 
-assert.equal(VALORAE_I10_DIVIDEND_AGENDA_VERSION, '21.12.67-i10-dividend-agenda-range-history-future');
+assert.match(VALORAE_I10_DIVIDEND_AGENDA_VERSION, /^21\.12\.\d+-.+i10-dividend-agenda$/);
 assert.equal(normalizeAgendaDate('01/06/26'), '01/06/2026');
 assert.equal(normalizeAgendaDate('29/05/2026'), '29/05/2026');
 

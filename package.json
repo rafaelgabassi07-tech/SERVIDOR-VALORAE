@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE otimizado para bootstrap mobile, cache stale-first, Supabase e montagem rápida de informações no APK.",
+  "description": "Proxy VALORAE otimizado com limpeza de código, contratos de release consistentes e fluxo APK/Proxy validado.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -55,9 +55,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.84-asset-chart-flow-deep-fix",
+    "releasePatch": "21.12.86-code-cleanup-contract-hygiene",
     "freeOnly": true,
-    "notes": "Correção profunda do fluxo de gráficos Detalhes/Análise: assetChartBundle canônico, contrato mobile explícito e deep refresh para FIIs/ações sem apagar dados bons."
+    "notes": "Auditoria de limpeza: centraliza release, corrige testes legados, alinha monitor/PWA/service worker/métricas e preserva compatibilidade dos endpoints do APK."
   },
   "notes": "Supabase Auth com e-mail/senha, sincronização recuperável por conta e persistência de transações, proventos e snapshots."
 }

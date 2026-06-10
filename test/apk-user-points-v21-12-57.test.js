@@ -9,7 +9,7 @@ const dividends = read('routes/portfolio/dividends.js');
 const nextDividends = read('routes/portfolio/next-dividends.js');
 const pkg = JSON.parse(read('package.json'));
 
-assert.match(pkg.valorae.releasePatch, /^21\.12\.(60-valorae-i10-home-rankings-sync|61-valorae-i10-complete-asset-charts|62-valorae-i10-complete-asset-charts|65-valorae-i10-dividend-agenda-parser-boundary-fix|67-valorae-i10-dividend-agenda-range-history-future|68-valorae-i10-asset-charts-end-to-end-fix|69-valorae-financial-charts-deep-fix|70-valorae-financial-charts-deep-fix|71-valorae-financial-charts-audit-e2e-fix|72-valorae-final-ui-charts-news-backup-fix)$/);
+assert.match(pkg.valorae.releasePatch, /^21\.12\.\d+-.+$/, 'releasePatch deve acompanhar a release atual sem travar testes em patches antigos.');
 assert.match(yahoo, /IFIX_PROXY/);
 assert.match(yahoo, /XFIX11\.SA/);
 assert.match(history, /normalizeHistoryTicker/);
@@ -25,4 +25,4 @@ assert.match(nextDividends, /upcomingEvents/);
 assert.match(nextDividends, /historyEvents/);
 assert.match(nextDividends, /nextDividend/);
 assert.doesNotMatch(nextDividends, /root error/i);
-console.log('apk-user-points-v21-12-62 OK');
+console.log('apk-user-points-current-release OK');

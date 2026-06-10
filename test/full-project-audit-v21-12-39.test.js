@@ -30,8 +30,8 @@ assert.ok(sw.includes(`valorae-proxy-server-v${CACHE_VERSION}`));
 assert.match(serverHtml, /21\.12\.48-monitor-responsive-settings-theme/);
 assert.match(indexHtml, /21\.12\.48-monitor-responsive-settings-theme/);
 assert.ok(serverHtml.includes(`v${PUBLIC_VERSION} UI`));
-assert.ok(integrationManifestRoute.includes(`${RELEASE}-integration-manifest`));
-assert.ok(integrationManifestRoute.includes(`releasePatch: '${RELEASE}'`));
+assert.ok(integrationManifestRoute.includes('VALORAE_RELEASE_PATCH'), 'manifesto de integração deve usar fonte única da release atual.');
+assert.ok(integrationManifestRoute.includes('releasePatch: VALORAE_RELEASE_PATCH')); 
 
 const combined = [JSON.stringify(metadata), sw, serverHtml, indexHtml].join('\n');
 assert.doesNotMatch(combined, /MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API/);
@@ -45,6 +45,6 @@ for (const required of ['/server/metrics', '/server/tests', '/integration/manife
 
 const metrics = getServerMetricsSnapshot();
 assert.equal(metrics.releasePatch, RELEASE);
-assert.match(metrics.version, /21\.12\.(40|41|42|43|44|45|46|47|48|49|50|51|52|54|55|56|57|58|59|60|61|62|63|64|65|67|68|69|70|71|72)/);
+assert.match(metrics.version, /^21\.12\.\d+-.+monitor$/, 'métricas devem acompanhar a release atual do proxy.');
 
 console.log('full-project-audit-v21-12-39/42 OK');

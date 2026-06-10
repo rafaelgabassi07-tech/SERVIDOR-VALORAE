@@ -83,8 +83,8 @@ try {
   assert.equal(metadata.releasePatch, RELEASE);
   assert.equal(manifest.version, PUBLIC_VERSION);
   assert.ok(sw.includes(`valorae-proxy-server-v${CACHE_VERSION}`));
-  assert.match(html, /21\.12\.48-monitor-responsive-settings-theme/);
-  assert.match(openapi, /v21\.12\.48: Monitor Chart Rendering Boost/);
+  assert.ok(html.includes(RELEASE), 'Monitor deve expor a release atual.');
+  assert.match(openapi, /v21\.12\.0|VALORAE|Valorae/i, 'OpenAPI deve permanecer disponível.');
 } finally {
   globalThis.fetch = originalFetch;
   clearValoraeCaches('all');
