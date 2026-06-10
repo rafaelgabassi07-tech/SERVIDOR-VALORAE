@@ -3,13 +3,14 @@ import { sendJson, queryObject, readJsonBody } from '../lib/core/http.js';
 import { cacheStats, clearCache } from '../lib/core/cache.js';
 import { buildMobilePortfolioSync } from '../lib/contracts/mobile.js';
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
-import { buildPortfolioAnalysis, buildHistory, buildAssetHistory, buildRankings } from '../lib/portfolio/analysis.js';
+import { buildPortfolioAnalysis, buildHistory, buildRankings } from '../lib/portfolio/analysis.js';
 import { buildAssetsPayload, buildIndicesPayload, buildMarketMovers, getQuote } from '../lib/sources/quotes.js';
 import { getNews } from '../lib/sources/news.js';
 import { getIpcaSeries } from '../lib/sources/ipca.js';
 import { fetchText } from '../lib/sources/fetch.js';
 import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tickers.js';
 import { getConfirmedDividendsByTicker } from '../lib/sources/status-dividends.js';
+import { buildAssetDetails, getAssetHistory } from '../lib/sources/asset-details.js';
 
 function stripApi(pathname) {
   let path = pathname || '/';
@@ -86,13 +87,13 @@ async function monitorSelfTest() {
     includeRankings: false
   });
   const emptyDividends = await buildDividendsContract({ positions: [], tickers: [] });
-  const assetHistory = buildAssetHistory({ ticker: 'PETR4', currentPrice: 32, months: 3 });
+  const assetHistory = await getAssetHistory({ ticker: 'PETR4', range: '1M', timeoutMs: 10 });
   const checks = [
     { name: 'mobileContract', ok: contract?.endpoint === 'mobile-portfolio-sync' && contract?.bundleVersion === RELEASE.version },
     { name: 'analysisBlock', ok: Boolean(contract?.analysis?.summary) },
     { name: 'historyBlock', ok: Array.isArray(contract?.history?.points) },
     { name: 'emptyDividendGuard', ok: emptyDividends?.status === 'EMPTY' && emptyDividends?.officialEvents?.length === 0 },
-    { name: 'assetHistory', ok: assetHistory?.ticker === 'PETR4' && Array.isArray(assetHistory?.points) }
+    { name: 'assetHistoryContract', ok: assetHistory?.ticker === 'PETR4' && Array.isArray(assetHistory?.points) }
   ];
   const failed = checks.filter(check => !check.ok);
   return {
@@ -125,8 +126,7 @@ function assetPayload(payload = {}) {
     peers: [],
     quality: { score: ticker ? 70 : 0, status: ticker ? 'available' : 'missing' },
     coverage: { ticker: Boolean(ticker), assetClass: Boolean(assetClass), source: 'normalized' },
-    actionPlan: [{ priority: 'normal', text: 'Usar análise de carteira e eventos oficiais normalizados.' }],
-    sourceMap: { primary: 'VALORAE Fonte Oficial', dividendConfirmed: 'StatusInvest', dividendCalendar: 'Investidor10' }
+    actionPlan: [{ priority: 'normal', text: 'Usar análise de carteira e eventos oficiais normalizados.' }]
   };
 }
 
@@ -189,16 +189,15 @@ export async function dispatchRoute(req, res) {
 
     if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, buildPortfolioAnalysis(payload));
     if (path === '/portfolio/history') return sendJson(req, res, buildHistory(payload));
-    if (path === '/asset/history') return sendJson(req, res, buildAssetHistory(payload));
+    if (path === '/asset/history') return sendJson(req, res, await getAssetHistory(payload), { cacheControl: 'private, max-age=45' });
     if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.months || 12), { cacheControl: 'private, max-age=300' });
     if (path === '/market/rankings') return sendJson(req, res, await buildMarketMovers(payload), { cacheControl: 'private, max-age=45' });
     if (path === '/market/indices') return sendJson(req, res, await buildIndicesPayload(), { cacheControl: 'private, max-age=45' });
 
     if (path === '/asset/quote' || path === '/quote' || path === '/quotes') return sendJson(req, res, await getQuote(payload.ticker || payload.symbol || payload.q), { cacheControl: 'private, max-age=30' });
     if (path === '/asset' || path === '/asset/coverage' || path === '/asset/fundamentals' || path === '/asset/profile' || path === '/asset/valuation' || path === '/asset/profitability' || path === '/asset/debt' || path === '/asset/statements' || path === '/asset/peers' || path === '/asset/source-map' || path === '/asset/indicators' || path === '/asset/quality' || path === '/asset/action-plan') {
-      const base = assetPayload(payload);
-      const quote = base.ticker ? await getQuote(base.ticker, { timeoutMs: Number(payload.timeoutMs || 3500) }) : null;
-      return sendJson(req, res, { ...base, quote, cotacao: quote, price: quote?.price || 0, currentPrice: quote?.currentPrice || 0, precoAtual: quote?.currentPrice || 0, changePercent: quote?.changePercent || 0, variacaoDay: quote?.changePercent || 0 }, { cacheControl: 'private, max-age=45' });
+      const enriched = await buildAssetDetails(payload);
+      return sendJson(req, res, { ...assetPayload(payload), ...enriched }, { cacheControl: 'private, max-age=60' });
     }
     if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
     if (path === '/assets') return sendJson(req, res, await buildAssetsPayload(payload), { cacheControl: 'private, max-age=45' });
