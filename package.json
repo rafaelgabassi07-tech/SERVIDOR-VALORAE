@@ -55,9 +55,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.81-sync-performance-hardening",
+    "releasePatch": "21.12.84-asset-chart-flow-deep-fix",
     "freeOnly": true,
-    "notes": "Deadlines móveis, paralelização de dividendos, análise de carteira com deadline de rota e ajustes para reduzir latência percebida no APK."
+    "notes": "Correção profunda do fluxo de gráficos Detalhes/Análise: assetChartBundle canônico, contrato mobile explícito e deep refresh para FIIs/ações sem apagar dados bons."
   },
   "notes": "Supabase Auth com e-mail/senha, sincronização recuperável por conta e persistência de transações, proventos e snapshots."
 }

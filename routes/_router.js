@@ -56,6 +56,7 @@ const ROUTES = {
   '/errors': () => import('./errors.js'),
   '/asset/history': () => import('./asset/history.js'),
   '/asset/dividends': () => import('./asset/dividends.js'),
+  '/dividends/batch': () => import('./dividends/batch.js'),
   '/asset/next-dividend': () => import('./asset/next-dividend.js'),
   '/market/indices': () => import('./market/indices.js'),
   '/market/ipca': () => import('./market/ipca.js'),

@@ -1,6 +1,7 @@
 import { ValoraeEngine, canonicalizeTicker, inferAssetType, validarTicker } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-dividend-agenda.js';
+import { coalesce } from '../../lib/resilience/inflight.js';
 import { beginRoute, boolParam, resolveSelfScrapeUrl, sendRouteError, clampNumber } from '../../lib/http/route.js';
 
 function parseBRDate(d) { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{2}|\d{4})/); if (!m) return null; const y = String(m[3]).length === 2 ? `20${m[3]}` : m[3]; return new Date(`${y}-${m[2]}-${m[1]}T00:00:00Z`); }
@@ -16,7 +17,7 @@ export default async function handler(req, res) {
     const data = await ValoraeEngine.fetchAtivo(ticker, inferAssetType(ticker), { mode: q.mode || 'super', includeNews: false, view: 'full', cache: !boolParam(q.nocache || q.refresh), bypassCache: boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || 'standard' });
     const today = new Date(); today.setUTCHours(0, 0, 0, 0);
     const historico = data.results?.dividendos?.historico || data.results?.historicoDividendos || [];
-    const agenda = await fetchInvestidor10DividendAgenda([ticker], { assetClass: data.type === 'FII' ? 'FII' : 'ACAO', timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000), historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, 36, 0, 72), futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, 18, 0, 72), startDate: q.startDate || q.portfolioCreatedAt || q.createdAt, concurrency: clampNumber(q.agendaConcurrency || q.concurrency, 4, 1, 8) });
+    const agenda = await coalesce(`dividends:${ticker}:asset-next:${data.type}`, () => fetchInvestidor10DividendAgenda([ticker], { assetClass: data.type === 'FII' ? 'FII' : 'ACAO', timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000), historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, 36, 0, 72), futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, 18, 0, 72), startDate: q.startDate || q.portfolioCreatedAt || q.createdAt, concurrency: clampNumber(q.agendaConcurrency || q.concurrency, 4, 1, 8), deadlineMs: clampNumber(q.routeDeadlineMs || q.deadlineMs, 8200, 1000, 18000) - 650 }));
     const events = [...(agenda.events || []), ...historico.map(x => ({ ...x, ticker, status: 'Recebido', source: x.source || 'Investidor10 Página do Ativo' }))];
     const upcoming = events.map(x => ({ ...x, _pag: parseBRDate(x.paymentDate || x.dataPagamento), _com: parseBRDate(x.dateCom || x.dataCom) })).filter(x => (x._pag && x._pag >= today) || (!x._pag && x._com && x._com >= today)).sort((a, b) => (a._pag || a._com) - (b._pag || b._com));
     const history = events.map(x => ({ ...x, _pag: parseBRDate(x.paymentDate || x.dataPagamento), _com: parseBRDate(x.dateCom || x.dataCom) })).filter(x => !((x._pag && x._pag >= today) || (!x._pag && x._com && x._com >= today))).sort((a, b) => (b._pag || b._com || 0) - (a._pag || a._com || 0));

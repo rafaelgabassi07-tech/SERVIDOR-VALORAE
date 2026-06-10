@@ -1,6 +1,7 @@
 import { ValoraeEngine, canonicalizeTicker, inferAssetType, validarTicker } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-dividend-agenda.js';
+import { coalesce } from '../../lib/resilience/inflight.js';
 import { beginRoute, boolParam, resolveSelfScrapeUrl, sendRouteError, clampNumber } from '../../lib/http/route.js';
 
 export default async function handler(req, res) {
@@ -18,7 +19,7 @@ export default async function handler(req, res) {
     let agendaEvents = [];
     let agendaDiagnostics = [];
     if (wantsUpcoming) {
-      const agenda = await fetchInvestidor10DividendAgenda([ticker], { assetClass: type === 'FII' ? 'FII' : 'ACAO', timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000), historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, 36, 0, 72), futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, 18, 0, 72), startDate: q.startDate || q.portfolioCreatedAt || q.createdAt, concurrency: clampNumber(q.agendaConcurrency || q.concurrency, 4, 1, 8) });
+      const agenda = await coalesce(`dividends:${ticker}:asset-dividends:${type}`, () => fetchInvestidor10DividendAgenda([ticker], { assetClass: type === 'FII' ? 'FII' : 'ACAO', timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, 9000, 1000, 18000), historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, 36, 0, 72), futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, 18, 0, 72), startDate: q.startDate || q.portfolioCreatedAt || q.createdAt, concurrency: clampNumber(q.agendaConcurrency || q.concurrency, 4, 1, 8), deadlineMs: clampNumber(q.routeDeadlineMs || q.deadlineMs, 8200, 1000, 18000) - 650 }));
       agendaEvents = agenda.events || [];
       agendaDiagnostics = agenda.diagnostics || [];
     }

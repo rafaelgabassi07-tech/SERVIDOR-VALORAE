@@ -1,6 +1,7 @@
 import { ValoraeEngine, canonicalizeTicker, validarTicker, inferAssetType } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-dividend-agenda.js';
+import { coalesce } from '../../lib/resilience/inflight.js';
 import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../../lib/http/route.js';
 
 const MAX_TICKERS = Number(process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 30);
@@ -126,7 +127,7 @@ export default async function handler(req, res) {
     };
     const agenda = boolParam(q.includeUpcoming || q.complete || q.upcoming, true)
       ? await withRouteDeadline(
-          () => fetchInvestidor10DividendAgenda(tickers, agendaOptions),
+          () => coalesce(`dividends:${tickers.slice().sort().join(',')}:${agendaOptions.historyMonths}:${agendaOptions.futureMonths}:${agendaOptions.assetClass || 'ALL'}:${compactMode ? 'fast' : 'normal'}`, () => fetchInvestidor10DividendAgenda(tickers, { ...agendaOptions, deadlineMs: Math.max(900, routeDeadlineMs - 650) })),
           Math.max(900, routeDeadlineMs - 500),
           () => ({ events: [], diagnostics: [{ level: 'warning', message: `Agenda excedeu deadline de ${routeDeadlineMs}ms; retornando payload parcial/cacheável.` }], range: agendaOptions, partial: true })
         )

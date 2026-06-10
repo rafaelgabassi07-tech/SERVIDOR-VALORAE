@@ -46,6 +46,7 @@ export default async function handler(req, res) {
       '/api/market/rankings?type=FII',
       '/api/asset/dividends?ticker=PETR4',
       '/api/portfolio/dividends?tickers=PETR4,GARE11',
+      '/api/dividends/batch?tickers=PETR4,GARE11',
       '/api/portfolio/next-dividends?tickers=PETR4,GARE11',
       '/api/portfolio/history?tickers=PETR4,GARE11&quantities=100,200&avgPrices=32,8.5&range=1Y',
       '/api/portfolio/analyze',
