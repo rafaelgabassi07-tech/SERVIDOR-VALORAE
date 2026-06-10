@@ -4,7 +4,7 @@ import { fetchInvestidor10DividendAgenda, parseAgendaDate } from '../../lib/mark
 import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../../lib/http/route.js';
 import { coalesce } from '../../lib/resilience/inflight.js';
 
-const MAX_TICKERS = Number(process.env.VALORAE_DIVIDENDS_BATCH_MAX_TICKERS || process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 30);
+const MAX_TICKERS = Number(process.env.VALORAE_DIVIDENDS_BATCH_MAX_TICKERS || process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 45);
 const officialDividendCache = globalThis.__VALORAE_OFFICIAL_DIVIDEND_CACHE__ || new Map();
 globalThis.__VALORAE_OFFICIAL_DIVIDEND_CACHE__ = officialDividendCache;
 const OFFICIAL_CACHE_TTL_MS = Number(process.env.VALORAE_OFFICIAL_DIVIDEND_TTL_MS || 24 * 60 * 60 * 1000);
@@ -116,6 +116,13 @@ function cacheGetEvents(ticker = '') {
   officialDividendCache.delete(canonicalizeTicker(ticker));
   return { events: [], status: 'MISS' };
 }
+function eventDate(e = {}, kind = 'payment') {
+  const value = kind === 'eligibility'
+    ? firstText(e.dateCom, e.comDate, e.dataCom, e.recordDate, e.dataBase, e.paymentDate, e.payDate, e.dataPagamento)
+    : firstText(e.paymentDate, e.payDate, e.dataPagamento, e.date, e.data, e.dateCom, e.comDate, e.dataCom);
+  return parseBRDate(value) || parseAgendaDate(value);
+}
+
 function splitByPortfolio(events = [], positions = []) {
   const today = new Date(); today.setUTCHours(0, 0, 0, 0);
   const positionsByTicker = new Map((positions || []).map(p => [canonicalizeTicker(p.ticker), p]));
@@ -124,12 +131,16 @@ function splitByPortfolio(events = [], positions = []) {
   for (const e of events) {
     const pos = positionsByTicker.get(canonicalizeTicker(e.ticker));
     const quantity = firstNumber(pos?.quantity, e.quantity);
-    const relevantDate = parseBRDate(e.paymentDate || e.dateCom) || parseAgendaDate(e.paymentDate || e.dateCom);
-    const isPast = relevantDate && relevantDate < today;
+    const paymentOrDisplayDate = eventDate(e, 'payment');
+    const eligibilityDate = eventDate(e, 'eligibility') || paymentOrDisplayDate;
+    const isPast = paymentOrDisplayDate && paymentOrDisplayDate < today;
     const firstPurchaseAt = Number(pos?.firstPurchaseAt || 0);
-    const eligiblePast = !isPast || !firstPurchaseAt || !relevantDate || firstPurchaseAt <= relevantDate.getTime() + 86_399_999;
-    const amount = quantity > 0 && Number(e.valuePerShare || 0) > 0 ? quantity * Number(e.valuePerShare || 0) : Number(e.estimatedAmount || 0);
-    const out = { ...e, quantity, estimatedAmount: amount };
+    // Elegibilidade de proventos retroativos é definida por Data Com/record date,
+    // não pela data de pagamento. Isso corrige carteiras que compraram antes da
+    // Data Com, mas só receberam o pagamento meses depois.
+    const eligiblePast = !isPast || !firstPurchaseAt || !eligibilityDate || firstPurchaseAt <= eligibilityDate.getTime() + 86_399_999;
+    const amount = quantity > 0 && Number(e.valuePerShare || 0) > 0 ? Number((quantity * Number(e.valuePerShare || 0)).toFixed(2)) : Number(e.estimatedAmount || 0);
+    const out = { ...e, quantity, estimatedAmount: amount, eligibilityDate: eligibilityDate ? eligibilityDate.toISOString().slice(0, 10) : undefined };
     if (isPast) { if (eligiblePast) received.push({ ...out, status: firstText(out.status, 'Recebido') }); }
     else if (quantity > 0) upcoming.push({ ...out, status: firstText(out.status, 'Previsto') });
   }
@@ -158,17 +169,19 @@ export default async function handler(req, res) {
     }
     const compactMode = ['compact','boot','fast','mobile'].includes(String(q.mode || q.profile || '').toLowerCase());
     const deepMode = boolParam(q.deep || q.deepSync || q.complete, false) || /deep|background|complete/i.test(String(q.mode || ''));
-    const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, compactMode && !deepMode ? 5400 : 11500, 1200, 18000);
-    const historyMonths = clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, deepMode ? 36 : 6, 0, 72);
-    const futureMonths = clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, deepMode ? 18 : 12, 0, 72);
+    const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, compactMode && !deepMode ? 7200 : 14500, 1200, 22000);
+    const historyMonths = clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, deepMode ? 48 : 24, 0, 72);
+    const futureMonths = clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, deepMode ? 24 : 18, 0, 72);
     const agendaOptions = {
-      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, compactMode && !deepMode ? 1800 : 6500, 600, 18000),
+      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, compactMode && !deepMode ? 3200 : 9000, 600, 20000),
       historyMonths,
       futureMonths,
       startDate: q.startDate || q.portfolioCreatedAt || q.createdAt,
-      concurrency: clampNumber(q.agendaConcurrency || q.concurrency, compactMode ? 4 : 4, 1, 8),
+      concurrency: clampNumber(q.agendaConcurrency || q.concurrency, compactMode ? 5 : 5, 1, 8),
+      futureFirst: boolParam(q.futureFirst || q.prioritizeFuture || q.upcomingFirst, true),
+      priority: q.priority || q.priorityMode || 'upcoming-first',
       assetClass: normalizeAgendaAssetClass(q.assetClass || q.type || q.classe),
-      deadlineMs: Math.max(900, routeDeadlineMs - 750),
+      deadlineMs: Math.max(1200, routeDeadlineMs - 650),
     };
 
     const cachedOfficial = tickers.flatMap(t => cacheGetEvents(t).events);
@@ -190,7 +203,7 @@ export default async function handler(req, res) {
     [...cachedOfficial, ...fromAgenda, ...fromAssets]
       .filter(e => e?.ticker && (e.dateCom || e.paymentDate || e.valuePerShare > 0))
       .forEach(e => officialByKey.set(eventKey(e), e));
-    const officialEvents = [...officialByKey.values()].sort((a, b) => (parseBRDate(a.paymentDate || a.dateCom)?.getTime() || 0) - (parseBRDate(b.paymentDate || b.dateCom)?.getTime() || 0));
+    const officialEvents = [...officialByKey.values()].sort((a, b) => (eventDate(a, 'payment')?.getTime() || 0) - (eventDate(b, 'payment')?.getTime() || 0));
     cacheSetEvents(officialEvents);
     const assetHistory = tickers.map(t => ({ ticker: t, assetType: isKnownB3Unit(t) ? 'ACAO_UNIT' : inferAssetType(t), events: officialEvents.filter(e => canonicalizeTicker(e.ticker) === t), count: officialEvents.filter(e => canonicalizeTicker(e.ticker) === t).length }));
     const { portfolioReceived, portfolioUpcoming } = splitByPortfolio(officialEvents, Array.isArray(q.positions) ? q.positions : []);

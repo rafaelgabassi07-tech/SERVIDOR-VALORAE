@@ -4,7 +4,7 @@ import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-d
 import { coalesce } from '../../lib/resilience/inflight.js';
 import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../../lib/http/route.js';
 
-const MAX_TICKERS = Number(process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 30);
+const MAX_TICKERS = Number(process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 45);
 
 function firstText(...values) {
   for (const v of values) {
@@ -129,13 +129,15 @@ export default async function handler(req, res) {
     }
     if (!tickers.length) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: 'Nenhum ticker válido enviado.', errors }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'portfolio' });
     const compactMode = ['compact','boot','fast','mobile'].includes(String(q.mode || q.profile || '').toLowerCase());
-    const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, compactMode ? 5200 : 8200, 1000, 18000);
+    const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, compactMode ? 7200 : 10500, 1000, 22000);
     const agendaOptions = {
-      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, compactMode ? 3600 : 6500, 1000, 18000),
-      historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, compactMode ? 12 : 36, 0, 72),
-      futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, compactMode ? 12 : 18, 0, 72),
+      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, compactMode ? 4200 : 10000, 1000, 20000),
+      historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, compactMode ? 24 : 48, 0, 72),
+      futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, compactMode ? 18 : 24, 0, 72),
       startDate: q.startDate || q.portfolioCreatedAt || q.createdAt,
-      concurrency: clampNumber(q.agendaConcurrency || q.concurrency, compactMode ? 5 : 4, 1, 8),
+      concurrency: clampNumber(q.agendaConcurrency || q.concurrency, compactMode ? 5 : 5, 1, 8),
+      futureFirst: boolParam(q.futureFirst || q.prioritizeFuture || q.upcomingFirst, true),
+      priority: q.priority || q.priorityMode || 'upcoming-first',
       assetClass: normalizeAgendaAssetClass(q.assetClass || q.type || q.classe) || assetClassFromPositions(q.positions),
     };
 
@@ -160,7 +162,7 @@ export default async function handler(req, res) {
 
     const agendaPromise = boolParam(q.includeUpcoming || q.complete || q.upcoming, true)
       ? withRouteDeadline(
-          () => coalesce(`dividends:${tickers.slice().sort().join(',')}:${agendaOptions.historyMonths}:${agendaOptions.futureMonths}:${agendaOptions.assetClass || 'ALL'}:${compactMode ? 'fast' : 'normal'}`, () => fetchInvestidor10DividendAgenda(tickers, { ...agendaOptions, deadlineMs: Math.max(900, routeDeadlineMs - 650) })),
+          () => coalesce(`dividends:${tickers.slice().sort().join(',')}:${agendaOptions.historyMonths}:${agendaOptions.futureMonths}:${agendaOptions.assetClass || 'ALL'}:${compactMode ? 'fast' : 'normal'}`, () => fetchInvestidor10DividendAgenda(tickers, { ...agendaOptions, deadlineMs: Math.max(1200, routeDeadlineMs - 650) })),
           Math.max(900, routeDeadlineMs - 500),
           () => ({ events: [], diagnostics: [{ level: 'warning', message: `Agenda excedeu deadline de ${routeDeadlineMs}ms; retornando payload parcial/cacheável.` }], range: agendaOptions, partial: true })
         ).catch(err => ({ events: [], diagnostics: [{ level: 'warning', message: err?.message || String(err) }], range: agendaOptions, partial: true }))

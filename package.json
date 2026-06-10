@@ -55,9 +55,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.86-code-cleanup-contract-hygiene",
+    "releasePatch": "21.12.87-agenda-proventos-retroactive-cleanup",
     "freeOnly": true,
-    "notes": "Auditoria de limpeza: centraliza release, corrige testes legados, alinha monitor/PWA/service worker/métricas e preserva compatibilidade dos endpoints do APK."
+    "notes": "Agenda de dividendos futura ampliada, evolução retroativa por data-com, dividendPositions no bundle e limpeza de fluxo APK/Proxy."
   },
   "notes": "Supabase Auth com e-mail/senha, sincronização recuperável por conta e persistência de transações, proventos e snapshots."
 }

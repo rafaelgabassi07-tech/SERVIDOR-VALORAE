@@ -4,7 +4,7 @@ import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-d
 import { coalesce } from '../../lib/resilience/inflight.js';
 import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../../lib/http/route.js';
 
-const MAX_TICKERS = Number(process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 30);
+const MAX_TICKERS = Number(process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 45);
 function parseBRDate(d) {
   const s = String(d || '').trim();
   const br = s.match(/(\d{2})\/(\d{2})\/(\d{2}|\d{4})/);
@@ -95,9 +95,13 @@ export default async function handler(req, res) {
   try {
     const q = route.input;
     const positionTickers = Array.isArray(q.positions) ? q.positions.map(p => p?.ticker).filter(Boolean) : [];
-    const raw = parseList(q.tickers || q.ticker || positionTickers.join(',')).map(String).map(s => s.trim()).filter(Boolean);
+    let raw = parseList(q.tickers || q.ticker || positionTickers.join(',')).map(String).map(s => s.trim()).filter(Boolean);
+    const warnings = [];
     if (!raw.length) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: 'Envie tickers=PETR4,GARE11' }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'portfolio' });
-    if (raw.length > MAX_TICKERS) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: `Máximo de ${MAX_TICKERS} tickers.` }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'portfolio' });
+    if (raw.length > MAX_TICKERS) {
+      warnings.push({ scope: 'portfolio-next-dividends', message: `Carteira com ${raw.length} tickers; processando ${MAX_TICKERS} para preservar deadline.` });
+      raw = raw.slice(0, MAX_TICKERS);
+    }
     const tickers = [];
     const inputErrors = [];
     for (const item of raw) {
@@ -106,7 +110,7 @@ export default async function handler(req, res) {
       if (err) inputErrors.push({ ticker: item, error: err }); else tickers.push(t);
     }
     const compactMode = ['compact','boot','fast','mobile'].includes(String(q.mode || q.profile || '').toLowerCase());
-    const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, compactMode ? 4800 : 8200, 1000, 18000);
+    const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, compactMode ? 7200 : 10500, 1000, 22000);
     let batch = { assets: [], stats: {}, errors: [] };
     try {
       batch = await withRouteDeadline(
@@ -118,16 +122,18 @@ export default async function handler(req, res) {
       batch.errors = [{ scope: 'fetchAtivosBatch', error: err?.message || String(err) }];
     }
     const agendaOptions = {
-      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, compactMode ? 3800 : 9000, 1000, 18000),
-      historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, compactMode ? 12 : 36, 0, 72),
-      futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, compactMode ? 12 : 18, 0, 72),
+      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, compactMode ? 4200 : 10000, 1000, 20000),
+      historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, compactMode ? 24 : 48, 0, 72),
+      futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, compactMode ? 18 : 24, 0, 72),
       startDate: q.startDate || q.portfolioCreatedAt || q.createdAt,
-      concurrency: clampNumber(q.agendaConcurrency || q.concurrency, 4, 1, 8),
+      concurrency: clampNumber(q.agendaConcurrency || q.concurrency, 5, 1, 8),
+      futureFirst: boolParam(q.futureFirst || q.prioritizeFuture || q.upcomingFirst, true),
+      priority: q.priority || q.priorityMode || 'upcoming-first',
       assetClass: normalizeAgendaAssetClass(q.assetClass || q.type || q.classe) || assetClassFromPositions(q.positions),
     };
     const agenda = boolParam(q.includeUpcoming || q.complete || q.upcoming, true)
       ? await withRouteDeadline(
-          () => coalesce(`dividends:${tickers.slice().sort().join(',')}:${agendaOptions.historyMonths}:${agendaOptions.futureMonths}:${agendaOptions.assetClass || 'ALL'}:${compactMode ? 'fast' : 'normal'}`, () => fetchInvestidor10DividendAgenda(tickers, { ...agendaOptions, deadlineMs: Math.max(900, routeDeadlineMs - 650) })),
+          () => coalesce(`dividends:${tickers.slice().sort().join(',')}:${agendaOptions.historyMonths}:${agendaOptions.futureMonths}:${agendaOptions.assetClass || 'ALL'}:${compactMode ? 'fast' : 'normal'}`, () => fetchInvestidor10DividendAgenda(tickers, { ...agendaOptions, deadlineMs: Math.max(1200, routeDeadlineMs - 650) })),
           Math.max(900, routeDeadlineMs - 500),
           () => ({ events: [], diagnostics: [{ level: 'warning', message: `Agenda excedeu deadline de ${routeDeadlineMs}ms; retornando payload parcial/cacheável.` }], range: agendaOptions, partial: true })
         )
@@ -188,12 +194,13 @@ export default async function handler(req, res) {
       proventos: events,
       upcomingEvents,
       historyEvents,
-      agendaDiagnostics: agenda.diagnostics || [],
+      agendaDiagnostics: [...warnings, ...(agenda.diagnostics || [])],
       agendaRange: agenda.range || agendaOptions,
       partial: !!agenda.partial || !!batch.stats?.partial,
       deadlineMs: routeDeadlineMs,
       stats: batch.stats,
       errors: [...inputErrors, ...batch.errors],
+      warnings,
     }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'portfolio', cacheControl: 'private, max-age=30, stale-while-revalidate=300' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'portfolio' });

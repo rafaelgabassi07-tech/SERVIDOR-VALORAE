@@ -8,9 +8,9 @@ import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute, boolParam, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../../lib/http/route.js';
 import { coalesce } from '../../lib/resilience/inflight.js';
 
-const MAX_POSITIONS = Number(process.env.VALORAE_PORTFOLIO_INSIGHTS_MAX_POSITIONS || 30);
+const MAX_POSITIONS = Number(process.env.VALORAE_PORTFOLIO_INSIGHTS_MAX_POSITIONS || 45);
 const MAX_RANKING_TICKERS = Number(process.env.VALORAE_PORTFOLIO_INSIGHTS_RANKING_MAX_TICKERS || 15);
-const INSIGHTS_BUNDLE_VERSION = '21.12.85';
+const INSIGHTS_BUNDLE_VERSION = '21.12.87';
 
 function firstText(...values) {
   for (const v of values) {
@@ -75,6 +75,12 @@ function normalizeDividendEvent(row = {}, ticker = '', status = '') {
     source: firstText(row.source, 'Investidor10/VALORAE'),
   };
 }
+function eventDate(e = {}, kind = 'payment') {
+  const value = kind === 'eligibility'
+    ? firstText(e.dateCom, e.comDate, e.dataCom, e.recordDate, e.dataBase, e.paymentDate, e.payDate, e.dataPagamento)
+    : firstText(e.paymentDate, e.payDate, e.dataPagamento, e.date, e.data, e.dateCom, e.comDate, e.dataCom);
+  return parseBRDate(value) || parseAgendaDate(value);
+}
 function splitByPortfolio(events = [], positions = []) {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
@@ -84,12 +90,13 @@ function splitByPortfolio(events = [], positions = []) {
   for (const e of events) {
     const pos = positionsByTicker.get(canonicalizeTicker(e.ticker));
     const quantity = firstNumber(pos?.quantity, e.quantity);
-    const relevantDate = parseBRDate(e.paymentDate || e.dateCom) || parseAgendaDate(e.paymentDate || e.dateCom);
-    const isPast = relevantDate && relevantDate < today;
+    const paymentOrDisplayDate = eventDate(e, 'payment');
+    const eligibilityDate = eventDate(e, 'eligibility') || paymentOrDisplayDate;
+    const isPast = paymentOrDisplayDate && paymentOrDisplayDate < today;
     const firstPurchaseAt = Number(pos?.firstPurchaseAt || 0);
-    const eligiblePast = !isPast || !firstPurchaseAt || !relevantDate || firstPurchaseAt <= relevantDate.getTime() + 86_399_999;
+    const eligiblePast = !isPast || !firstPurchaseAt || !eligibilityDate || firstPurchaseAt <= eligibilityDate.getTime() + 86_399_999;
     const amount = quantity > 0 && Number(e.valuePerShare || 0) > 0 ? Number((quantity * Number(e.valuePerShare || 0)).toFixed(2)) : firstNumber(e.estimatedAmount, e.totalAmount, e.grossAmount);
-    const out = { ...e, quantity, estimatedAmount: amount, totalAmount: amount };
+    const out = { ...e, quantity, estimatedAmount: amount, totalAmount: amount, eligibilityDate: eligibilityDate ? eligibilityDate.toISOString().slice(0, 10) : undefined };
     if (isPast) {
       if (eligiblePast) received.push({ ...out, status: firstText(out.status, 'Recebido') });
     } else if (quantity > 0) {
@@ -105,7 +112,7 @@ function normalizeEvents(rawEvents = [], positions = []) {
     if (!event.ticker || (!event.dateCom && !event.paymentDate && !event.valuePerShare)) continue;
     byKey.set(eventKey(event), event);
   }
-  const officialEvents = [...byKey.values()].sort((a, b) => (parseBRDate(a.paymentDate || a.dateCom)?.getTime() || 0) - (parseBRDate(b.paymentDate || b.dateCom)?.getTime() || 0));
+  const officialEvents = [...byKey.values()].sort((a, b) => (eventDate(a, 'payment')?.getTime() || 0) - (eventDate(b, 'payment')?.getTime() || 0));
   const assetHistory = [...new Set(positions.map(p => canonicalizeTicker(p.ticker)).filter(Boolean))].map(ticker => {
     const events = officialEvents.filter(e => canonicalizeTicker(e.ticker) === ticker);
     const type = isKnownB3Unit(ticker) ? 'ACAO_UNIT' : inferAssetType(ticker);
@@ -153,18 +160,31 @@ export default async function handler(req, res) {
     const warnings = [];
     const positions = positionsRaw.length > MAX_POSITIONS ? positionsRaw.slice(0, MAX_POSITIONS) : positionsRaw;
     if (positionsRaw.length > MAX_POSITIONS) warnings.push({ scope: 'portfolio-insights-bundle', message: `Carteira com ${positionsRaw.length} ativos; processando ${MAX_POSITIONS} para preservar deadline mobile.` });
+    const dividendInputPositions = Array.isArray(q.dividendPositions) && q.dividendPositions.length ? q.dividendPositions : positionsRaw;
+    const dividendPositionsRaw = normalizePortfolioPositions({ positions: dividendInputPositions });
+    const dividendPositions = dividendPositionsRaw.length > MAX_POSITIONS ? dividendPositionsRaw.slice(0, MAX_POSITIONS) : dividendPositionsRaw;
+    if (dividendPositionsRaw.length > MAX_POSITIONS) warnings.push({ scope: 'portfolio-insights-bundle-dividends', message: `Agenda recebeu ${dividendPositionsRaw.length} ativos; processando ${MAX_POSITIONS} tickers balanceados.` });
     const tickers = [...new Set(positions.map(p => canonicalizeTicker(p.ticker)).filter(Boolean))];
+    const dividendTickers = [...new Set([
+      ...dividendPositions.map(p => canonicalizeTicker(p.ticker)),
+      ...String(q.dividendTickers || '').split(',').map(s => canonicalizeTicker(s.trim()))
+    ].filter(Boolean))];
     const inputErrors = [];
     const cleanTickers = [];
     for (const item of tickers) {
       const err = validarTicker(item);
       if (err) inputErrors.push({ ticker: item, error: err }); else cleanTickers.push(item);
     }
+    const cleanDividendTickers = [];
+    for (const item of (dividendTickers.length ? dividendTickers : tickers)) {
+      const err = validarTicker(item);
+      if (err) inputErrors.push({ ticker: item, error: err }); else cleanDividendTickers.push(item);
+    }
     const range = firstText(q.range, '1Y');
     const months = clampNumber(q.months || q.last || q.ipcaMonths, 12, 1, 120);
-    const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, deepMode ? 15000 : 5800, 1200, 22000);
+    const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, deepMode ? 15000 : 7800, 1200, 22000);
     const cache = !boolParam(q.nocache || q.refresh, false);
-    const signature = JSON.stringify({ p: positions.map(p => [canonicalizeTicker(p.ticker), Number(p.quantity || 0), Number(p.averagePrice || 0), Number(p.firstPurchaseAt || 0)]), range, months, deepMode, includeRankings, includeDividends });
+    const signature = JSON.stringify({ p: positions.map(p => [canonicalizeTicker(p.ticker), Number(p.quantity || 0), Number(p.averagePrice || 0), Number(p.firstPurchaseAt || 0)]), d: dividendPositions.map(p => [canonicalizeTicker(p.ticker), Number(p.quantity || 0), Number(p.firstPurchaseAt || 0)]), range, months, deepMode, includeRankings, includeDividends });
     const out = await coalesce(`portfolio-insights-bundle:${signature}`, async () => {
       const commonProfile = q.profile || (compactMode ? 'mobile' : 'portfolio');
       const analysisPromise = withRouteDeadline(
@@ -194,15 +214,17 @@ export default async function handler(req, res) {
       ).catch(err => ({ ok: false, partial: true, points: [], series: [], items: [], warnings: [err?.message || String(err)] }));
 
       const dividendsPromise = includeDividends ? withRouteDeadline(
-        () => fetchInvestidor10DividendAgenda(cleanTickers, {
-          timeoutMs: deepMode ? 8500 : 2200,
-          historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, deepMode ? 36 : 8, 0, 72),
-          futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, deepMode ? 18 : 12, 0, 72),
+        () => fetchInvestidor10DividendAgenda(cleanDividendTickers, {
+          timeoutMs: deepMode ? 11000 : 3600,
+          historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, deepMode ? 48 : 24, 0, 72),
+          futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, deepMode ? 24 : 18, 0, 72),
           startDate: q.startDate || q.portfolioCreatedAt || q.createdAt,
-          concurrency: clampNumber(q.agendaConcurrency || q.concurrency, compactMode ? 4 : 4, 1, 8),
-          deadlineMs: Math.min(routeDeadlineMs - 700, deepMode ? 11000 : 3200),
+          concurrency: clampNumber(q.agendaConcurrency || q.concurrency, compactMode ? 5 : 5, 1, 8),
+          futureFirst: true,
+          priority: 'upcoming-first',
+          deadlineMs: Math.min(routeDeadlineMs - 700, deepMode ? 12500 : 5200),
         }),
-        Math.min(routeDeadlineMs - 500, deepMode ? 11500 : 3400),
+        Math.min(routeDeadlineMs - 500, deepMode ? 13000 : 5600),
         () => ({ ok: false, partial: true, events: [], diagnostics: [{ level: 'warning', message: `Agenda de dividendos excedeu deadline do bundle; APK deve preservar cache oficial.` }] })
       ).catch(err => ({ ok: false, partial: true, events: [], diagnostics: [{ level: 'warning', message: err?.message || String(err) }] })) : Promise.resolve({ ok: true, events: [], diagnostics: [] });
 
@@ -221,7 +243,7 @@ export default async function handler(req, res) {
       ).catch(err => ({ ok: false, partial: true, ranking: [], rankings: {}, warnings: [err?.message || String(err)] })) : Promise.resolve({ ok: true, ranking: [], rankings: {} });
 
       const [analysis, history, ipca, dividendsRaw, rankingsRaw] = await Promise.all([analysisPromise, historyPromise, ipcaPromise, dividendsPromise, rankingsPromise]);
-      const dividends = normalizeEvents(dividendsRaw.events || dividendsRaw.items || [], positions);
+      const dividends = normalizeEvents(dividendsRaw.events || dividendsRaw.items || [], dividendPositions.length ? dividendPositions : positions);
       const ranking = sanitizeRanking(rankingsRaw, cleanTickers.slice(0, MAX_RANKING_TICKERS));
       const historyPoints = history.points || history.history || history.series || [];
       const ipcaPoints = ipca.points || ipca.series || ipca.items || [];
@@ -246,6 +268,8 @@ export default async function handler(req, res) {
         blockStatus,
         counts: {
           positions: positions.length,
+          dividendPositions: dividendPositions.length,
+          dividendTickers: cleanDividendTickers.length,
           truncatedPositions: Math.max(0, positionsRaw.length - positions.length),
           historyPoints: historyPoints.length,
           ipcaPoints: ipcaPoints.length,
