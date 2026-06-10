@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy v21.12.76: ponte opcional Supabase para snapshots/cache de carteira, sem dependência paga obrigatória.",
+  "description": "Proxy VALORAE otimizado para bootstrap mobile, cache stale-first, Supabase e montagem rápida de informações no APK.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -55,9 +55,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.78-supabase-auth-fullsync",
+    "releasePatch": "21.12.81-sync-performance-hardening",
     "freeOnly": true,
-    "notes": "Supabase Auth com e-mail/senha, JWT validado no Proxy, e persistência de transações, proventos e snapshots."
+    "notes": "Deadlines móveis, paralelização de dividendos, análise de carteira com deadline de rota e ajustes para reduzir latência percebida no APK."
   },
   "notes": "Supabase Auth com e-mail/senha, sincronização recuperável por conta e persistência de transações, proventos e snapshots."
 }

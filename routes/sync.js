@@ -7,10 +7,19 @@ const SNAPSHOT_TABLE = process.env.VALORAE_SUPABASE_SNAPSHOT_TABLE || 'valorae_u
 const CLIENTS_TABLE = process.env.VALORAE_SUPABASE_CLIENTS_TABLE || 'valorae_sync_clients';
 const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'valorae_transactions';
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
-const CORE_VERSION = '21.12.78-supabase-auth-fullsync';
+const CORE_VERSION = '21.12.81-sync-performance-hardening';
 
 function cleanUrl(raw = '') {
-  return String(raw || '').trim().replace(/\/+$/, '');
+  let value = String(raw || '').trim().replace(/\/+$/, '');
+  // Aceita SUPABASE_URL colada com /rest/v1, /auth/v1 etc. no Vercel e normaliza
+  // para a raiz do projeto. Isso evita chamadas quebradas como /rest/v1/rest/v1/tabela.
+  value = value
+    .replace(/\/rest\/v1\/?$/i, '')
+    .replace(/\/auth\/v1\/?$/i, '')
+    .replace(/\/storage\/v1\/?$/i, '')
+    .replace(/\/functions\/v1\/?$/i, '')
+    .replace(/\/+$/, '');
+  return value;
 }
 
 function getSupabaseConfig() {
@@ -103,6 +112,37 @@ function eventKey(userId, ev = {}) {
     ev.status || '',
   ].join('|');
   return crypto.createHash('sha256').update(raw).digest('hex');
+}
+
+function isLocalDividendProjection(ev = {}) {
+  const source = safeText(ev.source || ev.fonte || '', 240).toLowerCase();
+  const status = safeText(ev.status || '', 120).toLowerCase();
+  const payloadSource = safeText(ev.payload?.source || '', 240).toLowerCase();
+  const combined = `${source} ${status} ${payloadSource}`;
+  return combined.includes('previsão local') ||
+    combined.includes('previsao local') ||
+    combined.includes('estimativa local') ||
+    combined.includes('último provento conhecido') ||
+    combined.includes('ultimo provento conhecido');
+}
+
+function hasUsableDividendEvent(ev = {}) {
+  const ticker = safeText(ev.ticker || ev.symbol || '', 32);
+  const dateCom = safeText(ev.dateCom || ev.date_com || '', 40);
+  const paymentDate = safeText(ev.paymentDate || ev.payment_date || '', 40);
+  const value = Number(ev.valuePerShare ?? ev.value_per_share ?? ev.value ?? 0);
+  const amount = Number(ev.estimatedAmount ?? ev.estimated_amount ?? 0);
+  return Boolean(ticker) && Boolean(dateCom || paymentDate) && (Number.isFinite(value) && value > 0 || Number.isFinite(amount) && amount > 0);
+}
+
+async function purgeLocalDividendPredictions(userId) {
+  const encodedUser = encodeURIComponent(userId);
+  await Promise.all([
+    supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodedUser}&source=ilike.*local*`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }).catch(() => null),
+    supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodedUser}&status=ilike.*local*`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }).catch(() => null),
+    supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodedUser}&source=ilike.*estimativa*`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }).catch(() => null),
+    supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodedUser}&status=ilike.*previs*`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }).catch(() => null),
+  ]);
 }
 
 function safeClientCredentials(input = {}, req, { requireSecret = true } = {}) {
@@ -378,14 +418,18 @@ function dividendRow(userId, ev = {}) {
 async function upsertDividendEvents(input, auth) {
   const userId = auth.userId;
   const arr = Array.isArray(input.events) ? input.events : [];
-  const rows = arr.map((ev) => dividendRow(userId, ev)).filter((r) => r.ticker);
-  if (!rows.length) return { ok: true, count: 0, message: 'Nenhum provento para salvar.' };
+  await purgeLocalDividendPredictions(userId);
+  const rows = arr
+    .filter((ev) => !isLocalDividendProjection(ev) && hasUsableDividendEvent(ev))
+    .map((ev) => dividendRow(userId, ev))
+    .filter((r) => r.ticker);
+  if (!rows.length) return { ok: true, count: 0, message: 'Nenhum provento real para salvar. Previsões locais foram ignoradas.' };
   await supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?on_conflict=user_id,event_key`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
     body: JSON.stringify(rows),
   });
-  return { ok: true, count: rows.length };
+  return { ok: true, count: rows.length, ignoredLocalProjections: Math.max(0, arr.length - rows.length) };
 }
 
 async function getDividendEvents(input, auth) {

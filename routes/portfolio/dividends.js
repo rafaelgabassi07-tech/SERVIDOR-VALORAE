@@ -129,31 +129,43 @@ export default async function handler(req, res) {
     if (!tickers.length) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: 'Nenhum ticker válido enviado.', errors }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'portfolio' });
     const compactMode = ['compact','boot','fast','mobile'].includes(String(q.mode || q.profile || '').toLowerCase());
     const routeDeadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs, compactMode ? 5200 : 8200, 1000, 18000);
-    let batch = { assets: [], stats: {}, errors: [] };
-    try {
-      batch = await withRouteDeadline(
-        () => ValoraeEngine.fetchAtivosBatch(tickers, { mode: compactMode ? 'turbo' : (q.mode || 'super'), includeNews: false, view: 'compact', maxConcurrency: clampNumber(q.maxConcurrency || q.concurrency, compactMode ? 3 : 4, 1, 6), cache: !boolParam(q.nocache || q.refresh), valoraeScrapeUrl: resolveSelfScrapeUrl(req, q), profile: q.profile || (compactMode ? 'fast' : 'portfolio'), timeoutMs: compactMode ? 2200 : clampNumber(q.timeoutMs, 4500, 1000, 12000) }),
-        Math.max(900, Math.min(routeDeadlineMs - 800, compactMode ? 2600 : 4500)),
-        () => ({ assets: [], stats: { partial: true, timeout: true, scope: 'fetchAtivosBatch' }, errors: [{ scope: 'fetchAtivosBatch', error: 'Deadline parcial atingido; continuando com agenda e cache.' }] })
-      );
-    } catch (err) {
-      batch.errors = [{ scope: 'fetchAtivosBatch', error: err?.message || String(err) }];
-    }
     const agendaOptions = {
-      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, compactMode ? 4200 : 6500, 1000, 18000),
+      timeoutMs: clampNumber(q.timeoutMs || q.agendaTimeoutMs, compactMode ? 3600 : 6500, 1000, 18000),
       historyMonths: clampNumber(q.historyMonths || q.monthsBack || q.pastMonths, compactMode ? 12 : 36, 0, 72),
       futureMonths: clampNumber(q.futureMonths || q.monthsForward || q.horizonMonths, compactMode ? 12 : 18, 0, 72),
       startDate: q.startDate || q.portfolioCreatedAt || q.createdAt,
-      concurrency: clampNumber(q.agendaConcurrency || q.concurrency, 4, 1, 8),
+      concurrency: clampNumber(q.agendaConcurrency || q.concurrency, compactMode ? 5 : 4, 1, 8),
       assetClass: normalizeAgendaAssetClass(q.assetClass || q.type || q.classe) || assetClassFromPositions(q.positions),
     };
-    const agenda = boolParam(q.includeUpcoming || q.complete || q.upcoming, true)
-      ? await withRouteDeadline(
+
+    // Rodar fundamentos e agenda em paralelo é essencial para mobile: antes o handler
+    // gastava um deadline no batch e só depois começava a agenda, dobrando a latência
+    // percebida no APK. Cada bloco preserva fallback parcial e a resposta chega mais cedo.
+    const batchPromise = withRouteDeadline(
+      () => ValoraeEngine.fetchAtivosBatch(tickers, {
+        mode: compactMode ? 'turbo' : (q.mode || 'super'),
+        includeNews: false,
+        view: 'compact',
+        maxConcurrency: clampNumber(q.maxConcurrency || q.concurrency, compactMode ? 4 : 4, 1, 6),
+        cache: !boolParam(q.nocache || q.refresh),
+        valoraeScrapeUrl: resolveSelfScrapeUrl(req, q),
+        profile: q.profile || (compactMode ? 'fast' : 'portfolio'),
+        timeoutMs: compactMode ? 1800 : clampNumber(q.timeoutMs, 4500, 1000, 12000),
+        continueOnError: true,
+      }),
+      Math.max(800, Math.min(routeDeadlineMs - 900, compactMode ? 2100 : 4500)),
+      () => ({ assets: [], stats: { partial: true, timeout: true, scope: 'fetchAtivosBatch' }, errors: [{ scope: 'fetchAtivosBatch', error: 'Deadline parcial atingido; continuando com agenda e cache.' }] })
+    ).catch(err => ({ assets: [], stats: { partial: true, error: true, scope: 'fetchAtivosBatch' }, errors: [{ scope: 'fetchAtivosBatch', error: err?.message || String(err) }] }));
+
+    const agendaPromise = boolParam(q.includeUpcoming || q.complete || q.upcoming, true)
+      ? withRouteDeadline(
           () => fetchInvestidor10DividendAgenda(tickers, agendaOptions),
           Math.max(900, routeDeadlineMs - 500),
           () => ({ events: [], diagnostics: [{ level: 'warning', message: `Agenda excedeu deadline de ${routeDeadlineMs}ms; retornando payload parcial/cacheável.` }], range: agendaOptions, partial: true })
-        )
-      : { events: [], diagnostics: [], range: agendaOptions };
+        ).catch(err => ({ events: [], diagnostics: [{ level: 'warning', message: err?.message || String(err) }], range: agendaOptions, partial: true }))
+      : Promise.resolve({ events: [], diagnostics: [], range: agendaOptions });
+
+    const [batch, agenda] = await Promise.all([batchPromise, agendaPromise]);
     const agendaByTicker = new Map();
     for (const ev of agenda.events || []) {
       const k = canonicalizeTicker(ev.ticker);
