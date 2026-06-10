@@ -27,7 +27,7 @@ function firstNumber(...values) {
 }
 function parseBRDate(d) {
   const s = String(d || '').trim();
-  const br = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})/);
+  const br = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})/);
   if (br) {
     const y = String(br[3]).length === 2 ? `20${br[3]}` : br[3];
     return new Date(`${y}-${String(br[2]).padStart(2, '0')}-${String(br[1]).padStart(2, '0')}T00:00:00Z`);
@@ -36,6 +36,30 @@ function parseBRDate(d) {
   if (iso) return new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00Z`);
   return null;
 }
+
+function formatBRDateUTC(date) {
+  if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return '';
+  return `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()}`;
+}
+function previousBusinessDayText(raw = '') {
+  const d = parseBRDate(raw);
+  if (!d) return '';
+  const out = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  do { out.setUTCDate(out.getUTCDate() - 1); } while (out.getUTCDay() === 0 || out.getUTCDay() === 6);
+  return formatBRDateUTC(out);
+}
+function resolveDividendDates(row = {}) {
+  const explicitDateCom = firstText(row.dateCom, row.comDate, row.dataCom, row.data_com, row.recordDate, row.dataBase, row.baseDate, row.lastDateCom);
+  const exDate = firstText(row.exDate, row.dataEx, row.exDividendDate, row.dataExProvento, row.dateEx);
+  const paymentDirect = firstText(row.paymentDate, row.payDate, row.dataPagamento, row.data_pagamento, row.dataPagamentoPrevista, row.dataPagto, row.pagamento, row.pgto);
+  const genericDate = firstText(row.date, row.data);
+  const statusText = firstText(row.status, row.paymentStatus, row.situacao, row.state, row.kind).toLowerCase();
+  const genericLooksLikePayment = Boolean(genericDate) && (Boolean(explicitDateCom || exDate || paymentDirect) || /pag|pago|pay|receb|confirm|liquid/.test(statusText));
+  const dateCom = explicitDateCom || previousBusinessDayText(exDate) || (!paymentDirect && !genericLooksLikePayment ? genericDate : '');
+  const paymentDate = paymentDirect || (genericLooksLikePayment ? genericDate : '');
+  return { dateCom, paymentDate, exDate, eligibilityDateSource: explicitDateCom ? 'dateCom' : exDate ? 'exDate-previous-business-day' : dateCom ? 'generic-date' : '' };
+}
+
 function splitDividendEvents(events = []) {
   const today = new Date(); today.setUTCHours(0, 0, 0, 0);
   const pending = e => !firstText(e.paymentDate, e.dataPagamento, e.payDate) && /prev|futur|agenda|provision|anunci|a confirmar|sem data|confirm|dividend|rendimento|jcp|jscp/i.test(firstText(e.status, e.paymentStatus, e.type, e.kind, e.dateCom, e.dataCom));
@@ -52,12 +76,11 @@ function splitDividendEvents(events = []) {
 }
 function normalizeDividendEvent(row = {}, ticker = '', status = '') {
   const valuePerShare = firstNumber(row.valuePerShare, row.valorPorCota, row.valorPorAcao, row.valor, row.value, row.amount, row.dividend, row.rendimento, row.provento, row.cashAmount);
-  const type = firstText(row.type, row.tipo, row.kind, 'Provento');
+  const dividendType = firstText(row.dividendType, row.type, row.tipo, row.kind, row.eventType, 'Provento');
   const tickerOut = firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase();
-  const dateCom = firstText(row.dateCom, row.comDate, row.dataCom, row.recordDate, row.dataBase);
-  const paymentDate = firstText(row.paymentDate, row.payDate, row.dataPagamento, row.dataPagamentoPrevista, row.dataPagto, row.date, row.data);
+  const { dateCom, paymentDate, exDate, eligibilityDateSource } = resolveDividendDates(row);
   const confirmed = Boolean(paymentDate);
-  const provisioned = !confirmed && /provision|anunci|jscp|jcp|dividend|rendimento|amort/i.test(firstText(row.paymentStatus, row.status, type));
+  const provisioned = !confirmed && /provision|anunci|jscp|jcp|dividend|rendimento|amort/i.test(firstText(row.paymentStatus, row.status, row.situacao, dividendType));
   const finalStatus = firstText(row.status, status, confirmed ? 'Confirmado' : provisioned ? 'Anunciado/Provisionado' : 'Anunciado');
   return {
     ticker: tickerOut,
@@ -75,10 +98,12 @@ function normalizeDividendEvent(row = {}, ticker = '', status = '') {
     value: valuePerShare,
     amount: valuePerShare,
     valor: valuePerShare,
-    type,
-    kind: type,
-    tipo: type,
-    dividendType: type,
+    type: dividendType,
+    kind: dividendType,
+    tipo: dividendType,
+    dividendType,
+    exDate,
+    eligibilityDateSource,
     status: finalStatus,
     paymentStatus: confirmed ? 'CONFIRMED' : provisioned ? 'PROVISIONED' : 'ANNOUNCED',
     announcementStatus: 'ANNOUNCED',

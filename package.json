@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE otimizado com limpeza de código, contratos de release consistentes e fluxo APK/Proxy validado.",
+  "description": "Proxy VALORAE simplificado por contrato mobile único, lógica centralizada de proventos e redução de fallbacks pesados.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -55,9 +55,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.88-agenda-evolution-logic-fix",
+    "releasePatch": "21.12.93-valorae-native-contract-polish",
     "freeOnly": true,
-    "notes": "Agenda de dividendos futura ampliada, evolução retroativa por data-com, dividendPositions no bundle e limpeza de fluxo APK/Proxy."
+    "notes": "Contrato mobile nativo VALORAE: blocos opcionais respeitados, rankings leves por padrão, coalescing por flags e identidade preservada."
   },
   "notes": "Supabase Auth com e-mail/senha, sincronização recuperável por conta e persistência de transações, proventos e snapshots."
 }

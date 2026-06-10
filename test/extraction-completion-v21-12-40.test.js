@@ -3,7 +3,7 @@ import { ValoraeEngine } from '../lib/Valorae-engine.js';
 
 const originalFetch = globalThis.fetch;
 
-function investorHtml(ticker = 'PETR4') {
+function invaloraerHtml(ticker = 'PETR4') {
   return `<!doctype html><html><head><title>${ticker} | Investidor10</title></head><body>
     <h1>${ticker} Petrobras PN</h1>
     <section>
@@ -34,7 +34,7 @@ try {
       });
     }
     if (String(url).includes('investidor10.com.br')) {
-      return new Response(investorHtml('PETR4'), { status: 200, headers: { 'content-type': 'text/html' } });
+      return new Response(invaloraerHtml('PETR4'), { status: 200, headers: { 'content-type': 'text/html' } });
     }
     return jsonResponse({ chart: { result: [] } }, { status: 404 });
   };

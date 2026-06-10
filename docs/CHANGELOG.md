@@ -8,7 +8,7 @@
 
 # v21.12.59 — Rankings Investidor10 próprios e captura completa
 
-- Substitui o mecanismo simples de rankings por um extrator próprio do VALORAE Proxy, baseado nas mesmas páginas que o AeroScraper usa no Investidor10: `maiores-altas` e `maiores-baixas`.
+- Substitui o mecanismo simples de rankings por um extrator próprio do VALORAE Proxy, baseado nas mesmas páginas que o VALORAE usa no Investidor10: `maiores-altas` e `maiores-baixas`.
 - Adiciona fallback para a home do Investidor10 quando as páginas dedicadas falharem, mantendo stale-if-error e sem criar dados sintéticos.
 - Entrega aliases compatíveis com o APK VALORAE Carteira: `altas/baixas`, `highs/lows`, `gainers/losers`, `topGainers/topLosers` e `maioresAltas/maioresBaixas`.
 - Adiciona `mode=complete`, `strict=1`, `limit` e `minRows` em `/api/v1/market/rankings` para exigir captura com ticker, preço e variação.

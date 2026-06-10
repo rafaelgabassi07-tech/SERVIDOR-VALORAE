@@ -9,7 +9,7 @@ function jsonResponse(data, init = {}) {
   return new Response(JSON.stringify(data), { status: init.status || 200, headers: { 'content-type': 'application/json' } });
 }
 
-function richInvestorHtml(price = '32,45') {
+function richInvaloraerHtml(price = '32,45') {
   return `<!doctype html><html><body>
     <h1>PETR4 Petrobras PN</h1>
     <section>
@@ -54,10 +54,10 @@ try {
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), method: init.method || 'GET' });
     if (String(url).includes('/api/scrape')) {
-      return jsonResponse({ status: 200, html: richInvestorHtml('32,45') });
+      return jsonResponse({ status: 200, html: richInvaloraerHtml('32,45') });
     }
     if (String(url).includes('investidor10.com.br')) {
-      return new Response(richInvestorHtml('32,45'), { status: 200, headers: { 'content-type': 'text/html' } });
+      return new Response(richInvaloraerHtml('32,45'), { status: 200, headers: { 'content-type': 'text/html' } });
     }
     return jsonResponse({ chart: { result: [] } }, { status: 404 });
   };

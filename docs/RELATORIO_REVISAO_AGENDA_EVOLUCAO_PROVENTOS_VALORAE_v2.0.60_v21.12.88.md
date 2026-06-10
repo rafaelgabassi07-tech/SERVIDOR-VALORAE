@@ -1,6 +1,6 @@
 # Relatório técnico — Revisão final da Agenda de Dividendos e Evolução de Proventos
 
-**Entrega:** APK VALORAE `v2.0.60` + VALORAE Proxy `v21.12.88`  
+**Entrega:** APK VALORAE `v2.0.60` + VALORAE Proxy `v21.12.89`  
 **Foco:** corrigir a arquitetura de dados de proventos para que Agenda e Evolução bebam da mesma fonte oficial, mas cada tela aplique sua própria regra de carteira.  
 **Princípio adotado:** Proxy busca e preserva o universo oficial; APK calcula elegibilidade e montagem por tela.
 
@@ -50,7 +50,7 @@ Evolução de Proventos:
 
 ---
 
-## 3. Correções aplicadas no Proxy `v21.12.88`
+## 3. Correções aplicadas no Proxy `v21.12.89`
 
 ### 3.1 `/api/v1/dividends/batch`
 
@@ -74,7 +74,7 @@ Evolução de Proventos:
 
 ### 3.3 Limpeza e consistência de versão
 
-- Release pública atualizada para `21.12.88-agenda-evolution-logic-fix`.
+- Release pública atualizada para `21.12.89-agenda-evolution-final-validation`.
 - Monitor, service worker, manifesto e metadados mantidos consistentes.
 - Adicionado script de verificação:
 
@@ -166,17 +166,17 @@ npm run check: 297 arquivos JS verificados
 npm test: 93 arquivos executados; falhas=0
 npm run build: Build OK para Vercel
 npm run smoke: Smoke OK
-verificação estática v21.12.88: OK
+verificação estática v21.12.89: OK
 ```
 
 Logs:
 
 ```text
-docs/PROXY_CHECK_AGENDA_EVOLUTION_v21.12.88.log
-docs/PROXY_TEST_AGENDA_EVOLUTION_v21.12.88.log
-docs/PROXY_BUILD_AGENDA_EVOLUTION_v21.12.88.log
-docs/PROXY_SMOKE_AGENDA_EVOLUTION_v21.12.88.log
-docs/PROXY_STATIC_AGENDA_EVOLUTION_v21.12.88.log
+docs/PROXY_CHECK_AGENDA_EVOLUTION_v21.12.89.log
+docs/PROXY_TEST_AGENDA_EVOLUTION_v21.12.89.log
+docs/PROXY_BUILD_AGENDA_EVOLUTION_v21.12.89.log
+docs/PROXY_SMOKE_AGENDA_EVOLUTION_v21.12.89.log
+docs/PROXY_STATIC_AGENDA_EVOLUTION_v21.12.89.log
 ```
 
 ### APK
@@ -213,8 +213,8 @@ Arquivos de detalhe:
 
 ```text
 APK: app/docs/ARQUIVOS_ALTERADOS_AGENDA_EVOLUTION_v2.0.60.txt
-Proxy: docs/ARQUIVOS_ALTERADOS_AGENDA_EVOLUTION_v21.12.88.txt
-JSON: CHANGE_STATS_v2.0.60_v21.12.88.json
+Proxy: docs/ARQUIVOS_ALTERADOS_AGENDA_EVOLUTION_v21.12.89.txt
+JSON: CHANGE_STATS_v2.0.60_v21.12.89.json
 ```
 
 ---

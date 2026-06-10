@@ -4,7 +4,7 @@ import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-d
 import { coalesce } from '../../lib/resilience/inflight.js';
 import { beginRoute, boolParam, resolveSelfScrapeUrl, sendRouteError, clampNumber } from '../../lib/http/route.js';
 
-function parseBRDate(d) { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{2}|\d{4})/); if (!m) return null; const y = String(m[3]).length === 2 ? `20${m[3]}` : m[3]; return new Date(`${y}-${m[2]}-${m[1]}T00:00:00Z`); }
+function parseBRDate(d) { const m = String(d || '').match(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})/); if (!m) return null; const y = String(m[3]).length === 2 ? `20${m[3]}` : m[3]; return new Date(`${y}-${m[2]}-${m[1]}T00:00:00Z`); }
 
 export default async function handler(req, res) {
   const route = beginRoute(req, res, { version: ValoraeEngine.version, methods: ['GET', 'POST'], route: 'asset-next-dividend', rateMax: Number(process.env.VALORAE_RATE_LIMIT_DIVIDENDS_MAX || 90), profile: 'next-dividend' });

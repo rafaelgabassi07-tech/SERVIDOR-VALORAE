@@ -1,0 +1,46 @@
+{
+  "release": {
+    "apk": "2.0.65",
+    "proxy": "21.12.93"
+  },
+  "withoutGeneratedLogsReports": [
+    {
+      "project": "APK",
+      "filesChanged": 48,
+      "linesAdded": 66,
+      "linesRemoved": 1973
+    },
+    {
+      "project": "Proxy",
+      "filesChanged": 47,
+      "linesAdded": 138,
+      "linesRemoved": 1007
+    },
+    {
+      "project": "Total",
+      "filesChanged": 95,
+      "linesAdded": 204,
+      "linesRemoved": 2980
+    }
+  ],
+  "includingGeneratedLogsReports": [
+    {
+      "project": "APK",
+      "filesChanged": 67,
+      "linesAdded": 137,
+      "linesRemoved": 6059
+    },
+    {
+      "project": "Proxy",
+      "filesChanged": 75,
+      "linesAdded": 180,
+      "linesRemoved": 4916
+    },
+    {
+      "project": "Total",
+      "filesChanged": 142,
+      "linesAdded": 317,
+      "linesRemoved": 10975
+    }
+  ]
+}

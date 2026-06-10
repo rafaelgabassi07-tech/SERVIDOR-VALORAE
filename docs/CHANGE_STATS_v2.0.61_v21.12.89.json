@@ -1,0 +1,325 @@
+{
+  "apk_excluding_logs_reports": {
+    "files_changed": 7,
+    "lines_added": 152,
+    "lines_removed": 43,
+    "files": [
+      {
+        "path": "{baseline_apk => apk}/app/build.gradle.kts",
+        "added": 2,
+        "removed": 2
+      },
+      {
+        "path": "{baseline_apk => apk}/app/src/main/java/com/example/network/B3NetworkService.kt",
+        "added": 91,
+        "removed": 23
+      },
+      {
+        "path": "{baseline_apk => apk}/app/src/main/java/com/example/viewmodel/PortfolioViewModel.kt",
+        "added": 3,
+        "removed": 0
+      },
+      {
+        "path": "{baseline_apk => apk}/metadata.json",
+        "added": 12,
+        "removed": 12
+      },
+      {
+        "path": "/dev/null => apk/scripts/verify_valorae_agenda_evolution_v2061.py",
+        "added": 38,
+        "removed": 0
+      },
+      {
+        "path": "{baseline_apk => apk}/update.json",
+        "added": 3,
+        "removed": 3
+      },
+      {
+        "path": "{baseline_apk => apk}/version.json",
+        "added": 3,
+        "removed": 3
+      }
+    ]
+  },
+  "proxy_excluding_logs_reports": {
+    "files_changed": 16,
+    "lines_added": 303,
+    "lines_removed": 80,
+    "files": [
+      {
+        "path": "{baseline_proxy => proxy}/lib/Valorae-engine.js",
+        "added": 5,
+        "removed": 3
+      },
+      {
+        "path": "{baseline_proxy => proxy}/lib/market/investidor10-dividend-agenda.js",
+        "added": 18,
+        "removed": 5
+      },
+      {
+        "path": "{baseline_proxy => proxy}/lib/release/current.js",
+        "added": 4,
+        "removed": 4
+      },
+      {
+        "path": "{baseline_proxy => proxy}/metadata.json",
+        "added": 7,
+        "removed": 7
+      },
+      {
+        "path": "{baseline_proxy => proxy}/package.json",
+        "added": 1,
+        "removed": 1
+      },
+      {
+        "path": "{baseline_proxy => proxy}/public/index.html",
+        "added": 8,
+        "removed": 8
+      },
+      {
+        "path": "{baseline_proxy => proxy}/public/manifest.webmanifest",
+        "added": 2,
+        "removed": 2
+      },
+      {
+        "path": "{baseline_proxy => proxy}/public/server.html",
+        "added": 8,
+        "removed": 8
+      },
+      {
+        "path": "{baseline_proxy => proxy}/public/service-worker.js",
+        "added": 2,
+        "removed": 2
+      },
+      {
+        "path": "{baseline_proxy => proxy}/routes/dividends/batch.js",
+        "added": 45,
+        "removed": 11
+      },
+      {
+        "path": "{baseline_proxy => proxy}/routes/portfolio/dividends.js",
+        "added": 33,
+        "removed": 8
+      },
+      {
+        "path": "{baseline_proxy => proxy}/routes/portfolio/insights-bundle.js",
+        "added": 45,
+        "removed": 10
+      },
+      {
+        "path": "{baseline_proxy => proxy}/routes/portfolio/next-dividends.js",
+        "added": 33,
+        "removed": 8
+      },
+      {
+        "path": "{baseline_proxy => proxy}/scripts/verify-dividend-agenda-evolution-v21-12-88.mjs",
+        "added": 3,
+        "removed": 3
+      },
+      {
+        "path": "/dev/null => proxy/scripts/verify-dividend-agenda-evolution-v21-12-89.js",
+        "added": 68,
+        "removed": 0
+      },
+      {
+        "path": "/dev/null => proxy/scripts/verify-dividend-agenda-evolution-v21-12-89.mjs",
+        "added": 21,
+        "removed": 0
+      }
+    ]
+  },
+  "apk_all": {
+    "files_changed": 11,
+    "lines_added": 208,
+    "lines_removed": 59,
+    "files": [
+      {
+        "path": "{baseline_apk => apk}/app/build.gradle.kts",
+        "added": 2,
+        "removed": 2
+      },
+      {
+        "path": "/dev/null => apk/app/docs/APK_BUILD_ATTEMPT_AGENDA_EVOLUTION_v2.0.61.log",
+        "added": 21,
+        "removed": 0
+      },
+      {
+        "path": "/dev/null => apk/app/docs/APK_STATIC_AGENDA_EVOLUTION_v2.0.61.log",
+        "added": 19,
+        "removed": 0
+      },
+      {
+        "path": "{baseline_apk => apk}/app/docs/CHANGE_STATS_v2.0.60_v21.12.88.json",
+        "added": 1,
+        "removed": 1
+      },
+      {
+        "path": "{baseline_apk => apk}/app/docs/RELATORIO_REVISAO_AGENDA_EVOLUCAO_PROVENTOS_VALORAE_v2.0.60_v21.12.88.md",
+        "added": 15,
+        "removed": 15
+      },
+      {
+        "path": "{baseline_apk => apk}/app/src/main/java/com/example/network/B3NetworkService.kt",
+        "added": 91,
+        "removed": 23
+      },
+      {
+        "path": "{baseline_apk => apk}/app/src/main/java/com/example/viewmodel/PortfolioViewModel.kt",
+        "added": 3,
+        "removed": 0
+      },
+      {
+        "path": "{baseline_apk => apk}/metadata.json",
+        "added": 12,
+        "removed": 12
+      },
+      {
+        "path": "/dev/null => apk/scripts/verify_valorae_agenda_evolution_v2061.py",
+        "added": 38,
+        "removed": 0
+      },
+      {
+        "path": "{baseline_apk => apk}/update.json",
+        "added": 3,
+        "removed": 3
+      },
+      {
+        "path": "{baseline_apk => apk}/version.json",
+        "added": 3,
+        "removed": 3
+      }
+    ]
+  },
+  "proxy_all": {
+    "files_changed": 25,
+    "lines_added": 526,
+    "lines_removed": 92,
+    "files": [
+      {
+        "path": "{baseline_proxy => proxy}/docs/CHANGE_STATS_v2.0.60_v21.12.88.json",
+        "added": 1,
+        "removed": 1
+      },
+      {
+        "path": "/dev/null => proxy/docs/PROXY_AGENDA_EVOLUTION_SCENARIOS_v21.12.89.log",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "/dev/null => proxy/docs/PROXY_AGENDA_EVOLUTION_SCENARIOS_v21.12.89.status",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "/dev/null => proxy/docs/PROXY_BUILD_v21.12.89.log",
+        "added": 10,
+        "removed": 0
+      },
+      {
+        "path": "/dev/null => proxy/docs/PROXY_BUILD_v21.12.89.status",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "/dev/null => proxy/docs/PROXY_CHECK_v21.12.89.log",
+        "added": 5,
+        "removed": 0
+      },
+      {
+        "path": "/dev/null => proxy/docs/PROXY_TEST_v21.12.89.log",
+        "added": 192,
+        "removed": 0
+      },
+      {
+        "path": "/dev/null => proxy/docs/PROXY_TEST_v21.12.89.status",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "{baseline_proxy => proxy}/docs/RELATORIO_REVISAO_AGENDA_EVOLUCAO_PROVENTOS_VALORAE_v2.0.60_v21.12.88.md",
+        "added": 11,
+        "removed": 11
+      },
+      {
+        "path": "{baseline_proxy => proxy}/lib/Valorae-engine.js",
+        "added": 5,
+        "removed": 3
+      },
+      {
+        "path": "{baseline_proxy => proxy}/lib/market/investidor10-dividend-agenda.js",
+        "added": 18,
+        "removed": 5
+      },
+      {
+        "path": "{baseline_proxy => proxy}/lib/release/current.js",
+        "added": 4,
+        "removed": 4
+      },
+      {
+        "path": "{baseline_proxy => proxy}/metadata.json",
+        "added": 7,
+        "removed": 7
+      },
+      {
+        "path": "{baseline_proxy => proxy}/package.json",
+        "added": 1,
+        "removed": 1
+      },
+      {
+        "path": "{baseline_proxy => proxy}/public/index.html",
+        "added": 8,
+        "removed": 8
+      },
+      {
+        "path": "{baseline_proxy => proxy}/public/manifest.webmanifest",
+        "added": 2,
+        "removed": 2
+      },
+      {
+        "path": "{baseline_proxy => proxy}/public/server.html",
+        "added": 8,
+        "removed": 8
+      },
+      {
+        "path": "{baseline_proxy => proxy}/public/service-worker.js",
+        "added": 2,
+        "removed": 2
+      },
+      {
+        "path": "{baseline_proxy => proxy}/routes/dividends/batch.js",
+        "added": 45,
+        "removed": 11
+      },
+      {
+        "path": "{baseline_proxy => proxy}/routes/portfolio/dividends.js",
+        "added": 33,
+        "removed": 8
+      },
+      {
+        "path": "{baseline_proxy => proxy}/routes/portfolio/insights-bundle.js",
+        "added": 45,
+        "removed": 10
+      },
+      {
+        "path": "{baseline_proxy => proxy}/routes/portfolio/next-dividends.js",
+        "added": 33,
+        "removed": 8
+      },
+      {
+        "path": "{baseline_proxy => proxy}/scripts/verify-dividend-agenda-evolution-v21-12-88.mjs",
+        "added": 3,
+        "removed": 3
+      },
+      {
+        "path": "/dev/null => proxy/scripts/verify-dividend-agenda-evolution-v21-12-89.js",
+        "added": 68,
+        "removed": 0
+      },
+      {
+        "path": "/dev/null => proxy/scripts/verify-dividend-agenda-evolution-v21-12-89.mjs",
+        "added": 21,
+        "removed": 0
+      }
+    ]
+  }
+}

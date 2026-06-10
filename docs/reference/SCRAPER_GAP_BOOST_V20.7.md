@@ -54,9 +54,9 @@ curl -X POST "https://valorae-proxy.vercel.app/api/compat/scraper4" \
 ```
 
 
-### Atualização v21.12.59 — rankings iguais ao AeroScraper sem depender dele
+### Atualização v21.12.59 — rankings iguais ao VALORAE sem depender dele
 
-O endpoint de rankings agora usa primeiro as páginas específicas usadas pelo AeroScraper:
+O endpoint de rankings agora usa primeiro as páginas específicas usadas pelo VALORAE:
 
 ```text
 https://investidor10.com.br/acoes/rankings/maiores-altas/

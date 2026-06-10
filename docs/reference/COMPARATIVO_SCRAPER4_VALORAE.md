@@ -4,7 +4,7 @@
 
 O Scraper (4).js é forte em performance operacional porque usa cache final, coalescing de chamadas em andamento, retries com backoff e um modelo de multi-selector em uma única chamada externa. O Valorae-engine.js v20.0 mantém a vantagem principal do projeto Valorae: é self-contained, versionado, com diagnóstico de fontes, fallback por fonte, parser específico por tipo de ativo e JSON mais estruturado para ações/FIIs.
 
-A v20.0 incorpora os pontos fortes úteis do Scraper (4), mas evita sua dependência obrigatória do AeroScrape externo.
+A v20.0 incorpora os pontos fortes úteis do Scraper (4), mas evita sua dependência obrigatória do VALORAE externo.
 
 ## Melhorias aplicadas na v20.0
 

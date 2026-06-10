@@ -6,7 +6,7 @@ Esta versão foca nas fraquezas restantes do Valorae quando comparado ao `Scrape
 
 1. **Seletores customizados em `/api/scrape` e `/api/batch-scrape`**
 
-O Scraper tinha vantagem por aceitar multi-selectors no AeroScrape. O Valorae agora aceita um subconjunto seguro de seletores simples em `selectors`:
+O Scraper tinha vantagem por aceitar multi-selectors no VALORAE. O Valorae agora aceita um subconjunto seguro de seletores simples em `selectors`:
 
 ```json
 {

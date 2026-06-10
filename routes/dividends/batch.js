@@ -1,8 +1,17 @@
 import { ValoraeEngine, canonicalizeTicker, validarTicker, inferAssetType, isKnownB3Unit } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
-import { fetchInvestidor10DividendAgenda, parseAgendaDate } from '../../lib/market/investidor10-dividend-agenda.js';
+import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-dividend-agenda.js';
 import { beginRoute, boolParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../../lib/http/route.js';
 import { coalesce } from '../../lib/resilience/inflight.js';
+import {
+  eventKey,
+  normalizeDividendEvent,
+  dividendHistoryFromAsset,
+  normalizeAgendaAssetClass,
+  eventDate,
+  splitOfficialByPaymentStatus,
+  splitByPortfolio,
+} from '../../lib/portfolio/dividends-contract.js';
 
 const MAX_TICKERS = Number(process.env.VALORAE_DIVIDENDS_BATCH_MAX_TICKERS || process.env.VALORAE_PORTFOLIO_DIVIDENDS_MAX_TICKERS || 45);
 const officialDividendCache = globalThis.__VALORAE_OFFICIAL_DIVIDEND_CACHE__ || new Map();
@@ -10,91 +19,6 @@ globalThis.__VALORAE_OFFICIAL_DIVIDEND_CACHE__ = officialDividendCache;
 const OFFICIAL_CACHE_TTL_MS = Number(process.env.VALORAE_OFFICIAL_DIVIDEND_TTL_MS || 24 * 60 * 60 * 1000);
 const OFFICIAL_CACHE_STALE_MS = Number(process.env.VALORAE_OFFICIAL_DIVIDEND_STALE_MS || 7 * 24 * 60 * 60 * 1000);
 
-function firstText(...values) {
-  for (const v of values) {
-    if (v === null || v === undefined) continue;
-    const s = String(v).trim();
-    if (s) return s;
-  }
-  return '';
-}
-function firstNumber(...values) {
-  for (const v of values) {
-    if (v === null || v === undefined || v === '') continue;
-    if (typeof v === 'number' && Number.isFinite(v)) return v;
-    const s = String(v).replace(/R\$/gi, '').replace(/%/g, '').trim();
-    const n = Number(s.includes(',') ? s.replace(/\./g, '').replace(',', '.') : s);
-    if (Number.isFinite(n)) return n;
-  }
-  return 0;
-}
-function parseBRDate(d) {
-  const s = String(d || '').trim();
-  const br = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})/);
-  if (br) {
-    const y = String(br[3]).length === 2 ? `20${br[3]}` : br[3];
-    const out = new Date(`${y}-${String(br[2]).padStart(2, '0')}-${String(br[1]).padStart(2, '0')}T00:00:00Z`);
-    return Number.isFinite(out.getTime()) ? out : null;
-  }
-  const iso = s.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (iso) return new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00Z`);
-  return null;
-}
-function eventKey(e = {}) {
-  return [e.ticker, e.dateCom, e.paymentDate, e.type, Number(e.valuePerShare || 0).toFixed(8)].join('|').toUpperCase();
-}
-function normalizeDividendEvent(row = {}, ticker = '', status = '') {
-  const tickerOut = firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase();
-  const valuePerShare = firstNumber(row.valuePerShare, row.valorPorCota, row.valorPorAcao, row.valor, row.value, row.amount, row.dividend, row.rendimento, row.provento, row.cashAmount);
-  const type = firstText(row.type, row.tipo, row.kind, 'Provento');
-  const dateCom = firstText(row.dateCom, row.comDate, row.dataCom, row.recordDate, row.dataBase);
-  const paymentDate = firstText(row.paymentDate, row.payDate, row.dataPagamento, row.dataPagamentoPrevista, row.dataPagto, row.date, row.data);
-  const inferred = inferAssetType(tickerOut);
-  const assetType = isKnownB3Unit(tickerOut) ? 'ACAO_UNIT' : inferred;
-  const confirmed = Boolean(paymentDate);
-  return {
-    ticker: tickerOut,
-    asset: tickerOut,
-    symbol: tickerOut,
-    codigo: tickerOut,
-    eventKey: eventKey({ ticker: tickerOut, dateCom, paymentDate, type, valuePerShare }),
-    dateCom,
-    dataCom: dateCom,
-    comDate: dateCom,
-    recordDate: dateCom,
-    paymentDate,
-    payDate: paymentDate,
-    dataPagamento: paymentDate,
-    valuePerShare,
-    value: valuePerShare,
-    amount: valuePerShare,
-    valor: valuePerShare,
-    type,
-    kind: type,
-    tipo: type,
-    dividendType: type,
-    status: firstText(row.status, status, confirmed ? 'Confirmado' : 'Anunciado/Provisionado'),
-    paymentStatus: confirmed ? 'CONFIRMED' : 'ANNOUNCED',
-    announcementStatus: 'ANNOUNCED',
-    announced: Boolean(dateCom || valuePerShare > 0),
-    confirmed,
-    provisioned: !confirmed,
-    assetType,
-    assetClass: assetType === 'FII' ? 'FII' : 'ACAO',
-    source: firstText(row.source, 'Investidor10/VALORAE'),
-  };
-}
-function dividendHistoryFromAsset(asset = {}) {
-  const r = asset.results || {};
-  const divs = r.dividendos || r.dividends || r.proventos || {};
-  return divs.historico || divs.history || divs.items || r.historicoDividendos || r.historicoProventos || r.proventos || [];
-}
-function normalizeAgendaAssetClass(value = '') {
-  const s = String(value || '').trim().toUpperCase();
-  if (/FII|FUNDO|IMOB/.test(s)) return 'FII';
-  if (/ACAO|AÇÃO|ACOES|AÇÕES|STOCK|ON|PN|UNIT/.test(s)) return 'ACAO';
-  return '';
-}
 function cacheSetEvents(events = []) {
   const now = Date.now();
   for (const event of events) {
@@ -107,6 +31,7 @@ function cacheSetEvents(events = []) {
   }
   if (officialDividendCache.size > 500) officialDividendCache.clear();
 }
+
 function cacheGetEvents(ticker = '') {
   const entry = officialDividendCache.get(canonicalizeTicker(ticker));
   if (!entry) return { events: [], status: 'MISS' };
@@ -115,77 +40,6 @@ function cacheGetEvents(ticker = '') {
   if (entry.staleAt >= now) return { events: entry.events || [], status: 'STALE' };
   officialDividendCache.delete(canonicalizeTicker(ticker));
   return { events: [], status: 'MISS' };
-}
-function eventDate(e = {}, kind = 'payment') {
-  const value = kind === 'eligibility'
-    ? firstText(e.dateCom, e.comDate, e.dataCom, e.recordDate, e.dataBase, e.paymentDate, e.payDate, e.dataPagamento)
-    : firstText(e.paymentDate, e.payDate, e.dataPagamento, e.date, e.data, e.dateCom, e.comDate, e.dataCom);
-  return parseBRDate(value) || parseAgendaDate(value);
-}
-function eventPaymentDate(e = {}) {
-  const value = firstText(e.paymentDate, e.payDate, e.dataPagamento, e.data_pagamento, e.dataPagamentoPrevista, e.dataPagto, e.pagamento, e.pgto);
-  return parseBRDate(value) || parseAgendaDate(value);
-}
-function pendingOrAnnouncedDividend(e = {}) {
-  const status = firstText(e.status, e.paymentStatus, e.type, e.kind).toLowerCase();
-  const source = firstText(e.source, e.fonte).toLowerCase();
-  const hasNoPaymentDate = !eventPaymentDate(e);
-  if (!hasNoPaymentDate) return false;
-  return /prev|futur|agenda|provision|anunci|a confirmar|sem data|confirm/.test(status) ||
-    /agenda|provision/.test(source) ||
-    Boolean(firstText(e.dateCom, e.comDate, e.dataCom, e.recordDate, e.dataBase) || Number(e.valuePerShare || 0) > 0 || Number(e.estimatedAmount || 0) > 0);
-}
-function eligibleByDateCom(pos = {}, eligibilityDate = null) {
-  const firstPurchaseAt = Number(pos?.firstPurchaseAt || 0);
-  return !firstPurchaseAt || !eligibilityDate || firstPurchaseAt <= eligibilityDate.getTime() + 86_399_999;
-}
-
-function splitOfficialByPaymentStatus(events = []) {
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  const paid = [];
-  const future = [];
-  const announced = [];
-  for (const e of events || []) {
-    const paymentDate = eventPaymentDate(e);
-    if (paymentDate && paymentDate < today && !pendingOrAnnouncedDividend(e)) {
-      paid.push(e);
-    } else if (paymentDate && paymentDate >= today) {
-      future.push(e);
-    } else if (pendingOrAnnouncedDividend(e) || !paymentDate) {
-      announced.push(e);
-    }
-  }
-  return { officialPaidEvents: paid, officialFutureEvents: future, officialAnnouncedEvents: announced, officialUpcomingEvents: [...future, ...announced] };
-}
-
-function splitByPortfolio(events = [], positions = []) {
-  const today = new Date(); today.setUTCHours(0, 0, 0, 0);
-  const positionsByTicker = new Map((positions || []).map(p => [canonicalizeTicker(p.ticker), p]));
-  const received = [];
-  const upcoming = [];
-  for (const e of events) {
-    const pos = positionsByTicker.get(canonicalizeTicker(e.ticker));
-    const quantity = firstNumber(pos?.quantity, e.quantity);
-    const paymentDate = eventPaymentDate(e);
-    const displayDate = paymentDate || eventDate(e, 'payment');
-    const eligibilityDate = eventDate(e, 'eligibility') || displayDate;
-    const hasPaymentDate = Boolean(paymentDate);
-    const isPastPaid = hasPaymentDate && paymentDate < today && !pendingOrAnnouncedDividend(e);
-    // Regra de carteira: Data Com/record date define direito; data de pagamento
-    // define se entra em Evolução (recebido) ou Agenda (futuro/provisionado).
-    // Evento sem data de pagamento nunca vira recebido só porque a Data Com passou.
-    const eligible = eligibleByDateCom(pos, eligibilityDate);
-    const amount = quantity > 0 && Number(e.valuePerShare || 0) > 0 ? Number((quantity * Number(e.valuePerShare || 0)).toFixed(2)) : Number(e.estimatedAmount || 0);
-    const out = { ...e, quantity, estimatedAmount: amount, totalAmount: amount, eligibilityDate: eligibilityDate ? eligibilityDate.toISOString().slice(0, 10) : undefined };
-    if (isPastPaid) {
-      if (eligible) received.push({ ...out, originalStatus: out.status, status: 'Recebido', portfolioBlock: 'received' });
-    } else if (quantity > 0 && eligible) {
-      const nextStatus = hasPaymentDate ? 'Previsto' : firstText(out.status, 'Anunciado/Provisionado');
-      upcoming.push({ ...out, originalStatus: out.status, status: nextStatus, portfolioBlock: 'upcoming' });
-    }
-  }
-  return { portfolioReceived: received, portfolioUpcoming: upcoming };
 }
 
 export default async function handler(req, res) {

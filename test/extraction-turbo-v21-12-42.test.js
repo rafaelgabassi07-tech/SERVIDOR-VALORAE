@@ -7,7 +7,7 @@ function jsonResponse(data, init = {}) {
   return new Response(JSON.stringify(data), { status: init.status || 200, headers: { 'content-type': 'application/json' } });
 }
 
-function weakInvestorHtml() {
+function weakInvaloraerHtml() {
   return `<!doctype html><html><body>
     <h1>PETR4 Petrobras PN</h1>
     <section>Cotação R$ 32,45 Variação 1,25%</section>
@@ -40,7 +40,7 @@ try {
       });
     }
     if (u.includes('investidor10.com.br')) {
-      return new Response(weakInvestorHtml(), { status: 200, headers: { 'content-type': 'text/html' } });
+      return new Response(weakInvaloraerHtml(), { status: 200, headers: { 'content-type': 'text/html' } });
     }
     if (u.includes('statusinvest.com.br')) {
       return new Response(richStatusInvestHtml(), { status: 200, headers: { 'content-type': 'text/html' } });

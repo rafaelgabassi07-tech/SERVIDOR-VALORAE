@@ -1,6 +1,6 @@
 {
-  "name": "VALORAE Proxy Server v21.12.88",
-  "short_name": "VALORAE Proxy",
+  "name": "VALORAE Proxy Server v21.12.93",
+  "short_name": "VALORAE v21.12.93",
   "description": "Cockpit profissional do VALORAE Proxy/Engine com limpeza de código, contratos de release consistentes e compatibilidade APK/Proxy.",
   "id": "/server.html",
   "start_url": "/server.html#command",
@@ -61,5 +61,5 @@
       "url": "/server.html#integration"
     }
   ],
-  "version": "21.12.88"
+  "version": "21.12.93"
 }

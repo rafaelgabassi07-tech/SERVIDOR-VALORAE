@@ -8,7 +8,7 @@ function jsonResponse(data, init = {}) {
   return new Response(JSON.stringify(data), { status: init.status || 200, headers: { 'content-type': 'application/json' } });
 }
 
-function richInvestorHtml(price = '32,45') {
+function richInvaloraerHtml(price = '32,45') {
   return `<!doctype html><html><body>
     <h1>PETR4 Petrobras PN</h1>
     <section>
@@ -54,8 +54,8 @@ try {
       await new Promise(resolve => setTimeout(resolve, 45));
       return jsonResponse({ error: 'simulated slow source' }, { status: 503 });
     }
-    if (u.includes('/api/scrape')) return jsonResponse({ status: 200, html: richInvestorHtml() });
-    if (u.includes('investidor10.com.br')) return new Response(richInvestorHtml(), { status: 200, headers: { 'content-type': 'text/html' } });
+    if (u.includes('/api/scrape')) return jsonResponse({ status: 200, html: richInvaloraerHtml() });
+    if (u.includes('investidor10.com.br')) return new Response(richInvaloraerHtml(), { status: 200, headers: { 'content-type': 'text/html' } });
     return jsonResponse({ chart: { result: [] } }, { status: 404 });
   };
 

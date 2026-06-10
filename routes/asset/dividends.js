@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       agendaDiagnostics = agenda.diagnostics || [];
     }
     const today = new Date(); today.setUTCHours(0, 0, 0, 0);
-    const parseDate = (d) => { const s = String(d || ''); const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})/); if (m) { const y = String(m[3]).length === 2 ? `20${m[3]}` : m[3]; return new Date(`${y}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}T00:00:00Z`); } const iso = s.match(/(\d{4})-(\d{2})-(\d{2})/); return iso ? new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00Z`) : null; };
+    const parseDate = (d) => { const s = String(d || ''); const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})/); if (m) { const y = String(m[3]).length === 2 ? `20${m[3]}` : m[3]; return new Date(`${y}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}T00:00:00Z`); } const iso = s.match(/(\d{4})-(\d{2})-(\d{2})/); return iso ? new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00Z`) : null; };
     const normalizedHistory = historico.map(row => ({
       ...row,
       ticker,
