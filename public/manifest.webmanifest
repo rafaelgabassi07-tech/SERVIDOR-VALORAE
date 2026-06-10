@@ -4,5 +4,9 @@
   "start_url": "/server.html",
   "display": "standalone",
   "background_color": "#07110d",
-  "theme_color": "#0f1d17"
+  "theme_color": "#0f1d17",
+  "id": "/server.html",
+  "description": "Monitor operacional do VALORAE Proxy.",
+  "scope": "/",
+  "orientation": "any"
 }

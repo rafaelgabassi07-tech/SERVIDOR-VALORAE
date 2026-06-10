@@ -31,17 +31,15 @@ const server = http.createServer(async (req, res) => {
   }
   const clean = ['/', '/server', '/monitor', '/tests', '/inspector'].includes(parsed.pathname) ? '/server.html' : parsed.pathname;
   const target = path.normalize(path.join(PUBLIC_DIR, clean));
-  if (!path.relative(PUBLIC_DIR, target) || !path.relative(PUBLIC_DIR, target).startsWith('..')) {
-    fs.readFile(target, (err, data) => {
-      if (err) return sendText(res, 404, 'Não encontrado');
-      res.statusCode = 200;
-      res.setHeader('Content-Type', MIME[path.extname(target)] || 'application/octet-stream');
-      setSecurityHeaders(res, path.extname(target) === '.html' ? 'public, max-age=60' : 'public, max-age=300');
-      res.end(data);
-    });
-    return;
-  }
-  sendText(res, 403, 'Acesso negado');
+  const relative = path.relative(PUBLIC_DIR, target);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) return sendText(res, 403, 'Acesso negado');
+  fs.readFile(target, (err, data) => {
+    if (err) return sendText(res, 404, 'Não encontrado');
+    res.statusCode = 200;
+    res.setHeader('Content-Type', MIME[path.extname(target)] || 'application/octet-stream');
+    setSecurityHeaders(res, path.extname(target) === '.html' ? 'public, max-age=60' : 'public, max-age=300');
+    res.end(data);
+  });
 });
 
 server.listen(PORT, '0.0.0.0', () => console.log(`VALORAE Proxy rodando em http://0.0.0.0:${PORT}`));

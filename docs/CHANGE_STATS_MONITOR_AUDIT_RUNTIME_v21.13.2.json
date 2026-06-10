@@ -1,0 +1,65 @@
+{
+  "base": "21.13.1",
+  "new": "21.13.2",
+  "scope": "runtime_without_generated_docs",
+  "files_changed": 11,
+  "lines_added": 293,
+  "lines_removed": 50,
+  "files": [
+    {
+      "file": "lib/core/release.js",
+      "added": 4,
+      "removed": 4
+    },
+    {
+      "file": "metadata.json",
+      "added": 4,
+      "removed": 4
+    },
+    {
+      "file": "package.json",
+      "added": 5,
+      "removed": 5
+    },
+    {
+      "file": "public/manifest.webmanifest",
+      "added": 5,
+      "removed": 1
+    },
+    {
+      "file": "public/server.html",
+      "added": 135,
+      "removed": 15
+    },
+    {
+      "file": "public/service-worker.js",
+      "added": 26,
+      "removed": 4
+    },
+    {
+      "file": "routes/_router.js",
+      "added": 62,
+      "removed": 2
+    },
+    {
+      "file": "scripts/audit-version.js",
+      "added": 14,
+      "removed": 4
+    },
+    {
+      "file": "scripts/verify-monitor-audit-v21-13-2.js",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "file": "server.js",
+      "added": 9,
+      "removed": 11
+    },
+    {
+      "file": "test/monitor.test.js",
+      "added": 7,
+      "removed": 0
+    }
+  ]
+}

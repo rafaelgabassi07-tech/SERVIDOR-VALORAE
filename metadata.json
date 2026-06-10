@@ -1,7 +1,7 @@
 {
-  "name": "VALORAE Proxy v21.13.1",
-  "version": "21.13.1",
-  "release": "21.13.1-valorae-integration-audit-fix",
-  "description": "Proxy VALORAE reconstruído com contrato mobile único, rotas reduzidas e monitor redesenhado.",
+  "name": "VALORAE Proxy v21.13.3",
+  "version": "21.13.3",
+  "release": "21.13.3-valorae-runtime-feed-fix",
+  "description": "Proxy VALORAE reconstruído com contrato mobile único, rotas reduzidas e monitor operacional auditável, notícias, cotações, IPCA e rankings restaurados.",
   "contract": "valorae-mobile-portfolio-sync"
 }
