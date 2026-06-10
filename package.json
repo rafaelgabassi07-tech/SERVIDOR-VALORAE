@@ -1,6 +1,6 @@
 {
   "name": "valorae-proxy",
-  "version": "21.13.3",
+  "version": "21.13.4",
   "description": "Proxy VALORAE reconstruído com contrato mobile único, rotas reduzidas, monitor operacional, notícias, cotações, IPCA e rankings restaurados.",
   "private": true,
   "type": "module",
@@ -13,15 +13,15 @@
     "build": "node scripts/build-vercel-safe.js",
     "audit:version": "node scripts/audit-version.js",
     "audit:identity": "node scripts/audit-identity.js",
-    "verify": "node scripts/verify-runtime-feeds-v21-13-3.js"
+    "verify": "node scripts/verify-ipca-portfolio-v21-13-4.js"
   },
   "engines": {
     "node": "20.x"
   },
   "dependencies": {},
   "valorae": {
-    "coreVersion": "21.13.3",
-    "releasePatch": "21.13.3-valorae-runtime-feed-fix",
+    "coreVersion": "21.13.4",
+    "releasePatch": "21.13.4-ipca-portfolio-audit-fix",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   }
