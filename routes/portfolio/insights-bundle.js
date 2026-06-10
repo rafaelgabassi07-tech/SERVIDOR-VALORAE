@@ -10,7 +10,7 @@ import { coalesce } from '../../lib/resilience/inflight.js';
 
 const MAX_POSITIONS = Number(process.env.VALORAE_PORTFOLIO_INSIGHTS_MAX_POSITIONS || 45);
 const MAX_RANKING_TICKERS = Number(process.env.VALORAE_PORTFOLIO_INSIGHTS_RANKING_MAX_TICKERS || 15);
-const INSIGHTS_BUNDLE_VERSION = '21.12.87';
+const INSIGHTS_BUNDLE_VERSION = '21.12.88';
 
 function firstText(...values) {
   for (const v of values) {
@@ -81,6 +81,41 @@ function eventDate(e = {}, kind = 'payment') {
     : firstText(e.paymentDate, e.payDate, e.dataPagamento, e.date, e.data, e.dateCom, e.comDate, e.dataCom);
   return parseBRDate(value) || parseAgendaDate(value);
 }
+function eventPaymentDate(e = {}) {
+  const value = firstText(e.paymentDate, e.payDate, e.dataPagamento, e.data_pagamento, e.dataPagamentoPrevista, e.dataPagto, e.pagamento, e.pgto);
+  return parseBRDate(value) || parseAgendaDate(value);
+}
+function pendingOrAnnouncedDividend(e = {}) {
+  const status = firstText(e.status, e.paymentStatus, e.type, e.kind).toLowerCase();
+  const source = firstText(e.source, e.fonte).toLowerCase();
+  const hasNoPaymentDate = !eventPaymentDate(e);
+  if (!hasNoPaymentDate) return false;
+  return /prev|futur|agenda|provision|anunci|a confirmar|sem data|confirm/.test(status) ||
+    /agenda|provision/.test(source) ||
+    Boolean(firstText(e.dateCom, e.comDate, e.dataCom, e.recordDate, e.dataBase) || Number(e.valuePerShare || 0) > 0 || Number(e.estimatedAmount || 0) > 0);
+}
+function eligibleByDateCom(pos = {}, eligibilityDate = null) {
+  const firstPurchaseAt = Number(pos?.firstPurchaseAt || 0);
+  return !firstPurchaseAt || !eligibilityDate || firstPurchaseAt <= eligibilityDate.getTime() + 86_399_999;
+}
+function splitOfficialByPaymentStatus(events = []) {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const paid = [];
+  const future = [];
+  const announced = [];
+  for (const e of events || []) {
+    const paymentDate = eventPaymentDate(e);
+    if (paymentDate && paymentDate < today && !pendingOrAnnouncedDividend(e)) {
+      paid.push(e);
+    } else if (paymentDate && paymentDate >= today) {
+      future.push(e);
+    } else if (pendingOrAnnouncedDividend(e) || !paymentDate) {
+      announced.push(e);
+    }
+  }
+  return { officialPaidEvents: paid, officialFutureEvents: future, officialAnnouncedEvents: announced, officialUpcomingEvents: [...future, ...announced] };
+}
 function splitByPortfolio(events = [], positions = []) {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
@@ -90,17 +125,21 @@ function splitByPortfolio(events = [], positions = []) {
   for (const e of events) {
     const pos = positionsByTicker.get(canonicalizeTicker(e.ticker));
     const quantity = firstNumber(pos?.quantity, e.quantity);
-    const paymentOrDisplayDate = eventDate(e, 'payment');
-    const eligibilityDate = eventDate(e, 'eligibility') || paymentOrDisplayDate;
-    const isPast = paymentOrDisplayDate && paymentOrDisplayDate < today;
-    const firstPurchaseAt = Number(pos?.firstPurchaseAt || 0);
-    const eligiblePast = !isPast || !firstPurchaseAt || !eligibilityDate || firstPurchaseAt <= eligibilityDate.getTime() + 86_399_999;
+    const paymentDate = eventPaymentDate(e);
+    const displayDate = paymentDate || eventDate(e, 'payment');
+    const eligibilityDate = eventDate(e, 'eligibility') || displayDate;
+    const hasPaymentDate = Boolean(paymentDate);
+    const isPastPaid = hasPaymentDate && paymentDate < today && !pendingOrAnnouncedDividend(e);
+    // Data Com/record date define elegibilidade; data de pagamento define
+    // Evolução x Agenda. Sem data de pagamento confirmada, permanece Agenda.
+    const eligible = eligibleByDateCom(pos, eligibilityDate);
     const amount = quantity > 0 && Number(e.valuePerShare || 0) > 0 ? Number((quantity * Number(e.valuePerShare || 0)).toFixed(2)) : firstNumber(e.estimatedAmount, e.totalAmount, e.grossAmount);
     const out = { ...e, quantity, estimatedAmount: amount, totalAmount: amount, eligibilityDate: eligibilityDate ? eligibilityDate.toISOString().slice(0, 10) : undefined };
-    if (isPast) {
-      if (eligiblePast) received.push({ ...out, status: firstText(out.status, 'Recebido') });
-    } else if (quantity > 0) {
-      upcoming.push({ ...out, status: firstText(out.status, 'Previsto') });
+    if (isPastPaid) {
+      if (eligible) received.push({ ...out, originalStatus: out.status, status: 'Recebido', portfolioBlock: 'received' });
+    } else if (quantity > 0 && eligible) {
+      const nextStatus = hasPaymentDate ? 'Previsto' : firstText(out.status, 'Anunciado/Provisionado');
+      upcoming.push({ ...out, originalStatus: out.status, status: nextStatus, portfolioBlock: 'upcoming' });
     }
   }
   return { portfolioReceived: received, portfolioUpcoming: upcoming };
@@ -118,7 +157,8 @@ function normalizeEvents(rawEvents = [], positions = []) {
     const type = isKnownB3Unit(ticker) ? 'ACAO_UNIT' : inferAssetType(ticker);
     return { ticker, assetType: type, assetClass: type === 'FII' ? 'FII' : 'ACAO', events, history: events, count: events.length };
   });
-  return { officialEvents, assetHistory, ...splitByPortfolio(officialEvents, positions) };
+  const officialStatusBlocks = splitOfficialByPaymentStatus(officialEvents);
+  return { officialEvents, assetHistory, ...officialStatusBlocks, ...splitByPortfolio(officialEvents, positions) };
 }
 function sanitizeRanking(data = {}, tickers = []) {
   const ranking = Array.isArray(data.ranking) ? data.ranking : [];
@@ -274,6 +314,8 @@ export default async function handler(req, res) {
           historyPoints: historyPoints.length,
           ipcaPoints: ipcaPoints.length,
           officialDividendEvents: dividends.officialEvents.length,
+          officialFutureEvents: dividends.officialFutureEvents.length,
+          officialAnnouncedEvents: dividends.officialAnnouncedEvents.length,
           portfolioReceivedDividends: dividends.portfolioReceived.length,
           portfolioUpcomingDividends: dividends.portfolioUpcoming.length,
           rankingItems: ranking.count,
@@ -288,6 +330,11 @@ export default async function handler(req, res) {
         ipcaSeries: ipcaPoints,
         dividends: {
           officialEvents: dividends.officialEvents,
+          officialPaidEvents: dividends.officialPaidEvents,
+          officialFutureEvents: dividends.officialFutureEvents,
+          officialAnnouncedEvents: dividends.officialAnnouncedEvents,
+          officialUpcomingEvents: dividends.officialUpcomingEvents,
+          allOfficialFuturePayments: dividends.officialUpcomingEvents,
           assetHistory: dividends.assetHistory,
           portfolioReceived: dividends.portfolioReceived,
           portfolioUpcoming: dividends.portfolioUpcoming,
@@ -298,6 +345,11 @@ export default async function handler(req, res) {
           partial: Boolean(dividendsRaw?.partial),
         },
         officialDividendEvents: dividends.officialEvents,
+        officialPaidEvents: dividends.officialPaidEvents,
+        officialFutureEvents: dividends.officialFutureEvents,
+        officialAnnouncedEvents: dividends.officialAnnouncedEvents,
+        officialUpcomingEvents: dividends.officialUpcomingEvents,
+        allOfficialFuturePayments: dividends.officialUpcomingEvents,
         assetDividendHistory: dividends.assetHistory,
         portfolioReceivedDividends: dividends.portfolioReceived,
         portfolioUpcomingDividends: dividends.portfolioUpcoming,

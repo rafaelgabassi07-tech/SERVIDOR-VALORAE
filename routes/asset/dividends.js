@@ -40,8 +40,9 @@ export default async function handler(req, res) {
       source: row.source || 'Investidor10 Página do Ativo'
     }));
     const events = [...agendaEvents, ...normalizedHistory];
-    const upcomingEvents = events.filter(e => { const d = parseDate(e.paymentDate || e.dataPagamento || e.dateCom || e.dataCom); return d && d >= today; });
-    const historyEvents = events.filter(e => { const d = parseDate(e.paymentDate || e.dataPagamento || e.dateCom || e.dataCom); return !d || d < today; });
+    const pending = e => !(e.paymentDate || e.dataPagamento || e.payDate) && /prev|futur|agenda|provision|anunci|a confirmar|sem data|confirm|dividend|rendimento|jcp|jscp/i.test(String(e.status || e.paymentStatus || e.type || e.kind || e.dateCom || e.dataCom || ''));
+    const upcomingEvents = events.filter(e => { const p = parseDate(e.paymentDate || e.dataPagamento || e.payDate); const c = parseDate(e.dateCom || e.dataCom); return (p && p >= today) || (!p && (pending(e) || (c && c >= today))); });
+    const historyEvents = events.filter(e => { const p = parseDate(e.paymentDate || e.dataPagamento || e.payDate); const c = parseDate(e.dateCom || e.dataCom); return !((p && p >= today) || (!p && (pending(e) || (c && c >= today)))); });
     return sendJson(req, res, {
       version: ValoraeEngine.version,
       requestId: route.requestId,

@@ -38,13 +38,14 @@ function parseBRDate(d) {
 }
 function splitDividendEvents(events = []) {
   const today = new Date(); today.setUTCHours(0, 0, 0, 0);
-  const decorated = (events || []).map(e => ({ ...e, _pag: parseBRDate(e.paymentDate || e.dataPagamento), _com: parseBRDate(e.dateCom || e.dataCom) }));
+  const pending = e => !firstText(e.paymentDate, e.dataPagamento, e.payDate) && /prev|futur|agenda|provision|anunci|a confirmar|sem data|confirm|dividend|rendimento|jcp|jscp/i.test(firstText(e.status, e.paymentStatus, e.type, e.kind, e.dateCom, e.dataCom));
+  const decorated = (events || []).map(e => ({ ...e, _pag: parseBRDate(e.paymentDate || e.dataPagamento || e.payDate), _com: parseBRDate(e.dateCom || e.dataCom) }));
   const upcomingEvents = decorated
-    .filter(e => (e._pag && e._pag >= today) || (!e._pag && e._com && e._com >= today))
-    .sort((a, b) => (a._pag || a._com || 0) - (b._pag || b._com || 0))
+    .filter(e => (e._pag && e._pag >= today) || (!e._pag && (pending(e) || (e._com && e._com >= today))))
+    .sort((a, b) => (a._pag || a._com || Number.MAX_SAFE_INTEGER) - (b._pag || b._com || Number.MAX_SAFE_INTEGER))
     .map(({ _pag, _com, ...e }) => ({ ...e, status: firstText(e.status, 'Previsto') }));
   const historyEvents = decorated
-    .filter(e => !((e._pag && e._pag >= today) || (!e._pag && e._com && e._com >= today)))
+    .filter(e => !((e._pag && e._pag >= today) || (!e._pag && (pending(e) || (e._com && e._com >= today)))))
     .sort((a, b) => (b._pag || b._com || 0) - (a._pag || a._com || 0))
     .map(({ _pag, _com, ...e }) => e);
   return { upcomingEvents, historyEvents, agendaEvents: [...upcomingEvents, ...historyEvents] };

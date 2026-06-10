@@ -32,6 +32,10 @@ function firstNumber(...values) {
   }
   return 0;
 }
+function pendingOrAnnouncedDividend(e = {}) {
+  const status = firstText(e.status, e.paymentStatus, e.type, e.kind).toLowerCase();
+  return !firstText(e.paymentDate, e.dataPagamento, e.payDate) && /prev|futur|agenda|provision|anunci|a confirmar|sem data|confirm|dividend|rendimento|jcp|jscp/i.test(status || firstText(e.dateCom, e.dataCom));
+}
 function normalizeDividendEvent(row = {}, ticker = '', status = '') {
   const valuePerShare = firstNumber(row.valuePerShare, row.valorPorCota, row.valorPorAcao, row.valor, row.value, row.amount, row.dividend, row.rendimento, row.provento, row.cashAmount);
   const type = firstText(row.type, row.tipo, row.kind, 'Provento');
@@ -155,13 +159,13 @@ export default async function handler(req, res) {
       const merged = [...(agendaByTicker.get(a.ticker) || []), ...historico]
         .filter((e, idx, arr) => arr.findIndex(x => [x.ticker, x.dateCom, x.paymentDate, x.type, x.valuePerShare].join('|') === [e.ticker, e.dateCom, e.paymentDate, e.type, e.valuePerShare].join('|')) === idx);
       const upcoming = merged
-        .map(x => ({ ...x, _pag: parseBRDate(x.paymentDate), _com: parseBRDate(x.dateCom) }))
-        .filter(x => (x._pag && x._pag >= today) || (!x._pag && x._com && x._com >= today))
-        .sort((x, y) => (x._pag || x._com || 0) - (y._pag || y._com || 0))
+        .map(x => ({ ...x, _pag: parseBRDate(x.paymentDate || x.dataPagamento || x.payDate), _com: parseBRDate(x.dateCom || x.dataCom) }))
+        .filter(x => (x._pag && x._pag >= today) || (!x._pag && (pendingOrAnnouncedDividend(x) || (x._com && x._com >= today))))
+        .sort((x, y) => (x._pag || x._com || Number.MAX_SAFE_INTEGER) - (y._pag || y._com || Number.MAX_SAFE_INTEGER))
         .map(({ _pag, _com, ...x }) => ({ ...x, status: firstText(x.status, 'Previsto') }));
       const history = merged
-        .map(x => ({ ...x, _pag: parseBRDate(x.paymentDate), _com: parseBRDate(x.dateCom) }))
-        .filter(x => !((x._pag && x._pag >= today) || (!x._pag && x._com && x._com >= today)))
+        .map(x => ({ ...x, _pag: parseBRDate(x.paymentDate || x.dataPagamento || x.payDate), _com: parseBRDate(x.dateCom || x.dataCom) }))
+        .filter(x => !((x._pag && x._pag >= today) || (!x._pag && (pendingOrAnnouncedDividend(x) || (x._com && x._com >= today)))))
         .sort((x, y) => (y._pag || y._com || 0) - (x._pag || x._com || 0))
         .map(({ _pag, _com, ...x }) => x);
       const next = upcoming[0] || null;

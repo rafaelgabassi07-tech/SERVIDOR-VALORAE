@@ -122,6 +122,42 @@ function eventDate(e = {}, kind = 'payment') {
     : firstText(e.paymentDate, e.payDate, e.dataPagamento, e.date, e.data, e.dateCom, e.comDate, e.dataCom);
   return parseBRDate(value) || parseAgendaDate(value);
 }
+function eventPaymentDate(e = {}) {
+  const value = firstText(e.paymentDate, e.payDate, e.dataPagamento, e.data_pagamento, e.dataPagamentoPrevista, e.dataPagto, e.pagamento, e.pgto);
+  return parseBRDate(value) || parseAgendaDate(value);
+}
+function pendingOrAnnouncedDividend(e = {}) {
+  const status = firstText(e.status, e.paymentStatus, e.type, e.kind).toLowerCase();
+  const source = firstText(e.source, e.fonte).toLowerCase();
+  const hasNoPaymentDate = !eventPaymentDate(e);
+  if (!hasNoPaymentDate) return false;
+  return /prev|futur|agenda|provision|anunci|a confirmar|sem data|confirm/.test(status) ||
+    /agenda|provision/.test(source) ||
+    Boolean(firstText(e.dateCom, e.comDate, e.dataCom, e.recordDate, e.dataBase) || Number(e.valuePerShare || 0) > 0 || Number(e.estimatedAmount || 0) > 0);
+}
+function eligibleByDateCom(pos = {}, eligibilityDate = null) {
+  const firstPurchaseAt = Number(pos?.firstPurchaseAt || 0);
+  return !firstPurchaseAt || !eligibilityDate || firstPurchaseAt <= eligibilityDate.getTime() + 86_399_999;
+}
+
+function splitOfficialByPaymentStatus(events = []) {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const paid = [];
+  const future = [];
+  const announced = [];
+  for (const e of events || []) {
+    const paymentDate = eventPaymentDate(e);
+    if (paymentDate && paymentDate < today && !pendingOrAnnouncedDividend(e)) {
+      paid.push(e);
+    } else if (paymentDate && paymentDate >= today) {
+      future.push(e);
+    } else if (pendingOrAnnouncedDividend(e) || !paymentDate) {
+      announced.push(e);
+    }
+  }
+  return { officialPaidEvents: paid, officialFutureEvents: future, officialAnnouncedEvents: announced, officialUpcomingEvents: [...future, ...announced] };
+}
 
 function splitByPortfolio(events = [], positions = []) {
   const today = new Date(); today.setUTCHours(0, 0, 0, 0);
@@ -131,18 +167,23 @@ function splitByPortfolio(events = [], positions = []) {
   for (const e of events) {
     const pos = positionsByTicker.get(canonicalizeTicker(e.ticker));
     const quantity = firstNumber(pos?.quantity, e.quantity);
-    const paymentOrDisplayDate = eventDate(e, 'payment');
-    const eligibilityDate = eventDate(e, 'eligibility') || paymentOrDisplayDate;
-    const isPast = paymentOrDisplayDate && paymentOrDisplayDate < today;
-    const firstPurchaseAt = Number(pos?.firstPurchaseAt || 0);
-    // Elegibilidade de proventos retroativos é definida por Data Com/record date,
-    // não pela data de pagamento. Isso corrige carteiras que compraram antes da
-    // Data Com, mas só receberam o pagamento meses depois.
-    const eligiblePast = !isPast || !firstPurchaseAt || !eligibilityDate || firstPurchaseAt <= eligibilityDate.getTime() + 86_399_999;
+    const paymentDate = eventPaymentDate(e);
+    const displayDate = paymentDate || eventDate(e, 'payment');
+    const eligibilityDate = eventDate(e, 'eligibility') || displayDate;
+    const hasPaymentDate = Boolean(paymentDate);
+    const isPastPaid = hasPaymentDate && paymentDate < today && !pendingOrAnnouncedDividend(e);
+    // Regra de carteira: Data Com/record date define direito; data de pagamento
+    // define se entra em Evolução (recebido) ou Agenda (futuro/provisionado).
+    // Evento sem data de pagamento nunca vira recebido só porque a Data Com passou.
+    const eligible = eligibleByDateCom(pos, eligibilityDate);
     const amount = quantity > 0 && Number(e.valuePerShare || 0) > 0 ? Number((quantity * Number(e.valuePerShare || 0)).toFixed(2)) : Number(e.estimatedAmount || 0);
-    const out = { ...e, quantity, estimatedAmount: amount, eligibilityDate: eligibilityDate ? eligibilityDate.toISOString().slice(0, 10) : undefined };
-    if (isPast) { if (eligiblePast) received.push({ ...out, status: firstText(out.status, 'Recebido') }); }
-    else if (quantity > 0) upcoming.push({ ...out, status: firstText(out.status, 'Previsto') });
+    const out = { ...e, quantity, estimatedAmount: amount, totalAmount: amount, eligibilityDate: eligibilityDate ? eligibilityDate.toISOString().slice(0, 10) : undefined };
+    if (isPastPaid) {
+      if (eligible) received.push({ ...out, originalStatus: out.status, status: 'Recebido', portfolioBlock: 'received' });
+    } else if (quantity > 0 && eligible) {
+      const nextStatus = hasPaymentDate ? 'Previsto' : firstText(out.status, 'Anunciado/Provisionado');
+      upcoming.push({ ...out, originalStatus: out.status, status: nextStatus, portfolioBlock: 'upcoming' });
+    }
   }
   return { portfolioReceived: received, portfolioUpcoming: upcoming };
 }
@@ -206,6 +247,7 @@ export default async function handler(req, res) {
     const officialEvents = [...officialByKey.values()].sort((a, b) => (eventDate(a, 'payment')?.getTime() || 0) - (eventDate(b, 'payment')?.getTime() || 0));
     cacheSetEvents(officialEvents);
     const assetHistory = tickers.map(t => ({ ticker: t, assetType: isKnownB3Unit(t) ? 'ACAO_UNIT' : inferAssetType(t), events: officialEvents.filter(e => canonicalizeTicker(e.ticker) === t), count: officialEvents.filter(e => canonicalizeTicker(e.ticker) === t).length }));
+    const officialStatusBlocks = splitOfficialByPaymentStatus(officialEvents);
     const { portfolioReceived, portfolioUpcoming } = splitByPortfolio(officialEvents, Array.isArray(q.positions) ? q.positions : []);
     const cacheStatus = agenda.cacheStatus || (cacheStates.includes('HIT') ? 'HIT' : cacheStates.includes('STALE') ? 'STALE' : officialEvents.length ? 'LIVE' : 'MISS');
 
@@ -214,6 +256,11 @@ export default async function handler(req, res) {
       requestId: route.requestId,
       endpoint: 'dividends-batch',
       officialEvents,
+      officialPaidEvents: officialStatusBlocks.officialPaidEvents,
+      officialFutureEvents: officialStatusBlocks.officialFutureEvents,
+      officialAnnouncedEvents: officialStatusBlocks.officialAnnouncedEvents,
+      officialUpcomingEvents: officialStatusBlocks.officialUpcomingEvents,
+      allOfficialFuturePayments: officialStatusBlocks.officialUpcomingEvents,
       assetHistory,
       portfolioReceived,
       portfolioUpcoming,
@@ -231,7 +278,7 @@ export default async function handler(req, res) {
       partial: !!agenda.partial || !!batch.stats?.partial || agendaEmptyButCacheExists,
       cacheStatus,
       sourceStatus: cacheStatus === 'LIVE' ? 'Proxy ao vivo' : cacheStatus === 'HIT' ? 'Cache oficial fresco' : cacheStatus === 'STALE' ? 'Cache oficial stale' : 'Sem cache oficial',
-      counts: { officialEvents: officialEvents.length, assetHistory: assetHistory.length, portfolioReceived: portfolioReceived.length, portfolioUpcoming: portfolioUpcoming.length },
+      counts: { officialEvents: officialEvents.length, officialFutureEvents: officialStatusBlocks.officialFutureEvents.length, officialAnnouncedEvents: officialStatusBlocks.officialAnnouncedEvents.length, assetHistory: assetHistory.length, portfolioReceived: portfolioReceived.length, portfolioUpcoming: portfolioUpcoming.length },
       agendaRange: agenda.range || agendaOptions,
       deadlineMs: routeDeadlineMs,
     }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'dividends', cacheControl: 'private, max-age=30, stale-while-revalidate=600' });

@@ -1,0 +1,134 @@
+{
+  "version": "v2.0.60_v21.12.88",
+  "projects": {
+    "apk": {
+      "files_changed": 9,
+      "additions": 247,
+      "deletions": 95,
+      "files": [
+        {
+          "file": "app/build.gradle.kts",
+          "additions": 2,
+          "deletions": 2
+        },
+        {
+          "file": "app/src/main/java/com/example/network/B3NetworkService.kt",
+          "additions": 33,
+          "deletions": 3
+        },
+        {
+          "file": "app/src/main/java/com/example/ui/screens/ChartsScreen.kt",
+          "additions": 110,
+          "deletions": 52
+        },
+        {
+          "file": "app/src/main/java/com/example/ui/screens/DashboardScreen.kt",
+          "additions": 28,
+          "deletions": 13
+        },
+        {
+          "file": "app/src/main/java/com/example/viewmodel/PortfolioViewModel.kt",
+          "additions": 20,
+          "deletions": 5
+        },
+        {
+          "file": "metadata.json",
+          "additions": 10,
+          "deletions": 10
+        },
+        {
+          "file": "scripts/verify_valorae_agenda_evolution_v2060.py",
+          "additions": 33,
+          "deletions": 0
+        },
+        {
+          "file": "update.json",
+          "additions": 6,
+          "deletions": 5
+        },
+        {
+          "file": "version.json",
+          "additions": 5,
+          "deletions": 5
+        }
+      ]
+    },
+    "proxy": {
+      "files_changed": 13,
+      "additions": 191,
+      "deletions": 65,
+      "files": [
+        {
+          "file": "lib/release/current.js",
+          "additions": 3,
+          "deletions": 3
+        },
+        {
+          "file": "metadata.json",
+          "additions": 7,
+          "deletions": 7
+        },
+        {
+          "file": "package.json",
+          "additions": 1,
+          "deletions": 1
+        },
+        {
+          "file": "public/index.html",
+          "additions": 8,
+          "deletions": 8
+        },
+        {
+          "file": "public/manifest.webmanifest",
+          "additions": 2,
+          "deletions": 2
+        },
+        {
+          "file": "public/server.html",
+          "additions": 8,
+          "deletions": 8
+        },
+        {
+          "file": "public/service-worker.js",
+          "additions": 2,
+          "deletions": 2
+        },
+        {
+          "file": "routes/asset/dividends.js",
+          "additions": 3,
+          "deletions": 2
+        },
+        {
+          "file": "routes/dividends/batch.js",
+          "additions": 59,
+          "deletions": 12
+        },
+        {
+          "file": "routes/portfolio/dividends.js",
+          "additions": 5,
+          "deletions": 4
+        },
+        {
+          "file": "routes/portfolio/insights-bundle.js",
+          "additions": 63,
+          "deletions": 11
+        },
+        {
+          "file": "routes/portfolio/next-dividends.js",
+          "additions": 9,
+          "deletions": 5
+        },
+        {
+          "file": "scripts/verify-dividend-agenda-evolution-v21-12-88.mjs",
+          "additions": 21,
+          "deletions": 0
+        }
+      ]
+    }
+  },
+  "totals": {
+    "files_changed": 22,
+    "additions": 438,
+    "deletions": 160
+  }
+}

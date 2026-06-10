@@ -55,7 +55,7 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.87-agenda-proventos-retroactive-cleanup",
+    "releasePatch": "21.12.88-agenda-evolution-logic-fix",
     "freeOnly": true,
     "notes": "Agenda de dividendos futura ampliada, evolução retroativa por data-com, dividendPositions no bundle e limpeza de fluxo APK/Proxy."
   },
