@@ -3,7 +3,7 @@ import { sendJson, queryObject, readJsonBody } from '../lib/core/http.js';
 import { cacheStats, clearCache } from '../lib/core/cache.js';
 import { buildMobilePortfolioSync } from '../lib/contracts/mobile.js';
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
-import { buildPortfolioAnalysis, buildHistory, buildRankings } from '../lib/portfolio/analysis.js';
+import { buildPortfolioAnalysis, buildHistory, buildAssetHistory, buildRankings } from '../lib/portfolio/analysis.js';
 import { getIpcaSeries } from '../lib/sources/ipca.js';
 import { fetchText } from '../lib/sources/fetch.js';
 import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tickers.js';
@@ -108,7 +108,8 @@ export async function dispatchRoute(req, res) {
     if (path === '/asset/dividends' || path === '/asset/next-dividend') return sendJson(req, res, await handleAssetDividends(payload), { cacheControl: 'private, max-age=60' });
 
     if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, buildPortfolioAnalysis(payload));
-    if (path === '/portfolio/history' || path === '/asset/history') return sendJson(req, res, buildHistory(payload));
+    if (path === '/portfolio/history') return sendJson(req, res, buildHistory(payload));
+    if (path === '/asset/history') return sendJson(req, res, buildAssetHistory(payload));
     if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.months || 12), { cacheControl: 'private, max-age=300' });
     if (path === '/market/rankings') return sendJson(req, res, buildRankings(payload));
     if (path === '/market/indices') return sendJson(req, res, { status: 'OK', indices: [], items: [] });

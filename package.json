@@ -1,6 +1,6 @@
 {
   "name": "valorae-proxy",
-  "version": "21.13.0",
+  "version": "21.13.1",
   "description": "Proxy VALORAE reconstruído com contrato mobile único, rotas enxutas e regras de carteira centralizadas.",
   "private": true,
   "type": "module",
@@ -13,15 +13,15 @@
     "build": "node scripts/build-vercel-safe.js",
     "audit:version": "node scripts/audit-version.js",
     "audit:identity": "node scripts/audit-identity.js",
-    "verify": "node scripts/verify-valorae-rebuilt.js"
+    "verify": "node scripts/verify-integration-audit-v21-13-1.js"
   },
   "engines": {
     "node": "20.x"
   },
   "dependencies": {},
   "valorae": {
-    "coreVersion": "21.13.0",
-    "releasePatch": "21.13.0-valorae-rebuilt-proxy",
+    "coreVersion": "21.13.1",
+    "releasePatch": "21.13.1-valorae-integration-audit-fix",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   }

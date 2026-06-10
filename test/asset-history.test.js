@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { buildAssetHistory } from '../lib/portfolio/analysis.js';
+const empty = buildAssetHistory({ ticker: 'PETR4' });
+assert.equal(empty.status, 'EMPTY');
+assert.equal(empty.ticker, 'PETR4');
+assert.deepEqual(empty.points, []);
+const ok = buildAssetHistory({ ticker: 'PETR4', currentPrice: 32, months: 3 });
+assert.equal(ok.status, 'OK');
+assert.equal(ok.points.length, 3);
+assert.equal(ok.points.at(-1).ticker, 'PETR4');
+assert.ok(ok.points.every(p => typeof p.close === 'number'));
