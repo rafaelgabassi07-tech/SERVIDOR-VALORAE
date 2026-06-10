@@ -1,7 +1,7 @@
 {
-  "name": "VALORAE Proxy v21.13.5",
-  "version": "21.13.5",
-  "release": "21.13.5-asset-analysis-detail-unified-flow",
-  "description": "Proxy VALORAE v21.13.5 com fluxo unificado de fundamentos, histórico e gráficos para Análise e Detalhes do Ativo.",
+  "name": "VALORAE Proxy v21.13.7",
+  "version": "21.13.7",
+  "release": "21.13.7-asset-fundamentals-deep-validation",
+  "description": "Proxy VALORAE v21.13.7 com fluxo enriquecido de fundamentos, histórico e gráficos para Análise e Detalhes do Ativo.",
   "contract": "valorae-mobile-portfolio-sync"
 }
