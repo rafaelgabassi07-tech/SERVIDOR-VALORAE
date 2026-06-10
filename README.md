@@ -24,3 +24,17 @@ A versão `21.13.1` mantém o contrato mobile único, remove fan-out oculto do f
 - O APK calcula carteira, elegibilidade, Agenda e Evolução.
 - Data Com ou Data Ex menos um pregão define direito ao provento.
 - Data de pagamento define se o evento aparece em Agenda ou Evolução.
+
+
+## Proventos oficiais
+
+O Proxy usa o Status Invest por ativo como fonte principal de proventos passados, anunciados e futuros, via `companytickerprovents`, e usa a agenda pública como complemento para calendário quando disponível. Não é necessário configurar variáveis de ambiente para isso funcionar.
+
+Variáveis opcionais:
+
+- `VALORAE_STATUSINVEST_ENABLED=0` desativa a busca no Status Invest.
+- `VALORAE_STATUSINVEST_CHART_PROVENTS_TYPE=2` define o tipo do gráfico/consulta de proventos usado no Status Invest.
+- `VALORAE_STATUSINVEST_TIMEOUT_MS=5500` define timeout da fonte Status Invest.
+- `VALORAE_AGENDA_ENABLED=0` ou `VALORAE_INVESTIDOR10_AGENDA_ENABLED=0` desativa apenas o complemento de agenda pública.
+
+As rotas que alimentam a Agenda de Dividendos e a Evolução de Proventos são `/api/v1/dividends/batch`, `/api/v1/portfolio/next-dividends`, `/api/v1/portfolio/events`, `/api/v1/asset/dividends` e `/api/v1/asset/next-dividend`.

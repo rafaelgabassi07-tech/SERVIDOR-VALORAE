@@ -10,6 +10,7 @@ import { getIpcaSeries } from '../lib/sources/ipca.js';
 import { fetchText } from '../lib/sources/fetch.js';
 import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tickers.js';
 import { getConfirmedDividendsByTicker } from '../lib/sources/status-dividends.js';
+import { getAgendaDividends } from '../lib/sources/agenda-dividends.js';
 import { buildAssetDetails, getAssetHistory } from '../lib/sources/asset-details.js';
 
 function stripApi(pathname) {
@@ -149,9 +150,34 @@ async function mobileBootstrap(payload = {}) {
 }
 
 async function handleAssetDividends(payload = {}) {
-  const ticker = normalizeTicker(payload.ticker || payload.symbol || (payload.tickers || '').split(',')[0]);
+  const ticker = normalizeTicker(payload.ticker || payload.symbol || uniqueTickers(payload.tickers || payload.dividendTickers || [])[0]);
+  const diagnostics = [];
   const result = await getConfirmedDividendsByTicker(ticker, { timeoutMs: Number(payload.timeoutMs || 5500) });
-  return { status: 'OK', ticker, events: result.events, dividends: result.events, dividendEvents: result.events, diagnostics: result.diagnostics };
+  diagnostics.push(...(Array.isArray(result.diagnostics) ? result.diagnostics : [result.diagnostics].filter(Boolean)));
+  let events = result.events || [];
+
+  const includeUpcoming = payload.includeUpcoming === undefined || !['0', 'false', 'no', 'off'].includes(String(payload.includeUpcoming).toLowerCase());
+  if (ticker && includeUpcoming) {
+    const agenda = await getAgendaDividends([ticker], { timeoutMs: Number(payload.agendaTimeoutMs || payload.timeoutMs || 5500) });
+    diagnostics.push(...(agenda.diagnostics || []));
+    const map = new Map();
+    for (const event of [...events, ...(agenda.events || [])]) {
+      const key = event.eventKey || [event.ticker, event.eligibilityDate || event.dateCom || event.exDate || '', event.paymentDate || '', event.dividendType || '', Number(event.valuePerShare || 0).toFixed(8)].join('|');
+      const existing = map.get(key);
+      if (!existing || (event.paymentDate && !existing.paymentDate) || (event.valuePerShare && !existing.valuePerShare)) map.set(key, event);
+    }
+    events = [...map.values()];
+  }
+
+  return {
+    status: 'OK',
+    ticker,
+    sourcePolicy: 'STATUSINVEST_PER_TICKER_PLUS_INVESTIDOR10_CALENDAR_COMPLEMENT',
+    events,
+    dividends: events,
+    dividendEvents: events,
+    diagnostics
+  };
 }
 
 function emptyCompatible(status = 'OK') {
