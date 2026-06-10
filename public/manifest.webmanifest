@@ -1,65 +1,8 @@
 {
-  "name": "VALORAE Proxy Server v21.12.93",
-  "short_name": "VALORAE v21.12.93",
-  "description": "Cockpit profissional do VALORAE Proxy/Engine com limpeza de código, contratos de release consistentes e compatibilidade APK/Proxy.",
-  "id": "/server.html",
-  "start_url": "/server.html#command",
-  "scope": "/",
+  "name": "VALORAE Proxy Monitor",
+  "short_name": "VALORAE Proxy",
+  "start_url": "/server.html",
   "display": "standalone",
-  "orientation": "any",
-  "background_color": "#0b0f0d",
-  "theme_color": "#0f3d2e",
-  "categories": [
-    "finance",
-    "productivity",
-    "utilities"
-  ],
-  "icons": [
-    {
-      "src": "/assets/valorae-logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/assets/valorae-icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/assets/valorae-icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Dashboard",
-      "short_name": "Painel",
-      "url": "/server.html#command"
-    },
-    {
-      "name": "Métricas",
-      "short_name": "Métricas",
-      "url": "/api/server/metrics"
-    },
-    {
-      "name": "Integração",
-      "short_name": "Integração",
-      "url": "/server.html#integration"
-    },
-    {
-      "name": "Maturidade pessoal",
-      "short_name": "Maturidade",
-      "url": "/server.html#quality"
-    },
-    {
-      "name": "Manifesto de integração",
-      "short_name": "Manifesto",
-      "url": "/server.html#integration"
-    }
-  ],
-  "version": "21.12.93"
+  "background_color": "#07110d",
+  "theme_color": "#0f1d17"
 }

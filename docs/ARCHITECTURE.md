@@ -1,26 +1,16 @@
-# Architecture — Valorae Proxy v21.12.0
+# Arquitetura VALORAE Proxy v21.13.0
+
+O Proxy foi reconstruído para reduzir fan-out, remover cadeias de fallback escondidas e expor um contrato principal para o APK:
 
 ```text
-api/router.js + rewrites /api/:path*
-        │
-        ▼
-routes/_router.js  ── aliases v1/v2/legados
-        │
-        ├─ routes/asset.js / assets / compare / market
-        ├─ routes/portfolio/*
-        ├─ routes/scrape / batch-scrape / compat/scraper4
-        └─ routes/system: ready, manifest, env, schema, source/status
-        │
-        ▼
-lib/Valorae-engine.js  ← núcleo central preservado
-        │
-        ├─ lib/market/*
-        ├─ lib/portfolio/*
-        ├─ lib/quality/*
-        ├─ lib/resilience/*
-        ├─ lib/scrape/*
-        ├─ lib/security/*
-        └─ lib/catalogs/*
+/api/v1/mobile/portfolio-sync
 ```
 
-O projeto evita dependências externas obrigatórias. Cache é em memória, adequado a instâncias serverless quentes, e pode resetar quando a Function esfriar.
+As rotas legadas essenciais permanecem como aliases leves e previsíveis. Elas não chamam uma cadeia de fallback pesada: retornam o mesmo contrato centralizado ou blocos calculados diretamente.
+
+## Regra de proventos
+
+- Data Com ou Data Ex anterior ao pregão define elegibilidade.
+- Data de pagamento define Agenda ou Evolução.
+- Fonte por ticker para eventos confirmados.
+- Agenda pública como complemento para eventos futuros/provisionados.

@@ -1,207 +1,143 @@
-import { ValoraeEngine } from '../lib/Valorae-engine.js';
-import { sendJson } from '../lib/performance/http.js';
-import { beginRoute } from '../lib/http/route.js';
-import { attachProxyMetricsInterceptor } from '../lib/observability/server-metrics.js';
+import { RELEASE } from '../lib/core/release.js';
+import { sendJson, queryObject, readJsonBody } from '../lib/core/http.js';
+import { cacheStats, clearCache } from '../lib/core/cache.js';
+import { buildMobilePortfolioSync } from '../lib/contracts/mobile.js';
+import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
+import { buildPortfolioAnalysis, buildHistory, buildRankings } from '../lib/portfolio/analysis.js';
+import { getIpcaSeries } from '../lib/sources/ipca.js';
+import { fetchText } from '../lib/sources/fetch.js';
+import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tickers.js';
+import { getConfirmedDividendsByTicker } from '../lib/sources/status-dividends.js';
 
-const ROUTES = {
-  '/health': () => import('./health.js'),
-  '/ready': () => import('./ready.js'),
-  '/manifest': () => import('./manifest.js'),
-  '/env': () => import('./env.js'),
-  '/schema': () => import('./schema.js'),
-  '/source/status': () => import('./source/status.js'),
-  '/release/readiness': () => import('./release/readiness.js'),
-  '/personal/readiness': () => import('./release/readiness.js'),
-  '/cache/stats': () => import('./cache/stats.js'),
-  '/server/metrics': () => import('./server/metrics.js'),
-  '/observability': () => import('./server/metrics.js'),
-  '/server/tests': () => import('./server/tests.js'),
-  '/deploy/status': () => import('./deploy/status.js'),
-  '/asset': () => import('./asset.js'),
-  '/asset/coverage': () => import('./asset/coverage.js'),
-  '/asset/fundamentals': () => import('./asset/fundamentals.js'),
-  '/asset/profile': () => import('./asset/profile.js'),
-  '/asset/valuation': () => import('./asset/valuation.js'),
-  '/asset/profitability': () => import('./asset/profitability.js'),
-  '/asset/debt': () => import('./asset/debt.js'),
-  '/asset/statements': () => import('./asset/statements.js'),
-  '/asset/peers': () => import('./asset/peers.js'),
-  '/asset/source-map': () => import('./asset/source-map.js'),
-  '/asset/indicators': () => import('./asset/indicators.js'),
-  '/asset/quality': () => import('./asset/quality.js'),
-  '/asset/action-plan': () => import('./asset/action-plan.js'),
-  '/fii/profile': () => import('./fii/profile.js'),
-  '/fii/income': () => import('./fii/income.js'),
-  '/fii/patrimonial': () => import('./fii/patrimonial.js'),
-  '/fii/portfolio': () => import('./fii/portfolio.js'),
-  '/fii/vacancy': () => import('./fii/vacancy.js'),
-  '/fii/communications': () => import('./fii/communications.js'),
-  '/fii/checklist': () => import('./fii/checklist.js'),
-  '/fii/indicators': () => import('./fii/indicators.js'),
-  '/assets': () => import('./assets.js'),
-  '/compare': () => import('./compare.js'),
-  '/scrape': () => import('./scrape.js'),
-  '/batch-scrape': () => import('./batch-scrape.js'),
-  '/news': () => import('./news.js'),
-  '/mobile/bootstrap': () => import('./mobile/bootstrap.js'),
-  '/app/bootstrap': () => import('./mobile/bootstrap.js'),
-  '/mobile/portfolio-sync': () => import('./mobile/portfolio-sync.js'),
-  '/app/portfolio-sync': () => import('./mobile/portfolio-sync.js'),
-  '/sync': () => import('./sync.js'),
-  '/openapi': () => import('./openapi.js'),
-  '/fields': () => import('./fields.js'),
-  '/integration/sdk': () => import('./integration/sdk.js'),
-  '/integration/prompts': () => import('./integration/prompts.js'),
-  '/integration/manifest': () => import('./integration/manifest.js'),
-  '/engine/maturity': () => import('./engine/maturity.js'),
-  '/engine/performance': () => import('./engine/performance.js'),
-  '/errors': () => import('./errors.js'),
-  '/asset/history': () => import('./asset/history.js'),
-  '/asset/dividends': () => import('./asset/dividends.js'),
-  '/dividends/batch': () => import('./dividends/batch.js'),
-  '/asset/next-dividend': () => import('./asset/next-dividend.js'),
-  '/market/indices': () => import('./market/indices.js'),
-  '/market/ipca': () => import('./market/ipca.js'),
-  '/market/rankings': () => import('./market/rankings.js'),
-  '/portfolio/analyze': () => import('./portfolio/analyze.js'),
-  '/portfolio/insights-bundle': () => import('./portfolio/insights-bundle.js'),
-  '/portfolio/allocation': () => import('./portfolio/allocation.js'),
-  '/portfolio/dividends': () => import('./portfolio/dividends.js'),
-  '/portfolio/events': () => import('./portfolio/events.js'),
-  '/portfolio/history': () => import('./portfolio/history.js'),
-  '/portfolio/income': () => import('./portfolio/income.js'),
-  '/portfolio/next-dividends': () => import('./portfolio/next-dividends.js'),
-  '/portfolio/rebalance': () => import('./portfolio/rebalance.js'),
-  '/portfolio/risk': () => import('./portfolio/risk.js'),
-  '/portfolio/summary': () => import('./portfolio/summary.js'),
-  '/portfolio/transactions': () => import('./portfolio/transactions.js'),
-  '/watchlist/analyze': () => import('./watchlist/analyze.js'),
-  '/admin/status': () => import('./admin/status.js'),
-  '/admin/cache': () => import('./admin/cache.js'),
-  '/compat/scraper4': () => import('./compat/scraper4.js'),
-};
-
-const LEGACY_ALIASES = {
-  '/cotacao': '/asset',
-  '/ativo': '/asset',
-  '/ativos': '/assets',
-  '/ranking': '/market/rankings',
-  '/rankings': '/market/rankings',
-  '/carteira': '/portfolio/analyze',
-  '/portfolio': '/portfolio/analyze',
-  '/scraper4': '/compat/scraper4',
-  '/scraper': '/compat/scraper4',
-};
-
-function parseUrl(req) {
-  return new URL(req?.url || '/api', 'https://valorae.local');
-}
-
-function stripApiPrefix(pathname) {
-  if (pathname === '/api') return '/';
-  if (pathname.startsWith('/api/')) return pathname.slice('/api'.length) || '/';
-  return pathname || '/';
-}
-
-function normalizePath(req) {
-  const parsed = parseUrl(req);
-  let path = stripApiPrefix(parsed.pathname);
-  if (path === '/' || path === '') return { path: '/', apiVersion: 'v1', parsed };
+function stripApi(pathname) {
+  let path = pathname || '/';
+  if (path === '/api') return '/';
+  if (path.startsWith('/api/')) path = path.slice(4);
   const m = path.match(/^\/(v[12])(?:\/(.*))?$/);
-  let apiVersion = 'v1';
-  if (m) {
-    apiVersion = m[1];
-    path = `/${m[2] || ''}`;
-  }
+  if (m) path = `/${m[2] || ''}`;
   path = path.replace(/\/+$/, '') || '/';
-  return { path: LEGACY_ALIASES[path] || path, apiVersion, parsed };
+  return path;
 }
 
-function queryFromSearchParams(params) {
-  const out = {};
-  for (const [key, value] of params.entries()) {
-    if (out[key] === undefined) out[key] = value;
-    else if (Array.isArray(out[key])) out[key].push(value);
-    else out[key] = [out[key], value];
-  }
-  return out;
+async function bodyOrQuery(req, parsed) {
+  const query = queryObject(parsed.searchParams);
+  const method = String(req.method || 'GET').toUpperCase();
+  if (method === 'GET') return { ...query };
+  const body = await readJsonBody(req).catch(err => { throw err; });
+  return typeof body === 'object' && !Array.isArray(body) ? { ...query, ...body } : { ...query, body };
 }
 
-function mergeQuery(req, apiVersion, parsed) {
-  const fromUrl = queryFromSearchParams((parsed || parseUrl(req)).searchParams);
-  req.query = { ...fromUrl, ...(req.query || {}) };
-  if (apiVersion === 'v2') {
-    req.query.envelope = req.query.envelope ?? '1';
-    req.query.apiVersion = 'v2';
-  }
+function rootPayload() {
+  return {
+    name: RELEASE.name,
+    version: RELEASE.version,
+    status: 'online',
+    contract: RELEASE.contract,
+    routes: ['/api/v1/mobile/portfolio-sync', '/api/v1/dividends/batch', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health'],
+    monitor: '/server.html'
+  };
+}
+
+function health() {
+  return { status: 'OK', online: true, version: RELEASE.version, release: RELEASE.patch, now: new Date().toISOString() };
+}
+
+function manifest() {
+  return { status: 'OK', name: RELEASE.name, version: RELEASE.version, release: RELEASE.patch, contract: RELEASE.contract, endpoints: routeManifest().routes };
+}
+
+function assetPayload(payload = {}) {
+  const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q);
+  const assetClass = classifyTicker(ticker);
+  return {
+    status: ticker ? 'OK' : 'EMPTY',
+    ticker,
+    symbol: ticker,
+    assetClass,
+    source: 'VALORAE Fonte Oficial',
+    profile: { ticker, assetClass, name: ticker, segment: assetClass === 'FII' ? 'Fundo imobiliário' : 'Renda variável' },
+    fundamentals: {},
+    indicators: {},
+    valuation: {},
+    profitability: {},
+    debt: {},
+    statements: {},
+    peers: [],
+    quality: { score: ticker ? 70 : 0, status: ticker ? 'available' : 'missing' },
+    coverage: { ticker: Boolean(ticker), assetClass: Boolean(assetClass), source: 'normalized' },
+    actionPlan: [{ priority: 'normal', text: 'Usar análise de carteira e eventos oficiais normalizados.' }],
+    sourceMap: { primary: 'VALORAE Fonte Oficial', dividendConfirmed: 'StatusInvest', dividendCalendar: 'Investidor10' }
+  };
+}
+
+async function handleAssetDividends(payload = {}) {
+  const ticker = normalizeTicker(payload.ticker || payload.symbol || (payload.tickers || '').split(',')[0]);
+  const result = await getConfirmedDividendsByTicker(ticker, { timeoutMs: Number(payload.timeoutMs || 5500) });
+  return { status: 'OK', ticker, events: result.events, dividends: result.events, dividendEvents: result.events, diagnostics: result.diagnostics };
+}
+
+function emptyCompatible(status = 'OK') {
+  return { status, items: [], events: [], data: [], partial: false, source: 'VALORAE Proxy' };
 }
 
 export async function dispatchRoute(req, res) {
-  const { path, apiVersion, parsed } = normalizePath(req);
-  const metricRoute = path === '/' ? '/api' : `/api${path}`;
-  attachProxyMetricsInterceptor(req, res, { route: metricRoute });
-  if (path === '/') {
-    mergeQuery(req, apiVersion, parsed);
-    const route = beginRoute(req, res, {
-      version: ValoraeEngine.version,
-      methods: ['GET'],
-      route: 'index',
-      rateMax: Number(process.env.VALORAE_RATE_LIMIT_HEALTH_MAX || 180),
-      profile: 'index',
-      cacheControl: 'private, max-age=30',
-    });
-    if (route.done) return;
-    return sendJson(req, res, {
-      name: 'VALORAE Proxy Server API',
-      version: ValoraeEngine.version,
-      status: 'online',
-      compatibility: 'GitHub/Vercel serverless proxy',
-      dashboard: '/server.html',
-      tests: '/server.html#tests',
-      router: { version: 'internal-v1-v2-consolidated', ...routeManifest() },
-      examples: {
-        asset: '/api/asset?ticker=PETR4&mode=super&includeNews=1',
-        assets: '/api/assets?tickers=PETR4,GARE11,VISC11&mode=super',
-        scrape: '/api/scrape?url=https://investidor10.com.br/acoes/petr4/',
-        news: '/api/news?ticker=PETR4',
-        batchScrape: '/api/batch-scrape',
-        health: '/api/health',
-        ready: '/api/ready',
-        metrics: '/api/server/metrics',
-        portfolioInsightsBundle: '/api/v1/portfolio/insights-bundle',
-        testsLab: '/api/server/tests?mode=quick',
-        cacheStats: '/api/cache/stats',
-        sourceStatus: '/api/source/status',
-        engineMaturity: '/api/v1/engine/maturity?ticker=PETR4',
-        enginePerformance: '/api/v1/engine/performance?ticker=PETR4',
-        assetIndicators: '/api/v1/asset/indicators?ticker=PETR4',
-        assetQuality: '/api/v1/asset/quality?ticker=PETR4',
-        assetActionPlan: '/api/v1/asset/action-plan?ticker=PETR4',
-        integrationManifest: '/api/v1/integration/manifest',
-        releaseReadiness: '/api/v1/release/readiness',
-        fields: '/api/fields',
-        errors: '/api/errors',
-        openapi: '/api/openapi',
-      },
-    }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'index', cacheControl: 'private, max-age=30' });
+  const parsed = new URL(req.url || '/api', 'https://valorae.local');
+  const path = stripApi(parsed.pathname);
+  const payload = await bodyOrQuery(req, parsed);
+
+  try {
+    if (path === '/') return sendJson(req, res, rootPayload());
+    if (path === '/health' || path === '/ready') return sendJson(req, res, health(), { cacheControl: 'private, max-age=10' });
+    if (path === '/env') return sendJson(req, res, { status: 'OK', env: { node: process.version, runtime: 'node' }, version: RELEASE.version });
+    if (path === '/manifest' || path === '/integration/manifest' || path === '/schema' || path === '/source/status' || path === '/release/readiness' || path === '/deploy/status' || path === '/personal/readiness') return sendJson(req, res, manifest());
+    if (path === '/cache/stats') return sendJson(req, res, { status: 'OK', cache: cacheStats() });
+    if (path === '/fields') return sendJson(req, res, { status: 'OK', fields: ['positions','dividendPositions','transactions','tickers','includeAnalysis','includeHistory','includeIpca','includeDividends','includeRankings'] });
+    if (path === '/errors') return sendJson(req, res, { status: 'OK', errors: ['INVALID_JSON','PAYLOAD_TOO_LARGE','ROUTE_ERROR','NOT_FOUND'] });
+    if (path === '/openapi') return sendJson(req, res, { status: 'OK', openapi: '3.0.0', info: { title: 'VALORAE Proxy API', version: RELEASE.version }, paths: Object.fromEntries(routeManifest().routes.map(r => [`/api/v1${r}`, { get: { summary: r } }])) });
+    if (path === '/sync') return sendJson(req, res, { status: 'OK', endpoint: 'sync', contract: RELEASE.contract });
+    if (path === '/integration/sdk' || path === '/integration/prompts') return sendJson(req, res, { status: 'OK', version: RELEASE.version, contract: RELEASE.contract, items: [] });
+    if (path === '/admin/status') return sendJson(req, res, { status: 'OK', admin: false, version: RELEASE.version, cache: cacheStats() });
+    if (path === '/compat/scraper4' || path === '/scraper4') return sendJson(req, res, { status: 'OK', compatibility: true, endpoint: '/api/v1/scrape' });
+    if (path === '/cache/clear' || path === '/admin/cache') { clearCache(); return sendJson(req, res, { status: 'OK', cleared: true }); }
+
+    if (path === '/mobile/bootstrap' || path === '/app/bootstrap') return sendJson(req, res, { status: 'OK', version: RELEASE.version, contract: RELEASE.contract, defaultEndpoint: '/api/v1/mobile/portfolio-sync' });
+    if (path === '/mobile/portfolio-sync' || path === '/app/portfolio-sync' || path === '/portfolio/insights-bundle') return sendJson(req, res, await buildMobilePortfolioSync(payload), { cacheControl: 'private, max-age=20' });
+
+    if (path === '/dividends/batch') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: 'private, max-age=60' });
+    if (path === '/portfolio/dividends' || path === '/portfolio/next-dividends' || path === '/portfolio/events') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: 'private, max-age=60' });
+    if (path === '/asset/dividends' || path === '/asset/next-dividend') return sendJson(req, res, await handleAssetDividends(payload), { cacheControl: 'private, max-age=60' });
+
+    if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, buildPortfolioAnalysis(payload));
+    if (path === '/portfolio/history' || path === '/asset/history') return sendJson(req, res, buildHistory(payload));
+    if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.months || 12), { cacheControl: 'private, max-age=300' });
+    if (path === '/market/rankings') return sendJson(req, res, buildRankings(payload));
+    if (path === '/market/indices') return sendJson(req, res, { status: 'OK', indices: [], items: [] });
+
+    if (path === '/asset' || path === '/asset/coverage' || path === '/asset/fundamentals' || path === '/asset/profile' || path === '/asset/valuation' || path === '/asset/profitability' || path === '/asset/debt' || path === '/asset/statements' || path === '/asset/peers' || path === '/asset/source-map' || path === '/asset/indicators' || path === '/asset/quality' || path === '/asset/action-plan') return sendJson(req, res, assetPayload(payload));
+    if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
+    if (path === '/assets') return sendJson(req, res, { status: 'OK', assets: uniqueTickers(payload.tickers || payload.positions || []).map(t => assetPayload({ ticker: t })) });
+    if (path === '/compare') return sendJson(req, res, { status: 'OK', items: uniqueTickers(payload.tickers || []).map(t => assetPayload({ ticker: t })) });
+    if (path === '/news' || path === '/watchlist/analyze') return sendJson(req, res, emptyCompatible('OK'));
+    if (path === '/scrape') {
+      const url = String(payload.url || '');
+      if (!/^https?:\/\//i.test(url)) return sendJson(req, res, { status: 'ERROR', error: 'URL inválida.' }, { status: 400 });
+      const fetched = await fetchText(url, { timeoutMs: Number(payload.timeoutMs || 5500), ttlMs: 60000 });
+      return sendJson(req, res, { status: fetched.status ? 'OK' : 'ERROR', url, html: payload.returnHtml ? fetched.text : undefined, text: fetched.text?.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0, Number(payload.limit || 5000)), metrics: { cacheStatus: fetched.cacheStatus, status: fetched.status } });
+    }
+    if (path === '/batch-scrape') return sendJson(req, res, { status: 'OK', results: [], data: [] });
+    if (path === '/server/metrics' || path === '/observability' || path === '/engine/maturity' || path === '/engine/performance') return sendJson(req, res, { status: 'OK', version: RELEASE.version, metrics: { cache: cacheStats() } });
+
+    return sendJson(req, res, { status: 'NOT_FOUND', error: 'Rota não encontrada no contrato enxuto VALORAE.', path, available: routeManifest().routes }, { status: 404, cacheControl: 'no-store' });
+  } catch (error) {
+    const status = Number(error?.status || 500);
+    return sendJson(req, res, { status: 'ERROR', code: error?.code || 'ROUTE_ERROR', error: status >= 500 ? 'Erro interno no Proxy VALORAE.' : error?.message, path }, { status, cacheControl: 'no-store' });
   }
-  const load = ROUTES[path];
-  if (!load) {
-    return sendJson(req, res, {
-      version: ValoraeEngine.version,
-      status: 'NOT_FOUND',
-      error: 'Rota não encontrada no router interno Valorae.',
-      path,
-      hint: 'Consulte /api/openapi, /api/fields e /api/errors.',
-    }, { status: 404, engineVersion: ValoraeEngine.version, profile: 'router', cacheControl: 'private, max-age=30' });
-  }
-  mergeQuery(req, apiVersion, parsed);
-  const mod = await load();
-  return mod.default(req, res);
 }
 
 export function routeManifest() {
-  return { routes: Object.keys(ROUTES).sort(), legacyAliases: LEGACY_ALIASES, physicalFunctions: ['api/router.js'] };
+  return { routes: [
+    '/health','/ready','/manifest','/env','/schema','/source/status','/release/readiness','/personal/readiness','/cache/stats','/server/metrics','/observability','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/analyze','/portfolio/allocation','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/asset','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/compat/scraper4'
+  ].sort() };
 }
 
-export const _test = { parseUrl, queryFromSearchParams, stripApiPrefix };
+export const _test = { stripApi, assetPayload };

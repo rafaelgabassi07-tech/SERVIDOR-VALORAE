@@ -1,43 +1,25 @@
 import { dispatchRoute } from '../routes/_router.js';
 
-function queryToObject(params) {
-  const out = {};
-  for (const [key, value] of params.entries()) {
-    if (key === 'path') continue;
-    if (out[key] === undefined) out[key] = value;
-    else if (Array.isArray(out[key])) out[key].push(value);
-    else out[key] = [out[key], value];
-  }
-  return out;
+function normalizePath(rawPath = '') {
+  let value = Array.isArray(rawPath) ? rawPath.join('/') : String(rawPath || '');
+  try { value = decodeURIComponent(value); } catch {}
+  value = value.replace(/^\/+/, '').replace(/\/+/g, '/');
+  if (value.startsWith('api/')) value = value.slice(4);
+  return value;
 }
 
-function normalizeProxyPath(rawPath = '') {
-  let path = Array.isArray(rawPath) ? rawPath.join('/') : String(rawPath || '');
-  try { path = decodeURIComponent(path); } catch {}
-  path = path.replace(/^\/+/, '').replace(/\/+/g, '/');
-  if (path === 'router') path = '';
-  if (path.startsWith('api/')) path = path.slice(4);
-  return path;
-}
-
-function rewriteRequestForInternalRouter(req) {
-  const originalUrl = req?.url || '/api/router';
-  const parsed = new URL(originalUrl, 'https://valorae.vercel.local');
-  let proxyPath = normalizeProxyPath(parsed.searchParams.get('path') || req?.query?.path || '');
-  if (!proxyPath && parsed.pathname && parsed.pathname !== '/api/router') {
-    proxyPath = normalizeProxyPath(parsed.pathname.replace(/^\/api\/?/, ''));
-  }
+function rewrite(req) {
+  const original = req.url || '/api/router';
+  const parsed = new URL(original, 'https://valorae.local');
+  const path = normalizePath(parsed.searchParams.get('path') || '');
   parsed.searchParams.delete('path');
   const query = parsed.searchParams.toString();
-  const cleanPath = proxyPath ? `/api/${proxyPath}` : '/api';
-  req.__valoraeOriginalUrl = originalUrl;
-  req.url = `${cleanPath}${query ? `?${query}` : ''}`;
-  req.query = queryToObject(parsed.searchParams);
+  req.url = `/api/${path}${query ? `?${query}` : ''}`;
   return req;
 }
 
 export default async function handler(req, res) {
-  return dispatchRoute(rewriteRequestForInternalRouter(req), res);
+  return dispatchRoute(rewrite(req), res);
 }
 
-export const _test = { normalizeProxyPath, rewriteRequestForInternalRouter };
+export const _test = { normalizePath, rewrite };

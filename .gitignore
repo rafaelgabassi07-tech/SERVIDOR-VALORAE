@@ -1,16 +1,4 @@
-# VALORAE release hygiene
-.env
-.env.*
-!.env.example
-.vercel/
 node_modules/
-dist/
-build/
-coverage/
-.cache/
-.gradle/
+.env
 .DS_Store
 *.log
-*.zip
-reports/*.tmp
-reports/*.local.*

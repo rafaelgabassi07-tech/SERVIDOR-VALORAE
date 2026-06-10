@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import { buildMobilePortfolioSync } from '../lib/contracts/mobile.js';
+import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
+import { normalizeDate, previousBusinessDayIso } from '../lib/core/dates.js';
+const checks=[];
+checks.push(['date 4 digits', normalizeDate('10/06/2026') === '2026-06-10']);
+checks.push(['previous business from monday', previousBusinessDayIso('2026-06-15') === '2026-06-12']);
+const bundle = await buildMobilePortfolioSync({positions:[{ticker:'PETR4',quantity:10,avgPrice:20,currentPrice:22,firstPurchaseDate:'2024-01-01'}],includeIpca:false,includeDividends:false,includeRankings:false});
+checks.push(['mobile endpoint id', bundle.endpoint === 'mobile-portfolio-sync']);
+checks.push(['mobile analysis', !!bundle.analysis?.summary]);
+const div = await buildDividendsContract({positions:[{ticker:'PETR4',quantity:10,firstPurchaseDate:'2024-01-01'}],tickers:['PETR4'],timeoutMs:1});
+checks.push(['dividend contract shape', Array.isArray(div.officialEvents) && Array.isArray(div.portfolioUpcoming)]);
+checks.push(['monitor exists', fs.existsSync('public/server.html')]);
+const failed = checks.filter(([,ok])=>!ok).map(([name])=>name);
+if(failed.length) throw new Error(`VALORAE rebuilt verify failed: ${failed.join(', ')}`);
+console.log('VALORAE Proxy rebuilt v21.13.0 OK');
