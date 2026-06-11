@@ -36,5 +36,9 @@ Variáveis opcionais:
 - `VALORAE_STATUSINVEST_CHART_PROVENTS_TYPE=2` define o tipo do gráfico/consulta de proventos usado no Status Invest.
 - `VALORAE_STATUSINVEST_TIMEOUT_MS=5500` define timeout da fonte Status Invest.
 - `VALORAE_AGENDA_ENABLED=0` ou `VALORAE_INVESTIDOR10_AGENDA_ENABLED=0` desativa apenas o complemento de agenda pública.
+- `VALORAE_AGENDA_MONTH_PAGES_ENABLED=0` desativa varredura de páginas mensais futuras do Investidor10.
+- `VALORAE_AGENDA_MONTHS_AHEAD=18` define o horizonte de páginas mensais futuras.
+- `VALORAE_IPCA_INVESTIDOR10_ENABLED=0` desativa o fallback real de IPCA pela tabela pública do Investidor10 quando o BCB estiver indisponível.
+- `VALORAE_FETCH_RETRIES=1` controla retentativas curtas para Status Invest/Investidor10/BCB sem criar dados simulados.
 
 As rotas que alimentam a Agenda de Dividendos e a Evolução de Proventos são `/api/v1/dividends/batch`, `/api/v1/portfolio/next-dividends`, `/api/v1/portfolio/events`, `/api/v1/asset/dividends` e `/api/v1/asset/next-dividend`.
