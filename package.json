@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
-  "version": "21.13.8",
-  "description": "Proxy VALORAE enxuto com contrato mobile e fluxo enriquecido de fundamentos, histórico e gráficos por ativo.",
+  "version": "21.13.9",
+  "description": "Proxy VALORAE enxuto, prático e cache-first para o ecossistema mobile VALORAE.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,8 +20,8 @@
   },
   "dependencies": {},
   "valorae": {
-    "coreVersion": "21.13.8",
-    "releasePatch": "21.13.8-dividends-source-timeout-stale-cache",
+    "coreVersion": "21.13.9",
+    "releasePatch": "21.13.9-practical-cache-first-flow",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   }

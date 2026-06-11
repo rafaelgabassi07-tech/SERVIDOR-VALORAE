@@ -1,7 +1,8 @@
 {
-  "name": "VALORAE Proxy v21.13.8",
-  "version": "21.13.8",
-  "release": "21.13.8-dividends-source-timeout-stale-cache",
-  "description": "Proxy VALORAE v21.13.8 com fluxo enriquecido de fundamentos, histórico e gráficos para Análise e Detalhes do Ativo.",
-  "contract": "valorae-mobile-portfolio-sync"
+  "name": "VALORAE Proxy v21.13.9",
+  "version": "21.13.9",
+  "release": "21.13.9-practical-cache-first-flow",
+  "description": "Proxy VALORAE v21.13.9 com fluxo prático cache-first, sync leve e rotas dedicadas inspiradas em AeroScrape+Vesto.",
+  "contract": "valorae-mobile-portfolio-sync",
+  "primaryMobileRoute": "/api/v1/mobile/practical-sync"
 }

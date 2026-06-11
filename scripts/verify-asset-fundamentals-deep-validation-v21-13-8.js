@@ -2,7 +2,7 @@ process.env.VALORAE_DISABLE_EXTERNAL = '1';
 import { RELEASE } from '../lib/core/release.js';
 import { buildAssetDetails, getAssetHistory, _test } from '../lib/sources/asset-details.js';
 import { routeManifest } from '../routes/_router.js';
-if (RELEASE.version !== '21.13.8') throw new Error(`Versão inesperada: ${RELEASE.version}`);
+if (RELEASE.version !== '21.13.9') throw new Error(`Versão inesperada: ${RELEASE.version}`);
 const routes = routeManifest().routes;
 for (const route of ['/asset','/asset/history','/asset/fundamentals','/mobile/portfolio-sync']) {
   if (!routes.includes(route)) throw new Error(`Rota ausente: ${route}`);
@@ -20,4 +20,4 @@ if (merged.indicatorCards.length < 2 || !merged.financialSeries.revenueProfit?.l
 
 const hist = await getAssetHistory({ ticker: 'PETR4', timeoutMs: 10, range: '1Y' });
 if (hist.ticker !== 'PETR4' || !Array.isArray(hist.points)) throw new Error('Histórico do ativo inválido');
-console.log('VALORAE Proxy asset fundamentals deep validation v21.13.8 OK');
+console.log('VALORAE Proxy asset fundamentals deep validation v21.13.9 OK');
