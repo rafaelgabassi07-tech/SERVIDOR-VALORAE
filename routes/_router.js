@@ -229,13 +229,13 @@ async function buildComparisonPayload(payload = {}) {
 async function handleAssetDividends(payload = {}) {
   const ticker = normalizeTicker(payload.ticker || payload.symbol || uniqueTickers(payload.tickers || payload.dividendTickers || [])[0]);
   const diagnostics = [];
-  const result = await getConfirmedDividendsByTicker(ticker, { timeoutMs: Number(payload.timeoutMs || 5500) });
+  const result = await getConfirmedDividendsByTicker(ticker, { timeoutMs: Number(payload.timeoutMs || 9000), htmlTimeoutMs: Number(payload.htmlTimeoutMs || 3500) });
   diagnostics.push(...(Array.isArray(result.diagnostics) ? result.diagnostics : [result.diagnostics].filter(Boolean)));
   let events = result.events || [];
 
   const includeUpcoming = payload.includeUpcoming === undefined || !['0', 'false', 'no', 'off'].includes(String(payload.includeUpcoming).toLowerCase());
   if (ticker && includeUpcoming) {
-    const agenda = await getAgendaDividends([ticker], { timeoutMs: Number(payload.agendaTimeoutMs || payload.timeoutMs || 5500) });
+    const agenda = await getAgendaDividends([ticker], { timeoutMs: Number(payload.agendaTimeoutMs || payload.timeoutMs || 9000), futureMonths: Number(payload.futureMonths || payload.monthsForward || 18), deadlineAt: Date.now() + Number(payload.agendaTimeoutMs || payload.timeoutMs || 9000), maxPages: Number(payload.agendaMaxPages || 64) });
     diagnostics.push(...(agenda.diagnostics || []));
     const map = new Map();
     for (const event of [...events, ...(agenda.events || [])]) {
@@ -246,10 +246,14 @@ async function handleAssetDividends(payload = {}) {
     events = [...map.values()];
   }
 
+  const partial = diagnostics.some(d => d?.status === 0 || d?.status === 'PARTIAL' || String(d?.reason || d?.error || '').toLowerCase().includes('deadline') || String(d?.reason || d?.error || '').toLowerCase().includes('timeout'));
   return {
-    status: 'OK',
+    status: partial && events.length === 0 ? 'PARTIAL' : 'OK',
+    sourceStatus: events.length ? (partial ? 'PARTIAL_LIVE_OR_CACHE' : 'LIVE_OR_CACHE') : (partial ? 'SOURCE_TIMEOUT' : 'EMPTY'),
     ticker,
-    sourcePolicy: 'STATUSINVEST_PER_TICKER_PLUS_INVESTIDOR10_CALENDAR_COMPLEMENT',
+    sourcePolicy: 'STATUSINVEST_PER_TICKER_PLUS_INVESTIDOR10_CALENDAR_COMPLEMENT_STALE_IF_ERROR',
+    partial,
+    retryAfterMs: partial && events.length === 0 ? 30000 : undefined,
     events,
     dividends: events,
     dividendEvents: events,

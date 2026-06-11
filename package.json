@@ -1,6 +1,6 @@
 {
   "name": "valorae-proxy",
-  "version": "21.13.7",
+  "version": "21.13.8",
   "description": "Proxy VALORAE enxuto com contrato mobile e fluxo enriquecido de fundamentos, histórico e gráficos por ativo.",
   "private": true,
   "type": "module",
@@ -13,15 +13,15 @@
     "build": "node scripts/build-vercel-safe.js",
     "audit:version": "node scripts/audit-version.js",
     "audit:identity": "node scripts/audit-identity.js",
-    "verify": "node scripts/verify-asset-fundamentals-deep-validation-v21-13-7.js"
+    "verify": "node scripts/verify-asset-fundamentals-deep-validation-v21-13-8.js"
   },
   "engines": {
     "node": "20.x"
   },
   "dependencies": {},
   "valorae": {
-    "coreVersion": "21.13.7",
-    "releasePatch": "21.13.7-asset-fundamentals-deep-validation",
+    "coreVersion": "21.13.8",
+    "releasePatch": "21.13.8-dividends-source-timeout-stale-cache",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   }
