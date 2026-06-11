@@ -19,3 +19,20 @@ const empty = await buildDividendsContract({ positions: [], tickers: [], include
 assert.equal(empty.status, 'EMPTY');
 assert.equal(empty.officialEvents.length, 0);
 assert.equal(empty.diagnostics[0].reason, 'emptyTickers');
+
+
+const variants = parseAgendaHtml('PETR4 JSCP R$ 1,000000 Data COM 05/01/2026 Data de Pagamento 20/01/2026 BBAS3 DIV R$ 0,50 Data COM 01/02/2026 Data de Pagamento 15/02/2026 MXRF11 Rendimentos R$ 0,10 Data COM 30/01/2026 Data de Pagamento 14/02/2026', ['PETR4','BBAS3','MXRF11']);
+const petr = variants.find(e => e.ticker === 'PETR4');
+assert.equal(petr.dividendType, 'JCP');
+assert.equal(petr.grossValuePerShare, 1);
+assert.equal(petr.valuePerShare, 0.825);
+assert.equal(petr.taxRate, 0.175);
+assert.equal(petr.taxable, true);
+const bbas = variants.find(e => e.ticker === 'BBAS3');
+assert.equal(bbas.dividendType, 'DIVIDENDO');
+assert.equal(bbas.valuePerShare, 0.5);
+assert.equal(bbas.taxRate, 0);
+const mxrf = variants.find(e => e.ticker === 'MXRF11');
+assert.equal(mxrf.dividendType, 'RENDIMENTO');
+assert.equal(mxrf.valuePerShare, 0.1);
+assert.equal(mxrf.taxRate, 0);
