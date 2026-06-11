@@ -8,6 +8,12 @@ const analysis = buildPortfolioAnalysis({ positions: [
 assert.equal(analysis.allocationBySector.some(x => x.sector === 'Petróleo'), true);
 assert.equal(analysis.allocationBySector.some(x => x.sector === 'Fundos Imobiliários'), true);
 assert.equal(analysis.rebalance.every(x => x.action === 'OBSERVAR'), true);
+assert.equal(Number.isFinite(analysis.score), true);
+assert.equal(analysis.score > 0, true);
+assert.equal(analysis.positionRanking.length, 2);
+assert.equal(analysis.actionPlan.length > 0, true);
+assert.equal(analysis.intelligence.positionRanking.items.length, 2);
+assert.equal(analysis.summary.allocation.byType.length, 2);
 assert.equal(analysis.rebalancePolicy.includes('Sem metas reais'), true);
 
 const targeted = buildPortfolioAnalysis({

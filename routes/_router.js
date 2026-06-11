@@ -149,6 +149,83 @@ async function mobileBootstrap(payload = {}) {
   };
 }
 
+function comparisonPointsFromHistory(history = {}) {
+  const rows = history.points || history.history || history.series || [];
+  const clean = Array.isArray(rows) ? rows.filter(point => Number(point?.close || point?.price || point?.value || 0) > 0) : [];
+  if (clean.length < 2) return [];
+  const base = Number(clean[0]?.close || clean[0]?.price || clean[0]?.value || 0);
+  if (!(base > 0)) return [];
+  return clean.map((point, index) => {
+    const current = Number(point?.close || point?.price || point?.value || 0);
+    return {
+      label: point?.label || point?.date || `P${index + 1}`,
+      date: point?.date || point?.timestamp || point?.time || '',
+      value: Math.round((((current / base) - 1) * 100) * 10000) / 10000,
+      returnPercent: Math.round((((current / base) - 1) * 100) * 10000) / 10000
+    };
+  });
+}
+
+function comparisonTickers(payload = {}) {
+  const values = Array.isArray(payload.tickers || payload.symbols || payload.assets)
+    ? (payload.tickers || payload.symbols || payload.assets)
+    : String(payload.tickers || payload.symbols || payload.assets || payload.ticker || payload.symbol || '').split(/[,;\s]+/);
+  const out = [];
+  for (const value of values) {
+    const raw = String(value?.ticker || value?.symbol || value || '').trim().toUpperCase();
+    const special = raw.replace(/[^A-Z0-9]/g, '');
+    if (['IBOV', 'BVSP', 'IBOVESPA', 'IFIX', 'IPCA', 'CDI', 'USD', 'USDBRL', 'USDBRLX', 'BRLX'].includes(special)) {
+      const canonical = ['BVSP', 'IBOVESPA'].includes(special) ? 'IBOV' : (['USD', 'USDBRL', 'USDBRLX', 'BRLX'].includes(special) ? 'USD' : special);
+      if (!out.includes(canonical)) out.push(canonical);
+      continue;
+    }
+    for (const ticker of uniqueTickers([raw])) if (!out.includes(ticker)) out.push(ticker);
+  }
+  return out;
+}
+
+async function buildComparisonPayload(payload = {}) {
+  const requested = comparisonTickers(payload);
+  const range = payload.range || payload.period || '1Y';
+  const timeoutMs = Number(payload.timeoutMs || 3800);
+  const series = [];
+  const diagnostics = [];
+  const marketTickers = requested.filter(ticker => ticker !== 'IPCA' && ticker !== 'CDI');
+  const histories = await Promise.all(marketTickers.map(async ticker => {
+    const history = await getAssetHistory({ ticker, range, timeoutMs }).catch(error => ({ status: 'ERROR', ticker, points: [], error: error?.message }));
+    return [ticker, history];
+  }));
+  for (const [ticker, history] of histories) {
+    const points = comparisonPointsFromHistory(history);
+    if (points.length >= 2) series.push({ name: ticker, ticker, points, source: history.source || 'VALORAE Fonte Oficial' });
+    diagnostics.push({ ticker, status: history.status, count: points.length, cacheStatus: history.cacheStatus, error: history.error });
+  }
+  if (requested.includes('IPCA')) {
+    const months = String(range).toUpperCase() === 'MAX' ? 120 : (String(range).toUpperCase() === '5Y' ? 60 : 12);
+    const ipca = await getIpcaSeries(months).catch(error => ({ status: 'ERROR', points: [], error: error?.message }));
+    const points = (ipca.points || ipca.series || []).map(point => ({
+      label: point.month || point.date || '',
+      date: point.date || '',
+      value: Number(point.accumulatedPercent || 0),
+      returnPercent: Number(point.accumulatedPercent || 0)
+    }));
+    if (points.length >= 2) series.push({ name: 'IPCA', ticker: 'IPCA', points, source: ipca.source || 'VALORAE IPCA' });
+    diagnostics.push({ ticker: 'IPCA', status: ipca.status, count: points.length, cacheStatus: ipca.cacheStatus, error: ipca.error });
+  }
+  return {
+    status: series.length ? 'OK' : 'EMPTY',
+    endpoint: 'compare',
+    range,
+    source: 'VALORAE Fonte Oficial',
+    series,
+    comparison: series,
+    items: series,
+    results: series,
+    diagnostics,
+    partial: series.length < requested.filter(ticker => ticker !== 'CDI').length
+  };
+}
+
 async function handleAssetDividends(payload = {}) {
   const ticker = normalizeTicker(payload.ticker || payload.symbol || uniqueTickers(payload.tickers || payload.dividendTickers || [])[0]);
   const diagnostics = [];
@@ -227,7 +304,7 @@ export async function dispatchRoute(req, res) {
     }
     if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
     if (path === '/assets') return sendJson(req, res, await buildAssetsPayload(payload), { cacheControl: 'private, max-age=45' });
-    if (path === '/compare') return sendJson(req, res, { status: 'OK', items: uniqueTickers(payload.tickers || []).map(t => assetPayload({ ticker: t })) });
+    if (path === '/compare') return sendJson(req, res, await buildComparisonPayload(payload), { cacheControl: 'private, max-age=60' });
     if (path === '/news') return sendJson(req, res, await getNews(payload), { cacheControl: 'private, max-age=120' });
     if (path === '/watchlist/analyze') return sendJson(req, res, emptyCompatible('OK'));
     if (path === '/scrape') {
@@ -252,4 +329,4 @@ export function routeManifest() {
   ].sort() };
 }
 
-export const _test = { stripApi, assetPayload };
+export const _test = { stripApi, assetPayload, comparisonTickers, buildComparisonPayload };
