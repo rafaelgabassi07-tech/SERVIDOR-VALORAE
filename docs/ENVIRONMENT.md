@@ -19,6 +19,15 @@ Principais variáveis:
 | `VALORAE_ADMIN_TOKEN` | Ativa rotas admin | vazio/desativado |
 | `VALORAE_ADMIN_ALLOW_QUERY_TOKEN` | Permite token admin via query apenas fora de produção | `0` |
 | `VALORAE_ADMIN_ALLOW_QUERY_TOKEN_IN_PRODUCTION` | Override explícito e não recomendado para query token em produção | `0` |
+| `SUPABASE_URL` | URL do projeto Supabase para `/api/sync` | vazio/desativado |
+| `SUPABASE_SERVICE_ROLE_KEY` | Chave server-side para REST Supabase no Proxy | vazio/desativado |
+| `SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_ANON_KEY` | Chave pública opcional para validar JWT do usuário | usa service key como fallback |
+| `VALORAE_SUPABASE_SNAPSHOT_TABLE` | Tabela de snapshots | `valorae_user_snapshots` |
+| `VALORAE_SUPABASE_CLIENTS_TABLE` | Tabela de clientes/dispositivos | `valorae_sync_clients` |
+| `VALORAE_SUPABASE_TRANSACTIONS_TABLE` | Tabela de transações | `valorae_transactions` |
+| `VALORAE_SUPABASE_DIVIDENDS_TABLE` | Tabela de proventos | `valorae_dividend_events` |
+| `VALORAE_SUPABASE_SYNC_TOKEN` | Token admin legado opcional para sync | vazio/desativado |
+| `VALORAE_SUPABASE_CLIENT_SECRET_PEPPER` | Pepper opcional para hash do segredo local | vazio |
 
 | `VALORAE_ADAPTIVE_COMPLETION_ENABLED` | Liga complemento HTML sob demanda para reduzir PARTIAL | `1` |
 | `VALORAE_ADAPTIVE_COMPLETION_TIMEOUT_MS` | Orçamento do complemento adaptativo | `4500` |

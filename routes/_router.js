@@ -17,6 +17,8 @@ import integrationSdkHandler from './integration/sdk.js';
 import integrationPromptsHandler from './integration/prompts.js';
 import releaseReadinessHandler from './release/readiness.js';
 import compatScraperHandler from './compat/scraper4.js';
+import syncHandler from './sync.js';
+import serverMetricsHandler from './server/metrics.js';
 
 function stripApi(pathname) {
   let path = pathname || '/';
@@ -39,8 +41,8 @@ function applyRuntimeCors(req, res) {
   const origin = req?.headers?.origin || '*';
   res.setHeader('Access-Control-Allow-Origin', origin === '*' ? '*' : String(origin));
   res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, HEAD, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Valorae-App, X-Valorae-Channel, X-Valorae-App-Version, X-Valorae-Build, X-Valorae-App-Id, X-Valorae-Client-Key');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Valorae-App, X-Valorae-Channel, X-Valorae-App-Version, X-Valorae-Build, X-Valorae-App-Id, X-Valorae-Client-Key, X-Valorae-User-Id, X-Valorae-Device-Id, X-Valorae-Client-Secret, X-Valorae-Sync-Token');
   res.setHeader('Access-Control-Expose-Headers', 'X-Valorae-Auth-Mode, X-Valorae-Response-Bytes, X-Valorae-Cache-Policy, X-Valorae-Performance, X-Valorae-Cache, ETag');
   res.setHeader('Access-Control-Max-Age', '600');
 }
@@ -382,7 +384,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/fields') return sendJson(req, res, { status: 'OK', endpoint: 'fields', fields: ['positions','dividendPositions','transactions','tickers','includeAnalysis','includeHistory','includeIpca','includeDividends','includeRankings'] });
     if (path === '/errors') return sendJson(req, res, { status: 'OK', endpoint: 'errors', errors: ['INVALID_JSON','PAYLOAD_TOO_LARGE','ROUTE_ERROR','NOT_FOUND'] });
     if (path === '/openapi') return sendJson(req, res, { status: 'OK', openapi: '3.0.0', info: { title: 'VALORAE Proxy API', version: RELEASE.version }, paths: Object.fromEntries(routeManifest().routes.map(r => [`/api/v1${r}`, { get: { summary: r } }])) });
-    if (path === '/sync') return sendJson(req, res, { status: 'OK', endpoint: 'sync', route: '/api/sync', contract: RELEASE.contract, supabase: { authMode: 'supabase_email_password' } });
+    if (path === '/sync') return syncHandler(req, res);
     if (path === '/admin/status') return sendJson(req, res, { status: 'OK', admin: false, version: RELEASE.version, cache: cacheStats() });
     if (path === '/compat/scraper4' || path === '/scraper4' || path === '/scraper') return compatScraperHandler(req, res);
     if (path === '/cache/clear' || path === '/admin/cache') { clearCache(); return sendJson(req, res, { status: 'OK', cleared: true }); }
@@ -424,7 +426,7 @@ export async function dispatchRoute(req, res) {
       return sendJson(req, res, { status: fetched.status ? 'OK' : 'ERROR', url, html: payload.returnHtml ? fetched.text : undefined, text: fetched.text?.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0, Number(payload.limit || 5000)), metrics: { cacheStatus: fetched.cacheStatus, status: fetched.status } });
     }
     if (path === '/batch-scrape') return sendJson(req, res, { status: 'OK', results: [], data: [] });
-    if (path === '/server/metrics' || path === '/observability' || path === '/engine/maturity' || path === '/engine/performance') return sendJson(req, res, { status: 'OK', version: RELEASE.version, metrics: { cache: cacheStats() } });
+    if (path === '/server/metrics' || path === '/observability' || path === '/engine/maturity' || path === '/engine/performance') return serverMetricsHandler(req, res);
     if (path === '/server/tests') return sendJson(req, res, await monitorSelfTest(), { cacheControl: 'no-store' });
 
     return sendJson(req, res, { status: 'NOT_FOUND', error: 'Rota não encontrada no contrato enxuto VALORAE.', path, available: routeManifest().routes }, { status: 404, cacheControl: 'no-store' });

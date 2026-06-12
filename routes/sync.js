@@ -221,6 +221,67 @@ async function supabaseFetch(path, init = {}) {
   return json ?? text;
 }
 
+async function probeSupabaseTable(table, label = table) {
+  const started = Date.now();
+  try {
+    const rows = await supabaseFetch(`/rest/v1/${table}?select=*&limit=1`, { method: 'GET' });
+    return {
+      table,
+      label,
+      ok: true,
+      accessible: true,
+      rowsChecked: Array.isArray(rows) ? rows.length : 0,
+      elapsedMs: Date.now() - started,
+    };
+  } catch (err) {
+    return {
+      table,
+      label,
+      ok: false,
+      accessible: false,
+      code: err.code || 'SUPABASE_TABLE_PROBE_ERROR',
+      status: err.status || 500,
+      message: String(err.message || 'Falha ao consultar tabela Supabase.').slice(0, 240),
+      elapsedMs: Date.now() - started,
+    };
+  }
+}
+
+async function supabaseDiagnostics() {
+  const cfg = getSupabaseConfig();
+  const started = Date.now();
+  if (!cfg.configured) {
+    return {
+      ok: false,
+      configured: false,
+      code: 'SUPABASE_NOT_CONFIGURED',
+      message: 'Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Vercel do Proxy.',
+      elapsedMs: Date.now() - started,
+    };
+  }
+  const probes = await Promise.all([
+    probeSupabaseTable(SNAPSHOT_TABLE, 'snapshots'),
+    probeSupabaseTable(CLIENTS_TABLE, 'clients'),
+    probeSupabaseTable(TRANSACTIONS_TABLE, 'transactions'),
+    probeSupabaseTable(DIVIDENDS_TABLE, 'dividends'),
+  ]);
+  const failed = probes.filter((p) => !p.ok);
+  return {
+    ok: failed.length === 0,
+    configured: true,
+    urlConfigured: Boolean(cfg.url),
+    keyConfigured: Boolean(cfg.key),
+    authConfigured: cfg.authConfigured,
+    checkedAt: nowIso(),
+    elapsedMs: Date.now() - started,
+    tables: probes,
+    failedTables: failed.map((p) => p.table),
+    recommendation: failed.length
+      ? 'Revise nomes das tabelas, políticas/permissões, service role key e URL do projeto no Vercel.'
+      : 'Supabase acessível pelo Proxy. Escrita/leitura deve funcionar se o APK enviar identidade e payload válidos.',
+  };
+}
+
 async function verifySupabaseBearer(req) {
   const cfg = getSupabaseConfig();
   const token = authorizationBearer(req);
@@ -513,8 +574,22 @@ export default async function handler(req, res) {
           authMode: 'supabase_email_password',
           legacyAdminTokenEnabled: Boolean(process.env.VALORAE_SUPABASE_SYNC_TOKEN),
         },
-        capabilities: ['health', 'register_client', 'upsert_snapshot', 'get_snapshot', 'upsert_transactions', 'get_transactions', 'upsert_dividend_events', 'get_dividend_events', 'delete_user_data'],
+        capabilities: ['health', 'diagnostics', 'register_client', 'upsert_snapshot', 'get_snapshot', 'upsert_transactions', 'get_transactions', 'upsert_dividend_events', 'get_dividend_events', 'delete_user_data'],
+        diagnosticsHint: 'Use /api/sync?action=diagnostics para testar conexão real com Supabase e tabelas.',
       }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
+    }
+
+    if (action === 'diagnostics' || action === 'self_test' || action === 'ping') {
+      const diagnostics = await supabaseDiagnostics();
+      return sendJson(req, res, {
+        ok: diagnostics.ok,
+        version: ValoraeEngine.version,
+        patch: CORE_VERSION,
+        requestId: route.requestId,
+        route: '/api/sync',
+        action,
+        supabase: diagnostics,
+      }, { status: diagnostics.configured ? 200 : 503, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
     }
 
     if (!cfg.configured) {

@@ -28,4 +28,10 @@ Eles são mapeados para os modos internos `compact|standard|full` e `fast|standa
 
 ## `/api/sync`
 
-A URL legada `/api/sync` foi mantida, mas retorna `410` com `SYNC_DISABLED_FREE_ONLY`. A build free-only não usa banco/storage externo.
+A URL `/api/sync` agora é roteada para o handler real de sincronização Supabase quando as variáveis existem no Vercel.
+
+- `GET /api/sync?action=health` mostra se as variáveis foram detectadas.
+- `GET /api/sync?action=diagnostics` testa conexão real com Supabase e tabelas.
+- Sem `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`, ações de leitura/escrita retornam `SUPABASE_NOT_CONFIGURED`.
+
+O projeto continua sem dependência `@supabase/supabase-js`; a integração usa `fetch` nativo e REST do Supabase para manter a árvore simples no AI Studio.

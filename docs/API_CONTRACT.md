@@ -133,3 +133,53 @@ chart_manifest[].renderable === false
 ```
 
 como “dados indisponíveis no momento”.
+
+
+## Contrato Supabase Sync
+
+A sincronização opcional com Supabase fica na rota única:
+
+```text
+/api/sync
+```
+
+Ações aceitas:
+
+```text
+health
+diagnostics
+register_client
+upsert_snapshot
+get_snapshot
+upsert_transactions
+get_transactions
+upsert_dividend_events
+get_dividend_events
+delete_user_data
+```
+
+Teste de configuração:
+
+```text
+GET /api/sync?action=health
+```
+
+Teste de funcionamento real com Supabase:
+
+```text
+GET /api/sync?action=diagnostics
+```
+
+`diagnostics` tenta acessar as tabelas configuradas e retorna `ok: true` somente quando URL, chave e tabelas estão acessíveis.
+
+Headers aceitos pelo Android/APK para sincronização local:
+
+```text
+Authorization
+X-Valorae-User-Id
+X-Valorae-Device-Id
+X-Valorae-Client-Secret
+X-Valorae-Sync-Token
+```
+
+O Proxy não envia a service role key para o APK. A chave fica apenas no ambiente do Vercel.

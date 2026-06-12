@@ -63,6 +63,39 @@ Quando um bloco visual existe, mas a série não foi capturada com segurança, o
 - `GET /api/v1/asset/dividends`
 - `GET /server.html`
 
+
+## Supabase pelo Proxy
+
+O Proxy possui sincronização Supabase opcional em:
+
+```text
+GET  /api/sync?action=health
+GET  /api/sync?action=diagnostics
+POST /api/sync?action=register_client
+POST /api/sync?action=upsert_snapshot
+POST /api/sync?action=upsert_transactions
+POST /api/sync?action=upsert_dividend_events
+GET  /api/sync?action=get_snapshot
+GET  /api/sync?action=get_transactions
+GET  /api/sync?action=get_dividend_events
+DELETE /api/sync?action=delete_user_data
+```
+
+No Vercel, configure no mínimo:
+
+```text
+SUPABASE_URL=https://SEU-PROJETO.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
+```
+
+Depois do deploy, teste de verdade com:
+
+```text
+https://SEU-PROXY.vercel.app/api/sync?action=diagnostics
+```
+
+`health` só informa se as variáveis existem. `diagnostics` consulta as tabelas reais e mostra se o Proxy consegue conversar com o Supabase sem expor chaves.
+
 ## Validação local
 
 ```bash
