@@ -1,41 +1,45 @@
-# Android Java Guide — Valorae v21.12.0
+# Android Java Guide — VALORAE Proxy
 
-O cliente Java puro fica em:
+O cliente Android pode integrar usando HTTP simples. A rota mais importante para fundamentos e gráficos é:
 
 ```text
-public/sdk/android-java/ValoraeClient.java
+POST /api/scraper
 ```
 
-Ele usa apenas APIs padrão do Java/Android:
+Exemplo de corpo:
 
-- `HttpURLConnection`
-- timeouts configuráveis
-- tratamento de erro HTTP
-- fechamento seguro de streams
-
-Exemplo:
-
-```java
-ValoraeClient client = new ValoraeClient("https://seu-deploy.vercel.app");
-String ready = client.readyJson();
-String manifest = client.manifestJson();
-String petr4 = client.assetJson("PETR4", "quote", "quote");
-String carteira = client.portfolioAnalyzeJson("{\"positions\":[{\"ticker\":\"PETR4\",\"quantity\":10,\"averagePrice\":32}]}");
+```json
+{
+  "mode": "fundamentos",
+  "ticker": "BBAS3"
+}
 ```
 
-## Rotas úteis
+A resposta vem no envelope:
 
-- `readyJson()`
-- `manifestJson()`
-- `assetJson()`
-- `assetV2Json()`
-- `assetsJson()`
-- `compareJson()`
-- `rankingsJson()`
-- `portfolioAnalyzeJson()`
-- `cacheStatsJson()`
-- `openApiJson()`
+```json
+{
+  "json": {
+    "ticker": "BBAS3",
+    "graficos_i10": [],
+    "chart_manifest": []
+  }
+}
+```
 
-## v21.12.0 — Scraper/API otimizado
+## Recomendações no APK
 
-O VALORAE agora possui cache final de resultado para `/api/scrape` e `/api/batch-scrape`, chave HTML segura contra contaminação por truncamento, batch coalescido por `fetchKey`, fast-path conservador para seletores simples, métricas detalhadas de scraping e controles mobile (`compact=1`, `previewChars` e `fields=`). Tudo permanece free-only, sem dependências obrigatórias e sem desmembrar `lib/Valorae-engine.js`.
+- Renderize gráficos usando `chart_manifest` para descobrir os blocos disponíveis.
+- Use `graficos_i10` quando precisar dos pontos completos.
+- Se `renderable` for `false`, mostre estado vazio em vez de travar a tela.
+- Não dependa apenas do sufixo do ticker para classificar ativo; use `tipo_ativo` e `classe_ativo` enviados pelo Proxy.
+- Preserve timeout e tratamento de erro HTTP no app.
+
+## Rotas auxiliares
+
+- `GET /api/v1/health`
+- `GET /api/v1/manifest`
+- `GET /api/v1/asset/history`
+- `GET /api/v1/asset/dividends`
+- `POST /api/v1/mobile/portfolio-sync`
+- `POST /api/v1/dividends/batch`

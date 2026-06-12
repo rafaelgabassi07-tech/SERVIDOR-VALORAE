@@ -1,107 +1,135 @@
-# API Contract — Valorae Proxy v21.12.0
+# API Contract — VALORAE Proxy Mobile
 
-## Envelope v1
+## Rota compatível com APK
 
-Endpoints `/api/*` e `/api/v1/*` retornam o payload direto do recurso.
+```text
+POST /api/scraper
+```
 
-## Envelope v2
-
-Endpoints `/api/v2/*` ou `?envelope=1` retornam:
+Payload mínimo:
 
 ```json
 {
-  "ok": true,
-  "schemaVersion": "envelope-v2",
-  "version": "21.12.0",
-  "requestId": "...",
-  "data": {},
-  "meta": {
-    "apiVersion": "v2",
-    "generatedAt": "...",
-    "payloadControls": {}
-  }
+  "mode": "fundamentos",
+  "ticker": "HGLG11"
 }
 ```
 
-## Endpoints de contrato e lançamento
-
-- `/api/v1/ready`: readiness sem chamadas externas.
-- `/api/v1/manifest`: manifesto de rotas, aliases e capacidades.
-- `/api/fields`: catálogo de campos estáveis.
-- `/api/errors`: catálogo de erros.
-- `/api/openapi`: OpenAPI 3.1.
-
-## Controles de payload
-
-- `fields=a,b.c`: recorta o payload final.
-- `dataFields=a,b.c`: recorta `data` quando há envelope.
-- `lean=1`: remove campos pesados.
-- `maxItems=20`: limita arrays recursivamente.
-
-Caminhos perigosos como `__proto__`, `prototype` e `constructor` são ignorados para evitar prototype pollution.
-
-## Views
-
-Aliases públicos aceitos:
+Aliases aceitos para ativo:
 
 ```text
-instant -> compact
-ultra -> compact
-quote -> compact
-card -> compact
-wallet -> standard
-detail -> full
-analysis -> full
+ticker, symbol, ativo, codigo, code, papel, slug, asset, query, q, url
 ```
 
-Views internas compatíveis: `compact`, `standard`, `full`.
-
-## Profiles
-
-Aliases públicos aceitos:
+Aliases aceitos para modo `fundamentos`:
 
 ```text
-instant -> instant
-ultra -> instant
-quote -> fast
-card -> fast
-wallet -> portfolio
-analysis -> deep
-balanced -> standard
-complete -> deep
+fundamentos, asset
 ```
 
-Profiles internos compatíveis: `instant`, `fast`, `standard`, `deep`, `portfolio`.
+## Envelope de resposta
 
-## Erros
-
-Respostas de erro usam shape comum:
+A rota compatível mantém o formato esperado pelo APK:
 
 ```json
 {
-  "version": "...",
-  "requestId": "...",
-  "status": "ERROR",
-  "code": "INVALID_TICKER",
-  "error": "..."
+  "json": {},
+  "_src": "valorae-compat",
+  "contract": "..."
 }
 ```
 
-Consulte `/api/errors` para o catálogo atual.
+O payload principal sempre fica em `json`.
 
-## Confiabilidade
+## Campos principais para tela de ativo
 
-Campos recomendados para UI Web/APK:
+```text
+ticker
+nome
+tipo_ativo
+classe_ativo
+source_url
+cotacao
+rentabilidade_chart
+comparacao
+comparacao_indices
+charts_financeiros
+historico_indicadores
+distribuicoes_12m
+dividend_yield_history
+dividend_history
+imoveis
+distribuicao_ativos_fundo
+graficos_i10
+chart_manifest
+chart_fidelity
+_coverage
+```
 
-- `quality.score`
-- `fieldConfidence`
-- `sourceReport`
-- `parserResilience`
-- `sourceDrift`
-- `schemaStability`
+## Contrato gráfico canônico
 
-Eles indicam se a resposta está completa, parcial ou com possível mudança de fonte.
+`graficos_i10` é uma lista de gráficos/tabelas/listas visuais extraídas do ativo.
 
-## v21.12.0 — Scraper/API otimizado
+Cada item segue o formato:
 
-O VALORAE agora possui cache final de resultado para `/api/scrape` e `/api/batch-scrape`, chave HTML segura contra contaminação por truncamento, batch coalescido por `fetchKey`, fast-path conservador para seletores simples, métricas detalhadas de scraping e controles mobile (`compact=1`, `previewChars` e `fields=`). Tudo permanece free-only, sem dependências obrigatórias e sem desmembrar `lib/Valorae-engine.js`.
+```json
+{
+  "id": "receitas_lucros",
+  "title": "Receitas e Lucros",
+  "chartType": "bar_line",
+  "legacyField": "charts_financeiros.receitas_lucros",
+  "renderable": true,
+  "dataCount": 5,
+  "points": []
+}
+```
+
+`chart_manifest` é uma versão leve para a UI decidir rapidamente o que renderizar:
+
+```json
+{
+  "id": "lista_imoveis",
+  "title": "Lista de Imóveis",
+  "chartType": "property_list_with_abl",
+  "legacyField": "imoveis",
+  "renderable": true,
+  "dataCount": 10,
+  "sourceStatus": "captured"
+}
+```
+
+## Regras de fidelidade
+
+- O Proxy não cria série sintética para preencher gráfico ausente.
+- `renderable: false` indica ausência segura de dados renderizáveis.
+- `rentabilidade` e `comparacao_indices` são blocos separados.
+- `comparacao` representa tabela de pares por ticker.
+- `imoveis` representa imóveis físicos.
+- `distribuicao_ativos_fundo` representa composição de ativos em FIIs de papel/híbridos.
+
+## Aliases mobile
+
+O Proxy mantém campos em `snake_case` e aliases em `camelCase`:
+
+```text
+graficos_i10 -> graficosI10, graficos
+chart_manifest -> chartManifest
+chart_fidelity -> chartFidelity
+charts_financeiros -> chartsFinanceiros
+historico_indicadores -> historicoIndicadores
+comparacao_indices -> comparacaoIndices
+distribuicoes_12m -> distribuicoes12m
+dividend_yield_history -> dividendYieldHistory
+dividend_history -> dividendHistory
+distribuicao_ativos_fundo -> distribuicaoAtivosFundo
+```
+
+## Falhas controladas
+
+Quando a origem muda ou um bloco não está disponível, a resposta deve continuar válida para o APK. A UI deve tratar:
+
+```text
+chart_manifest[].renderable === false
+```
+
+como “dados indisponíveis no momento”.

@@ -6,9 +6,9 @@
 
 ---
 
-## 1. Referência comparativa AeroScrape + Vesto
+## 1. Referência comparativa referências externas
 
-A nova revisão manteve como referência os pontos fortes observados no AeroScrape + Vesto:
+A nova revisão manteve como referência os pontos fortes observados no referências externas:
 
 1. **Batch/coalescing:** evitar chamadas duplicadas e agrupar tickers por janela.
 2. **Cache/stale-first:** mostrar o que já existe e atualizar em segundo plano.

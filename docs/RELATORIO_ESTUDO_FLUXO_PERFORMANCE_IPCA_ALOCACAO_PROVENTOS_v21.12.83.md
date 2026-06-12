@@ -2,7 +2,7 @@
 
 ## Escopo desta rodada
 
-Esta rodada analisou o projeto VALORAE atualizado na rodada anterior, o Valorae Proxy, o relatório de auditoria AeroScrape/Vesto e os projetos de referência `AeroScrape-main` e `Vesto (2).apk`. A intervenção foi conservadora: preservar nomes, árvore, rotas antigas, `applicationId`, Gradle, estrutura do Proxy e compatibilidade com Google AI Studio.
+Esta rodada analisou o projeto VALORAE atualizado na rodada anterior, o Valorae Proxy, o relatório de auditoria motor externo de referência/APK externo de referência e os projetos de referência `referencia-extra` e `APK externo de referência`. A intervenção foi conservadora: preservar nomes, árvore, rotas antigas, `applicationId`, Gradle, estrutura do Proxy e compatibilidade com Google AI Studio.
 
 O objetivo foi melhorar desempenho e correção lógica nas páginas/fluxos de:
 
@@ -16,9 +16,9 @@ O objetivo foi melhorar desempenho e correção lógica nas páginas/fluxos de:
 
 ## Referências extraídas dos projetos do seu irmão
 
-### AeroScrape
+### motor externo de referência
 
-O AeroScrape confirma três padrões bons para o VALORAE:
+O motor externo de referência confirma três padrões bons para o VALORAE:
 
 1. **Batch e coalescing**: agrupar chamadas semelhantes e evitar várias consultas iguais simultâneas.
 2. **Cache com status explícito**: retornar `HIT`, `STALE`, `MISS` ou equivalente para a UI saber se está vendo dado fresco ou preservado.
@@ -26,9 +26,9 @@ O AeroScrape confirma três padrões bons para o VALORAE:
 
 No VALORAE isso foi aplicado nos fluxos de proventos, IPCA, alocação e histórico.
 
-### Vesto
+### APK externo de referência
 
-O Vesto reforça um fluxo mais resiliente:
+O APK externo de referência reforça um fluxo mais resiliente:
 
 ```text
 abrir com dados conhecidos
@@ -271,6 +271,6 @@ java.net.UnknownHostException: services.gradle.org
 
 ## Limitações honestas
 
-- O APK Vesto foi inspecionado via assets públicos extraídos, não por decompilação Java/Kotlin completa.
+- O APK APK externo de referência foi inspecionado via assets públicos extraídos, não por decompilação Java/Kotlin completa.
 - O build Android completo não pôde ser concluído no sandbox porque o Gradle wrapper depende de download externo bloqueado.
 - Não foram feitos testes reais contra Investidor10/BCB com rede externa no runtime do pacote; a correção foi feita pelo contrato e validação estática do Proxy.

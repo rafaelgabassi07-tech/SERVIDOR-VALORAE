@@ -1,44 +1,82 @@
 # VALORAE Proxy
 
-Proxy enxuto do ecossistema VALORAE. A entrada principal para o APK é:
+Proxy enxuto para integração mobile do VALORAE, pronto para ser anexado diretamente na árvore do AI Studio.
+
+## Entrada principal para APK Android
 
 ```text
-/api/v1/mobile/portfolio-sync
+POST /api/scraper
 ```
 
-A versão `21.13.1` mantém o contrato mobile único, remove fan-out oculto do fluxo normal e preserva aliases leves apenas quando o APK precisa de compatibilidade direta.
+Payload recomendado:
 
-## Rotas principais
+```json
+{
+  "mode": "fundamentos",
+  "ticker": "BBAS3"
+}
+```
+
+Resposta compatível com o APK:
+
+```json
+{
+  "json": {
+    "ticker": "BBAS3",
+    "tipo_ativo": "acao",
+    "classe_ativo": "acao",
+    "graficos_i10": [],
+    "chart_manifest": []
+  }
+}
+```
+
+O Proxy aceita aliases comuns como `ticker`, `symbol`, `ativo`, `codigo`, `papel`, `slug`, URL do Investidor10 ou texto contendo o ticker.
+
+## Gráficos do Investidor10 para o APK
+
+O contrato mobile entrega campos legados e catálogo gráfico canônico:
+
+- `graficos_i10` / `graficosI10` / `graficos`
+- `chart_manifest` / `chartManifest`
+- `chart_fidelity` / `chartFidelity`
+- `rentabilidade_chart`
+- `comparacao` e `comparacao_indices`
+- `charts_financeiros`
+- `historico_indicadores`
+- `distribuicoes_12m`
+- `dividend_yield_history`
+- `dividend_history`
+- `imoveis`
+- `distribuicao_ativos_fundo`
+
+Quando um bloco visual existe, mas a série não foi capturada com segurança, o catálogo marca `renderable: false` em vez de inventar dados.
+
+## Rotas úteis
 
 - `GET /api/v1/health`
 - `GET /api/v1/manifest`
+- `POST /api/scraper`
 - `POST /api/v1/mobile/portfolio-sync`
 - `POST /api/v1/dividends/batch`
 - `GET /api/v1/asset/history`
 - `GET /api/v1/asset/dividends`
 - `GET /server.html`
 
-## Regras centrais
+## Validação local
 
-- O Proxy normaliza eventos oficiais e entrega contrato previsível.
-- O APK calcula carteira, elegibilidade, Agenda e Evolução.
-- Data Com ou Data Ex menos um pregão define direito ao provento.
-- Data de pagamento define se o evento aparece em Agenda ou Evolução.
+```bash
+npm test
+npm run check
+npm run typecheck
+npm run smoke
+npm run audit:identity
+```
 
+## Política de manutenção
 
-## Proventos oficiais
+Este pacote foi limpo para manter somente código, testes e documentação operacional. Relatórios históricos, auditorias antigas e dumps de mudança foram removidos para reduzir peso e facilitar manutenção.
 
-O Proxy usa o Status Invest por ativo como fonte principal de proventos passados, anunciados e futuros, via `companytickerprovents`, e usa a agenda pública como complemento para calendário quando disponível. Não é necessário configurar variáveis de ambiente para isso funcionar.
+## Compatibilidade histórica mantida
 
-Variáveis opcionais:
-
-- `VALORAE_STATUSINVEST_ENABLED=0` desativa a busca no Status Invest.
-- `VALORAE_STATUSINVEST_CHART_PROVENTS_TYPE=2` define o tipo do gráfico/consulta de proventos usado no Status Invest.
-- `VALORAE_STATUSINVEST_TIMEOUT_MS=5500` define timeout da fonte Status Invest.
-- `VALORAE_AGENDA_ENABLED=0` ou `VALORAE_INVESTIDOR10_AGENDA_ENABLED=0` desativa apenas o complemento de agenda pública.
-- `VALORAE_AGENDA_MONTH_PAGES_ENABLED=0` desativa varredura de páginas mensais futuras do Investidor10.
-- `VALORAE_AGENDA_MONTHS_AHEAD=18` define o horizonte de páginas mensais futuras.
-- `VALORAE_IPCA_INVESTIDOR10_ENABLED=0` desativa o fallback real de IPCA pela tabela pública do Investidor10 quando o BCB estiver indisponível.
-- `VALORAE_FETCH_RETRIES=1` controla retentativas curtas para Status Invest/Investidor10/BCB sem criar dados simulados.
-
-As rotas que alimentam a Agenda de Dividendos e a Evolução de Proventos são `/api/v1/dividends/batch`, `/api/v1/portfolio/next-dividends`, `/api/v1/portfolio/events`, `/api/v1/asset/dividends` e `/api/v1/asset/next-dividend`.
+O pacote mantém compatibilidade operacional com os marcos v21.12.26, v21.12.31, v21.12.32 e v21.12.35, incluindo `/api/v1/release/readiness`, uso pessoal e pessoas próximas, monitor com 7 áreas principais e contrato mobile para APK.

@@ -129,3 +129,21 @@ assert.equal(canonicalSingular.financial.balanceSheet[0].netWorth, 440);
 assert.equal(canonicalSingular.financial.balanceSheet[0].totalLiabilities, 550);
 assert.equal(canonicalSingular.revenueBreakdowns.geography['2024'][0].name, 'Brasil');
 assert.equal(canonicalSingular.revenueBreakdowns.business['2024'][0].name, 'Refino');
+
+const canonicalFiiAssetDistribution = buildInvestidor10CanonicalCharts({
+  ticker: 'MXRF11',
+  type: 'FII',
+  html: '<html><body><h2>COTAÇÃO MXRF11</h2><h2>Rentabilidade de MAXI RENDA</h2><h2>distribuição de ativos do fundo</h2></body></html>',
+  apiExtras: {
+    rawJson: {
+      distribuicaoAtivosFundo: [
+        { name: 'CRI', value: 78.5 },
+        { name: 'Caixa', value: 21.5 },
+      ],
+    },
+  },
+});
+
+assert.equal(canonicalFiiAssetDistribution.available.fiiAssetDistribution, true);
+assert.equal(canonicalFiiAssetDistribution.fii.assetDistribution.length, 2);
+assert.equal(canonicalFiiAssetDistribution.coverage.checks.find(x => x.key === 'fiiAssetDistribution').captured, true);

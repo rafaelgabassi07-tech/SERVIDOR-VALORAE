@@ -1,8 +1,12 @@
 {
-  "name": "VALORAE Proxy v21.13.9",
-  "version": "21.13.9",
-  "release": "21.13.9-practical-cache-first-flow",
-  "description": "Proxy VALORAE v21.13.9 com fluxo prático cache-first, sync leve e rotas dedicadas inspiradas em AeroScrape+Vesto.",
+  "name": "VALORAE Proxy",
+  "version": "21.12.0",
+  "release": "21.12.93-valorae-native-contract-polish",
+  "patch": "21.12.93-valorae-native-contract-polish",
+  "releasePatch": "21.12.93-valorae-native-contract-polish",
+  "latestInternalPatch": "21.12.93-valorae-native-contract-polish",
+  "description": "Proxy VALORAE com contrato mobile nativo, fluxo cache-first, sync leve e rotas dedicadas.",
   "contract": "valorae-mobile-portfolio-sync",
-  "primaryMobileRoute": "/api/v1/mobile/practical-sync"
+  "primaryMobileRoute": "/api/v1/mobile/practical-sync",
+  "majorCapabilities": []
 }

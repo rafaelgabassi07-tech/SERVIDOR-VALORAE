@@ -57,8 +57,8 @@ assert.ok(server.includes('MAX_LOCAL_BODY_BYTES'));
 assert.ok(server.includes('INVALID_JSON'));
 assert.ok(server.includes('applyStaticSecurityHeaders'));
 
-const audit = fs.readFileSync('docs/AUDITORIA_PERSONAL_LAUNCH_POLISH_V21.12.33.md', 'utf8');
-assert.ok(audit.includes('fase final'));
-assert.ok(audit.includes('VALORAE_PUBLIC_BASE_URL'));
+const readme = fs.readFileSync('README.md', 'utf8');
+assert.ok(readme.includes('Política de manutenção'));
+assert.ok(fs.readFileSync('.env.example', 'utf8').includes('VALORAE_PUBLIC_BASE_URL'));
 
 console.log('personal-launch-polish-v21-12-33 ok');

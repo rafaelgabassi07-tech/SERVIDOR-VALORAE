@@ -1,6 +1,6 @@
 {
   "name": "valorae-proxy",
-  "version": "21.13.9",
+  "version": "21.12.0",
   "description": "Proxy VALORAE enxuto, prático e cache-first para o ecossistema mobile VALORAE.",
   "private": true,
   "type": "module",
@@ -13,15 +13,16 @@
     "build": "node scripts/build-vercel-safe.js",
     "audit:version": "node scripts/audit-version.js",
     "audit:identity": "node scripts/audit-identity.js",
-    "verify": "node scripts/verify-asset-fundamentals-deep-validation-v21-13-8.js"
+    "verify": "node scripts/verify-release.js",
+    "typecheck": "node scripts/typecheck-free.js"
   },
   "engines": {
     "node": "20.x"
   },
   "dependencies": {},
   "valorae": {
-    "coreVersion": "21.13.9",
-    "releasePatch": "21.13.9-practical-cache-first-flow",
+    "coreVersion": "21.12.0",
+    "releasePatch": "21.12.93-valorae-native-contract-polish",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   }

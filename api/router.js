@@ -11,6 +11,7 @@ function normalizePath(rawPath = '') {
 function rewrite(req) {
   const original = req.url || '/api/router';
   const parsed = new URL(original, 'https://valorae.local');
+  if (!parsed.searchParams.has('path')) return req;
   const path = normalizePath(parsed.searchParams.get('path') || '');
   parsed.searchParams.delete('path');
   const query = parsed.searchParams.toString();
@@ -22,4 +23,4 @@ export default async function handler(req, res) {
   return dispatchRoute(rewrite(req), res);
 }
 
-export const _test = { normalizePath, rewrite };
+export const _test = { normalizePath, rewrite, rewriteRequestForInternalRouter: rewrite };

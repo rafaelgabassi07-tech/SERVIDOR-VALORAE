@@ -12,6 +12,11 @@ import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tick
 import { getConfirmedDividendsByTicker } from '../lib/sources/status-dividends.js';
 import { getAgendaDividends } from '../lib/sources/agenda-dividends.js';
 import { buildAssetDetails, getAssetHistory } from '../lib/sources/asset-details.js';
+import integrationManifestHandler from './integration/manifest.js';
+import integrationSdkHandler from './integration/sdk.js';
+import integrationPromptsHandler from './integration/prompts.js';
+import releaseReadinessHandler from './release/readiness.js';
+import compatScraperHandler from './compat/scraper4.js';
 
 function stripApi(pathname) {
   let path = pathname || '/';
@@ -21,6 +26,93 @@ function stripApi(pathname) {
   if (m) path = `/${m[2] || ''}`;
   path = path.replace(/\/+$/, '') || '/';
   return path;
+}
+
+function stripApiPrefix(pathname) {
+  let path = pathname || '/';
+  if (path === '/api') return '/';
+  if (path.startsWith('/api/')) return path.slice(4) || '/';
+  return path;
+}
+
+function applyRuntimeCors(req, res) {
+  const origin = req?.headers?.origin || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin === '*' ? '*' : String(origin));
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Valorae-App, X-Valorae-Channel, X-Valorae-App-Version, X-Valorae-Build, X-Valorae-App-Id, X-Valorae-Client-Key');
+  res.setHeader('Access-Control-Expose-Headers', 'X-Valorae-Auth-Mode, X-Valorae-Response-Bytes, X-Valorae-Cache-Policy, X-Valorae-Performance, X-Valorae-Cache, ETag');
+  res.setHeader('Access-Control-Max-Age', '600');
+}
+
+function sendCorsPreflight(req, res) {
+  applyRuntimeCors(req, res);
+  res.statusCode = 200;
+  res.setHeader('Cache-Control', 'private, max-age=600');
+  return res.end('');
+}
+
+function buildIntegrationSdkPayload() {
+  const jsClient = `export async function getValoraeAsset(ticker, options = {}) {
+  const baseUrl = (options.baseUrl || 'https://servidor-valorae.vercel.app').replace(/\\/$/, '');
+  const url = new URL(baseUrl + '/api/v1/asset');
+  const controller = new AbortController();
+  const timeoutMs = Math.max(1500, Math.min(Number(options.timeoutMs || 12000), 30000));
+  const timer = setTimeout(() => controller.abort(new Error('VALORAE_TIMEOUT')), timeoutMs);
+  url.searchParams.set('ticker', String(ticker || '').toUpperCase());
+  url.searchParams.set('view', options.view || 'app');
+  try {
+    const res = await fetch(url, { signal: controller.signal, headers: { accept: 'application/json', 'x-valorae-app': options.app || 'Meu App', 'x-valorae-channel': options.channel || 'web', 'x-valorae-app-version': options.appVersion || '1.0.0', 'x-valorae-build': options.build || 'release' } });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || data.code || 'Erro Valorae');
+    return data;
+  } finally { clearTimeout(timer); }
+}
+export function shouldReplaceLocalCache(data) {
+  if (!data || data.status === 'ERROR') return false;
+  if (data.appResponseIntegrity?.cacheSafe === false) return false;
+  if (data.engineLaunchGate?.decision === 'hold_previous_snapshot') return false;
+  return true;
+}`;
+  return {
+    status: 'OK',
+    version: RELEASE.version,
+    endpoint: 'integration/sdk',
+    recommendedView: 'app',
+    stableRoots: ['appMobileSnapshot', 'appPayload', 'appSyncEnvelope', 'appResponseIntegrity', 'engineLaunchGate', 'engineRuntimeProfiler'],
+    headers: ['x-valorae-app', 'x-valorae-channel', 'x-valorae-app-version', 'x-valorae-build', 'x-valorae-app-id', 'x-valorae-client-key'],
+    examples: { javascript: jsClient, kotlinAndroid: 'Use OkHttp/HttpURLConnection com TLS e timeout explícito.' },
+    rules: ['Use view=app em produção.', 'Preserve o último snapshot bom em respostas parciais.']
+  };
+}
+
+function buildIntegrationManifestPayload() {
+  return {
+    status: 'OK',
+    version: RELEASE.version,
+    endpoint: 'integration/manifest',
+    contractVersion: `${RELEASE.patch}-integration-manifest`,
+    releasePatch: RELEASE.patch,
+    stableRoots: {
+      firstPaint: 'appMobileSnapshot', detail: 'appPayload', cacheDecision: 'appSyncEnvelope', safety: 'appResponseIntegrity', quality: 'fieldConsistencyGuard', action: 'assetActionPlan'
+    },
+    endpoints: routeManifest().routes.map(path => ({ path: `/api/v1${path}`, method: 'GET' }))
+  };
+}
+
+function buildIntegrationPromptsPayload() {
+  return { status: 'OK', version: RELEASE.version, endpoint: 'integration/prompts', prompts: [] };
+}
+
+function scrapeError(code, message, status = 400, extras = {}) {
+  return { status: 'ERROR', code, error: message, ...extras, retryable: false };
+}
+
+function allowedScrapeHost(hostname = '') {
+  const host = String(hostname || '').toLowerCase();
+  const env = String(process.env.VALORAE_SCRAPE_ALLOWED_HOSTS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  const allowed = env.length ? env : ['investidor10.com.br', 'www.investidor10.com.br', 'statusinvest.com.br', 'www.statusinvest.com.br', 'fundamentus.com.br', 'www.fundamentus.com.br', 'dados.cvm.gov.br'];
+  return allowed.some(base => host === base || host.endsWith(`.${base}`));
 }
 
 async function bodyOrQuery(req, parsed) {
@@ -38,12 +130,13 @@ function rootPayload() {
     status: 'online',
     contract: RELEASE.contract,
     routes: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/dividends/batch', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/monitor/summary', '/api/v1/monitor/self-test', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health'],
+    router: routeManifest(),
     monitor: '/server.html'
   };
 }
 
 function health() {
-  return { status: 'OK', online: true, version: RELEASE.version, release: RELEASE.patch, now: new Date().toISOString() };
+  return { ok: true, status: 'OK', online: true, version: RELEASE.version, release: RELEASE.patch, now: new Date().toISOString() };
 }
 
 function manifest() {
@@ -268,23 +361,30 @@ function emptyCompatible(status = 'OK') {
 export async function dispatchRoute(req, res) {
   const parsed = new URL(req.url || '/api', 'https://valorae.local');
   const path = stripApi(parsed.pathname);
+  if (String(req.method || 'GET').toUpperCase() === 'OPTIONS') return sendCorsPreflight(req, res);
   const payload = await bodyOrQuery(req, parsed);
+  req.query = { ...(req.query || {}), ...payload };
+  if (req.body === undefined || req.body === null || (typeof req.body === 'object' && !Array.isArray(req.body) && Object.keys(req.body).length === 0)) req.body = payload;
 
   try {
+    applyRuntimeCors(req, res);
     if (path === '/') return sendJson(req, res, rootPayload());
     if (path === '/health' || path === '/ready') return sendJson(req, res, health(), { cacheControl: 'private, max-age=10' });
     if (path === '/env') return sendJson(req, res, { status: 'OK', env: { node: process.version, runtime: 'node' }, version: RELEASE.version });
-    if (path === '/manifest' || path === '/integration/manifest' || path === '/schema' || path === '/source/status' || path === '/release/readiness' || path === '/deploy/status' || path === '/personal/readiness') return sendJson(req, res, manifest());
+    if (path === '/integration/manifest') return sendJson(req, res, buildIntegrationManifestPayload(), { cacheControl: 'private, max-age=120' });
+    if (path === '/integration/sdk') return sendJson(req, res, buildIntegrationSdkPayload(), { cacheControl: 'private, max-age=120' });
+    if (path === '/integration/prompts') return sendJson(req, res, buildIntegrationPromptsPayload(), { cacheControl: 'private, max-age=120' });
+    if (path === '/release/readiness' || path === '/personal/readiness') return releaseReadinessHandler(req, res);
+    if (path === '/manifest' || path === '/schema' || path === '/source/status' || path === '/deploy/status') return sendJson(req, res, manifest());
     if (path === '/cache/stats') return sendJson(req, res, { status: 'OK', cache: cacheStats() });
     if (path === '/monitor/summary' || path === '/server/summary') return sendJson(req, res, monitorSummary(), { cacheControl: 'private, max-age=5' });
     if (path === '/monitor/self-test' || path === '/server/self-test') return sendJson(req, res, await monitorSelfTest(), { cacheControl: 'no-store' });
-    if (path === '/fields') return sendJson(req, res, { status: 'OK', fields: ['positions','dividendPositions','transactions','tickers','includeAnalysis','includeHistory','includeIpca','includeDividends','includeRankings'] });
-    if (path === '/errors') return sendJson(req, res, { status: 'OK', errors: ['INVALID_JSON','PAYLOAD_TOO_LARGE','ROUTE_ERROR','NOT_FOUND'] });
+    if (path === '/fields') return sendJson(req, res, { status: 'OK', endpoint: 'fields', fields: ['positions','dividendPositions','transactions','tickers','includeAnalysis','includeHistory','includeIpca','includeDividends','includeRankings'] });
+    if (path === '/errors') return sendJson(req, res, { status: 'OK', endpoint: 'errors', errors: ['INVALID_JSON','PAYLOAD_TOO_LARGE','ROUTE_ERROR','NOT_FOUND'] });
     if (path === '/openapi') return sendJson(req, res, { status: 'OK', openapi: '3.0.0', info: { title: 'VALORAE Proxy API', version: RELEASE.version }, paths: Object.fromEntries(routeManifest().routes.map(r => [`/api/v1${r}`, { get: { summary: r } }])) });
-    if (path === '/sync') return sendJson(req, res, { status: 'OK', endpoint: 'sync', contract: RELEASE.contract });
-    if (path === '/integration/sdk' || path === '/integration/prompts') return sendJson(req, res, { status: 'OK', version: RELEASE.version, contract: RELEASE.contract, items: [] });
+    if (path === '/sync') return sendJson(req, res, { status: 'OK', endpoint: 'sync', route: '/api/sync', contract: RELEASE.contract, supabase: { authMode: 'supabase_email_password' } });
     if (path === '/admin/status') return sendJson(req, res, { status: 'OK', admin: false, version: RELEASE.version, cache: cacheStats() });
-    if (path === '/compat/scraper4' || path === '/scraper4') return sendJson(req, res, { status: 'OK', compatibility: true, endpoint: '/api/v1/scrape' });
+    if (path === '/compat/scraper4' || path === '/scraper4' || path === '/scraper') return compatScraperHandler(req, res);
     if (path === '/cache/clear' || path === '/admin/cache') { clearCache(); return sendJson(req, res, { status: 'OK', cleared: true }); }
 
     if (path === '/mobile/bootstrap' || path === '/app/bootstrap') return sendJson(req, res, await mobileBootstrap(payload), { cacheControl: 'private, max-age=45' });
@@ -313,13 +413,19 @@ export async function dispatchRoute(req, res) {
     if (path === '/news') return sendJson(req, res, await getNews(payload), { cacheControl: 'private, max-age=120' });
     if (path === '/watchlist/analyze') return sendJson(req, res, emptyCompatible('OK'));
     if (path === '/scrape') {
-      const url = String(payload.url || '');
-      if (!/^https?:\/\//i.test(url)) return sendJson(req, res, { status: 'ERROR', error: 'URL inválida.' }, { status: 400 });
+      const url = String(payload.url || '').trim();
+      if (!url) return sendJson(req, res, scrapeError('MISSING_TARGET_URL', 'Informe url=https://... para fazer scraping controlado.'), { status: 400, cacheControl: 'no-store' });
+      let parsedTarget;
+      try { parsedTarget = new URL(url); } catch { return sendJson(req, res, scrapeError('INVALID_TARGET_URL', 'URL inválida.'), { status: 400, cacheControl: 'no-store' }); }
+      if (parsedTarget.username || parsedTarget.password) return sendJson(req, res, scrapeError('INVALID_TARGET_URL_CREDENTIALS', 'URL com credenciais embutidas não é aceita.'), { status: 400, cacheControl: 'no-store' });
+      if (parsedTarget.protocol !== 'https:') return sendJson(req, res, scrapeError('INVALID_TARGET_URL_PROTOCOL', 'Somente HTTPS é aceito para scraping via proxy.'), { status: 400, cacheControl: 'no-store' });
+      if (!allowedScrapeHost(parsedTarget.hostname)) return sendJson(req, res, scrapeError('SCRAPE_HOST_NOT_ALLOWED', 'Host fora da allowlist do Valorae Proxy.', 403, { hostname: parsedTarget.hostname }), { status: 403, cacheControl: 'no-store' });
       const fetched = await fetchText(url, { timeoutMs: Number(payload.timeoutMs || 5500), ttlMs: 60000 });
       return sendJson(req, res, { status: fetched.status ? 'OK' : 'ERROR', url, html: payload.returnHtml ? fetched.text : undefined, text: fetched.text?.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0, Number(payload.limit || 5000)), metrics: { cacheStatus: fetched.cacheStatus, status: fetched.status } });
     }
     if (path === '/batch-scrape') return sendJson(req, res, { status: 'OK', results: [], data: [] });
     if (path === '/server/metrics' || path === '/observability' || path === '/engine/maturity' || path === '/engine/performance') return sendJson(req, res, { status: 'OK', version: RELEASE.version, metrics: { cache: cacheStats() } });
+    if (path === '/server/tests') return sendJson(req, res, await monitorSelfTest(), { cacheControl: 'no-store' });
 
     return sendJson(req, res, { status: 'NOT_FOUND', error: 'Rota não encontrada no contrato enxuto VALORAE.', path, available: routeManifest().routes }, { status: 404, cacheControl: 'no-store' });
   } catch (error) {
@@ -329,9 +435,12 @@ export async function dispatchRoute(req, res) {
 }
 
 export function routeManifest() {
-  return { routes: [
-    '/health','/ready','/manifest','/env','/schema','/source/status','/release/readiness','/personal/readiness','/cache/stats','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/observability','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/analyze','/portfolio/allocation','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/compat/scraper4'
+  return {
+    physicalFunctions: ['api/router.js'],
+    legacyAliases: { '/ativo': '/asset', '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
+    routes: [
+    '/health','/ready','/manifest','/env','/schema','/source/status','/release/readiness','/personal/readiness','/cache/stats','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/analyze','/portfolio/allocation','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
   ].sort() };
 }
 
-export const _test = { stripApi, assetPayload, comparisonTickers, buildComparisonPayload };
+export const _test = { stripApi, stripApiPrefix, assetPayload, comparisonTickers, buildComparisonPayload };

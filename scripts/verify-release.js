@@ -4,14 +4,8 @@ const commands = [
   ['npm', ['run', 'check']],
   ['npm', ['test']],
   ['npm', ['run', 'typecheck']],
-  ['npm', ['run', 'audit:functions']],
-  ['npm', ['run', 'audit:free']],
   ['npm', ['run', 'audit:version']],
-  ['npm', ['run', 'audit:routes']],
-  ['npm', ['run', 'audit:release']],
-  ['npm', ['run', 'audit:minutiae']],
-  ['npm', ['run', 'audit:recommended']],
-  ['npm', ['run', 'audit:final']],
+  ['npm', ['run', 'audit:identity']],
   ['npm', ['run', 'smoke']],
 ];
 
@@ -24,4 +18,4 @@ for (const [cmd, args] of commands) {
     process.exit(result.status || 1);
   }
 }
-console.log('\nVerify OK: lançamento validado para GitHub/Vercel free-only. Rode npm run build separadamente para simular o build Vercel.');
+console.log('\nVerify OK: lançamento Valorae validado para GitHub/Vercel free-only e consumo APK.');

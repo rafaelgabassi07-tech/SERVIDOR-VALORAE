@@ -1,15 +1,19 @@
+import assert from 'node:assert/strict';
 import fs from 'node:fs';
+
+const expectedCore = '21.12.0';
+const expectedPublic = '21.12.93';
+const expectedPatch = '21.12.93-valorae-native-contract-polish';
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-const meta = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
-const release = fs.readFileSync('lib/core/release.js', 'utf8');
+const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
+const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
 const sw = fs.readFileSync('public/service-worker.js', 'utf8');
-const monitor = fs.readFileSync('public/server.html', 'utf8');
-const expected = '21.13.9';
-const ok = pkg.version === expected
-  && pkg.valorae.releasePatch.includes(expected)
-  && meta.version === expected
-  && release.includes(`version: '${expected}'`)
-  && sw.includes('v21-13-9')
-  && monitor.includes('VALORAE Proxy Monitor');
-if (!ok) throw new Error(`Version consistency failed for ${expected}`);
-console.log(`Version consistency OK: ${expected}`);
+
+assert.equal(pkg.version, expectedCore);
+assert.equal(pkg.valorae.coreVersion, expectedCore);
+assert.equal(pkg.valorae.releasePatch, expectedPatch);
+assert.equal(metadata.version, expectedCore);
+assert.equal(metadata.releasePatch, expectedPatch);
+assert.equal(manifest.version, expectedPublic);
+assert.ok(sw.includes('v21-12-93'));
+console.log('release audit OK:', expectedCore, expectedPatch);

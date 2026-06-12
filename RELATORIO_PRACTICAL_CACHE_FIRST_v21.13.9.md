@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Simplificar o ecossistema VALORAE seguindo a filosofia prática observada no AeroScrape + Vesto: caminho crítico curto, contrato leve, cache primeiro e rotas dedicadas para dados caros.
+Simplificar o ecossistema VALORAE seguindo a filosofia prática observada no referências externas: caminho crítico curto, contrato leve, cache primeiro e rotas dedicadas para dados caros.
 
 ## Alterações principais
 

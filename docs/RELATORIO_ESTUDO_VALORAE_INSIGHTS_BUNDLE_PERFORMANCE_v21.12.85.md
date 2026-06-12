@@ -2,7 +2,7 @@
 
 ## Escopo
 
-Nova auditoria profunda do fluxo AeroScrape + Vesto aplicada ao VALORAE com foco em:
+Nova auditoria profunda do fluxo referências externas aplicada ao VALORAE com foco em:
 
 - Evolução de proventos;
 - Agenda de dividendos;
@@ -16,11 +16,11 @@ A árvore do projeto foi preservada. Não houve renomeação de raiz, pacote And
 
 ---
 
-## 1. Diagnóstico comparativo AeroScrape + Vesto
+## 1. Diagnóstico comparativo referências externas
 
-### 1.1 AeroScrape
+### 1.1 motor externo de referência
 
-O AeroScrape usa três ideias que continuam sendo muito relevantes para o VALORAE:
+O motor externo de referência usa três ideias que continuam sendo muito relevantes para o VALORAE:
 
 1. **Batch real:** agrupa trabalho semelhante em uma única execução.
 2. **In-flight/dedupe:** chamadas iguais em andamento são reaproveitadas.
@@ -38,9 +38,9 @@ No VALORAE, antes desta rodada, o APK podia disparar várias rotas quase ao mesm
 
 Isso aumentava latência, concorrência no Proxy, risco de timeout e chance de uma página montar com blocos faltando.
 
-### 1.2 Vesto
+### 1.2 APK externo de referência
 
-O Vesto reforça o padrão:
+O APK externo de referência reforça o padrão:
 
 ```text
 1. Mostra dados locais/cache primeiro

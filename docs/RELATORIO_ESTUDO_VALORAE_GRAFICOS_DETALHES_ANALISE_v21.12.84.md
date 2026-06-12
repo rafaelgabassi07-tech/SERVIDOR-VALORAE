@@ -8,7 +8,7 @@
 
 ## 1. Diagnóstico profundo
 
-A auditoria anterior já mostrava que o VALORAE precisava seguir um fluxo mais próximo do AeroScrape + Vesto: carregar o último dado bom primeiro, revalidar em segundo plano e nunca apagar blocos bons por uma resposta vazia/parcial. Nesta nova rodada, o problema específico foi encontrado no fluxo dos gráficos.
+A auditoria anterior já mostrava que o VALORAE precisava seguir um fluxo mais próximo do referências externas: carregar o último dado bom primeiro, revalidar em segundo plano e nunca apagar blocos bons por uma resposta vazia/parcial. Nesta nova rodada, o problema específico foi encontrado no fluxo dos gráficos.
 
 ### 1.1 Fluxo anterior provável
 
@@ -47,11 +47,11 @@ Alguns gráficos chegam vazios quando a raiz canônica foi compactada ou não es
 
 ---
 
-## 2. Referência AeroScrape + Vesto aplicada
+## 2. Referência referências externas aplicada
 
-### 2.1 AeroScrape
+### 2.1 motor externo de referência
 
-O AeroScrape trabalha com um padrão robusto de cache/dedupe/batch:
+O motor externo de referência trabalha com um padrão robusto de cache/dedupe/batch:
 
 ```text
 requisição equivalente em andamento
@@ -70,9 +70,9 @@ Aplicação no VALORAE:
 - preservar último gráfico bom no APK;
 - impedir que uma resposta vazia substitua uma série já renderizável.
 
-### 2.2 Vesto
+### 2.2 APK externo de referência
 
-O Vesto reforça a ideia de renderização segura:
+O APK externo de referência reforça a ideia de renderização segura:
 
 ```text
 abrir ativo
