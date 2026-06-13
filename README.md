@@ -113,3 +113,25 @@ Este pacote foi limpo para manter somente código, testes e documentação opera
 ## Compatibilidade histórica mantida
 
 O pacote mantém compatibilidade operacional com os marcos v21.12.26, v21.12.31, v21.12.32 e v21.12.35, incluindo `/api/v1/release/readiness`, uso pessoal e pessoas próximas, monitor com 7 áreas principais e contrato mobile para APK.
+
+
+## Alinhamento APK `/api/sync` — 2026-06-13
+
+Esta versão do Proxy publica `capabilities` em `/api/sync?action=health` e `/api/sync?action=diagnostics`, para o APK diferenciar claramente:
+
+- Supabase configurado e tabelas acessíveis;
+- contrato `/api/sync` anunciado pelo servidor;
+- ações em lote disponíveis para cache-first.
+
+Capacidades anunciadas:
+
+```text
+health, diagnostics, register_client,
+upsert_snapshot, get_snapshot,
+upsert_snapshots, get_snapshots,
+upsert_transactions, get_transactions,
+upsert_dividend_events, get_dividend_events,
+delete_user_data
+```
+
+O APK deve preferir `get_snapshots` e `upsert_snapshots` quando precisar buscar/salvar vários snapshots de uma tela.

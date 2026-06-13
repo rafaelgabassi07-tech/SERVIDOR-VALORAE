@@ -7,7 +7,21 @@ const SNAPSHOT_TABLE = process.env.VALORAE_SUPABASE_SNAPSHOT_TABLE || 'valorae_u
 const CLIENTS_TABLE = process.env.VALORAE_SUPABASE_CLIENTS_TABLE || 'valorae_sync_clients';
 const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'valorae_transactions';
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
-const CORE_VERSION = '21.12.81-sync-performance-hardening';
+const CORE_VERSION = '21.13.19-apk-sync-contract-alignment';
+const SYNC_CAPABILITIES = Object.freeze([
+  'health',
+  'diagnostics',
+  'register_client',
+  'upsert_snapshot',
+  'get_snapshot',
+  'upsert_snapshots',
+  'get_snapshots',
+  'upsert_transactions',
+  'get_transactions',
+  'upsert_dividend_events',
+  'get_dividend_events',
+  'delete_user_data',
+]);
 
 function cleanUrl(raw = '') {
   let value = String(raw || '').trim().replace(/\/+$/, '');
@@ -169,7 +183,7 @@ function safeClientCredentials(input = {}, req, { requireSecret = true } = {}) {
 
 function safeRecord(input = {}, forcedUserId = '') {
   const domain = normalizeDomain(input.domain);
-  const snapshotKey = normalizeSnapshotKey(input.snapshot_key || input.snapshotKey);
+  const snapshotKey = normalizeSnapshotKey(input.snapshot_key || input.snapshotKey || input.key);
   const userId = safeText(forcedUserId || input.user_id || input.userId, 160);
   if (!userId || !domain || !snapshotKey) {
     const err = new Error('Campos obrigatórios ausentes: user_id, domain e snapshot_key.');
@@ -177,18 +191,52 @@ function safeRecord(input = {}, forcedUserId = '') {
     err.code = 'INVALID_SYNC_RECORD';
     throw err;
   }
+  const ttl = Number(input.cache_ttl_seconds ?? input.cacheTtlSeconds ?? input.ttlSeconds ?? 0);
+  const payload = input.encrypted ? null : (input.payload ?? {});
+  const explicitExpiresAt = safeText(input.expires_at || input.expiresAt || '', 80);
+  const expiresAt = explicitExpiresAt || (Number.isFinite(ttl) && ttl > 0 ? new Date(Date.now() + ttl * 1000).toISOString() : null);
+  const payloadSize = payload == null ? 0 : Buffer.byteLength(JSON.stringify(payload), 'utf8');
   return {
     user_id: userId,
     domain,
     snapshot_key: snapshotKey,
-    schema_version: Number(input.schema_version || 3),
-    app_version: safeText(input.app_version, 40),
-    device_id: safeText(input.device_id, 160),
+    schema_version: Number(input.schema_version || input.schemaVersion || 3),
+    app_version: safeText(input.app_version || input.appVersion, 40),
+    device_id: safeText(input.device_id || input.deviceId, 160),
     source: safeText(input.source || 'valorae-proxy', 80),
+    cache_scope: safeText(input.cache_scope || input.cacheScope || 'user', 40),
+    cache_ttl_seconds: Number.isFinite(ttl) && ttl > 0 ? Math.floor(ttl) : null,
+    expires_at: expiresAt,
+    source_updated_at: safeText(input.source_updated_at || input.sourceUpdatedAt || '', 80) || null,
+    etag: safeText(input.etag || '', 160) || null,
+    payload_size_bytes: payloadSize,
     encrypted: Boolean(input.encrypted),
-    payload: input.encrypted ? null : (input.payload ?? {}),
-    payload_ciphertext: input.encrypted ? String(input.payload_ciphertext || '') : null,
-    updated_at: input.updated_at || nowIso(),
+    payload,
+    payload_ciphertext: input.encrypted ? String(input.payload_ciphertext || input.payloadCiphertext || '') : null,
+    updated_at: input.updated_at || input.updatedAt || nowIso(),
+  };
+}
+
+function snapshotToClient(record = {}) {
+  const expiresAt = record.expires_at || null;
+  const fresh = !expiresAt || Number.isNaN(Date.parse(expiresAt)) || Date.parse(expiresAt) > Date.now();
+  return {
+    domain: record.domain,
+    snapshot_key: record.snapshot_key,
+    key: record.snapshot_key,
+    payload: record.payload || {},
+    payload_ciphertext: record.payload_ciphertext || null,
+    encrypted: Boolean(record.encrypted),
+    updated_at: record.updated_at || null,
+    expires_at: expiresAt,
+    cache_scope: record.cache_scope || 'user',
+    cache_ttl_seconds: record.cache_ttl_seconds ?? null,
+    source: record.source || null,
+    source_updated_at: record.source_updated_at || null,
+    etag: record.etag || null,
+    payload_size_bytes: record.payload_size_bytes ?? null,
+    fresh,
+    isFresh: fresh,
   };
 }
 
@@ -257,6 +305,7 @@ async function supabaseDiagnostics() {
       code: 'SUPABASE_NOT_CONFIGURED',
       message: 'Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Vercel do Proxy.',
       elapsedMs: Date.now() - started,
+      capabilities: SYNC_CAPABILITIES,
     };
   }
   const probes = await Promise.all([
@@ -276,6 +325,7 @@ async function supabaseDiagnostics() {
     elapsedMs: Date.now() - started,
     tables: probes,
     failedTables: failed.map((p) => p.table),
+    capabilities: SYNC_CAPABILITIES,
     recommendation: failed.length
       ? 'Revise nomes das tabelas, políticas/permissões, service role key e URL do projeto no Vercel.'
       : 'Supabase acessível pelo Proxy. Escrita/leitura deve funcionar se o APK enviar identidade e payload válidos.',
@@ -377,19 +427,39 @@ async function upsertSnapshot(record, auth) {
   return { ok: true, record: { user_id: row.user_id, domain: row.domain, snapshot_key: row.snapshot_key, updated_at: row.updated_at } };
 }
 
+async function upsertSnapshots(input, auth) {
+  const forcedUserId = auth.mode === 'device_client' || auth.mode === 'supabase_auth' ? auth.userId : '';
+  const arr = Array.isArray(input.snapshots) ? input.snapshots : Array.isArray(input.records) ? input.records : [];
+  const rows = arr.map((record) => safeRecord(record, forcedUserId));
+  if (!rows.length) return { ok: true, count: 0, message: 'Nenhum snapshot para salvar.' };
+  if (auth.userId && rows.some((row) => row.user_id !== auth.userId)) {
+    const err = new Error('Um ou mais snapshots não combinam com a identidade autenticada.');
+    err.status = 403;
+    err.code = 'SYNC_USER_MISMATCH';
+    throw err;
+  }
+  await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?on_conflict=user_id,domain,snapshot_key`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify(rows),
+  });
+  return { ok: true, count: rows.length, snapshots: rows.map(snapshotToClient) };
+}
+
 async function getSnapshot(input, auth) {
   const userId = auth.mode === 'device_client' || auth.mode === 'supabase_auth'
     ? auth.userId
     : safeText(input.userId || input.user_id || auth.userId || '', 160);
   const domain = normalizeDomain(input.domain);
-  const snapshotKey = normalizeSnapshotKey(input.snapshotKey || input.snapshot_key);
+  const snapshotKey = normalizeSnapshotKey(input.snapshotKey || input.snapshot_key || input.key);
   if (!userId || !domain || !snapshotKey) {
     const err = new Error('Informe userId, domain e snapshotKey.');
     err.status = 400;
     err.code = 'INVALID_SYNC_QUERY';
     throw err;
   }
-  const q = `user_id=eq.${encodeURIComponent(userId)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=eq.${encodeURIComponent(snapshotKey)}&select=payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id&order=updated_at.desc&limit=1`;
+  const select = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
+  const q = `user_id=eq.${encodeURIComponent(userId)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=eq.${encodeURIComponent(snapshotKey)}&select=${select}&order=updated_at.desc&limit=1`;
   const rows = await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?${q}`, { method: 'GET' });
   const record = Array.isArray(rows) ? rows[0] : null;
   if (!record) {
@@ -398,27 +468,84 @@ async function getSnapshot(input, auth) {
     err.code = 'SNAPSHOT_NOT_FOUND';
     throw err;
   }
-  return { ok: true, record };
+  const snapshot = snapshotToClient(record);
+  return { ok: true, record: snapshot, snapshot, snapshots: [snapshot], count: 1 };
+}
+
+async function getSnapshots(input, auth) {
+  const userId = auth.mode === 'device_client' || auth.mode === 'supabase_auth'
+    ? auth.userId
+    : safeText(input.userId || input.user_id || auth.userId || '', 160);
+  const domain = normalizeDomain(input.domain);
+  const keysInput = Array.isArray(input.keys) ? input.keys : String(input.keys || input.snapshot_keys || input.snapshotKeys || '').split(',');
+  const keys = keysInput.map((key) => normalizeSnapshotKey(key)).filter(Boolean).slice(0, 60);
+  if (!userId || !domain || !keys.length) {
+    const err = new Error('Informe userId, domain e keys/snapshot_keys.');
+    err.status = 400;
+    err.code = 'INVALID_SYNC_QUERY';
+    throw err;
+  }
+  const select = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
+  const inValues = keys.map((key) => encodeURIComponent(key)).join(',');
+  const q = `user_id=eq.${encodeURIComponent(userId)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=in.(${inValues})&select=${select}&order=updated_at.desc`;
+  const rows = await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?${q}`, { method: 'GET' });
+  const snapshots = (Array.isArray(rows) ? rows : []).map(snapshotToClient);
+  return { ok: true, count: snapshots.length, requested: keys.length, snapshots };
+}
+
+function normalizeTransactionDate(value) {
+  if (value == null || value === '') return '';
+  if (typeof value === 'number' && Number.isFinite(value)) return new Date(value).toISOString().slice(0, 10);
+  const raw = String(value).trim();
+  const br = raw.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/);
+  if (br) return `${br[3]}-${br[2]}-${br[1]}`;
+  const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return iso ? `${iso[1]}-${iso[2]}-${iso[3]}` : raw;
+}
+
+function transactionTimestamp(value) {
+  const normalized = normalizeTransactionDate(value);
+  const time = Date.parse(normalized);
+  return Number.isFinite(time) ? time : Date.now();
 }
 
 function transactionRow(userId, tx = {}) {
   const ticker = safeText(tx.ticker || tx.symbol || '', 32).toUpperCase().replace('.SA', '');
-  const rawId = safeText(tx.client_tx_id || tx.clientTxId || tx.id || `${ticker}-${tx.date || ''}-${tx.quantity || ''}-${tx.purchasePrice || tx.price || ''}-${tx.isSell || false}`, 120);
+  const date = normalizeTransactionDate(tx.date || tx.transaction_date || tx.transactionDate || tx.imported_at || tx.importedAt || '');
+  const operation = safeText(tx.operation || tx.side || (tx.isSell || tx.is_sell ? 'VENDA' : 'COMPRA'), 40).toUpperCase();
+  const quantity = Number(tx.quantity || 0);
+  const price = Number(tx.price ?? tx.purchasePrice ?? tx.purchase_price ?? 0);
+  const grossValue = Number(tx.grossValue ?? tx.gross_value ?? (Number.isFinite(quantity) && Number.isFinite(price) ? quantity * price : 0));
+  const rawId = safeText(tx.client_tx_id || tx.clientTxId || tx.id || `${ticker}-${date}-${operation}-${quantity}-${price}-${grossValue}`, 160);
   const clientTxId = rawId || crypto.randomUUID();
+  const assetType = safeText(tx.assetType || tx.asset_type || tx.type || '', 40);
   return {
     user_id: userId,
     client_tx_id: clientTxId,
     ticker,
     name: safeText(tx.name || ticker, 120),
-    quantity: Number(tx.quantity || 0),
-    purchase_price: Number(tx.purchasePrice ?? tx.purchase_price ?? tx.price ?? 0),
-    transaction_date: Number(tx.date || tx.transaction_date || Date.now()),
-    asset_type: safeText(tx.type || tx.asset_type || '', 24).toUpperCase(),
-    is_sell: Boolean(tx.isSell ?? tx.is_sell),
+    quantity: Number.isFinite(quantity) ? quantity : 0,
+    purchase_price: Number.isFinite(price) ? price : 0,
+    transaction_date: transactionTimestamp(date),
+    asset_type: assetType,
+    is_sell: operation.includes('VENDA') || operation === 'V',
     broker: safeText(tx.broker || '', 120),
     sector: safeText(tx.sector || '', 120),
     notes: safeText(tx.notes || '', 1000),
-    payload: tx,
+    payload: {
+      ...tx,
+      date,
+      operation,
+      symbol: ticker,
+      assetType,
+      asset_type: assetType,
+      price: Number.isFinite(price) ? price : 0,
+      grossValue: Number.isFinite(grossValue) ? grossValue : 0,
+      gross_value: Number.isFinite(grossValue) ? grossValue : 0,
+      source: tx.source || 'B3',
+      importedAt: Number(tx.importedAt ?? tx.imported_at ?? Date.now()),
+      imported_at: Number(tx.importedAt ?? tx.imported_at ?? Date.now()),
+    },
     updated_at: nowIso(),
   };
 }
@@ -438,21 +565,39 @@ async function upsertTransactions(input, auth) {
 
 async function getTransactions(input, auth) {
   const userId = auth.userId || safeText(input.userId || input.user_id || '', 160);
-  const q = `user_id=eq.${encodeURIComponent(userId)}&select=client_tx_id,ticker,name,quantity,purchase_price,transaction_date,asset_type,is_sell,broker,sector,notes,payload&order=transaction_date.desc`;
+  const q = `user_id=eq.${encodeURIComponent(userId)}&select=client_tx_id,ticker,name,quantity,purchase_price,transaction_date,asset_type,is_sell,broker,sector,notes,payload,updated_at&order=transaction_date.desc`;
   const rows = await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?${q}`, { method: 'GET' });
-  const transactions = (Array.isArray(rows) ? rows : []).map((r) => ({
-    id: Number(r.payload?.id || r.client_tx_id || 0) || 0,
-    ticker: r.ticker,
-    name: r.name || r.ticker,
-    quantity: Number(r.quantity || 0),
-    purchasePrice: Number(r.purchase_price || 0),
-    date: Number(r.transaction_date || Date.now()),
-    type: r.asset_type || r.payload?.type || '',
-    isSell: Boolean(r.is_sell),
-    broker: r.broker || '',
-    sector: r.sector || '',
-    notes: r.notes || '',
-  }));
+  const transactions = (Array.isArray(rows) ? rows : []).map((r) => {
+    const payload = r.payload || {};
+    const operation = safeText(payload.operation || (r.is_sell ? 'VENDA' : 'COMPRA'), 40).toUpperCase();
+    const price = Number(payload.price ?? payload.purchasePrice ?? r.purchase_price ?? 0);
+    const grossValue = Number(payload.grossValue ?? payload.gross_value ?? (Number(r.quantity || 0) * price));
+    return {
+      ...payload,
+      id: Number(payload.id || r.client_tx_id || 0) || 0,
+      client_tx_id: r.client_tx_id,
+      symbol: payload.symbol || r.ticker,
+      ticker: r.ticker,
+      name: r.name || r.ticker,
+      operation,
+      quantity: Number(r.quantity || 0),
+      price,
+      purchasePrice: price,
+      grossValue,
+      gross_value: grossValue,
+      date: payload.date || normalizeTransactionDate(r.transaction_date),
+      assetType: payload.assetType || payload.asset_type || r.asset_type || '',
+      asset_type: payload.asset_type || payload.assetType || r.asset_type || '',
+      isSell: Boolean(r.is_sell),
+      is_sell: Boolean(r.is_sell),
+      broker: r.broker || payload.broker || '',
+      sector: r.sector || payload.sector || '',
+      notes: r.notes || payload.notes || '',
+      source: payload.source || 'Supabase',
+      importedAt: Number(payload.importedAt ?? payload.imported_at ?? r.transaction_date ?? Date.now()),
+      imported_at: Number(payload.imported_at ?? payload.importedAt ?? r.transaction_date ?? Date.now()),
+    };
+  });
   return { ok: true, count: transactions.length, transactions };
 }
 
@@ -574,7 +719,7 @@ export default async function handler(req, res) {
           authMode: 'supabase_email_password',
           legacyAdminTokenEnabled: Boolean(process.env.VALORAE_SUPABASE_SYNC_TOKEN),
         },
-        capabilities: ['health', 'diagnostics', 'register_client', 'upsert_snapshot', 'get_snapshot', 'upsert_transactions', 'get_transactions', 'upsert_dividend_events', 'get_dividend_events', 'delete_user_data'],
+        capabilities: SYNC_CAPABILITIES,
         diagnosticsHint: 'Use /api/sync?action=diagnostics para testar conexão real com Supabase e tabelas.',
       }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
     }
@@ -588,6 +733,7 @@ export default async function handler(req, res) {
         requestId: route.requestId,
         route: '/api/sync',
         action,
+        capabilities: diagnostics.capabilities || SYNC_CAPABILITIES,
         supabase: diagnostics,
       }, { status: diagnostics.configured ? 200 : 503, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
     }
@@ -611,7 +757,9 @@ export default async function handler(req, res) {
     const auth = await verifyClient(req, input);
     let result;
     if (action === 'upsert_snapshot') result = await upsertSnapshot(input.record || input, auth);
+    else if (action === 'upsert_snapshots') result = await upsertSnapshots(input, auth);
     else if (action === 'get_snapshot') result = await getSnapshot(input, auth);
+    else if (action === 'get_snapshots') result = await getSnapshots(input, auth);
     else if (action === 'upsert_transactions') result = await upsertTransactions(input, auth);
     else if (action === 'get_transactions') result = await getTransactions(input, auth);
     else if (action === 'upsert_dividend_events') result = await upsertDividendEvents(input, auth);

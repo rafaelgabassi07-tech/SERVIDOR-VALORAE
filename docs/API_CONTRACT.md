@@ -151,6 +151,8 @@ diagnostics
 register_client
 upsert_snapshot
 get_snapshot
+upsert_snapshots
+get_snapshots
 upsert_transactions
 get_transactions
 upsert_dividend_events
@@ -171,6 +173,19 @@ GET /api/sync?action=diagnostics
 ```
 
 `diagnostics` tenta acessar as tabelas configuradas e retorna `ok: true` somente quando URL, chave e tabelas estão acessíveis.
+
+
+O endpoint `diagnostics` agora também publica a lista `capabilities` no topo da resposta e dentro de `supabase.capabilities`. Isso permite que o APK diferencie “tabelas Supabase acessíveis” de “contrato /api/sync incompleto”.
+
+Para snapshots, o Proxy aceita modo individual e em lote:
+
+```text
+upsert_snapshot / get_snapshot
+upsert_snapshots / get_snapshots
+```
+
+O modo em lote é o contrato preferido pelo APK para reduzir chamadas repetidas ao abrir telas.
+
 
 Headers aceitos pelo Android/APK para sincronização local:
 

@@ -112,7 +112,41 @@ create table if not exists public.valorae_dividend_events (
 - `health`: verifica variáveis detectadas.
 - `diagnostics`: verifica conexão real e tabelas.
 - `register_client`: registra dispositivo local.
-- `upsert_snapshot` / `get_snapshot`: salva e busca snapshots.
+- `upsert_snapshot` / `get_snapshot`: salva e busca um snapshot.
+- `upsert_snapshots` / `get_snapshots`: salva e busca snapshots em lote, contrato preferido pelo APK.
 - `upsert_transactions` / `get_transactions`: salva e busca transações.
 - `upsert_dividend_events` / `get_dividend_events`: salva e busca proventos reais.
 - `delete_user_data`: remove dados do usuário autenticado.
+
+
+## Alinhamento APK 2026-06-13
+
+O Proxy agora publica `capabilities` em `/api/sync?action=health` e `/api/sync?action=diagnostics`.
+
+Capacidades anunciadas:
+
+```text
+health
+diagnostics
+register_client
+upsert_snapshot
+get_snapshot
+upsert_snapshots
+get_snapshots
+upsert_transactions
+get_transactions
+upsert_dividend_events
+get_dividend_events
+delete_user_data
+```
+
+A tabela `valorae_user_snapshots` recebeu metadados opcionais de cache para o APK saber se um snapshot ainda está fresco:
+
+```sql
+cache_scope text default 'user'
+cache_ttl_seconds integer
+expires_at timestamptz
+source_updated_at timestamptz
+etag text
+payload_size_bytes integer
+```
