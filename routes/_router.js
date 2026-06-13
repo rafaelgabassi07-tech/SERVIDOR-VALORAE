@@ -5,6 +5,7 @@ import { buildMobilePortfolioSync } from '../lib/contracts/mobile.js';
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
 import { buildPortfolioAnalysis, buildRealMarketHistory, buildRankings } from '../lib/portfolio/analysis.js';
 import { buildAssetsPayload, buildIndicesPayload, buildMarketMovers, getQuote } from '../lib/sources/quotes.js';
+import { fetchInvestidor10Rankings } from '../lib/market/rankings-i10.js';
 import { getNews } from '../lib/sources/news.js';
 import { getIpcaSeries } from '../lib/sources/ipca.js';
 import { fetchText } from '../lib/sources/fetch.js';
@@ -104,6 +105,72 @@ function buildIntegrationManifestPayload() {
 
 function buildIntegrationPromptsPayload() {
   return { status: 'OK', version: RELEASE.version, endpoint: 'integration/prompts', prompts: [] };
+}
+
+function boolParamLocal(value, fallback = false) {
+  if (value === undefined || value === null || value === '') return fallback;
+  return ['1', 'true', 'yes', 'sim', 'on'].includes(String(value).toLowerCase());
+}
+
+function clampInt(value, fallback, min = 1, max = Number.MAX_SAFE_INTEGER) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(n)));
+}
+
+function rankingTickerInput(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') return value.split(/[;,\s]+/).filter(Boolean);
+  if (value && typeof value === 'object') return [value.ticker || value.symbol || value.code || ''].filter(Boolean);
+  return [];
+}
+
+async function buildCanonicalMarketRankings(payload = {}) {
+  const kind = String(payload.type || payload.kind || 'ACAO').toUpperCase();
+  const sourceMode = String(payload.source || 'home').toLowerCase();
+  const rankingMode = String(payload.mode || payload.captureMode || (boolParamLocal(payload.complete || payload.full || payload.precise) ? 'complete' : 'auto')).toLowerCase();
+  const completeMode = ['complete', 'full', 'deep', 'precise', 'max'].includes(rankingMode) || boolParamLocal(payload.complete || payload.fullCapture || payload.precise);
+  const requestedLimit = clampInt(payload.limit || payload.max || payload.maxItems, 6, 1, 30);
+  const minRows = clampInt(payload.minRows || payload.completeMinRows, Math.min(6, requestedLimit), 1, requestedLimit);
+  const explicitTickers = uniqueTickers([
+    ...rankingTickerInput(payload.tickers),
+    ...rankingTickerInput(payload.positions),
+    ...rankingTickerInput(payload.assets),
+  ]);
+
+  // A Home do APK deve seguir o ranking real publicado pelo Investidor10.
+  // A comparação por cesta/Yahoo só permanece disponível quando o cliente pede source=compare
+  // ou envia uma lista explícita de tickers.
+  if (!explicitTickers.length && kind === 'ACAO' && sourceMode !== 'compare') {
+    const preferredSource = ['dedicated', 'pages', 'ranking-pages'].includes(sourceMode) ? 'dedicated' : 'home';
+    const live = await fetchInvestidor10Rankings({
+      bypassCache: boolParamLocal(payload.nocache || payload.refresh),
+      timeoutMs: clampInt(payload.timeoutMs, completeMode ? 14000 : 5200, 1000, 25000),
+      mode: rankingMode,
+      requireComplete: completeMode && boolParamLocal(payload.strict, false),
+      limit: requestedLimit,
+      minRows,
+      preferredSource,
+    });
+    return {
+      status: live?.status || (live?.ok ? 'OK' : 'ERROR'),
+      endpoint: 'market-rankings',
+      type: kind,
+      rankingSource: preferredSource === 'home'
+        ? (completeMode ? 'investidor10-home-live-complete' : 'investidor10-home-live')
+        : (completeMode ? 'investidor10-dedicated-live-complete' : 'investidor10-dedicated-live'),
+      fallbackUsed: false,
+      fallbackPolicy: 'disabled-for-live-investidor10-home-rankings',
+      captureMode: rankingMode,
+      ...live,
+    };
+  }
+
+  return {
+    ...(await buildMarketMovers({ ...payload, tickers: explicitTickers.join(',') })),
+    endpoint: 'market-rankings',
+    rankingSource: 'valorae-compare-explicit-tickers',
+  };
 }
 
 function scrapeError(code, message, status = 400, extras = {}) {
@@ -401,7 +468,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/portfolio/history') return sendJson(req, res, await buildRealMarketHistory(payload));
     if (path === '/asset/history') return sendJson(req, res, await getAssetHistory(payload), { cacheControl: 'private, max-age=45' });
     if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.historyMonths || payload.months || 12), { cacheControl: 'private, max-age=300' });
-    if (path === '/market/rankings') return sendJson(req, res, await buildMarketMovers(payload), { cacheControl: 'private, max-age=45' });
+    if (path === '/market/rankings') return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, ...(await buildCanonicalMarketRankings(payload)) }, { cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
     if (path === '/market/indices') return sendJson(req, res, await buildIndicesPayload(), { cacheControl: 'private, max-age=45' });
 
     if (path === '/asset/quote' || path === '/quote' || path === '/quotes') return sendJson(req, res, await getQuote(payload.ticker || payload.symbol || payload.q), { cacheControl: 'private, max-age=30' });

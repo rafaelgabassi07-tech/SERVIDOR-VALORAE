@@ -2,6 +2,8 @@
 
 Proxy enxuto para integração mobile do VALORAE, pronto para ser anexado diretamente na árvore do AI Studio.
 
+Versão core atual: `21.12.0`.
+
 ## Entrada principal para APK Android
 
 ```text
