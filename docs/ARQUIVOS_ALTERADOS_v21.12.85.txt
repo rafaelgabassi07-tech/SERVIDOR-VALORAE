@@ -1,7 +1,0 @@
-docs/PROXY_CHECK_INSIGHTS_BUNDLE_v21.12.85.log
-docs/RELATORIO_ESTUDO_VALORAE_INSIGHTS_BUNDLE_PERFORMANCE_v21.12.85.md
-metadata.json
-package.json
-routes/_router.js
-routes/market/ipca.js
-routes/portfolio/insights-bundle.js

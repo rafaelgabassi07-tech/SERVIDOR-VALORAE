@@ -5,7 +5,7 @@
   "patch": "21.12.93-valorae-native-contract-polish",
   "releasePatch": "21.12.93-valorae-native-contract-polish",
   "latestInternalPatch": "21.12.93-valorae-native-contract-polish",
-  "description": "Proxy VALORAE com contrato mobile nativo, fluxo cache-first, sync leve e rotas dedicadas.",
+  "description": "Proxy VALORAE atualizado para notícias com abertura no navegador, símbolos em lote e política sem leitor nativo obrigatório.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": []

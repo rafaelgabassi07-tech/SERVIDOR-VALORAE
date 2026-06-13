@@ -1,8 +1,0 @@
-package.json
-metadata.json
-lib/Valorae-engine.js
-lib/quality/app-official-view.js
-lib/market/investidor10-chart-extractor.js
-docs/PROXY_CHECK_ASSET_CHART_FLOW_v21.12.84.log
-docs/RELATORIO_ESTUDO_VALORAE_GRAFICOS_DETALHES_ANALISE_v21.12.84.md
-docs/ARQUIVOS_ALTERADOS_ASSET_CHART_FLOW_v21.12.84.txt

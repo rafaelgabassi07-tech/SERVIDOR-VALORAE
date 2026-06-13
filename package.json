@@ -22,7 +22,7 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.93-valorae-native-contract-polish",
+    "releasePatch": "21.12.94-notification-news-browser-routing",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   }

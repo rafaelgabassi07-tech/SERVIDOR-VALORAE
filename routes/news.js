@@ -2,19 +2,49 @@ import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../lib/Valorae
 import { sendJson } from '../lib/performance/http.js';
 import { beginRoute, boolParam, clampNumber, sendRouteError } from '../lib/http/route.js';
 
+function parseSymbolList(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') return value.split(',');
+  return [];
+}
+
+function withBrowserOpenPolicy(news) {
+  const items = Array.isArray(news?.items) ? news.items.map(item => ({
+    ...item,
+    url: item.url || item.link || item.sourceUrl || '',
+    originalUrl: item.originalUrl || item.url || item.link || item.sourceUrl || '',
+    openInBrowser: true,
+    inAppReader: false,
+  })) : news?.items;
+  return {
+    ...news,
+    items,
+    news: items || news?.news,
+    articles: items || news?.articles,
+    articleExtraction: 'disabled',
+    openPolicy: { preferredClientAction: 'OPEN_ORIGINAL_URL_IN_BROWSER', requiresInAppReader: false },
+  };
+}
+
 export default async function handler(req, res) {
   const route = beginRoute(req, res, { version: ValoraeEngine.version, methods: ['GET'], route: 'news', rateMax: Number(process.env.VALORAE_RATE_LIMIT_NEWS_MAX || 90), profile: 'news' });
   if (route.done) return;
   try {
     const input = route.input;
-    const ticker = canonicalizeTicker(input.ticker);
+    const requestedSymbols = parseSymbolList(input.symbols || input.tickers || input.assets)
+      .map(symbol => canonicalizeTicker(symbol))
+      .filter(Boolean)
+      .slice(0, 8);
+    const ticker = canonicalizeTicker(input.ticker || input.symbol || requestedSymbols[0] || '');
     // Notícias globais da página "Notícias" do APK chegam sem ticker.
-    // Antes essa rota validava string vazia como ticker inválido e devolvia 400,
-    // fazendo o APK parecer incompatível com o Proxy. Valide apenas quando o
-    // usuário pediu notícia de um ativo específico.
-    const validation = ticker ? validarTicker(ticker) : null;
+    // Valide apenas símbolos realmente pedidos, mantendo o feed geral livre de 400.
+    const validationCandidates = [...new Set([ticker, ...requestedSymbols].filter(Boolean))];
+    const validation = validationCandidates.map(validarTicker).find(Boolean) || null;
     if (validation) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: validation }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'news' });
-    const aliases = typeof input.aliases === 'string' ? input.aliases.split(',').map(s => s.trim()).filter(Boolean).slice(0, 8) : [];
+    const aliases = [
+      ...(typeof input.aliases === 'string' ? input.aliases.split(',') : []),
+      ...requestedSymbols.filter(symbol => symbol !== ticker),
+    ].map(s => String(s || '').trim()).filter(Boolean).slice(0, 8);
     const timeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 350, 12000) : 3000;
     const newsTimeoutMs = input.newsTimeoutMs ? clampNumber(input.newsTimeoutMs, undefined, 350, 12000) : timeoutMs;
     const news = await ValoraeEngine.fetchNews(ticker, aliases, {
@@ -26,7 +56,8 @@ export default async function handler(req, res) {
       bypassCache: boolParam(input.refresh || input.nocache),
       lowLatencyBudget: timeoutMs !== undefined && timeoutMs <= 1000,
     });
-    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, ticker, ...news }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'news', cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
+    const normalizedNews = withBrowserOpenPolicy(news);
+    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, ticker, symbols: requestedSymbols, ...normalizedNews }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'news', cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'news' });
   }
