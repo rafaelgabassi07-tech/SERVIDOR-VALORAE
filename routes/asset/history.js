@@ -5,9 +5,11 @@ import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute, clampNumber, sendRouteError } from '../../lib/http/route.js';
 
 function normalizeHistoryTicker(raw = '') {
-  const t = String(raw || '').trim().toUpperCase().replace(/\.SA$/i, '');
+  const t = String(raw || '').trim().toUpperCase().replace(/\.SA$/i, '').replace(/[^A-Z0-9^]/g, '');
   if (['IFIX', '^IFIX'].includes(t)) return 'IFIX';
-  if (['IBOV', 'IBOVESPA', '^BVSP'].includes(t)) return '^BVSP';
+  if (['IBOV', 'IBOVESPA', '^BVSP'].includes(t)) return 'IBOV';
+  if (['SMLL', 'SMALL'].includes(t)) return 'SMLL';
+  if (['IDIV'].includes(t)) return 'IDIV';
   return canonicalizeTicker(t);
 }
 
@@ -17,11 +19,12 @@ export default async function handler(req, res) {
   try {
     const q = route.input;
     const ticker = normalizeHistoryTicker(q.ticker);
-    const isIndexAlias = ['IFIX', '^BVSP'].includes(ticker);
+    const officialIndexAlias = ['IFIX', 'IBOV', 'SMLL', 'IDIV'].includes(ticker);
+    const isIndexAlias = officialIndexAlias || ['^BVSP'].includes(ticker);
     const err = isIndexAlias ? null : validarTicker(ticker);
     if (err) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: err }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'history' });
-    const data = ticker === 'IFIX'
-      ? await fetchB3IndexDailyEvolution('IFIX', { years: String(q.range || '1Y').toUpperCase() === 'MAX' ? 5 : 2, timeoutMs: clampNumber(q.timeoutMs, 9000, 1000, 20000), limit: clampNumber(q.limit, 520, 30, 1200), bypassCache: q.nocache === '1' || q.refresh === '1' })
+    const data = officialIndexAlias
+      ? await fetchB3IndexDailyEvolution(ticker, { years: String(q.range || '1Y').toUpperCase() === 'MAX' ? 5 : 2, timeoutMs: clampNumber(q.timeoutMs, 9000, 1000, 20000), limit: clampNumber(q.limit, 520, 30, 1200), bypassCache: q.nocache === '1' || q.refresh === '1' })
       : await fetchYahooHistory(ticker, { range: q.range || '1Y', interval: q.interval, timeoutMs: clampNumber(q.timeoutMs, 9000, 1000, 20000) });
     const payload = data.ok ? data : {
       ...data,
@@ -37,7 +40,7 @@ export default async function handler(req, res) {
         fallbackRoots: ['appPayload.charts', 'appMobileSnapshot.charts', 'cache local do APK'],
       },
       reliability: {
-        source: data.source || (ticker === 'IFIX' ? 'B3 Oficial' : 'YahooChart'),
+        source: data.source || (officialIndexAlias ? `B3 Oficial - ${ticker}` : 'YahooChart'),
         state: 'UNAVAILABLE_OPTIONAL',
         optionalBlock: true,
         shouldKeepPreviousHistory: true,
