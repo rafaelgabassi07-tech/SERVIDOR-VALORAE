@@ -135,3 +135,7 @@ delete_user_data
 ```
 
 O APK deve preferir `get_snapshots` e `upsert_snapshots` quando precisar buscar/salvar vários snapshots de uma tela.
+
+### Portfolio Returns
+
+O Proxy expõe `POST /api/v1/portfolio/returns` para o modal Retorno do APK. O contrato consolida histórico real da carteira, transações, proventos recebidos e benchmarks como CDI, IPCA, IBOV e IFIX em uma única resposta para o app.
