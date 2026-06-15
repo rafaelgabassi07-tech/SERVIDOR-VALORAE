@@ -1,3 +1,10 @@
+# 2026-06-14 — Retorno: IFIX, IDIV e SMLL somente via Yahoo
+
+- Remove o fallback do Investidor10 para IFIX, IDIV e SMLL no contrato de Retorno.
+- Desativa também B3 e Mais Retorno como fallback para estes três índices, mantendo exclusivamente Yahoo Finance Chart API com `IFIX.SA`, `IDIV.SA` e `SMLL.SA`.
+- Quando o Yahoo retorna apenas snapshot, o Proxy usa somente `regularMarketPrice` e `chartPreviousClose`/`previousClose` do próprio Yahoo para montar uma comparação mínima, sem ETF, proxyTicker ou fonte alternativa.
+- `/api/v1/market/indices` passa a seguir a mesma política Yahoo-only para IFIX, IDIV e SMLL.
+
 # v21.12.60 — Rankings da Home Investidor10 sincronizados ao APK
 
 
