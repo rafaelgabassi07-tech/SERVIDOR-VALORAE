@@ -652,3 +652,9 @@
 - Logotipo interno redesenhado e padronizado no cabeçalho, drawer lateral, PWA manifest e ícones PNG.
 - Mantém Monitor responsivo, tema claro/escuro, filtros flutuantes, camada canônica e fontes ricas Investidor10/StatusInvest.
 - Adiciona teste regressivo `extreme-audit-logo-standard-v21-12-51`.
+
+## 2026-06-14 — Retorno IFIX/IDIV/SMLL Yahoo range compatibility
+- Auditada causa de indisponibilidade de IFIX, IDIV e SMLL no modal Retorno: `historyMonths=120` levava a busca Yahoo para `range=10y&interval=1mo`, que pode não retornar pontos suficientes para os índices diretos.
+- Proxy agora mantém `IFIX.SA`, `IDIV.SA` e `SMLL.SA`, mas tenta janelas compatíveis (`5y/1wk`, `2y/1d`, `1y/1d`, `6mo/1d`, `3mo/1d`, `1mo/1d`, `5d/1d`, `1d/1d`) antes de declarar vazio.
+- `/api/v1/market/indices` passa a incluir IFIX, IDIV e SMLL como snapshots diretos.
+- Nenhum ETF, proxyTicker ou simulação foi adicionado.
