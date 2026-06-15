@@ -22,7 +22,7 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.95-analysis-assets-suggestions",
+    "releasePatch": "21.12.96-investidor10-analysis-page-contract",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   }

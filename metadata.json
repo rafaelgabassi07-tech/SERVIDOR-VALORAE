@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.95-analysis-assets-suggestions",
-  "patch": "21.12.95-analysis-assets-suggestions",
-  "releasePatch": "21.12.95-analysis-assets-suggestions",
-  "latestInternalPatch": "21.12.95-analysis-assets-suggestions",
-  "description": "Proxy VALORAE atualizado para sugestões inteligentes de ticker e consumo mobile de análise de ativos.",
+  "release": "21.12.96-investidor10-analysis-page-contract",
+  "patch": "21.12.96-investidor10-analysis-page-contract",
+  "releasePatch": "21.12.96-investidor10-analysis-page-contract",
+  "latestInternalPatch": "21.12.96-investidor10-analysis-page-contract",
+  "description": "Proxy VALORAE atualizado com contrato fiel de página Análise para Ações e FIIs baseado nas seções do Investidor10, sem dados simulados.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": []
