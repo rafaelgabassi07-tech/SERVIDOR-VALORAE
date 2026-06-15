@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import health from '../routes/health.js';
 import asset from '../routes/asset.js';
+import assets from '../routes/assets.js';
 import compare from '../routes/compare.js';
 import scrape from '../routes/scrape.js';
 import transactions from '../routes/portfolio/transactions.js';
@@ -52,6 +53,12 @@ assert.ok(parseBody(r2).requestId);
 const r3 = await call(compare, req('GET', { tickers: 'PETR4' }));
 assert.equal(r3.statusCode, 400);
 assert.match(parseBody(r3).error, /ao menos dois/i);
+
+const rAssetsSuggestions = await call(assets, req('GET', { q: 'BBA', max: '5' }));
+assert.equal(rAssetsSuggestions.statusCode, 200);
+assert.equal(parseBody(rAssetsSuggestions).status, 'SUGGESTIONS');
+assert.ok(parseBody(rAssetsSuggestions).assets.some(item => item.symbol === 'BBAS3'));
+assert.equal(parseBody(rAssetsSuggestions).assets.find(item => item.symbol === 'BBAS3').price, null);
 
 const r4 = await call(scrape, req('GET', {}));
 assert.equal(r4.statusCode, 400);
