@@ -1,5 +1,13 @@
 # v21.12.60 — Rankings da Home Investidor10 sincronizados ao APK
 
+
+## 2026-06-14 — Retorno: IFIX, IDIV e SMLL via Yahoo Finance Chart API
+
+- IFIX, IDIV e SMLL passam a usar os símbolos diretos `IFIX.SA`, `IDIV.SA` e `SMLL.SA` na Yahoo Finance Chart API para o histórico/snapshot do modal Retorno.
+- B3 e Investidor10 permanecem como fallback de histórico; nenhum ETF, proxyTicker ou ativo substituto é usado para esses índices.
+- `/api/v1/asset/history` foi alinhado ao mesmo resolvedor de índices usado pelo contrato `/api/v1/portfolio/returns`.
+- Validação local: `npm run check` e `npm test` passaram sem falhas.
+
 - Corrige a fonte padrão de `Maiores Altas` e `Maiores Baixas` para a Home do Investidor10, evitando divergência com páginas dedicadas ou fallback de comparação.
 - Adiciona `source=home` em `/api/v1/market/rankings` para o APK VALORAE.
 - Desativa fallback de comparação/cesta fixa para rankings ao vivo sem tickers, impedindo ativos fora da Home do Investidor10.

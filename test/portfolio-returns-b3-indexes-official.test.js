@@ -17,9 +17,10 @@ const contract = await buildPortfolioReturns({
 for (const ticker of ['IBOV', 'SMLL', 'IDIV']) {
   const item = contract.benchmarks.find(row => row.ticker === ticker);
   assert.ok(item, `${ticker} benchmark should exist`);
-  assert.match(item.source || '', /B3 Oficial|B3/i);
+  assert.match(item.source || '', /Yahoo Finance Chart API|B3 Oficial|B3/i);
   assert.notEqual(item.source, 'YahooChart');
   assert.notEqual(item.proxyTickerUsed, true);
   assert.notEqual(item.simulated, true);
+  if (['SMLL', 'IDIV'].includes(ticker)) assert.equal(item.directIndexSymbol, true, `${ticker} should use a direct index symbol when Yahoo is involved`);
 }
-console.log('Portfolio returns B3 official indexes test OK.');
+console.log('Portfolio returns direct index source test OK.');

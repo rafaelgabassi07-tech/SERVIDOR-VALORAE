@@ -1,5 +1,5 @@
 import { fetchYahooHistory } from '../../lib/market/yahoo.js';
-import { fetchB3IndexDailyEvolution } from '../../lib/market/b3-index-history.js';
+import { getAssetHistory } from '../../lib/sources/asset-details.js';
 import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute, clampNumber, sendRouteError } from '../../lib/http/route.js';
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     const err = isIndexAlias ? null : validarTicker(ticker);
     if (err) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: err }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'history' });
     const data = officialIndexAlias
-      ? await fetchB3IndexDailyEvolution(ticker, { years: String(q.range || '1Y').toUpperCase() === 'MAX' ? 5 : 2, timeoutMs: clampNumber(q.timeoutMs, 9000, 1000, 20000), limit: clampNumber(q.limit, 520, 30, 1200), bypassCache: q.nocache === '1' || q.refresh === '1' })
+      ? await getAssetHistory({ ticker, range: q.range || '1Y', interval: q.interval, timeoutMs: clampNumber(q.timeoutMs, 9000, 1000, 20000), limit: clampNumber(q.limit, 520, 30, 1200), bypassCache: q.nocache === '1' || q.refresh === '1' })
       : await fetchYahooHistory(ticker, { range: q.range || '1Y', interval: q.interval, timeoutMs: clampNumber(q.timeoutMs, 9000, 1000, 20000) });
     const payload = data.ok ? data : {
       ...data,
