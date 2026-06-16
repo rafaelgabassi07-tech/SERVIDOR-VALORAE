@@ -22,7 +22,7 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.104-analysis-dividends-missing-signals",
+    "releasePatch": "21.12.105-analysis-real-sections-and-charts",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   }

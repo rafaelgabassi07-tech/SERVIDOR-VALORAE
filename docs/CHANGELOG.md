@@ -1,3 +1,12 @@
+# 2026-06-15 — Patch 21.12.105-analysis-real-sections-and-charts
+
+- `/api/v1/analysis` evolui para o contrato `26.analysis.v2`.
+- Integra ao `AnalysisPageResponse` as seções `historical_indicators`, `financial_statements`, `asset_charts`, `company_profile`, `revenue_breakdown` e `comparisons`.
+- Gráficos passam a ser enviados como séries JSON estruturadas em `charts[].series[].points`, sem HTML bruto, WebView ou dados sintéticos.
+- As sinalizações discretas continuam ativas, mas agora indicam apenas seções que realmente vieram sem dados suficientes.
+- Corrigida a leitura de `companyInfo.descricao`, `setor`, `subsetor` e `segmento` para não serem sobrescritos por campos vazios.
+- Rotas antigas de ativos, carteira e modais permanecem preservadas.
+
 # 2026-06-15 — Patch 21.12.103-analysis-unique-contract
 
 - Cria o endpoint exclusivo `/api/v1/analysis` para a página Análise do APK.
