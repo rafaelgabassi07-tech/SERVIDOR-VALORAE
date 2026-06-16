@@ -1,0 +1,12 @@
+{
+  "name": "VALORAE Proxy",
+  "version": "21.12.0",
+  "release": "21.12.128-analysis-source-routing-real-only-v44",
+  "patch": "21.12.128-analysis-source-routing-real-only-v44",
+  "releasePatch": "21.12.128-analysis-source-routing-real-only-v44",
+  "latestInternalPatch": "21.12.128-analysis-source-routing-real-only-v44",
+  "description": "Proxy VALORAE com auditoria rigorosa da página Análise: ETF/BDR roteados para URLs reais, JSON HTML reforçado e bloqueio de demonstrativos/DY/payout sem série real.",
+  "contract": "valorae-mobile-portfolio-sync",
+  "primaryMobileRoute": "/api/v1/mobile/practical-sync",
+  "majorCapabilities": []
+}

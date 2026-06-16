@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "outputDirectory": "public",
+  "buildCommand": "node scripts/build-vercel-safe.js",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=()" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/api", "destination": "/api/router?path=" },
+    { "source": "/api/:path*", "destination": "/api/router?path=:path*" },
+    { "source": "/", "destination": "/server.html" },
+    { "source": "/server", "destination": "/server.html" },
+    { "source": "/monitor", "destination": "/server.html" }
+  ]
+}

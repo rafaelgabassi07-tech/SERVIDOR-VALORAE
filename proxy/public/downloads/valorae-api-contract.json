@@ -1,0 +1,20 @@
+{
+  "name": "VALORAE Proxy Integration Contract",
+  "baseUrl": "https://servidor-valorae.vercel.app",
+  "transport": "HTTPS JSON",
+  "endpoints": [
+    { "method": "GET", "path": "/api/health", "purpose": "Saúde do proxy" },
+    { "method": "GET", "path": "/api/ready", "purpose": "Prontidão operacional" },
+    { "method": "GET", "path": "/api/asset?ticker=PETR4", "purpose": "Consulta de ativo individual" },
+    { "method": "GET", "path": "/api/assets?tickers=PETR4,VALE3", "purpose": "Consulta de múltiplos ativos" },
+    { "method": "POST", "path": "/api/portfolio/analyze", "purpose": "Análise de carteira" },
+    { "method": "GET", "path": "/api/server/metrics", "purpose": "Métricas em tempo real do servidor proxy" }
+  ],
+  "clientStates": ["loading", "online", "partial", "error", "empty"],
+  "notes": [
+    "Use timeout no app consumidor.",
+    "Trate 4xx e 5xx separadamente.",
+    "Não exponha segredos no cliente.",
+    "As métricas do servidor são em memória por instância serverless."
+  ]
+}

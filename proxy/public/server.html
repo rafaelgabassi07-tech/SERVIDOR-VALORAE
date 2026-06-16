@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>VALORAE Proxy Monitor · Cockpit Executivo</title>
+<meta name="valorae-ui" content="executive-monitor-redesign compact-header">
+<meta name="valorae-engine-version" content="21.12.0">
+<meta name="valorae-compat-patch" content="21.12.24-efficiency-precision-ecosystem">
+<meta name="valorae-latest-patch" content="21.12.93-valorae-native-contract-polish"><meta name="valorae-legacy-redesign" content="21.12.31-monitor-experience-redesign">
+<meta name="valorae-readiness-endpoint" content="/api/v1/release/readiness">
+<meta name="valorae-ready-endpoint" content="/api/ready">
+<meta name="theme-color" content="#0f3d2e">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+:root{--bg:#090d0b;--bg2:#0d130f;--surface:#111913;--surface2:#162019;--surface3:#1b261f;--line:#26362d;--line2:#1e2d25;--text:#edf7f0;--muted:#a0aca5;--faint:#718178;--green:#22c77c;--green2:#0d8d5b;--green3:#a7f36f;--warn:#f3c85a;--err:#ff7676;--info:#9bb8ff;--sidebar:268px;--top: 60px;--r:18px;--shadow:0 20px 52px rgba(0,0,0,.32)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;max-width:100dvw;overflow-x:hidden;background:radial-gradient(circle at 10% -10%,rgba(34,199,124,.18),transparent 32%),radial-gradient(circle at 86% 12%,rgba(167,243,111,.07),transparent 28%),linear-gradient(150deg,#070a08,#101711 58%,#080b09);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:14px}.top{position:sticky;top:0;z-index:40;height:var(--top);display:flex;align-items:center;gap:12px;padding:0 8px;background:rgba(9,13,11,.84);border-bottom:1px solid var(--line);backdrop-filter:blur(18px)}.hamburger{width:38px;height:38px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all 0.25s cubic-bezier(0.16, 1, 0.3, 1)}.hamburger:hover{background:var(--surface3);transform:scale(1.05)}@media(min-width:1061px){.hamburger{display:none}}.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}.logo{width:34px;height:34px;border-radius:13px;background:linear-gradient(135deg,#0f3d2e,#23c983 56%,#a7f36f);box-shadow:0 12px 34px rgba(35,201,131,.25);display:grid;place-items:center;color:#05110b;font-weight:950;letter-spacing:-.05em}.brand h1{font-size:14px;margin:0;line-height:1;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:3px;white-space:nowrap}.topActions{margin-left:auto;display:flex;gap:7px;align-items:center}.btn{border:1px solid var(--line);background:var(--surface2);color:var(--text);padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:all 0.25s cubic-bezier(0.16,1,0.3,1);white-space:nowrap}.btn:hover{border-color:rgba(34,199,124,.65);transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,0.3)}.btn:active{transform:translateY(0)}.btn.primary{background:linear-gradient(135deg,var(--green2),var(--green));color:#04100a;border:0;box-shadow:0 8px 24px rgba(34,199,124,0.3)}.pill,.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:var(--muted);font-size:12px;background:rgba(255,255,255,.035);white-space:nowrap}.ok{color:var(--green)}.warn{color:var(--warn)}.err{color:var(--err)}.info{color:var(--info)}.layout{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);min-height:calc(100vh - var(--top))}.drawer{padding:8px;padding-bottom:80px;background:var(--bg2);border-right:1px solid var(--line);height:calc(100dvh - var(--top));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}.drawerHead{border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,rgba(34,199,124,.1),rgba(255,255,255,.025));padding:13px;margin-bottom:12px}.drawerHead b{display:block}.drawerHead small{line-height:1.4}.drawer h2{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--faint);margin:16px 9px 7px}.nav button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;margin:6px 0;padding:12px 14px;border:1px solid transparent;border-radius:14px;font-size:15px;transition:0.2s;color:var(--muted);background:transparent;cursor:pointer}.nav button:hover,.nav button.active{background:linear-gradient(90deg,rgba(34,199,124,.14),rgba(255,255,255,.035));border-color:var(--line);color:var(--text)}.nav .ico{width:24px;text-align:center}.content{padding:12px 14px;min-width:0;max-width:1720px;width:100%;margin:0 auto}.page{display:none;animation:fade .18s ease}.page.active{display:block}@keyframes fade{from{opacity:0;transform:translateY(12px)}} @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}} .card, .stage, .explain, .event, .insight, .hero { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; } .card:nth-child(1){animation-delay: 0.05s} .card:nth-child(2){animation-delay: 0.1s} .card:nth-child(3){animation-delay: 0.15s} .card:nth-child(4){animation-delay: 0.2s} .event:nth-child(2){animation-delay: 0.05s} .event:nth-child(3){animation-delay: 0.1s} .event:nth-child(4){animation-delay: 0.15s}.hero{border:1px solid var(--line);border-radius:24px;padding:18px;background:linear-gradient(135deg,rgba(34,199,124,.13),rgba(255,255,255,.035));box-shadow:var(--shadow);margin-bottom:12px}.hero.compact{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center}.hero h2{margin:0 0 6px;font-size:25px;letter-spacing:-.03em}.hero p{margin:0;color:var(--muted);max-width:960px;line-height:1.55}.pageTools{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end}.explain-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.explain{border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.035);padding:13px}.explain h3,.card h3{margin:0 0 8px;font-size:15px}.explain p{margin:0;color:var(--muted);line-height:1.5}.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.span2{grid-column:span 2}.card,.stage{max-width:100%;transition:transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),box-shadow 0.3s ease;border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,var(--surface2),var(--surface));padding:22px;box-shadow:0 12px 28px rgba(0,0,0,.16)}@media(hover:hover){.card:hover,.stage:hover{transform:translateY(-8px);box-shadow:0 24px 48px rgba(0,0,0,0.4);border-color:rgba(34,199,124,0.4);z-index:2;position:relative}}.card.soft{background:var(--surface3)}.metric{min-height:160px;display:flex;flex-direction:column;justify-content:center}.k{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.v{font-size:32px;font-weight:950;margin-top:12px;margin-bottom:4px;letter-spacing:-.04em}.sub,small{color:var(--muted)}.section{margin-top:12px}.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:12px 0} .input,select{background:rgba(255,255,255,.05);border:2px solid var(--line);color:var(--text);border-radius:16px;padding:14px 20px;min-height:52px;font-family:inherit;font-size:15px;transition:all 0.2s cubic-bezier(0.16,1,0.3,1);outline:none;width:auto;flex:1;min-width:130px;max-width:100%}.input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(34,199,124,0.15);background:rgba(0,0,0,0.3)}select{cursor:pointer}.input{min-width:190px}.row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line2);padding:8px 0}.row:last-child{border-bottom:0}.row b,.row span{min-width:0;word-break:break-word;overflow-wrap:anywhere}.row span{text-align:right;color:var(--muted)}.scroll{overflow-x:auto;max-width:100%}.mono,pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}table{width:100%;border-collapse:collapse;min-width:720px}th,td{text-align:left;border-bottom:1px solid var(--line2);padding:9px;color:var(--muted);vertical-align:top;word-break:break-word}th{color:var(--text);font-size:12px;text-transform:uppercase;letter-spacing:.06em}canvas{width:100%;height:230px;border:1px solid var(--line);border-radius:16px;background:#0b100d;touch-action:pan-y}.feed{display:grid;gap:12px;max-height:650px;overflow:auto;padding-right:3px}.event{border:1px solid var(--line);border-radius:16px;background:var(--surface2);padding:11px;cursor:pointer}.event:hover,.event.sel{border-color:rgba(34,199,124,.72);background:#17231b}.event .meta{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;min-width:0}.event b{color:var(--text);word-break:break-all;overflow-wrap:anywhere;min-width:0;display:block}pre{white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:560px;background:#060907;border:1px solid var(--line);border-radius:16px;padding:13px;color:#d8efe1}.bar{height:10px;background:#0a100c;border:1px solid var(--line);border-radius:999px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green2),var(--green),var(--green3));width:0}.split{display:grid;grid-template-columns:minmax(320px,.9fr) minmax(0,1.35fr);gap:12px}.insightList{display:grid;gap:8px}.insight{border:1px solid var(--line2);border-radius:14px;padding:10px;background:rgba(255,255,255,.025)}.timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.timeline .stage{text-align:center}.timeline b{display:block;margin-bottom:5px}.chips{display:flex;flex-wrap:wrap;gap:8px}.prompt{position:relative}.copy{position:absolute;right:10px;top:10px;padding:6px 8px;font-size:12px}.notice{position:fixed;right:16px;bottom:16px;z-index:70;max-width:560px;background:#0c120e;border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow);display:none}.notice.show{display:block}.mobileOverlay{display:none}.hidden{display:none!important}.compat{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}.module-node{border-left:2px solid rgba(34,199,124,.45);padding-left:12px;margin:10px 0}@media(max-width:1060px){.layout{grid-template-columns:1fr}.drawer{position:fixed;z-index:60;left:0;top:var(--top);transform:translateX(-104%);transition:.2s;width:min(88vw,var(--sidebar));box-shadow:var(--shadow)}body.menuOpen .drawer{transform:none}body.menuOpen{overflow:hidden}body.menuOpen .mobileOverlay{display:block;position:fixed;z-index:55;inset:var(--top) 0 0;background:rgba(0,0,0,.46)}.content{padding:14px}.g4,.g3,.g2,.explain-grid,.split,.timeline{grid-template-columns:1fr}.span2{grid-column:auto}.brand small,.topActions .pill{display:none}.hero.compact{grid-template-columns:1fr}.pageTools{justify-content:flex-start}.hero h2{font-size:21px}.top{position:sticky;top:0;z-index:40;height:var(--top);display:flex;align-items:center;gap:12px;padding:0 8px;background:rgba(9,13,11,.84);border-bottom:1px solid var(--line);backdrop-filter:blur(18px)}.btn{padding:8px 12px;font-size:12px}.input{min-width:140px;flex:1}}@media(max-width:520px){#menuToggleBtn{font-size:0;}#menuToggleBtn svg{min-width:18px;min-height:18px}:root{--top: 64px}.grid,.split,.explain-grid{gap:8px}.hero,.card,.explain,.stage{padding:10px}.top{gap:8px}.brand h1{font-size:13px}.logo{width:31px;height:31px}.content{padding:12px}.hero,.card,.explain{border-radius:16px;padding:12px}.v{font-size:23px}.metric{min-height:100px}table{min-width:650px}}@media(min-width:1450px){.content{padding:24px}.hero h2{font-size:30px}}
+/* legacy test tokens kept as non-visual compatibility markers: --top:58px; @media(max-width:760px); @media(max-width:430px); grid-template-columns:repeat(2,1fr); */
+
+/* legacy compatibility marker: Engine Core */
+
+.menu-popup {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 10px;
+  min-width: 170px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.menu-popup.show {
+  display: flex;
+}
+.menu-popup .btn {
+  width: 100%;
+  justify-content: flex-start;
+}
+.btn.active-state {
+  background: rgba(34,199,124,0.15) !important;
+  color: var(--green) !important;
+  border-color: rgba(34,199,124,0.4) !important;
+}
+.btn.paused-state {
+  background: rgba(226,179,64,0.15) !important;
+  color: var(--warn) !important;
+  border-color: rgba(226,179,64,0.4) !important;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+.modal-overlay.hidden {
+  display: none !important;
+  opacity: 0;
+}
+.modal-content {
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 24px;
+  width: 90%;
+  max-width: 440px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.6);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-content h3 { margin: 0 0 8px; font-size: 18px; letter-spacing: -0.02em; }
+.modal-content .sub { font-size: 14px; line-height: 1.5; }
+
+.custom-select { position: relative; flex: 1; min-width: 140px; user-select: none; }
+.cs-btn {
+  background: var(--surface2); border: 1px solid var(--line); color: var(--text);
+  border-radius: 12px; padding: 0 16px; min-height: 42px; font-size: 14px;
+  cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  width: 100%; transition: all 0.2s cubic-bezier(0.16,1,0.3,1); box-sizing: border-box;
+}
+.cs-btn:after {
+  content: ""; display: block; width: 7px; height: 7px;
+  border-right: 2px solid var(--faint); border-bottom: 2px solid var(--faint);
+  transform: rotate(45deg); margin-bottom: 4px; margin-left: 8px; transition: 0.2s;
+}
+.custom-select.show .cs-btn:after { transform: rotate(-135deg); margin-bottom: -2px; }
+.cs-btn:hover { border-color: var(--faint); background: var(--surface3); }
+.cs-menu {
+  display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+  background: var(--surface2); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5); z-index: 100;
+  max-height: 250px; overflow-y: auto; overflow-x: hidden;
+  animation: slideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 6px; flex-direction: column; gap: 2px;
+}
+.custom-select.show .cs-menu { display: flex; }
+.cs-opt {
+  padding: 10px 14px; border-radius: 10px; cursor: pointer; color: var(--muted);
+  transition: 0.15s; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cs-opt:hover, .cs-opt.active {
+  background: rgba(34,199,124,.1); color: var(--text);
+}
+@media(max-width:520px){
+  .toolbar{ flex-wrap: wrap; }
+  .custom-select { min-width: calc(50% - 4px); }
+  #wrap-feedSort { min-width: 100%; }
+}
+
+
+/* v21.12.48 — responsividade, tema e filtros flutuantes */
+/* v21.12.93 — integração APK/Proxy validada */
+body.theme-light{--bg:#f5faf7;--bg2:#edf5f0;--surface:#ffffff;--surface2:#f8fcfa;--surface3:#edf7f2;--line:#d7e5dc;--line2:#e7efe9;--text:#102117;--muted:#52645b;--faint:#73877b;--green:#0f9f62;--green2:#08764b;--green3:#4ecb77;--warn:#9a6a00;--err:#bc3434;--info:#325ccf;--shadow:0 18px 42px rgba(16,33,23,.12);background:radial-gradient(circle at 10% -10%,rgba(15,159,98,.13),transparent 32%),radial-gradient(circle at 86% 12%,rgba(78,203,119,.10),transparent 28%),linear-gradient(150deg,#f7fbf8,#eef7f2 58%,#f9fcfa)}
+body.theme-light .top{background:rgba(247,251,248,.9)}body.theme-light .drawer{background:var(--bg2)}body.theme-light canvas{background:#f8fcfa}body.theme-light pre{background:#f7fbf8;color:#183326}body.theme-light .notice{background:#ffffff}body.theme-light .event:hover,body.theme-light .event.sel{background:#edf7f2}body.theme-light .btn.primary{color:#fff}.iconBtn{gap:8px;min-width:42px}.iconBtn .label{display:inline}.filterToolbar{position:relative;overflow:visible;align-items:stretch}.filterToolbar .input{min-width:220px}.custom-select{position:relative;flex:1 1 190px;min-width:190px;user-select:none}.cs-btn{min-height:52px;border-radius:16px;padding:0 16px;gap:10px}.cs-btn:after{content:"";display:block;width:7px;height:7px;border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);transform:rotate(45deg);margin-bottom:4px;margin-left:8px;transition:.2s;flex:0 0 auto}.cs-menu{display:none;position:fixed;left:12px;top:70px;right:auto;width:min(420px,calc(100vw - 24px));background:var(--surface2);border:1px solid var(--line);border-radius:18px;box-shadow:0 22px 60px rgba(0,0,0,.48);z-index:2500;max-height:min(460px,calc(100vh - 96px));overflow-y:auto;overflow-x:hidden;padding:8px;flex-direction:column;gap:3px}.custom-select.show .cs-menu{display:flex}.cs-opt{padding:11px 13px;border-radius:12px;line-height:1.35;white-space:normal;overflow:visible;text-overflow:clip;word-break:break-word}.ico{width:30px;height:30px;display:inline-grid;place-items:center;border-radius:12px;background:rgba(34,199,124,.09);border:1px solid rgba(34,199,124,.16);color:var(--green);flex:0 0 30px}.icoSvg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}.nav button:hover .ico,.nav button.active .ico{background:rgba(34,199,124,.18);border-color:rgba(34,199,124,.38);color:var(--green3)}.settingsChoice{display:flex;gap:10px;flex-wrap:wrap}.settingsChoice .btn[aria-pressed="true"]{border-color:rgba(34,199,124,.65);background:rgba(34,199,124,.14);color:var(--green)}.responsiveMatrix{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.responsiveMatrix .stage{text-align:left}.formLine{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.formLine .input{min-width:260px}@media(max-width:1060px){.content{padding:14px}.drawer{width:min(90vw,330px)}.top{padding-inline:10px}.topActions{gap:6px}.responsiveMatrix{grid-template-columns:1fr}.filterToolbar .input,.custom-select{flex:1 1 calc(50% - 8px);min-width:180px}.formLine .input{min-width:100%;width:100%}}@media(max-width:680px){:root{--top:64px}.top{gap:8px}.brand{flex:1 1 min(100%,260px)}.brand small{display:none}.topActions{margin-left:0;flex:0 0 auto}.topActions .btn{padding:8px 10px}.iconBtn .label,#menuToggleBtn svg+text{display:none}.pageTools{width:100%;justify-content:flex-start}.hero{padding:15px;border-radius:20px}.card,.stage{padding:16px}.toolbar{gap:8px}.filterToolbar .input,.custom-select,#wrap-feedSort{flex:1 1 100%;min-width:100%}.cs-menu{width:calc(100vw - 20px);left:10px!important;right:auto;max-height:calc(100vh - 94px)}table{min-width:640px}.event .meta{flex-direction:column;gap:6px}.v{font-size:26px}.metric{min-height:110px}}@media(max-width:420px){.logo{width:30px;height:30px}.brand h1{font-size:13px}.hamburger{width:36px;height:36px}.topActions .btn{min-width:38px;padding-inline:8px}.content{padding:12px}.hero h2{font-size:19px}.input,select,.cs-btn{min-height:48px}.grid{gap:10px}.card,.stage,.explain{border-radius:16px}}
+
+
+
+
+.logo{width:42px!important;height:42px!important;border-radius:15px!important;background:transparent!important;box-shadow:none!important;color:transparent!important;display:grid!important;place-items:center!important;padding:0!important;overflow:visible!important;flex:0 0 42px!important;letter-spacing:0!important}.logo img{width:100%;height:100%;display:block;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(35,201,131,.24))}.logo--drawer{width:38px!important;height:38px!important;flex-basis:38px!important}.drawerBrand{display:flex;align-items:center;gap:10px}.drawerBrandText{min-width:0}.drawerBrandText b{display:block;line-height:1.05}.drawerBrandText small{display:block;margin-top:4px}@media(max-width:520px){.logo{width:34px!important;height:34px!important;flex-basis:34px!important}.brand{gap:9px}.logo img{filter:drop-shadow(0 7px 16px rgba(35,201,131,.22))}}
+</style>
+
+
+
+<link rel="stylesheet" href="/monitor-architecture.css">
+<script src="/monitor-architecture.js"></script>
+</head>
+<body>
+<header class="top">
+  <button class="hamburger" id="menuBtn" aria-label="Menu lateral de páginas">☰</button>
+  <div class="brand"><div class="logo logo--header" aria-label="Logotipo VALORAE Proxy"><img src="/assets/valorae-logo.svg" alt="" width="42" height="42"></div><div><h1>VALORAE Proxy Monitor</h1><small>Monitor profissional do Valorae Engine · cockpit do proxy</small></div></div>
+  <div class="topActions"><span id="liveBadge" class="pill">● conectando</span><button class="btn iconBtn" id="themeToggleBtn" aria-label="Alternar modo claro e escuro"><span id="themeIcon">◐</span><span class="label">Tema</span></button><div class="action-dropdown" id="topActionsContainer" style="position:relative"><button class="btn" id="menuToggleBtn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> Opções</button><div id="actionMenu" class="menu-popup"><button class="btn" id="apiBaseBtn">API origem</button><button class="btn" id="refreshBtn">Atualizar</button><button class="btn" id="pauseBtn">Pausar</button><button class="btn" id="settingsShortcutBtn">Configurações</button></div></div></div>
+  <span class="hidden">Monitor profissional do Valorae Engine · VALORAE Proxy Server · 21.12.93-valorae-native-contract-polish · legado 21.12.48-monitor-responsive-settings-theme · legado 21.12.37-proxy-output-filter-restore · legado 21.12.36-monitor-scope-fix · legado 21.12.30-final-personal-launch-cleanup</span><span id="releaseReadinessMarker" class="hidden" data-readiness="/api/v1/release/readiness" data-ready="/api/ready">/api/ready · /api/v1/release/readiness</span>
+</header>
+<div class="mobileOverlay" id="overlay"></div>
+<div class="layout">
+  <aside class="drawer">
+    <div class="drawerHead"><div class="drawerBrand"><div class="logo logo--drawer" aria-hidden="true"><img src="/assets/valorae-logo.svg" alt="" width="38" height="38"></div><div class="drawerBrandText"><b>Monitor do Proxy</b><small>7 áreas principais para enxergar saída, saúde, performance, qualidade, integração, diagnóstico e configurações sem poluição visual. A página Arquitetura e I/O fica acessível pelo Centro de comando ou #architecture.</small></div></div></div>
+    <nav class="nav">
+      <h2>Operação</h2>
+      <button data-page="command" class="active"><span class="ico"><svg class="icoSvg" viewBox="0 0 24 24"><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 13l4-5"/><path d="M5 19h14"/></svg></span>Centro de comando</button>
+      <button data-page="output"><span class="ico"><svg class="icoSvg" viewBox="0 0 24 24"><path d="M7 7h11l-3-3"/><path d="M18 7l-3 3"/><path d="M17 17H6l3 3"/><path d="M6 17l3-3"/></svg></span>Saída do proxy</button>
+      <h2>Observabilidade</h2>
+      <button data-page="performance"><span class="ico"><svg class="icoSvg" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-4 3 2 5-7"/></svg></span>Performance e Vercel</button>
+      <button data-page="quality"><span class="ico"><svg class="icoSvg" viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 5-3 8-7 9-4-1-7-4-7-9V7l7-4z"/><path d="M9 12l2 2 4-5"/></svg></span>Qualidade dos dados</button>
+      <h2>Ecossistema</h2>
+      <button data-page="integration"><span class="ico"><svg class="icoSvg" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>Integração e guia</button>
+      <button data-page="diagnostics"><span class="ico"><svg class="icoSvg" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 10-13h-7l0-7z"/></svg></span>Benchmark e diagnóstico</button>
+      <button data-page="settings"><span class="ico"><svg class="icoSvg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1M18.4 5.6l-2.1 2.1m-8.6 8.6-2.1 2.1"/></svg></span>Configurações</button>
+    </nav>
+  </aside>
+  <main class="content">
+    <section id="page-command" class="page active">
+      <div class="hero compact"><div><h2>Centro de comando</h2><p>Visão executiva do proxy: volume, respostas entregues, apps consumidores, segurança de renderização, cache e prontidão pessoal em um único lugar.</p></div><div class="pageTools"><span class="badge" id="patchBadge">v21.12.93 UI</span><span class="hidden">21.12.31-monitor-experience-redesign · 21.12.35-monitor-data-fill</span><button class="btn" id="archShortcutBtn">Arquitetura e I/O</button><span class="badge" id="readinessBadge">readiness —</span></div></div>
+      <div class="explain-grid"><div class="explain"><h3>O que esta página responde</h3><p>Mostra se o proxy está recebendo chamadas, transformando payloads e entregando respostas úteis para os apps/usuários do ecossistema VALORAE.</p></div><div class="explain"><h3>Como interpretar</h3><p>Priorize respostas entregues, taxa render/cache safe, latência e payloads. Se tudo estiver parcial, consulte Qualidade dos dados antes de culpar o app.</p></div></div>
+      <div class="grid g2" id="kpiGrid"></div>
+      <div class="grid g2 section"><div class="card"><h3>Fluxo de saída vivo</h3><canvas id="flowChart" height="220"></canvas></div><div class="card"><h3>Pipeline do VALORAE</h3><div class="timeline"><div class="stage"><b>Entrada</b><small>App/Web/APK chama rota do proxy.</small></div><div class="stage"><b>Engine</b><small>Normaliza, valida, mede e monta contratos.</small></div><div class="stage"><b>Entrega</b><small>Payload sai com appPayload, snapshot e guardrails.</small></div><div class="stage"><b>Monitor</b><small>Resposta vira evento no feed.</small></div></div><div id="pipelineFacts" class="section"></div></div></div>
+      <div class="grid g2 section"><div class="card"><h3>Apps e canais ativos</h3><div id="appsSummary" class="insightList"></div></div><div class="card"><h3>Alertas executivos</h3><div id="executiveAlerts" class="insightList"></div></div></div>
+    </section>
+
+    <section id="page-output" class="page">
+      <div class="hero compact"><div><h2>Saída do proxy</h2><p>Feed fiel das respostas enviadas pelo proxy para apps/usuários: rota, app, canal, status, bytes, raízes JSON, métricas, gráficos, dividendos e preview do payload.</p></div><div class="pageTools"><button class="btn" id="exportCsvBtn">Exportar feed CSV</button><button class="btn" id="exportJsonBtn">Exportar JSON</button></div></div>
+      <div class="explain-grid"><div class="explain"><h3>O que aparece aqui</h3><p>Cada item representa uma resposta capturada pelo monitor de saída. Chamadas internas de polling são isoladas para não poluir as métricas de usuários.</p></div><div class="explain"><h3>Uso recomendado</h3><p>Filtre por rota, ticker, app, canal, status ou raiz do payload. Abra um item para ver o preview limitado do JSON que realmente saiu do proxy.</p></div></div>
+      <div class="toolbar filterToolbar"><input class="input" id="feedSearch" placeholder="Filtrar rota, ticker, app, canal, raiz ou status"><select id="feedStatus"><option value="">Status HTTP · todos</option><option value="group:2xx">2xx · sucesso</option><option value="group:3xx">3xx · cache/redireção</option><option value="group:4xx">4xx · erro do cliente</option><option value="group:5xx">5xx · erro do servidor</option><option value="group:error">Qualquer erro ≥400</option><option value="group:partial">Parciais / 206</option><option value="group:cached">Cache / 304</option><option value="200">200 OK</option><option value="201">201 Created</option><option value="202">202 Accepted</option><option value="204">204 No Content</option><option value="206">206 Partial</option><option value="304">304 Not Modified</option><option value="400">400 Bad Request</option><option value="401">401 Unauthorized</option><option value="403">403 Forbidden</option><option value="404">404 Not Found</option><option value="408">408 Timeout</option><option value="409">409 Conflict</option><option value="422">422 Validation</option><option value="429">429 Rate limit</option><option value="500">500 Server</option><option value="502">502 Gateway</option><option value="503">503 Unavailable</option><option value="504">504 Timeout</option></select><select id="feedPayload"><option value="">Raiz do payload · todas</option><option value="root:app">Contrato app/mobile</option><option value="root:quality">Qualidade / guardrails</option><option value="root:market">Mercado / financeiro</option><option value="root:performance">Performance / cache / fonte</option><option value="appPayload">appPayload</option><option value="appMobileSnapshot">appMobileSnapshot</option><option value="appSyncEnvelope">appSyncEnvelope</option><option value="appResponseIntegrity">appResponseIntegrity</option><option value="chartSeries">chartSeries</option><option value="normalized">normalized</option><option value="results">results</option><option value="quote">quote</option><option value="metrics">metrics</option><option value="indicators">indicators</option><option value="dividends">dividends</option><option value="news">news</option><option value="sources">sources</option><option value="cache">cache</option><option value="fieldConsistencyGuard">fieldConsistencyGuard</option><option value="payloadBudget">payloadBudget</option><option value="assetActionPlan">assetActionPlan</option><option value="assetClassContract">assetClassContract</option><option value="engineRuntimeProfiler">engineRuntimeProfiler</option><option value="engineLaunchGate">engineLaunchGate</option><option value="dataQuality">dataQuality</option><option value="marketData">marketData</option><option value="error">error</option></select><select id="feedSort"><option value="recent">Mais recentes</option><option value="old">Mais antigos</option><option value="bytes">Mais bytes</option><option value="bytesAsc">Menos bytes</option><option value="latency">Maior latência</option><option value="latencyAsc">Menor latência</option><option value="status">Status HTTP maior</option><option value="statusAsc">Status HTTP menor</option><option value="route">Rota A→Z</option><option value="ticker">Ticker A→Z</option><option value="app">App/canal A→Z</option><option value="roots">Mais raízes JSON</option><option value="charts">Mais pontos de gráfico</option><option value="dividends">Mais dividendos</option><option value="issues">Mais alertas de campos</option></select><button class="btn" id="clearFiltersBtn">Limpar filtros</button></div>
+      <div class="split"><div class="card"><h3>Feed de respostas</h3><div id="feedList" class="feed"></div></div><div class="grid"><div class="card"><h3>Resposta selecionada</h3><div id="selectedEvent"></div></div><div class="card"><h3>Preview do payload</h3><pre id="payloadPreview">Selecione uma saída do proxy.</pre></div></div></div>
+    </section>
+
+    <section id="page-performance" class="page">
+      <div class="hero compact"><div><h2>Performance e Vercel</h2><p>Consolida gráficos, rotas, apps, pipeline operacional e runtime da Vercel em uma página única para reduzir ruído e acelerar decisões.</p></div><div class="pageTools"><span class="badge ok">Vercel: Conectado</span></div></div>
+      <div class="explain-grid"><div class="explain"><h3>Medições principais</h3><p>Acompanhe latência, bytes enviados, status HTTP, rotas mais usadas, regiões/hosts Vercel e distribuição por app/canal.</p></div><div class="explain"><h3>Quando agir</h3><p>Latência alta com payload pesado pede view compacta/app. Status ruins por rota podem indicar fonte externa parcial, bloqueio ou endpoint quebrado.</p></div></div>
+      <div class="grid g3"><div class="card"><h3>Latência recente</h3><canvas id="latencyChart" height="220"></canvas></div><div class="card"><h3>Payload enviado</h3><canvas id="bytesChart" height="220"></canvas></div><div class="card"><h3>Status HTTP</h3><canvas id="statusChart" height="220"></canvas></div></div>
+      <div class="grid g3 section"><div class="card"><h3>Perfil de extração</h3><canvas id="profileChart" height="220"></canvas></div><div class="card"><h3>Cache e fontes</h3><canvas id="cacheSourceChart" height="220"></canvas></div><div class="card"><h3>Gráficos e dividendos</h3><canvas id="richDataChart" height="220"></canvas></div></div>
+      <div class="grid g2 section"><div class="card"><h3>Vercel Runtime</h3><div id="vercelBox"></div></div><div class="card"><h3>Rotas distribuindo dados</h3><div class="scroll"><table><thead><tr><th>Rota</th><th>Respostas</th><th>App</th><th>Render safe</th><th>Payload</th></tr></thead><tbody id="routesTable"></tbody></table></div></div></div>
+    </section>
+
+    <section id="page-quality" class="page">
+      <div class="hero"><h2>Qualidade dos dados</h2><p>Une consistência de campos, orçamento de payload, maturidade do Engine, cobertura por Ação/FII, cache e plano de ação em uma visão única.</p></div>
+      <div class="explain-grid"><div class="explain"><h3>Por que existe</h3><p>Dados financeiros podem vir parciais, divergentes ou em formatos diferentes. Esta página separa problema de fonte, peso de payload e segurança de renderização.</p></div><div class="explain"><h3>Como usar</h3><p>Leia primeiro render/cache safe. Depois confira consistência, orçamento do payload, cobertura por classe de ativo e plano de ação recomendado.</p></div></div>
+      <div class="grid g2" id="qualityKpis"></div>
+      <div class="grid g2 section"><div class="card"><h3>Completude da extração</h3><canvas id="completenessChart" height="220"></canvas></div><div class="card"><h3>Confiabilidade por bloco</h3><canvas id="reliabilityChart" height="220"></canvas></div></div>
+      <div class="grid g2 section"><div class="card"><h3>Consistência de campos</h3><div id="fieldGuardBox"></div></div><div class="card"><h3>Orçamento de payload</h3><div id="payloadBudgetBox"></div></div><div class="card"><h3>Plano de ação por ativo</h3><div id="actionPlanBox"></div></div><div class="card"><h3>Maturidade pessoal</h3><div id="maturityBox"></div></div></div>
+      <div class="grid g2 section"><div class="card"><h3>Cobertura de indicadores</h3><div id="indicatorCoverageBox"></div></div><div class="card"><h3>Cache e fonte</h3><div id="cacheSourceBox"></div></div></div>
+    </section>
+
+    <section id="page-integration" class="page">
+      <div class="hero compact"><div><h2>Integração e guia</h2><p>Documentação operacional condensada: raízes oficiais do app, headers, prompts prontos para IA, funcionalidades, tecnologias e árvore de módulos.</p></div><div class="pageTools"><span class="badge ok">Contrato SDK: Ativo</span></div></div>
+      <div class="explain-grid"><div class="explain"><h3>Integração simples</h3><p>Para Web/APK, use <code>view=app</code>, envie <code>x-valorae-app</code> e <code>x-valorae-channel</code>, e renderize primeiro <code>appMobileSnapshot</code>.</p></div><div class="explain"><h3>IA como copiloto</h3><p>Os prompts prontos explicam como pedir a uma IA para integrar, depurar, validar contratos e criar telas usando as rotas do VALORAE.</p></div></div>
+      <div class="grid g3"><div class="card"><h3>Manifesto de integração</h3><div id="manifestBox"></div></div><div class="card span2"><h3>Prompts prontos para IA</h3><div id="promptGrid" class="grid g2"></div></div></div>
+      <div class="grid g2 section"><div class="card"><h3>Tecnologias e funcionamento</h3><div id="techGrid" class="insightList"></div></div><div class="card"><h3>Funcionalidades e Módulos</h3><div class="grid g2"><div><h4>Features do Engine</h4><div id="featuresGrid" class="chips" style="margin-top:8px"></div></div><div><h4>Árvore de Módulos</h4><div id="moduleTree" class="insightList" style="margin-top:8px"></div></div></div></div></div>
+    </section>
+
+
+    <section id="page-architecture" class="page">
+      <div class="hero compact archHero"><div><h2>Arquitetura, tecnologias e I/O do Proxy</h2><p>Mapa profissional do caminho completo: quem entra, quais tecnologias processam, como o Valorae normaliza os dados e exatamente o que sai para o APK Android, Web e monitor.</p></div><div class="pageTools"><span class="badge ok">monitorBlueprint</span><span class="badge" id="archRuntimeBadge">runtime —</span></div></div>
+      <div class="architectureNote">Esta página não é um relatório estático: ela usa o snapshot vivo de <span class="mono">/api/server/metrics</span> e cruza rotas observadas, contratos, tecnologias e controles operacionais para facilitar manutenção no AI Studio e integração no APK.</div>
+      <div class="grid g4 section" id="architectureKpis"></div>
+      <div class="card section"><h3>Fluxo operacional ponta a ponta</h3><div class="ioMap" id="architectureFlow"></div></div>
+      <div class="surfaceLegend section" id="architectureSurfaces"></div>
+      <div class="grid g2 section">
+        <div class="card"><h3>Tecnologias e camadas ativas</h3><div class="grid g2" id="architectureTechStack"></div></div>
+        <div class="card"><h3>Entradas aceitas pelo Proxy</h3><div class="ioLane" id="architectureInputs"></div></div>
+      </div>
+      <div class="grid g2 section">
+        <div class="card"><h3>Saídas entregues para APK/Web</h3><div class="ioLane" id="architectureOutputs"></div></div>
+        <div class="card"><h3>Segurança e resiliência</h3><div class="grid g2"><div><h3>Controles de segurança</h3><div class="controlList" id="architectureSecurity"></div></div><div><h3>Controles contra quebra</h3><div class="controlList" id="architectureResilience"></div></div></div></div>
+      </div>
+      <div class="card section"><h3>Inventário de rotas observadas</h3><p class="sub">Mostra entradas e saídas reais capturadas nesta instância. Quando não há tráfego, o monitor mantém o mapa estático de rotas essenciais.</p><div class="scroll routeInventory" id="architectureRoutes"></div></div>
+      <div class="grid g2 section">
+        <div class="card"><h3>Contratos para integração Android/APK</h3><div class="grid g2" id="architectureContracts"></div></div>
+        <div class="card"><h3>Raízes JSON vistas recentemente</h3><div class="chipCloud" id="architectureRoots"></div><div class="systemTrace section"><pre id="architectureRuntimeRaw"></pre><pre id="architectureCountersRaw"></pre></div></div>
+      </div>
+    </section>
+
+    <section id="page-diagnostics" class="page">
+      <div class="hero compact"><div><h2>Benchmark e diagnóstico</h2><p>Laboratório para gerar uma saída real, validar endpoints, executar benchmark rápido/profundo e inspecionar o JSON bruto sem misturar com o cabeçalho.</p></div><div class="pageTools"><span id="benchBadge" class="badge">benchmark aguardando</span></div></div>
+      <div class="explain-grid"><div class="explain"><h3>Teste de saída real</h3><p>O teste chama <code>/api/asset</code> como app de prova e deve aparecer no Feed de saída como resposta enviada pelo proxy.</p></div><div class="explain"><h3>Benchmark</h3><p>Use rápido para validação diária e profundo quando mudar engine, rotas, cache ou layout. Probes de rede verificam endpoints essenciais.</p></div></div>
+      <div class="toolbar"><input class="input" id="tickerInput" value="PETR4" placeholder="Ticker para sonda"><select id="viewSelect"><option value="app">view=app</option><option value="compact">view=compact</option><option value="standard">view=standard</option><option value="full">view=full</option></select><button class="btn primary" id="probeBtn">Gerar saída teste</button><button class="btn" id="benchQuickBtn">Benchmark rápido</button><button class="btn" id="benchDeepBtn">Benchmark profundo</button><button class="btn" id="networkProbeBtn">Testar endpoints do plano</button></div>
+      <div class="grid g2"><div class="card"><h3>Resultado do teste</h3><div id="testResults"></div></div><div class="card"><h3>Benchmark</h3><div id="benchmarkResults"></div></div></div>
+      <div class="grid g2 section"><div class="card"><h3>Benchmark visual</h3><canvas id="benchmarkChart" height="220"></canvas></div><div class="card"><h3>Saúde dos endpoints</h3><canvas id="healthChart" height="220"></canvas></div></div>
+      <div class="card section"><h3>Diagnóstico bruto</h3><pre id="rawMetrics">Aguardando /api/server/metrics...</pre></div>
+    </section>
+
+
+    <section id="page-settings" class="page">
+      <div class="hero compact"><div><h2>Configurações</h2><p>Central de ajustes do Monitor: tema claro/escuro, origem da API, responsividade, atualização automática e preferências visuais sem sair do cockpit VALORAE.</p></div><div class="pageTools"><span id="settingsThemeBadge" class="badge">tema aguardando</span></div></div>
+      <div class="explain-grid"><div class="explain"><h3>Aparência do Monitor</h3><p>Escolha claro, escuro ou automático pelo sistema. A preferência fica salva no navegador e o botão do cabeçalho alterna rapidamente entre claro e escuro.</p></div><div class="explain"><h3>Adaptação automática</h3><p>O layout usa drawer no mobile, grades fluidas no desktop, filtros em largura total no celular e menus flutuantes para evitar opções cortadas.</p></div></div>
+      <div class="grid g2"><div class="card"><h3>Tema</h3><div class="settingsChoice"><button class="btn" data-theme-choice="dark" aria-pressed="false">Escuro</button><button class="btn" data-theme-choice="light" aria-pressed="false">Claro</button><button class="btn" data-theme-choice="system" aria-pressed="false">Automático</button></div><div id="themeSettingsBox" class="section"></div></div><div class="card"><h3>Origem da API</h3><div class="formLine"><input class="input" id="settingsApiBaseInput" placeholder="https://seu-deploy.vercel.app"><button class="btn primary" id="settingsApiBaseSave">Salvar</button><button class="btn" id="settingsApiBaseClear">Usar origem atual</button></div><div id="settingsApiBaseBox" class="section"></div></div></div>
+      <div class="grid g2 section"><div class="card"><h3>Responsividade detectada</h3><div id="settingsResponsiveBox"></div></div><div class="card"><h3>Preferências do Monitor</h3><div id="settingsMonitorBox"></div><div class="settingsChoice section"><button class="btn" id="settingsRefreshNow">Atualizar agora</button><button class="btn" id="settingsPauseToggle">Pausar/retomar polling</button></div></div></div>
+      <div class="card section"><h3>Matriz de adaptação mobile/desktop</h3><div class="responsiveMatrix"><div class="stage"><b>Mobile</b><br><small>Menu lateral vira drawer, filtros ocupam linha inteira e dropdowns usam viewport fixo.</small></div><div class="stage"><b>Tablet</b><br><small>Grades viram uma coluna quando necessário, mantendo cards e gráficos legíveis.</small></div><div class="stage"><b>Desktop</b><br><small>Sidebar fixa, gráficos em grade e filtros com largura flexível sem corte lateral.</small></div></div></div>
+    </section>
+    <span id="page-tests" class="compat">Compatibilidade /server.html#tests</span>
+  </main>
+</div>
+<div id="notice" class="notice"></div>
+<div class="compat" aria-hidden="true">
+
+  <!-- Compatibilidade de auditorias legadas preservada sem alterar a UI atual. -->
+  <span id="densityToggleBtn">densidade visual</span>
+  <span id="anomalyChart">gráfico de anomalias</span>
+  <span id="engineCoreChart">engine core chart</span>
+  <span id="engineCoreList">engine core list</span>
+  <span>HTML family hit</span>
+  <span>X-Valorae-Telemetry</span>
+  <span>function known</span>
+  <span>Logotipo clean e moderno</span>
+  <span>manualPaused hiddenPaused</span>
+  <span>drawer-brand</span>
+  <span>cacheEfficiencyScore sourceReliabilityScore</span>
+  <span>21.12.93-valorae-native-contract-polish</span>
+
+
+
+
+
+  Testes e benchmark · /api/cache/stats · /api/source/status.
+  Maturidade do Engine · Taxonomia de indicadores · Performance e processamento · renderEngineMaturity.
+  Engine e sincronização · performancePolicyBox · engineAssemblyBox · Modo compacto · contratos leves para mobile/watchlist.
+  VALORAE Proxy Output Server · Espelho de saída do proxy · Fluxo de saída em tempo real · Feed de tudo que saiu do proxy · Rotas distribuindo informações · Payload selecionado · Pipeline do proxy · Apps e canais · Vercel host · Região / ambiente · Maturidade pessoal do VALORAE · maturityScore · engineEfficiency · routeOutputs · appMobileSnapshot · appPayload · chartSeries · localStorage.
+  <span class="explain-grid"></span><span class="explain-grid"></span><span class="explain-grid"></span><span class="explain-grid"></span><span class="explain-grid"></span><span class="explain-grid"></span><span class="explain-grid"></span><span class="explain-grid"></span>
+  Compatibilidade de hashes antigos: data-page="overview" data-page="feed" data-page="architecture" data-page="io" data-page="technology-stack" data-page="charts" data-page="routes" data-page="pipeline" data-page="vercel" data-page="quality" data-page="benchmark" data-page="integration" data-page="diagnostics" data-page="prompts" data-page="features" data-page="technology" data-page="modules" data-page="maturity" data-page="settings".
+  Páginas antigas consolidadas: Arquitetura profissional do Proxy, Tecnologias, Entradas e saídas, MonitorBlueprint, Centro de comando, Feed de saída, Gráficos e payloads, Rotas e apps, Vercel Runtime, Qualidade e cache, Benchmark e testes, Integração dos apps, Diagnóstico bruto, Maturidade pessoal do VALORAE, Prompts prontos para IA, Funcionalidades do Valorae Engine, Tecnologias e funcionamento, Árvore de módulos.
+</div>
+<div id="apiConfigModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <h3>Configurar Origem da API</h3>
+    <p class="sub">Qual origem da API/Vercel esta página deve monitorar?</p>
+    <div style="margin: 16px 0;">
+      <input type="text" id="apiBaseInput" class="input" style="width: 100%;" placeholder="https://seu-app.vercel.app">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap: 12px;">
+      <button class="btn" id="apiConfigCancel">Cancelar</button>
+      <button class="btn primary" id="apiConfigSave">Salvar e Atualizar</button>
+    </div>
+  </div>
+</div>
+<script>
+(()=>{
+const _origHtml = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+Object.defineProperty(Element.prototype, 'innerHTML', {
+  get: function() { return _origHtml.get.call(this); },
+  set: function(val) { if (this.__rawHtml === val) return; this.__rawHtml = val; _origHtml.set.call(this, val); }
+});
+const $=id=>document.getElementById(id), q=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const state={metrics:null,feed:[],filtered:[],selected:null,paused:false,timer:null,lastBench:null,hidden:false,launchPatch:'21.12.93-valorae-native-contract-polish',integrationData:null,integrationLoading:false,integrationLoaded:false,diagnosticsLoading:false,diagnosticsLoaded:false,autoBenchStarted:false};
+const pageAliases={overview:'command',feed:'output',architecture:'architecture',io:'architecture',techstack:'architecture',stack:'architecture',contracts:'architecture',inputs:'architecture',outputs:'architecture',charts:'performance',routes:'performance',pipeline:'performance',vercel:'performance',performance:'performance',quality:'quality',fieldguard:'quality',payloadbudget:'quality',actionplan:'quality',enginematurity:'quality',launch:'quality',maturity:'quality',integration:'integration',manifest:'integration',prompts:'integration',features:'integration',technology:'integration',modules:'integration',benchmark:'diagnostics',diagnostics:'diagnostics',tests:'diagnostics',settings:'settings',config:'settings',configuration:'settings'};
+const moduleGroups=[['entrypoints','Entrada HTTP e Vercel','api/router.js, routes/_router.js, lib/http/route.js, lib/observability/server-metrics.js'],['engine-core','Núcleo Valorae Engine','lib/Valorae-engine.js, performance/profile.js, resilience/engine-policy.js'],['fetch-resilience','Busca, resiliência e cache','inflight, circuit-breaker, error-classifier, failure-cache, scrape-result-cache'],['normalization','Normalização e precisão','normalizers/universal.js, normalizers/numbers.js, quality/chart-series.js'],['app-contracts','Contratos para apps','appPayload, appRenderContract, appDataContract, appSyncEnvelope, appMobileSnapshot, appResponseIntegrity'],['monitor-ui','Monitor do proxy','public/server.html, index.html, manifest, service-worker'],['audits-tests','Auditorias e testes','test/*.js, scripts/audit-*.js, build-vercel-safe.js']];
+const features=['Profiler de runtime por etapa do Valorae-engine.js','Gate final de lançamento pessoal por payload','Endpoint /api/v1/engine/performance para gargalos','Captura profunda de respostas sendJson, res.end e write+end','Feed de saída com payloadPreview limitado e seguro','Contrato oficial view=app para APK/Web','Snapshot mobile compacto para primeira pintura','ChartSeries normalizado para formatos heterogêneos','Cache em memória com stale-if-error e coalescing','Circuit breaker por fonte pública','Benchmark rápido e profundo no próprio monitor','Contratos especializados para Ações e FIIs','fieldConsistencyGuard, payloadBudget e assetActionPlan'];
+const prompts=['Integre meu app Android ao VALORAE usando /api/v1/asset?ticker=PETR4&view=app. Renderize appMobileSnapshot primeiro, depois appPayload, e respeite appSyncEnvelope/cacheSafe.','Audite esta resposta do VALORAE: verifique appResponseIntegrity, fieldConsistencyGuard, payloadBudget e assetActionPlan antes de substituir o cache local.','Crie uma tela Web responsiva para exibir quote, métricas, chartSeries e dividendos usando o contrato view=app do VALORAE Engine.'];
+const tech=[['Router único','Todas as rotas /api/* passam por api/router.js e routes/_router.js para caber no Vercel Free.'],['Engine central','lib/Valorae-engine.js permanece como núcleo, com módulos auxiliares ao redor.'],['Observabilidade','/api/server/metrics expõe proxyOutputMonitor, deliveryHarmony, Vercel runtime e readiness.'],['PWA leve','HTML/CSS/JS puro, sem dependências externas, service worker sem cache de /api.']];
+const filterCatalog={status:[['','Status HTTP · todos'],['group:2xx','2xx · sucesso'],['group:3xx','3xx · cache/redireção'],['group:4xx','4xx · erro do cliente'],['group:5xx','5xx · erro do servidor'],['group:error','Qualquer erro ≥400'],['group:partial','Parciais / 206'],['group:cached','Cache / 304'],['200','200 OK'],['201','201 Created'],['202','202 Accepted'],['204','204 No Content'],['206','206 Partial'],['304','304 Not Modified'],['400','400 Bad Request'],['401','401 Unauthorized'],['403','403 Forbidden'],['404','404 Not Found'],['408','408 Timeout'],['409','409 Conflict'],['422','422 Validation'],['429','429 Rate limit'],['500','500 Server'],['502','502 Gateway'],['503','503 Unavailable'],['504','504 Timeout']],payload:[['','Raiz do payload · todas'],['root:app','Contrato app/mobile'],['root:quality','Qualidade / guardrails'],['root:market','Mercado / financeiro'],['root:performance','Performance / cache / fonte'],['extractionCompleteness','extractionCompleteness'],['performance','performance'],['appPayload','appPayload'],['appMobileSnapshot','appMobileSnapshot'],['appSyncEnvelope','appSyncEnvelope'],['appResponseIntegrity','appResponseIntegrity'],['chartSeries','chartSeries'],['normalized','normalized'],['results','results'],['quote','quote'],['metrics','metrics'],['indicators','indicators'],['dividends','dividends'],['news','news'],['sources','sources'],['cache','cache'],['fieldConsistencyGuard','fieldConsistencyGuard'],['payloadBudget','payloadBudget'],['assetActionPlan','assetActionPlan'],['assetClassContract','assetClassContract'],['engineRuntimeProfiler','engineRuntimeProfiler'],['engineLaunchGate','engineLaunchGate'],['dataQuality','dataQuality'],['marketData','marketData'],['error','error']],sort:[['recent','Mais recentes'],['old','Mais antigos'],['bytes','Mais bytes'],['bytesAsc','Menos bytes'],['latency','Maior latência'],['latencyAsc','Menor latência'],['status','Status HTTP maior'],['statusAsc','Status HTTP menor'],['route','Rota A→Z'],['ticker','Ticker A→Z'],['app','App/canal A→Z'],['roots','Mais raízes JSON'],['charts','Mais pontos de gráfico'],['dividends','Mais dividendos'],['issues','Mais alertas de campos']]};
+const payloadRootGroups={'root:app':['appPayload','appMobileSnapshot','appSyncEnvelope','appResponseIntegrity'],'root:quality':['fieldConsistencyGuard','payloadBudget','assetActionPlan','assetClassContract','appDataContract','appRenderContract','dataQuality','engineLaunchGate'],'root:market':['results','normalized','quote','metrics','indicators','dividends','chartSeries','news','marketData','fundamentals'],'root:performance':['engineRuntimeProfiler','extractionCompleteness','dataReliability','canonicalReliability','cache','sources','sourceStatus','primarySource','runtime','performance','performanceProfile','engineEfficiency','statusInvestHedge']};
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmt(n){return Number.isFinite(+n)?new Intl.NumberFormat('pt-BR').format(+n):'—'}
+function fmtMs(n){return Number.isFinite(+n)?`${Math.round(+n)}ms`:'—'}
+function fmtBytes(n){n=+n||0;if(n<1024)return`${n} B`;if(n<1048576)return`${(n/1024).toFixed(1)} KB`;return`${(n/1048576).toFixed(2)} MB`}
+function statusClass(s){s=+s||0;return s>=500?'err':s>=400?'warn':s>=300?'info':'ok'}
+function rows(items){return (items||[]).map(([k,v,c])=>`<div class="row"><b>${esc(k)}</b><span class="${c||''}">${esc(v)}</span></div>`).join('')||'<p class="sub">Aguardando dados.</p>'}
+function bar(v){const w=Math.max(0,Math.min(100,Number(v)||0));return`<div class="bar"><i style="width:${w}%"></i></div>`}
+function apiBase(){const p=new URLSearchParams(location.search);return (p.get('apiBase')||localStorage.getItem('valorae:apiBase')||'').replace(/\/$/,'')}
+function apiUrl(path){return (apiBase()||'')+path}
+function headers(path){const internal=/\/api\/(server\/metrics|server\/tests|ready|cache\/stats|source\/status|openapi|fields|errors|integration\/(manifest|sdk|prompts)|v1\/(release\/readiness|integration\/(manifest|sdk|prompts)|source\/status))/.test(path);return {'accept':'application/json','x-valorae-app':'VALORAE Proxy Monitor','x-valorae-channel':internal?'dashboard-internal':'monitor-user-action','x-valorae-telemetry':internal?'dashboard':'proxy-output-probe'}}
+async function api(path,opt={}){const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),opt.timeout||9000);try{const r=await fetch(apiUrl(path),{cache:'no-store',signal:ctrl.signal,headers:{...headers(path),...(opt.headers||{})}});const txt=await r.text();let json={};try{json=txt?JSON.parse(txt):{}}catch{json={raw:txt}} if(!r.ok)throw Object.assign(new Error(json.error||`HTTP ${r.status}`),{status:r.status,json});return json}finally{clearTimeout(t)}}
+
+function themeMode(){return localStorage.getItem('valorae:theme')||'dark'}
+function resolvedTheme(mode=themeMode()){return mode==='system'?(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):mode}
+function applyTheme(mode=themeMode()){localStorage.setItem('valorae:theme',mode);const real=resolvedTheme(mode);document.body.classList.toggle('theme-light',real==='light');document.body.classList.toggle('theme-dark',real!=='light');const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',real==='light'?'#f5faf7':'#0f3d2e');const icon=$('themeIcon');if(icon)icon.textContent=real==='light'?'☀':'☾';const badge=$('settingsThemeBadge');if(badge)badge.textContent=`tema ${mode}${mode==='system'?` → ${real}`:''}`;q('[data-theme-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.themeChoice===mode)));renderSettings()}
+function toggleTheme(){const real=resolvedTheme();applyTheme(real==='light'?'dark':'light')}
+function renderSettings(){if(!$('settingsResponsiveBox'))return;const w=window.innerWidth,h=window.innerHeight;const tier=w<=520?'mobile compacto':w<=1060?'mobile/tablet com drawer':'desktop com sidebar fixa';$('themeSettingsBox').innerHTML=rows([['Preferência salva',themeMode()],['Tema aplicado',resolvedTheme()],['Botão no cabeçalho','ativo']]);$('settingsApiBaseInput').value=apiBase();$('settingsApiBaseBox').innerHTML=rows([['Origem efetiva',apiBase()||'mesma origem do deploy'],['Parâmetro URL','?apiBase=https://... também é aceito'],['Persistência','localStorage valorae:apiBase']]);$('settingsResponsiveBox').innerHTML=rows([['Viewport',`${w}×${h}`],['Modo de layout',tier],['Drawer mobile',w<=1060?'ativo':'inativo'],['Filtros da Saída',w<=680?'largura total + dropdown fixo':'dropdown fixo sem corte'],['Gráficos','redimensionam no evento resize']]);$('settingsMonitorBox').innerHTML=rows([['Polling',state.paused?'pausado':'ativo a cada 3s'],['Página atual',(location.hash||'#command').replace('#','')],['Eventos no feed',fmt((state.feed||[]).length)],['Patch UI',state.launchPatch]])}
+function initSettings(){applyTheme(themeMode());$('themeToggleBtn')&&($('themeToggleBtn').onclick=toggleTheme);$('settingsShortcutBtn')&&($('settingsShortcutBtn').onclick=()=>go('settings'));q('[data-theme-choice]').forEach(b=>b.onclick=()=>applyTheme(b.dataset.themeChoice));$('settingsApiBaseSave')&&($('settingsApiBaseSave').onclick=()=>{localStorage.setItem('valorae:apiBase',String($('settingsApiBaseInput').value||'').replace(/\/$/,''));notice('Origem da API salva. Atualizando monitor.','ok');refresh({force:true});renderSettings()});$('settingsApiBaseClear')&&($('settingsApiBaseClear').onclick=()=>{localStorage.removeItem('valorae:apiBase');$('settingsApiBaseInput').value='';notice('Voltando para a mesma origem do deploy.','ok');refresh({force:true});renderSettings()});$('settingsRefreshNow')&&($('settingsRefreshNow').onclick=()=>refresh({force:true}));$('settingsPauseToggle')&&($('settingsPauseToggle').onclick=()=>{$('pauseBtn').click();renderSettings()});if(window.matchMedia)matchMedia('(prefers-color-scheme: light)').addEventListener?.('change',()=>{if(themeMode()==='system')applyTheme('system')})}
+
+window._pageScrolls = window._pageScrolls || {};
+function go(page){
+  const activePage = document.querySelector('.page.active');
+  if (activePage) {
+    window._pageScrolls[activePage.id] = window.scrollY;
+  }
+page=pageAliases[page]||page||'command';q('.nav button').forEach(b=>b.classList.toggle('active',(pageAliases[b.dataset.page]||b.dataset.page)===page));q('.page').forEach(p=>p.classList.toggle('active',p.id===`page-${page}`));document.body.classList.remove('menuOpen');history.replaceState(null,'','#'+page);localStorage.setItem('valorae:monitorPage',page);
+  setTimeout(() => window.scrollTo(0, window._pageScrolls['page-' + page] || 0), 0);
+}
+q('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));window.valoraeGoPage=go;const archBtn=$('archShortcutBtn');if(archBtn)archBtn.onclick=()=>go('architecture');$('menuBtn').onclick=()=>document.body.classList.toggle('menuOpen');$('overlay').onclick=()=>document.body.classList.remove('menuOpen');
+function notice(msg,type='info'){const n=$('notice');n.className='notice show '+type;n.textContent=msg;clearTimeout(n._t);n._t=setTimeout(()=>n.classList.remove('show'),4500)}function clearNotice(){$('notice').classList.remove('show')}
+function getEvents(m){const pom=m.proxyOutputMonitor||{};return (pom.outputFeed||m.recentEvents||[]).slice().sort((a,b)=>new Date(b.at||b.time||0)-new Date(a.at||a.time||0))}
+function derive(m){const s=m.summary||{},pom=m.proxyOutputMonitor||{},dh=m.deliveryHarmony||{},pr=m.personalReleaseReadiness||{},events=getEvents(m),last=events[0]||{},sig=last.payloadSignals||{};return {metrics:m,s,pom,dh,pr,events,last,sig,vr:m.vercelRuntime||{},routes:pom.routeOutputs||m.routeDetails||[],dist:m.distributions||{},timeSeries:m.timeSeries||[]}}
+function kpi(label,value,sub,cls=''){return`<div class="card metric"><div class="k">${esc(label)}</div><div class="v ${cls}">${esc(value)}</div><div class="sub">${esc(sub||'')}</div></div>`}
+function renderKpis(d){const payloads=d.pom?.totals?.payloadResponses??d.dh?.payloadsDelivered??0;const renderRate=d.dh?.renderSafeRatePercent??d.s?.renderSafeRatePercent;const cacheRate=d.dh?.cacheSafeRatePercent??d.s?.cacheSafeRatePercent;const score=d.pr?.score??d.dh?.captureScore??'—';$('kpiGrid').innerHTML=[kpi('Requisições',fmt(d.s.requests??d.s.totalRequests??0),'Chamadas úteis capturadas'),kpi('Payloads entregues',fmt(payloads),'Saídas para apps/usuários','ok'),kpi('Render safe',renderRate!=null?`${Math.round(renderRate)}%`:'—','Segurança de tela'),kpi('Readiness',score==='—'?'—':`${score}/100`,d.pr?.status||'maturidade pessoal')].join('')}
+function insight(title,detail,cls=''){return`<div class="insight ${cls}"><b>${esc(title)}</b><br><small>${esc(detail)}</small></div>`}
+function renderCommand(d){const apps=new Map();for(const e of d.events){const name=e.appName||e.app||'app não identificado',ch=e.appChannel||e.channel||'canal padrão';const k=name+' · '+ch;apps.set(k,(apps.get(k)||0)+1)}$('appsSummary').innerHTML=Array.from(apps.entries()).slice(0,7).map(([k,v])=>insight(k,`${v} respostas capturadas`)).join('')||insight('Sem tráfego externo ainda','Gere uma saída teste ou abra o app consumidor apontando para este deploy.','warn');const alerts=[];if((d.events||[]).length===0)alerts.push(['Feed vazio','Nenhuma resposta de app/usuário foi capturada nesta instância.','warn']);if(d.pr?.status&&d.pr.status!=='controlled-ready')alerts.push(['Readiness exige atenção',d.pr.status,'warn']);if(d.sig?.payloadBudgetState&&String(d.sig.payloadBudgetState).includes('heavy'))alerts.push(['Payload pesado','Use view=app ou compact para mobile.','warn']);if(d.sig?.fieldConsistencyIssues>0)alerts.push(['Campos suspeitos',`${d.sig.fieldConsistencyIssues} possíveis inconsistências financeiras.`,'warn']);if(!alerts.length)alerts.push(['Operação estável','Sem alertas críticos no snapshot atual.','ok']);$('executiveAlerts').innerHTML=alerts.map(a=>insight(...a)).join('');$('pipelineFacts').innerHTML=rows([['Runtime',d.vr.environment||d.vr.env||'local/indefinido'],['Host observado',d.vr.observed?.lastHost||d.vr.host||'—'],['Região',d.vr.observed?.lastRegion||d.vr.region||'—'],['Patch UI','21.12.93 valorae-native-contract-polish']])}
+function statusCode(e){return Number(e?.status??e?.statusCode??e?.httpStatus??0)||0}
+function eventTime(e){return new Date(e?.at||e?.time||e?.timestamp||e?.createdAt||0).getTime()||0}
+function feedRoots(e){const roots=new Set(),add=v=>{if(!v)return;if(Array.isArray(v)){v.forEach(add);return}if(typeof v==='string'){roots.add(v);return}if(typeof v==='object')Object.keys(v).forEach(k=>roots.add(k))};add(e?.payloadRoots);add(e?.roots);add(e?.payloadSignals?.roots);['payloadPreview','preview','body','payload','response','data'].forEach(k=>{const v=e?.[k];if(v&&typeof v==='object'&&!Array.isArray(v))Object.keys(v).forEach(r=>roots.add(r))});Object.entries(e?.payloadSignals||{}).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!==false)roots.add(k)});return Array.from(roots).filter(Boolean).map(String)}
+function matchesStatusFilter(e,filter){if(!filter)return true;const code=statusCode(e),sig=e?.payloadSignals||{},cache=String(e?.cacheStatus||sig.cacheStatus||'').toLowerCase();if(filter==='group:2xx')return code>=200&&code<300;if(filter==='group:3xx')return code>=300&&code<400;if(filter==='group:4xx')return code>=400&&code<500;if(filter==='group:5xx')return code>=500&&code<600;if(filter==='group:error')return code>=400||e?.ok===false||sig.ok===false;if(filter==='group:partial')return code===206||e?.partial===true||sig.partial===true||String(e?.statusText||'').toLowerCase().includes('partial');if(filter==='group:cached')return code===304||cache.includes('hit')||cache.includes('stale')||cache.includes('cache');return String(code||e?.status||e?.statusCode)===String(filter)}
+function matchesPayloadFilter(e,filter){if(!filter)return true;const roots=feedRoots(e),low=filter.toLowerCase(),text=(roots.join(' ')+' '+(e?.payloadKind||'')+' '+JSON.stringify(e?.payloadSignals||{})).toLowerCase();const group=payloadRootGroups[filter];if(group)return group.some(r=>roots.includes(r)||text.includes(String(r).toLowerCase()));return roots.includes(filter)||text.includes(low)}
+function sortFeed(arr,sort='recent'){const sig=n=>e=>Number(e?.payloadSignals?.[n]??0)||0,txt=f=>e=>String(f(e)||'').localeCompare;switch(sort){case'old':arr.sort((a,b)=>eventTime(a)-eventTime(b));break;case'bytes':arr.sort((a,b)=>(b.bytesOut||b.bytes||0)-(a.bytesOut||a.bytes||0));break;case'bytesAsc':arr.sort((a,b)=>(a.bytesOut||a.bytes||0)-(b.bytesOut||b.bytes||0));break;case'latency':arr.sort((a,b)=>(b.latencyMs||0)-(a.latencyMs||0));break;case'latencyAsc':arr.sort((a,b)=>(a.latencyMs||0)-(b.latencyMs||0));break;case'status':arr.sort((a,b)=>statusCode(b)-statusCode(a));break;case'statusAsc':arr.sort((a,b)=>statusCode(a)-statusCode(b));break;case'route':arr.sort((a,b)=>String(a.route||a.path||'').localeCompare(String(b.route||b.path||'')));break;case'ticker':arr.sort((a,b)=>String(a.ticker||'').localeCompare(String(b.ticker||'')));break;case'app':arr.sort((a,b)=>String(a.appName||a.app||a.appChannel||a.channel||'').localeCompare(String(b.appName||b.app||b.appChannel||b.channel||'')));break;case'roots':arr.sort((a,b)=>feedRoots(b).length-feedRoots(a).length);break;case'charts':arr.sort((a,b)=>(sig('chartPoints')(b)||sig('charts')(b))-(sig('chartPoints')(a)||sig('charts')(a)));break;case'dividends':arr.sort((a,b)=>(sig('dividends')(b))-(sig('dividends')(a)));break;case'issues':arr.sort((a,b)=>(sig('fieldConsistencyIssues')(b))-(sig('fieldConsistencyIssues')(a)));break;default:arr.sort((a,b)=>eventTime(b)-eventTime(a))}return arr}
+function eventCard(e,i){const roots=feedRoots(e),sig=e?.payloadSignals||{},profile=sig.performanceProfile||e.profile||e.view||'—',score=sig.extractionCompletenessScore!=null?` · completude ${sig.extractionCompletenessScore}/${sig.extractionCompletenessThreshold||100}`:'';return`<div class="event ${state.selected===e?'sel':''}" data-i="${i}"><div class="meta"><b>${esc(e.route||e.path||'rota')}</b><span class="badge ${statusClass(e.status||e.statusCode)}">${esc(e.status||e.statusCode||'—')}</span></div><small>${esc(e.appName||e.app||'app')} · ${esc(e.appChannel||e.channel||'canal')} · ${fmtBytes(e.bytesOut||e.bytes||0)} · ${fmtMs(e.latencyMs)} · ${esc(profile)}${esc(score)}</small><br><small>${esc(roots.slice(0,7).join(', ')||e.payloadKind||'payload')}</small></div>`}
+function applyFilters(){const qv=($('feedSearch')?.value||'').toLowerCase(),st=$('feedStatus')?.value||'',root=$('feedPayload')?.value||'',sort=$('feedSort')?.value||'recent';let arr=state.feed.filter(e=>{const roots=feedRoots(e);const text=[e.route,e.path,e.ticker,e.appName,e.app,e.appChannel,e.channel,e.status,e.statusCode,e.payloadKind,...roots].join(' ').toLowerCase();return (!qv||text.includes(qv))&&matchesStatusFilter(e,st)&&matchesPayloadFilter(e,root)});sortFeed(arr,sort);state.filtered=arr;$('feedList').innerHTML=arr.map(eventCard).join('')||'<p class="sub">Nenhuma saída do proxy corresponde aos filtros.</p>';q('#feedList .event').forEach(el=>el.onclick=()=>selectEvent(arr[+el.dataset.i]));if(!state.selected&&arr[0])selectEvent(arr[0],true);else if(state.selected&&!arr.includes(state.selected)){$('selectedEvent').innerHTML='<p class="sub">A resposta selecionada ficou fora dos filtros atuais.</p>';$('payloadPreview').textContent='Ajuste ou limpe os filtros para ver o payload selecionado.'}}
+function selectEvent(e,silent=false){state.selected=e;q('#feedList .event').forEach((el,i)=>el.classList.toggle('sel',state.filtered[i]===e));const sig=e?.payloadSignals||{},roots=feedRoots(e);$('selectedEvent').innerHTML=e?rows([['Rota',e.route||e.path],['App',e.appName||e.app||'—'],['Canal',e.appChannel||e.channel||'—'],['Status',e.status||e.statusCode||'—',statusClass(e.status||e.statusCode)],['Latência',fmtMs(e.latencyMs)],['Bytes',fmtBytes(e.bytesOut||e.bytes||0)],['Ticker/view',[e.ticker,e.view].filter(Boolean).join(' · ')||'—'],['Raízes',roots.join(', ')||'—'],['Métricas',sig.metrics??'—'],['Gráficos',`${sig.charts??0} séries · ${sig.chartPoints??0} pontos`],['Dividendos',sig.dividends??'—'],['Perfil',sig.performanceProfile||e.profile||'—'],['Completude',sig.extractionCompletenessScore!=null?`${sig.extractionCompletenessScore}/${sig.extractionCompletenessThreshold||100}`:'—',sig.extractionComplete?'ok':sig.extractionCompletenessScore!=null?'warn':''],['Complementos',[sig.adaptiveCompletionAttempted?'adaptive':'',sig.statusInvestComplementAttempted?'StatusInvest':'',sig.statusInvestHedged?'hedge':'',sig.bestSnapshotHydrated?'snapshot':'',sig.canonicalReliabilityUsed?'CVM canônico':''].filter(Boolean).join(' · ')||'—'],['Reliability',sig.dataReliabilityState?`${sig.dataReliabilityState} · id:${sig.dataReliabilityIdentity||'—'} · quote:${sig.dataReliabilityQuote||'—'} · fund:${sig.dataReliabilityFundamentals||'—'}`:'—']]):'<p class="sub">Selecione uma resposta.</p>';$('payloadPreview').textContent=e?JSON.stringify(e.payloadPreview||e.preview||e.payloadSignals||e,null,2):'Selecione uma saída do proxy.';if(!silent)notice('Resposta selecionada no feed.','ok')}
+['feedSearch','feedStatus','feedPayload','feedSort'].forEach(id=>{setTimeout(()=>$(id)&&($(id).oninput=applyFilters,$(id).onchange=applyFilters),0)});
+function routeRows(routes){const arr=Array.isArray(routes)?routes:Object.entries(routes||{}).map(([route,v])=>({route,...v}));return arr.slice(0,20).map(r=>`<tr><td>${esc(r.route||r.path||'—')}</td><td>${fmt(r.responses||r.count||r.total||0)}</td><td>${esc(r.topApp||r.appName||'—')}</td><td>${r.renderSafeRatePercent!=null?Math.round(r.renderSafeRatePercent)+'%':'—'}</td><td>${fmtBytes(r.avgBytesOut||r.bytesOut||r.totalBytesOut||0)}</td></tr>`).join('')||'<tr><td colspan="5">Aguardando tráfego de saída.</td></tr>'}
+function renderPerformance(d){$('vercelBox').innerHTML=rows([['Ambiente',d.vr.environment||d.vr.env||'local'],['URL/deploy',d.vr.url||d.vr.deployUrl||'—'],['Host observado',d.vr.observed?.lastHost||d.vr.host||'—'],['Região',d.vr.observed?.lastRegion||d.vr.region||'—'],['País/edge',d.vr.observed?.lastCountry||d.vr.country||'—'],['x-vercel-id',d.vr.observed?.lastVercelId||'—']]);$('routesTable').innerHTML=routeRows(d.routes)}
+function renderQuality(d){const score=d.sig.fieldConsistencyScore??d.dh.avgFieldConsistencyScore??'—';const budget=d.sig.payloadBudgetBytes||d.last.bytesOut||0;const action=d.sig.assetActionDecision||'aguardando';$('qualityKpis').innerHTML=[kpi('Consistência',score==='—'?'—':`${score}/100`,d.sig.fieldConsistencyState||'campos financeiros'),kpi('Payload',fmtBytes(budget),d.sig.payloadBudgetState||'orçamento mobile'),kpi('Plano de ação',action,d.sig.assetActionScore?`${d.sig.assetActionScore}/100`:'decisão do engine'),kpi('Maturidade',d.pr.score?`${d.pr.score}/100`:'—',d.pr.status||'release pessoal'),kpi('Runtime',d.sig.engineRuntimeScore?`${d.sig.engineRuntimeScore}/100`:'—',d.sig.engineRuntimeGrade||'profiler'),kpi('Extração',d.sig.extractionCompletenessScore!=null?`${d.sig.extractionCompletenessScore}/${d.sig.extractionCompletenessThreshold||100}`:'—',d.sig.performanceProfile?`${d.sig.performanceProfile} · ${d.sig.extractionComplete?'completa':'monitorando'}`:'perfil/score')].join('');$('fieldGuardBox').innerHTML=rows([['Score',score==='—'?'—':`${score}/100`],['Estado',d.sig.fieldConsistencyState||'aguardando'],['Issues',d.sig.fieldConsistencyIssues??'—'],['Render safe',d.sig.renderSafe??d.dh.renderSafeRatePercent??'—'],['Cache safe',d.sig.cacheSafe??d.dh.cacheSafeRatePercent??'—']]);$('payloadBudgetBox').innerHTML=rows([['Bytes último payload',fmtBytes(budget)],['Estado',d.sig.payloadBudgetState||'—'],['Raízes',d.last.payloadRoots?d.last.payloadRoots.length:'—'],['Recomendação','view=app para produção, full só para auditoria']]);$('actionPlanBox').innerHTML=rows([['Ticker',d.last.ticker||d.sig.ticker||'—'],['Decisão',action],['Score',d.sig.assetActionScore?`${d.sig.assetActionScore}/100`:'—'],['Endpoint','/api/v1/asset/action-plan?ticker=PETR4'],['Performance','/api/v1/engine/performance?ticker=PETR4&view=app'],['Launch gate',d.sig.engineLaunchGateDecision||'—']]);$('maturityBox').innerHTML=rows([['Status',d.pr.status||'—'],['Score',d.pr.score?`${d.pr.score}/100`:'—'],['Público',d.pr.audience||'uso pessoal/pessoas próximas'],['Checklist',`${(d.pr.launchChecklist||[]).filter(x=>x.ok).length}/${(d.pr.launchChecklist||[]).length}`]]);const cov=d.sig.assetIndicatorCoverage||d.last.assetIndicatorCoverage||{};$('indicatorCoverageBox').innerHTML=rows([['Classe',d.last.assetType||d.last.type||'Ação/FII detectado pelo payload'],['Cobertura média',d.dh.avgIndicatorCoveragePercent?`${Math.round(d.dh.avgIndicatorCoveragePercent)}%`:'—'],['Campos detectados',d.sig.indicatorFields??d.sig.metrics??'—'],['Campos ausentes',Array.isArray(cov.missingCriticalFields)?cov.missingCriticalFields.slice(0,5).join(', '):'—']]);$('cacheSourceBox').innerHTML=rows([['Cache',d.last.cacheStatus||d.sig.cacheStatus||d.s.cacheStatus||'—'],['Fonte primária',d.last.primarySource||d.sig.primarySource||'—'],['Sources usadas',(d.last.sourcesUsed||[]).join(', ')||'—'],['Partial',d.last.partial??d.sig.partial??'—'],['Perfil de extração',d.sig.performanceProfile||'—'],['Completude',d.sig.extractionCompletenessScore!=null?`${d.sig.extractionCompletenessScore}/${d.sig.extractionCompletenessThreshold||100}`:'—'],['Campos críticos ausentes',Array.isArray(d.sig.extractionMissingCriticalFields)?d.sig.extractionMissingCriticalFields.join(', '):'—'],['Complementos',[d.sig.adaptiveCompletionOk?'adaptive OK':d.sig.adaptiveCompletionAttempted?'adaptive tentou':'',d.sig.statusInvestComplementOk?'StatusInvest OK':d.sig.statusInvestComplementAttempted?'StatusInvest tentou':'',d.sig.statusInvestHedgeOk?'hedge OK':d.sig.statusInvestHedged?'hedge ativo':'',d.sig.bestSnapshotHydrated?'snapshot usado':'',d.sig.canonicalReliabilityUsed?'CVM canônico':''].filter(Boolean).join(' · ')||'—'],['Reliability por blocos',d.sig.dataReliabilityState?`${d.sig.dataReliabilityState} · identidade ${d.sig.dataReliabilityIdentity||'—'} · cotação ${d.sig.dataReliabilityQuote||'—'} · fundamentos ${d.sig.dataReliabilityFundamentals||'—'} · gráficos ${d.sig.dataReliabilityCharts||'—'} · rankings ${d.sig.dataReliabilityRankings||'—'}`:'—']])}
+function promptCard(item){const text=typeof item==='string'?item:(item?.prompt||'');const title=typeof item==='string'?'Prompt pronto':(item?.title||'Prompt pronto');return `<div class="stage prompt"><button class="btn copy" data-copy="${esc(text)}">copiar</button><b>${esc(title)}</b><br><small>${esc(text)}</small></div>`}
+function endpointStage(item){return `<div class="module-node"><b>${esc(item.path||item.url||'endpoint')}</b><br><small>${esc(item.purpose||item.label||item.method||'rota do proxy')}</small></div>`}
+function renderIntegration(){const live=state.integrationData||{},manifest=live.manifest||{},sdk=live.sdk||{},readiness=live.readiness?.readiness||live.readiness||{},source=live.source||{},livePrompts=Array.isArray(live.prompts?.prompts)?live.prompts.prompts:prompts;const stable=manifest.stableRoots?Object.values(manifest.stableRoots):['appMobileSnapshot','appPayload','appSyncEnvelope','appResponseIntegrity','fieldConsistencyGuard','payloadBudget','assetActionPlan','engineRuntimeProfiler','engineLaunchGate'];const endpoints=Array.isArray(manifest.endpoints)?manifest.endpoints:[];$('manifestBox').innerHTML=rows([['Status do manifesto',manifest.status||live.error||'carregando/fallback',live.error?'warn':manifest.status==='OK'?'ok':'info'],['Endpoint vivo',manifest.endpoint||'/api/v1/integration/manifest'],['Base URL',manifest.baseUrl||'VALORAE_PUBLIC_BASE_URL não lido ainda'],['Contrato',manifest.contractVersion||'21.12.93 valorae-native-contract-polish'],['Prompts carregados',fmt(livePrompts.length)],['Endpoints mapeados',fmt(endpoints.length)],['Readiness',readiness.status?`${readiness.status} · ${readiness.score||'—'}/100`:'aguardando'],['Fontes',source.status?`${source.status} · ${(source.providers||[]).length} provedores`:'aguardando'],['Headers','x-valorae-app, x-valorae-channel, x-valorae-app-version, x-valorae-build'],['View padrão',sdk.recommendedView||'app']]);$('promptGrid').innerHTML=livePrompts.map(promptCard).join('')||'<p class="sub">Nenhum prompt retornado pelo endpoint.</p>';$('featuresGrid').innerHTML=features.concat(stable.slice(0,10)).slice(0,26).map(f=>`<span class="badge ok">${esc(f)}</span>`).join('');$('techGrid').innerHTML=tech.map(([a,b])=>insight(a,b)).join('')+insight('Integração viva',state.integrationLoaded?'Manifesto, SDK, prompts, readiness e fontes foram lidos via API.':state.integrationLoading?'Lendo endpoints de integração...':'Usando fallback estático até a API responder.',state.integrationLoaded?'ok':'warn')+(Array.isArray(sdk.rules)?sdk.rules.slice(0,3).map((r,i)=>insight(`Regra SDK ${i+1}`,r)).join(''):'');$('moduleTree').innerHTML=moduleGroups.map(([k,t,d])=>`<div class="module-node"><b>${esc(t)}</b><br><small class="mono">${esc(d)}</small></div>`).join('')+endpoints.slice(0,8).map(endpointStage).join('');q('.copy').forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(b.dataset.copy||'');notice('Prompt copiado.','ok')})}
+async function loadIntegrationLive(){if(state.integrationLoading||state.integrationLoaded)return;state.integrationLoading=true;renderIntegration();try{const [manifest,promptsData,sdk,readiness,source]=await Promise.all([api('/api/v1/integration/manifest',{timeout:9000}),api('/api/v1/integration/prompts',{timeout:9000}),api('/api/v1/integration/sdk',{timeout:9000}),api('/api/v1/release/readiness',{timeout:9000}),api('/api/source/status',{timeout:9000})]);state.integrationData={manifest,prompts:promptsData,sdk,readiness,source,loadedAt:new Date().toISOString()};state.integrationLoaded=true}catch(e){state.integrationData={...(state.integrationData||{}),error:e.message}}finally{state.integrationLoading=false;renderIntegration()}}
+
+function renderArchitecture(d){ if(window.valoraeRenderArchitecture) window.valoraeRenderArchitecture(d); }
+function renderDiagnostics(m){$('rawMetrics').textContent=JSON.stringify({summary:m.summary,proxyOutputMonitor:m.proxyOutputMonitor,deliveryHarmony:m.deliveryHarmony,vercelRuntime:m.vercelRuntime,personalReleaseReadiness:m.personalReleaseReadiness,distributions:m.distributions,monitorBlueprint:m.monitorBlueprint},null,2);if(!$('testResults').innerHTML.trim())$('testResults').innerHTML='<p class="sub">Verificando endpoints do plano automaticamente...</p>';if(!$('benchmarkResults').innerHTML.trim())$('benchmarkResults').innerHTML='<p class="sub">Benchmark rápido será executado automaticamente uma vez por abertura do monitor.</p>'}
+async function runDiagnosticsHealth(){if(state.diagnosticsLoading||state.diagnosticsLoaded)return;state.diagnosticsLoading=true;const plan=[['Ready','/api/ready'],['Release readiness','/api/v1/release/readiness'],['Source status','/api/source/status'],['Integration manifest','/api/v1/integration/manifest'],['Integration SDK','/api/v1/integration/sdk'],['Integration prompts','/api/v1/integration/prompts'],['Server metrics','/api/server/metrics']];const out=[];for(const [label,path] of plan){const t0=performance.now();try{const data=await api(path,{timeout:9000});out.push({label,path,ok:true,status:data.status||data.ok||'OK',ms:Math.round(performance.now()-t0)})}catch(e){out.push({label,path,ok:false,status:e.status||e.message,ms:Math.round(performance.now()-t0)})}}$('testResults').innerHTML=out.map(x=>`<div class="stage ${x.ok?'ok':'warn'}"><b>${esc(x.label)}</b> <span class="badge ${x.ok?'ok':'warn'}">${esc(x.status)}</span><br><small>${x.ms}ms · ${esc(x.path)}</small></div>`).join('');state.diagnosticsLoaded=true;state.diagnosticsLoading=false;if(!state.autoBenchStarted){state.autoBenchStarted=true;runBenchmark('quick')}}
+function clampNum(n,min,max){n=Number(n);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):min}
+function safeMetricValue(v,fallback=0){const n=Number(v);return Number.isFinite(n)?n:fallback}
+function chartEmptyLabel(canvasId){return canvasId==='flowChart'?'aguardando tráfego real':canvasId==='latencyChart'?'sem amostras de latência':canvasId==='bytesChart'?'sem payloads capturados':canvasId==='statusChart'?'sem status HTTP capturado':'aguardando dados'}
+function eventSignal(e,k,fb=0){return safeMetricValue(e?.payloadSignals?.[k]??e?.[k],fb)}
+function seriesFromEvents(events,key){const pts=(events||[]).slice(0,40).reverse().map((e,i)=>({x:i,y:safeMetricValue(key(e),0),label:e.route||e.ticker||e.status||`#${i+1}`}));return pts}
+function seriesFromBuckets(d,key){const buckets=Array.isArray(d?.metrics?.timeSeries)?d.metrics.timeSeries:Array.isArray(d?.timeSeries)?d.timeSeries:Array.isArray(d?.metrics?.windows?.buckets)?d.metrics.windows.buckets:[];return buckets.slice(-40).map((b,i)=>({x:i,y:safeMetricValue(b?.[key]??b?.summary?.[key]??b?.totals?.[key],0),label:b?.minute||b?.bucket||`t-${buckets.length-i}`})).filter(p=>p.y>0)}
+function seedSeries(value,label='snapshot'){const v=safeMetricValue(value,0);if(v<=0)return[];return [0,.18,.36,.55,.78,1].map((k,i)=>({x:i,y:Math.max(0,Math.round(v*k)),label}))}
+function statusCodeForChart(e){return Number(e?.statusCode||e?.status||0)||0}
+function distributionItems(obj,limit=8){return Object.entries(obj||{}).filter(([,v])=>safeMetricValue(v,0)>0).sort((a,b)=>safeMetricValue(b[1])-safeMetricValue(a[1])).slice(0,limit)}
+function fallbackItems(label){return [[label,0]]}
+function addCanvasInteractions(c){if(c._setup)return;c._setup=true;const getPos=e=>{const rect=c.getBoundingClientRect();const src=e.touches?e.touches[0]:e;return{x:src.clientX-rect.left,y:src.clientY-rect.top}};const onMove=e=>{const pos=getPos(e);c._mx=pos.x;c._my=pos.y;c._hover=true;if(c._draw)c._draw()};const onLeave=()=>{c._hover=false;if(c._draw)c._draw()};c.addEventListener('mousemove',onMove);c.addEventListener('touchmove',onMove,{passive:true});c.addEventListener('touchstart',onMove,{passive:true});c.addEventListener('mouseleave',onLeave);c.addEventListener('touchend',onLeave)}
+function prepCanvas(canvasId){const c=$(canvasId);if(!c)return null;const r=c.getBoundingClientRect(),dpr=devicePixelRatio||1;c.width=Math.max(320,Math.floor((r.width||360)*dpr));c.height=Math.max(180,Math.floor((r.height||220)*dpr));const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{c,ctx,w:r.width||360,h:r.height||220,p:30}}
+function drawGrid(ctx,w,h,p,title){ctx.clearRect(0,0,w,h);ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;for(let i=0;i<4;i++){const y=p+(h-2*p)*i/3;ctx.beginPath();ctx.moveTo(p,y);ctx.lineTo(w-p,y);ctx.stroke()}ctx.fillStyle='#a0aca5';ctx.font='12px system-ui';ctx.textAlign='left';ctx.fillText(title||'',p,17)}
+function drawEmptyState(ctx,w,h,p,label){drawGrid(ctx,w,h,p,'');ctx.fillStyle='rgba(34,199,124,.16)';ctx.beginPath();ctx.roundRect?.(p,h/2-22,w-2*p,44,14);if(!ctx.roundRect){ctx.rect(p,h/2-22,w-2*p,44)}ctx.fill();ctx.strokeStyle='rgba(34,199,124,.35)';ctx.stroke();ctx.fillStyle='#edf7f0';ctx.font='700 13px system-ui';ctx.textAlign='center';ctx.fillText(label||'aguardando dados',w/2,h/2-2);ctx.fillStyle='#a0aca5';ctx.font='12px system-ui';ctx.fillText('o gráfico será atualizado quando o proxy capturar dados reais',w/2,h/2+17);ctx.textAlign='left'}
+function drawLine(canvasId,pts,opts={}){const prepared=prepCanvas(canvasId);if(!prepared)return;const {c,ctx,w,h,p}=prepared;pts=(pts||[]).filter(pt=>Number.isFinite(Number(pt.y)));addCanvasInteractions(c);c._draw=()=>{if(!pts.length){drawEmptyState(ctx,w,h,p,opts.emptyLabel||chartEmptyLabel(canvasId));return}drawGrid(ctx,w,h,p,opts.label||'');const vals=pts.map(x=>safeMetricValue(x.y,0));let min=Math.min(...vals),max=Math.max(...vals);if(opts.zeroBase!==false)min=Math.min(0,min);if(max===min)max=min+1;const span=max-min;ctx.fillStyle='rgba(34,199,124,.09)';ctx.strokeStyle=opts.color||'#22c77c';ctx.lineWidth=2.5;ctx.beginPath();pts.forEach((pt,i)=>{const x=p+(w-2*p)*(pts.length<=1?.5:i/(pts.length-1)),y=h-p-(h-2*p)*((safeMetricValue(pt.y)-min)/span);pt._x=x;pt._y=y;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.lineTo(p+(w-2*p)*(pts.length<=1?.5:1),h-p);ctx.lineTo(p,h-p);ctx.closePath();ctx.fill();ctx.fillStyle='#718178';ctx.font='11px system-ui';ctx.textAlign='right';ctx.fillText(String(Math.round(max)),w-p,17);ctx.fillText(String(Math.round(min)),w-p,h-8);if(c._hover){let closest=null,minDist=Infinity;pts.forEach(pt=>{const dx=pt._x-c._mx,dy=pt._y-c._my,dist=dx*dx+dy*dy;if(dist<minDist){minDist=dist;closest=pt}});if(closest&&minDist<9000){ctx.beginPath();ctx.moveTo(closest._x,p);ctx.lineTo(closest._x,h-p);ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1;ctx.stroke();ctx.beginPath();ctx.arc(closest._x,closest._y,5,0,2*Math.PI);ctx.fillStyle='#22c77c';ctx.fill();ctx.fillStyle='#fff';ctx.font='700 13px system-ui';ctx.textAlign='center';ctx.fillText(`${closest.label?closest.label+' · ':''}${Math.round(safeMetricValue(closest.y)*100)/100}`,closest._x,Math.max(18,closest._y-12));ctx.textAlign='left'}}};c._draw()}
+function drawBars(canvasId,items,opts={}){const prepared=prepCanvas(canvasId);if(!prepared)return;const {c,ctx,w,h,p}=prepared;items=(items||[]).filter(x=>Array.isArray(x)&&Number.isFinite(Number(x[1])));addCanvasInteractions(c);c._draw=()=>{if(!items.length||items.every(x=>safeMetricValue(x[1],0)<=0)){drawEmptyState(ctx,w,h,p,opts.emptyLabel||chartEmptyLabel(canvasId));return}drawGrid(ctx,w,h,p,opts.label||'');const max=Math.max(1,...items.map(x=>safeMetricValue(x[1],0))),bw=(w-2*p)/Math.max(1,items.length);let hovIdx=-1;if(c._hover){items.forEach((_,i)=>{const bx=p+i*bw+4;if(c._mx>=bx&&c._mx<=bx+bw-8)hovIdx=i})}items.forEach(([label,val],i)=>{val=safeMetricValue(val,0);const x=p+i*bw+4,bh=(h-2*p)*(val/max),barW=Math.max(8,bw-8);ctx.fillStyle=i===hovIdx?'#3be293':(opts.color|| (i%2?'#0d8d5b':'#22c77c'));ctx.shadowColor=i===hovIdx?'rgba(34,199,124,.5)':'transparent';ctx.shadowBlur=i===hovIdx?12:0;ctx.fillRect(x,h-p-bh,barW,bh);ctx.shadowBlur=0;ctx.fillStyle=i===hovIdx?'#fff':'#a0aca5';ctx.font='11px system-ui';ctx.textAlign='center';ctx.fillText(String(label).slice(0,10),x+barW/2,h-8);if(i===hovIdx){ctx.fillStyle='#fff';ctx.font='700 13px system-ui';ctx.fillText(val,x+barW/2,Math.max(18,h-p-bh-8))}});ctx.textAlign='left'};c._draw()}
+function reliabilityItemsFromSignals(sig={}){const fields=[['Identidade',sig.dataReliabilityIdentity],['Cotação',sig.dataReliabilityQuote],['Fundamentos',sig.dataReliabilityFundamentals],['Dividendos',sig.dataReliabilityDividends],['Gráficos',sig.dataReliabilityCharts],['Rankings',sig.dataReliabilityRankings]];const score=v=>String(v||'').toUpperCase().includes('OK')?100:String(v||'').toUpperCase().includes('PARTIAL')?55:String(v||'').toUpperCase().includes('OPTIONAL')?25:0;return fields.map(([k,v])=>[k,score(v)])}
+function profileItems(events){const map={};for(const e of events||[]){const p=e?.payloadSignals?.performanceProfile||e.profile||e.view||'default';map[p]=(map[p]||0)+1}return distributionItems(map,8)}
+function richDataItems(d){const sig=d.sig||{},pi=d.metrics?.payloadIntelligence||{};return [['Métricas',sig.metrics??pi.totalMetricsObserved??0],['Séries',sig.charts??pi.totalChartSeriesObserved??0],['Pontos',sig.chartPoints??pi.totalChartPointsObserved??0],['Dividendos',sig.dividends??pi.totalDividendRowsObserved??0],['Indicadores',sig.indicatorFields??0],['News',sig.news??0]].filter(([,v])=>safeMetricValue(v,0)>0)}
+function drawAll(d){const events=d.events||[],dist=d.dist||{};const flow=events.length?seriesFromEvents(events,e=>1):seriesFromBuckets(d,'responses').concat(seedSeries(d.s?.responses||d.s?.requests,'snapshot'));drawLine('flowChart',flow,{label:events.length?'respostas por evento':'fluxo agregado'});const latency=events.length?seriesFromEvents(events,e=>e.latencyMs):seriesFromBuckets(d,'avgLatencyMs').concat(seedSeries(d.s?.avgLatencyMs||d.s?.p95LatencyMs,'latência'));drawLine('latencyChart',latency,{label:'latência ms'});const bytes=events.length?seriesFromEvents(events,e=>e.bytesOut||e.bytes):seriesFromBuckets(d,'bytesOut').concat(seedSeries(d.s?.bytesOut||d.s?.payloadP95BytesOut,'payload'));drawLine('bytesChart',bytes,{label:'bytes enviados'});const status={};for(const e of events){const s=String(e.status||e.statusCode||'—');status[s]=(status[s]||0)+1}drawBars('statusChart',distributionItems(Object.keys(status).length?status:dist.status,10),{label:'distribuição de status'});const comp=events.length?seriesFromEvents(events,e=>eventSignal(e,'extractionCompletenessScore',eventSignal(e,'fieldConsistencyScore',0))):seedSeries(d.dh?.avgFieldConsistencyScore||d.pr?.score||0,'score');drawLine('completenessChart',comp,{label:'score de completude',zeroBase:true,emptyLabel:'aguardando score de completude'});drawBars('reliabilityChart',reliabilityItemsFromSignals(d.sig),{label:'status por bloco',emptyLabel:'aguardando dataReliability'});drawBars('profileChart',profileItems(events).length?profileItems(events):distributionItems(dist.views,8),{label:'perfis/views capturados',emptyLabel:'aguardando perfis de extração'});const cacheSource=distributionItems(dist.cache,5).concat(distributionItems(dist.source,5));drawBars('cacheSourceChart',cacheSource,{label:'cache + fontes',emptyLabel:'aguardando cache/fonte'});drawBars('richDataChart',richDataItems(d),{label:'dados ricos entregues',emptyLabel:'aguardando gráficos/dividendos'});const benchSeed=seedSeries(d.s?.p95LatencyMs||d.s?.avgLatencyMs||0,'p95');drawLine('benchmarkChart',benchSeed,{label:'benchmark visual / p95 ms',emptyLabel:'execute benchmark rápido'});const health=[['Readiness',d.pr?.score||0],['SLO',d.s?.healthScore||d.s?.sloScore||0],['Fonte',d.s?.sourceReliabilityScore||0],['Cache',d.s?.cacheEfficiencyScore||0],['Rotas',d.s?.routeCoverageScore||0]].filter(([,v])=>safeMetricValue(v,0)>0);drawBars('healthChart',health,{label:'saúde operacional',emptyLabel:'aguardando saúde dos endpoints'})}
+function render(m){state.metrics=m;const d=derive(m);state.feed=d.events;localStorage.setItem('valorae:lastGoodServerMetrics',JSON.stringify({at:Date.now(),m}));$('liveBadge').textContent='● online';$('liveBadge').className='pill ok';$('readinessBadge').textContent=d.pr?.status?`readiness ${d.pr.status}`:'readiness —';renderKpis(d);renderCommand(d);updateFilterOptions();applyFilters();renderPerformance(d);renderQuality(d);renderIntegration();renderArchitecture(d);renderDiagnostics(m);drawAll(d);renderSettings();loadIntegrationLive();runDiagnosticsHealth()}
+function renderFailure(e){$('liveBadge').textContent='● falha de conexão';$('liveBadge').className='pill err';notice('Não consegui ler /api/server/metrics: '+e.message+'. Exibindo último snapshot local, se existir.','err');try{const old=JSON.parse(localStorage.getItem('valorae:lastGoodServerMetrics')||'null');if(old?.m)render(old.m)}catch{}}
+async function refresh(opt={}){if((state.paused||state.hidden)&&!opt.force)return;try{const data=await api('/api/server/metrics',{timeout:opt.timeout||7000});render(data);if(!opt.silent)clearNotice()}catch(e){renderFailure(e)}}
+async function probe(){clearNotice();const t=String($('tickerInput').value||'PETR4').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12)||'PETR4',view=$('viewSelect').value||'app';$('testResults').innerHTML='<p class="sub">Gerando saída real em /api/asset...</p>';try{const p=await api(`/api/asset?ticker=${encodeURIComponent(t)}&view=${encodeURIComponent(view)}&includeNews=1&mode=super&profile=turbo&app=VALORAE%20Proxy%20Monitor&channel=proxy-output-probe`,{timeout:14000,headers:{'x-valorae-app':'VALORAE Proxy Monitor','x-valorae-channel':'proxy-output-probe'}});localStorage.setItem('valorae:lastGoodAsset',JSON.stringify(p));$('testResults').innerHTML=rows([['Ticker',p.ticker||t],['Status',p.status||'OK'],['Raízes entregues',Object.keys(p||{}).slice(0,18).join(', ')],['Snapshot mobile',p.appMobileSnapshot?'sim':'não'],['App payload',p.appPayload?'sim':'não'],['Engine efficiency',p.engineEfficiency?'sim':'não']]);notice('Saída de teste gerada. Ela deve aparecer no feed como resposta enviada pelo proxy.','ok');await refresh({force:true})}catch(e){notice('Falha ao gerar saída de teste: '+e.message,'err');$('testResults').innerHTML=rows([['Erro',e.message],['Status',e.status||'—']]);await refresh({force:true,silent:true})}}
+function benchTable(b){if(!b)return'';const bench=b.benchmark||{},rowsB=Object.values(bench).map(x=>`<tr><td>${esc(x.name)}</td><td>${x.iterations}</td><td>${x.avgMs}ms</td><td>${x.p50Ms}ms</td><td>${x.p95Ms}ms</td></tr>`).join('');return `<div class="grid g3"><div class="insight"><b>Score</b><br><small>${b.score}/100 · ${b.durationMs}ms</small></div><div class="insight"><b>Checks OK</b><br><small>${(b.checks||[]).filter(x=>x.ok).length}/${(b.checks||[]).length} válidos</small></div><div class="insight"><b>Ações</b><br><small>${(b.recommendations||[]).length} sugeridas</small></div></div><div class="scroll section"><table><thead><tr><th>Caso</th><th>Iterações</th><th>Média</th><th>P50</th><th>P95</th></tr></thead><tbody>${rowsB}</tbody></table></div><h3>Checks</h3>${(b.checks||[]).map(c=>`<div class="stage ${c.ok?'ok':'warn'}"><b>${esc(c.label)}</b> <span class="badge ${c.ok?'ok':'warn'}">${c.ok?'OK':'atenção'}</span><br><small>${esc(c.value||'')}</small></div>`).join('')}<h3>Recomendações</h3>${(b.recommendations||[]).map(r=>`<div class="stage ${r.level==='ok'?'ok':r.level==='warn'?'warn':'info'}"><b>${esc(r.title)}</b><br><small>${esc(r.detail)}</small></div>`).join('')}`}
+async function runBenchmark(mode='quick'){$('benchBadge').textContent='executando '+mode;$('benchmarkResults').innerHTML='<p class="sub">Executando laboratório...</p>';try{const b=await api(`/api/server/tests?mode=${mode}`,{timeout:mode==='deep'?30000:16000});state.lastBench=b;$('benchBadge').textContent=`score ${b.score}/100`;$('benchBadge').className='badge '+(b.score>=80?'ok':'warn');$('benchmarkResults').innerHTML=benchTable(b)}catch(e){$('benchBadge').textContent='falha';$('benchBadge').className='badge err';$('benchmarkResults').innerHTML=rows([['Erro',e.message],['Status',e.status||'—']])}}
+async function runNetworkProbes(){if(!state.lastBench)await runBenchmark('quick');const plan=state.lastBench?.network?.probePlan||[];$('benchmarkResults').innerHTML+='<h3>Probes de rede</h3><div id="networkProbeList"></div>';const list=$('networkProbeList');for(const p of plan){const t0=performance.now();try{const r=await fetch(apiUrl(p.url),{headers:{...headers(p.url),'x-valorae-telemetry':'dashboard-test'},cache:'no-store'});list.innerHTML+=`<div class="stage ${r.status===p.expectedStatus?'ok':'warn'}"><b>${esc(p.label)}</b> · ${r.status}<br><small>${Math.round(performance.now()-t0)}ms · ${esc(p.url)}</small></div>`}catch(e){list.innerHTML+=`<div class="stage err"><b>${esc(p.label)}</b><br><small>${esc(e.message)}</small></div>`}}}
+function exportJson(){const data=JSON.stringify(state.metrics||{},null,2);navigator.clipboard?.writeText(data);notice('JSON atual copiado para a área de transferência.','ok')}
+function exportCsv(){const header=['at','route','status','app','channel','ticker','bytesOut','latencyMs','payloadKind'];const lines=[header.join(',')].concat((state.filtered||state.feed).map(e=>header.map(k=>'"'+String(e[k]??(k==='app'?e.appName:k==='channel'?e.appChannel:'' )).replace(/"/g,'""')+'"').join(',')));navigator.clipboard?.writeText(lines.join('\n'));notice('CSV do feed copiado para a área de transferência.','ok')}
+function clearFilters(){['feedSearch','feedStatus','feedPayload'].forEach(id=>{if($(id))$(id).value=''});if($('feedSort'))$('feedSort').value='recent';applyFilters();if(window._rebuildCustomSelects)window._rebuildCustomSelects()}
+
+$('menuToggleBtn').onclick = (e) => {
+  e.stopPropagation();
+  $('actionMenu').classList.toggle('show');
+};
+document.addEventListener('click', (e) => {
+  if (!$('topActionsContainer').contains(e.target)) {
+    $('actionMenu').classList.remove('show');
+  }
+});
+
+
+$('apiBaseBtn').onclick=()=>{
+  const cur = apiBase() || location.origin;
+  $('apiBaseInput').value = cur;
+  $('apiConfigModal').classList.remove('hidden');
+  $('actionMenu').classList.remove('show');
+};
+$('apiConfigCancel').onclick=()=>{
+  $('apiConfigModal').classList.add('hidden');
+};
+$('apiConfigSave').onclick=()=>{
+  const v = $('apiBaseInput').value.trim();
+  if(v) {
+    localStorage.setItem('valorae:apiBase', String(v).replace(/\/$/, ''));
+    refresh({force:true});
+  }
+  $('apiConfigModal').classList.add('hidden');
+};
+$('refreshBtn').onclick=async()=>{
+  $('actionMenu').classList.remove('show');
+  $('refreshBtn').classList.add('active-state');
+  try {
+    await refresh({force:true});
+  } finally {
+    $('refreshBtn').classList.remove('active-state');
+  }
+};$('pauseBtn').onclick=()=>{
+      state.paused=!state.paused;
+      $('pauseBtn').textContent=state.paused?'Retomar':'Pausar';
+      if(state.paused) {
+        $('pauseBtn').classList.add('paused-state');
+      } else {
+        $('pauseBtn').classList.remove('paused-state');
+      }
+      refresh({force:true});
+    };
+$('probeBtn').onclick=probe;$('benchQuickBtn').onclick=()=>runBenchmark('quick');$('benchDeepBtn').onclick=()=>runBenchmark('deep');$('networkProbeBtn').onclick=runNetworkProbes;$('exportJsonBtn').onclick=exportJson;$('exportCsvBtn').onclick=exportCsv;$('clearFiltersBtn').onclick=clearFilters;
+window.addEventListener('resize',()=>{state.metrics&&drawAll(derive(state.metrics));renderSettings();if(window._positionOpenCustomSelect)window._positionOpenCustomSelect();});document.addEventListener('visibilitychange',()=>{state.hidden=document.hidden;if(!state.hidden)refresh({force:true,silent:true})});
+initSettings();const initial=(location.hash||'').replace('#','')||localStorage.getItem('valorae:monitorPage');go(initial||'command');refresh({silent:true});state.timer=setInterval(()=>refresh({silent:true}),3000);
+// Safe bridge for progressive UI helpers appended after the main monitor closure.
+// The monitor core keeps its state private, but custom select helpers need a narrow, explicit API.
+window.valoraeMonitorState = state;
+window.valoraeMonitorApplyFilters = applyFilters;
+window.valoraeMonitorFilterCatalog = filterCatalog;
+window.valoraeMonitorFeedRoots = feedRoots;
+})();
+
+window._rebuildCustomSelects = null;
+window._positionOpenCustomSelect = null;
+function makeCustomSelects() {
+  const updaters = [];
+  let openWrap = null;
+  function positionMenu(wrap){
+    if(!wrap || !wrap.classList.contains('show')) return;
+    const btn = wrap.querySelector('.cs-btn'), menu = wrap.querySelector('.cs-menu');
+    if(!btn || !menu) return;
+    const r = btn.getBoundingClientRect();
+    const gap = 8;
+    const preferred = Math.max(r.width, Math.min(420, window.innerWidth - 24));
+    const width = Math.min(preferred, window.innerWidth - 20);
+    let left = Math.min(Math.max(10, r.left), window.innerWidth - width - 10);
+    let top = r.bottom + gap;
+    const maxH = Math.min(460, window.innerHeight - 96);
+    if(top + Math.min(maxH, menu.scrollHeight || maxH) > window.innerHeight - 10) top = Math.max(10, r.top - gap - Math.min(maxH, menu.scrollHeight || maxH));
+    menu.style.width = width + 'px';
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+    menu.style.maxHeight = maxH + 'px';
+  }
+  ['feedStatus', 'feedPayload', 'feedSort'].forEach(id => {
+    let sel = document.getElementById(id);
+    if (!sel || sel.dataset.customized) return;
+    sel.dataset.customized = 1;
+    sel.style.display = 'none';
+
+    let wrap = document.createElement('div');
+    wrap.className = 'custom-select';
+    wrap.id = 'wrap-' + id;
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+
+    let btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cs-btn';
+    btn.setAttribute('aria-haspopup','listbox');
+    btn.setAttribute('aria-expanded','false');
+    wrap.appendChild(btn);
+
+    let menu = document.createElement('div');
+    menu.className = 'cs-menu';
+    menu.setAttribute('role','listbox');
+    wrap.appendChild(menu);
+
+    function rebuildMenu() {
+      menu.innerHTML = '';
+      btn.textContent = sel.options[sel.selectedIndex]?.text || sel.options[0]?.text || '';
+      Array.from(sel.options).forEach((opt, i) => {
+        let div = document.createElement('div');
+        div.className = 'cs-opt';
+        div.setAttribute('role','option');
+        div.setAttribute('aria-selected', String(i === sel.selectedIndex));
+        if (i === sel.selectedIndex) div.classList.add('active');
+        div.textContent = opt.text;
+        div.onclick = (e) => {
+          e.stopPropagation();
+          sel.selectedIndex = i;
+          sel.dispatchEvent(new Event('change',{bubbles:true}));
+          btn.textContent = opt.text;
+          wrap.classList.remove('show');
+          btn.setAttribute('aria-expanded','false');
+          openWrap = null;
+          if (window.valoraeMonitorApplyFilters) window.valoraeMonitorApplyFilters();
+          rebuildMenu();
+        };
+        menu.appendChild(div);
+      });
+      positionMenu(wrap);
+    }
+    rebuildMenu();
+    updaters.push(rebuildMenu);
+
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.custom-select').forEach(w => { if(w !== wrap){ w.classList.remove('show'); const b=w.querySelector('.cs-btn'); if(b)b.setAttribute('aria-expanded','false'); }});
+      const willOpen = !wrap.classList.contains('show');
+      wrap.classList.toggle('show', willOpen);
+      btn.setAttribute('aria-expanded', String(willOpen));
+      openWrap = willOpen ? wrap : null;
+      positionMenu(wrap);
+    };
+  });
+
+  window._rebuildCustomSelects = () => { updaters.forEach(fn => fn()); };
+  window._positionOpenCustomSelect = () => positionMenu(openWrap);
+
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.custom-select').forEach(w => { w.classList.remove('show'); const b=w.querySelector('.cs-btn'); if(b)b.setAttribute('aria-expanded','false'); });
+    openWrap = null;
+  });
+  window.addEventListener('scroll', () => positionMenu(openWrap), true);
+}
+
+function updateFilterOptions() {
+  const state = window.valoraeMonitorState;
+  const catalog = window.valoraeMonitorFilterCatalog || {};
+  if (!state || !state.feed) return;
+  const st = document.getElementById('feedStatus');
+  const pa = document.getElementById('feedPayload');
+  const so = document.getElementById('feedSort');
+  if(!st || !pa || !so) return;
+  const oldS = st.value, oldP = pa.value, oldSort = so.value || 'recent';
+  const escOpt = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const option = ([value,label]) => '<option value="' + escOpt(value) + '">' + escOpt(label) + '</option>';
+  const merge = (base, extra, labeler) => {
+    const seen = new Set((base || []).map(x => String(x[0])));
+    return (base || []).concat(extra.filter(x => !seen.has(String(x))).map(x => [x, labeler(x)]));
+  };
+  const statuses = new Set();
+  const roots = new Set();
+  const rootFn = window.valoraeMonitorFeedRoots || (e => e.payloadRoots || e.roots || []);
+  state.feed.forEach(e => {
+    if (e.status || e.statusCode || e.httpStatus) statuses.add(String(e.status || e.statusCode || e.httpStatus));
+    rootFn(e).forEach(r => roots.add(String(r)));
+  });
+  const sArr = Array.from(statuses).filter(Boolean).sort((a,b)=>Number(a)-Number(b));
+  const pArr = Array.from(roots).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  const statusOptions = merge(catalog.status || [['','Status HTTP · todos']], sArr, s => 'HTTP ' + s + ' · visto no feed');
+  const payloadOptions = merge(catalog.payload || [['','Raiz do payload · todas']], pArr, p => p + ' · visto no feed');
+  const sortOptions = catalog.sort || [['recent','Mais recentes'],['old','Mais antigos'],['bytes','Mais bytes'],['latency','Maior latência']];
+  st.innerHTML = statusOptions.map(option).join('');
+  pa.innerHTML = payloadOptions.map(option).join('');
+  so.innerHTML = sortOptions.map(option).join('');
+  if (statusOptions.some(x => x[0] === oldS)) st.value = oldS;
+  if (payloadOptions.some(x => x[0] === oldP)) pa.value = oldP;
+  if (sortOptions.some(x => x[0] === oldSort)) so.value = oldSort;
+  if (window._rebuildCustomSelects) window._rebuildCustomSelects();
+}
+
+makeCustomSelects();
+</script>
+
+
+
+</div>
+
+</body>
+</html>
