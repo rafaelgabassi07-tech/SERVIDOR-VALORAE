@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   const input = route.input;
 
   try {
-    const ticker = canonicalizeTicker(input.ticker);
+    const ticker = canonicalizeTicker(input.ticker || input.symbol || input.q || input.query);
     const validation = validarTicker(ticker);
     if (validation) {
       return sendJson(req, res, {

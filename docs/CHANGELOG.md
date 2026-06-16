@@ -1,3 +1,21 @@
+# 2026-06-15 — 21.12.101 — Análise híbrida StatusInvest + Investidor10
+
+- A página Análise passa a usar StatusInvest como fonte primária para números estruturados quando disponível.
+- Investidor10 permanece como referência visual, ordem das seções e complemento para campos específicos.
+- `assetAnalysisPage` passa para `21.12.101-analysis-hybrid-statusinvest-primary`.
+- Resumo do Ativo prioriza os cinco cards: Cotação, Variação (12M), P/L, P/VP e DY.
+- Ampliados aliases de leitura para rótulos do StatusInvest e Investidor10: D.Y, P/SR, M. Bruta, M. EBIT, M. EBITDA, Dív. líquida/PL, PL/Ativos, Liq. corrente e Valorização (12m).
+- Sem dados sintéticos: campos ausentes continuam omitidos.
+- `view=app` agora preserva `assetAnalysisPage` no topo, em `appPayload` e em `appMobileSnapshot`, evitando payload sem Análise no APK.
+- APK adiciona fallback visual para quote/indicadores legados enquanto a captura profunda ainda não trouxe o contrato completo.
+
+# 2026-06-15 — 21.12.100 — Indicadores Fundamentalistas de Ações na Análise
+
+- Implementa a seção oficial `stockFundamentalIndicators` no contrato `assetAnalysisPage`.
+- A seção segue a lista de Indicadores Fundamentalistas de Ações exibida no Investidor10: P/L, P/Receita (PSR), P/VP, DY, payout, margens, múltiplos EV, múltiplos de ativo, VPA, LPA, giro, ROE, ROIC, ROA, endividamento, estrutura patrimonial, liquidez e CAGR de 5 anos.
+- Corrige a rota `/api/v1/asset` para aceitar `ticker`, `symbol`, `q` ou `query`, evitando que o APK chame o Proxy com parâmetro válido e receba payload sem o ativo.
+- Mantém a política de não simular valores ausentes: só são enviados cards com dados reais capturados/normalizados.
+
 # 2026-06-15 — 21.12.99 — Reset limpo da Análise e Resumo funcional
 
 - Reinicia o contrato `assetAnalysisPage` para a página Análise com a versão `21.12.99-analysis-reset-clean-summary`.
