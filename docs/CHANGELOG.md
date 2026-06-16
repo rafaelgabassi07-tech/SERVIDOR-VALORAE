@@ -1,3 +1,12 @@
+# 2026-06-15 — 21.12.97 — Análise com fundamentos completos por seção
+
+- `assetAnalysisPage` agora envia `rows` completos por seção, além de `previewRows`, para permitir que o APK renderize dados fundamentalistas reais capturados do Investidor10.
+- Normaliza objetos com `keyValues`, `rows`, `linhas` e campos simples em linhas legíveis de análise.
+- Corrige mapeamentos de Ações para usar `empresa.dados`, `empresa.informacoes`, `empresa.regioesReceita`, `empresa.negociosReceita`, posição acionária e demonstrativos.
+- Corrige mapeamentos de FIIs para usar `checklistBah`, `informacoesFundo`, `valorPatrimonial`, `listaImoveis`, `distribuicoes12m`, média do tipo/segmento e relacionados.
+- Adiciona seção explícita de `Balanço patrimonial` para Ações.
+- Mantém a política `no synthetic values`: nada é simulado quando a fonte não entrega dados estruturados.
+
 # 2026-06-14 — Retorno: IFIX, IDIV e SMLL somente via Yahoo
 
 - Remove o fallback do Investidor10 para IFIX, IDIV e SMLL no contrato de Retorno.

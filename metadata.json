@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.96-investidor10-analysis-page-contract",
-  "patch": "21.12.96-investidor10-analysis-page-contract",
-  "releasePatch": "21.12.96-investidor10-analysis-page-contract",
-  "latestInternalPatch": "21.12.96-investidor10-analysis-page-contract",
-  "description": "Proxy VALORAE atualizado com contrato fiel de página Análise para Ações e FIIs baseado nas seções do Investidor10, sem dados simulados.",
+  "release": "21.12.97-analysis-full-fundamentals-contract",
+  "patch": "21.12.97-analysis-full-fundamentals-contract",
+  "releasePatch": "21.12.97-analysis-full-fundamentals-contract",
+  "latestInternalPatch": "21.12.97-analysis-full-fundamentals-contract",
+  "description": "Proxy VALORAE atualizado com contrato completo da página Análise com linhas reais por seção fundamentalista de Ações e FIIs, baseado nas seções do Investidor10, sem dados simulados.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": []

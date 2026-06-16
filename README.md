@@ -1,5 +1,9 @@
 # VALORAE Proxy
 
+Core público: 21.12.0  
+Patch interno: 21.12.97-analysis-full-fundamentals-contract
+
+
 Proxy enxuto para integração mobile do VALORAE, pronto para ser anexado diretamente na árvore do AI Studio.
 
 ## Entrada principal para APK Android
