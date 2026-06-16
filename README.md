@@ -1,3 +1,12 @@
+## 2026-06-16 — 21.12.124 — Análise com fontes reais para demonstrativos e receita
+
+Patch: `21.12.124-analysis-source-extraction-v40`
+
+- Melhorada a extração de DRE, Balanço e Fluxo de Caixa por vários anos.
+- Melhorada a leitura de negócios e regiões de receita a partir de estruturas reais de gráficos.
+- Gráficos históricos só são enviados quando há série real suficiente.
+- Mantida a política de não simular valores ausentes.
+
 ## 2026-06-16 — 21.12.123 — Análise por categorias e gráficos sempre visíveis
 
 Patch: `21.12.123-analysis-clean-categories-visible-charts-v39`

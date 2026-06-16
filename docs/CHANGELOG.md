@@ -1,3 +1,11 @@
+## 2026-06-16 — 21.12.124 — Análise com fontes reais para demonstrativos e receita
+
+Patch: `21.12.124-analysis-source-extraction-v40`
+
+- DRE, Balanço e Fluxo de Caixa passam a aproveitar tabelas anuais multi-período vindas da fonte.
+- Receita por negócio e região passa a aceitar formatos reais de gráficos do Investidor10.
+- Gráficos históricos seguem bloqueados quando só há ano atual.
+
 ## 2026-06-16 — 21.12.123 — Análise por categorias e gráficos sempre visíveis
 
 Patch: `21.12.123-analysis-clean-categories-visible-charts-v39`
