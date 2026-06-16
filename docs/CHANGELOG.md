@@ -1,3 +1,18 @@
+# 2026-06-15 — Patch 21.12.103-analysis-unique-contract
+
+- Cria o endpoint exclusivo `/api/v1/analysis` para a página Análise do APK.
+- Introduz o contrato único `AnalysisPageResponse`, com seções `summary` e `fundamental_indicators`.
+- A Análise passa a ser alimentada por JSON normalizado do Proxy, sem depender de `quoteOverview`, `assetSummary` solto, `appPayload.assetAnalysisPage` ou `appMobileSnapshot.assetAnalysisPage`.
+- As rotas antigas de ativo, gráficos, proventos, carteira e modais permanecem intactas para evitar regressão.
+- Adiciona teste de contrato que garante 5 itens no Resumo do Ativo e 31 Indicadores Fundamentalistas quando os dados existem.
+
+# 2026-06-15 — 21.12.102 — Análise: resumo completo e visual alinhado
+
+- `assetAnalysisPage` passa para `21.12.102-analysis-summary-visual-contract`.
+- O Resumo do Ativo agora usa também a taxonomia dos Indicadores Fundamentalistas para completar P/L, P/VP e DY quando o `assetSummary` vier parcial.
+- Reforçados aliases de Variação/Valorização 12M para alimentar corretamente o card de resumo sem usar variação diária indevidamente.
+- Mantida a política de não simular valores ausentes.
+
 # 2026-06-15 — 21.12.101 — Análise híbrida StatusInvest + Investidor10
 
 - A página Análise passa a usar StatusInvest como fonte primária para números estruturados quando disponível.

@@ -14,6 +14,7 @@ import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tick
 import { getConfirmedDividendsByTicker } from '../lib/sources/status-dividends.js';
 import { getAgendaDividends } from '../lib/sources/agenda-dividends.js';
 import { buildAssetDetails, getAssetHistory } from '../lib/sources/asset-details.js';
+import { buildAnalysisPageResponse } from '../lib/analysis/analysis-page-response.js';
 import integrationManifestHandler from './integration/manifest.js';
 import integrationSdkHandler from './integration/sdk.js';
 import integrationPromptsHandler from './integration/prompts.js';
@@ -199,7 +200,7 @@ function rootPayload() {
     version: RELEASE.version,
     status: 'online',
     contract: RELEASE.contract,
-    routes: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/dividends/batch', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/monitor/summary', '/api/v1/monitor/self-test', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health'],
+    routes: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/dividends/batch', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/analysis', '/api/v1/monitor/summary', '/api/v1/monitor/self-test', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health'],
     router: routeManifest(),
     monitor: '/server.html'
   };
@@ -470,6 +471,23 @@ export async function dispatchRoute(req, res) {
     if (path === '/portfolio/returns' || path === '/portfolio/return' || path === '/portfolio/performance') return sendJson(req, res, await buildPortfolioReturns(payload), { cacheControl: 'private, max-age=60' });
     if (path === '/portfolio/history') return sendJson(req, res, await buildRealMarketHistory(payload));
     if (path === '/asset/history') return sendJson(req, res, await getAssetHistory(payload), { cacheControl: 'private, max-age=45' });
+    if (path === '/analysis' || path === '/asset/analysis') {
+      const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query);
+      if (!ticker) return sendJson(req, res, { status: 'ERROR', ok: false, endpoint: 'analysis', error: 'Informe ticker=PETR4 ou symbol=PETR4.' }, { status: 400, cacheControl: 'no-store' });
+      const enriched = await buildAssetDetails({
+        ...payload,
+        ticker,
+        symbol: ticker,
+        q: ticker,
+        timeoutMs: payload.timeoutMs || 12000,
+        quoteTimeoutMs: payload.quoteTimeoutMs || payload.timeoutMs || 5000,
+        fundamentalTimeoutMs: payload.fundamentalTimeoutMs || payload.timeoutMs || 9000,
+        yahooTimeoutMs: payload.yahooTimeoutMs || payload.timeoutMs || 5000,
+        dividendTimeoutMs: payload.dividendTimeoutMs || payload.timeoutMs || 5000,
+        range: payload.range || '1Y'
+      });
+      return sendJson(req, res, buildAnalysisPageResponse(enriched, payload), { cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
+    }
     if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.historyMonths || payload.months || 12), { cacheControl: 'private, max-age=300' });
     if (path === '/market/rankings') return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, ...(await buildCanonicalMarketRankings(payload)) }, { cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
     if (path === '/market/indices') return sendJson(req, res, await buildIndicesPayload(), { cacheControl: 'private, max-age=45' });
@@ -511,7 +529,7 @@ export function routeManifest() {
     physicalFunctions: ['api/router.js'],
     legacyAliases: { '/ativo': '/asset', '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
     routes: [
-    '/health','/ready','/manifest','/env','/schema','/source/status','/release/readiness','/personal/readiness','/cache/stats','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
+    '/health','/ready','/manifest','/env','/schema','/source/status','/release/readiness','/personal/readiness','/cache/stats','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
   ].sort() };
 }
 
