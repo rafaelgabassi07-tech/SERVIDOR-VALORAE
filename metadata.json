@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.105-analysis-real-sections-and-charts",
-  "patch": "21.12.105-analysis-real-sections-and-charts",
-  "releasePatch": "21.12.105-analysis-real-sections-and-charts",
-  "latestInternalPatch": "21.12.105-analysis-real-sections-and-charts",
-  "description": "Proxy VALORAE com /api/v1/analysis v26 integrando histórico, demonstrativos, gráficos estruturados, perfil, receita e comparadores ao contrato único.",
+  "release": "21.12.107-analysis-real-charts-v28",
+  "patch": "21.12.107-analysis-real-charts-v28",
+  "releasePatch": "21.12.107-analysis-real-charts-v28",
+  "latestInternalPatch": "21.12.107-analysis-real-charts-v28",
+  "description": "Proxy VALORAE com Checkpoint 28: gráficos reais da Análise em séries JSON estruturadas para renderização nativa no APK, sem HTML, iframe, imagem ou simulação de dados.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": []

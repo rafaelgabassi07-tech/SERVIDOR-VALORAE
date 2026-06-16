@@ -1,7 +1,7 @@
 # VALORAE Proxy
 
 Core público: 21.12.0  
-Patch interno: 21.12.98-analysis-asset-summary-structured
+Patch interno: 21.12.107-analysis-real-charts-v28
 
 
 Proxy enxuto para integração mobile do VALORAE, pronto para ser anexado diretamente na árvore do AI Studio.
@@ -36,6 +36,14 @@ Resposta compatível com o APK:
 ```
 
 O Proxy aceita aliases comuns como `ticker`, `symbol`, `ativo`, `codigo`, `papel`, `slug`, URL do Investidor10 ou texto contendo o ticker.
+
+## Checkpoint 28 — Gráficos reais da Análise
+
+A página Análise usa o endpoint exclusivo `/api/v1/analysis` e o contrato `AnalysisPageResponse`. Para gráficos, o Proxy envia somente JSON estruturado em `sections[].charts[].series[].points`; o APK renderiza nativamente em Canvas.
+
+Gráficos aceitos quando houver dados reais: cotação histórica, histórico de proventos/rendimentos, Dividend Yield histórico, Receitas e Lucros, Lucro x Cotação, Evolução Patrimonial, Payout histórico, valor patrimonial de FIIs, distribuição de ativos de FIIs e comparadores em seção própria.
+
+Não há HTML, iframe, imagem de site ou simulação de IBOV, IFIX, CDI, IPCA ou valores ausentes.
 
 ## Gráficos do Investidor10 para o APK
 

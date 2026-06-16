@@ -1,3 +1,12 @@
+# 2026-06-16 — Patch 21.12.107-analysis-real-charts-v28
+
+- Checkpoint 28 implementa gráficos reais na página Análise usando `charts[].series[].points` do contrato `AnalysisPageResponse`.
+- O Proxy passa a expor séries estruturadas adicionais para `dividend_yield_history`, `payout_history`, rendimento mensal de FIIs, valor patrimonial de FIIs e distribuição de ativos do fundo quando a fonte entrega dados reais.
+- Comparadores continuam separados em `comparisons` e só aparecem quando há série confiável de índice/ativo semelhante; nenhum IBOV, IFIX, CDI ou IPCA é simulado.
+- O APK deixa de renderizar mini-barras simples e passa a desenhar gráficos nativos em Canvas, com barras, linhas, legendas e último ponto.
+- Mantida a regra: sem HTML, iframe, WebView, imagem de site ou valores fabricados para a Análise.
+- Rotas antigas de patrimônio, retorno, proventos, agenda, detalhes do ativo, equilíbrio e carteira permanecem preservadas.
+
 # 2026-06-15 — Patch 21.12.105-analysis-real-sections-and-charts
 
 - `/api/v1/analysis` evolui para o contrato `26.analysis.v2`.
@@ -731,3 +740,12 @@
 - Foram adicionadas `missingSignals` e seções `missing` para apontar discretamente módulos ainda não integrados ao contrato novo.
 - Rotas antigas de `/api/v1/asset`, `/api/v1/asset/dividends`, modais e carteira foram preservadas.
 - Política mantida: sem HTML bruto no APK e sem dados sintéticos.
+
+## 2026-06-16 — Patch 21.12.106 — Checkpoint 27 Analysis contract audit
+
+- Auditado o contrato único `/api/v1/analysis` para a página Análise.
+- Adicionado teste regressivo cobrindo PETR4, BBAS3 e HGLG11 com `AnalysisPageResponse 26.analysis.v2`.
+- APK reforçado para não sinalizar como pendente uma seção que contenha `items` ou `charts` reais.
+- Parser Android passa a calcular `itemCount` local como `items + charts` quando necessário.
+- Fallback de versão do contrato Android alinhado para `26.analysis.v2`.
+- Política preservada: sem HTML bruto, sem simulação e sem retornar a `assetSummary`, `quoteOverview`, `assetAnalysisPage`, `appPayload` ou `appMobileSnapshot` na tela Análise.
