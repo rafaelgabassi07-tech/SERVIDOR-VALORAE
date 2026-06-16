@@ -1,3 +1,31 @@
+## 2026-06-16 — 21.12.132-analysis-clean-mobile-v48
+
+Patch: `21.12.132-analysis-clean-mobile-v48`
+
+- A comparação da página Análise passa a aceitar ativo + IBOV, IFIX, CDI, IPCA, SMLL, IDIV e IVVB11 quando houver séries reais alinhadas.
+- A área Sobre a empresa passa a receber `Valor da firma` a partir das informações reais da fonte, incluindo o bloco `INFORMAÇÕES SOBRE A EMPRESA` do Investidor10.
+- Valores monetários duplicados da fonte, como valor simples + valor detalhado, são normalizados para exibição compacta no APK sem inventar informação.
+- A regra real-only continua preservada: benchmarks sintéticos/proxy ticker continuam rejeitados.
+
+## 2026-06-16 — 21.12.127 — Auditoria rigorosa da extração HTML da Análise
+
+Patch: `21.12.127-analysis-html-extraction-real-only-v43`
+
+- A rota real `/api/v1/analysis` continua usando extração HTML balanceada para objetos JSON aninhados do Investidor10, incluindo gráficos com `datasets` internos.
+- URLs reais de APIs de gráficos descobertas no HTML passam a ser consultadas de forma deduplicada e limitada.
+- DRE, Balanço e Fluxo de Caixa ficam bloqueados quando a fonte fornece apenas `financialSummary`/snapshot pontual; demonstrativo exige série, tabela ou gráfico real capturado.
+- Descrições, setor, subsetor e segmento genéricos deixam de ser preenchidos quando a fonte não envia texto/classificação real.
+- Criados testes regressivos `analysis-investidor10-html-extractor-v42` e `analysis-html-extraction-real-only-v43` cobrindo JSON aninhado, objetos JS-like, bloqueio de demonstrativos sem série real e bloqueio de classificações inventadas.
+
+## 2026-06-16 — 21.12.125 — Análise com cobertura ampliada das fontes reais
+
+Patch: `21.12.125-analysis-source-coverage-v41`
+
+- Ampliada a cobertura da página Análise contra StatusInvest, Investidor10 e referência técnica do referência técnica externa.
+- Adicionadas seções normalizadas para mercado/risco/liquidez, posição acionária e checklist de FIIs.
+- Corrigida a leitura de demonstrativos financeiros multi-ano por labels/datasets e por mapas de período.
+- Mantida a regra: sem dados sintéticos e sem gráficos históricos com apenas um período real.
+
 ## 2026-06-16 — 21.12.124 — Análise com fontes reais para demonstrativos e receita
 
 Patch: `21.12.124-analysis-source-extraction-v40`

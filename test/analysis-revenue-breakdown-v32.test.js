@@ -28,7 +28,7 @@ assert.ok(!stockResponse.missingSignals.some(signal => signal.id === 'revenue_br
 assert.ok(section.items.some(item => item.group === 'Negócios que geram receita' && item.label === 'Exploração e Produção' && item.value.includes('%')));
 assert.ok(section.items.some(item => item.group === 'Regiões onde gera receita' && item.label === 'Brasil'));
 assert.equal(section.charts.length, 2, 'deve criar uma composição para negócios e outra para regiões');
-assert.ok(section.charts.every(chart => chart.chartType === 'horizontal_bar_composition'), 'receita por negócio/região deve usar barras horizontais de composição');
+assert.ok(section.charts.every(chart => chart.chartType === 'donut_composition'), 'receita por negócio/região deve usar composição/donut fiel ao ChartPie da fonte');
 assert.ok(section.charts.every(chart => chart.series.every(serie => serie.points.every(point => point.value > 0 && point.value <= 100))), 'pontos precisam ser percentuais reais válidos');
 
 const internalExternalResponse = buildAnalysisPageResponse({

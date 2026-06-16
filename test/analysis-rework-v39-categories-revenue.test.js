@@ -28,13 +28,15 @@ assert.equal(revenue.status, 'ready');
 assert.ok(revenue.items.some(item => item.label === 'Mercado interno'));
 assert.ok(revenue.items.some(item => item.label === 'Brasil'));
 assert.ok(revenue.charts.length >= 2, 'negócios e regiões devem gerar gráficos separados quando há fonte real');
-assert.ok(revenue.charts.every(chart => chart.chartType === 'horizontal_bar_composition'));
+assert.ok(revenue.charts.every(chart => chart.chartType === 'donut_composition'));
 assert.ok(revenue.charts.every(chart => chart.series.every(serie => serie.points.every(point => point.value > 0 && point.value <= 100))));
 
 const apk = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
 assertOptionalMatch(apk, /AnalysisCategoryBlock/);
 assertOptionalMatch(apk, /Gráficos visíveis/);
-assertOptionalMatch(apk, /isHorizontalBarAnalysisChart/);
+assertOptionalMatch(apk, /Composição visual/);
+assertOptionalMatch(apk, /Detalhamento da fonte/);
+assertOptionalMatch(apk, /isCompositionAnalysisChart/);
 assertOptionalDoesNotMatch(apk, /CompactSectionPreview/);
 assertOptionalDoesNotMatch(apk, /Recolher/);
 assertOptionalDoesNotMatch(apk, /Há visualizações disponíveis para leitura/);

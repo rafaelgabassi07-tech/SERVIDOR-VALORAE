@@ -1,6 +1,44 @@
-## 2026-06-16 — 21.12.124 — Análise com fontes reais para demonstrativos e receita
+## 2026-06-16 — 21.12.132-analysis-clean-mobile-v48
 
-Patch: `21.12.124-analysis-source-extraction-v40`
+Patch: `21.12.132-analysis-clean-mobile-v48`
+
+- A comparação da página Análise passa a aceitar ativo + IBOV, IFIX, CDI, IPCA, SMLL, IDIV e IVVB11 quando houver séries reais alinhadas.
+- A área Sobre a empresa passa a receber `Valor da firma` a partir das informações reais da fonte, incluindo o bloco `INFORMAÇÕES SOBRE A EMPRESA` do Investidor10.
+- Valores monetários duplicados da fonte, como valor simples + valor detalhado, são normalizados para exibição compacta no APK sem inventar informação.
+- A regra real-only continua preservada: benchmarks sintéticos/proxy ticker continuam rejeitados.
+
+## 2026-06-16 — 21.12.131-analysis-clean-mobile-v47
+
+Patch: `21.12.131-analysis-clean-mobile-v47`
+
+- Checkpoint visual v47 da página Análise: categorias mais limpas no APK, listas agrupadas e menos containers internos.
+- Contrato `/api/v1/analysis` preservado; nenhuma informação foi inventada, simulada ou derivada como dado real.
+- O gráfico `asset_vs_indices` continua aceitando somente séries reais alinhadas e agora tem leitura mobile mais estável no APK.
+
+## 2026-06-16 — 21.12.128-analysis-source-routing-real-only-v44
+
+Patch: `21.12.128-analysis-source-routing-real-only-v44`
+
+- Nova auditoria minuciosa da extração HTML/API usada pela página Análise.
+- BOVA11 agora roteia como ETF para caminhos reais `/etfs/`; AAPL34 agora roteia como BDR para caminhos reais `/bdrs/`.
+- ETFs deixam de receber/sinalizar seções não aplicáveis de FII ou empresa, evitando falso erro no APK.
+- Histórico de payout, histórico de dividend yield e demonstrativos financeiros deixam de aceitar valores derivados sem série/período real.
+- Sem dados simulados, inventados ou preenchidos por rótulos artificiais como `P1`, `P2` ou `Atual`.
+
+## 2026-06-16 — 21.12.127-analysis-html-extraction-real-only-v43
+
+Patch: `21.12.127-analysis-html-extraction-real-only-v43`
+
+- Reforçada a extração HTML da rota real `/api/v1/analysis` usada pelo APK.
+- Corrigida a leitura de JSON aninhado em scripts do Investidor10, incluindo `datasets` internos de gráficos.
+- Adicionada descoberta deduplicada de APIs reais de gráficos presentes no HTML da fonte.
+- Bloqueada a criação de DRE, Balanço, Fluxo de Caixa e Lucro x Cotação a partir de indicadores pontuais ou snapshots sem série/tabela real.
+- Removidos preenchimentos genéricos de descrição, setor, subsetor e segmento quando a fonte não envia esses campos.
+- Adicionados testes regressivos específicos para impedir retorno das falhas.
+
+## 2026-06-16 — 21.12.125-analysis-source-coverage-v41
+
+Patch: `21.12.125-analysis-source-coverage-v41`
 
 - Melhorada a extração de DRE, Balanço e Fluxo de Caixa por vários anos.
 - Melhorada a leitura de negócios e regiões de receita a partir de estruturas reais de gráficos.
