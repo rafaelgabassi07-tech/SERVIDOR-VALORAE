@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.103-analysis-unique-contract",
-  "patch": "21.12.103-analysis-unique-contract",
-  "releasePatch": "21.12.103-analysis-unique-contract",
-  "latestInternalPatch": "21.12.103-analysis-unique-contract",
-  "description": "Proxy VALORAE com endpoint exclusivo /api/v1/analysis e contrato único AnalysisPageResponse para a página Análise.",
+  "release": "21.12.104-analysis-dividends-missing-signals",
+  "patch": "21.12.104-analysis-dividends-missing-signals",
+  "releasePatch": "21.12.104-analysis-dividends-missing-signals",
+  "latestInternalPatch": "21.12.104-analysis-dividends-missing-signals",
+  "description": "Proxy VALORAE com endpoint exclusivo /api/v1/analysis e contrato único AnalysisPageResponse com proventos e sinalizações discretas para a página Análise.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": []

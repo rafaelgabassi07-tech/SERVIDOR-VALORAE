@@ -714,3 +714,11 @@
 - Proxy agora mantém `IFIX.SA`, `IDIV.SA` e `SMLL.SA`, mas tenta janelas compatíveis (`5y/1wk`, `2y/1d`, `1y/1d`, `6mo/1d`, `3mo/1d`, `1mo/1d`, `5d/1d`, `1d/1d`) antes de declarar vazio.
 - `/api/v1/market/indices` passa a incluir IFIX, IDIV e SMLL como snapshots diretos.
 - Nenhum ETF, proxyTicker ou simulação foi adicionado.
+
+## 2026-06-15 — Patch 21.12.104 — Analysis dividends and missing signals
+
+- `/api/v1/analysis` mantém o contrato único `AnalysisPageResponse` e evolui para `25.analysis.v1`.
+- Foram adicionadas as seções `dividends_summary` e `dividends_history` para proventos/rendimentos por ativo.
+- Foram adicionadas `missingSignals` e seções `missing` para apontar discretamente módulos ainda não integrados ao contrato novo.
+- Rotas antigas de `/api/v1/asset`, `/api/v1/asset/dividends`, modais e carteira foram preservadas.
+- Política mantida: sem HTML bruto no APK e sem dados sintéticos.
