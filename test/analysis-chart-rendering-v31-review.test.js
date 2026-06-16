@@ -50,7 +50,8 @@ assert.equal(distribution?.chartType, 'donut_composition', 'distribuição de at
 const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
 assertOptionalMatch(screen, /isCompositionAnalysisChart/);
 assertOptionalMatch(screen, /drawArc/);
-assertOptionalDoesNotMatch(screen, /drawRoundRect/);
+assertOptionalMatch(screen, /isHorizontalBarAnalysisChart/);
+assertOptionalMatch(screen, /drawRoundRect/);
 assertOptionalDoesNotMatch(screen, /isBarLike/);
 
 console.log('Analysis chart rendering review test OK.');

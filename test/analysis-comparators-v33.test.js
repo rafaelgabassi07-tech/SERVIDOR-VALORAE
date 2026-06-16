@@ -166,7 +166,7 @@ assert.ok(fiiComparisons.charts.some(chart => chart.id === 'asset_vs_ifix'));
 const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
 assertOptionalMatch(screen, /ComparisonAnalysisBlock/);
 assertOptionalMatch(screen, /ComparisonMetricRow/);
-assertOptionalMatch(screen, /Ativo x índice/);
+assertOptionalMatch(screen, /Comparação acumulada/);
 assertOptionalMatch(screen, /multi_line/);
 assertOptionalDoesNotMatch(screen, /assetSummary solto|quoteOverview|appPayload\.assetAnalysisPage|appMobileSnapshot\.assetAnalysisPage/);
 

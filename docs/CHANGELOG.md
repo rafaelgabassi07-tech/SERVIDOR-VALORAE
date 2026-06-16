@@ -1,3 +1,12 @@
+## 2026-06-16 — 21.12.123 — Análise por categorias e gráficos sempre visíveis
+
+Patch: `21.12.123-analysis-clean-categories-visible-charts-v39`
+
+- Página Análise reorganizada por categorias limpas no APK.
+- Gráficos deixam de ficar dentro de área recolhível; apenas dados textuais longos podem ser compactados.
+- Extração de receita por negócio/região ampliada no Proxy.
+- Receita por negócio/região usa barras horizontais quando há percentuais reais.
+
 ## 2026-06-16 — 21.12.122 — Revisão estrutural da página Análise
 
 Patch: `21.12.122-analysis-page-rework-v38`

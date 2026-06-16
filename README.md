@@ -1,3 +1,11 @@
+## 2026-06-16 — 21.12.123 — Análise por categorias e gráficos sempre visíveis
+
+Patch: `21.12.123-analysis-clean-categories-visible-charts-v39`
+
+- Extração ampliada para receita por negócio/região.
+- Suporte à página Análise limpa, com gráficos sempre visíveis no APK.
+- Sem valores sintéticos: quando a fonte não fornece percentual real, o gráfico não é criado.
+
 ## 2026-06-16 — 21.12.122 — Revisão estrutural da página Análise
 
 Patch: `21.12.122-analysis-page-rework-v38`
@@ -291,3 +299,10 @@ O Proxy expõe `POST /api/v1/portfolio/returns` para o modal Retorno do APK. O c
 Patch: `21.12.113-analysis-revenue-breakdown-v32`.
 
 A rota `/api/v1/analysis` mantém o contrato `AnalysisPageResponse` e passa a preencher a seção `revenue_breakdown` quando houver percentuais reais de receita por negócio, região ou mercado interno/externo. O Proxy não cria percentuais sintéticos: se a fonte não entregar dados válidos, a seção permanece vazia e sinalizada.
+
+
+## 2026-06-16 — Análise por categorias e receita ampliada
+
+- Patch `21.12.123-analysis-clean-categories-visible-charts-v39`.
+- Extração de receita por negócio/região ampliada para reconhecer mais formatos estruturados.
+- Mantida política de não sintetizar valores: sem percentual real, a seção permanece indisponível para gráfico.

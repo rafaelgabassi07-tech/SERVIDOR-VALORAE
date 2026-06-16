@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.122-analysis-page-rework-v38",
-  "patch": "21.12.122-analysis-page-rework-v38",
-  "releasePatch": "21.12.122-analysis-page-rework-v38",
-  "latestInternalPatch": "21.12.122-analysis-page-rework-v38",
-  "description": "Proxy VALORAE com revisão estrutural da página Análise: textos limpos, gráficos por intenção visual, comparadores agrupados e filtros contra gráficos pobres.",
+  "release": "21.12.123-analysis-clean-categories-visible-charts-v39",
+  "patch": "21.12.123-analysis-clean-categories-visible-charts-v39",
+  "releasePatch": "21.12.123-analysis-clean-categories-visible-charts-v39",
+  "latestInternalPatch": "21.12.123-analysis-clean-categories-visible-charts-v39",
+  "description": "Proxy VALORAE com extração ampliada de receita por negócio/região e suporte à Análise por categorias com gráficos sempre visíveis.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": []

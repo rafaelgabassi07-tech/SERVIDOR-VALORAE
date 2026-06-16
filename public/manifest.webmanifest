@@ -9,5 +9,5 @@
   "description": "Monitor operacional do VALORAE Proxy.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.122"
+  "version": "21.12.123"
 }

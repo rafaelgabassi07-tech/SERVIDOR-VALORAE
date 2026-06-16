@@ -115,7 +115,8 @@ assertOptionalMatch(screen, /drawLine/, 'Gráficos de séries temporais precisam
 assertOptionalMatch(screen, /drawArc/, 'Composições precisam usar arco/donut nativo');
 assertOptionalDoesNotMatch(screen, /getAnalysisPage\(normalizedQuery\)/, 'Análise não pode carregar a cada letra');
 assertOptionalDoesNotMatch(screen, /assetAnalysisPage|appMobileSnapshot\.assetAnalysisPage|appPayload\.assetAnalysisPage|quoteOverview|assetSummary/, 'AnalysisScreen não pode voltar a contratos antigos');
-assertOptionalDoesNotMatch(screen, /drawRoundRect|isBarLike|WebView|iframe|<html/i, 'Análise não pode usar barras temporais, WebView ou HTML');
+assertOptionalMatch(screen, /isHorizontalBarAnalysisChart/, 'Análise precisa renderizar barras horizontais nativas quando o dado pede barras');
+assertOptionalDoesNotMatch(screen, /isBarLike|WebView|iframe|<html/i, 'Análise não pode usar renderização antiga, WebView ou HTML');
 assertOptionalMatch(client, /executeJsonGet\(\s*"\/api\/v1\/analysis"/, 'getAnalysisPage precisa chamar somente /api/v1/analysis');
 
 console.log('Analysis final audit v37 test OK.');
