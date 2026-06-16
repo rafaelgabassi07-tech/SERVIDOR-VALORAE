@@ -39,3 +39,7 @@ console.log('Asset analysis page contract test OK.');
 assert.match(engine, /rowsFromAnyAnalysisValue/);
 assert.match(engine, /rows: resolved.rows/);
 assert.match(engine, /rowsFromGenericObject/);
+assert.match(engine, /buildQuoteOverviewRows/);
+assert.match(engine, /quoteOverview/);
+assert.match(engine, /Resumo do ativo/);
+assert.match(engine, /Resumo do FII/);

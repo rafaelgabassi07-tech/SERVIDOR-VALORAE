@@ -1,11 +1,10 @@
-# 2026-06-15 — 21.12.97 — Análise com fundamentos completos por seção
+# 2026-06-15 — 21.12.98 — Resumo do Ativo estruturado na Análise
 
-- `assetAnalysisPage` agora envia `rows` completos por seção, além de `previewRows`, para permitir que o APK renderize dados fundamentalistas reais capturados do Investidor10.
-- Normaliza objetos com `keyValues`, `rows`, `linhas` e campos simples em linhas legíveis de análise.
-- Corrige mapeamentos de Ações para usar `empresa.dados`, `empresa.informacoes`, `empresa.regioesReceita`, `empresa.negociosReceita`, posição acionária e demonstrativos.
-- Corrige mapeamentos de FIIs para usar `checklistBah`, `informacoesFundo`, `valorPatrimonial`, `listaImoveis`, `distribuicoes12m`, média do tipo/segmento e relacionados.
-- Adiciona seção explícita de `Balanço patrimonial` para Ações.
-- Mantém a política `no synthetic values`: nada é simulado quando a fonte não entrega dados estruturados.
+- `assetAnalysisPage.sections[key=quoteOverview]` agora é montado como resumo estruturado, com linhas normalizadas e prontas para o APK.
+- Para Ações, o resumo prioriza ticker, nome, classe, cotação, variação 12M, DY, P/VP, P/L, liquidez, setor, subsetor, segmento, valor de mercado, patrimônio, ROE/ROIC, margem, payout, free float e tag along quando a fonte entrega.
+- Para FIIs, o resumo prioriza ticker, nome do fundo, cotação da cota, DY 12M, P/VP, liquidez diária, último rendimento, valor patrimonial por cota, valor patrimonial total, vacância, cotistas, cotas emitidas, segmento, tipo, mandato, gestão, prazo, taxa, público-alvo e CNPJ quando disponíveis.
+- Mantém a política `no synthetic values`: o Proxy não cria valores quando o Investidor10 não entrega o campo.
+- O contrato continua compatível com `rows` e `previewRows`, mas agora o Resumo do Ativo deixa de depender de objetos genéricos de cotação.
 
 # 2026-06-14 — Retorno: IFIX, IDIV e SMLL somente via Yahoo
 

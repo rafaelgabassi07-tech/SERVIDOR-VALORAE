@@ -1,7 +1,7 @@
 # VALORAE Proxy
 
 Core público: 21.12.0  
-Patch interno: 21.12.97-analysis-full-fundamentals-contract
+Patch interno: 21.12.98-analysis-asset-summary-structured
 
 
 Proxy enxuto para integração mobile do VALORAE, pronto para ser anexado diretamente na árvore do AI Studio.
