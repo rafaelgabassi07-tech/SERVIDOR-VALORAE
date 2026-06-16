@@ -22,7 +22,7 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.98-analysis-asset-summary-structured",
+    "releasePatch": "21.12.99-analysis-reset-clean-summary",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   }

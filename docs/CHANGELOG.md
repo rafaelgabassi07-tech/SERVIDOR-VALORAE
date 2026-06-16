@@ -1,3 +1,11 @@
+# 2026-06-15 — 21.12.99 — Reset limpo da Análise e Resumo funcional
+
+- Reinicia o contrato `assetAnalysisPage` para a página Análise com a versão `21.12.99-analysis-reset-clean-summary`.
+- Substitui a lógica anterior de seções por um contrato menor e controlado, começando por `assetSummary`.
+- `assetSummary` separa Ações e FIIs e normaliza somente campos reais já presentes no payload do Proxy.
+- Mantém a política de não criar valores sintéticos, não simular gráficos e não preencher campos ausentes artificialmente.
+- A página Análise do APK deve renderizar o contrato novo e não depender de renderizadores legados de gráficos/mapas.
+
 # 2026-06-15 — 21.12.98 — Resumo do Ativo estruturado na Análise
 
 - `assetAnalysisPage.sections[key=quoteOverview]` agora é montado como resumo estruturado, com linhas normalizadas e prontas para o APK.
