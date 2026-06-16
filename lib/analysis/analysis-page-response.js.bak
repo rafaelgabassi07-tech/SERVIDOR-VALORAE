@@ -456,36 +456,14 @@ function dualSeriesChart(id, title, chartType, rows = [], source = 'VALORAE Prox
   };
 }
 
-function chartPeriodLabel(chart = {}) {
-  const firstSeries = arrayFrom(chart.series).find(serie => arrayFrom(serie.points).length);
-  const points = arrayFrom(firstSeries?.points);
-  if (!points.length) return '';
-  const first = cleanText(points[0]?.label);
-  const last = cleanText(points[points.length - 1]?.label);
-  if (!first || !last) return '';
-  return first === last ? first : `${first} a ${last}`;
-}
-
-function chartLastDisplay(chart = {}) {
-  const firstSeries = arrayFrom(chart.series).find(serie => arrayFrom(serie.points).length);
-  const last = arrayFrom(firstSeries?.points).slice(-1)[0];
-  if (!last) return '';
-  return cleanText(last.display) || compactDisplay(last.value);
-}
-
 function chartPreviewItems(charts = []) {
-  return charts.map(chart => {
-    const period = chartPeriodLabel(chart);
-    const last = chartLastDisplay(chart);
-    const value = [period ? `Período: ${period}` : '', last ? `Último: ${last}` : ''].filter(Boolean).join(' • ');
-    return {
-      id: chart.id,
-      label: chart.title,
-      value: value || 'Série real disponível',
-      group: chart.source || 'Fonte real',
-      source: chart.source || 'Fonte real'
-    };
-  });
+  return charts.map(chart => ({
+    id: chart.id,
+    label: chart.title,
+    value: `${chart.series.reduce((sum, serie) => sum + (serie.points?.length || 0), 0)} ponto(s)`,
+    group: chart.source || 'VALORAE Proxy',
+    source: chart.source || 'VALORAE Proxy'
+  }));
 }
 
 function tableItemsFromObject(obj = {}, source = 'VALORAE Proxy', limit = 24) {
@@ -915,7 +893,7 @@ function buildFinancialStatementCharts(payload = {}) {
       charts.push({
         id: `${group.id}_statement`,
         title: `${group.title} por período`,
-        chartType: 'grouped_bar',
+        chartType: 'multi_line',
         source: 'StatusInvest/Yahoo fundamentals normalizados pelo Proxy',
         unit: 'R$',
         series
@@ -934,13 +912,13 @@ function buildAssetCharts(payload = {}) {
   const price = analysisChart('price_history', 'Cotação histórica', 'line', bundle.priceHistory || payload.historicoPrecos || payload.results?.historicoPrecos, 'Yahoo Finance / StatusInvest', { valueKeys: ['close', 'price', 'value'], minPoints: 2, limit: 24, unit: 'R$' });
   if (price) charts.push(price);
 
-  const dividends = analysisChart(isFii ? 'fii_monthly_distribution' : 'dividend_history', isFii ? 'Rendimento mensal' : 'Histórico de proventos', 'bar', bundle.dividendMonthly || bundle.fiiDistribution12m || bundle.dividendYearly, 'StatusInvest/Investidor10 proventos', { valueKeys: ['amount', 'value', 'total', 'valuePerShare'], minPoints: 2, limit: 14, unit: 'R$' });
+  const dividends = analysisChart(isFii ? 'fii_monthly_distribution' : 'dividend_history', isFii ? 'Rendimento mensal' : 'Histórico de proventos', 'line', bundle.dividendMonthly || bundle.fiiDistribution12m || bundle.dividendYearly, 'StatusInvest/Investidor10 proventos', { valueKeys: ['amount', 'value', 'total', 'valuePerShare'], minPoints: 2, limit: 14, unit: 'R$' });
   if (dividends) charts.push(dividends);
 
-  const dyHistory = analysisChart('dividend_yield_history', 'Dividend Yield histórico', 'bar', bundle.dividendYieldHistory || bundle.fiiDividendYieldHistory || payload.dividendYieldHistory || payload.results?.dividendYieldHistory, 'StatusInvest/Investidor10 proventos', { valueKeys: ['yieldPercent', 'dividendYield', 'dy', 'valuePercent', 'percent', 'percentage', 'value'], minPoints: 2, limit: 14, unit: '%' });
+  const dyHistory = analysisChart('dividend_yield_history', 'Dividend Yield histórico', 'line', bundle.dividendYieldHistory || bundle.fiiDividendYieldHistory || payload.dividendYieldHistory || payload.results?.dividendYieldHistory, 'StatusInvest/Investidor10 proventos', { valueKeys: ['yieldPercent', 'dividendYield', 'dy', 'valuePercent', 'percent', 'percentage', 'value'], minPoints: 2, limit: 14, unit: '%' });
   if (dyHistory) charts.push(dyHistory);
 
-  const revenueProfit = dualSeriesChart('revenue_profit', 'Receitas e Lucros', 'grouped_bar', bundle.revenueProfit || payload.statements?.revenueProfit || payload.results?.statements?.revenueProfit, 'StatusInvest/Yahoo fundamentals', { id: 'revenue', label: 'Receita', valueKeys: ['netRevenue', 'revenue', 'receita'] }, { id: 'profit', label: 'Lucro', valueKeys: ['netProfit', 'profit', 'lucro'] });
+  const revenueProfit = dualSeriesChart('revenue_profit', 'Receitas e Lucros', 'multi_line', bundle.revenueProfit || payload.statements?.revenueProfit || payload.results?.statements?.revenueProfit, 'StatusInvest/Yahoo fundamentals', { id: 'revenue', label: 'Receita', valueKeys: ['netRevenue', 'revenue', 'receita'] }, { id: 'profit', label: 'Lucro', valueKeys: ['netProfit', 'profit', 'lucro'] });
   if (revenueProfit) charts.push(revenueProfit);
 
   const profitVsQuoteRows = arrayFrom(bundle.profitVsQuote || payload.statements?.profitVsQuote || payload.results?.statements?.profitVsQuote)
@@ -951,10 +929,10 @@ function buildAssetCharts(payload = {}) {
     : null;
   if (profitQuote) charts.push(profitQuote);
 
-  const equity = analysisChart(isFii ? 'fii_patrimonial_value' : 'equity_evolution', isFii ? 'Valor patrimonial' : 'Evolução patrimonial', 'bar', bundle.equityEvolution || bundle.balanceSheet || bundle.fiiPatrimonialInfo || payload.statements?.balanceSheet || payload.results?.statements?.balanceSheet, 'StatusInvest/Yahoo fundamentals', { valueKeys: ['netWorth', 'equity', 'patrimonioLiquido', 'valorPatrimonial', 'patrimonialValue', 'value'], minPoints: 2, limit: 12, unit: isFii ? 'R$' : '' });
+  const equity = analysisChart(isFii ? 'fii_patrimonial_value' : 'equity_evolution', isFii ? 'Valor patrimonial' : 'Evolução patrimonial', 'line', bundle.equityEvolution || bundle.balanceSheet || bundle.fiiPatrimonialInfo || payload.statements?.balanceSheet || payload.results?.statements?.balanceSheet, 'StatusInvest/Yahoo fundamentals', { valueKeys: ['netWorth', 'equity', 'patrimonioLiquido', 'valorPatrimonial', 'patrimonialValue', 'value'], minPoints: 2, limit: 12, unit: isFii ? 'R$' : '' });
   if (equity) charts.push(equity);
 
-  const payout = analysisChart('payout_history', 'Payout histórico', 'bar', bundle.payoutHistory || payload.payoutHistory || payload.results?.payoutHistory, 'StatusInvest/Investidor10', { valueKeys: ['payout', 'valuePercent', 'percent', 'percentage', 'value'], minPoints: 2, limit: 14, unit: '%' });
+  const payout = analysisChart('payout_history', 'Payout histórico', 'line', bundle.payoutHistory || payload.payoutHistory || payload.results?.payoutHistory, 'StatusInvest/Investidor10', { valueKeys: ['payout', 'valuePercent', 'percent', 'percentage', 'value'], minPoints: 2, limit: 14, unit: '%' });
   if (payout) charts.push(payout);
 
   const assetDistributionPoints = normalizePercentDistributionChartPoints(normalizeDistributionPoints(bundle.fiiAssetDistribution || payload.fiiAssetDistribution || payload.results?.fiiAssetDistribution || payload.results?.distribuicaoAtivosFundo, ['percentual', 'valuePercent', 'percent', 'percentage', 'value']));
@@ -984,13 +962,7 @@ const STOCK_PROFILE_FIELDS = [
   { id: 'freeFloat', label: 'Free float', group: 'Governança', aliases: ['freeFloat', 'free float', 'freefloat'] },
   { id: 'shares', label: 'Número de ações', group: 'Mercado', aliases: ['numeroAcoes', 'número de ações', 'acoesEmitidas', 'shares', 'sharesOutstanding'] },
   { id: 'marketCap', label: 'Valor de mercado', group: 'Mercado', aliases: ['valorMercado', 'valor de mercado', 'marketCap', 'marketValue'] },
-  { id: 'equity', label: 'Patrimônio líquido', group: 'Mercado', aliases: ['patrimonioLiquido', 'patrimônio líquido', 'equity', 'netWorth'] },
-  { id: 'enterpriseValue', label: 'Valor da firma', group: 'Mercado', aliases: ['valorFirma', 'valor da firma', 'enterpriseValue', 'ev'] },
-  { id: 'assets', label: 'Ativos', group: 'Balanço', aliases: ['ativos', 'totalAssets', 'assets', 'ativoTotal'] },
-  { id: 'grossDebt', label: 'Dívida bruta', group: 'Balanço', aliases: ['dividaBruta', 'dívida bruta', 'grossDebt'] },
-  { id: 'netDebt', label: 'Dívida líquida', group: 'Balanço', aliases: ['dividaLiquida', 'dívida líquida', 'netDebt'] },
-  { id: 'cash', label: 'Disponibilidade', group: 'Balanço', aliases: ['disponibilidade', 'disponibilidades', 'cash', 'caixa'] },
-  { id: 'dailyLiquidity', label: 'Liquidez média diária', group: 'Liquidez', aliases: ['liquidezMediaDiaria', 'liquidez média diária', 'averageDailyLiquidity', 'dailyLiquidity'] }
+  { id: 'equity', label: 'Patrimônio líquido', group: 'Mercado', aliases: ['patrimonioLiquido', 'patrimônio líquido', 'equity', 'netWorth'] }
 ];
 
 const FII_PROFILE_FIELDS = [
@@ -1012,7 +984,7 @@ function profileDisplay(value, spec = {}) {
   if (display && display !== '-' && display !== '--') return display;
   const raw = value?.value ?? value?.valor ?? value?.amount ?? value?.raw ?? value;
   if (raw === undefined || raw === null) return '';
-  if (['marketCap', 'equity', 'enterpriseValue', 'assets', 'grossDebt', 'netDebt', 'cash', 'dailyLiquidity'].includes(spec.id)) {
+  if (spec.id === 'marketCap' || spec.id === 'equity') {
     const n = finiteValue(raw);
     return n === undefined ? cleanText(raw) : `R$ ${compactDisplay(n)}`;
   }
@@ -1029,9 +1001,7 @@ function profileValueByAliases(info = {}, spec = {}) {
 
 function addProfileItem(rows, seen, spec, rawValue, source = 'StatusInvest/Investidor10') {
   const value = profileDisplay(rawValue, spec);
-  const numeric = finiteValue(rawValue?.value ?? rawValue?.valor ?? rawValue?.amount ?? rawValue?.raw ?? rawValue);
-  if (numeric === 0 && ['enterpriseValue', 'assets', 'grossDebt', 'netDebt', 'cash', 'dailyLiquidity', 'marketCap', 'equity', 'shares'].includes(spec.id)) return;
-  if (!value || value === '-' || value === '--' || /^R\$\s*0([,.]00)?$/.test(value) || /^0([,.]0+)?$/.test(value)) return;
+  if (!value || value === '-' || value === '--') return;
   const key = `${spec.id}|${value}`.toLowerCase();
   if (seen.has(key)) return;
   seen.add(key);
@@ -1070,13 +1040,7 @@ function buildCompanyProfileItems(payload = {}, assetType = '') {
     cnpj: firstClean(payload.cnpj, merged.cnpj),
     site: firstClean(payload.site, payload.website, merged.site, merged.website),
     valorMercado: firstClean(payload.marketCap, payload.valorMercado, merged.valorMercado, merged.marketCap),
-    patrimonioLiquido: firstClean(payload.equity, payload.netWorth, payload.patrimonioLiquido, merged.patrimonioLiquido, merged.equity, merged.netWorth),
-    valorFirma: firstClean(payload.enterpriseValue, payload.valorFirma, merged.valorFirma, merged.enterpriseValue, payload.ev, merged.ev),
-    ativos: firstClean(payload.assets, payload.totalAssets, payload.ativos, merged.assets, merged.totalAssets, merged.ativos),
-    dividaBruta: firstClean(payload.grossDebt, payload.dividaBruta, merged.grossDebt, merged.dividaBruta),
-    dividaLiquida: firstClean(payload.netDebt, payload.dividaLiquida, merged.netDebt, merged.dividaLiquida),
-    disponibilidade: firstClean(payload.cash, payload.caixa, payload.disponibilidades, merged.cash, merged.caixa, merged.disponibilidades),
-    liquidezMediaDiaria: firstClean(payload.dailyLiquidity, payload.liquidezMediaDiaria, merged.dailyLiquidity, merged.liquidezMediaDiaria)
+    patrimonioLiquido: firstClean(payload.equity, payload.netWorth, payload.patrimonioLiquido, merged.patrimonioLiquido, merged.equity, merged.netWorth)
   };
 
   const rows = [];
@@ -1383,44 +1347,6 @@ function collectComparisonCandidates(payload = {}) {
   return candidates;
 }
 
-
-function comparisonPeriodValue(series = []) {
-  const first = arrayFrom(series).find(serie => arrayFrom(serie.points).length);
-  const points = arrayFrom(first?.points);
-  if (!points.length) return 'Série real recebida';
-  const start = cleanText(points[0]?.label);
-  const end = cleanText(points[points.length - 1]?.label);
-  const coverage = start && end && start !== end ? `${start} a ${end}` : (end || start);
-  return coverage ? `Período comparável: ${coverage}` : 'Série real recebida';
-}
-
-function buildCombinedIndexComparisonChart(ticker = '', charts = []) {
-  const indexCharts = arrayFrom(charts)
-    .filter(chart => /^asset_vs_(ibov|ifix|cdi|ipca|smll|idiv)$/.test(chart.id || ''))
-    .filter(chart => arrayFrom(chart.series).length >= 2);
-  const assetSeries = indexCharts
-    .map(chart => arrayFrom(chart.series).find(serie => cleanText(serie.label).toUpperCase() === ticker))
-    .find(Boolean);
-  if (!assetSeries) return null;
-  const benchmarkSeries = [];
-  for (const chart of indexCharts) {
-    const code = (chart.comparatorCode || (chart.id || '').replace('asset_vs_', '')).toUpperCase();
-    const serie = arrayFrom(chart.series).find(item => comparatorCode(item.label) === code || cleanText(item.label).toUpperCase() === code);
-    if (serie && arrayFrom(serie.points).length >= 8) benchmarkSeries.push({ ...serie, id: code.toLowerCase(), label: code });
-  }
-  if (benchmarkSeries.length < 2) return null;
-  const aligned = alignSeriesByCommonLabels([{ ...assetSeries, id: 'asset', label: ticker || 'Ativo' }, ...benchmarkSeries], 6);
-  if (aligned.length < 3) return null;
-  return {
-    id: 'asset_vs_indices',
-    title: `${ticker || 'Ativo'} x índices`,
-    chartType: 'multi_line',
-    source: 'B3/BCB/Yahoo séries reais alinhadas pelo Proxy',
-    unit: '%',
-    series: aligned.slice(0, 5)
-  };
-}
-
 function buildComparisonItemsAndCharts(payload = {}) {
   const ticker = cleanText(payload.ticker || payload.symbol || payload.results?.ticker || payload.results?.symbol).toUpperCase();
   const rows = [];
@@ -1447,8 +1373,8 @@ function buildComparisonItemsAndCharts(payload = {}) {
     if (seenCharts.has(id)) continue;
     seenCharts.add(id);
     const source = cleanText(candidate.source) || 'VALORAE Proxy comparadores reais';
-    rows.push({ id, label: `${ticker || 'Ativo'} x ${code}`, value: comparisonPeriodValue(series), group: 'Ativo x índice', source });
-    charts.push({ id, title: `${ticker || 'Ativo'} x ${code}`, chartType: 'multi_line', source, unit: '%', series, comparatorCode: code });
+    rows.push({ id, label: `${ticker || 'Ativo'} x ${code}`, value: `${series.reduce((sum, serie) => sum + serie.points.length, 0)} ponto(s)`, group: 'Ativo x índice', source });
+    charts.push({ id, title: `${ticker || 'Ativo'} x ${code}`, chartType: 'multi_line', source, unit: '%', series });
   }
 
   for (const item of arrayFrom(payload.peers || payload.results?.peers || payload.comparadorAcoes || payload.results?.comparadorAcoes || payload.comparacaoFiis || payload.results?.comparacaoFiis)) {
@@ -1472,13 +1398,11 @@ function buildComparisonItemsAndCharts(payload = {}) {
     const id = `asset_vs_${label.toLowerCase()}`;
     if (seenCharts.has(id)) continue;
     seenCharts.add(id);
-    rows.push({ id, label: `${ticker || 'Ativo'} x ${label}`, value: comparisonPeriodValue(aligned), group: 'Ativo x par semelhante', source: candidate.source || 'StatusInvest/Investidor10' });
+    rows.push({ id, label: `${ticker || 'Ativo'} x ${label}`, value: `${aligned[0].points.length} ponto(s)`, group: 'Ativo x par semelhante', source: candidate.source || 'StatusInvest/Investidor10' });
     charts.push({ id, title: `${ticker || 'Ativo'} x ${label}`, chartType: 'multi_line', source: candidate.source || 'StatusInvest/Investidor10', unit: '%', series: aligned });
   }
 
-  const combined = buildCombinedIndexComparisonChart(ticker, charts);
-  const finalCharts = combined ? [combined, ...charts.filter(chart => chart.id !== combined.id)] : charts;
-  return { items: rows.slice(0, 32), charts: finalCharts.slice(0, 7) };
+  return { items: rows.slice(0, 32), charts: charts.slice(0, 6) };
 }
 
 
@@ -1699,13 +1623,13 @@ function buildFiiDetailCharts(payload = {}, assetType = '') {
   const bundle = payload.assetChartBundle || payload.assetChartsMobile || payload.results?.assetChartBundle || payload.results?.assetChartsMobile || {};
   const charts = [];
 
-  const income = analysisChart('fii_detail_monthly_income', 'Rendimento mensal do FII', 'bar', bundle.fiiDistribution12m || bundle.dividendMonthly || payload.distribuicoes12m || payload.results?.distribuicoes12m, 'StatusInvest/Investidor10 rendimentos de FIIs', { valueKeys: ['amount', 'value', 'valor', 'rendimento', 'income', 'valuePerShare'], minPoints: 2, limit: 14, unit: 'R$' });
+  const income = analysisChart('fii_detail_monthly_income', 'Rendimento mensal do FII', 'line', bundle.fiiDistribution12m || bundle.dividendMonthly || payload.distribuicoes12m || payload.results?.distribuicoes12m, 'StatusInvest/Investidor10 rendimentos de FIIs', { valueKeys: ['amount', 'value', 'valor', 'rendimento', 'income', 'valuePerShare'], minPoints: 2, limit: 14, unit: 'R$' });
   if (income) charts.push(income);
 
-  const dy = analysisChart('fii_detail_dy_history', 'Dividend Yield histórico do FII', 'bar', bundle.dividendYieldHistory || bundle.fiiDividendYieldHistory || payload.dividendYieldHistory || payload.results?.dividendYieldHistory, 'StatusInvest/Investidor10 histórico de DY', { valueKeys: ['yieldPercent', 'dividendYield', 'dy', 'valuePercent', 'percent', 'percentage', 'value'], minPoints: 2, limit: 14, unit: '%' });
+  const dy = analysisChart('fii_detail_dy_history', 'Dividend Yield histórico do FII', 'line', bundle.dividendYieldHistory || bundle.fiiDividendYieldHistory || payload.dividendYieldHistory || payload.results?.dividendYieldHistory, 'StatusInvest/Investidor10 histórico de DY', { valueKeys: ['yieldPercent', 'dividendYield', 'dy', 'valuePercent', 'percent', 'percentage', 'value'], minPoints: 2, limit: 14, unit: '%' });
   if (dy) charts.push(dy);
 
-  const patrimony = analysisChart('fii_detail_patrimonial_value', 'Valor patrimonial por período', 'bar', bundle.equityEvolution || bundle.fiiPatrimonialInfo || payload.valorPatrimonialHistorico || payload.results?.valorPatrimonialHistorico, 'StatusInvest/Investidor10 valor patrimonial', { valueKeys: ['valorPatrimonialCota', 'patrimonialValue', 'valorPatrimonial', 'netWorth', 'equity', 'value'], minPoints: 2, limit: 12, unit: 'R$' });
+  const patrimony = analysisChart('fii_detail_patrimonial_value', 'Valor patrimonial por período', 'line', bundle.equityEvolution || bundle.fiiPatrimonialInfo || payload.valorPatrimonialHistorico || payload.results?.valorPatrimonialHistorico, 'StatusInvest/Investidor10 valor patrimonial', { valueKeys: ['valorPatrimonialCota', 'patrimonialValue', 'valorPatrimonial', 'netWorth', 'equity', 'value'], minPoints: 2, limit: 12, unit: 'R$' });
   if (patrimony) charts.push(patrimony);
 
   const historical = normalizeHistoricalIndicatorRecords(payload, 'FII');
@@ -1721,7 +1645,7 @@ function buildFiiDetailCharts(payload = {}, assetType = '') {
       charts.push({
         id: `fii_detail_${spec.id}`,
         title: `${spec.label} histórico`,
-        chartType: 'bar',
+        chartType: 'line',
         source: 'Investidor10 histórico de indicadores de FIIs',
         unit: spec.unit || '',
         series: [{ id: spec.id, label: spec.label, points }]
@@ -1771,7 +1695,7 @@ function section(id, title, type, items, source = 'VALORAE Proxy', extra = {}) {
     source,
     items: safeItems,
     charts: safeCharts,
-    message: ready ? undefined : 'Dados reais ainda não disponíveis para este bloco.'
+    message: ready ? undefined : 'Seção sem dados reais suficientes. O Proxy não envia valores sintéticos.'
   };
 }
 

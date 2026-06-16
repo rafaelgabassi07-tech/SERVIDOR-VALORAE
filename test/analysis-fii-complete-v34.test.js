@@ -104,10 +104,10 @@ assert.ok(fiiDetails.items.some(item => item.group === 'Lista de imóveis' && it
 assert.ok(fiiDetails.items.some(item => item.group === 'Distribuição de ativos' && item.label === 'Galpões logísticos'));
 assert.ok(fiiDetails.items.some(item => item.group === 'FIIs relacionados' && item.label === 'KNRI11'));
 assert.ok(!fiiDetails.items.some(item => item.group === 'FIIs relacionados' && item.label === 'HGLG11'), 'o próprio FII não deve aparecer como relacionado');
-assert.ok(fiiDetails.charts.some(chart => chart.id === 'fii_detail_monthly_income' && chart.chartType === 'line'));
-assert.ok(fiiDetails.charts.some(chart => chart.id === 'fii_detail_dy_history' && chart.chartType === 'line'));
+assert.ok(fiiDetails.charts.some(chart => chart.id === 'fii_detail_monthly_income' && chart.chartType === 'bar'));
+assert.ok(fiiDetails.charts.some(chart => chart.id === 'fii_detail_dy_history' && chart.chartType === 'bar'));
 assert.ok(fiiDetails.charts.some(chart => chart.id === 'fii_detail_asset_distribution' && chart.chartType === 'donut_composition'));
-assert.ok(fiiDetails.charts.every(chart => chart.chartType !== 'bar' && chart.chartType !== 'bar_line'), 'séries temporais de FIIs não podem voltar para barras');
+assert.ok(!fiiDetails.charts.some(chart => /line/.test(chart.chartType) && /monthly_income|dy_history/.test(chart.id)), 'rendimentos e DY de FII devem usar barras discretas, não linhas cruas');
 
 const comparisons = fiiResponse.sections.find(section => section.id === 'comparisons');
 assert.equal(comparisons.status, 'ready');

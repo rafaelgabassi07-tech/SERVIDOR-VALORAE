@@ -28,10 +28,14 @@ const response = buildAnalysisPageResponse({
 
 const assetCharts = response.sections.find(section => section.id === 'asset_charts')?.charts || [];
 const statementCharts = response.sections.find(section => section.id === 'financial_statements')?.charts || [];
-const forbiddenTimeSeriesTypes = new Set(['bar', 'bar_line', 'column', 'column_multi_financial_statement']);
+const barExpected = new Set(['dividend_history', 'dividend_yield_history', 'revenue_profit', 'equity_evolution', 'payout_history', 'income_statement_statement', 'cash_flow_statement']);
 for (const chart of [...assetCharts, ...statementCharts]) {
-  assert.ok(!forbiddenTimeSeriesTypes.has(chart.chartType), `${chart.id} não deve ser classificado como barra/coluna em séries temporais`);
+  if (barExpected.has(chart.id)) {
+    assert.ok(['bar', 'grouped_bar'].includes(chart.chartType), `${chart.id} deve usar barras quando o dado é periódico/discreto`);
+  }
 }
+const price = assetCharts.find(chart => chart.id === 'price_history');
+assert.equal(price?.chartType, 'line', 'cotação histórica continua em linha por ser evolução contínua');
 
 const fiiResponse = buildAnalysisPageResponse({
   ticker: 'HGLG11',
