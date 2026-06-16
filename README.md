@@ -1,7 +1,113 @@
+## 2026-06-16 — 21.12.121 — Checkpoint 37: Auditoria final da Análise
+
+- Revisão final do contrato único `/api/v1/analysis` com `AnalysisPageResponse` e `contractVersion = 26.analysis.v2`.
+- Testes adicionados para ticker inexistente, resposta parcial, FIIs completos, comparadores com fonte simulada aninhada e gráficos alinhados por período real.
+- Confirmado que gráficos temporais seguem como `line`/`multi_line` e composições seguem como `donut_composition` ou composição percentual.
+- Confirmado que `missingSignals` não aponta seções que já têm `items[]` ou `charts[]` reais.
+- Validado que o APK mantém busca inteligente por `submittedTicker` e não chama `/api/v1/analysis` a cada letra.
+- Novo teste regressivo: `analysis-final-audit-v37.test.js`.
+
+## 2026-06-16 — 21.12.120 — Checkpoint 36: Refinamento visual final da Análise
+
+- A página Análise ganhou mapa visual compacto dos blocos recebidos pelo contrato único.
+- Seções longas, como Histórico de Indicadores, Demonstrativos e FIIs completos, agora podem ser recolhidas com prévia curta.
+- Cabeçalhos das seções mostram fonte, quantidade de itens e quantidade de gráficos, reduzindo ruído visual.
+- Sinalizações foram reduzidas e mantidas discretas para não competir com dados reais.
+- A busca inteligente do Checkpoint 35 foi revisada e mantida: `/api/v1/analysis` só carrega após confirmação/toque em sugestão.
+- Novo teste regressivo: `analysis-visual-refinement-v36.test.js`.
+
+## 2026-06-16 — 21.12.119 — Checkpoint 35: Busca inteligente da Análise
+
+- `/api/v1/assets` ganhou política `analysis_intelligent_search_v35` para sugestões por ticker, nome e segmento.
+- Sugestões retornam sem preço/variação simulados, com `rank`, `match` e fonte `VALORAE_CATALOG`.
+- O APK separa sugestões de carregamento: `/api/v1/analysis` só é chamado após confirmação ou toque em sugestão.
+- Adicionados últimos pesquisados, favoritos/carteira priorizados, debounce de 360 ms e estado sem resultado.
+- Novo teste regressivo: `analysis-intelligent-search-v35.test.js`.
+
+## 2026-06-16 — 21.12.118 — Revisão de fidelidade dos gráficos da Análise
+
+Revisão específica para garantir que os gráficos da página Análise sejam fiéis à fonte e ao tipo de dado recebido.
+
+- Comparadores `multi_line` agora só são montados quando ativo e índice/par têm pelo menos dois períodos reais em comum.
+- `Lucro x Cotação` passa a ser classificado como `multi_line`, preservando as duas séries no APK.
+- Distribuições de ativos de FIIs rejeitam percentuais inválidos, zerados ou acima de 100%.
+- Novo teste `analysis-chart-source-fidelity-v34-review.test.js` cobre fonte explícita, pontos numéricos, alinhamento de períodos e composições.
+- Mantido contrato único `/api/v1/analysis`, sem HTML, WebView, iframe, imagem externa ou dado simulado.
+
+## 2026-06-16 — 21.12.117 — Checkpoint 34: FIIs completos na Análise
+
+- Implementada seção `fii_details` no contrato único `/api/v1/analysis` para consolidar dados específicos de FIIs.
+- Normalizados cadastro, gestão, rendimentos, P/VP, valor patrimonial, vacância, cotistas, cotas emitidas, imóveis, distribuição de ativos e FIIs relacionados.
+- Gráficos específicos de FIIs continuam em linha/composição real, sem retornar a barras temporais.
+- Comparadores de FIIs seguem bloqueando séries simuladas e exigindo dados reais alinhados.
+- Testes do Proxy passaram com 33 test files e failures=0.
+
+## 2026-06-16 — 21.12.116 — Revisão global dos Checkpoints 27 a 33 da Análise
+
+- Corrigido `npm test` do Proxy para funcionar também quando o pacote Proxy é extraído sozinho, sem depender de uma pasta APK irmã.
+- Reforçado `dualSeriesChart` para aceitar gráficos `multi_line` somente quando as duas séries tiverem pelo menos dois períodos em comum.
+- Atualizada política de fontes do `AnalysisPageResponse` para explicitar StatusInvest/Investidor10, Yahoo Finance, B3 e BCB conforme o tipo de dado.
+- Mantido contrato único `/api/v1/analysis`, `AnalysisPageResponse` e `contractVersion = 26.analysis.v2`.
+- Sem alteração de `versionCode`/`versionName` do APK.
+
+## 2026-06-16 — 21.12.115 — Revisão do Checkpoint 33: Comparadores da Análise
+
+- Revisada fielmente a seção `comparisons` do `/api/v1/analysis`.
+- Mantido `AnalysisPageResponse` (`26.analysis.v2`) e gráficos `multi_line` para ativo x índice/par.
+- Reforçada a proteção contra comparadores falsos: agora flags `simulated`, `synthetic`, `fake`, `proxyTickerUsed`, `reconstructedFromYahooSnapshot` e textos de fallback falso são bloqueados também dentro de `series[]` e `points[]`, não só no comparador raiz.
+- Pares semelhantes com `proxyTickerUsed`, ETF/proxy ticker ou fonte simulada são descartados.
+- `npm run check` e `npm test` passaram com 32 arquivos de teste e 0 falhas.
+
+## 2026-06-16 — 21.12.114 — Checkpoint 33: Comparadores da Análise
+
+- A seção `comparisons` do `/api/v1/analysis` passa a normalizar comparadores reais como `multi_line`.
+- Ativo x índice exige duas séries alinhadas: série do ativo e série do índice/par, com pelo menos 2 pontos cada.
+- IBOV, IFIX, CDI e IPCA só aparecem quando houver fonte confiável; SMLL/IDIV ficam suportados quando vierem de fonte real já conhecida.
+- Rejeitados índice simulado, proxy ticker, ETF substituto, próprio ticker como par e comparador sem série do ativo.
+- O APK ganhou bloco visual próprio para Comparadores, preservando Canvas de linhas e sem barras para séries temporais.
+- Teste regressivo: `analysis-comparators-v33.test.js`.
+
+## 2026-06-16 — 21.12.112 — Revisão dos gráficos da Análise
+
+- Corrigida a classificação visual dos gráficos do contrato `/api/v1/analysis`.
+- Séries temporais de proventos, receitas/lucros, evolução patrimonial, payout e demonstrativos passam a sair como `line`/`multi_line`, não `bar`/`bar_line`.
+- Distribuições, como ativos de FIIs e receitas por negócio/região, passam a sair como `donut_composition`.
+- O APK foi ajustado para desenhar linhas nativas no Canvas e composições via arco/donut, sem `drawRoundRect` para séries temporais.
+- Adicionado teste regressivo `analysis-chart-rendering-v31-review.test.js`.
+- Sem HTML, iframe, WebView, imagem externa ou dados simulados.
+
+
+## 2026-06-16 — 21.12.111 — Checkpoint 31: Sobre Empresa/Fundo na Análise
+
+- A seção `company_profile` passa a normalizar descrição e cadastro real de empresas e FIIs.
+- Empresas: setor, subsetor, segmento, CNPJ, site, atividade principal, governança, tag along, free float, número de ações, valor de mercado e patrimônio líquido.
+- FIIs: razão social, CNPJ, administrador, gestor, segmento, tipo de fundo, mandato, tipo de gestão, prazo, taxa de administração e público-alvo.
+- Mantido `/api/v1/analysis` como contrato único da página Análise, sem HTML ou dados simulados.
+
+## 2026-06-16 — Checkpoint 30 — DRE, Balanço e Fluxo de Caixa
+
+- `/api/v1/analysis` mantém `AnalysisPageResponse` (`26.analysis.v2`).
+- A seção `financial_statements` passa a normalizar demonstrativos reais: DRE, Balanço e Fluxo de Caixa.
+- DRE cobre Receita líquida, Lucro bruto, EBIT, EBITDA e Lucro líquido.
+- Balanço cobre Ativos, Passivos, Patrimônio líquido, Dívida bruta, Dívida líquida e Caixa.
+- Fluxo de Caixa cobre Fluxo operacional, Fluxo de investimento e Fluxo de financiamento.
+- A seção envia `items[]` para tabela e `charts[]` apenas quando há séries numéricas reais com pelo menos dois períodos.
+- Não há HTML, iframe, imagem externa, índice ou valor simulado.
+- Patch: `21.12.110-analysis-financial-statements-v30`.
+
+
+## 2026-06-16 — Checkpoint 29 — Histórico de Indicadores completo
+
+- `/api/v1/analysis` mantém `AnalysisPageResponse` (`26.analysis.v2`).
+- `historical_indicators` passa a normalizar históricos reais de Ações e FIIs em tabela e gráficos estruturados.
+- Ações: P/L, P/VP, DY, ROE, ROIC, margens, dívida, liquidez e crescimento de receita/lucro.
+- FIIs: P/VP, DY, vacância, valor patrimonial por cota, rendimento por cota, cotistas e liquidez.
+- Gráficos históricos só são emitidos com dois ou mais pontos reais. Sem HTML, iframe, WebView, imagem externa ou simulação.
+
 # VALORAE Proxy
 
 Core público: 21.12.0  
-Patch interno: 21.12.107-analysis-real-charts-v28
+Patch interno: 21.12.108-analysis-real-charts-v28-review
 
 
 Proxy enxuto para integração mobile do VALORAE, pronto para ser anexado diretamente na árvore do AI Studio.
@@ -38,6 +144,13 @@ Resposta compatível com o APK:
 O Proxy aceita aliases comuns como `ticker`, `symbol`, `ativo`, `codigo`, `papel`, `slug`, URL do Investidor10 ou texto contendo o ticker.
 
 ## Checkpoint 28 — Gráficos reais da Análise
+
+### Revisão do Checkpoint 28 — validação dos gráficos
+
+- Comparadores não usam o próprio ticker como índice falso.
+- `Lucro x Cotação` só é emitido quando houver cotação e lucro reais em pelo menos dois períodos.
+- `charts[].series[].points[]` continua sendo o único formato aceito para gráficos da Análise.
+
 
 A página Análise usa o endpoint exclusivo `/api/v1/analysis` e o contrato `AnalysisPageResponse`. Para gráficos, o Proxy envia somente JSON estruturado em `sections[].charts[].series[].points`; o APK renderiza nativamente em Canvas.
 
@@ -151,3 +264,9 @@ O APK deve preferir `get_snapshots` e `upsert_snapshots` quando precisar buscar/
 ### Portfolio Returns
 
 O Proxy expõe `POST /api/v1/portfolio/returns` para o modal Retorno do APK. O contrato consolida histórico real da carteira, transações, proventos recebidos e benchmarks como CDI, IPCA, IBOV e IFIX em uma única resposta para o app.
+
+### Checkpoint 32 — Negócios e Regiões de Receita
+
+Patch: `21.12.113-analysis-revenue-breakdown-v32`.
+
+A rota `/api/v1/analysis` mantém o contrato `AnalysisPageResponse` e passa a preencher a seção `revenue_breakdown` quando houver percentuais reais de receita por negócio, região ou mercado interno/externo. O Proxy não cria percentuais sintéticos: se a fonte não entregar dados válidos, a seção permanece vazia e sinalizada.

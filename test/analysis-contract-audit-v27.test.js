@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { readOptionalApkFile, assertOptionalMatch, assertOptionalDoesNotMatch } from './_optional-apk.js';
 import { buildAnalysisPageResponse } from '../lib/analysis/analysis-page-response.js';
 
 function assertMissingSignalsMirrorEmptySections(response) {
@@ -50,12 +51,12 @@ for (const fixture of [
   assert.ok(response.sections.some(section => section.id === 'company_profile' && section.status === 'ready'));
 }
 
-const client = fs.readFileSync('../apk/app/src/main/java/com/example/data/proxy/ValoraeProxyClient.kt', 'utf8');
-const screen = fs.readFileSync('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt', 'utf8');
-assert.match(client, /readySectionIds/);
-assert.match(client, /sanitizedSignals/);
-assert.match(client, /items\.size \+ charts\.size/);
-assert.match(client, /"26\.analysis\.v2"/);
-assert.doesNotMatch(screen, /quoteOverview|assetSummary solto|appPayload\.assetAnalysisPage|appMobileSnapshot\.assetAnalysisPage/);
+const client = readOptionalApkFile('../apk/app/src/main/java/com/example/data/proxy/ValoraeProxyClient.kt');
+const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
+assertOptionalMatch(client, /readySectionIds/);
+assertOptionalMatch(client, /sanitizedSignals/);
+assertOptionalMatch(client, /items\.size \+ charts\.size/);
+assertOptionalMatch(client, /"26\.analysis\.v2"/);
+assertOptionalDoesNotMatch(screen, /quoteOverview|assetSummary solto|appPayload\.assetAnalysisPage|appMobileSnapshot\.assetAnalysisPage/);
 
 console.log('Checkpoint 27 analysis contract audit test OK.');

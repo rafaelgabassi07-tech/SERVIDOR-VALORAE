@@ -28,7 +28,7 @@ Data: 2026-06-16
 
 ## Validação
 
-- Teste novo: `test/analysis-real-charts-v28.test.js`.
+- Teste novo: `test/analysis-real-charts-v28-review.test.js`.
 - Resultado local do Proxy: `26 test files; failures=0`.
 - Gradle do APK não foi executado porque o pacote não contém `gradlew` e o ambiente não possui `gradle` instalado. Foi feita validação estática dos arquivos Kotlin alterados.
 
@@ -36,4 +36,13 @@ Data: 2026-06-16
 
 - APK `versionCode`: `26061401` — mantido.
 - APK `versionName`: `2026.06.14.1` — mantido.
-- Proxy patch: `21.12.107-analysis-real-charts-v28`.
+- Proxy patch: `21.12.108-analysis-real-charts-v28-review`.
+
+## Revisão adicional — 2026-06-16
+
+Após nova auditoria do Checkpoint 28, foram reforçadas duas proteções:
+
+- `buildAssetChartBundle()` não cria mais `indexComparison` usando o próprio ticker; comparadores só entram quando houver série real de índice ou par semelhante.
+- `buildAssetCharts()` só permite `profit_vs_quote` quando houver cotação e lucro reais em pelo menos dois períodos; série zerada ou mal alinhada é descartada.
+
+O teste `analysis-real-charts-v28.test.js` foi ampliado para garantir essas duas regras e preservar a renderização por `charts[].series[].points[]`.

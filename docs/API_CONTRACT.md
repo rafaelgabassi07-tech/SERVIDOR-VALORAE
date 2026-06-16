@@ -1,3 +1,23 @@
+## 2026-06-16 — Checkpoint 30 — DRE, Balanço e Fluxo de Caixa
+
+- `/api/v1/analysis` mantém `AnalysisPageResponse` (`26.analysis.v2`).
+- A seção `financial_statements` passa a normalizar demonstrativos reais: DRE, Balanço e Fluxo de Caixa.
+- DRE cobre Receita líquida, Lucro bruto, EBIT, EBITDA e Lucro líquido.
+- Balanço cobre Ativos, Passivos, Patrimônio líquido, Dívida bruta, Dívida líquida e Caixa.
+- Fluxo de Caixa cobre Fluxo operacional, Fluxo de investimento e Fluxo de financiamento.
+- A seção envia `items[]` para tabela e `charts[]` apenas quando há séries numéricas reais com pelo menos dois períodos.
+- Não há HTML, iframe, imagem externa, índice ou valor simulado.
+- Patch: `21.12.110-analysis-financial-statements-v30`.
+
+
+## 2026-06-16 — Checkpoint 29 — Histórico de Indicadores completo
+
+- `/api/v1/analysis` mantém `AnalysisPageResponse` (`26.analysis.v2`).
+- `historical_indicators` passa a normalizar históricos reais de Ações e FIIs em tabela e gráficos estruturados.
+- Ações: P/L, P/VP, DY, ROE, ROIC, margens, dívida, liquidez e crescimento de receita/lucro.
+- FIIs: P/VP, DY, vacância, valor patrimonial por cota, rendimento por cota, cotistas e liquidez.
+- Gráficos históricos só são emitidos com dois ou mais pontos reais. Sem HTML, iframe, WebView, imagem externa ou simulação.
+
 # API Contract — VALORAE Proxy Mobile
 
 ## Rota compatível com APK

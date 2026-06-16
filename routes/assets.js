@@ -66,23 +66,48 @@ function looksLikeFullB3Ticker(rawQuery = '') {
   return /^[A-Z]{4}[0-9]{1,2}[A-Z]?$/.test(canonicalizeTicker(rawQuery));
 }
 
-function buildAssetSuggestions(rawQuery = '', max = 8) {
-  const clean = canonicalizeTicker(rawQuery).slice(0, 12);
+function normalizeSearchText(raw = '') {
+  return String(raw || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
+}
+
+export function buildAssetSuggestions(rawQuery = '', max = 8) {
+  const clean = normalizeSearchText(rawQuery).slice(0, 24);
   if (clean.length < 2) return [];
-  return ASSET_SUGGESTION_CATALOG
-    .filter(([ticker, name, segment]) => ticker.startsWith(clean) || String(name).toUpperCase().includes(clean) || String(segment).toUpperCase().includes(clean))
-    .slice(0, max)
-    .map(([ticker, name, segment]) => ({
-      symbol: ticker,
-      ticker,
-      name,
-      assetClass: inferAssetType(ticker),
-      segment,
-      suggestion: true,
-      source: 'VALORAE_CATALOG',
-      price: null,
-      variationPercent: null,
-    }));
+  const scored = ASSET_SUGGESTION_CATALOG
+    .map(([ticker, name, segment]) => {
+      const tickerKey = normalizeSearchText(ticker);
+      const nameKey = normalizeSearchText(name);
+      const segmentKey = normalizeSearchText(segment);
+      const match = tickerKey.startsWith(clean) ? 'ticker_prefix'
+        : tickerKey.includes(clean) ? 'ticker_contains'
+          : nameKey.includes(clean) ? 'name'
+            : segmentKey.includes(clean) ? 'segment'
+              : null;
+      if (!match) return null;
+      const score = match === 'ticker_prefix' ? 100 : match === 'ticker_contains' ? 85 : match === 'name' ? 70 : 55;
+      return { ticker, name, segment, match, score };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score || a.ticker.localeCompare(b.ticker))
+    .slice(0, max);
+  return scored.map((item, index) => ({
+    symbol: item.ticker,
+    ticker: item.ticker,
+    name: item.name,
+    assetClass: inferAssetType(item.ticker),
+    segment: item.segment,
+    suggestion: true,
+    rank: index + 1,
+    match: item.match,
+    searchPolicy: 'analysis_intelligent_search_v35',
+    source: 'VALORAE_CATALOG',
+    price: null,
+    variationPercent: null,
+  }));
 }
 
 export default async function handler(req, res) {
@@ -115,6 +140,10 @@ export default async function handler(req, res) {
           assets: suggestions,
           results: suggestions,
           source: 'VALORAE_CATALOG',
+          searchPolicy: 'analysis_intelligent_search_v35',
+          minQueryLength: 2,
+          debounceRecommendedMs: 360,
+          analysisEndpoint: '/api/v1/analysis',
           message: suggestions.length ? 'Sugestões de ticker retornadas sem simular cotação.' : 'Nenhum ticker sugerido para a busca informada.',
         }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'assets-suggestions', cacheControl: 'private, max-age=300, stale-while-revalidate=900' });
       }

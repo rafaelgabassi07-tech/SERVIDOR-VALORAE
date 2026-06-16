@@ -26,10 +26,10 @@ Transformar os gráficos preliminares da página Análise em gráficos reais e �
 - Nenhum HTML, iframe, WebView ou imagem de site foi introduzido.
 
 ## Validação
-- Adicionado teste regressivo `analysis-real-charts-v28.test.js`.
+- Adicionado teste regressivo `analysis-real-charts-v28-review.test.js`.
 - `npm test` do Proxy passou com 26 arquivos e 0 falhas.
 
 ## Versões
-- Proxy: `21.12.107-analysis-real-charts-v28`.
+- Proxy: `21.12.108-analysis-real-charts-v28-review`.
 - APK `versionCode`: mantido em `26061401`.
 - APK `versionName`: mantido em `2026.06.14.1`.

@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.107-analysis-real-charts-v28",
-  "patch": "21.12.107-analysis-real-charts-v28",
-  "releasePatch": "21.12.107-analysis-real-charts-v28",
-  "latestInternalPatch": "21.12.107-analysis-real-charts-v28",
-  "description": "Proxy VALORAE com Checkpoint 28: gráficos reais da Análise em séries JSON estruturadas para renderização nativa no APK, sem HTML, iframe, imagem ou simulação de dados.",
+  "release": "21.12.121-analysis-final-audit-v37",
+  "patch": "21.12.121-analysis-final-audit-v37",
+  "releasePatch": "21.12.121-analysis-final-audit-v37",
+  "latestInternalPatch": "21.12.121-analysis-final-audit-v37",
+  "description": "Proxy VALORAE com auditoria final da página Análise, validando contrato único, edge cases, gráficos fiéis à fonte e sinalizações sem dados falsos.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": []
