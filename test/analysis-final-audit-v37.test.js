@@ -107,7 +107,7 @@ assert.ok(!(section(fakeComparison, 'comparisons')?.charts || []).some(chart => 
 const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
 const client = readOptionalApkFile('../apk/app/src/main/java/com/example/data/proxy/ValoraeProxyClient.kt');
 assertOptionalMatch(screen, /submittedTicker/, 'Busca precisa separar texto digitado de ticker consultado');
-assertOptionalMatch(screen, /AnalysisVisualOverview/, 'Mapa visual do checkpoint 36 precisa permanecer');
+assertOptionalMatch(screen, /AnalysisCategoryHeader/, 'Hierarquia visual da Análise precisa permanecer');
 assertOptionalMatch(screen, /AnalysisMissingSignalsSection/, 'Sinalização discreta precisa permanecer');
 assertOptionalMatch(screen, /FiiDetailsBlock/, 'FIIs completos precisam permanecer no APK');
 assertOptionalMatch(screen, /ComparisonAnalysisBlock/, 'Comparadores precisam permanecer no APK');

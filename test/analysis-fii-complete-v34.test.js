@@ -124,7 +124,7 @@ assert.ok(emptyFii.missingSignals.some(signal => signal.id === 'fii_details'));
 
 const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
 assertOptionalMatch(screen, /FiiDetailsBlock/);
-assertOptionalMatch(screen, /FiiDetailsGroup/);
+assertOptionalMatch(screen, /FiiDetailRow/);
 assertOptionalMatch(screen, /fii_details/);
 assertOptionalDoesNotMatch(screen, /assetSummary solto|quoteOverview|appPayload\.assetAnalysisPage|appMobileSnapshot\.assetAnalysisPage/);
 

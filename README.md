@@ -1,3 +1,11 @@
+## 2026-06-16 — 21.12.133-analysis-solid-units-v50
+
+Patch: `21.12.133-analysis-solid-units-v50`
+
+- Reforça a leitura de valores monetários com unidades da fonte, incluindo mil, milhões, bilhões e trilhões.
+- Padroniza DRE e Balanço por período em formato compacto real, sem transformar snapshot pontual em demonstrativo.
+- Adiciona teste regressivo para garantir que séries de DRE e Balanço preservem valores em escala correta.
+
 ## 2026-06-16 — 21.12.132-analysis-clean-mobile-v48
 
 Patch: `21.12.132-analysis-clean-mobile-v48`

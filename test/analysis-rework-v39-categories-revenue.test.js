@@ -33,8 +33,8 @@ assert.ok(revenue.charts.every(chart => chart.series.every(serie => serie.points
 
 const apk = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
 assertOptionalMatch(apk, /AnalysisCategoryBlock/);
-assertOptionalMatch(apk, /Gráficos visíveis/);
-assertOptionalMatch(apk, /Composição visual/);
+assertOptionalMatch(apk, /RichAnalysisChart/);
+assertOptionalMatch(apk, /Detalhamento da receita/);
 assertOptionalMatch(apk, /Detalhamento da fonte/);
 assertOptionalMatch(apk, /isCompositionAnalysisChart/);
 assertOptionalDoesNotMatch(apk, /CompactSectionPreview/);

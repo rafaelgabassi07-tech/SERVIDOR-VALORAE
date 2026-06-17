@@ -51,7 +51,7 @@ const profile = response.sections.find(section => section.id === 'company_profil
 const firmValue = profile.items.find(item => item.id === 'profile_enterpriseValue');
 assert.ok(firmValue, 'Valor da firma deve chegar na área Sobre a empresa quando a fonte informa o campo');
 assert.equal(firmValue.label, 'Valor da firma');
-assert.equal(firmValue.value, 'R$ 854,70 Bilhões', 'Valor da firma deve usar valor real compacto da fonte e não card vazio');
+assert.equal(firmValue.value, 'R$ 854,70 bi', 'Valor da firma deve usar valor real compacto da fonte e não card vazio');
 assert.ok(!profile.items.some(item => item.label === 'Valor da firma' && !String(item.value || '').trim()), 'não pode existir card Valor da firma vazio');
 
 console.log('Analysis clean mobile v48 comparison/profile test OK.');
