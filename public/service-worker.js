@@ -1,4 +1,4 @@
-const CACHE = 'valorae-proxy-server-v21-12-132';
+const CACHE = 'valorae-proxy-server-v21-12-140';
 const STATIC_ASSETS = ['/server.html', '/manifest.webmanifest'];
 
 self.addEventListener('install', event => {

@@ -1,3 +1,12 @@
+## 2026-06-16 — 21.12.134-analysis-source-routing-v51
+
+Patch: `21.12.134-analysis-source-routing-v51`
+
+- Corrige o roteamento do Histórico de Indicadores para o contrato da Análise, incluindo `assetChartsCanonical.company.fundamentalIndicatorHistory`, `assetChartsCanonical.fii.fundamentalIndicatorHistory`, `sections.historicoIndicadores` e tabelas reais da fonte.
+- Corrige a Posição acionária para aceitar `results.sections.empresa.posicaoAcionaria`, mapas de acionistas, arrays tabulares e extração HTML real do Investidor10.
+- Reforça o extractor do Investidor10 para encaminhar `rawJson.historicoIndicadoresFii` ao canonical de FIIs.
+- Adiciona teste regressivo v51 garantindo que as duas pendências não entrem em `missingSignals` quando houver dados reais.
+
 ## 2026-06-16 — 21.12.133-analysis-solid-units-v50
 
 Patch: `21.12.133-analysis-solid-units-v50`

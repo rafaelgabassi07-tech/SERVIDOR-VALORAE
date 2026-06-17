@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.133-analysis-solid-units-v50",
-  "patch": "21.12.133-analysis-solid-units-v50",
-  "releasePatch": "21.12.133-analysis-solid-units-v50",
-  "latestInternalPatch": "21.12.133-analysis-solid-units-v50",
-  "description": "Proxy Valorae alinhado ao checkpoint v48 da página Análise: comparadores com índices ampliados, Valor da firma corrigido e contrato real-only preservado.",
+  "release": "21.12.140-analysis-modals-connected-v57",
+  "patch": "21.12.140-analysis-modals-connected-v57",
+  "releasePatch": "21.12.140-analysis-modals-connected-v57",
+  "latestInternalPatch": "21.12.140-analysis-modals-connected-v57",
+  "description": "Proxy Valorae checkpoint v57 da página Análise: superfícies portfolio_asset_modal e ranking_asset_modal passam a ser selecionáveis por query, mantendo consumerContract compartilhado e tela limpa sem dados sintéticos.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": []

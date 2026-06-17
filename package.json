@@ -22,7 +22,7 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.133-analysis-solid-units-v50",
+    "releasePatch": "21.12.140-analysis-modals-connected-v57",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   }

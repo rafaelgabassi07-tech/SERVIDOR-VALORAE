@@ -1,3 +1,30 @@
+
+## 2026-06-16 — 21.12.140-analysis-modals-connected-v57
+
+- Conecta a página Análise aos consumidores reais `portfolio_asset_modal` e `ranking_asset_modal`.
+- `/api/v1/analysis` passa a aceitar `surface`/`consumer` e marca a superfície ativa no `consumerContract`.
+- Mantém a regra real-only: sem dados simulados, sem diagnóstico técnico na UI final.
+- Adiciona teste `analysis-modals-connected-v57.test.js` para carteira e ranking.
+
+## 2026-06-16 — 21.12.135-analysis-source-coverage-v52
+
+Patch: `21.12.135-analysis-source-coverage-v52`
+
+- Ampliada a cobertura real da página Análise para Investidor10 e StatusInvest em ações e FIIs.
+- Incluído roteamento de PEG Ratio para ações e histórico/indicadores quando disponível.
+- Adicionadas seções limpas para Patrimônio e Contábil do FII e Portfólio do FII no contrato `/api/v1/analysis`.
+- Encaminhados `fiiInfo`, lista de imóveis, distribuição por estado, distribuição de ativos, comparação de FIIs e dados patrimoniais capturados de caminhos canonical/sections/results.
+- Mantida política real-only: nenhuma informação é simulada quando a fonte não fornece dados.
+
+## 2026-06-16 — 21.12.134-analysis-source-routing-v51
+
+Patch: `21.12.134-analysis-source-routing-v51`
+
+- Corrige o roteamento do Histórico de Indicadores para o contrato da Análise, incluindo `assetChartsCanonical.company.fundamentalIndicatorHistory`, `assetChartsCanonical.fii.fundamentalIndicatorHistory`, `sections.historicoIndicadores` e tabelas reais da fonte.
+- Corrige a Posição acionária para aceitar `results.sections.empresa.posicaoAcionaria`, mapas de acionistas, arrays tabulares e extração HTML real do Investidor10.
+- Reforça o extractor do Investidor10 para encaminhar `rawJson.historicoIndicadoresFii` ao canonical de FIIs.
+- Adiciona teste regressivo v51 garantindo que as duas pendências não entrem em `missingSignals` quando houver dados reais.
+
 ## 2026-06-16 — 21.12.133-analysis-solid-units-v50
 
 Patch: `21.12.133-analysis-solid-units-v50`
