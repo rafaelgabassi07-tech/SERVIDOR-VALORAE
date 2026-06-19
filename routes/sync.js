@@ -7,7 +7,13 @@ const SNAPSHOT_TABLE = process.env.VALORAE_SUPABASE_SNAPSHOT_TABLE || 'valorae_u
 const CLIENTS_TABLE = process.env.VALORAE_SUPABASE_CLIENTS_TABLE || 'valorae_sync_clients';
 const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'valorae_transactions';
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
-const CORE_VERSION = '21.12.147-sync-pending-diagnostics-v84';
+const CORE_VERSION = '21.12.149-sync-timestamp-normalization-v86';
+
+const SNAPSHOT_FULL_SELECT = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
+const SNAPSHOT_LEGACY_SELECT = 'payload,updated_at,domain,snapshot_key,user_id';
+const SNAPSHOT_CACHE_COLUMNS = Object.freeze(['cache_scope', 'cache_ttl_seconds', 'expires_at', 'source_updated_at', 'etag', 'payload_size_bytes']);
+const SNAPSHOT_LEGACY_COMPAT_MESSAGE = 'Tabela valorae_user_snapshots sem colunas de cache v85; rode supabase/002_valorae_snapshot_cache_columns_v85.sql para habilitar TTL/etag, ou mantenha o Proxy v85 que salva em modo compatível.';
+
 const SYNC_CAPABILITIES = Object.freeze([
   'health',
   'diagnostics',
@@ -113,6 +119,34 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function normalizePostgrestTimestamp(value, { allowNull = true } = {}) {
+  if (value == null || value === '') return allowNull ? null : nowIso();
+  if (value instanceof Date && Number.isFinite(value.getTime())) return value.toISOString();
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    const millis = Math.abs(value) > 9999999999 ? value : value * 1000;
+    const date = new Date(millis);
+    return Number.isFinite(date.getTime()) ? date.toISOString() : (allowNull ? null : nowIso());
+  }
+  const raw = String(value).trim();
+  if (!raw) return allowNull ? null : nowIso();
+  if (/^\d{10,17}$/.test(raw)) {
+    const numeric = Number(raw);
+    if (Number.isFinite(numeric)) {
+      const millis = raw.length >= 13 ? numeric : numeric * 1000;
+      const date = new Date(millis);
+      return Number.isFinite(date.getTime()) ? date.toISOString() : (allowNull ? null : nowIso());
+    }
+  }
+  const br = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (br) {
+    const date = new Date(Date.UTC(Number(br[3]), Number(br[2]) - 1, Number(br[1]), Number(br[4] || 0), Number(br[5] || 0), Number(br[6] || 0)));
+    return Number.isFinite(date.getTime()) ? date.toISOString() : (allowNull ? null : nowIso());
+  }
+  const parsed = Date.parse(raw);
+  if (Number.isFinite(parsed)) return new Date(parsed).toISOString();
+  return allowNull ? null : nowIso();
+}
+
 function clientSecretHash(userId, clientSecret) {
   const pepper = String(process.env.VALORAE_SUPABASE_CLIENT_SECRET_PEPPER || process.env.VALORAE_SUPABASE_SYNC_TOKEN || '').trim();
   return crypto.createHash('sha256').update(`${pepper}:${userId}:${clientSecret}`).digest('hex');
@@ -195,7 +229,7 @@ function safeRecord(input = {}, forcedUserId = '') {
   }
   const ttl = Number(input.cache_ttl_seconds ?? input.cacheTtlSeconds ?? input.ttlSeconds ?? 0);
   const payload = input.encrypted ? null : (input.payload ?? {});
-  const explicitExpiresAt = safeText(input.expires_at || input.expiresAt || '', 80);
+  const explicitExpiresAt = normalizePostgrestTimestamp(input.expires_at ?? input.expiresAt ?? null);
   const expiresAt = explicitExpiresAt || (Number.isFinite(ttl) && ttl > 0 ? new Date(Date.now() + ttl * 1000).toISOString() : null);
   const payloadSize = payload == null ? 0 : Buffer.byteLength(JSON.stringify(payload), 'utf8');
   return {
@@ -209,13 +243,13 @@ function safeRecord(input = {}, forcedUserId = '') {
     cache_scope: safeText(input.cache_scope || input.cacheScope || 'user', 40),
     cache_ttl_seconds: Number.isFinite(ttl) && ttl > 0 ? Math.floor(ttl) : null,
     expires_at: expiresAt,
-    source_updated_at: safeText(input.source_updated_at || input.sourceUpdatedAt || '', 80) || null,
+    source_updated_at: normalizePostgrestTimestamp(input.source_updated_at ?? input.sourceUpdatedAt ?? null),
     etag: safeText(input.etag || '', 160) || null,
     payload_size_bytes: payloadSize,
     encrypted: Boolean(input.encrypted),
     payload,
     payload_ciphertext: input.encrypted ? String(input.payload_ciphertext || input.payloadCiphertext || '') : null,
-    updated_at: input.updated_at || input.updatedAt || nowIso(),
+    updated_at: normalizePostgrestTimestamp(input.updated_at ?? input.updatedAt ?? null, { allowNull: false }),
   };
 }
 
@@ -271,6 +305,100 @@ async function supabaseFetch(path, init = {}) {
   return json ?? text;
 }
 
+
+function isSnapshotCacheColumnMissingError(err) {
+  const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`.toLowerCase();
+  return err?.code === 'PGRST204' && SNAPSHOT_CACHE_COLUMNS.some((column) => text.includes(column.toLowerCase())) ||
+    SNAPSHOT_CACHE_COLUMNS.some((column) => text.includes(`'${column.toLowerCase()}' column`) || text.includes(`\"${column.toLowerCase()}\" column`));
+}
+
+function legacySnapshotRow(row = {}) {
+  return {
+    user_id: row.user_id,
+    domain: row.domain,
+    snapshot_key: row.snapshot_key,
+    payload: row.payload ?? {},
+    updated_at: row.updated_at || nowIso(),
+  };
+}
+
+function legacySnapshotRows(rows = []) {
+  return rows.map((row) => legacySnapshotRow(row));
+}
+
+async function postSnapshotRows(rows) {
+  const payload = Array.isArray(rows) ? rows : [rows];
+  try {
+    await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?on_conflict=user_id,domain,snapshot_key`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(rows),
+    });
+    return { schemaMode: 'full', degraded: false };
+  } catch (err) {
+    if (!isSnapshotCacheColumnMissingError(err)) throw err;
+    await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?on_conflict=user_id,domain,snapshot_key`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(Array.isArray(rows) ? legacySnapshotRows(payload) : legacySnapshotRow(rows)),
+    });
+    return {
+      schemaMode: 'legacy_snapshot_columns',
+      degraded: true,
+      warning: SNAPSHOT_LEGACY_COMPAT_MESSAGE,
+      missingColumns: SNAPSHOT_CACHE_COLUMNS,
+    };
+  }
+}
+
+async function fetchSnapshotRowsWithCompat(queryBuilder) {
+  try {
+    return {
+      rows: await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?${queryBuilder(SNAPSHOT_FULL_SELECT)}`, { method: 'GET' }),
+      schemaMode: 'full',
+      degraded: false,
+    };
+  } catch (err) {
+    if (!isSnapshotCacheColumnMissingError(err)) throw err;
+    return {
+      rows: await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?${queryBuilder(SNAPSHOT_LEGACY_SELECT)}`, { method: 'GET' }),
+      schemaMode: 'legacy_snapshot_columns',
+      degraded: true,
+      warning: SNAPSHOT_LEGACY_COMPAT_MESSAGE,
+      missingColumns: SNAPSHOT_CACHE_COLUMNS,
+    };
+  }
+}
+
+async function probeSnapshotCacheColumns() {
+  const started = Date.now();
+  const checks = [];
+  for (const column of SNAPSHOT_CACHE_COLUMNS) {
+    try {
+      await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?select=${column}&limit=1`, { method: 'GET' });
+      checks.push({ column, ok: true });
+    } catch (err) {
+      checks.push({
+        column,
+        ok: false,
+        code: err.code || 'SUPABASE_SCHEMA_COLUMN_ERROR',
+        message: String(err.message || '').slice(0, 180),
+      });
+    }
+  }
+  const missing = checks.filter((item) => !item.ok).map((item) => item.column);
+  return {
+    ok: missing.length === 0,
+    elapsedMs: Date.now() - started,
+    expectedColumns: SNAPSHOT_CACHE_COLUMNS,
+    missingColumns: missing,
+    checks,
+    recommendation: missing.length
+      ? 'Execute supabase/002_valorae_snapshot_cache_columns_v85.sql no SQL Editor do Supabase e depois publique/reinicie o Proxy para recarregar o schema cache.'
+      : 'Colunas de cache do snapshot presentes.',
+  };
+}
+
 async function probeSupabaseTable(table, label = table) {
   const started = Date.now();
   try {
@@ -310,15 +438,19 @@ async function supabaseDiagnostics() {
       capabilities: SYNC_CAPABILITIES,
     };
   }
-  const probes = await Promise.all([
+  const [snapshotSchema, ...probes] = await Promise.all([
+    probeSnapshotCacheColumns(),
     probeSupabaseTable(SNAPSHOT_TABLE, 'snapshots'),
     probeSupabaseTable(CLIENTS_TABLE, 'clients'),
     probeSupabaseTable(TRANSACTIONS_TABLE, 'transactions'),
     probeSupabaseTable(DIVIDENDS_TABLE, 'dividends'),
   ]);
   const failed = probes.filter((p) => !p.ok);
+  const snapshotSchemaMissing = snapshotSchema.missingColumns || [];
   return {
-    ok: failed.length === 0,
+    ok: failed.length === 0 && snapshotSchema.ok,
+    schemaCompatible: snapshotSchema.ok,
+    snapshotSchema,
     configured: true,
     urlConfigured: Boolean(cfg.url),
     keyConfigured: Boolean(cfg.key),
@@ -330,7 +462,9 @@ async function supabaseDiagnostics() {
     capabilities: SYNC_CAPABILITIES,
     recommendation: failed.length
       ? 'Revise nomes das tabelas, políticas/permissões, service role key e URL do projeto no Vercel.'
-      : 'Supabase acessível pelo Proxy. Escrita/leitura deve funcionar se o APK enviar identidade e payload válidos.',
+      : snapshotSchemaMissing.length
+        ? 'Supabase acessível, mas a tabela de snapshots está em schema antigo. Execute supabase/002_valorae_snapshot_cache_columns_v85.sql para remover pendência de cache_scope.'
+        : 'Supabase acessível pelo Proxy. Escrita/leitura deve funcionar se o APK enviar identidade e payload válidos.',
   };
 }
 
@@ -476,12 +610,15 @@ async function upsertSnapshot(record, auth) {
     err.code = 'SYNC_USER_MISMATCH';
     throw err;
   }
-  await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?on_conflict=user_id,domain,snapshot_key`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify(row),
-  });
-  return { ok: true, record: { user_id: row.user_id, domain: row.domain, snapshot_key: row.snapshot_key, updated_at: row.updated_at } };
+  const compatibility = await postSnapshotRows(row);
+  return {
+    ok: true,
+    record: { user_id: row.user_id, domain: row.domain, snapshot_key: row.snapshot_key, updated_at: row.updated_at },
+    schemaMode: compatibility.schemaMode,
+    degraded: compatibility.degraded,
+    warning: compatibility.warning,
+    missingColumns: compatibility.missingColumns,
+  };
 }
 
 async function upsertSnapshots(input, auth) {
@@ -495,12 +632,16 @@ async function upsertSnapshots(input, auth) {
     err.code = 'SYNC_USER_MISMATCH';
     throw err;
   }
-  await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?on_conflict=user_id,domain,snapshot_key`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify(rows),
-  });
-  return { ok: true, count: rows.length, snapshots: rows.map(snapshotToClient) };
+  const compatibility = await postSnapshotRows(rows);
+  return {
+    ok: true,
+    count: rows.length,
+    snapshots: rows.map(snapshotToClient),
+    schemaMode: compatibility.schemaMode,
+    degraded: compatibility.degraded,
+    warning: compatibility.warning,
+    missingColumns: compatibility.missingColumns,
+  };
 }
 
 async function getSnapshot(input, auth) {
@@ -515,9 +656,9 @@ async function getSnapshot(input, auth) {
     err.code = 'INVALID_SYNC_QUERY';
     throw err;
   }
-  const select = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
-  const q = `user_id=eq.${encodeURIComponent(userId)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=eq.${encodeURIComponent(snapshotKey)}&select=${select}&order=updated_at.desc&limit=1`;
-  const rows = await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?${q}`, { method: 'GET' });
+  const queryBuilder = (select) => `user_id=eq.${encodeURIComponent(userId)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=eq.${encodeURIComponent(snapshotKey)}&select=${select}&order=updated_at.desc&limit=1`;
+  const compatibility = await fetchSnapshotRowsWithCompat(queryBuilder);
+  const rows = compatibility.rows;
   const record = Array.isArray(rows) ? rows[0] : null;
   if (!record) {
     const err = new Error('Snapshot não encontrado.');
@@ -526,7 +667,17 @@ async function getSnapshot(input, auth) {
     throw err;
   }
   const snapshot = snapshotToClient(record);
-  return { ok: true, record: snapshot, snapshot, snapshots: [snapshot], count: 1 };
+  return {
+    ok: true,
+    record: snapshot,
+    snapshot,
+    snapshots: [snapshot],
+    count: 1,
+    schemaMode: compatibility.schemaMode,
+    degraded: compatibility.degraded,
+    warning: compatibility.warning,
+    missingColumns: compatibility.missingColumns,
+  };
 }
 
 async function getSnapshots(input, auth) {
@@ -542,12 +693,21 @@ async function getSnapshots(input, auth) {
     err.code = 'INVALID_SYNC_QUERY';
     throw err;
   }
-  const select = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
   const inValues = keys.map((key) => encodeURIComponent(key)).join(',');
-  const q = `user_id=eq.${encodeURIComponent(userId)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=in.(${inValues})&select=${select}&order=updated_at.desc`;
-  const rows = await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?${q}`, { method: 'GET' });
+  const queryBuilder = (select) => `user_id=eq.${encodeURIComponent(userId)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=in.(${inValues})&select=${select}&order=updated_at.desc`;
+  const compatibility = await fetchSnapshotRowsWithCompat(queryBuilder);
+  const rows = compatibility.rows;
   const snapshots = (Array.isArray(rows) ? rows : []).map(snapshotToClient);
-  return { ok: true, count: snapshots.length, requested: keys.length, snapshots };
+  return {
+    ok: true,
+    count: snapshots.length,
+    requested: keys.length,
+    snapshots,
+    schemaMode: compatibility.schemaMode,
+    degraded: compatibility.degraded,
+    warning: compatibility.warning,
+    missingColumns: compatibility.missingColumns,
+  };
 }
 
 function normalizeTransactionDate(value) {

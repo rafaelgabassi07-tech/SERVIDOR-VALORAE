@@ -111,3 +111,6 @@ comment on column public.valorae_user_snapshots.expires_at is 'Data/hora em que 
 comment on column public.valorae_user_snapshots.source_updated_at is 'Data/hora declarada pela fonte original do payload.';
 comment on column public.valorae_user_snapshots.etag is 'Assinatura ou versão lógica do payload.';
 comment on column public.valorae_user_snapshots.payload_size_bytes is 'Tamanho aproximado do payload salvo.';
+
+-- Recarrega o schema cache do PostgREST após criar/alterar colunas.
+notify pgrst, 'reload schema';
