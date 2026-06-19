@@ -1,19 +1,14 @@
-# Valorae Proxy — Checkpoint v86
+# Valorae Proxy v88 — Cloud Primary Supabase
 
-Correção crítica do envio de snapshots para Supabase quando `source_updated_at`, `updated_at` ou `expires_at` chegam como timestamp numérico em milissegundos.
-
-## Versão
+Pacote pronto para Vercel/AI Studio, com arquivos na raiz.
 
 - Core: `21.12.0`
-- Patch: `21.12.149-sync-timestamp-normalization-v86`
+- Patch: `21.12.151-cloud-primary-supabase-v88`
 
-## Correções
+Principais mudanças:
 
-- Converte valores como `1781844563444` para ISO UTC antes de gravar no Supabase.
-- Normaliza segundos Unix, milissegundos Unix, ISO e datas brasileiras simples.
-- Mantém fallback v85 para tabela `valorae_user_snapshots` em schema antigo.
-- Evita pendência local presa por `date/time field value out of range`.
-
-## Uso
-
-Publique este Proxy v86 no Vercel, atualize o APK v86 e toque em **Tentar enviar agora** no app.
+- `/api/sync` confirma uso de `valorae_transactions`, `valorae_dividend_events`, `valorae_user_snapshots`, `valorae_sync_clients` e `valorae_sync_backups`.
+- Escritas confirmadas de Histórico, snapshots e proventos agora são espelhadas em `valorae_sync_backups`.
+- Novas actions: `upsert_sync_backup` e `get_sync_backups`.
+- Diagnóstico passa a testar também a tabela de backups.
+- Incluído SQL `supabase/003_valorae_cloud_primary_tables_v88.sql` para preparar/ajustar todas as tabelas de nuvem.

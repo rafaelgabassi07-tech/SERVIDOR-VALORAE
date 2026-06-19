@@ -7,7 +7,8 @@ const SNAPSHOT_TABLE = process.env.VALORAE_SUPABASE_SNAPSHOT_TABLE || 'valorae_u
 const CLIENTS_TABLE = process.env.VALORAE_SUPABASE_CLIENTS_TABLE || 'valorae_sync_clients';
 const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'valorae_transactions';
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
-const CORE_VERSION = '21.12.149-sync-timestamp-normalization-v86';
+const BACKUPS_TABLE = process.env.VALORAE_SUPABASE_BACKUPS_TABLE || process.env.VALORAE_SUPABASE_BACKUP_TABLE || 'valorae_sync_backups';
+const CORE_VERSION = '21.12.151-cloud-primary-supabase-v88';
 
 const SNAPSHOT_FULL_SELECT = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
 const SNAPSHOT_LEGACY_SELECT = 'payload,updated_at,domain,snapshot_key,user_id';
@@ -28,6 +29,8 @@ const SYNC_CAPABILITIES = Object.freeze([
   'get_transactions',
   'upsert_dividend_events',
   'get_dividend_events',
+  'upsert_sync_backup',
+  'get_sync_backups',
   'delete_user_data',
 ]);
 
@@ -444,6 +447,7 @@ async function supabaseDiagnostics() {
     probeSupabaseTable(CLIENTS_TABLE, 'clients'),
     probeSupabaseTable(TRANSACTIONS_TABLE, 'transactions'),
     probeSupabaseTable(DIVIDENDS_TABLE, 'dividends'),
+    probeSupabaseTable(BACKUPS_TABLE, 'backups'),
   ]);
   const failed = probes.filter((p) => !p.ok);
   const snapshotSchemaMissing = snapshotSchema.missingColumns || [];
@@ -611,8 +615,10 @@ async function upsertSnapshot(record, auth) {
     throw err;
   }
   const compatibility = await postSnapshotRows(row);
+  const backup = await mirrorSyncBackup(row.user_id, 'snapshot', row.payload, { domain: row.domain, snapshot_key: row.snapshot_key, source: row.source || 'apk-snapshot' });
   return {
     ok: true,
+    backupMirrored: backup.ok,
     record: { user_id: row.user_id, domain: row.domain, snapshot_key: row.snapshot_key, updated_at: row.updated_at },
     schemaMode: compatibility.schemaMode,
     degraded: compatibility.degraded,
@@ -633,9 +639,11 @@ async function upsertSnapshots(input, auth) {
     throw err;
   }
   const compatibility = await postSnapshotRows(rows);
+  const backup = await mirrorSyncBackup(forcedUserId || rows[0]?.user_id, 'snapshots_batch', { snapshots: rows.map((row) => ({ domain: row.domain, snapshot_key: row.snapshot_key, payload: row.payload })) }, { source: 'apk-snapshots-batch', count: rows.length });
   return {
     ok: true,
     count: rows.length,
+    backupMirrored: backup.ok,
     snapshots: rows.map(snapshotToClient),
     schemaMode: compatibility.schemaMode,
     degraded: compatibility.degraded,
@@ -726,7 +734,7 @@ function transactionTimestamp(value) {
   return Number.isFinite(time) ? time : Date.now();
 }
 
-function transactionRow(userId, tx = {}) {
+function transactionRow(userId, tx = {}, options = {}) {
   const ticker = safeText(tx.ticker || tx.symbol || '', 32).toUpperCase().replace('.SA', '');
   const date = normalizeTransactionDate(tx.date || tx.transaction_date || tx.transactionDate || tx.imported_at || tx.importedAt || '');
   const operation = safeText(tx.operation || tx.side || (tx.isSell || tx.is_sell ? 'VENDA' : 'COMPRA'), 40).toUpperCase();
@@ -736,6 +744,10 @@ function transactionRow(userId, tx = {}) {
   const rawId = safeText(tx.client_tx_id || tx.clientTxId || tx.id || `${ticker}-${date}-${operation}-${quantity}-${price}-${grossValue}`, 160);
   const clientTxId = rawId || crypto.randomUUID();
   const assetType = safeText(tx.assetType || tx.asset_type || tx.type || '', 40);
+  const transactionTime = transactionTimestamp(date);
+  const transactionDateValue = options.dateMode === 'iso'
+    ? new Date(transactionTime).toISOString()
+    : transactionTime;
   return {
     user_id: userId,
     client_tx_id: clientTxId,
@@ -743,7 +755,7 @@ function transactionRow(userId, tx = {}) {
     name: safeText(tx.name || ticker, 120),
     quantity: Number.isFinite(quantity) ? quantity : 0,
     purchase_price: Number.isFinite(price) ? price : 0,
-    transaction_date: transactionTimestamp(date),
+    transaction_date: transactionDateValue,
     asset_type: assetType,
     is_sell: operation.includes('VENDA') || operation === 'V',
     broker: safeText(tx.broker || '', 120),
@@ -780,17 +792,45 @@ function postgrestIn(values = []) {
   return values.map((value) => encodeURIComponent(value)).join(',');
 }
 
+function isTransactionDateColumnError(err) {
+  const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`.toLowerCase();
+  return text.includes('date/time field value out of range') ||
+    text.includes('invalid input syntax for type timestamp') ||
+    text.includes('invalid input syntax for type timestamp with time zone') ||
+    text.includes('invalid input syntax for type bigint') && text.includes('transaction_date');
+}
+
+async function postTransactionRows(rows, { conflict = 'user_id,client_tx_id' } = {}) {
+  if (!rows.length) return { mode: 'bigint' };
+  const path = `/rest/v1/${TRANSACTIONS_TABLE}?on_conflict=${conflict}`;
+  const init = {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify(rows),
+  };
+  try {
+    await supabaseFetch(path, init);
+    return { mode: 'bigint' };
+  } catch (err) {
+    if (!isTransactionDateColumnError(err)) throw err;
+    const isoRows = rows.map((row) => ({
+      ...row,
+      transaction_date: normalizePostgrestTimestamp(row.transaction_date, { allowNull: false }),
+      payload: { ...(row.payload || {}), transactionDateMode: 'iso' },
+    }));
+    await supabaseFetch(path, { ...init, body: JSON.stringify(isoRows) });
+    return { mode: 'iso', warning: 'transaction_date salvo em ISO por compatibilidade com schema Supabase legado.' };
+  }
+}
+
 async function upsertTransactions(input, auth) {
   const userId = auth.userId;
   const arr = Array.isArray(input.transactions) ? input.transactions : [];
   const rows = arr.map((tx) => transactionRow(userId, tx)).filter((r) => r.ticker);
   if (!rows.length) return { ok: true, count: 0, message: 'Nenhuma transação para salvar.' };
-  await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?on_conflict=user_id,client_tx_id`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify(rows),
-  });
-  return { ok: true, count: rows.length };
+  const write = await postTransactionRows(rows);
+  const backup = await mirrorSyncBackup(userId, 'transactions', { transactions: rows.map((row) => row.payload || row) }, { source: 'apk-history', count: rows.length });
+  return { ok: true, count: rows.length, transactionDateMode: write.mode, warning: write.warning, backupMirrored: backup.ok, backupWarning: backup.warning };
 }
 
 async function replaceTransactionsForSymbols(input, auth) {
@@ -808,17 +848,16 @@ async function replaceTransactionsForSymbols(input, auth) {
     headers: { prefer: 'return=minimal' },
   });
 
-  if (rows.length) {
-    await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?on_conflict=user_id,client_tx_id`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify(rows),
-    });
-  }
+  const write = rows.length ? await postTransactionRows(rows) : { mode: 'none' };
+  const backup = await mirrorSyncBackup(userId, 'transactions_replace', { symbols, transactions: rows.map((row) => row.payload || row) }, { source: 'apk-history-replace', count: rows.length, symbols: symbols.join(',') });
 
   return {
+    backupMirrored: backup.ok,
+    backupWarning: backup.warning,
     ok: true,
     count: rows.length,
+    transactionDateMode: write.mode,
+    warning: write.warning,
     deletedScopeSymbols: symbols.length,
     symbols,
     message: rows.length
@@ -836,6 +875,7 @@ async function getTransactions(input, auth) {
     const operation = safeText(payload.operation || (r.is_sell ? 'VENDA' : 'COMPRA'), 40).toUpperCase();
     const price = Number(payload.price ?? payload.purchasePrice ?? r.purchase_price ?? 0);
     const grossValue = Number(payload.grossValue ?? payload.gross_value ?? (Number(r.quantity || 0) * price));
+    const transactionMillis = transactionTimestamp(r.transaction_date || payload.date || payload.transaction_date || payload.transactionDate || Date.now());
     return {
       ...payload,
       id: Number(payload.id || r.client_tx_id || 0) || 0,
@@ -858,8 +898,8 @@ async function getTransactions(input, auth) {
       sector: r.sector || payload.sector || '',
       notes: r.notes || payload.notes || '',
       source: payload.source || 'Supabase',
-      importedAt: Number(payload.importedAt ?? payload.imported_at ?? r.transaction_date ?? Date.now()),
-      imported_at: Number(payload.imported_at ?? payload.importedAt ?? r.transaction_date ?? Date.now()),
+      importedAt: Number(payload.importedAt ?? payload.imported_at ?? transactionMillis),
+      imported_at: Number(payload.imported_at ?? payload.importedAt ?? transactionMillis),
     };
   });
   return { ok: true, count: transactions.length, transactions };
@@ -899,7 +939,8 @@ async function upsertDividendEvents(input, auth) {
     headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
     body: JSON.stringify(rows),
   });
-  return { ok: true, count: rows.length, ignoredLocalProjections: Math.max(0, arr.length - rows.length) };
+  const backup = await mirrorSyncBackup(userId, 'dividend_events', { events: rows.map((row) => row.payload || row) }, { source: 'apk-dividend-agenda', count: rows.length });
+  return { ok: true, count: rows.length, ignoredLocalProjections: Math.max(0, arr.length - rows.length), backupMirrored: backup.ok, backupWarning: backup.warning };
 }
 
 async function getDividendEvents(input, auth) {
@@ -919,6 +960,68 @@ async function getDividendEvents(input, auth) {
     source: r.source,
   }));
   return { ok: true, count: events.length, events };
+}
+
+function syncBackupRow(userId, kind, payload = {}, metadata = {}) {
+  const serializedPayload = payload == null ? {} : payload;
+  const size = Buffer.byteLength(JSON.stringify(serializedPayload), 'utf8');
+  return {
+    user_id: userId,
+    backup_kind: safeText(kind || 'sync_event', 80),
+    source: safeText(metadata.source || 'valorae-proxy', 120),
+    payload: serializedPayload,
+    payload_size_bytes: size,
+    metadata: metadata || {},
+    created_at: nowIso(),
+    updated_at: nowIso(),
+  };
+}
+
+function isBackupSchemaError(err) {
+  const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`.toLowerCase();
+  return err?.code === 'PGRST204' || text.includes('valorae_sync_backups') && (text.includes('column') || text.includes('schema cache'));
+}
+
+async function mirrorSyncBackup(userId, kind, payload = {}, metadata = {}) {
+  if (!userId) return { ok: false, skipped: true, reason: 'missing_user_id' };
+  const row = syncBackupRow(userId, kind, payload, metadata);
+  try {
+    await supabaseFetch(`/rest/v1/${BACKUPS_TABLE}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', prefer: 'return=minimal' },
+      body: JSON.stringify(row),
+    });
+    return { ok: true, table: BACKUPS_TABLE, mode: 'full' };
+  } catch (err) {
+    if (!isBackupSchemaError(err)) return { ok: false, table: BACKUPS_TABLE, warning: err.message || 'Falha ao espelhar backup.' };
+    // Compatibilidade com projetos que criaram uma tabela simples só com user_id/payload/created_at.
+    try {
+      await supabaseFetch(`/rest/v1/${BACKUPS_TABLE}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', prefer: 'return=minimal' },
+        body: JSON.stringify({ user_id: userId, payload: row.payload, created_at: row.created_at }),
+      });
+      return { ok: true, table: BACKUPS_TABLE, mode: 'legacy' };
+    } catch (legacyErr) {
+      return { ok: false, table: BACKUPS_TABLE, warning: legacyErr.message || 'Falha ao espelhar backup legado.' };
+    }
+  }
+}
+
+async function upsertSyncBackup(input, auth) {
+  const userId = auth.userId;
+  const payload = input.payload || input.data || input.record || {};
+  const kind = input.backup_kind || input.kind || input.reason || 'manual_backup';
+  const backup = await mirrorSyncBackup(userId, kind, payload, { source: input.source || 'apk-manual-backup', reason: input.reason || kind });
+  return { ok: backup.ok, backup };
+}
+
+async function getSyncBackups(input, auth) {
+  const userId = auth.userId || safeText(input.userId || input.user_id || '', 160);
+  const limit = Math.min(Math.max(Number(input.limit || 20), 1), 100);
+  const q = `user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc&limit=${limit}`;
+  const rows = await supabaseFetch(`/rest/v1/${BACKUPS_TABLE}?${q}`, { method: 'GET' });
+  return { ok: true, count: Array.isArray(rows) ? rows.length : 0, backups: Array.isArray(rows) ? rows : [] };
 }
 
 async function deleteUserData(auth) {
@@ -980,6 +1083,8 @@ export default async function handler(req, res) {
           clientsTable: CLIENTS_TABLE,
           transactionsTable: TRANSACTIONS_TABLE,
           dividendsTable: DIVIDENDS_TABLE,
+          backupsTable: BACKUPS_TABLE,
+          cloudMode: 'cloud_primary_local_cache',
           authMode: 'supabase_email_password',
           legacyAdminTokenEnabled: Boolean(process.env.VALORAE_SUPABASE_SYNC_TOKEN),
         },
@@ -1041,6 +1146,8 @@ export default async function handler(req, res) {
     else if (action === 'get_transactions') result = await getTransactions(input, auth);
     else if (action === 'upsert_dividend_events') result = await upsertDividendEvents(input, auth);
     else if (action === 'get_dividend_events') result = await getDividendEvents(input, auth);
+    else if (action === 'upsert_sync_backup') result = await upsertSyncBackup(input, auth);
+    else if (action === 'get_sync_backups') result = await getSyncBackups(input, auth);
     else if (action === 'delete_user_data') result = await deleteUserData(auth);
     else {
       return sendJson(req, res, {

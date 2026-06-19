@@ -67,7 +67,7 @@ try {
   const payload = json(diagnostics);
   assert.equal(payload.ok, true);
   assert.equal(payload.supabase.ok, true);
-  assert.equal(payload.supabase.tables.length, 4);
+  assert.equal(payload.supabase.tables.length, 5);
   assert.ok(seenUrls.every((u) => !u.includes('/rest/v1/rest/v1/')), 'SUPABASE_URL com /rest/v1 deve ser normalizada');
   assert.ok(seenUrls.some((u) => u.includes('/rest/v1/valorae_user_snapshots')));
 

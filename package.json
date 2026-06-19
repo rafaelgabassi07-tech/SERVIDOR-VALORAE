@@ -22,8 +22,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.149-sync-timestamp-normalization-v86",
+    "releasePatch": "21.12.151-cloud-primary-supabase-v88",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
-  }
+  },
+  "releasePatch": "21.12.151-cloud-primary-supabase-v88"
 }

@@ -249,6 +249,6 @@ Substitui o Histórico remoto somente dos tickers enviados em `symbols`. Use dep
 Se o Supabase retornar `Could not find the cache_scope column`, execute `supabase/002_valorae_snapshot_cache_columns_v85.sql`. O Proxy v85 também possui fallback de compatibilidade para não bloquear a fila offline-first enquanto a migração não é aplicada.
 
 
-## Snapshot timestamp normalization v86
+## Snapshot timestamp normalization v87
 
 O Proxy normaliza `expires_at`, `source_updated_at` e `updated_at` recebidos como ISO, Unix segundos, Unix milissegundos ou data brasileira simples antes de gravar em campos `timestamptz` do Supabase. Isso corrige erros como `date/time field value out of range: "1781844563444"`.
