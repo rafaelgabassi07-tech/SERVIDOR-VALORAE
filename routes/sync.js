@@ -7,10 +7,11 @@ const SNAPSHOT_TABLE = process.env.VALORAE_SUPABASE_SNAPSHOT_TABLE || 'valorae_u
 const CLIENTS_TABLE = process.env.VALORAE_SUPABASE_CLIENTS_TABLE || 'valorae_sync_clients';
 const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'valorae_transactions';
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
-const CORE_VERSION = '21.12.143-apk-proxy-sync-contract-v78';
+const CORE_VERSION = '21.12.147-sync-pending-diagnostics-v84';
 const SYNC_CAPABILITIES = Object.freeze([
   'health',
   'diagnostics',
+  'auth_check',
   'register_client',
   'upsert_snapshot',
   'get_snapshot',
@@ -349,6 +350,53 @@ async function verifySupabaseBearer(req) {
   return { id: String(user.id), email: String(user.email || '') };
 }
 
+async function checkSupabaseAuth(req) {
+  const cfg = getSupabaseConfig();
+  const token = authorizationBearer(req);
+  if (!cfg.configured) {
+    return {
+      ok: false,
+      authenticated: false,
+      code: 'SUPABASE_NOT_CONFIGURED',
+      authMode: 'none',
+      message: 'Proxy sem SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY. Configure as variáveis no Vercel antes de enviar pendências.',
+      supabase: { configured: false, urlConfigured: Boolean(cfg.url), keyConfigured: Boolean(cfg.key) },
+    };
+  }
+  if (!token) {
+    return {
+      ok: false,
+      authenticated: false,
+      code: 'AUTH_TOKEN_MISSING',
+      authMode: 'none',
+      message: 'APK sem sessão Supabase ativa. Entre novamente na Conta VALORAE para enviar pendências locais.',
+      supabase: { configured: true, authConfigured: cfg.authConfigured },
+    };
+  }
+  const user = await verifySupabaseBearer(req).catch(() => null);
+  if (!user?.id) {
+    return {
+      ok: false,
+      authenticated: false,
+      code: 'SUPABASE_BEARER_INVALID',
+      authMode: 'supabase_auth',
+      message: 'Token Supabase não foi aceito pelo Proxy. Confirme se o APK e o Proxy usam o mesmo projeto Supabase e entre novamente no app.',
+      supabase: { configured: true, authConfigured: cfg.authConfigured },
+    };
+  }
+  return {
+    ok: true,
+    authenticated: true,
+    code: 'AUTH_OK',
+    authMode: 'supabase_auth',
+    userId: user.id,
+    email: user.email,
+    message: 'Sessão Supabase validada pelo Proxy. Pendências podem ser enviadas.',
+    supabase: { configured: true, authConfigured: cfg.authConfigured },
+  };
+}
+
+
 async function registerClient(input, req) {
   const client = safeClientCredentials(input, req, { requireSecret: true });
   const row = {
@@ -377,8 +425,16 @@ async function registerClient(input, req) {
 }
 
 async function verifyClient(req, input = {}) {
+  const bearer = authorizationBearer(req);
+  const syncToken = String(process.env.VALORAE_SUPABASE_SYNC_TOKEN || '').trim();
   const supabaseUser = await verifySupabaseBearer(req).catch(() => null);
   if (supabaseUser?.id) return { mode: 'supabase_auth', userId: supabaseUser.id, email: supabaseUser.email };
+  if (bearer && bearer !== syncToken) {
+    const err = new Error('Sessão Supabase não foi aceita pelo Proxy. Verifique se APK e Proxy usam o mesmo projeto Supabase e entre novamente.');
+    err.status = 401;
+    err.code = 'SUPABASE_BEARER_INVALID';
+    throw err;
+  }
 
   if (hasValidAdminToken(req)) {
     const userId = safeText(input.userId || input.user_id || input.record?.user_id || '', 160);
@@ -784,6 +840,18 @@ export default async function handler(req, res) {
         capabilities: diagnostics.capabilities || SYNC_CAPABILITIES,
         supabase: diagnostics,
       }, { status: diagnostics.configured ? 200 : 503, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
+    }
+
+    if (action === 'auth_check') {
+      const result = await checkSupabaseAuth(req);
+      return sendJson(req, res, {
+        version: ValoraeEngine.version,
+        patch: CORE_VERSION,
+        requestId: route.requestId,
+        route: '/api/sync',
+        action,
+        ...result,
+      }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
     }
 
     if (!cfg.configured) {

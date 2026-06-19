@@ -176,6 +176,7 @@ Ações aceitas:
 ```text
 health
 diagnostics
+auth_check
 register_client
 upsert_snapshot
 get_snapshot
@@ -202,6 +203,15 @@ GET /api/sync?action=diagnostics
 ```
 
 `diagnostics` tenta acessar as tabelas configuradas e retorna `ok: true` somente quando URL, chave e tabelas estão acessíveis.
+
+Validação da sessão usada pelo APK antes de enviar pendências locais:
+
+```text
+GET /api/sync?action=auth_check
+Authorization: Bearer <access_token_supabase>
+```
+
+`auth_check` retorna `authenticated: true` quando o token do APK pertence ao mesmo projeto Supabase configurado no Proxy. Se retornar `SUPABASE_BEARER_INVALID`, o APK e o Proxy provavelmente estão apontando para projetos Supabase diferentes ou a sessão expirou e o usuário precisa entrar novamente.
 
 
 O endpoint `diagnostics` agora também publica a lista `capabilities` no topo da resposta e dentro de `supabase.capabilities`. Isso permite que o APK diferencie “tabelas Supabase acessíveis” de “contrato /api/sync incompleto”.

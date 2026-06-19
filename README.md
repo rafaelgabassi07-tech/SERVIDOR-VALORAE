@@ -1,13 +1,11 @@
-# VALORAE Proxy — Checkpoint v83
+# VALORAE Proxy — Checkpoint v82
 
-Patch: `21.12.146-analysis-comparison-visual-v83`
+Patch: `21.12.145-analysis-sector-peers-v82`
 
 ## Foco
 
-Suporte contratual leve aos aprimoramentos visuais do comparador setorial da Análise.
-
+- Reforço do comparador setorial da página Análise do APK.
 - `/api/v1/assets?peerOf=PETR4&max=10` continua retornando apenas pares do mesmo grupo comparável.
-- Sugestões setoriais agora carregam metadados visuais como `displayLabel`, `visualGroupLabel` e `uiRole=sector_peer_card`.
-- Resposta geral inclui `uiPolicy` e `visualHints` para orientar cards, estado vazio e aviso de comparação manual.
-- Mantidos `strictSameSector=true`, `sector`, `segment`, `peerGroup` e `compatibility`.
-- Nenhum preço, variação ou recomendação é simulado pelo catálogo de sugestões.
+- `/api/v1/assets?peerOf=PETR4&compareWith=BBAS3` agora também devolve `compatibility`, informando se o par pertence ao mesmo `peerGroup`.
+- Respostas de sugestão retornam `strictSameSector: true`, `sector`, `segment`, `peerGroup` e `searchPolicy=analysis_same_sector_suggestions_v82`.
+- Catálogo ampliado em petróleo/gás, energia e infraestrutura financeira, sem preço/variação simulados.

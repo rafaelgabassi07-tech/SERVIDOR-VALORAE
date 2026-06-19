@@ -1,14 +1,14 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.146-analysis-comparison-visual-v83",
-  "patch": "21.12.146-analysis-comparison-visual-v83",
-  "releasePatch": "21.12.146-analysis-comparison-visual-v83",
-  "latestInternalPatch": "21.12.146-analysis-comparison-visual-v83",
-  "description": "Proxy Valorae checkpoint v83: metadados visuais para sugestões setoriais do comparador da Análise, preservando strictSameSector e sem simular preço/recomendação.",
+  "release": "21.12.147-sync-pending-diagnostics-v84",
+  "patch": "21.12.147-sync-pending-diagnostics-v84",
+  "releasePatch": "21.12.147-sync-pending-diagnostics-v84",
+  "latestInternalPatch": "21.12.147-sync-pending-diagnostics-v84",
+  "description": "Proxy Valorae checkpoint v84: diagnóstico de pendências locais e validação de autenticação Supabase antes de enviar snapshots/transações.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [],
-  "cleanup": "proxy-clean-v83-2026-06-19",
-  "cleanupDescription": "Pacote limpo para AI Studio; preserva docs essenciais e relatório final v83."
+  "cleanup": "proxy-clean-v84-2026-06-19",
+  "cleanupDescription": "Pacote limpo para AI Studio; preserva docs essenciais e relatório final v84."
 }
