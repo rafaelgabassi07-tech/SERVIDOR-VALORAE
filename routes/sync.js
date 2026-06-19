@@ -7,7 +7,7 @@ const SNAPSHOT_TABLE = process.env.VALORAE_SUPABASE_SNAPSHOT_TABLE || 'valorae_u
 const CLIENTS_TABLE = process.env.VALORAE_SUPABASE_CLIENTS_TABLE || 'valorae_sync_clients';
 const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'valorae_transactions';
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
-const CORE_VERSION = '21.13.19-apk-sync-contract-alignment';
+const CORE_VERSION = '21.12.143-apk-proxy-sync-contract-v78';
 const SYNC_CAPABILITIES = Object.freeze([
   'health',
   'diagnostics',
@@ -17,6 +17,7 @@ const SYNC_CAPABILITIES = Object.freeze([
   'upsert_snapshots',
   'get_snapshots',
   'upsert_transactions',
+  'replace_transactions_for_symbols',
   'get_transactions',
   'upsert_dividend_events',
   'get_dividend_events',
@@ -550,6 +551,19 @@ function transactionRow(userId, tx = {}) {
   };
 }
 
+
+function normalizeTransactionSymbols(input = []) {
+  const source = Array.isArray(input) ? input : String(input || '').split(',');
+  return [...new Set(source
+    .map((symbol) => safeText(symbol, 32).toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/F$/, (match, offset, value) => /^[A-Z]{4}[0-9]{1,2}F$/.test(value) ? '' : match))
+    .filter(Boolean)
+    .slice(0, 80))];
+}
+
+function postgrestIn(values = []) {
+  return values.map((value) => encodeURIComponent(value)).join(',');
+}
+
 async function upsertTransactions(input, auth) {
   const userId = auth.userId;
   const arr = Array.isArray(input.transactions) ? input.transactions : [];
@@ -561,6 +575,40 @@ async function upsertTransactions(input, auth) {
     body: JSON.stringify(rows),
   });
   return { ok: true, count: rows.length };
+}
+
+async function replaceTransactionsForSymbols(input, auth) {
+  const userId = auth.userId;
+  const symbols = normalizeTransactionSymbols(input.symbols || input.tickers || input.symbol || input.ticker || []);
+  if (!userId || !symbols.length) return { ok: true, count: 0, deleted: 0, message: 'Nenhum ticker para substituir.' };
+
+  const arr = Array.isArray(input.transactions) ? input.transactions : [];
+  const rows = arr
+    .map((tx) => transactionRow(userId, tx))
+    .filter((r) => r.ticker && symbols.includes(r.ticker));
+
+  await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?user_id=eq.${encodeURIComponent(userId)}&ticker=in.(${postgrestIn(symbols)})`, {
+    method: 'DELETE',
+    headers: { prefer: 'return=minimal' },
+  });
+
+  if (rows.length) {
+    await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?on_conflict=user_id,client_tx_id`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(rows),
+    });
+  }
+
+  return {
+    ok: true,
+    count: rows.length,
+    deletedScopeSymbols: symbols.length,
+    symbols,
+    message: rows.length
+      ? `Histórico remoto substituído para ${symbols.length} ticker(s).`
+      : `Histórico remoto limpo para ${symbols.length} ticker(s).`,
+  };
 }
 
 async function getTransactions(input, auth) {
@@ -761,6 +809,7 @@ export default async function handler(req, res) {
     else if (action === 'get_snapshot') result = await getSnapshot(input, auth);
     else if (action === 'get_snapshots') result = await getSnapshots(input, auth);
     else if (action === 'upsert_transactions') result = await upsertTransactions(input, auth);
+    else if (action === 'replace_transactions_for_symbols') result = await replaceTransactionsForSymbols(input, auth);
     else if (action === 'get_transactions') result = await getTransactions(input, auth);
     else if (action === 'upsert_dividend_events') result = await upsertDividendEvents(input, auth);
     else if (action === 'get_dividend_events') result = await getDividendEvents(input, auth);

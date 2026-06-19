@@ -1,12 +1,14 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.140-analysis-modals-connected-v57",
-  "patch": "21.12.140-analysis-modals-connected-v57",
-  "releasePatch": "21.12.140-analysis-modals-connected-v57",
-  "latestInternalPatch": "21.12.140-analysis-modals-connected-v57",
-  "description": "Proxy Valorae checkpoint v57 da página Análise: superfícies portfolio_asset_modal e ranking_asset_modal passam a ser selecionáveis por query, mantendo consumerContract compartilhado e tela limpa sem dados sintéticos.",
+  "release": "21.12.146-analysis-comparison-visual-v83",
+  "patch": "21.12.146-analysis-comparison-visual-v83",
+  "releasePatch": "21.12.146-analysis-comparison-visual-v83",
+  "latestInternalPatch": "21.12.146-analysis-comparison-visual-v83",
+  "description": "Proxy Valorae checkpoint v83: metadados visuais para sugestões setoriais do comparador da Análise, preservando strictSameSector e sem simular preço/recomendação.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
-  "majorCapabilities": []
+  "majorCapabilities": [],
+  "cleanup": "proxy-clean-v83-2026-06-19",
+  "cleanupDescription": "Pacote limpo para AI Studio; preserva docs essenciais e relatório final v83."
 }

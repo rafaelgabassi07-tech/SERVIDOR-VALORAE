@@ -1,62 +1,12 @@
 import { ValoraeEngine, canonicalizeTicker, inferAssetType, validarTicker } from '../lib/Valorae-engine.js';
 import { resolvePerformanceOptions } from '../lib/performance/profile.js';
+import { ASSET_SUGGESTION_CATALOG, buildPeerCatalogEntries, describePeerCompatibility } from '../lib/catalogs/asset-peers.js';
 import { sendJson } from '../lib/performance/http.js';
 import { beginRoute, boolParam, falseParam, parseList, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../lib/http/route.js';
 
 const MAX_TICKERS = Number(process.env.MAX_TICKERS_PER_REQUEST || 20);
 
-const ASSET_SUGGESTION_CATALOG = [
-  ['PETR4', 'Petrobras PN', 'Petróleo, Gás e Biocombustíveis'],
-  ['PETR3', 'Petrobras ON', 'Petróleo, Gás e Biocombustíveis'],
-  ['VALE3', 'Vale ON', 'Mineração'],
-  ['BBAS3', 'Banco do Brasil ON', 'Bancos'],
-  ['ITUB4', 'Itaú Unibanco PN', 'Bancos'],
-  ['BBDC4', 'Bradesco PN', 'Bancos'],
-  ['BBDC3', 'Bradesco ON', 'Bancos'],
-  ['ABEV3', 'Ambev ON', 'Bebidas'],
-  ['WEGE3', 'WEG ON', 'Máquinas e Equipamentos'],
-  ['BBSE3', 'BB Seguridade ON', 'Seguradoras'],
-  ['EGIE3', 'Engie Brasil ON', 'Energia Elétrica'],
-  ['TAEE11', 'Taesa Unit', 'Energia Elétrica'],
-  ['SANB11', 'Santander Brasil Unit', 'Bancos'],
-  ['KLBN11', 'Klabin Unit', 'Papel e Celulose'],
-  ['ALUP11', 'Alupar Unit', 'Energia Elétrica'],
-  ['BPAC11', 'BTG Pactual Unit', 'Financeiro'],
-  ['ELET3', 'Eletrobras ON', 'Energia Elétrica'],
-  ['ELET6', 'Eletrobras PNB', 'Energia Elétrica'],
-  ['RENT3', 'Localiza ON', 'Aluguel de veículos'],
-  ['LREN3', 'Lojas Renner ON', 'Varejo'],
-  ['SUZB3', 'Suzano ON', 'Papel e Celulose'],
-  ['PRIO3', 'PRIO ON', 'Petróleo e Gás'],
-  ['MXRF11', 'Maxi Renda FII', 'Recebíveis imobiliários'],
-  ['KNCR11', 'Kinea Rendimentos Imobiliários FII', 'Recebíveis imobiliários'],
-  ['CPTS11', 'Capitânia Securities II FII', 'Recebíveis imobiliários'],
-  ['HGCR11', 'CSHG Recebíveis Imobiliários FII', 'Recebíveis imobiliários'],
-  ['HGLG11', 'CSHG Logística FII', 'Logística'],
-  ['XPLG11', 'XP Log FII', 'Logística'],
-  ['BTLG11', 'BTG Pactual Logística FII', 'Logística'],
-  ['BRCO11', 'Bresco Logística FII', 'Logística'],
-  ['VISC11', 'Vinci Shopping Centers FII', 'Shopping centers'],
-  ['XPML11', 'XP Malls FII', 'Shopping centers'],
-  ['HSML11', 'HSI Malls FII', 'Shopping centers'],
-  ['KNRI11', 'Kinea Renda Imobiliária FII', 'Híbrido'],
-  ['ALZR11', 'Alianza Trust Renda Imobiliária FII', 'Renda urbana'],
-  ['TRXF11', 'TRX Real Estate FII', 'Renda urbana'],
-  ['VGIP11', 'Valora CRI Índice de Preço FII', 'Recebíveis imobiliários'],
-  ['IRDM11', 'Iridium Recebíveis Imobiliários FII', 'Recebíveis imobiliários'],
-  ['GARE11', 'Guardian Real Estate FII', 'Híbrido'],
-  ['BOVA11', 'iShares Ibovespa Fundo de Índice', 'ETF Brasil'],
-  ['IVVB11', 'ETF S&P 500', 'ETF exterior'],
-  ['SMAL11', 'ETF Small Caps', 'ETF Brasil'],
-  ['DIVO11', 'ETF Dividendos', 'ETF Brasil'],
-  ['HASH11', 'ETF Cripto', 'ETF cripto'],
-  ['AAPL34', 'Apple BDR', 'BDR'],
-  ['MSFT34', 'Microsoft BDR', 'BDR'],
-  ['GOGL34', 'Alphabet BDR', 'BDR'],
-  ['AMZO34', 'Amazon BDR', 'BDR'],
-  ['TSLA34', 'Tesla BDR', 'BDR'],
-  ['NVDC34', 'NVIDIA BDR', 'BDR'],
-];
+
 
 function suggestionQuery(input = {}) {
   return String(input.q || input.search || input.query || '').trim();
@@ -78,18 +28,21 @@ export function buildAssetSuggestions(rawQuery = '', max = 8) {
   const clean = normalizeSearchText(rawQuery).slice(0, 24);
   if (clean.length < 2) return [];
   const scored = ASSET_SUGGESTION_CATALOG
-    .map(([ticker, name, segment]) => {
+    .map((entry) => {
+      const { ticker, name, segment, sector, peerGroup } = entry;
       const tickerKey = normalizeSearchText(ticker);
       const nameKey = normalizeSearchText(name);
       const segmentKey = normalizeSearchText(segment);
+      const sectorKey = normalizeSearchText(sector);
       const match = tickerKey.startsWith(clean) ? 'ticker_prefix'
         : tickerKey.includes(clean) ? 'ticker_contains'
           : nameKey.includes(clean) ? 'name'
             : segmentKey.includes(clean) ? 'segment'
-              : null;
+              : sectorKey.includes(clean) ? 'sector'
+                : null;
       if (!match) return null;
       const score = match === 'ticker_prefix' ? 100 : match === 'ticker_contains' ? 85 : match === 'name' ? 70 : 55;
-      return { ticker, name, segment, match, score };
+      return { ticker, name, segment, sector, peerGroup, match, score };
     })
     .filter(Boolean)
     .sort((a, b) => b.score - a.score || a.ticker.localeCompare(b.ticker))
@@ -100,6 +53,8 @@ export function buildAssetSuggestions(rawQuery = '', max = 8) {
     name: item.name,
     assetClass: inferAssetType(item.ticker),
     segment: item.segment,
+    sector: item.sector,
+    peerGroup: item.peerGroup,
     suggestion: true,
     rank: index + 1,
     match: item.match,
@@ -123,6 +78,69 @@ export default async function handler(req, res) {
 
   try {
     const query = suggestionQuery(input);
+    const explicitPeerOf = input.peerOf || input.sameSectorOf || input.baseTicker;
+    const compareWith = input.compareWith || input.targetTicker || input.candidateTicker || input.rightTicker;
+    const peerOf = explicitPeerOf || compareWith;
+    if (peerOf) {
+      const cleanPeer = canonicalizeTicker(peerOf);
+      const cleanCompareWith = explicitPeerOf && compareWith ? canonicalizeTicker(compareWith) : '';
+      const max = clampNumber(input.max || input.limit, 10, 1, 25);
+      const { base, peers } = buildPeerCatalogEntries(cleanPeer, { query, max, includeBase: false });
+      const compatibility = cleanCompareWith ? describePeerCompatibility(cleanPeer, cleanCompareWith) : null;
+      const suggestions = peers.map((item, index) => ({
+        symbol: item.ticker,
+        ticker: item.ticker,
+        name: item.name,
+        assetClass: inferAssetType(item.ticker),
+        segment: item.segment,
+        sector: item.sector,
+        peerGroup: item.peerGroup,
+        suggestion: true,
+        rank: index + 1,
+        match: 'same_sector',
+        searchPolicy: 'analysis_same_sector_suggestions_v83',
+        displayLabel: `${item.ticker} • ${item.segment}`,
+        visualGroupLabel: `${item.sector} • ${item.segment}`,
+        uiRole: 'sector_peer_card',
+        source: 'VALORAE_PEER_CATALOG',
+        baseTicker: cleanPeer,
+        baseSegment: base?.segment || null,
+        baseSector: base?.sector || null,
+        strictSameSector: true,
+        price: null,
+        variationPercent: null,
+      }));
+      return sendJson(req, res, {
+        version: ValoraeEngine.version,
+        requestId: route.requestId,
+        status: suggestions.length ? 'SAME_SECTOR_SUGGESTIONS' : 'EMPTY',
+        count: suggestions.length,
+        query: cleanPeer,
+        searchText: query || null,
+        peerOf: cleanPeer,
+        compareWith: cleanCompareWith || null,
+        compatibility,
+        strictSameSector: true,
+        baseKnown: Boolean(base),
+        base: base ? { ticker: base.ticker, name: base.name, sector: base.sector, segment: base.segment, peerGroup: base.peerGroup } : null,
+        assets: suggestions,
+        results: suggestions,
+        source: 'VALORAE_PEER_CATALOG',
+        searchPolicy: 'analysis_same_sector_suggestions_v83',
+        uiPolicy: {
+          presentation: 'analysis_sector_peer_cards_v83',
+          strictSameSector: true,
+          showManualWarning: true,
+          emptyState: 'manual_comparison_allowed_without_auto_mixing',
+        },
+        visualHints: {
+          baseLabel: base ? `${base.ticker} • ${base.segment}` : cleanPeer,
+          groupLabel: base ? `${base.sector} • ${base.segment}` : null,
+          cardTitle: 'Pares comparáveis',
+        },
+        message: suggestions.length ? 'Sugestões limitadas ao mesmo setor/segmento do ativo-base com metadados visuais v83.' : 'Ativo-base ainda sem pares setoriais no catálogo local do Proxy.',
+      }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'assets-sector-peers', cacheControl: 'private, max-age=300, stale-while-revalidate=900' });
+    }
     const rawInput = input.tickers || input.ticker || input.symbols || input.symbol;
     let raw = parseList(rawInput).map(t => String(t).trim()).filter(Boolean);
     if (!raw.length && query) {

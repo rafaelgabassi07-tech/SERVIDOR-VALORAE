@@ -1,3 +1,11 @@
+# 2026-06-18 — Checkpoint v82 — Comparação setorial com compatibilidade explícita
+
+- `/api/v1/assets` aceita `peerOf`, `sameSectorOf`, `baseTicker` e `compareWith` para o comparador da página Análise.
+- Quando `peerOf` é enviado, a rota retorna apenas sugestões com o mesmo `peerGroup` do ativo-base.
+- Quando `compareWith` também é enviado, a resposta inclui `compatibility` com `samePeerGroup`, `baseKnown`, `targetKnown`, `base`, `target` e mensagem legível.
+- Respostas setoriais usam `searchPolicy=analysis_same_sector_suggestions_v83` e `strictSameSector=true`.
+- O contrato não simula preço, variação ou recomendação; ele só fornece metadados para orientar a comparação visual no APK.
+
 ## 2026-06-16 — Checkpoint 30 — DRE, Balanço e Fluxo de Caixa
 
 - `/api/v1/analysis` mantém `AnalysisPageResponse` (`26.analysis.v2`).
@@ -174,6 +182,7 @@ get_snapshot
 upsert_snapshots
 get_snapshots
 upsert_transactions
+replace_transactions_for_symbols
 get_transactions
 upsert_dividend_events
 get_dividend_events
@@ -218,3 +227,8 @@ X-Valorae-Sync-Token
 ```
 
 O Proxy não envia a service role key para o APK. A chave fica apenas no ambiente do Vercel.
+
+
+### replace_transactions_for_symbols
+
+Substitui o Histórico remoto somente dos tickers enviados em `symbols`. Use depois de edição, exclusão, restauração ou reimportação no APK para manter a tabela `valorae_transactions` consistente com o Room local sem apagar outros ativos do usuário.

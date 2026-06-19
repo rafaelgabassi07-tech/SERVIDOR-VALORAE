@@ -1,3 +1,24 @@
+## 2026-06-18 — 21.12.146-analysis-comparison-visual-v83
+
+- Reforça o contrato de pares setoriais do comparador da página Análise.
+- `/api/v1/assets?peerOf=...` passa a devolver `strictSameSector=true` e `searchPolicy=analysis_same_sector_suggestions_v83`.
+- `/api/v1/assets?peerOf=PETR4&compareWith=BBAS3` passa a devolver `compatibility`, indicando se o par pertence ao mesmo `peerGroup`.
+- Catálogo setorial ampliado para reduzir estados vazios em petróleo/gás, energia e infraestrutura financeira.
+- Mantém respostas sem preço/variação simulados e sem recomendação de compra/venda.
+
+## 2026-06-17 — 21.12.142-analysis-modal-curated-carteira-v61
+
+- Atualiza `consumerContract` para `26.analysis.surface.v4`.
+- Mantém a página Análise completa e limita os modais da Carteira/rankings aos 9 blocos solicitados.
+- Documenta `uiPolicy.modalCuratedSectionIds` para consumo do APK.
+- Preserva cotação em tempo real e chart `revenue_profit` para renderização curada nos modais.
+
+## 2026-06-17 — 21.12.141-analysis-unified-realtime-v60
+
+- Unifica a lista de seções prontas entre página Análise, modal de ativo da carteira e modal de ativo dos rankings.
+- Adiciona cotação em tempo real ao gráfico `price_history`, preservando série histórica real quando disponível.
+- Atualiza `consumerContract` para `26.analysis.surface.v3`, sem cortar informações por superfície.
+
 
 ## 2026-06-16 — 21.12.140-analysis-modals-connected-v57
 
