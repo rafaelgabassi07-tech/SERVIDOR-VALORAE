@@ -22,9 +22,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.151-cloud-primary-supabase-v88",
+    "releasePatch": "21.12.152-safe-yahoo-quotes-v101",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   },
-  "releasePatch": "21.12.151-cloud-primary-supabase-v88"
+  "releasePatch": "21.12.152-safe-yahoo-quotes-v101"
 }

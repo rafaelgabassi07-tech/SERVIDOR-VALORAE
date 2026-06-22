@@ -492,13 +492,18 @@ export async function dispatchRoute(req, res) {
     if (path === '/market/rankings') return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, ...(await buildCanonicalMarketRankings(payload)) }, { cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
     if (path === '/market/indices') return sendJson(req, res, await buildIndicesPayload(), { cacheControl: 'private, max-age=45' });
 
-    if (path === '/asset/quote' || path === '/quote' || path === '/quotes') return sendJson(req, res, await getQuote(payload.ticker || payload.symbol || payload.q), { cacheControl: 'private, max-age=30' });
+    if (path === '/asset/quote' || path === '/quote') return sendJson(req, res, await getQuote(payload.ticker || payload.symbol || payload.q), { cacheControl: 'private, max-age=30, stale-while-revalidate=300' });
+    if (path === '/quotes') {
+      const rawBatch = payload.tickers || payload.symbols || payload.assets || payload.positions;
+      const hasBatch = Array.isArray(rawBatch) ? rawBatch.length > 1 : String(rawBatch || '').split(/[,;\s]+/).filter(Boolean).length > 1;
+      return sendJson(req, res, hasBatch ? await buildAssetsPayload({ ...payload, max: payload.max || 60 }) : await getQuote(payload.ticker || payload.symbol || payload.q || rawBatch), { cacheControl: 'private, max-age=30, stale-while-revalidate=300' });
+    }
     if (path === '/asset' || path === '/asset/coverage' || path === '/asset/fundamentals' || path === '/asset/profile' || path === '/asset/valuation' || path === '/asset/profitability' || path === '/asset/debt' || path === '/asset/statements' || path === '/asset/peers' || path === '/asset/source-map' || path === '/asset/indicators' || path === '/asset/quality' || path === '/asset/action-plan') {
       const enriched = await buildAssetDetails(payload);
       return sendJson(req, res, { ...assetPayload(payload), ...enriched }, { cacheControl: 'private, max-age=60' });
     }
     if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
-    if (path === '/assets') return sendJson(req, res, await buildAssetsPayload(payload), { cacheControl: 'private, max-age=45' });
+    if (path === '/assets') return sendJson(req, res, await buildAssetsPayload(payload), { cacheControl: 'private, max-age=30, stale-while-revalidate=300' });
     if (path === '/compare') return sendJson(req, res, await buildComparisonPayload(payload), { cacheControl: 'private, max-age=60' });
     if (path === '/news') return sendJson(req, res, await getNews(payload), { cacheControl: 'private, max-age=120' });
     if (path === '/watchlist/analyze') return sendJson(req, res, emptyCompatible('OK'));

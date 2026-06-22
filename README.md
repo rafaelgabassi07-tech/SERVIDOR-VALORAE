@@ -3,7 +3,7 @@
 Pacote pronto para Vercel/AI Studio, com arquivos na raiz.
 
 - Core: `21.12.0`
-- Patch: `21.12.151-cloud-primary-supabase-v88`
+- Patch: `21.12.152-safe-yahoo-quotes-v101`
 
 Principais mudanças:
 
