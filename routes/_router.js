@@ -19,6 +19,9 @@ import integrationManifestHandler from './integration/manifest.js';
 import integrationSdkHandler from './integration/sdk.js';
 import integrationPromptsHandler from './integration/prompts.js';
 import releaseReadinessHandler from './release/readiness.js';
+import assetsHandler from './assets.js';
+import assetHistoryHandler from './asset/history.js';
+import marketIndicesHandler from './market/indices.js';
 import compatScraperHandler from './compat/scraper4.js';
 import syncHandler from './sync.js';
 import serverMetricsHandler from './server/metrics.js';
@@ -470,7 +473,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, buildPortfolioAnalysis(payload), { cacheControl: 'private, max-age=20' });
     if (path === '/portfolio/returns' || path === '/portfolio/return' || path === '/portfolio/performance') return sendJson(req, res, await buildPortfolioReturns(payload), { cacheControl: 'private, max-age=60' });
     if (path === '/portfolio/history') return sendJson(req, res, await buildRealMarketHistory(payload));
-    if (path === '/asset/history') return sendJson(req, res, await getAssetHistory(payload), { cacheControl: 'private, max-age=45' });
+    if (path === '/asset/history') return assetHistoryHandler(req, res);
     if (path === '/analysis' || path === '/asset/analysis') {
       const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query);
       if (!ticker) return sendJson(req, res, { status: 'ERROR', ok: false, endpoint: 'analysis', error: 'Informe ticker=PETR4 ou symbol=PETR4.' }, { status: 400, cacheControl: 'no-store' });
@@ -494,7 +497,7 @@ export async function dispatchRoute(req, res) {
     }
     if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.historyMonths || payload.months || 12), { cacheControl: 'private, max-age=300' });
     if (path === '/market/rankings') return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, ...(await buildCanonicalMarketRankings(payload)) }, { cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
-    if (path === '/market/indices') return sendJson(req, res, await buildIndicesPayload(), { cacheControl: 'private, max-age=45' });
+    if (path === '/market/indices') return marketIndicesHandler(req, res);
 
     if (path === '/asset/quote' || path === '/quote') return sendJson(req, res, await getQuote(payload.ticker || payload.symbol || payload.q), { cacheControl: 'private, max-age=30, stale-while-revalidate=300' });
     if (path === '/quotes') {
@@ -507,7 +510,7 @@ export async function dispatchRoute(req, res) {
       return sendJson(req, res, { ...assetPayload(payload), ...enriched }, { cacheControl: 'private, max-age=60' });
     }
     if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
-    if (path === '/assets') return sendJson(req, res, await buildAssetsPayload(payload), { cacheControl: 'private, max-age=30, stale-while-revalidate=300' });
+    if (path === '/assets') return assetsHandler(req, res);
     if (path === '/compare') return sendJson(req, res, await buildComparisonPayload(payload), { cacheControl: 'private, max-age=60' });
     if (path === '/news') return sendJson(req, res, await getNews(payload), { cacheControl: 'private, max-age=120' });
     if (path === '/watchlist/analyze') return sendJson(req, res, emptyCompatible('OK'));

@@ -1,18 +1,18 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.158-quote-chart-comparison-deep-v114",
-  "patch": "21.12.158-quote-chart-comparison-deep-v114",
-  "releasePatch": "21.12.158-quote-chart-comparison-deep-v114",
-  "latestInternalPatch": "21.12.158-quote-chart-comparison-deep-v114",
-  "description": "Checkpoint v114 mantém o Proxy compatível com a nova experiência do APK: gráfico de cotação unificado e página de Comparação reforçada, sem alteração de contrato quebrante.",
+  "release": "21.12.159-apk-proxy-contract-hardening-v115",
+  "patch": "21.12.159-apk-proxy-contract-hardening-v115",
+  "releasePatch": "21.12.159-apk-proxy-contract-hardening-v115",
+  "latestInternalPatch": "21.12.159-apk-proxy-contract-hardening-v115",
+  "description": "Checkpoint v115 corrige o caminho real APK↔Proxy: /assets roteado para sugestões/pares setoriais, /asset/history centralizado no Proxy e /market/indices usando snapshot paralelo resiliente.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [],
   "cleanup": "proxy-clean-v87-2026-06-19",
   "cleanupDescription": "Pacote limpo para AI Studio; inclui normalização de timestamps e fallback de schema v85.",
-  "releaseDate": "2026-06-22",
-  "checkpoint": "quote-chart-comparison-deep-v114",
-  "title": "Cotação unificada e Comparação reforçada",
-  "summary": "Proxy compatível com o APK v114; preserva contratos existentes de Análise, sugestões setoriais e comparadores."
+  "releaseDate": "2026-06-23",
+  "checkpoint": "apk-proxy-contract-hardening-v115",
+  "title": "Contrato APK+Proxy endurecido",
+  "summary": "Proxy v115 alinha as rotas consumidas pelo APK, preservando contratos existentes e removendo divergências entre roteador principal e handlers dedicados."
 }

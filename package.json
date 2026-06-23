@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy Valorae checkpoint v114: compatibilidade com cotação unificada e comparação reforçada no APK.",
+  "description": "Proxy Valorae checkpoint v115: contrato APK+Proxy endurecido para assets, histórico de cotação e índices.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,9 +22,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.158-quote-chart-comparison-deep-v114",
+    "releasePatch": "21.12.159-apk-proxy-contract-hardening-v115",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   },
-  "releasePatch": "21.12.158-quote-chart-comparison-deep-v114"
+  "releasePatch": "21.12.159-apk-proxy-contract-hardening-v115"
 }
