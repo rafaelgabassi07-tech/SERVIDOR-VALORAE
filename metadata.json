@@ -1,18 +1,18 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.155-build-security-v106",
-  "patch": "21.12.156-agenda-com-ex-payment-v108",
-  "releasePatch": "21.12.156-agenda-com-ex-payment-v108",
-  "latestInternalPatch": "21.12.155-build-security-v106",
-  "description": "Proxy Valorae checkpoint v106: auditoria de versão, metadados de release e empacotamento limpo.",
+  "release": "21.12.157-release-tests-sync-hardening-v109",
+  "patch": "21.12.157-release-tests-sync-hardening-v109",
+  "releasePatch": "21.12.157-release-tests-sync-hardening-v109",
+  "latestInternalPatch": "21.12.157-release-tests-sync-hardening-v109",
+  "description": "Checkpoint v109 corrige divergências de release, restaura testes do contrato de Análise e preserva Data COM, Data EX e COM estimada no sync de proventos.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [],
   "cleanup": "proxy-clean-v87-2026-06-19",
   "cleanupDescription": "Pacote limpo para AI Studio; inclui normalização de timestamps e fallback de schema v85.",
   "releaseDate": "2026-06-22",
-  "checkpoint": "agenda-com-ex-payment-v108",
-  "title": "Agenda com Data COM e Data EX separadas",
-  "summary": "Checkpoint v108 separa Data COM, Data EX e Pagamento, evitando usar Data EX como Data COM sem sinalização."
+  "checkpoint": "release-tests-sync-hardening-v109",
+  "title": "Release, testes e sync de proventos endurecidos",
+  "summary": "Checkpoint v109 corrige release do Proxy, testes de contrato e preservação COM/EX/COM estimada na nuvem."
 }

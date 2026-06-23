@@ -161,6 +161,9 @@ function eventKey(userId, ev = {}) {
     ev.ticker || ev.symbol || '',
     ev.paymentDate || ev.payment_date || '',
     ev.dateCom || ev.date_com || '',
+    ev.inferredComDate || ev.inferred_com_date || ev.estimatedComDate || '',
+    ev.exDate || ev.ex_date || ev.dateEx || '',
+    ev.eligibilityDateSource || ev.eligibility_date_source || ev.dateComSource || '',
     ev.valuePerShare || ev.value_per_share || ev.value || '',
     ev.status || '',
   ].join('|');
@@ -182,10 +185,12 @@ function isLocalDividendProjection(ev = {}) {
 function hasUsableDividendEvent(ev = {}) {
   const ticker = safeText(ev.ticker || ev.symbol || '', 32);
   const dateCom = safeText(ev.dateCom || ev.date_com || '', 40);
+  const inferredComDate = safeText(ev.inferredComDate || ev.inferred_com_date || ev.estimatedComDate || '', 40);
+  const exDate = safeText(ev.exDate || ev.ex_date || ev.dateEx || '', 40);
   const paymentDate = safeText(ev.paymentDate || ev.payment_date || '', 40);
   const value = Number(ev.valuePerShare ?? ev.value_per_share ?? ev.value ?? 0);
   const amount = Number(ev.estimatedAmount ?? ev.estimated_amount ?? 0);
-  return Boolean(ticker) && Boolean(dateCom || paymentDate) && (Number.isFinite(value) && value > 0 || Number.isFinite(amount) && amount > 0);
+  return Boolean(ticker) && Boolean(dateCom || inferredComDate || exDate || paymentDate) && (Number.isFinite(value) && value > 0 || Number.isFinite(amount) && amount > 0);
 }
 
 async function purgeLocalDividendPredictions(userId) {
@@ -908,19 +913,27 @@ async function getTransactions(input, auth) {
 function dividendRow(userId, ev = {}) {
   const status = safeText(ev.status || '', 80);
   const low = status.toLowerCase();
+  const normalizedPayload = {
+    ...ev,
+    dateCom: safeText(ev.dateCom || ev.date_com || '', 40),
+    exDate: safeText(ev.exDate || ev.ex_date || ev.dateEx || '', 40),
+    inferredComDate: safeText(ev.inferredComDate || ev.inferred_com_date || ev.estimatedComDate || '', 40),
+    eligibilityDateSource: safeText(ev.eligibilityDateSource || ev.eligibility_date_source || ev.dateComSource || '', 80),
+    paymentDate: safeText(ev.paymentDate || ev.payment_date || '', 40),
+  };
   return {
     user_id: userId,
-    event_key: eventKey(userId, ev),
+    event_key: eventKey(userId, normalizedPayload),
     ticker: safeText(ev.ticker || ev.symbol || '', 32).toUpperCase().replace('.SA', ''),
-    date_com: safeText(ev.dateCom || ev.date_com || '', 40),
-    payment_date: safeText(ev.paymentDate || ev.payment_date || '', 40),
+    date_com: normalizedPayload.dateCom,
+    payment_date: normalizedPayload.paymentDate,
     value_per_share: Number(ev.valuePerShare ?? ev.value_per_share ?? ev.value ?? 0),
     quantity: Number(ev.quantity || 0),
     estimated_amount: Number(ev.estimatedAmount ?? ev.estimated_amount ?? 0),
     status,
     category: low.includes('pago') || low.includes('receb') || low.includes('paid') ? 'received' : 'future',
     source: safeText(ev.source || 'VALORAE', 160),
-    payload: ev,
+    payload: normalizedPayload,
     updated_at: nowIso(),
   };
 }
@@ -952,6 +965,9 @@ async function getDividendEvents(input, auth) {
   const events = (Array.isArray(rows) ? rows : []).map((r) => r.payload || ({
     ticker: r.ticker,
     dateCom: r.date_com,
+    exDate: r.ex_date || '',
+    inferredComDate: r.inferred_com_date || '',
+    eligibilityDateSource: r.eligibility_date_source || '',
     paymentDate: r.payment_date,
     valuePerShare: Number(r.value_per_share || 0),
     quantity: Number(r.quantity || 0),
