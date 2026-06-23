@@ -474,17 +474,21 @@ export async function dispatchRoute(req, res) {
     if (path === '/analysis' || path === '/asset/analysis') {
       const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query);
       if (!ticker) return sendJson(req, res, { status: 'ERROR', ok: false, endpoint: 'analysis', error: 'Informe ticker=PETR4 ou symbol=PETR4.' }, { status: 400, cacheControl: 'no-store' });
+      const requestedSurface = String(payload.surface || payload.consumer || payload.consumerId || '').toLowerCase();
+      const requestedMode = String(payload.mode || payload.priority || '').toLowerCase();
+      const modalFast = requestedMode.includes('modal_fast') || requestedMode.includes('essential') || requestedSurface.includes('modal');
       const enriched = await buildAssetDetails({
         ...payload,
         ticker,
         symbol: ticker,
         q: ticker,
-        timeoutMs: payload.timeoutMs || 12000,
-        quoteTimeoutMs: payload.quoteTimeoutMs || payload.timeoutMs || 5000,
-        fundamentalTimeoutMs: payload.fundamentalTimeoutMs || payload.timeoutMs || 9000,
-        yahooTimeoutMs: payload.yahooTimeoutMs || payload.timeoutMs || 5000,
-        dividendTimeoutMs: payload.dividendTimeoutMs || payload.timeoutMs || 5000,
-        range: payload.range || '1Y'
+        mode: modalFast ? 'modal_fast' : payload.mode,
+        timeoutMs: payload.timeoutMs || (modalFast ? 5200 : 12000),
+        quoteTimeoutMs: payload.quoteTimeoutMs || (modalFast ? 2400 : 5000),
+        fundamentalTimeoutMs: payload.fundamentalTimeoutMs || (modalFast ? 4200 : 9000),
+        yahooTimeoutMs: payload.yahooTimeoutMs || (modalFast ? 3200 : 5000),
+        dividendTimeoutMs: payload.dividendTimeoutMs || (modalFast ? 3200 : 5000),
+        range: payload.range || (modalFast ? '6M' : '1Y')
       });
       return sendJson(req, res, buildAnalysisPageResponse(enriched, payload), { cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
     }

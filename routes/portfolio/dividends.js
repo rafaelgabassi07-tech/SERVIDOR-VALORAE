@@ -55,15 +55,16 @@ function resolveDividendDates(row = {}) {
   const genericDate = firstText(row.date, row.data);
   const statusText = firstText(row.status, row.paymentStatus, row.situacao, row.state, row.kind).toLowerCase();
   const genericLooksLikePayment = Boolean(genericDate) && (Boolean(explicitDateCom || exDate || paymentDirect) || /pag|pago|pay|receb|confirm|liquid/.test(statusText));
-  const dateCom = explicitDateCom || previousBusinessDayText(exDate) || (!paymentDirect && !genericLooksLikePayment ? genericDate : '');
+  const inferredComDate = explicitDateCom ? '' : previousBusinessDayText(exDate);
+  const dateCom = explicitDateCom || (!paymentDirect && !genericLooksLikePayment ? genericDate : '');
   const paymentDate = paymentDirect || (genericLooksLikePayment ? genericDate : '');
-  return { dateCom, paymentDate, exDate, eligibilityDateSource: explicitDateCom ? 'dateCom' : exDate ? 'exDate-previous-business-day' : dateCom ? 'generic-date' : '' };
+  return { dateCom, paymentDate, exDate, inferredComDate, eligibilityDateSource: explicitDateCom ? 'dateCom' : inferredComDate ? 'exDate-previous-business-day' : dateCom ? 'generic-date' : '' };
 }
 
 function splitDividendEvents(events = []) {
   const today = new Date(); today.setUTCHours(0, 0, 0, 0);
   const pending = e => !firstText(e.paymentDate, e.dataPagamento, e.payDate) && /prev|futur|agenda|provision|anunci|a confirmar|sem data|confirm|dividend|rendimento|jcp|jscp/i.test(firstText(e.status, e.paymentStatus, e.type, e.kind, e.dateCom, e.dataCom));
-  const decorated = (events || []).map(e => ({ ...e, _pag: parseBRDate(e.paymentDate || e.dataPagamento || e.payDate), _com: parseBRDate(e.dateCom || e.dataCom) }));
+  const decorated = (events || []).map(e => ({ ...e, _pag: parseBRDate(e.paymentDate || e.dataPagamento || e.payDate), _com: parseBRDate(e.dateCom || e.dataCom || e.inferredComDate || e.estimatedComDate || e.exDate || e.dataEx) }));
   const upcomingEvents = decorated
     .filter(e => (e._pag && e._pag >= today) || (!e._pag && (pending(e) || (e._com && e._com >= today))))
     .sort((a, b) => (a._pag || a._com || Number.MAX_SAFE_INTEGER) - (b._pag || b._com || Number.MAX_SAFE_INTEGER))
@@ -78,7 +79,7 @@ function normalizeDividendEvent(row = {}, ticker = '', status = '') {
   const valuePerShare = firstNumber(row.valuePerShare, row.valorPorCota, row.valorPorAcao, row.valor, row.value, row.amount, row.dividend, row.rendimento, row.provento, row.cashAmount);
   const dividendType = firstText(row.dividendType, row.type, row.tipo, row.kind, row.eventType, 'Provento');
   const tickerOut = firstText(row.ticker, row.symbol, row.codigo, ticker).toUpperCase();
-  const { dateCom, paymentDate, exDate, eligibilityDateSource } = resolveDividendDates(row);
+  const { dateCom, paymentDate, exDate, inferredComDate, eligibilityDateSource } = resolveDividendDates(row);
   const confirmed = Boolean(paymentDate);
   const provisioned = !confirmed && /provision|anunci|jscp|jcp|dividend|rendimento|amort/i.test(firstText(row.paymentStatus, row.status, row.situacao, dividendType));
   const finalStatus = firstText(row.status, status, confirmed ? 'Confirmado' : provisioned ? 'Anunciado/Provisionado' : 'Anunciado');
@@ -91,6 +92,8 @@ function normalizeDividendEvent(row = {}, ticker = '', status = '') {
     dataCom: dateCom,
     comDate: dateCom,
     recordDate: dateCom,
+    inferredComDate,
+    estimatedComDate: inferredComDate,
     paymentDate,
     payDate: paymentDate,
     dataPagamento: paymentDate,
@@ -107,7 +110,7 @@ function normalizeDividendEvent(row = {}, ticker = '', status = '') {
     status: finalStatus,
     paymentStatus: confirmed ? 'CONFIRMED' : provisioned ? 'PROVISIONED' : 'ANNOUNCED',
     announcementStatus: 'ANNOUNCED',
-    announced: Boolean(dateCom || valuePerShare > 0),
+    announced: Boolean(dateCom || inferredComDate || exDate || valuePerShare > 0),
     confirmed,
     provisioned,
     source: firstText(row.source, 'Investidor10/VALORAE'),

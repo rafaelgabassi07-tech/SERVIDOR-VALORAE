@@ -98,7 +98,10 @@ export default async function handler(req, res) {
         suggestion: true,
         rank: index + 1,
         match: 'same_sector',
-        searchPolicy: 'analysis_same_sector_suggestions_v83',
+        searchPolicy: 'analysis_same_sector_suggestions_v103',
+        comparisonMode: 'decision',
+        comparisonConfidence: 'HIGH',
+        peerQuality: item.peerGroup === base?.peerGroup ? 'same_peer_group' : 'same_sector_fallback',
         displayLabel: `${item.ticker} • ${item.segment}`,
         visualGroupLabel: `${item.sector} • ${item.segment}`,
         uiRole: 'sector_peer_card',
@@ -126,9 +129,12 @@ export default async function handler(req, res) {
         assets: suggestions,
         results: suggestions,
         source: 'VALORAE_PEER_CATALOG',
-        searchPolicy: 'analysis_same_sector_suggestions_v83',
+        searchPolicy: 'analysis_same_sector_suggestions_v103',
+        comparisonContract: 'analysis_comparison_decision_v103',
+        comparisonMode: base ? 'decision' : 'informative',
+        comparisonConfidence: base ? 'HIGH' : 'UNKNOWN_BASE',
         uiPolicy: {
-          presentation: 'analysis_sector_peer_cards_v83',
+          presentation: 'analysis_sector_peer_cards_v103',
           strictSameSector: true,
           showManualWarning: true,
           emptyState: 'manual_comparison_allowed_without_auto_mixing',
@@ -138,7 +144,7 @@ export default async function handler(req, res) {
           groupLabel: base ? `${base.sector} • ${base.segment}` : null,
           cardTitle: 'Pares comparáveis',
         },
-        message: suggestions.length ? 'Sugestões limitadas ao mesmo setor/segmento do ativo-base com metadados visuais v83.' : 'Ativo-base ainda sem pares setoriais no catálogo local do Proxy.',
+        message: suggestions.length ? 'Sugestões limitadas ao mesmo grupo comparável do ativo-base com metadados de decisão v103.' : 'Ativo-base ainda sem pares setoriais no catálogo local do Proxy.',
       }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'assets-sector-peers', cacheControl: 'private, max-age=300, stale-while-revalidate=900' });
     }
     const rawInput = input.tickers || input.ticker || input.symbols || input.symbol;

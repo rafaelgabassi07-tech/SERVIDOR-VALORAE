@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE enxuto, prático e cache-first para o ecossistema mobile VALORAE.",
+  "description": "Proxy Valorae checkpoint v108: Agenda com Data COM, Data EX e pagamento separados, sem confundir Data EX como Data COM.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,9 +22,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.152-safe-yahoo-quotes-v101",
+    "releasePatch": "21.12.156-agenda-com-ex-payment-v108",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   },
-  "releasePatch": "21.12.152-safe-yahoo-quotes-v101"
+  "releasePatch": "21.12.156-agenda-com-ex-payment-v108"
 }
