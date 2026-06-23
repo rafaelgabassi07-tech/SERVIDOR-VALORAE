@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy Valorae checkpoint v116: ranking da Home e notícias resilientes para o APK.",
+  "description": "Proxy Valorae checkpoint v119: release sincronizado com onboarding cinematográfico do APK.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,9 +22,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.160-home-ranking-news-resilience-v116",
+    "releasePatch": "21.12.164-cinematic-scroll-fluidity-v120",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   },
-  "releasePatch": "21.12.160-home-ranking-news-resilience-v116"
+  "releasePatch": "21.12.164-cinematic-scroll-fluidity-v120"
 }

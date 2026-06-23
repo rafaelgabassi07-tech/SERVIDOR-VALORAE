@@ -1,18 +1,18 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.160-home-ranking-news-resilience-v116",
-  "patch": "21.12.160-home-ranking-news-resilience-v116",
-  "releasePatch": "21.12.160-home-ranking-news-resilience-v116",
-  "latestInternalPatch": "21.12.160-home-ranking-news-resilience-v116",
-  "description": "Checkpoint v116 corrige o ranking da tela inicial e endurece o fluxo de notícias: o Proxy deixa de devolver erro fatal quando a fonte ao vivo falha, entrega fallback operacional rastreável e usa link absoluto válido para notícias em fallback.",
+  "release": "21.12.164-cinematic-scroll-fluidity-v120",
+  "patch": "21.12.164-cinematic-scroll-fluidity-v120",
+  "releasePatch": "21.12.164-cinematic-scroll-fluidity-v120",
+  "latestInternalPatch": "21.12.164-cinematic-scroll-fluidity-v120",
+  "description": "Checkpoint v120 audita e otimiza o onboarding cinematográfico por scroll: reduz jank no WebView Android, adiciona modo de baixa potência, pausa animações fora da tela, remove blur pesado e melhora limpeza de recursos.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [],
   "cleanup": "proxy-clean-v87-2026-06-19",
   "cleanupDescription": "Pacote limpo para AI Studio; inclui normalização de timestamps e fallback de schema v85.",
-  "releaseDate": "2026-06-23",
-  "checkpoint": "home-ranking-news-resilience-v116",
-  "title": "Ranking da Home e Notícias resilientes",
-  "summary": "Proxy v116 mantém o ranking da Home e notícias funcionando mesmo quando fontes públicas ficam indisponíveis, com fallback explícito e rastreável."
+  "releaseDate": "2026-06-24",
+  "checkpoint": "cinematic-scroll-fluidity-v120",
+  "title": "Fluidez do onboarding cinematográfico",
+  "summary": "Proxy v120 sincroniza release e metadados com a otimização de fluidez do onboarding cinematográfico, sem alterar contratos de dados."
 }

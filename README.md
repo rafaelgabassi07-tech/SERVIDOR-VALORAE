@@ -3,11 +3,11 @@
 Pacote pronto para Vercel/AI Studio, com arquivos na raiz.
 
 - Core: `21.12.0`
-- Patch: `21.12.160-home-ranking-news-resilience-v116`
+- Patch: `21.12.164-cinematic-scroll-fluidity-v120
 
 Principais mudanças do v116:
 
-- Release pública, metadata, PWA, service worker e auditoria de versão sincronizados em `21.12.160`.
+- Release pública, metadata, PWA, service worker e auditoria de versão sincronizados em `21.12.164-cinematic-scroll-fluidity-v120
 - Contrato do ranking da Home preserva aliases altas/baixas/highs/lows e adiciona fallback explícito quando a fonte ao vivo falha.
 - Compatibilidade mantida com `/api/v1/market/rankings` e `/api/v1/news`, usados pela Home e pela aba Notícias do APK.
 - Notícias em fallback agora usam URL absoluta válida para abrir busca no Google Notícias, evitando link relativo inválido no Android.
