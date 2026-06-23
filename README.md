@@ -1,14 +1,14 @@
-# Valorae Proxy v117 — Configurações auditadas e corrigidas
+# Valorae Proxy v114 — Cotação unificada e Comparação reforçada
 
 Pacote pronto para Vercel/AI Studio, com arquivos na raiz.
 
 - Core: `21.12.0`
-- Patch: `21.12.161-settings-audit-fixes-v117`
+- Patch: `21.12.158-quote-chart-comparison-deep-v114`
 
-Principais mudanças do v117:
+Principais mudanças do v114:
 
-- Release pública, metadata, PWA, service worker e auditoria de versão sincronizados em `21.12.161`.
-- Contratos existentes de Análise, sugestões setoriais e comparadores preservados para o APK v117.
+- Release pública, metadata, PWA, service worker e auditoria de versão sincronizados em `21.12.158`.
+- Contratos existentes de Análise, sugestões setoriais e comparadores preservados para o APK v114.
 - Compatibilidade mantida com `/api/v1/analysis` e `/api/v1/assets?peerOf=...`, usados pela página de Análise e pelo modal de Comparação.
 - Nenhum fallback simulado foi adicionado para índices, pares ou cotações; o APK apenas reorganiza e exibe os dados reais com mais robustez.
 

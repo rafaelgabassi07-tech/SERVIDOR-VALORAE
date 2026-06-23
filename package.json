@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy Valorae checkpoint v117: compatibilidade com o APK v117 após auditoria e correções da página Configurações.",
+  "description": "Proxy Valorae checkpoint v114: compatibilidade com cotação unificada e comparação reforçada no APK.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,9 +22,9 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.161-settings-audit-fixes-v117",
+    "releasePatch": "21.12.158-quote-chart-comparison-deep-v114",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true
   },
-  "releasePatch": "21.12.161-settings-audit-fixes-v117"
+  "releasePatch": "21.12.158-quote-chart-comparison-deep-v114"
 }
