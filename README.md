@@ -1,16 +1,16 @@
-# Valorae Proxy v115 — Contrato APK+Proxy endurecido
+# Valorae Proxy v116 — Ranking da Home e Notícias resilientes
 
 Pacote pronto para Vercel/AI Studio, com arquivos na raiz.
 
 - Core: `21.12.0`
-- Patch: `21.12.159-apk-proxy-contract-hardening-v115`
+- Patch: `21.12.160-home-ranking-news-resilience-v116`
 
-Principais mudanças do v115:
+Principais mudanças do v116:
 
-- Release pública, metadata, PWA, service worker e auditoria de versão sincronizados em `21.12.159`.
-- Contratos existentes de Análise, sugestões setoriais e comparadores preservados para o APK v114.
-- Compatibilidade mantida com `/api/v1/analysis` e `/api/v1/assets?peerOf=...`, usados pela página de Análise e pelo modal de Comparação.
-- Nenhum fallback simulado foi adicionado para índices, pares ou cotações; o APK apenas reorganiza e exibe os dados reais com mais robustez.
+- Release pública, metadata, PWA, service worker e auditoria de versão sincronizados em `21.12.160`.
+- Contrato do ranking da Home preserva aliases altas/baixas/highs/lows e adiciona fallback explícito quando a fonte ao vivo falha.
+- Compatibilidade mantida com `/api/v1/market/rankings` e `/api/v1/news`, usados pela Home e pela aba Notícias do APK.
+- Notícias em fallback agora usam URL absoluta válida para abrir busca no Google Notícias, evitando link relativo inválido no Android.
 
 Histórico anterior mantido:
 

@@ -123,6 +123,42 @@ function clampInt(value, fallback, min = 1, max = Number.MAX_SAFE_INTEGER) {
   return Math.max(min, Math.min(max, Math.floor(n)));
 }
 
+
+function rankingArraysFrom(payload = {}) {
+  const rankings = payload?.rankings && typeof payload.rankings === 'object' ? payload.rankings : {};
+  const highs = payload?.altas || payload?.highs || payload?.gainers || payload?.maioresAltas || rankings.altas || rankings.highs || rankings.gainers || rankings.maioresAltas || [];
+  const lows = payload?.baixas || payload?.lows || payload?.losers || payload?.maioresBaixas || rankings.baixas || rankings.lows || rankings.losers || rankings.maioresBaixas || [];
+  return { highs: Array.isArray(highs) ? highs : [], lows: Array.isArray(lows) ? lows : [] };
+}
+
+function mergeRankingRows(primary = [], fallback = [], limit = 6) {
+  const out = [];
+  const seen = new Set();
+  for (const row of [...(primary || []), ...(fallback || [])]) {
+    const symbol = String(row?.ticker || row?.symbol || row?.code || '').trim().toUpperCase();
+    if (!symbol || seen.has(symbol)) continue;
+    seen.add(symbol);
+    out.push({ ...row, ticker: symbol, symbol, rank: out.length + 1 });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+function withRankingAliases(highs = [], lows = []) {
+  return {
+    highs,
+    lows,
+    altas: highs,
+    baixas: lows,
+    maioresAltas: highs,
+    maioresBaixas: lows,
+    gainers: highs,
+    losers: lows,
+    topGainers: highs,
+    topLosers: lows,
+  };
+}
+
 function rankingTickerInput(value) {
   if (Array.isArray(value)) return value;
   if (typeof value === 'string') return value.split(/[;,\s]+/).filter(Boolean);
@@ -157,17 +193,60 @@ async function buildCanonicalMarketRankings(payload = {}) {
       minRows,
       preferredSource,
     });
+    const liveRows = rankingArraysFrom(live);
+    const liveComplete = liveRows.highs.length >= minRows && liveRows.lows.length >= minRows;
+    const liveSourceLabel = preferredSource === 'home'
+      ? (completeMode ? 'investidor10-home-live-complete' : 'investidor10-home-live')
+      : (completeMode ? 'investidor10-dedicated-live-complete' : 'investidor10-dedicated-live');
+
+    if (liveComplete || (liveRows.highs.length + liveRows.lows.length > 0 && boolParamLocal(payload.strictLive))) {
+      return {
+        status: live?.status || (live?.ok ? 'OK' : 'PARTIAL'),
+        endpoint: 'market-rankings',
+        type: kind,
+        rankingSource: liveSourceLabel,
+        fallbackUsed: false,
+        fallbackPolicy: 'live-investidor10-home-rankings',
+        captureMode: rankingMode,
+        ...live,
+      };
+    }
+
+    const fallback = await buildMarketMovers({
+      ...payload,
+      source: 'compare',
+      limit: requestedLimit,
+      timeoutMs: clampInt(payload.fallbackTimeoutMs || payload.quoteTimeoutMs || payload.timeoutMs, 2600, 700, 8000),
+    });
+    const fallbackRows = rankingArraysFrom(fallback);
+    const highs = mergeRankingRows(liveRows.highs, fallbackRows.highs, requestedLimit);
+    const lows = mergeRankingRows(liveRows.lows, fallbackRows.lows, requestedLimit);
+    const hasRows = highs.length > 0 || lows.length > 0;
+    const aliases = withRankingAliases(highs, lows);
+    const liveWarnings = [live?.warning, ...(Array.isArray(live?.warnings) ? live.warnings : []), ...(Array.isArray(live?.errors) ? live.errors : [])].filter(Boolean);
+    const fallbackWarnings = [fallback?.warning, ...(Array.isArray(fallback?.warnings) ? fallback.warnings : [])].filter(Boolean);
+
     return {
-      status: live?.status || (live?.ok ? 'OK' : 'ERROR'),
+      status: hasRows ? (fallback?.fallbackUsed ? 'FALLBACK' : 'OK') : 'EMPTY',
+      ok: hasRows,
       endpoint: 'market-rankings',
       type: kind,
-      rankingSource: preferredSource === 'home'
-        ? (completeMode ? 'investidor10-home-live-complete' : 'investidor10-home-live')
-        : (completeMode ? 'investidor10-dedicated-live-complete' : 'investidor10-dedicated-live'),
-      fallbackUsed: false,
-      fallbackPolicy: 'disabled-for-live-investidor10-home-rankings',
+      rankingSource: `${liveSourceLabel}+valorae-quote-fallback`,
+      fallbackUsed: true,
+      fallbackPolicy: 'live-investidor10-first-then-proxy-quote-operational-fallback',
       captureMode: rankingMode,
-      ...live,
+      partial: true,
+      source: fallback?.source || live?.source || 'VALORAE Fonte Oficial',
+      generatedAt: new Date().toISOString(),
+      requestedLimit,
+      rankings: aliases,
+      ...aliases,
+      warnings: [...liveWarnings, ...fallbackWarnings].slice(0, 8),
+      warning: liveWarnings[0] || fallbackWarnings[0] || 'Ranking ao vivo não retornou linhas suficientes; usando fallback operacional via Proxy.',
+      liveStatus: live?.status || null,
+      fallbackStatus: fallback?.status || null,
+      attempts: live?.attempts || [],
+      errors: live?.errors || [],
     };
   }
 
