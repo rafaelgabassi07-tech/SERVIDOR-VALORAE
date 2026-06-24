@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy Valorae checkpoint v119: release sincronizado com onboarding cinematográfico do APK.",
+  "description": "Valorae Proxy 21.12.172 sincronizado ao APK v128: polimento textual e visual da apresentação, sem alteração funcional de contrato.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,9 +22,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.164-cinematic-scroll-fluidity-v120",
+    "releasePatch": "21.12.172-presentation-copy-polish-v128",
     "contract": "valorae-mobile-portfolio-sync",
-    "freeOnly": true
+    "freeOnly": true,
+    "publicVersion": "21.12.172",
+    "checkpoint": "presentation-copy-polish-v128",
+    "releaseLabel": "presentation-copy-polish-v128"
   },
-  "releasePatch": "21.12.164-cinematic-scroll-fluidity-v120"
+  "releasePatch": "21.12.172-presentation-copy-polish-v128"
 }
