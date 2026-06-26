@@ -591,7 +591,7 @@ export async function dispatchRoute(req, res) {
     if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
     if (path === '/assets') return assetsHandler(req, res);
     if (path === '/compare') return sendJson(req, res, await buildComparisonPayload(payload), { cacheControl: 'private, max-age=60' });
-    if (path === '/news') return sendJson(req, res, await getNews(payload), { cacheControl: 'private, max-age=120' });
+    if (path === '/news') return sendJson(req, res, await getNews(payload), { cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
     if (path === '/watchlist/analyze') return sendJson(req, res, emptyCompatible('OK'));
     if (path === '/scrape') {
       const url = String(payload.url || '').trim();

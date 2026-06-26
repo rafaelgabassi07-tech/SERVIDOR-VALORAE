@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { sendJson } from '../lib/performance/http.js';
+import { formatBrDate } from '../lib/core/dates.js';
 import { beginRoute, getInput } from '../lib/http/route.js';
 import { ValoraeEngine } from '../lib/Valorae-engine.js';
 
@@ -895,6 +896,7 @@ async function getTransactions(input, auth) {
       grossValue,
       gross_value: grossValue,
       date: payload.date || normalizeTransactionDate(r.transaction_date),
+      dateDisplay: formatBrDate(payload.date || normalizeTransactionDate(r.transaction_date), ''),
       assetType: payload.assetType || payload.asset_type || r.asset_type || '',
       asset_type: payload.asset_type || payload.assetType || r.asset_type || '',
       isSell: Boolean(r.is_sell),
@@ -965,10 +967,14 @@ async function getDividendEvents(input, auth) {
   const events = (Array.isArray(rows) ? rows : []).map((r) => r.payload || ({
     ticker: r.ticker,
     dateCom: r.date_com,
+    dateComDisplay: formatBrDate(r.date_com, ''),
     exDate: r.ex_date || '',
+    exDateDisplay: formatBrDate(r.ex_date, ''),
     inferredComDate: r.inferred_com_date || '',
+    inferredComDateDisplay: formatBrDate(r.inferred_com_date, ''),
     eligibilityDateSource: r.eligibility_date_source || '',
     paymentDate: r.payment_date,
+    paymentDateDisplay: formatBrDate(r.payment_date, ''),
     valuePerShare: Number(r.value_per_share || 0),
     quantity: Number(r.quantity || 0),
     estimatedAmount: Number(r.estimated_amount || 0),

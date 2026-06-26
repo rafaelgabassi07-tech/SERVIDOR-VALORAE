@@ -1,5 +1,27 @@
 # RELATÓRIO VALORAE PROXY
 
+## 2026-06-26 — v142 — Notícias diárias e ordem cronológica
+
+- **Proxy:** 21.12.174-br-date-display-v144
+- **APK relacionado:** 2026.06.26.03 / versionCode 26062603
+
+### Auditoria
+- O endpoint de notícias priorizava relevância antes da data no motor `fetchGoogleNews`, quebrando a regra de notícia mais nova no topo.
+- O cache do feed não tinha chave diária explícita e podia servir lista antiga dentro da janela stale.
+- A rota `/api/v1/news` não normalizava a ordem final antes de responder ao APK.
+
+### Correções
+- `lib/Valorae-engine.js` passou a ordenar por `publishedAt/pubDate/timestamp` descendente antes de usar relevância como desempate.
+- A chave do cache de notícias agora inclui o dia (`yyyy-MM-dd`), evitando reaproveitamento indevido entre dias.
+- `routes/news.js` aplica ordenação final por data e reduziu cache HTTP para `max-age=30`.
+- `lib/sources/news.js` aceita refresh/nocache com sufixo `_fresh`, evitando cache interno quando o APK exige atualização.
+
+### Validação
+- `npm run check` executado com sucesso.
+- `node --check` executado nos arquivos alterados de notícias.
+
+---
+
 Este é o relatório único e reutilizável do Proxy. Novos checkpoints devem ser adicionados neste mesmo arquivo, evitando vários relatórios soltos na raiz.
 
 ## 2026-06-24 — Onboarding executivo nativo sem 3D
@@ -75,7 +97,7 @@ Checkpoint v124 inova o visual do onboarding cinematográfico com identidade Car
 ## 2026-06-24 — v125 — Sincronização Editorial Studio
 
 ### Versão
-- Proxy: `21.12.172-presentation-copy-polish-v128`
+- Proxy: `21.12.174-br-date-display-v144`
 
 ### Objetivo
 Sincronizar metadata/release com o APK v125. Não houve mudança funcional de contrato.
@@ -89,7 +111,7 @@ Sincronizar metadata/release com o APK v125. Não houve mudança funcional de co
 ## v127 — Sincronização com apresentação vertical 3D
 
 - Data: 2026-06-24
-- Proxy: `21.12.172-presentation-copy-polish-v128`
+- Proxy: `21.12.174-br-date-display-v144`
 - APK pareado: `2026.06.24.9` / `26062409`
 
 ### Escopo
@@ -100,7 +122,7 @@ Sincronização de release, metadados, README, service worker e auditoria de ver
 
 ## Checkpoint v127 — Polimento textual e visual da apresentação (2026-06-24)
 
-**Proxy:** 21.12.172-presentation-copy-polish-v128
+**Proxy:** 21.12.174-br-date-display-v144
 
 ### Objetivo
 Validar e preservar eventos de Data COM futura anunciada para que o APK consiga mostrar a oportunidade antes da data de corte.
@@ -117,13 +139,13 @@ Validar e preservar eventos de Data COM futura anunciada para que o APK consiga 
 
 ## Checkpoint v128 — Sincronização do polimento da apresentação (2026-06-24)
 
-**Proxy:** 21.12.172-presentation-copy-polish-v128
+**Proxy:** 21.12.174-br-date-display-v144
 
 ### Objetivo
 Sincronizar metadados e versão com o APK v128, que remove termos técnicos da apresentação e refina a narrativa visual do onboarding.
 
 ### Alterações
-- Release/patch atualizado para `21.12.172-presentation-copy-polish-v128`.
+- Release/patch atualizado para `21.12.174-br-date-display-v144`.
 - README, metadata, manifest, service worker e auditoria de versão sincronizados.
 - Sem alteração funcional de endpoints, contratos ou parsers.
 
@@ -132,3 +154,26 @@ Sincronizar metadados e versão com o APK v128, que remove termos técnicos da a
 - `npm run check`: OK.
 - `npm test`: OK.
 - Relatório único mantido na raiz.
+
+
+## Checkpoint v144 — datas brasileiras de exibição (2026-06-26)
+- Proxy: `21.12.174-br-date-display-v144`.
+- Adicionados formatBrDate/formatBrDateTime em lib/core/dates.js para campos de exibição.
+- Notícias incluem publishedAtDisplay/displayDate em pt-BR, mantendo publishedAt/timestamp para ordenação e cache.
+- Itens visíveis da Análise usam DD/MM/AAAA em proventos; sincronização Supabase não teve colunas/tipos alterados.
+
+
+## 2026-06-26 — v145 — Revisão final de datas brasileiras
+
+- **Proxy:** 21.12.175-br-date-final-audit-v145
+- **Objetivo:** confirmar se nada ficou sem conversão visual após o v144.
+
+### Correção aplicada
+- `normalizeDate` agora aceita `AAAA/MM/DD` e `AAAA.MM.DD`, além de `AAAA-MM-DD`.
+- `formatBrDate`/`formatBrDateTime` passam a converter esses formatos para `DD/MM/AAAA` corretamente.
+- Nenhum campo técnico do Supabase foi alterado.
+
+### Validação
+- `npm run check`: OK.
+- `npm run audit:version`: OK.
+- `npm run test`: OK.

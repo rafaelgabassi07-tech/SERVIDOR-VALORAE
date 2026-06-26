@@ -1,6 +1,7 @@
 import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../lib/Valorae-engine.js';
 import { sendJson } from '../lib/performance/http.js';
 import { beginRoute, boolParam, clampNumber, sendRouteError } from '../lib/http/route.js';
+import { formatBrDateTime } from '../lib/core/dates.js';
 
 function parseSymbolList(value) {
   if (Array.isArray(value)) return value;
@@ -8,11 +9,35 @@ function parseSymbolList(value) {
   return [];
 }
 
+
+function newsDateMs(item = {}) {
+  const raw = item.publishedAt ?? item.pubDate ?? item.date ?? item.time ?? item.timestamp ?? '';
+  if (typeof raw === 'number') return raw > 9_999_999_999 ? raw : raw * 1000;
+  const str = String(raw || '').trim();
+  if (!str) return 0;
+  if (/^\d+$/.test(str)) {
+    const n = Number(str);
+    return n > 9_999_999_999 ? n : n * 1000;
+  }
+  const parsed = Date.parse(str);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function sortNewsNewestFirst(items = []) {
+  return [...items].sort((a, b) => {
+    const byDate = newsDateMs(b) - newsDateMs(a);
+    if (byDate) return byDate;
+    return Number(b.relevanceScore || 0) - Number(a.relevanceScore || 0);
+  });
+}
+
 function withBrowserOpenPolicy(news) {
-  const items = Array.isArray(news?.items) ? news.items.map(item => ({
+  const items = Array.isArray(news?.items) ? sortNewsNewestFirst(news.items).map(item => ({
     ...item,
     url: item.url || item.link || item.sourceUrl || '',
     originalUrl: item.originalUrl || item.url || item.link || item.sourceUrl || '',
+    publishedAtDisplay: formatBrDateTime(item.publishedAt || item.pubDate || item.date || item.time || item.timestamp || '', ''),
+    displayDate: formatBrDateTime(item.publishedAt || item.pubDate || item.date || item.time || item.timestamp || '', ''),
     openInBrowser: true,
     inAppReader: false,
   })) : news?.items;
@@ -57,7 +82,7 @@ export default async function handler(req, res) {
       lowLatencyBudget: timeoutMs !== undefined && timeoutMs <= 1000,
     });
     const normalizedNews = withBrowserOpenPolicy(news);
-    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, ticker, symbols: requestedSymbols, ...normalizedNews }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'news', cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
+    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, ticker, symbols: requestedSymbols, ...normalizedNews }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'news', cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'news' });
   }
