@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.176: correção de escala monetária na Análise, preservando mil/milhão/bilhão/trilhão para o APK.",
+  "description": "Valorae Proxy 21.12.177: auditoria de escala e origem dos dados da Análise para o APK.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,12 +22,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.176-analysis-value-scale-v146",
+    "releasePatch": "21.12.177-analysis-source-scale-audit-v147",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.176",
-    "checkpoint": "analysis-value-scale-v146",
-    "releaseLabel": "analysis-value-scale-v146"
+    "publicVersion": "21.12.177",
+    "checkpoint": "analysis-source-scale-audit-v147",
+    "releaseLabel": "analysis-source-scale-audit-v147"
   },
-  "releasePatch": "21.12.176-analysis-value-scale-v146"
+  "releasePatch": "21.12.177-analysis-source-scale-audit-v147"
 }
