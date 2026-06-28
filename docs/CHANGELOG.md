@@ -1,3 +1,10 @@
+## 21.12.176-analysis-value-scale-v146 — Correção de escala de valores da Análise
+
+- Preserva sufixos de escala monetária em campos da Análise.
+- Evita valores de grande porte aparecendo como pequenos reais unitários no APK.
+- Suprime campos zerados/indisponíveis de faixa de preço e liquidez.
+- Não altera Supabase, sincronização, SQL ou contratos de carteira.
+
 ## 2026-06-18 — 21.12.146-analysis-comparison-visual-v83
 
 - Reforça o contrato de pares setoriais do comparador da página Análise.

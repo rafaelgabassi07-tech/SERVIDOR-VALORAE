@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.175: revisão final de datas brasileiras, aceitando AAAA/MM/DD sem alterar contratos técnicos de API/Supabase.",
+  "description": "Valorae Proxy 21.12.176: correção de escala monetária na Análise, preservando mil/milhão/bilhão/trilhão para o APK.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,12 +22,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.175-br-date-final-audit-v145",
+    "releasePatch": "21.12.176-analysis-value-scale-v146",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.175",
-    "checkpoint": "br-date-final-audit-v145",
-    "releaseLabel": "br-date-final-audit-v145"
+    "publicVersion": "21.12.176",
+    "checkpoint": "analysis-value-scale-v146",
+    "releaseLabel": "analysis-value-scale-v146"
   },
-  "releasePatch": "21.12.175-br-date-final-audit-v145"
+  "releasePatch": "21.12.176-analysis-value-scale-v146"
 }
