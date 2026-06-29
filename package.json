@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.180: checklist e radar da Análise alinhados ao APK.",
+  "description": "Valorae Proxy 21.12.182: checklist/radar com revisão profunda de dados na Análise e modais.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,12 +15,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.180-checklist-radar-v150",
+    "releasePatch": "21.12.182-checklist-radar-deep-fix-v152",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.180",
-    "checkpoint": "checklist-radar-v150",
-    "releaseLabel": "checklist-radar-v150"
+    "publicVersion": "21.12.182",
+    "checkpoint": "checklist-radar-deep-fix-v152",
+    "releaseLabel": "checklist-radar-deep-fix-v152"
   },
-  "releasePatch": "21.12.180-checklist-radar-v150"
+  "releasePatch": "21.12.182-checklist-radar-deep-fix-v152"
 }
