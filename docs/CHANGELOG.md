@@ -1,3 +1,10 @@
+
+## 21.12.183 — radar Jan-Dez e logos do ranking — 2026-06-30
+
+- Rankings do Investidor10 passam a expor `logoUrl` e `logo_url` quando a imagem do ativo está disponível no HTML da fonte.
+- Cache dos rankings foi invalidado para evitar reaproveitar payload antigo sem logotipo.
+- Contrato do Radar de Dividendos permanece com 1 resumo + 12 meses de Data COM + 12 meses de Data Pagamento para o APK renderizar janeiro a dezembro sem desaparecimento.
+
 ## 21.12.176-analysis-value-scale-v146 — Correção de escala de valores da Análise
 
 - Preserva sufixos de escala monetária em campos da Análise.
