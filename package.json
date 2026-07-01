@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.186: correção do envio de lançamentos da Carteira para o Supabase.",
+  "description": "Valorae Proxy 21.12.187: notícias atuais, histórico de proventos com datas e suporte aos tooltips da Análise.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,12 +15,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.186-supabase-transaction-sync-v156",
+    "releasePatch": "21.12.187-news-proventos-tooltips-v157",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.186",
-    "checkpoint": "supabase-transaction-sync-v156",
-    "releaseLabel": "supabase-transaction-sync-v156"
+    "publicVersion": "21.12.187",
+    "checkpoint": "news-proventos-tooltips-v157",
+    "releaseLabel": "news-proventos-tooltips-v157"
   },
-  "releasePatch": "21.12.186-supabase-transaction-sync-v156"
+  "releasePatch": "21.12.187-news-proventos-tooltips-v157"
 }

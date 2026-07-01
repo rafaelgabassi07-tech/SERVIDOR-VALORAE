@@ -1,3 +1,9 @@
+## 21.12.187-news-proventos-tooltips-v157
+
+- Notícias: reforçada ordenação `publishedAt_desc`, com metadados `sortedBy`, `asOf` e política de frescor no retorno do Proxy.
+- Proventos: normalização de pagamento, Data COM e competência mensal para evitar histórico pobre ou sem datas.
+- Análise: contratos de gráficos preservam rótulos de períodos/mês para tooltips completos no APK.
+
 ## 21.12.186-supabase-transaction-sync-v156
 
 - Corrige o salvamento de lançamentos da Carteira no Supabase quando a tabela remota não aceita o upsert principal por `client_tx_id`.
