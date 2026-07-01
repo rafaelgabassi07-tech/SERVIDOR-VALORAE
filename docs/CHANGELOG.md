@@ -1,3 +1,8 @@
+## 21.12.184-news-search-query-v154
+- `/api/v1/news` passa a aceitar `query`/`search` como busca textual livre para a página de Notícias do APK.
+- Mantém compatibilidade com `ticker`, `symbol`, `symbols` e `q` quando o termo parece ticker único.
+- Resposta inclui `query` e `search` para rastrear a intenção usada na busca.
+
 
 ## 21.12.183 — radar Jan-Dez e logos do ranking — 2026-06-30
 
