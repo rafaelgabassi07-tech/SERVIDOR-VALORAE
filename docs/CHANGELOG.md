@@ -1,3 +1,14 @@
+## 21.12.186-supabase-transaction-sync-v156
+
+- Corrige o salvamento de lançamentos da Carteira no Supabase quando a tabela remota não aceita o upsert principal por `client_tx_id`.
+- Adiciona caminho compatível que remove o escopo afetado e reinsere as transações sem deixar o APK preso em pendência permanente.
+- Normaliza tickers de transações com a mesma regra usada no escopo de substituição.
+
+## 21.12.185-news-feed-volume-tags-v155
+
+- Aumenta o volume de notícias suportado pelo endpoint.
+- Normaliza tags para que notícias solicitadas por símbolos da carteira sejam exibidas como Carteira no APK.
+
 ## 21.12.184-news-search-query-v154
 - `/api/v1/news` passa a aceitar `query`/`search` como busca textual livre para a página de Notícias do APK.
 - Mantém compatibilidade com `ticker`, `symbol`, `symbols` e `q` quando o termo parece ticker único.

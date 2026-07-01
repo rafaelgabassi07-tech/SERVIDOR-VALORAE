@@ -9,7 +9,7 @@ const CLIENTS_TABLE = process.env.VALORAE_SUPABASE_CLIENTS_TABLE || 'valorae_syn
 const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'valorae_transactions';
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
 const BACKUPS_TABLE = process.env.VALORAE_SUPABASE_BACKUPS_TABLE || process.env.VALORAE_SUPABASE_BACKUP_TABLE || 'valorae_sync_backups';
-const CORE_VERSION = '21.12.151-cloud-primary-supabase-v88';
+const CORE_VERSION = '21.12.186-supabase-transaction-sync-v156';
 
 const SNAPSHOT_FULL_SELECT = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
 const SNAPSHOT_LEGACY_SELECT = 'payload,updated_at,domain,snapshot_key,user_id';
@@ -741,7 +741,7 @@ function transactionTimestamp(value) {
 }
 
 function transactionRow(userId, tx = {}, options = {}) {
-  const ticker = safeText(tx.ticker || tx.symbol || '', 32).toUpperCase().replace('.SA', '');
+  const ticker = normalizeTransactionSymbols([tx.ticker || tx.symbol || ''])[0] || '';
   const date = normalizeTransactionDate(tx.date || tx.transaction_date || tx.transactionDate || tx.imported_at || tx.importedAt || '');
   const operation = safeText(tx.operation || tx.side || (tx.isSell || tx.is_sell ? 'VENDA' : 'COMPRA'), 40).toUpperCase();
   const quantity = Number(tx.quantity || 0);
@@ -798,6 +798,13 @@ function postgrestIn(values = []) {
   return values.map((value) => encodeURIComponent(value)).join(',');
 }
 
+function postgrestTextIn(values = []) {
+  return values
+    .map((value) => String(value || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"'))
+    .map((value) => encodeURIComponent(`"${value}"`))
+    .join(',');
+}
+
 function isTransactionDateColumnError(err) {
   const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`.toLowerCase();
   return text.includes('date/time field value out of range') ||
@@ -806,27 +813,87 @@ function isTransactionDateColumnError(err) {
     text.includes('invalid input syntax for type bigint') && text.includes('transaction_date');
 }
 
-async function postTransactionRows(rows, { conflict = 'user_id,client_tx_id' } = {}) {
-  if (!rows.length) return { mode: 'bigint' };
-  const path = `/rest/v1/${TRANSACTIONS_TABLE}?on_conflict=${conflict}`;
-  const init = {
+function isTransactionConflictTargetError(err) {
+  const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`.toLowerCase();
+  return err?.code === '42P10' ||
+    text.includes('no unique or exclusion constraint') ||
+    text.includes('on conflict') && text.includes('constraint') ||
+    text.includes('there is no unique') && text.includes('client_tx_id');
+}
+
+async function deleteTransactionRowsByClientIds(userId, clientTxIds = []) {
+  const ids = [...new Set(clientTxIds.map((id) => safeText(id, 160)).filter(Boolean))].slice(0, 250);
+  if (!userId || !ids.length) return 0;
+  await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?user_id=eq.${encodeURIComponent(userId)}&client_tx_id=in.(${postgrestTextIn(ids)})`, {
+    method: 'DELETE',
+    headers: { prefer: 'return=minimal' },
+  });
+  return ids.length;
+}
+
+async function postTransactionRowsRaw(rows, { conflict = 'user_id,client_tx_id' } = {}) {
+  const conflictQuery = conflict ? `?on_conflict=${conflict}` : '';
+  const headers = conflict
+    ? { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' }
+    : { 'content-type': 'application/json', prefer: 'return=minimal' };
+  await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}${conflictQuery}`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
+    headers,
     body: JSON.stringify(rows),
-  };
-  try {
-    await supabaseFetch(path, init);
-    return { mode: 'bigint' };
-  } catch (err) {
-    if (!isTransactionDateColumnError(err)) throw err;
-    const isoRows = rows.map((row) => ({
-      ...row,
-      transaction_date: normalizePostgrestTimestamp(row.transaction_date, { allowNull: false }),
-      payload: { ...(row.payload || {}), transactionDateMode: 'iso' },
-    }));
-    await supabaseFetch(path, { ...init, body: JSON.stringify(isoRows) });
-    return { mode: 'iso', warning: 'transaction_date salvo em ISO por compatibilidade com schema Supabase legado.' };
+  });
+}
+
+async function postTransactionRows(rows, { conflict = 'user_id,client_tx_id', allowPlainInsertFallback = false, scopeAlreadyCleared = false } = {}) {
+  if (!rows.length) return { mode: 'bigint' };
+  let rowsToWrite = rows;
+  let mode = 'bigint';
+  let dateWarning = '';
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      await postTransactionRowsRaw(rowsToWrite, { conflict });
+      return { mode, conflictMode: 'upsert', warning: dateWarning || undefined };
+    } catch (err) {
+      if (isTransactionDateColumnError(err) && mode !== 'iso') {
+        rowsToWrite = rows.map((row) => ({
+          ...row,
+          transaction_date: normalizePostgrestTimestamp(row.transaction_date, { allowNull: false }),
+          payload: { ...(row.payload || {}), transactionDateMode: 'iso' },
+        }));
+        mode = 'iso';
+        dateWarning = 'transaction_date salvo em ISO por compatibilidade com schema Supabase legado.';
+        continue;
+      }
+      if (allowPlainInsertFallback && isTransactionConflictTargetError(err)) {
+        if (!scopeAlreadyCleared) {
+          await deleteTransactionRowsByClientIds(rowsToWrite[0]?.user_id || '', rowsToWrite.map((row) => row.client_tx_id));
+        }
+        try {
+          await postTransactionRowsRaw(rowsToWrite, { conflict: '' });
+        } catch (plainErr) {
+          if (!isTransactionDateColumnError(plainErr) || mode === 'iso') throw plainErr;
+          rowsToWrite = rows.map((row) => ({
+            ...row,
+            transaction_date: normalizePostgrestTimestamp(row.transaction_date, { allowNull: false }),
+            payload: { ...(row.payload || {}), transactionDateMode: 'iso' },
+          }));
+          mode = 'iso';
+          dateWarning = 'transaction_date salvo em ISO por compatibilidade com schema Supabase legado.';
+          await postTransactionRowsRaw(rowsToWrite, { conflict: '' });
+        }
+        return {
+          mode,
+          conflictMode: 'plain_insert_after_delete',
+          warning: [dateWarning, 'Histórico salvo em modo compatível porque a tabela não aceitou on_conflict por client_tx_id.']
+            .filter(Boolean)
+            .join(' '),
+        };
+      }
+      throw err;
+    }
   }
+
+  return { mode, conflictMode: 'upsert', warning: dateWarning || undefined };
 }
 
 async function upsertTransactions(input, auth) {
@@ -834,9 +901,9 @@ async function upsertTransactions(input, auth) {
   const arr = Array.isArray(input.transactions) ? input.transactions : [];
   const rows = arr.map((tx) => transactionRow(userId, tx)).filter((r) => r.ticker);
   if (!rows.length) return { ok: true, count: 0, message: 'Nenhuma transação para salvar.' };
-  const write = await postTransactionRows(rows);
+  const write = await postTransactionRows(rows, { allowPlainInsertFallback: true });
   const backup = await mirrorSyncBackup(userId, 'transactions', { transactions: rows.map((row) => row.payload || row) }, { source: 'apk-history', count: rows.length });
-  return { ok: true, count: rows.length, transactionDateMode: write.mode, warning: write.warning, backupMirrored: backup.ok, backupWarning: backup.warning };
+  return { ok: true, count: rows.length, transactionDateMode: write.mode, conflictMode: write.conflictMode, warning: write.warning, backupMirrored: backup.ok, backupWarning: backup.warning };
 }
 
 async function replaceTransactionsForSymbols(input, auth) {
@@ -854,7 +921,7 @@ async function replaceTransactionsForSymbols(input, auth) {
     headers: { prefer: 'return=minimal' },
   });
 
-  const write = rows.length ? await postTransactionRows(rows) : { mode: 'none' };
+  const write = rows.length ? await postTransactionRows(rows, { allowPlainInsertFallback: true, scopeAlreadyCleared: true }) : { mode: 'none' };
   const backup = await mirrorSyncBackup(userId, 'transactions_replace', { symbols, transactions: rows.map((row) => row.payload || row) }, { source: 'apk-history-replace', count: rows.length, symbols: symbols.join(',') });
 
   return {
@@ -863,6 +930,7 @@ async function replaceTransactionsForSymbols(input, auth) {
     ok: true,
     count: rows.length,
     transactionDateMode: write.mode,
+    conflictMode: write.conflictMode,
     warning: write.warning,
     deletedScopeSymbols: symbols.length,
     symbols,
