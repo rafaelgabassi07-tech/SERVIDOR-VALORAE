@@ -1,3 +1,9 @@
+## 21.12.189-dividend-dates-analysis-modal-v159
+
+- Proventos: normaliza pagamento, Data COM, competência e período antes de montar gráficos e histórico.
+- Análise/modal: evita que labels genéricos como `Mensal` ou `Anual` substituam mês/ano real nos tooltips.
+- Histórico: ordenação passa a usar chave cronológica tolerante a `yyyy-MM`, `MM/yyyy`, datas completas e nomes de mês.
+
 ## 21.12.187-news-proventos-tooltips-v157
 
 - Notícias: reforçada ordenação `publishedAt_desc`, com metadados `sortedBy`, `asOf` e política de frescor no retorno do Proxy.

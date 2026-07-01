@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.187: notícias atuais, histórico de proventos com datas e suporte aos tooltips da Análise.",
+  "description": "Valorae Proxy 21.12.189: datas de proventos corrigidas na Análise e no modal do ativo.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,12 +15,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.187-news-proventos-tooltips-v157",
+    "releasePatch": "21.12.189-dividend-dates-analysis-modal-v159",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.187",
-    "checkpoint": "news-proventos-tooltips-v157",
-    "releaseLabel": "news-proventos-tooltips-v157"
+    "publicVersion": "21.12.189",
+    "checkpoint": "dividend-dates-analysis-modal-v159",
+    "releaseLabel": "dividend-dates-analysis-modal-v159"
   },
-  "releasePatch": "21.12.187-news-proventos-tooltips-v157"
+  "releasePatch": "21.12.189-dividend-dates-analysis-modal-v159"
 }
