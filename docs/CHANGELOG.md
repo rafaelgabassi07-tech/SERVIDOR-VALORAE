@@ -1,3 +1,11 @@
+# Proxy changelog
+
+## 21.12.196-analysis-liquidity-quotes-v166
+
+- Enriquece `/api/v1/quotes` com `dailyLiquidity`, `averageDailyLiquidity`, `liquidezMediaDiaria`, `liquidezDiaria` e displays compactos de liquidez.
+- Mantém P/VP, DY, cotação e variação no mesmo contrato em lote para subpáginas de categorias da Análise.
+- Adiciona metadado de capacidades em `quotePolicy.includes` para sinalizar que a resposta contém liquidez média diária.
+
 # v164 — Notícias claras e fundamentos sob demanda
 
 - `/api/v1/quotes` preparado para carregamento sob demanda de listas maiores de categorias da Análise.

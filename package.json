@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.194: reforça quotes com fundamentos para subpáginas de categorias e mantém compatibilidade com notificações de notícias claras.",
+  "description": "Valorae Proxy 21.12.196: Enriquece o contrato de quotes com liquidez média diária para tabelas da Análise no APK.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,12 +15,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.194-notification-news-analysis-cards-v164",
+    "releasePatch": "21.12.196-analysis-liquidity-quotes-v166",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.194",
-    "checkpoint": "notification-news-analysis-cards-v164",
-    "releaseLabel": "notification-news-analysis-cards-v164"
+    "publicVersion": "21.12.196",
+    "checkpoint": "analysis-liquidity-quotes-v166",
+    "releaseLabel": "analysis-liquidity-quotes-v166"
   },
-  "releasePatch": "21.12.194-notification-news-analysis-cards-v164"
+  "releasePatch": "21.12.196-analysis-liquidity-quotes-v166"
 }

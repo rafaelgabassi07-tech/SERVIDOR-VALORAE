@@ -1,3 +1,10 @@
+# VALORAE Proxy — v166
+
+Public version: 21.12.196
+Patch: `21.12.196-analysis-liquidity-quotes-v166`
+
+Enriquece o contrato de notícias com hints de título, tópico, motivo e URL de abertura para notificações profissionais no APK.
+
 # VALORAE Proxy — v164
 
 Ajusta o contrato de quotes para suportar melhor o carregamento sob demanda de P/VP e DY nas subpáginas de categorias da Análise.
