@@ -1,5 +1,12 @@
 # Proxy changelog
 
+## 21.12.198-portfolio-dedupe-sync-v168
+
+- Normaliza tickers de transações no Supabase removendo prefixos, `.SA`, `-SA`, `SA` colado e lote fracionário `F`.
+- Deduplica linhas por `client_tx_id` antes de `upsert_transactions` e `replace_transactions_for_symbols`.
+- `get_transactions` restaura `symbol`, `ticker`, `client_tx_id` e `clientTxId` já canonizados para impedir duplicidade na Carteira.
+- Compatível com APK v282 e com o contrato de sync existente.
+
 ## 21.12.197-analysis-quotes-liquidity-fallback-v167
 
 - Snapshot Fundamentus passa a mapear aliases adicionais de P/VP/PVPA, DY, cotação e liquidez média diária.

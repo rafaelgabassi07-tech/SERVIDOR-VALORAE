@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.197: Refina /api/v1/quotes para reduzir campos vazios de P/VP, DY, cotação e liquidez nas subpáginas da Análise, extraindo liquidez do snapshot Fundamentus e estimando valor negociado via volume quando necessário.",
+  "description": "Valorae Proxy 21.12.198: Normaliza tickers de transações no Supabase, remove variações .SA/-SA/fracionário e deduplica linhas por client_tx_id no upsert, replace e restore para impedir que ativos da Carteira reapareçam duplicados.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,12 +15,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.197-analysis-quotes-liquidity-fallback-v167",
+    "releasePatch": "21.12.198-portfolio-dedupe-sync-v168",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.197",
-    "checkpoint": "analysis-quotes-liquidity-fallback-v167",
-    "releaseLabel": "analysis-quotes-liquidity-fallback-v167"
+    "publicVersion": "21.12.198",
+    "checkpoint": "portfolio-dedupe-sync-v168",
+    "releaseLabel": "portfolio-dedupe-sync-v168"
   },
-  "releasePatch": "21.12.197-analysis-quotes-liquidity-fallback-v167"
+  "releasePatch": "21.12.198-portfolio-dedupe-sync-v168"
 }

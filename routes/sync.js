@@ -9,7 +9,7 @@ const CLIENTS_TABLE = process.env.VALORAE_SUPABASE_CLIENTS_TABLE || 'valorae_syn
 const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'valorae_transactions';
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
 const BACKUPS_TABLE = process.env.VALORAE_SUPABASE_BACKUPS_TABLE || process.env.VALORAE_SUPABASE_BACKUP_TABLE || 'valorae_sync_backups';
-const CORE_VERSION = '21.12.186-supabase-transaction-sync-v156';
+const CORE_VERSION = '21.12.198-portfolio-dedupe-sync-v168';
 
 const SNAPSHOT_FULL_SELECT = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
 const SNAPSHOT_LEGACY_SELECT = 'payload,updated_at,domain,snapshot_key,user_id';
@@ -786,12 +786,41 @@ function transactionRow(userId, tx = {}, options = {}) {
 }
 
 
+function normalizeSingleTransactionSymbol(symbol) {
+  let ticker = safeText(symbol, 40)
+    .toUpperCase()
+    .replace(/^BVMF:/, '')
+    .replace(/^BMFBOVESPA:/, '')
+    .replace(/^B3:/, '')
+    .replace(/\.SA$/, '')
+    .replace(/-SA$/, '')
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 16);
+  if (/^[A-Z]{4}[0-9]{1,2}SA$/.test(ticker)) ticker = ticker.slice(0, -2);
+  if (/^[A-Z]{4}[0-9]{1,2}F$/.test(ticker)) ticker = ticker.slice(0, -1);
+  return ticker.slice(0, 12);
+}
+
 function normalizeTransactionSymbols(input = []) {
   const source = Array.isArray(input) ? input : String(input || '').split(',');
   return [...new Set(source
-    .map((symbol) => safeText(symbol, 32).toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/F$/, (match, offset, value) => /^[A-Z]{4}[0-9]{1,2}F$/.test(value) ? '' : match))
+    .map((symbol) => normalizeSingleTransactionSymbol(symbol))
     .filter(Boolean)
     .slice(0, 80))];
+}
+
+function dedupeTransactionRowsByClientId(rows = []) {
+  const seen = new Set();
+  const output = [];
+  for (const row of rows) {
+    const key = safeText(row?.client_tx_id || '', 160);
+    if (key) {
+      if (seen.has(key)) continue;
+      seen.add(key);
+    }
+    output.push(row);
+  }
+  return output;
 }
 
 function postgrestIn(values = []) {
@@ -899,7 +928,7 @@ async function postTransactionRows(rows, { conflict = 'user_id,client_tx_id', al
 async function upsertTransactions(input, auth) {
   const userId = auth.userId;
   const arr = Array.isArray(input.transactions) ? input.transactions : [];
-  const rows = arr.map((tx) => transactionRow(userId, tx)).filter((r) => r.ticker);
+  const rows = dedupeTransactionRowsByClientId(arr.map((tx) => transactionRow(userId, tx)).filter((r) => r.ticker));
   if (!rows.length) return { ok: true, count: 0, message: 'Nenhuma transação para salvar.' };
   const write = await postTransactionRows(rows, { allowPlainInsertFallback: true });
   const backup = await mirrorSyncBackup(userId, 'transactions', { transactions: rows.map((row) => row.payload || row) }, { source: 'apk-history', count: rows.length });
@@ -912,9 +941,9 @@ async function replaceTransactionsForSymbols(input, auth) {
   if (!userId || !symbols.length) return { ok: true, count: 0, deleted: 0, message: 'Nenhum ticker para substituir.' };
 
   const arr = Array.isArray(input.transactions) ? input.transactions : [];
-  const rows = arr
+  const rows = dedupeTransactionRowsByClientId(arr
     .map((tx) => transactionRow(userId, tx))
-    .filter((r) => r.ticker && symbols.includes(r.ticker));
+    .filter((r) => r.ticker && symbols.includes(r.ticker)));
 
   await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?user_id=eq.${encodeURIComponent(userId)}&ticker=in.(${postgrestIn(symbols)})`, {
     method: 'DELETE',
@@ -944,19 +973,22 @@ async function getTransactions(input, auth) {
   const userId = auth.userId || safeText(input.userId || input.user_id || '', 160);
   const q = `user_id=eq.${encodeURIComponent(userId)}&select=client_tx_id,ticker,name,quantity,purchase_price,transaction_date,asset_type,is_sell,broker,sector,notes,payload,updated_at&order=transaction_date.desc`;
   const rows = await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?${q}`, { method: 'GET' });
-  const transactions = (Array.isArray(rows) ? rows : []).map((r) => {
+  const uniqueRows = dedupeTransactionRowsByClientId(Array.isArray(rows) ? rows : []);
+  const transactions = uniqueRows.map((r) => {
     const payload = r.payload || {};
     const operation = safeText(payload.operation || (r.is_sell ? 'VENDA' : 'COMPRA'), 40).toUpperCase();
     const price = Number(payload.price ?? payload.purchasePrice ?? r.purchase_price ?? 0);
     const grossValue = Number(payload.grossValue ?? payload.gross_value ?? (Number(r.quantity || 0) * price));
     const transactionMillis = transactionTimestamp(r.transaction_date || payload.date || payload.transaction_date || payload.transactionDate || Date.now());
+    const ticker = normalizeSingleTransactionSymbol(payload.symbol || r.ticker);
     return {
       ...payload,
       id: Number(payload.id || r.client_tx_id || 0) || 0,
       client_tx_id: r.client_tx_id,
-      symbol: payload.symbol || r.ticker,
-      ticker: r.ticker,
-      name: r.name || r.ticker,
+      clientTxId: r.client_tx_id,
+      symbol: ticker,
+      ticker,
+      name: r.name || ticker,
       operation,
       quantity: Number(r.quantity || 0),
       price,
