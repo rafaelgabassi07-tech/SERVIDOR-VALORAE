@@ -5,8 +5,12 @@ import { formatBrDateTime } from '../lib/core/dates.js';
 
 function parseSymbolList(value) {
   if (Array.isArray(value)) return value;
-  if (typeof value === 'string') return value.split(',');
+  if (typeof value === 'string') return value.split(/[,;\s]+/);
   return [];
+}
+
+function safeSearchText(value) {
+  return String(value || '').trim().replace(/\s+/g, ' ').slice(0, 80);
 }
 
 
@@ -56,10 +60,11 @@ export default async function handler(req, res) {
   if (route.done) return;
   try {
     const input = route.input;
-    const requestedSymbols = parseSymbolList(input.symbols || input.tickers || input.assets)
+    const requestedSymbols = [...new Set(parseSymbolList(input.symbols || input.tickers || input.assets)
       .map(symbol => canonicalizeTicker(symbol))
-      .filter(Boolean)
+      .filter(Boolean))]
       .slice(0, 48);
+    const searchQuery = safeSearchText(input.query || input.search || input.q || '');
     const ticker = canonicalizeTicker(input.ticker || input.symbol || requestedSymbols[0] || '');
     // Notícias globais da página "Notícias" do APK chegam sem ticker.
     // Valide apenas símbolos realmente pedidos, mantendo o feed geral livre de 400.
@@ -67,7 +72,7 @@ export default async function handler(req, res) {
     const validation = validationCandidates.map(validarTicker).find(Boolean) || null;
     if (validation) return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: validation }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'news' });
     const aliases = [
-      ...(typeof input.aliases === 'string' ? input.aliases.split(',') : []),
+      ...(typeof input.aliases === 'string' ? input.aliases.split(/[,;\s]+/) : []),
       ...requestedSymbols.filter(symbol => symbol !== ticker),
     ].map(s => String(s || '').trim()).filter(Boolean).slice(0, 48);
     const timeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 350, 12000) : 3000;
@@ -80,9 +85,10 @@ export default async function handler(req, res) {
       nocache: boolParam(input.nocache),
       bypassCache: boolParam(input.refresh || input.nocache),
       lowLatencyBudget: timeoutMs !== undefined && timeoutMs <= 1000,
+      searchQuery,
     });
     const normalizedNews = withBrowserOpenPolicy(news);
-    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, ticker, symbols: requestedSymbols, ...normalizedNews }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'news', cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
+    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, ...normalizedNews, ticker, searchQuery, userQuery: searchQuery, symbols: requestedSymbols }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'news', cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'news' });
   }

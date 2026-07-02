@@ -5,12 +5,15 @@ import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute, clampNumber, sendRouteError } from '../../lib/http/route.js';
 
 function normalizeHistoryTicker(raw = '') {
-  const t = String(raw || '').trim().toUpperCase().replace(/\.SA$/i, '').replace(/[^A-Z0-9^]/g, '');
-  if (['IFIX', '^IFIX'].includes(t)) return 'IFIX';
-  if (['IBOV', 'IBOVESPA', '^BVSP'].includes(t)) return 'IBOV';
-  if (['SMLL', 'SMALL'].includes(t)) return 'SMLL';
-  if (['IDIV'].includes(t)) return 'IDIV';
-  return canonicalizeTicker(t);
+  const text = String(raw || '').trim().toUpperCase();
+  const compactAlias = text.replace(/\.SA$/i, '').replace(/[^A-Z0-9^]/g, '');
+  const canonical = canonicalizeTicker(text);
+  const aliases = new Set([compactAlias, canonical]);
+  if (aliases.has('IFIX') || aliases.has('^IFIX')) return 'IFIX';
+  if (aliases.has('IBOV') || aliases.has('IBOVESPA') || aliases.has('^BVSP')) return 'IBOV';
+  if (aliases.has('SMLL') || aliases.has('SMALL')) return 'SMLL';
+  if (aliases.has('IDIV')) return 'IDIV';
+  return canonical;
 }
 
 export default async function handler(req, res) {

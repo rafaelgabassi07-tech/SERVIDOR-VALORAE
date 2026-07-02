@@ -48,7 +48,7 @@ function tickerFromPayload(payload = {}) {
   const text = String(raw || '').trim();
   const fromUrl = text.match(/\/(?:acoes|fiis|fiagros|etfs|bdrs|stocks|reits)\/([a-z]{4}[0-9]{1,2}[a-z]?)\/?/i)?.[1];
   const fromQuery = text.match(/[?&](?:ticker|symbol|ativo|codigo|papel)=([a-z]{4}[0-9]{1,2}[a-z]?)/i)?.[1];
-  const fromFreeText = text.match(/\b([A-Z]{4}[0-9]{1,2}[A-Z]?)\b/i)?.[1];
+  const fromFreeText = text.match(/\b((?:[A-Z]{4}[0-9]{1,2}[A-Z]?|[A-Z0-9]{3,6}[0-9]{1,2}))\b/i)?.[1];
   return canonicalizeTicker(fromUrl || fromQuery || fromFreeText || text);
 }
 
@@ -66,7 +66,7 @@ function assetTypeFromPayload(payload = {}, ticker = '') {
   if (raw.includes('STOCK') || raw.includes('REIT')) return 'STOCK';
   if (raw.includes('ACAO') || raw.includes('AÇÃO') || raw.includes('UNIT')) return 'ACAO';
   if (KNOWN_ROUTE_ETFS.has(ticker)) return 'ETF';
-  if (/34$|35$|36$|39$/.test(ticker)) return 'BDR';
+  if (/^[A-Z]{4}3[0-9]$/.test(ticker)) return 'BDR';
   if (KNOWN_ROUTE_UNITS.has(ticker)) return 'ACAO';
   return inferAssetType(ticker);
 }

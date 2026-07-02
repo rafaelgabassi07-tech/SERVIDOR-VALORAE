@@ -1,4 +1,4 @@
-import { ValoraeEngine } from '../../lib/Valorae-engine.js';
+import { ValoraeEngine, canonicalizeTicker } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute, boolParam, clampNumber, resolveSelfScrapeUrl, sendRouteError } from '../../lib/http/route.js';
 import { resolvePerformanceOptions } from '../../lib/performance/profile.js';
@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   if (route.done) return;
   const input = route.input;
   try {
-    const ticker = String(input.ticker || 'PETR4').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12) || 'PETR4';
+    const ticker = canonicalizeTicker(input.ticker || 'PETR4') || 'PETR4';
     const perfOptions = resolvePerformanceOptions({
       mode: input.mode || 'super',
       includeNews: boolParam(input.includeNews),

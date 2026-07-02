@@ -13,7 +13,7 @@ function suggestionQuery(input = {}) {
 }
 
 function looksLikeFullB3Ticker(rawQuery = '') {
-  return /^[A-Z]{4}[0-9]{1,2}[A-Z]?$/.test(canonicalizeTicker(rawQuery));
+  return /^(?:[A-Z]{4}[0-9]{1,2}[A-Z]?|[A-Z0-9]{3,6}[0-9]{1,2})$/.test(canonicalizeTicker(rawQuery));
 }
 
 function normalizeSearchText(raw = '') {

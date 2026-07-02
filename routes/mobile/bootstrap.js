@@ -14,14 +14,19 @@ export default async function handler(req, res) {
   try {
     const q = route.input;
     const deadlineMs = clampNumber(q.routeDeadlineMs || q.deadlineMs || q.timeoutMs, 3200, 1000, 8000);
-    const raw = parseList(q.tickers || q.ticker).map(t => String(t).trim()).filter(Boolean).slice(0, 20);
+    const raw = parseList(q.tickers || q.ticker).map(t => String(t).trim()).filter(Boolean).slice(0, 32);
     const tickers = [];
+    const seenTickers = new Set();
     const inputErrors = [];
     for (const item of raw) {
       const ticker = canonicalizeTicker(item);
       const err = validarTicker(ticker);
       if (err) inputErrors.push({ ticker: item, error: err });
-      else tickers.push(ticker);
+      else if (!seenTickers.has(ticker)) {
+        seenTickers.add(ticker);
+        tickers.push(ticker);
+      }
+      if (tickers.length >= 20) break;
     }
 
     const assetFallback = (reason = 'bootstrap-deadline') => ({
@@ -65,7 +70,7 @@ export default async function handler(req, res) {
       ? withRouteDeadline(
           async () => {
             try {
-              return await ValoraeEngine.fetchNews('', [], {
+              return await ValoraeEngine.fetchNews('', tickers.slice(0, 8), {
                 limit: clampNumber(q.newsLimit || q.limit, 8, 0, 20),
                 timeoutMs: clampNumber(q.newsTimeoutMs || q.timeoutMs, 1400, 350, 4000),
                 newsTimeoutMs: clampNumber(q.newsTimeoutMs || q.timeoutMs, 1400, 350, 4000),

@@ -3,13 +3,15 @@ import { sendJson } from '../lib/performance/http.js';
 import { formatBrDate } from '../lib/core/dates.js';
 import { beginRoute, getInput } from '../lib/http/route.js';
 import { ValoraeEngine } from '../lib/Valorae-engine.js';
+import { normalizeTicker } from '../lib/core/tickers.js';
 
 const SNAPSHOT_TABLE = process.env.VALORAE_SUPABASE_SNAPSHOT_TABLE || 'valorae_user_snapshots';
 const CLIENTS_TABLE = process.env.VALORAE_SUPABASE_CLIENTS_TABLE || 'valorae_sync_clients';
 const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'valorae_transactions';
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
 const BACKUPS_TABLE = process.env.VALORAE_SUPABASE_BACKUPS_TABLE || process.env.VALORAE_SUPABASE_BACKUP_TABLE || 'valorae_sync_backups';
-const CORE_VERSION = '21.12.198-portfolio-dedupe-sync-v168';
+const CORE_VERSION = '21.12.201-general-full-regression-audit-v171';
+// Compat lineage: 21.12.151-cloud-primary-supabase-v88.
 
 const SNAPSHOT_FULL_SELECT = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
 const SNAPSHOT_LEGACY_SELECT = 'payload,updated_at,domain,snapshot_key,user_id';
@@ -159,7 +161,7 @@ function clientSecretHash(userId, clientSecret) {
 function eventKey(userId, ev = {}) {
   const raw = [
     userId,
-    ev.ticker || ev.symbol || '',
+    normalizeSingleTransactionSymbol(ev.ticker || ev.symbol || ''),
     ev.paymentDate || ev.payment_date || '',
     ev.dateCom || ev.date_com || '',
     ev.inferredComDate || ev.inferred_com_date || ev.estimatedComDate || '',
@@ -184,7 +186,7 @@ function isLocalDividendProjection(ev = {}) {
 }
 
 function hasUsableDividendEvent(ev = {}) {
-  const ticker = safeText(ev.ticker || ev.symbol || '', 32);
+  const ticker = normalizeSingleTransactionSymbol(ev.ticker || ev.symbol || '');
   const dateCom = safeText(ev.dateCom || ev.date_com || '', 40);
   const inferredComDate = safeText(ev.inferredComDate || ev.inferred_com_date || ev.estimatedComDate || '', 40);
   const exDate = safeText(ev.exDate || ev.ex_date || ev.dateEx || '', 40);
@@ -787,18 +789,7 @@ function transactionRow(userId, tx = {}, options = {}) {
 
 
 function normalizeSingleTransactionSymbol(symbol) {
-  let ticker = safeText(symbol, 40)
-    .toUpperCase()
-    .replace(/^BVMF:/, '')
-    .replace(/^BMFBOVESPA:/, '')
-    .replace(/^B3:/, '')
-    .replace(/\.SA$/, '')
-    .replace(/-SA$/, '')
-    .replace(/[^A-Z0-9]/g, '')
-    .slice(0, 16);
-  if (/^[A-Z]{4}[0-9]{1,2}SA$/.test(ticker)) ticker = ticker.slice(0, -2);
-  if (/^[A-Z]{4}[0-9]{1,2}F$/.test(ticker)) ticker = ticker.slice(0, -1);
-  return ticker.slice(0, 12);
+  return normalizeTicker(safeText(symbol, 40));
 }
 
 function normalizeTransactionSymbols(input = []) {
@@ -1015,8 +1006,11 @@ async function getTransactions(input, auth) {
 function dividendRow(userId, ev = {}) {
   const status = safeText(ev.status || '', 80);
   const low = status.toLowerCase();
+  const normalizedTicker = normalizeSingleTransactionSymbol(ev.ticker || ev.symbol || '');
   const normalizedPayload = {
     ...ev,
+    ticker: normalizedTicker,
+    symbol: normalizedTicker,
     dateCom: safeText(ev.dateCom || ev.date_com || '', 40),
     exDate: safeText(ev.exDate || ev.ex_date || ev.dateEx || '', 40),
     inferredComDate: safeText(ev.inferredComDate || ev.inferred_com_date || ev.estimatedComDate || '', 40),
@@ -1026,7 +1020,7 @@ function dividendRow(userId, ev = {}) {
   return {
     user_id: userId,
     event_key: eventKey(userId, normalizedPayload),
-    ticker: safeText(ev.ticker || ev.symbol || '', 32).toUpperCase().replace('.SA', ''),
+    ticker: normalizeSingleTransactionSymbol(ev.ticker || ev.symbol || ''),
     date_com: normalizedPayload.dateCom,
     payment_date: normalizedPayload.paymentDate,
     value_per_share: Number(ev.valuePerShare ?? ev.value_per_share ?? ev.value ?? 0),
@@ -1294,3 +1288,12 @@ export default async function handler(req, res) {
     }, { status: err.status || 500, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
   }
 }
+
+export const _test = {
+  normalizeSingleTransactionSymbol,
+  normalizeTransactionSymbols,
+  transactionRow,
+  dividendRow,
+  eventKey,
+  hasUsableDividendEvent,
+};
