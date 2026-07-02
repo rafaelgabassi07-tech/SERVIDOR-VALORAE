@@ -1,3 +1,18 @@
+# VALORAE Proxy — v167
+
+Public version: 21.12.197
+Patch: `21.12.197-analysis-quotes-liquidity-fallback-v167`
+
+Refina /api/v1/quotes para reduzir campos vazios de P/VP, DY, cotação e liquidez nas subpáginas da Análise, extraindo liquidez do snapshot Fundamentus e estimando valor negociado via volume quando necessário.
+
+## Principais mudanças
+- Snapshot Fundamentus passa a mapear aliases adicionais de P/VP/PVPA, DY, cotação e liquidez média diária.
+- Parser de FIIs e ações aceita colunas como Liq.2meses, Liquidez Média Diária, Liq. Diária e Volume Médio.
+- Quotes do Yahoo preservam volume negociado e o contrato estima liquidez quando a fonte de fundamentos não entrega liquidez explícita.
+- Mantida compatibilidade com assets, quotes, items e results do contrato do APK.
+
+---
+
 # VALORAE Proxy — v166
 
 Public version: 21.12.196

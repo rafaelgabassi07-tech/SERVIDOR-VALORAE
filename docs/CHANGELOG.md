@@ -1,5 +1,12 @@
 # Proxy changelog
 
+## 21.12.197-analysis-quotes-liquidity-fallback-v167
+
+- Snapshot Fundamentus passa a mapear aliases adicionais de P/VP/PVPA, DY, cotação e liquidez média diária.
+- Parser de FIIs e ações aceita colunas como Liq.2meses, Liquidez Média Diária, Liq. Diária e Volume Médio.
+- Quotes do Yahoo preservam volume negociado e o contrato estima liquidez quando a fonte de fundamentos não entrega liquidez explícita.
+- Mantida compatibilidade com assets, quotes, items e results do contrato do APK.
+
 ## 21.12.196-analysis-liquidity-quotes-v166
 
 - Enriquece `/api/v1/quotes` com `dailyLiquidity`, `averageDailyLiquidity`, `liquidezMediaDiaria`, `liquidezDiaria` e displays compactos de liquidez.
