@@ -1,3 +1,27 @@
+# v164 — Notícias claras e fundamentos sob demanda
+
+- `/api/v1/quotes` preparado para carregamento sob demanda de listas maiores de categorias da Análise.
+- Limite padrão do lote de quotes/fundamentos elevado para 180 tickers e timeout de fundamentos reforçado.
+
+## 21.12.193 — notification-permissions-refinement-v163
+
+- Refina o endpoint `/api/v1/news` para radar de notícias da carteira.
+- Consulta até 96 símbolos e usa termos de evento relevante para reduzir ruído.
+- Expõe metadados de relevância para o APK gerar notificações mais acionáveis.
+
+## 21.12.191 — Fundamentos em lote para Descoberta por setores (v161)
+
+- `/api/v1/quotes` passa a retornar `assets`, `quotes`, `items` e `results` com cotação, variação do dia, P/VP e Dividend Yield quando disponíveis.
+- Adicionado snapshot em lote do Fundamentus para enriquecer ações e FIIs sem exigir scraping individual de cada ativo da lista.
+- Contrato preserva ausência real com campo vazio/ausente; o APK continua mostrando `—` quando a fonte não entrega P/VP ou DY.
+- Compatível com a Descoberta por setores do APK v265, incluindo prévia, Ver mais e Ver todos.
+
+## 21.12.190 — Compatibilidade da Análise vazia integrada aos Favoritos (v160)
+
+- Mantém contrato da Análise sem novas rotas.
+- Registra compatibilidade com o APK v254, que usa favoritos, carteira, recentes e sugestões locais antes da primeira pesquisa.
+- Preserva chamadas existentes de busca e AnalysisPageResponse.
+
 ## 21.12.189-dividend-dates-analysis-modal-v159
 
 - Proventos: normaliza pagamento, Data COM, competência e período antes de montar gráficos e histórico.

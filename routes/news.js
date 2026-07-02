@@ -59,7 +59,7 @@ export default async function handler(req, res) {
     const requestedSymbols = parseSymbolList(input.symbols || input.tickers || input.assets)
       .map(symbol => canonicalizeTicker(symbol))
       .filter(Boolean)
-      .slice(0, 16);
+      .slice(0, 48);
     const ticker = canonicalizeTicker(input.ticker || input.symbol || requestedSymbols[0] || '');
     // Notícias globais da página "Notícias" do APK chegam sem ticker.
     // Valide apenas símbolos realmente pedidos, mantendo o feed geral livre de 400.
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
     const aliases = [
       ...(typeof input.aliases === 'string' ? input.aliases.split(',') : []),
       ...requestedSymbols.filter(symbol => symbol !== ticker),
-    ].map(s => String(s || '').trim()).filter(Boolean).slice(0, 16);
+    ].map(s => String(s || '').trim()).filter(Boolean).slice(0, 48);
     const timeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 350, 12000) : 3000;
     const newsTimeoutMs = input.newsTimeoutMs ? clampNumber(input.newsTimeoutMs, undefined, 350, 12000) : timeoutMs;
     const news = await ValoraeEngine.fetchNews(ticker, aliases, {

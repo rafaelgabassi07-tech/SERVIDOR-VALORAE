@@ -580,9 +580,13 @@ export async function dispatchRoute(req, res) {
 
     if (path === '/asset/quote' || path === '/quote') return sendJson(req, res, await getQuote(payload.ticker || payload.symbol || payload.q), { cacheControl: 'private, max-age=30, stale-while-revalidate=300' });
     if (path === '/quotes') {
-      const rawBatch = payload.tickers || payload.symbols || payload.assets || payload.positions;
-      const hasBatch = Array.isArray(rawBatch) ? rawBatch.length > 1 : String(rawBatch || '').split(/[,;\s]+/).filter(Boolean).length > 1;
-      return sendJson(req, res, hasBatch ? await buildAssetsPayload({ ...payload, max: payload.max || 60 }) : await getQuote(payload.ticker || payload.symbol || payload.q || rawBatch), { cacheControl: 'private, max-age=30, stale-while-revalidate=300' });
+      const rawBatch = payload.tickers || payload.symbols || payload.assets || payload.positions || payload.ticker || payload.symbol || payload.q;
+      return sendJson(req, res, await buildAssetsPayload({
+        ...payload,
+        tickers: rawBatch,
+        max: payload.max || 180,
+        fundamentalTimeoutMs: payload.fundamentalTimeoutMs || payload.fundamentusTimeoutMs || 6500
+      }), { cacheControl: 'private, max-age=30, stale-while-revalidate=300' });
     }
     if (path === '/asset' || path === '/asset/coverage' || path === '/asset/fundamentals' || path === '/asset/profile' || path === '/asset/valuation' || path === '/asset/profitability' || path === '/asset/debt' || path === '/asset/statements' || path === '/asset/peers' || path === '/asset/source-map' || path === '/asset/indicators' || path === '/asset/quality' || path === '/asset/action-plan') {
       const enriched = await buildAssetDetails(payload);
