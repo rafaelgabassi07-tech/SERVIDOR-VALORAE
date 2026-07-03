@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.218: Vercel Node 24 com limpeza automática de artefatos temporários antes do build.",
+  "description": "Valorae Proxy 21.12.219: gráficos da Análise e dos modais restritos a séries reais do Investidor10, mantendo fundamentos/proventos de StatusInvest e Investidor10.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.218-vercel-temp-artifact-prune-v188",
+    "releasePatch": "21.12.219-investidor10-only-analysis-charts-v189",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.218",
-    "checkpoint": "vercel-temp-artifact-prune-v188",
-    "releaseLabel": "vercel-temp-artifact-prune-v188"
+    "publicVersion": "21.12.219",
+    "checkpoint": "investidor10-only-analysis-charts-v189",
+    "releaseLabel": "investidor10-only-analysis-charts-v189"
   },
-  "releasePatch": "21.12.218-vercel-temp-artifact-prune-v188"
+  "releasePatch": "21.12.219-investidor10-only-analysis-charts-v189"
 }

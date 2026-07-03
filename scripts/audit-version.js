@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const expectedCore = '21.12.0';
-const expectedPublic = '21.12.218';
-const expectedPatch = '21.12.218-vercel-temp-artifact-prune-v188';
+const expectedPublic = '21.12.219';
+const expectedPatch = '21.12.219-investidor10-only-analysis-charts-v189';
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
 const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
@@ -15,5 +15,5 @@ assert.equal(pkg.valorae.releasePatch, expectedPatch);
 assert.equal(metadata.version, expectedCore);
 assert.equal(metadata.releasePatch, expectedPatch);
 assert.equal(manifest.version, expectedPublic);
-assert.ok(sw.includes('v21-12-218'));
+assert.ok(sw.includes('v21-12-219'));
 console.log('release audit OK:', expectedCore, expectedPatch);
