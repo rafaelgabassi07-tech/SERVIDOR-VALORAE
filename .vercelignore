@@ -13,3 +13,7 @@ docs/audits
 docs/reference
 
 .gradle/
+*.bak
+*.tmp
+*.orig
+*~

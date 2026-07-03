@@ -10,3 +10,7 @@ dist/
 build/
 .tmp/
 .cache/
+*.bak
+*.tmp
+*.orig
+*~

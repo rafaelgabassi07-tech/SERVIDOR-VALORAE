@@ -2,10 +2,17 @@
 
 Release date: 2026-07-02  
 Core version: 21.12.0  
-Public version: 21.12.217  
-Patch: `21.12.217-vercel-node24-release-hygiene-v187`
+Public version: 21.12.218  
+Patch: `21.12.218-vercel-temp-artifact-prune-v188`
 
 Proxy v185 continua a auditoria de captura, bloqueia gráfico de cotação com ponto único, adiciona sourceCaptureMap/criticalMissingSectionIds ao dataQuality e reforça a política de gráficos reais para APK e modais.
+
+## v188 — Vercel temp artifact prune
+
+- Corrige erro persistente no Vercel causado por `lib/analysis/analysis-page-response.js.bak` presente no contexto de build.
+- Build seguro agora remove artefatos temporários antes de validar a release.
+- `.gitignore`, `.vercelignore` e `package-lock.json` alinhados.
+
 
 ## Alterações
 - Bloqueio de gráfico de cotação com ponto único no contrato da Análise.
