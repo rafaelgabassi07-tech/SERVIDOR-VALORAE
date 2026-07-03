@@ -1,23 +1,25 @@
-# VALORAE Proxy — v178
+# VALORAE Proxy — v185
 
 Core version: 21.12.0  
-Public version: 21.12.208  
-Patch: `21.12.208-investidor10-gap-news-copy-audit-v178`  
-Checkpoint: `investidor10-gap-news-copy-audit-v178`
+Public version: 21.12.216  
+Patch: `21.12.216-performance-optimization-v186`  
+Checkpoint: `performance-optimization-v186`
 
-## v178 — Auditoria Investidor10, lacunas de FIIs e notificações APK
+## v185 — Qualidade estrita de gráficos e captura contínua
 
-Correções aplicadas:
+Proxy v185 continua a auditoria de captura, bloqueia gráfico de cotação com ponto único, adiciona sourceCaptureMap/criticalMissingSectionIds ao dataQuality e reforça a política de gráficos reais para APK e modais.
 
-- Varredura das páginas do Investidor10 para ação e FII, alinhando o contrato do Proxy aos blocos visíveis de cotação, rentabilidade, histórico de indicadores, dividendos/proventos, comparadores, dados cadastrais, receitas/lucros, lucro x cotação, evolução patrimonial e balanço.
-- Captura canônica de breve apresentação do ativo a partir do bloco `SOBRE A EMPRESA` ou dos campos reais de `INFORMAÇÕES SOBRE` no caso de FIIs.
-- `assetChartsCanonical`, `assetChartBundle`, contrato `/analysis` e contrato mobile compatível agora carregam `profilePresentation`/`assetPresentation`/`sobre`.
-- Gráficos financeiros do contrato do APK passaram a preservar múltiplas séries quando a fonte expõe mais de duas informações: receita líquida, lucro bruto, EBITDA, EBIT e lucro líquido.
-- Evolução patrimonial passou a aceitar patrimônio líquido, ativos e passivos no mesmo gráfico multi-série.
-- Demonstrativos por período agora podem transportar até 5 séries alinhadas em vez de cortar em 3.
-- Testes regressivos de contrato e lacunas do Investidor10 cobrindo apresentação de ação, apresentação de FII e gráficos multi-série.
+### Correções principais
+- Bloqueia gráfico de cotação quando só existe um ponto derivado do preço atual.
+- Mantém gráficos temporais apenas com pontos suficientes; composições/categorias continuam preservando ordem da fonte.
+- `dataQuality` agora expõe `sourceCaptureMap`, `criticalMissingSectionIds`, `strictChartPolicyOk` e `appActionHints`.
+- `sourceCoverage` marca seções críticas para facilitar auditoria APK ↔ Proxy.
+- Novo teste de regressão: `analysis-quality-strict-charts-v185.test.js`.
 
-Validação esperada:
+## v186 — Auditoria de desempenho e otimização de rota
 
-- `npm run verify`
-- ZIP sem pasta wrapper, pronto para AI Studio.
+Proxy v186 reduz trabalho duplicado na rota /api/v1/analysis com cache LRU curto, coalescing de requisições iguais e preservação do contrato estrito de gráficos reais para melhorar abertura da Análise e dos modais no APK.
+
+- Cache curto da rota /api/v1/analysis para reduzir abertura repetida de ativos e modais.
+- Coalescing de requisições simultâneas iguais para evitar múltiplos scrapes/normalizações da mesma fonte.
+- Política estrita de gráficos reais preservada.

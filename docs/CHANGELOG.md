@@ -1,20 +1,26 @@
-# v178 — Auditoria Investidor10, lacunas de FIIs e notificações APK
+# v185 — Qualidade estrita de gráficos e captura contínua
 
+Release date: 2026-07-02  
 Core version: 21.12.0  
-Public version: 21.12.208  
-Patch: `21.12.208-investidor10-gap-news-copy-audit-v178`
+Public version: 21.12.216  
+Patch: `21.12.216-performance-optimization-v186`
 
-## Correções
+Proxy v185 continua a auditoria de captura, bloqueia gráfico de cotação com ponto único, adiciona sourceCaptureMap/criticalMissingSectionIds ao dataQuality e reforça a política de gráficos reais para APK e modais.
 
-- Proxy revisado contra páginas reais do Investidor10 de ação e FII para identificar blocos visíveis que não chegavam bem ao APK.
-- Adicionada captura de breve apresentação do ativo: `assetPresentation`, `profilePresentation`, `description`, `sobre` e aliases compatíveis.
-- Alinhado `applyApiExtrasToResults`, `assetChartBundle`, `AnalysisPageResponse` e `mobile-scraper-contract` para propagar a apresentação do ativo.
-- Corrigido contrato dos gráficos financeiros com mais de duas informações: `revenue_profit` agora pode carregar receita líquida, lucro bruto, EBITDA, EBIT e lucro líquido.
-- Corrigido `equity_evolution` para carregar patrimônio líquido, ativos e passivos quando disponíveis.
-- Demonstrativos financeiros por período ampliados para até 5 séries alinhadas.
-- Mantidas as correções do v175 para ETFs, units e BDRs.
+## Alterações
+- Bloqueio de gráfico de cotação com ponto único no contrato da Análise.
+- `dataQuality` ampliado com mapa de captura por seção e lista de seções críticas ausentes.
+- Política estrita para gráficos reais reforçada antes do payload chegar no APK.
+- Teste v185 cobrindo ausência de gráfico sintético de cotação e presença de auditoria de captura.
 
-## Testes
+## Validação
+- `npm run verify`
+- `node scripts/check-syntax.js`
 
-- Testes regressivos de contrato e lacunas do Investidor10 cobrem apresentação de ação, apresentação de FII e gráficos multi-série.
-- `npm run verify` deve executar build, sintaxe, testes e auditoria de versão.
+## v186 — Auditoria de desempenho e otimização de rota
+
+Proxy v186 reduz trabalho duplicado na rota /api/v1/analysis com cache LRU curto, coalescing de requisições iguais e preservação do contrato estrito de gráficos reais para melhorar abertura da Análise e dos modais no APK.
+
+- Cache curto da rota /api/v1/analysis para reduzir abertura repetida de ativos e modais.
+- Coalescing de requisições simultâneas iguais para evitar múltiplos scrapes/normalizações da mesma fonte.
+- Política estrita de gráficos reais preservada.

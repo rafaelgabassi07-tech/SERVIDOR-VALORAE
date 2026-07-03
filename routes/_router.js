@@ -25,6 +25,31 @@ import marketIndicesHandler from './market/indices.js';
 import compatScraperHandler from './compat/scraper4.js';
 import syncHandler from './sync.js';
 import serverMetricsHandler from './server/metrics.js';
+import { TtlLruCache } from '../lib/cache/memory.js';
+import { coalesce } from '../lib/resilience/inflight.js';
+
+const analysisRouteCache = globalThis.__VALORAE_ANALYSIS_ROUTE_CACHE__ || new TtlLruCache({
+  name: 'analysis-route-response-cache',
+  maxEntries: 96,
+  maxBytes: 14 * 1024 * 1024,
+  ttlMs: 60 * 1000
+});
+globalThis.__VALORAE_ANALYSIS_ROUTE_CACHE__ = analysisRouteCache;
+
+function analysisRouteCacheKey(ticker, payload = {}) {
+  const pick = (value, fallback = '') => String(value ?? fallback).trim().toLowerCase();
+  return [
+    'analysis',
+    String(ticker || '').toUpperCase(),
+    pick(payload.surface || payload.consumer || payload.consumerId, 'page'),
+    pick(payload.mode || payload.priority, 'full'),
+    pick(payload.range, 'auto'),
+    pick(payload.fastMode || payload.fast || '', ''),
+    pick(payload.chartPointLimit, ''),
+    pick(payload.maxCharts, ''),
+    pick(payload.maxItems, '')
+  ].join(':');
+}
 
 function stripApi(pathname) {
   let path = pathname || '/';
@@ -94,6 +119,34 @@ export function shouldReplaceLocalCache(data) {
   };
 }
 
+function routeMethod(path = '') {
+  const normalized = String(path || '').replace(/^\/api(?:\/v[12])?/, '') || '/';
+  const postRoutes = new Set([
+    '/sync',
+    '/mobile/bootstrap', '/app/bootstrap',
+    '/mobile/practical-sync', '/app/practical-sync',
+    '/mobile/portfolio-sync', '/app/portfolio-sync', '/portfolio/insights-bundle',
+    '/dividends/batch',
+    '/portfolio/dividends', '/portfolio/next-dividends', '/portfolio/events',
+    '/portfolio/returns', '/portfolio/analyze', '/portfolio/allocation', '/portfolio/equilibrium',
+    '/portfolio/balance', '/portfolio/history', '/portfolio/income', '/portfolio/rebalance',
+    '/portfolio/risk', '/portfolio/summary', '/portfolio/transactions',
+    '/compare', '/watchlist/analyze', '/batch-scrape'
+  ]);
+  return postRoutes.has(normalized) ? 'POST' : 'GET';
+}
+
+function openApiOperationForRoute(route = '') {
+  const method = routeMethod(route).toLowerCase();
+  return {
+    [method]: {
+      summary: route,
+      description: method === 'post' ? 'Aceita query string e/ou JSON body.' : 'Rota consultiva via query string.',
+      responses: { '200': { description: 'Resposta VALORAE JSON' } }
+    }
+  };
+}
+
 function buildIntegrationManifestPayload() {
   return {
     status: 'OK',
@@ -104,7 +157,7 @@ function buildIntegrationManifestPayload() {
     stableRoots: {
       firstPaint: 'appMobileSnapshot', detail: 'appPayload', cacheDecision: 'appSyncEnvelope', safety: 'appResponseIntegrity', quality: 'fieldConsistencyGuard', action: 'assetActionPlan'
     },
-    endpoints: routeManifest().routes.map(path => ({ path: `/api/v1${path}`, method: 'GET' }))
+    endpoints: routeManifest().routes.map(path => ({ path: `/api/v1${path}`, method: routeMethod(path) }))
   };
 }
 
@@ -534,7 +587,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/monitor/self-test' || path === '/server/self-test') return sendJson(req, res, await monitorSelfTest(), { cacheControl: 'no-store' });
     if (path === '/fields') return sendJson(req, res, { status: 'OK', endpoint: 'fields', fields: ['positions','dividendPositions','transactions','tickers','includeAnalysis','includeHistory','includeIpca','includeDividends','includeRankings'] });
     if (path === '/errors') return sendJson(req, res, { status: 'OK', endpoint: 'errors', errors: ['INVALID_JSON','PAYLOAD_TOO_LARGE','ROUTE_ERROR','NOT_FOUND'] });
-    if (path === '/openapi') return sendJson(req, res, { status: 'OK', openapi: '3.0.0', info: { title: 'VALORAE Proxy API', version: RELEASE.version }, paths: Object.fromEntries(routeManifest().routes.map(r => [`/api/v1${r}`, { get: { summary: r } }])) });
+    if (path === '/openapi') return sendJson(req, res, { status: 'OK', openapi: '3.0.0', info: { title: 'VALORAE Proxy API', version: RELEASE.version }, paths: Object.fromEntries(routeManifest().routes.map(r => [`/api/v1${r}`, openApiOperationForRoute(r)])) });
     if (path === '/sync') return syncHandler(req, res);
     if (path === '/admin/status') return sendJson(req, res, { status: 'OK', admin: false, version: RELEASE.version, cache: cacheStats() });
     if (path === '/compat/scraper4' || path === '/scraper4' || path === '/scraper') return compatScraperHandler(req, res);
@@ -559,20 +612,37 @@ export async function dispatchRoute(req, res) {
       const requestedSurface = String(payload.surface || payload.consumer || payload.consumerId || '').toLowerCase();
       const requestedMode = String(payload.mode || payload.priority || '').toLowerCase();
       const modalFast = requestedMode.includes('modal_fast') || requestedMode.includes('essential') || requestedSurface.includes('modal');
-      const enriched = await buildAssetDetails({
-        ...payload,
-        ticker,
-        symbol: ticker,
-        q: ticker,
-        mode: modalFast ? 'modal_fast' : payload.mode,
-        timeoutMs: payload.timeoutMs || (modalFast ? 5200 : 12000),
-        quoteTimeoutMs: payload.quoteTimeoutMs || (modalFast ? 2400 : 5000),
-        fundamentalTimeoutMs: payload.fundamentalTimeoutMs || (modalFast ? 4200 : 9000),
-        yahooTimeoutMs: payload.yahooTimeoutMs || (modalFast ? 3200 : 5000),
-        dividendTimeoutMs: payload.dividendTimeoutMs || (modalFast ? 3200 : 5000),
-        range: payload.range || (modalFast ? '6M' : '1Y')
+      const cacheKey = analysisRouteCacheKey(ticker, payload);
+      const refreshRequested = String(payload.refresh || payload.nocache || '').toLowerCase() === 'true' || payload._ts;
+      if (!refreshRequested) {
+        const cached = analysisRouteCache.get(cacheKey);
+        if (cached) {
+          return sendJson(req, res, { ...cached, requestId: payload.requestId || cached.requestId, cache: { ...(cached.cache || {}), routeCache: 'hit' } }, { cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
+        }
+      }
+      const responsePayload = await coalesce(cacheKey, async () => {
+        if (!refreshRequested) {
+          const joined = analysisRouteCache.get(cacheKey);
+          if (joined) return { ...joined, cache: { ...(joined.cache || {}), routeCache: 'joined-hit' } };
+        }
+        const enriched = await buildAssetDetails({
+          ...payload,
+          ticker,
+          symbol: ticker,
+          q: ticker,
+          mode: modalFast ? 'modal_fast' : payload.mode,
+          timeoutMs: payload.timeoutMs || (modalFast ? 5200 : 12000),
+          quoteTimeoutMs: payload.quoteTimeoutMs || (modalFast ? 2400 : 5000),
+          fundamentalTimeoutMs: payload.fundamentalTimeoutMs || (modalFast ? 4200 : 9000),
+          yahooTimeoutMs: payload.yahooTimeoutMs || (modalFast ? 3200 : 5000),
+          dividendTimeoutMs: payload.dividendTimeoutMs || (modalFast ? 3200 : 5000),
+          range: payload.range || (modalFast ? '6M' : '1Y')
+        });
+        const built = buildAnalysisPageResponse(enriched, payload);
+        analysisRouteCache.set(cacheKey, built, modalFast ? 45 * 1000 : 90 * 1000);
+        return { ...built, cache: { ...(built.cache || {}), routeCache: 'miss' } };
       });
-      return sendJson(req, res, buildAnalysisPageResponse(enriched, payload), { cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
+      return sendJson(req, res, { ...responsePayload, requestId: payload.requestId || responsePayload.requestId }, { cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
     }
     if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.historyMonths || payload.months || 12), { cacheControl: 'private, max-age=300' });
     if (path === '/market/rankings') return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, ...(await buildCanonicalMarketRankings(payload)) }, { cacheControl: 'private, max-age=60, stale-while-revalidate=300' });
@@ -628,4 +698,4 @@ export function routeManifest() {
   ].sort() };
 }
 
-export const _test = { stripApi, stripApiPrefix, assetPayload, comparisonTickers, buildComparisonPayload };
+export const _test = { stripApi, stripApiPrefix, routeMethod, openApiOperationForRoute, assetPayload, comparisonTickers, buildComparisonPayload };

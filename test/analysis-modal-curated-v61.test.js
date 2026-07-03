@@ -37,6 +37,7 @@ assert.deepEqual(page.consumerContract.uiPolicy.modalCuratedSectionIds, [
   'realtime_quote_chart',
   'summary',
   'fundamental_indicators',
+  'peer_fundamental_comparator',
   'company_profile',
   'dividends_history',
   'dividend_radar',

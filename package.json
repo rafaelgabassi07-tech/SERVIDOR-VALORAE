@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.208: Auditoria Investidor10 com lacunas de FIIs, gráficos multi-série alinhados e contrato curado para o APK.",
+  "description": "Valorae Proxy 21.12.216: auditoria de desempenho, cache da Análise e coalescing de requisições.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.208-investidor10-gap-news-copy-audit-v178",
+    "releasePatch": "21.12.216-performance-optimization-v186",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.208",
-    "checkpoint": "investidor10-gap-news-copy-audit-v178",
-    "releaseLabel": "investidor10-gap-news-copy-audit-v178"
+    "publicVersion": "21.12.216",
+    "checkpoint": "performance-optimization-v186",
+    "releaseLabel": "performance-optimization-v186"
   },
-  "releasePatch": "21.12.208-investidor10-gap-news-copy-audit-v178"
+  "releasePatch": "21.12.216-performance-optimization-v186"
 }
