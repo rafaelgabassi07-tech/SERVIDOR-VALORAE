@@ -1,22 +1,29 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.233-fii-distributions12m-v203",
-  "patch": "21.12.233-fii-distributions12m-v203",
-  "releasePatch": "21.12.233-fii-distributions12m-v203",
-  "latestInternalPatch": "21.12.233-fii-distributions12m-v203",
-  "description": "Proxy v203 evolui /api/v1/asset/fii-modal para contrato 26.asset-modal.fii.v11 e adiciona Distribuições nos últimos 12 meses ao modal único de FIIs.",
+  "release": "21.12.238-fii-vacancy-history-v208",
+  "patch": "21.12.238-fii-vacancy-history-v208",
+  "releasePatch": "21.12.238-fii-vacancy-history-v208",
+  "latestInternalPatch": "21.12.238-fii-vacancy-history-v208",
+  "description": "Proxy v208 evolui /api/v1/asset/fii-modal para contrato 26.asset-modal.fii.v16, adicionando Histórico da taxa de vacância com filtros 12m/anos, barras empilhadas de vacância/ocupação e fallback por dados do Investidor10.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
-  "majorCapabilities": [],
-  "cleanup": "proxy-clean-v203-2026-07-03",
-  "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador de FIIs, checklist e distribuições dos últimos 12 meses.",
+  "majorCapabilities": [
+    "Histórico da taxa de vacância no modal único de FIIs."
+  ],
+  "cleanup": "proxy-clean-v207-2026-07-03",
+  "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-03",
-  "checkpoint": "fii-distributions12m-v203",
-  "title": "v203 — Distribuições 12M no modal de FIIs",
-  "summary": "Proxy v203 mantém os blocos anteriores e adiciona o bloco Distribuições nos últimos 12 meses ao contrato do modal único de FII, com Yield de 1, 3, 6 e 12 meses e valor pago por cota.",
-  "publicVersion": "21.12.233",
-  "label": "fii-distributions12m-v203",
-  "updatedAt": "2026-07-03T00:00:00-03:00",
-  "date": "2026-07-03"
+  "checkpoint": "fii-vacancy-history-v208",
+  "title": "Proxy v208 — Histórico da taxa de vacância no modal de FIIs",
+  "summary": "Proxy v208 evolui /api/v1/asset/fii-modal para contrato 26.asset-modal.fii.v16, adicionando Histórico da taxa de vacância com filtros 12m/anos, barras empilhadas de vacância/ocupação e fallback por dados do Investidor10.",
+  "publicVersion": "21.12.238",
+  "label": "fii-vacancy-history-v208",
+  "updatedAt": "2026-07-03T00:00:00.000Z",
+  "date": "2026-07-03",
+  "notes": [
+    "Contrato 26.asset-modal.fii.v16 adiciona vacancyHistory ao modal único de FIIs.",
+    "Fonte principal: Investidor10, com parser do bloco Histórico da taxa de vacância e endpoints candidatos de vacância.",
+    "Mantém as seções anteriores do modal de FII."
+  ]
 }

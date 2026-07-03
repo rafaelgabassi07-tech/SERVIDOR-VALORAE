@@ -1,3 +1,17 @@
+## v207 — Lista de imóveis no modal de FIIs — 2026-07-03
+
+- Evolui o contrato do modal único de FII para `26.asset-modal.fii.v15`.
+- Adiciona `propertyPortfolio` com estados, quantidade de imóveis, participação e lista de imóveis do Investidor10.
+- Implementa parser dedicado da seção `LISTA DE IMÓVEIS`, encerrando antes de comunicados/históricos para não misturar conteúdos.
+- Mantém todos os blocos anteriores do modal: Sobre o fundo, Dividend Yield/Dividendos, distribuições 12M, checklist, comparação com índices e comparador de FIIs.
+
+## v206 — Sobre o fundo no modal de FIIs — 2026-07-03
+
+- Evolui o contrato do modal único de FII para `26.asset-modal.fii.v14`.
+- Adiciona `aboutFund` com o bloco **SOBRE A {TICKER}** do Investidor10.
+- O parser captura subtópicos: Sobre o fundo, Estratégia e composição, Diversificação e exposição, Estrutura do fundo e taxas e Informações adicionais.
+- O bloco preserva parágrafos e lista de ativos/locatários quando o Investidor10 expõe a lista no HTML.
+
 
 ## v203 — Distribuições 12M no modal de FIIs — 2026-07-03
 

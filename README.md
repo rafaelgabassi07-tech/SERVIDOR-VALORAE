@@ -1,24 +1,10 @@
-# VALORAE Proxy — v203 — Distribuições 12M no modal de FIIs
+# Valorae Proxy — v208
 
 Core version: 21.12.0  
-Public version: 21.12.233  
-Patch: `21.12.233-fii-distributions12m-v203`  
-Checkpoint: `fii-distributions12m-v203`
+Public version: 21.12.238  
+Patch: `21.12.238-fii-vacancy-history-v208`  
+Checkpoint: `fii-vacancy-history-v208`
 
-Proxy v203 acompanha o APK v322: o modal único de FIIs passa a receber o bloco **Distribuições nos últimos 12 meses** do Investidor10, incluindo Yield 1M/3M/6M/12M e valor pago por cota.
+## Destaque
 
-## Escopo
-
-- Contrato `/api/v1/asset/fii-modal` evoluído para `26.asset-modal.fii.v11`.
-- Novo objeto `distributions12m` no contrato de FII.
-- Parser dedicado e fallback HTML para a seção `DISTRIBUIÇÕES NOS ÚLTIMOS 12 MESES`.
-- Mantidos os blocos anteriores: cotação Yahoo, comparação com índices, comparador com outros FIIs, checklist Buy and Hold, rentabilidade, informações cadastrais e histórico de indicadores.
-
-## Validação
-
-- `node --check lib/analysis/fii-modal-contract.js`
-- `node test/fii-modal-distributions12m-v203.test.js`
-- `npm run check:syntax`
-- `npm test`
-- `npm run audit:version`
-
+Evolui o contrato do modal único de FIIs para `26.asset-modal.fii.v16`, adicionando o objeto `vacancyHistory` com histórico da taxa de vacância, filtros por período e dados de vacância/ocupação para renderização mobile no APK v327.
