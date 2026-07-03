@@ -1,3 +1,11 @@
+## v197 — Correção de visibilidade da comparação com índices no modal único de FIIs — 2026-07-03
+
+- Corrigido o caso em que o bloco "Comparação com índices" podia não aparecer no modal único de FIIs quando o Yahoo retornava histórico parcial ou vazio para algum período.
+- Contrato `/api/v1/asset/fii-modal` atualizado para `26.asset-modal.fii.v5`; o bloco `comparison` permanece presente mesmo em estado parcial.
+- IFIX, IDIV e SMLL passam a ser buscados explicitamente pelos símbolos diretos `IFIX.SA`, `IDIV.SA` e `SMLL.SA` também nas cotações rápidas.
+- O Proxy tenta intervalos alternativos do próprio Yahoo para 2A/5A/10A antes de devolver estado parcial.
+- APK v316 renderiza o card da comparação sempre, exibindo mensagem clara quando o histórico do Yahoo ainda está incompleto.
+
 ## v196 — Comparação IFIX/IDIV/SMLL no modal único de FIIs — 2026-07-03
 
 - Evoluído `/api/v1/asset/fii-modal` para contrato `26.asset-modal.fii.v4`.

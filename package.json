@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.226: adiciona comparação de FIIs com IFIX/IDIV/SMLL via Yahoo e corrige cards superiores do modal único de FIIs.",
+  "description": "Valorae Proxy 21.12.227: corrige a visibilidade da comparação com índices no modal único de FIIs e reforça fallback de histórico Yahoo.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.226-fii-modal-yahoo-indices-v196",
+    "releasePatch": "21.12.227-fii-modal-index-visibility-v197",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.226",
-    "checkpoint": "fii-modal-yahoo-indices-v196",
-    "releaseLabel": "fii-modal-yahoo-indices-v196"
+    "publicVersion": "21.12.227",
+    "checkpoint": "fii-modal-index-visibility-v197",
+    "releaseLabel": "fii-modal-index-visibility-v197"
   },
-  "releasePatch": "21.12.226-fii-modal-yahoo-indices-v196"
+  "releasePatch": "21.12.227-fii-modal-index-visibility-v197"
 }
