@@ -1,4 +1,18 @@
 
+## 2026-07-03 — Proxy v218 / patch 21.12.248-stock-modal-fundamentals-complete-v218
+- Reforçada a seção `fundamentalIndicators` do modal único de ações com a grade completa da referência PETR4/Investidor10.
+- Mantidos todos os 31 indicadores: P/L, PSR, P/VP, Dividend Yield, Payout, margens, EVs, P/Ebits, P/Ativo, P/Cap.Giro, P/Ativo Circ. Líq., VPA, LPA, Giro Ativos, ROE, ROIC, ROA, dívidas, estrutura patrimonial, liquidez corrente e CAGRs 5 anos.
+- Teste de contrato confirma `expected=31` e impede regressão por omissão de indicador.
+- Yahoo continua restrito a cotação/gráfico; fundamentos seguem Investidor10-first.
+
+
+## 2026-07-03 — Proxy v217 / patch 21.12.247-stock-modal-historical-indicators-v217
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v3`.
+- Adicionado `historicalIndicators` ao modal único de ações com tabela histórica de indicadores fundamentalistas.
+- Estrutura pronta para períodos `5y` / `10y` via `periods`, `selectedPeriod` e `tablesByPeriod`.
+- Mantidos cards rápidos, gráfico Yahoo, rentabilidade nominal/real e indicadores fundamentalistas do checkpoint anterior.
+
+
 ## 21.12.246-stock-modal-fundamentals-v216 — 2026-07-03
 
 - Evolui o contrato do modal único de ações para `26.asset-modal.stock.v2`.

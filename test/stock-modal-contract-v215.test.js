@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/stock-modal-contract.js';
 
-assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v2');
+assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v3');
 
 const html = `
 <html><body>
@@ -49,6 +49,31 @@ assert.equal(fundamentals.items.find(item => item.id === 'margem_ebit').value, '
 assert.equal(fundamentals.items.find(item => item.id === 'margem_ebitda').value, '46,35%');
 assert.equal(fundamentals.items.find(item => item.id === 'divida_liquida_patrimonio').value, '0,73');
 assert.equal(fundamentals.items.find(item => item.id === 'cagr_lucros_5_anos').numericValue, 77.66);
+
+const historical = _test.buildStockHistoricalIndicators({
+  '5y': {
+    columns: ['Atual', '2025', '2024', '2023', '2022', '2021'],
+    rows: [
+      { label: 'P/L', values: { Atual: '4,54', '2025': '3,61', '2024': '12,74', '2023': '3,85', '2022': '1,68', '2021': '3,44' } },
+      { label: 'P/Receita (PSR)', values: { Atual: '0,98', '2025': '0,80', '2024': '0,95', '2023': '0,94', '2022': '0,49', '2021': '0,81' } },
+      { label: 'Dividend Yield', values: { Atual: '7,78%', '2025': '10,49%', '2024': '21,49%', '2023': '19,33%', '2022': '67,99%', '2021': '19,85%' } }
+    ]
+  },
+  '10y': {
+    columns: ['Atual', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016'],
+    rows: [
+      { label: 'P/L', values: { Atual: '4,54', '2025': '3,61', '2024': '12,74', '2023': '3,85', '2022': '1,68', '2021': '3,44', '2020': '5,00', '2019': '9,00', '2018': '7,50', '2017': '8,10', '2016': '6,80' } }
+    ]
+  }
+}, 'PETR4');
+assert.equal(historical.status, 'OK');
+assert.deepEqual(historical.periods, ['5y', '10y']);
+assert.equal(historical.selectedPeriod, '5y');
+assert.equal(historical.columns[0], 'Atual');
+assert.equal(historical.rows.length, 3);
+assert.equal(historical.tablesByPeriod['10y'].rows.length, 1);
+assert.equal(historical.rows[0].label, 'P/L');
+
 
 const rows = _test.returnsRowsFromInvestidor10Profitability({
   profitability: {

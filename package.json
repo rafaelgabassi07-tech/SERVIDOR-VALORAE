@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.246: adiciona indicadores fundamentalistas do modal único de ações com referência PETR4/Investidor10.",
+  "description": "Valorae Proxy 21.12.248: modal único de ações com grade completa de indicadores fundamentalistas PETR4/Investidor10.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.246-stock-modal-fundamentals-v216",
+    "releasePatch": "21.12.248-stock-modal-fundamentals-complete-v218",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.246",
-    "checkpoint": "stock-modal-fundamentals-v216",
-    "releaseLabel": "stock-modal-fundamentals-v216"
+    "publicVersion": "21.12.248",
+    "checkpoint": "stock-modal-fundamentals-complete-v218",
+    "releaseLabel": "stock-modal-fundamentals-complete-v218"
   },
-  "releasePatch": "21.12.246-stock-modal-fundamentals-v216"
+  "releasePatch": "21.12.248-stock-modal-fundamentals-complete-v218"
 }
