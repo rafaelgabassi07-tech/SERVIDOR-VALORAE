@@ -1,3 +1,11 @@
+## v200 — Correção do comparador com outros FIIs (2026-07-03)
+
+- Evoluído o contrato do modal de FII para `26.asset-modal.fii.v8`.
+- Investigado o motivo do aviso "Comparador com outros FIIs ainda não foi retornado": o HTML estático do Investidor10 para GGRC11 contém o cabeçalho **COMPARANDO COM OUTROS FIIS**, mas não contém as linhas da tabela renderizada.
+- Adicionado fallback controlado que usa a seção **FIIs Relacionados** do próprio Investidor10 e enriquece os pares por suas páginas individuais para preencher Dividend Yield, P/VP, Valor Patrimonial, Tipo e Segmento.
+- Mantido o parsing da tabela original quando o Investidor10 devolver as linhas completas no HTML.
+- Adicionado teste regressivo `fii-modal-peer-related-fallback-v200.test.js`.
+
 ## v199 — Comparação completa com índices no modal de FIIs (2026-07-03)
 - `/api/v1/asset/fii-modal` evoluiu para `26.asset-modal.fii.v7`.
 - O bloco **Comparação com índices** passa a entregar ativo + IFIX + CDI + IPCA + IBOV + SMLL + IDIV + IVVB11.
