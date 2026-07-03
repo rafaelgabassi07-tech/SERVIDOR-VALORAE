@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.227: corrige a visibilidade da comparação com índices no modal único de FIIs e reforça fallback de histórico Yahoo.",
+  "description": "Valorae Proxy 21.12.228: adiciona ao modal único de FIIs o comparador Investidor10 “Comparando com outros FIIs” por mesmo tipo e segmento.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.227-fii-modal-index-visibility-v197",
+    "releasePatch": "21.12.228-fii-modal-peer-comparison-v198",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.227",
-    "checkpoint": "fii-modal-index-visibility-v197",
-    "releaseLabel": "fii-modal-index-visibility-v197"
+    "publicVersion": "21.12.228",
+    "checkpoint": "fii-modal-peer-comparison-v198",
+    "releaseLabel": "fii-modal-peer-comparison-v198"
   },
-  "releasePatch": "21.12.227-fii-modal-index-visibility-v197"
+  "releasePatch": "21.12.228-fii-modal-peer-comparison-v198"
 }

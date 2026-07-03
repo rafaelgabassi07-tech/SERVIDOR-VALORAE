@@ -1,3 +1,12 @@
+
+## v198 — Comparando com outros FIIs no modal único (2026-07-03)
+
+- `/api/v1/asset/fii-modal` evoluiu para `26.asset-modal.fii.v6`.
+- Adicionado bloco `peerComparison` com a tabela Investidor10 **Comparando com outros FIIs**.
+- O contrato envia FII, Dividend Yield, P/VP, Valor Patrimonial, Tipo e Segmento.
+- O filtro informativo padrão é **Mesmo tipo e segmento**.
+- Destaques automáticos indicam maior DY, menor P/VP válido e maior Valor Patrimonial.
+
 ## v197 — Correção de visibilidade da comparação com índices no modal único de FIIs — 2026-07-03
 
 - Corrigido o caso em que o bloco "Comparação com índices" podia não aparecer no modal único de FIIs quando o Yahoo retornava histórico parcial ou vazio para algum período.

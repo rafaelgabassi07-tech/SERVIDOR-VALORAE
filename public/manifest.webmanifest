@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Contrato curado para APK: modal único universal de ativos; Análise como busca/listagem e detalhes concentrados no AssetDetailsModal.",
+  "description": "Contrato curado para APK: modal único de FIIs com comparação por índices e tabela Comparando com outros FIIs do Investidor10.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.227"
+  "version": "21.12.228"
 }
