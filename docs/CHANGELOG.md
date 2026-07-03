@@ -1,3 +1,11 @@
+## v194 — Histórico de indicadores Investidor10 no modal único de FIIs — 2026-07-03
+
+- Evoluído `/api/v1/asset/fii-modal` para contrato `26.asset-modal.fii.v3`.
+- Cards rápidos de FII passam a ser extraídos do bloco inicial do Investidor10: cotação, DY 12M, P/VP, liquidez diária e variação 12M.
+- Rentabilidade nominal e real do bloco “Rentabilidade” passa a vir do Investidor10, sem BCB/IPCA no modal.
+- Adicionado `historicalIndicators` com colunas e linhas do histórico de indicadores fundamentalistas do Investidor10.
+- StatusInvest, Fundamentus e fallbacks legados permanecem descartados dentro do modal único do ativo.
+
 
 ## v193 — Informações Investidor10 no modal único de FIIs — 2026-07-03
 
