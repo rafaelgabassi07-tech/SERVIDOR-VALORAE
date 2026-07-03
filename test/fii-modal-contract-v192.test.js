@@ -5,7 +5,7 @@ const nonFii = await buildFiiModalContract({ ticker: 'PETR4' });
 assert.equal(nonFii.ok, true);
 assert.equal(nonFii.status, 'NOT_FII');
 assert.equal(nonFii.contract, 'FiiAssetModalResponse');
-assert.equal(nonFii.contractVersion, '26.asset-modal.fii.v8');
+assert.equal(nonFii.contractVersion, '26.asset-modal.fii.v11');
 assert.equal(nonFii.ticker, 'PETR4');
 
 const invalid = await buildFiiModalContract({ ticker: '' });

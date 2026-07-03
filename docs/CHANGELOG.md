@@ -1,3 +1,10 @@
+
+## v203 — Distribuições 12M no modal de FIIs — 2026-07-03
+
+- Evolui o contrato do modal único de FII para `26.asset-modal.fii.v11`.
+- Adiciona `distributions12m` com Yield 1M/3M/6M/12M e valor pago por cota do Investidor10.
+- Mantém fallback HTML direto para a seção “Distribuições nos últimos 12 meses”.
+
 ## v200 — Correção do comparador com outros FIIs (2026-07-03)
 
 - Evoluído o contrato do modal de FII para `26.asset-modal.fii.v8`.

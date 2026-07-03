@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.230: corrige o comparador de FIIs do modal único com fallback Investidor10 por FIIs Relacionados.",
+  "description": "Valorae Proxy 21.12.233: adiciona Distribuições nos últimos 12 meses ao modal único de FIIs.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.230-fii-peer-comparison-related-fallback-v200",
+    "releasePatch": "21.12.233-fii-distributions12m-v203",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.230",
-    "checkpoint": "fii-peer-comparison-related-fallback-v200",
-    "releaseLabel": "fii-peer-comparison-related-fallback-v200"
+    "publicVersion": "21.12.233",
+    "checkpoint": "fii-distributions12m-v203",
+    "releaseLabel": "fii-distributions12m-v203"
   },
-  "releasePatch": "21.12.230-fii-peer-comparison-related-fallback-v200"
+  "releasePatch": "21.12.233-fii-distributions12m-v203"
 }
