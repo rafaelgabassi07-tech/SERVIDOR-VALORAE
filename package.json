@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.219: gráficos da Análise e dos modais restritos a séries reais do Investidor10, mantendo fundamentos/proventos de StatusInvest e Investidor10.",
+  "description": "Valorae Proxy 21.12.222: inicia a reconstrução do modal único com contrato dedicado de FIIs, cotação/gráfico Yahoo e métricas rápidas sem StatusInvest/Investidor10/fallback legado.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.219-investidor10-only-analysis-charts-v189",
+    "releasePatch": "21.12.222-fii-asset-modal-v192",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.219",
-    "checkpoint": "investidor10-only-analysis-charts-v189",
-    "releaseLabel": "investidor10-only-analysis-charts-v189"
+    "publicVersion": "21.12.222",
+    "checkpoint": "fii-asset-modal-v192",
+    "releaseLabel": "fii-asset-modal-v192"
   },
-  "releasePatch": "21.12.219-investidor10-only-analysis-charts-v189"
+  "releasePatch": "21.12.222-fii-asset-modal-v192"
 }

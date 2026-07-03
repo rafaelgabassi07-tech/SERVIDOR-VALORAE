@@ -15,6 +15,7 @@ import { getConfirmedDividendsByTicker } from '../lib/sources/status-dividends.j
 import { getAgendaDividends } from '../lib/sources/agenda-dividends.js';
 import { buildAssetDetails, getAssetHistory } from '../lib/sources/asset-details.js';
 import { buildAnalysisPageResponse } from '../lib/analysis/analysis-page-response.js';
+import { buildFiiModalContract } from '../lib/analysis/fii-modal-contract.js';
 import integrationManifestHandler from './integration/manifest.js';
 import integrationSdkHandler from './integration/sdk.js';
 import integrationPromptsHandler from './integration/prompts.js';
@@ -49,6 +50,78 @@ function analysisRouteCacheKey(ticker, payload = {}) {
     pick(payload.maxCharts, ''),
     pick(payload.maxItems, '')
   ].join(':');
+}
+
+
+function analysisModalResetSurfaceId(payload = {}) {
+  const raw = String(payload.surface || payload.consumer || payload.consumerId || payload.uiSurface || payload.modalSurface || '').trim().toLowerCase();
+  if (!raw) return '';
+  const normalized = raw.replace(/[^a-z0-9_:-]/g, '_');
+  if (['analysis_asset_modal', 'portfolio_asset_modal', 'ranking_asset_modal'].includes(normalized)) return normalized;
+  if (normalized.includes('modal')) return normalized;
+  return '';
+}
+
+function buildResetAnalysisModalResponse(ticker, payload = {}) {
+  const surfaceId = analysisModalResetSurfaceId(payload) || 'analysis_asset_modal';
+  const now = new Date().toISOString();
+  return {
+    ok: true,
+    status: 'RESET',
+    endpoint: 'analysis',
+    contract: 'AnalysisPageResponse',
+    contractVersion: '26.analysis.modal-reset.v1',
+    version: RELEASE.version,
+    patch: RELEASE.patch,
+    ticker,
+    symbol: ticker,
+    assetType: 'ATIVO',
+    name: ticker,
+    updatedAt: now,
+    sourcePolicy: 'Modal zerado: nenhum dado, gráfico, fundamento, provento ou fallback de StatusInvest, Investidor10, Yahoo, B3, BCB ou fontes auxiliares é retornado para superfícies de modal.',
+    sources: [],
+    sections: [],
+    sourceCoverage: [],
+    dataQuality: { status: 'RESET', message: 'Conteúdo removido para reconstrução dos modais do zero.' },
+    summary: { totalSections: 0, readySections: 0, emptySections: 0, missingSections: 0, totalItems: 0, totalCharts: 0 },
+    missingSignals: [],
+    consumerSurface: {
+      id: surfaceId,
+      title: 'Modal zerado',
+      role: 'Superfície limpa para reconstrução completa do modal.',
+      density: 'blank',
+      maxInitialSections: 0
+    },
+    diagnostics: {
+      modalReset: true,
+      legacySourcesDiscarded: true,
+      statusInvestDiscarded: true,
+      investidor10Discarded: true,
+      fallbackDiscarded: true,
+      sourceRequestsSkipped: true
+    },
+    consumerContract: {
+      version: '26.analysis.surface.modal-reset.v1',
+      activeSurfaceId: surfaceId,
+      activeSurface: { id: surfaceId, title: 'Modal zerado', density: 'blank', maxInitialSections: 0 },
+      intendedConsumers: ['analysis_asset_modal', 'portfolio_asset_modal', 'ranking_asset_modal'],
+      surfaces: [],
+      sectionPriorities: [],
+      uiPolicy: {
+        modalReset: true,
+        showOnlyReadySections: true,
+        modalCuratedSectionIds: [],
+        hiddenFromUser: [],
+        neverRenderSyntheticData: true,
+        neverUseFallbackDataInModal: true
+      }
+    },
+    resetPlan: {
+      reason: 'start_modals_from_zero',
+      cleared: ['charts', 'fundamentals', 'dividends', 'profile', 'tables', 'legacy_fallbacks', 'statusinvest_payload', 'investidor10_payload'],
+      nextStep: 'definir novo desenho e novo contrato por seção antes de reconectar fontes'
+    }
+  };
 }
 
 function stripApi(pathname) {
@@ -606,10 +679,14 @@ export async function dispatchRoute(req, res) {
     if (path === '/portfolio/returns' || path === '/portfolio/return' || path === '/portfolio/performance') return sendJson(req, res, await buildPortfolioReturns(payload), { cacheControl: 'private, max-age=60' });
     if (path === '/portfolio/history') return sendJson(req, res, await buildRealMarketHistory(payload));
     if (path === '/asset/history') return assetHistoryHandler(req, res);
+    if (path === '/asset/fii-modal' || path === '/fii/modal') return sendJson(req, res, await buildFiiModalContract(payload), { cacheControl: 'private, max-age=45, stale-while-revalidate=300' });
     if (path === '/analysis' || path === '/asset/analysis') {
       const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query);
       if (!ticker) return sendJson(req, res, { status: 'ERROR', ok: false, endpoint: 'analysis', error: 'Informe ticker=PETR4 ou symbol=PETR4.' }, { status: 400, cacheControl: 'no-store' });
-      const requestedSurface = String(payload.surface || payload.consumer || payload.consumerId || '').toLowerCase();
+      const requestedSurface = String(payload.surface || payload.consumer || payload.consumerId || payload.uiSurface || payload.modalSurface || '').toLowerCase();
+      if (analysisModalResetSurfaceId(payload)) {
+        return sendJson(req, res, buildResetAnalysisModalResponse(ticker, payload), { cacheControl: 'no-store' });
+      }
       const requestedMode = String(payload.mode || payload.priority || '').toLowerCase();
       const modalFast = requestedMode.includes('modal_fast') || requestedMode.includes('essential') || requestedSurface.includes('modal');
       const cacheKey = analysisRouteCacheKey(ticker, payload);
