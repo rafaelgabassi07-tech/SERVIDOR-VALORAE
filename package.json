@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.244: auditoria do modal único de FIIs, checklist independente da carteira e comunicados/PDFs robustos.",
+  "description": "Valorae Proxy 21.12.246: adiciona indicadores fundamentalistas do modal único de ações com referência PETR4/Investidor10.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.244-fii-modal-full-audit-v214",
+    "releasePatch": "21.12.246-stock-modal-fundamentals-v216",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.244",
-    "checkpoint": "fii-modal-full-audit-v214",
-    "releaseLabel": "fii-modal-full-audit-v214"
+    "publicVersion": "21.12.246",
+    "checkpoint": "stock-modal-fundamentals-v216",
+    "releaseLabel": "stock-modal-fundamentals-v216"
   },
-  "releasePatch": "21.12.244-fii-modal-full-audit-v214"
+  "releasePatch": "21.12.246-stock-modal-fundamentals-v216"
 }

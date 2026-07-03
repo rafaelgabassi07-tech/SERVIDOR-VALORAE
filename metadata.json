@@ -1,31 +1,31 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.244-fii-modal-full-audit-v214",
-  "patch": "21.12.244-fii-modal-full-audit-v214",
-  "releasePatch": "21.12.244-fii-modal-full-audit-v214",
-  "latestInternalPatch": "21.12.244-fii-modal-full-audit-v214",
-  "description": "Proxy v214 evolui para o contrato 26.asset-modal.fii.v21, corrige checklist buy and hold independente da carteira e reforça comunicados/PDFs do modal único de FIIs.",
+  "release": "21.12.246-stock-modal-fundamentals-v216",
+  "patch": "21.12.246-stock-modal-fundamentals-v216",
+  "releasePatch": "21.12.246-stock-modal-fundamentals-v216",
+  "latestInternalPatch": "21.12.246-stock-modal-fundamentals-v216",
+  "description": "Proxy v216 amplia o contrato 26.asset-modal.stock.v2 com indicadores fundamentalistas de ações a partir do Investidor10.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Checklist Buy and Hold independente da carteira no modal único de FIIs.",
-    "Comunicados do FII combinando página principal e rota /communications/fii/{TICKER}/.",
-    "Reconhecimento robusto de links intermediários de documentos/PDF do Investidor10."
+    "Contrato /api/v1/asset/stock-modal evoluído para 26.asset-modal.stock.v2.",
+    "Indicadores fundamentalistas de ações extraídos do HTML público do Investidor10.",
+    "Bloco Sem comparativos, modos grid/list e agrupamento por valuation, margens, rentabilidade, dívida e crescimento."
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-03",
-  "checkpoint": "fii-modal-full-audit-v214",
-  "title": "Proxy v214 — Auditoria do modal único de FIIs",
-  "summary": "Proxy v214 evolui para o contrato 26.asset-modal.fii.v21, corrige checklist buy and hold independente da carteira e reforça comunicados/PDFs do modal único de FIIs.",
-  "publicVersion": "21.12.244",
-  "label": "fii-modal-full-audit-v214",
+  "checkpoint": "stock-modal-fundamentals-v216",
+  "title": "Proxy v216 — Modal único de ações: indicadores fundamentalistas",
+  "summary": "Inclui a grade/lista de indicadores fundamentalistas de ações no contrato do modal único, seguindo a referência PETR4/Investidor10.",
+  "publicVersion": "21.12.246",
+  "label": "stock-modal-fundamentals-v216",
   "updatedAt": "2026-07-03T00:00:00.000Z",
   "date": "2026-07-03",
   "notes": [
-    "Contrato 26.asset-modal.fii.v21 adiciona fallback derivado para checklist quando o HTML público não traz a seção completa.",
-    "Parser de comunicados reconhece Data de Divulgação e links /fiis/link_comunicado/ como documento oficial.",
-    "fetchText passa a preservar contentType/finalUrl para detecção de PDF após redirecionamento."
+    "Adiciona fundamentalIndicators.items e fundamentalIndicators.groups para renderização mobile.",
+    "Mantém cards rápidos, gráfico intradiário e rentabilidade do checkpoint v215.",
+    "Yahoo permanece restrito a cotação/gráfico e fallback de série histórica."
   ]
 }

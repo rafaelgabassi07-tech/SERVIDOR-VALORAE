@@ -1,3 +1,18 @@
+
+## 21.12.246-stock-modal-fundamentals-v216 — 2026-07-03
+
+- Evolui o contrato do modal único de ações para `26.asset-modal.stock.v2`.
+- Adiciona a seção `fundamentalIndicators` com a grade/lista de indicadores fundamentalistas de ações do Investidor10.
+- Agrupa indicadores por valuation, margens, rentabilidade, endividamento e crescimento, mantendo o seletor inicial `Sem comparativos`.
+
+## 21.12.245-stock-modal-start-v215 — 2026-07-03
+
+- Inicia o modal único de ações pelo contrato `26.asset-modal.stock.v1`.
+- Adiciona `/api/v1/asset/stock-modal` com aliases `/asset/action-modal` e `/acao/modal`.
+- Implementa cards rápidos de ações conforme referência PETR4/Investidor10: Cotação, Variação 12M, P/L, P/VP e DY.
+- Implementa bloco Rentabilidade nominal/real de 1 mês a 10 anos com Investidor10 e fallback Yahoo + IPCA.
+- Adiciona teste regressivo `stock-modal-contract-v215.test.js`.
+
 ## v214 — Auditoria do modal único de FIIs — 2026-07-03
 
 - Evolui o contrato do modal único de FII para `26.asset-modal.fii.v21`.
