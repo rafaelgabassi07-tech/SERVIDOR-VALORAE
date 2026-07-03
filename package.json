@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.243: comunicados e documentos/PDF no modal único de FIIs.",
+  "description": "Valorae Proxy 21.12.244: auditoria do modal único de FIIs, checklist independente da carteira e comunicados/PDFs robustos.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.243-fii-announcements-pdf-v213",
+    "releasePatch": "21.12.244-fii-modal-full-audit-v214",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.243",
-    "checkpoint": "fii-announcements-pdf-v213",
-    "releaseLabel": "fii-announcements-pdf-v213"
+    "publicVersion": "21.12.244",
+    "checkpoint": "fii-modal-full-audit-v214",
+    "releaseLabel": "fii-modal-full-audit-v214"
   },
-  "releasePatch": "21.12.243-fii-announcements-pdf-v213"
+  "releasePatch": "21.12.244-fii-modal-full-audit-v214"
 }

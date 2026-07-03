@@ -1,29 +1,31 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.243-fii-announcements-pdf-v213",
-  "patch": "21.12.243-fii-announcements-pdf-v213",
-  "releasePatch": "21.12.243-fii-announcements-pdf-v213",
-  "latestInternalPatch": "21.12.243-fii-announcements-pdf-v213",
-  "description": "Proxy v213 evolui para o contrato 26.asset-modal.fii.v20 e adiciona Comunicados do FII com links de documentos/PDF do Investidor10 para o modal único.",
+  "release": "21.12.244-fii-modal-full-audit-v214",
+  "patch": "21.12.244-fii-modal-full-audit-v214",
+  "releasePatch": "21.12.244-fii-modal-full-audit-v214",
+  "latestInternalPatch": "21.12.244-fii-modal-full-audit-v214",
+  "description": "Proxy v214 evolui para o contrato 26.asset-modal.fii.v21, corrige checklist buy and hold independente da carteira e reforça comunicados/PDFs do modal único de FIIs.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Comunicados do FII com links de documentos/PDF no modal único de FIIs."
+    "Checklist Buy and Hold independente da carteira no modal único de FIIs.",
+    "Comunicados do FII combinando página principal e rota /communications/fii/{TICKER}/.",
+    "Reconhecimento robusto de links intermediários de documentos/PDF do Investidor10."
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-03",
-  "checkpoint": "fii-announcements-pdf-v213",
-  "title": "Proxy v213 — Comunicados e PDFs no modal de FIIs",
-  "summary": "Proxy v213 evolui para o contrato 26.asset-modal.fii.v20 e adiciona Comunicados do FII com links de documentos/PDF do Investidor10 para o modal único.",
-  "publicVersion": "21.12.243",
-  "label": "fii-announcements-pdf-v213",
+  "checkpoint": "fii-modal-full-audit-v214",
+  "title": "Proxy v214 — Auditoria do modal único de FIIs",
+  "summary": "Proxy v214 evolui para o contrato 26.asset-modal.fii.v21, corrige checklist buy and hold independente da carteira e reforça comunicados/PDFs do modal único de FIIs.",
+  "publicVersion": "21.12.244",
+  "label": "fii-modal-full-audit-v214",
   "updatedAt": "2026-07-03T00:00:00.000Z",
   "date": "2026-07-03",
   "notes": [
-    "Contrato 26.asset-modal.fii.v20 adiciona o objeto announcements no modal único de FII.",
-    "Parser captura título, data, tipo, link de abrir e PDF direto quando disponível.",
-    "Fallback mantém link oficial quando o PDF direto não estiver exposto pelo Investidor10."
+    "Contrato 26.asset-modal.fii.v21 adiciona fallback derivado para checklist quando o HTML público não traz a seção completa.",
+    "Parser de comunicados reconhece Data de Divulgação e links /fiis/link_comunicado/ como documento oficial.",
+    "fetchText passa a preservar contentType/finalUrl para detecção de PDF após redirecionamento."
   ]
 }

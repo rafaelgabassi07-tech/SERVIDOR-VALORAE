@@ -1,3 +1,13 @@
+## v214 — Auditoria do modal único de FIIs — 2026-07-03
+
+- Evolui o contrato do modal único de FII para `26.asset-modal.fii.v21`.
+- Corrige o Checklist Buy and Hold para funcionar mesmo quando o ativo não está comprado na carteira, usando a seção pública do Investidor10 ou fallback derivado das métricas do próprio modal.
+- Comunicados passam a combinar a página principal do FII com a rota pública `/communications/fii/{TICKER}/`.
+- Links intermediários `/fiis/link_comunicado/{TICKER}/{ID}/` são reconhecidos como documentos/PDFs e recebem `buttonLabel: Abrir PDF`.
+- Parser limpa `Data de Divulgação` do título e preserva a data correta em `dateDisplay`.
+- `fetchText` preserva `contentType` e `finalUrl` para detecção robusta de PDF após redirecionamento.
+- Adiciona testes regressivos `fii-modal-checklist-independent-v214.test.js` e `fii-modal-announcements-routes-v214.test.js`.
+
 ## v213 — Comunicados e PDFs no modal de FIIs — 2026-07-03
 
 - Evolui o contrato do modal único de FII para `26.asset-modal.fii.v20`.

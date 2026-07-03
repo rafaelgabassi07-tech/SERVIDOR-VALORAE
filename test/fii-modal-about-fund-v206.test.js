@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/fii-modal-contract.js';
 
-assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v20');
+assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v21');
 
 const html = `
   <section>
