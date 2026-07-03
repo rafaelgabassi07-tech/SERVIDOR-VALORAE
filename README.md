@@ -1,10 +1,8 @@
-# VALORAE Proxy — v198 — Comparando com outros FIIs no modal único
+# VALORAE Proxy — v199 — Comparação completa com índices no modal de FIIs
 
-Core version: 21.12.0  
-Public version: 21.12.228  
-Patch: `21.12.228-fii-modal-peer-comparison-v198`  
-Checkpoint: `fii-modal-peer-comparison-v198`
+Core: 21.12.0  
+Public version: 21.12.229  
+Patch: `21.12.229-fii-modal-full-index-comparison-v199`  
+Checkpoint: `fii-modal-full-index-comparison-v199`
 
-Proxy v198 acompanha o APK v317: o modal único de FIIs passa a entregar o bloco **Comparando com outros FIIs** do Investidor10, filtrado por **Mesmo tipo e segmento**, com FII, Dividend Yield, P/VP, Valor Patrimonial, Tipo e Segmento. O contrato FII evoluiu para `26.asset-modal.fii.v6` e mantém a comparação com índices via Yahoo direto para IFIX.SA, IDIV.SA e SMLL.SA.
-
-Pacote limpo para deploy/AI Studio com arquivos diretamente na raiz do ZIP.
+Proxy v199 acompanha o APK v318: o modal único de FIIs corrige o bloco **Comparação com índices** para exibir e desenhar as séries do ativo, IFIX, CDI, IPCA, IBOV, SMLL, IDIV e IVVB11 nos períodos 2A, 5A e 10A. CDI/IPCA usam Banco Central SGS; IFIX/IDIV/SMLL seguem exclusivamente via Yahoo Finance Chart API com símbolos diretos.

@@ -1,7 +1,13 @@
+## v199 — Comparação completa com índices no modal de FIIs (2026-07-03)
+- `/api/v1/asset/fii-modal` evoluiu para `26.asset-modal.fii.v7`.
+- O bloco **Comparação com índices** passa a entregar ativo + IFIX + CDI + IPCA + IBOV + SMLL + IDIV + IVVB11.
+- CDI e IPCA usam Banco Central SGS; ativo, IBOV, IVVB11 e os índices Yahoo usam Yahoo Finance Chart API, mantendo IFIX/IDIV/SMLL sem fallback Investidor10/B3/ETF/proxy.
+- O contrato agora envia `itemsByPeriod` e `seriesByPeriod` completos para 2A, 5A e 10A, permitindo que o APK desenhe as linhas e monte os cards de simulação por benchmark.
 
-## v198 — Comparando com outros FIIs no modal único (2026-07-03)
 
-- `/api/v1/asset/fii-modal` evoluiu para `26.asset-modal.fii.v6`.
+## v199 — Comparação completa com índices no modal de FIIs (2026-07-03)
+
+- `/api/v1/asset/fii-modal` evoluiu para `26.asset-modal.fii.v7`.
 - Adicionado bloco `peerComparison` com a tabela Investidor10 **Comparando com outros FIIs**.
 - O contrato envia FII, Dividend Yield, P/VP, Valor Patrimonial, Tipo e Segmento.
 - O filtro informativo padrão é **Mesmo tipo e segmento**.

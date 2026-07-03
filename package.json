@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.228: adiciona ao modal único de FIIs o comparador Investidor10 “Comparando com outros FIIs” por mesmo tipo e segmento.",
+  "description": "Valorae Proxy 21.12.229: corrige a comparação com índices no modal único de FIIs com ativo, IFIX, CDI, IPCA, IBOV, SMLL, IDIV e IVVB11.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.228-fii-modal-peer-comparison-v198",
+    "releasePatch": "21.12.229-fii-modal-full-index-comparison-v199",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.228",
-    "checkpoint": "fii-modal-peer-comparison-v198",
-    "releaseLabel": "fii-modal-peer-comparison-v198"
+    "publicVersion": "21.12.229",
+    "checkpoint": "fii-modal-full-index-comparison-v199",
+    "releaseLabel": "fii-modal-full-index-comparison-v199"
   },
-  "releasePatch": "21.12.228-fii-modal-peer-comparison-v198"
+  "releasePatch": "21.12.229-fii-modal-full-index-comparison-v199"
 }

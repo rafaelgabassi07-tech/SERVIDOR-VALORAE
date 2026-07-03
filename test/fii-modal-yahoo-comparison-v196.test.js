@@ -40,7 +40,17 @@ assert.equal(item.returnDisplay, '+20,00%');
 console.log('FII modal Yahoo comparison v196 test OK.');
 
 
-assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v6');
-assert.deepEqual(_test.FII_INDEX_BENCHMARKS.map(item => item.yahooSymbol), ['IFIX.SA', 'IDIV.SA', 'SMLL.SA']);
+assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v7');
+assert.deepEqual(_test.FII_INDEX_BENCHMARKS.map(item => item.code), ['IFIX', 'CDI', 'IPCA', 'IBOV', 'SMLL', 'IDIV', 'IVVB11']);
+assert.deepEqual(_test.FII_INDEX_BENCHMARKS.filter(item => item.yahooSymbol).map(item => item.yahooSymbol), ['IFIX.SA', '^BVSP', 'SMLL.SA', 'IDIV.SA', 'IVVB11.SA']);
 assert.deepEqual(_test.comparisonFetchPlans({ key: '2y', range: '2Y', interval: '1wk' }).map(plan => `${plan.range}/${plan.interval}`), ['2Y/1wk', '2Y/1d']);
 assert.deepEqual(_test.comparisonFetchPlans({ key: '10y', range: '10Y', interval: '1mo' }).map(plan => `${plan.range}/${plan.interval}`), ['10Y/1mo', '10Y/1wk', '10Y/1d']);
+
+const macroPoints = _test.normalizeAccumulatedBenchmarkPoints([
+  { month: '2024-01', accumulatedPercent: 1 },
+  { month: '2024-02', accumulatedPercent: 2.01 },
+  { month: '2024-03', accumulatedPercent: 3.0301 }
+], { months: 3 }, 'Banco Central SGS CDI');
+assert.equal(macroPoints.length, 3);
+assert.equal(macroPoints[0].returnPercent, 0);
+assert.ok(macroPoints[2].returnPercent > 1.9);

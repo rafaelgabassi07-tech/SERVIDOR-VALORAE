@@ -18,7 +18,7 @@ const sampleHtml = `
 
 const parsed = _test.extractInvestidor10FiiPeerComparison(sampleHtml, 'GGRC11');
 
-assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v6');
+assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v7');
 assert.equal(parsed.status, 'OK');
 assert.equal(parsed.title, 'Comparando com outros FIIs');
 assert.equal(parsed.filterLabel, 'Mesmo tipo e segmento');
