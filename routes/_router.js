@@ -546,7 +546,7 @@ function comparisonTickers(payload = {}) {
   for (const value of values) {
     const raw = String(value?.ticker || value?.symbol || value || '').trim().toUpperCase();
     const special = raw.replace(/[^A-Z0-9]/g, '');
-    if (['IBOV', 'BVSP', 'IBOVESPA', 'IFIX', 'IPCA', 'CDI', 'USD', 'USDBRL', 'USDBRLX', 'BRLX'].includes(special)) {
+    if (['IBOV', 'BVSP', 'IBOVESPA', 'IFIX', 'IDIV', 'SMLL', 'IPCA', 'CDI', 'USD', 'USDBRL', 'USDBRLX', 'BRLX'].includes(special)) {
       const canonical = ['BVSP', 'IBOVESPA'].includes(special) ? 'IBOV' : (['USD', 'USDBRL', 'USDBRLX', 'BRLX'].includes(special) ? 'USD' : special);
       if (!out.includes(canonical)) out.push(canonical);
       continue;

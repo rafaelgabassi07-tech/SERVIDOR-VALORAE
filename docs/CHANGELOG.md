@@ -1,3 +1,12 @@
+## v196 — Comparação IFIX/IDIV/SMLL no modal único de FIIs — 2026-07-03
+
+- Evoluído `/api/v1/asset/fii-modal` para contrato `26.asset-modal.fii.v4`.
+- Adicionado bloco `comparison` para FIIs com séries 2A/5A/10A e simulação de R$ 1.000,00 no estilo Investidor10.
+- IFIX, IDIV e SMLL passam a usar somente Yahoo Finance Chart API com símbolos diretos `IFIX.SA`, `IDIV.SA` e `SMLL.SA`.
+- Corrigida a extração dos cards superiores do modal de FII: cotação, DY 12M, P/VP, liquidez diária e variação 12M.
+- Adicionados fallbacks controlados: cotação/variação pelo Yahoo e DY/PVP/liquidez pelo histórico de indicadores do Investidor10 quando o bloco superior vier incompleto.
+- StatusInvest, Fundamentus, ETF substituto ou ticker proxy permanecem descartados no modal único de FIIs.
+
 ## v195 — Roteamento universal para o modal único do ativo — 2026-07-03
 
 - APK v314 deixa de carregar `AnalysisPageResponse` pela página Análise quando o usuário busca ou seleciona um ticker.

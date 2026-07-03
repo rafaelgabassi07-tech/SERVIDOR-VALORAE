@@ -1,13 +1,13 @@
 # VALORAE Proxy — v195
 
 Core version: 21.12.0  
-Public version: 21.12.225  
-Patch: `21.12.225-universal-asset-modal-routing-v195`  
-Checkpoint: `universal-asset-modal-routing-v195`
+Public version: 21.12.226  
+Patch: `21.12.226-fii-modal-yahoo-indices-v196`  
+Checkpoint: `fii-modal-yahoo-indices-v196`
 
 ## v195 — Roteamento universal para o modal único do ativo
 
-Proxy v195 acompanha o APK v314 com auditoria de roteamento: a página Análise deixa de carregar detalhes próprios de ativos no APK, e buscas, sugestões, rankings, subpáginas e tickers de notícias passam a abrir o `AssetDetailsModal` único. `/api/v1/analysis` permanece compatível para contratos legados, mas não é mais a superfície de detalhes acionada pela busca da Análise no APK.
+Proxy v196 acompanha o APK v315: o modal único de FIIs recebe comparação com IFIX/IDIV/SMLL via Yahoo Finance Chart API e os cards superiores passam a ter extração/fallbacks robustos.
 
 ### Correções principais
 - Busca confirmada na Análise abre o modal único.
