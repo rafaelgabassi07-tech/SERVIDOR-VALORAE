@@ -1,9 +1,9 @@
 # VALORAE Proxy — v185
 
 Core version: 21.12.0  
-Public version: 21.12.216  
-Patch: `21.12.216-performance-optimization-v186`  
-Checkpoint: `performance-optimization-v186`
+Public version: 21.12.217  
+Patch: `21.12.217-vercel-node24-release-hygiene-v187`  
+Checkpoint: `vercel-node24-release-hygiene-v187`
 
 ## v185 — Qualidade estrita de gráficos e captura contínua
 

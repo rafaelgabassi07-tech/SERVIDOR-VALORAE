@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.216: auditoria de desempenho, cache da Análise e coalescing de requisições.",
+  "description": "Valorae Proxy 21.12.217: compatibilidade Vercel Node 24 e release sem artefatos temporários.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,17 +14,17 @@
     "verify": "npm run build && npm run check:syntax && npm test && npm run audit:version"
   },
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.216-performance-optimization-v186",
+    "releasePatch": "21.12.217-vercel-node24-release-hygiene-v187",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.216",
-    "checkpoint": "performance-optimization-v186",
-    "releaseLabel": "performance-optimization-v186"
+    "publicVersion": "21.12.217",
+    "checkpoint": "vercel-node24-release-hygiene-v187",
+    "releaseLabel": "vercel-node24-release-hygiene-v187"
   },
-  "releasePatch": "21.12.216-performance-optimization-v186"
+  "releasePatch": "21.12.217-vercel-node24-release-hygiene-v187"
 }

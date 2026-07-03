@@ -2,8 +2,8 @@
 
 Release date: 2026-07-02  
 Core version: 21.12.0  
-Public version: 21.12.216  
-Patch: `21.12.216-performance-optimization-v186`
+Public version: 21.12.217  
+Patch: `21.12.217-vercel-node24-release-hygiene-v187`
 
 Proxy v185 continua a auditoria de captura, bloqueia gráfico de cotação com ponto único, adiciona sourceCaptureMap/criticalMissingSectionIds ao dataQuality e reforça a política de gráficos reais para APK e modais.
 
