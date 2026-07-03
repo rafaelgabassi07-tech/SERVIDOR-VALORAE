@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.224: centraliza o modal único de FIIs no Investidor10 para cards, rentabilidade, informações e histórico de indicadores fundamentalistas, mantendo StatusInvest e fallbacks bloqueados.",
+  "description": "Valorae Proxy 21.12.225: alinha o APK ao modal único universal, mantendo /api/v1/analysis apenas compatível e roteando buscas/listas para AssetDetailsModal no app.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.224-fii-modal-investidor10-history-v194",
+    "releasePatch": "21.12.225-universal-asset-modal-routing-v195",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.224",
-    "checkpoint": "fii-modal-investidor10-history-v194",
-    "releaseLabel": "fii-modal-investidor10-history-v194"
+    "publicVersion": "21.12.225",
+    "checkpoint": "universal-asset-modal-routing-v195",
+    "releaseLabel": "universal-asset-modal-routing-v195"
   },
-  "releasePatch": "21.12.224-fii-modal-investidor10-history-v194"
+  "releasePatch": "21.12.225-universal-asset-modal-routing-v195"
 }

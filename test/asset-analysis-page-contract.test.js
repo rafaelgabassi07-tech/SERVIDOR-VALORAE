@@ -25,7 +25,9 @@ assertOptionalMatch(client, /toAnalysisPageResponse/);
 assertOptionalMatch(models, /data class ValoraeAnalysisPageResponse/);
 
 assertOptionalMatch(analysisScreen, /fun AnalysisScreen/);
-assertOptionalMatch(analysisScreen, /getAnalysisPage/);
+assertOptionalDoesNotMatch(analysisScreen, /getAnalysisPage/);
+assertOptionalMatch(analysisScreen, /AssetDetailsModal/);
+assertOptionalMatch(analysisScreen, /openAssetAnalysisModal/);
 assertOptionalMatch(analysisScreen, /AssetSummarySection/);
 assertOptionalMatch(analysisScreen, /FundamentalIndicatorsSection/);
 assertOptionalMatch(analysisScreen, /AnalysisPageResponse/);

@@ -1,3 +1,11 @@
+## v195 — Roteamento universal para o modal único do ativo — 2026-07-03
+
+- APK v314 deixa de carregar `AnalysisPageResponse` pela página Análise quando o usuário busca ou seleciona um ticker.
+- Busca principal, sugestões, rankings, categorias e subpáginas da Análise passam a abrir `AssetDetailsModal`.
+- Tickers clicáveis em notícias da Home e da aba Notícias também abrem o modal único.
+- Adicionada auditoria `analysis-universal-modal-v195.test.js` para evitar retorno do fluxo antigo.
+- `/api/v1/analysis` permanece compatível no Proxy, mas os detalhes do ativo devem evoluir no modal único.
+
 ## v194 — Histórico de indicadores Investidor10 no modal único de FIIs — 2026-07-03
 
 - Evoluído `/api/v1/asset/fii-modal` para contrato `26.asset-modal.fii.v3`.

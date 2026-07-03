@@ -23,6 +23,8 @@ assertOptionalMatch(screen, /delay\(360\)/, 'APK deve aplicar debounce antes de 
 assertOptionalMatch(client, /searchMode" to "analysis"/, 'APK deve pedir sugestões em modo de busca da Análise');
 assertOptionalMatch(client, /suggest" to "true"/, 'APK deve usar endpoint de sugestões sem capturar análise completa');
 assertOptionalDoesNotMatch(screen, /getAnalysisPage\(normalizedQuery\)/, 'APK não deve carregar /api/v1/analysis automaticamente a cada ticker digitado');
-assertOptionalMatch(screen, /getAnalysisPage\(submittedTicker\)/, 'APK deve carregar /api/v1/analysis somente após submissão/seleção');
+assertOptionalDoesNotMatch(screen, /getAnalysisPage/, 'APK não deve carregar /api/v1/analysis pela página Análise; busca abre o modal único');
+assertOptionalMatch(screen, /openAssetAnalysisModal\(target, \"Busca da Análise\"\)/, 'Busca confirmada deve abrir o modal único do ativo');
+assertOptionalMatch(screen, /onSuggestionSelect = \{ openAssetAnalysisModal\(it, \"Sugestão da busca\"\) \}/, 'Sugestões da busca devem abrir o modal único');
 
 console.log('Analysis intelligent search v35 test OK.');
