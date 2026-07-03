@@ -1,3 +1,10 @@
+
+## v193 — Informações Investidor10 no modal único de FIIs — 2026-07-03
+
+- Revisado `/api/v1/asset/fii-modal` para contrato `26.asset-modal.fii.v2`.
+- Incluído bloco de informações oficiais do Investidor10 para FIIs, sem reativar StatusInvest nem fallback legado.
+- Mantidos gráfico/cotação/rentabilidade nominal por Yahoo e rentabilidade real por IPCA BCB.
+
 # v185 — Qualidade estrita de gráficos e captura contínua
 
 Release date: 2026-07-02  
