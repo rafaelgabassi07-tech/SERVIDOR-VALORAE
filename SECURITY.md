@@ -14,3 +14,8 @@ O VALORAE é mantido como proxy HTTP/JSON serverless e free-only. Não abra issu
 - URLs de scrape são restritas a hosts permitidos.
 - Erros em produção são sanitizados por padrão.
 - Admin fica desativado sem `VALORAE_ADMIN_TOKEN`.
+
+### Checkpoint 2026-07-03 — v330/v211
+
+Correção do gráfico **Comparação com índices** no modal único de FIIs: IFIX, SMLL e IDIV passam a reutilizar a mesma camada `getAssetHistory` da página Retorno, mantendo os seletores fixos e a simulação de R$ 1.000,00 por período.
+

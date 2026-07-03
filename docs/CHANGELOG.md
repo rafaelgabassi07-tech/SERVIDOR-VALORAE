@@ -1,3 +1,39 @@
+## v213 — Comunicados e PDFs no modal de FIIs — 2026-07-03
+
+- Evolui o contrato do modal único de FII para `26.asset-modal.fii.v20`.
+- Adiciona `announcements` com Comunicados do FII, título, data, tipo, link oficial e `pdfUrl` quando o documento direto for PDF.
+- Parser captura a seção `COMUNICADOS DO {TICKER}` do Investidor10 e mantém fallback para abrir a página oficial quando o PDF direto não estiver exposto.
+- APK v332 renderiza lista paginada com botão **Abrir PDF/Abrir** usando navegador/visualizador externo seguro.
+- Adiciona teste regressivo `fii-modal-announcements-v213.test.js`.
+
+## v212 — Revisão de valor patrimonial no modal de FIIs — 2026-07-03
+
+- Mantém o contrato `26.asset-modal.fii.v19` estável para preservar compatibilidade.
+- Documenta a revisão APK v331: ajuda nas barras patrimoniais e visual sólido em Média do tipo e segmento.
+- Reexecutados `node --check`, `npm run check:syntax`, teste patrimonial e suíte completa.
+
+## v211 — Valor patrimonial e média do segmento no modal de FIIs — 2026-07-03
+
+- Evolui o contrato para 26.asset-modal.fii.v19.
+- Adiciona `patrimonialInfo` com barras de valor patrimonial/cota e valor da cota, cards de cotas, P/VP e patrimônio total.
+- Adiciona Média do tipo e segmento com comparações de P/VP, DY (12M), Valor Patrimonial e Val. Patrimonial p/ Cota.
+- Adiciona teste regressivo `fii-modal-patrimonial-info-v211.test.js`.
+
+## v210 — Comparação com índices alinhada à página Retorno — 2026-07-03
+
+- Evolui o contrato do modal único de FII para `26.asset-modal.fii.v18`.
+- Corrige IFIX, SMLL e IDIV no gráfico **Comparação com índices** ao reutilizar `getAssetHistory`, a mesma camada de histórico usada pela página **Retorno**.
+- Mantém Yahoo direto nos símbolos `IFIX.SA`, `SMLL.SA` e `IDIV.SA` como prioridade; quando o Yahoo entrega apenas snapshot, usa o normalizador já validado na página Retorno para desenhar linha e gerar a simulação de R$ 1.000,00.
+- Adiciona `selectorOptions` ao contrato para garantir seletores fixos de IFIX, CDI, IPCA, IBOV, SMLL, IDIV e IVVB11 no APK.
+- Adiciona teste regressivo `fii-modal-return-index-reuse-v210.test.js`.
+
+## v209 — Correção Dividend Yield/Dividendos no modal de FIIs — 2026-07-03
+
+- Evolui o contrato do modal único de FII para `26.asset-modal.fii.v17`.
+- Corrige a captura das seções `DIVIDEND YIELD {TICKER}` e `{TICKER} DIVIDENDOS` do Investidor10 quando os dados dinâmicos não vêm no JSON/API.
+- A tabela passa a preencher Tipo, Data Com, Pagamento e Valor; os eventos alimentam os gráficos mensal/anual e a tabela paginada no APK.
+- Corrige leitura da data de pagamento no extractor do Investidor10 para evitar linha sem pagamento.
+
 ## v207 — Lista de imóveis no modal de FIIs — 2026-07-03
 
 - Evolui o contrato do modal único de FII para `26.asset-modal.fii.v15`.

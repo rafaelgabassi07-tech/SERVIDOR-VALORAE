@@ -40,7 +40,7 @@ assert.equal(item.returnDisplay, '+20,00%');
 console.log('FII modal Yahoo comparison v196 test OK.');
 
 
-assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v16');
+assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v20');
 assert.deepEqual(_test.FII_INDEX_BENCHMARKS.map(item => item.code), ['IFIX', 'CDI', 'IPCA', 'IBOV', 'SMLL', 'IDIV', 'IVVB11']);
 assert.deepEqual(_test.FII_INDEX_BENCHMARKS.filter(item => item.yahooSymbol).map(item => item.yahooSymbol), ['IFIX.SA', '^BVSP', 'SMLL.SA', 'IDIV.SA', 'IVVB11.SA']);
 assert.deepEqual(_test.comparisonFetchPlans({ key: '2y', range: '2Y', interval: '1wk' }).map(plan => `${plan.range}/${plan.interval}`), ['2Y/1wk', '2Y/1mo', '2Y/1d']);

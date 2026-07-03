@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.238: adiciona Histórico da taxa de vacância no modal único de FIIs.",
+  "description": "Valorae Proxy 21.12.243: comunicados e documentos/PDF no modal único de FIIs.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.238-fii-vacancy-history-v208",
+    "releasePatch": "21.12.243-fii-announcements-pdf-v213",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.238",
-    "checkpoint": "fii-vacancy-history-v208",
-    "releaseLabel": "fii-vacancy-history-v208"
+    "publicVersion": "21.12.243",
+    "checkpoint": "fii-announcements-pdf-v213",
+    "releaseLabel": "fii-announcements-pdf-v213"
   },
-  "releasePatch": "21.12.238-fii-vacancy-history-v208"
+  "releasePatch": "21.12.243-fii-announcements-pdf-v213"
 }

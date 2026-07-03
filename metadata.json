@@ -1,29 +1,29 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.238-fii-vacancy-history-v208",
-  "patch": "21.12.238-fii-vacancy-history-v208",
-  "releasePatch": "21.12.238-fii-vacancy-history-v208",
-  "latestInternalPatch": "21.12.238-fii-vacancy-history-v208",
-  "description": "Proxy v208 evolui /api/v1/asset/fii-modal para contrato 26.asset-modal.fii.v16, adicionando Histórico da taxa de vacância com filtros 12m/anos, barras empilhadas de vacância/ocupação e fallback por dados do Investidor10.",
+  "release": "21.12.243-fii-announcements-pdf-v213",
+  "patch": "21.12.243-fii-announcements-pdf-v213",
+  "releasePatch": "21.12.243-fii-announcements-pdf-v213",
+  "latestInternalPatch": "21.12.243-fii-announcements-pdf-v213",
+  "description": "Proxy v213 evolui para o contrato 26.asset-modal.fii.v20 e adiciona Comunicados do FII com links de documentos/PDF do Investidor10 para o modal único.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Histórico da taxa de vacância no modal único de FIIs."
+    "Comunicados do FII com links de documentos/PDF no modal único de FIIs."
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-03",
-  "checkpoint": "fii-vacancy-history-v208",
-  "title": "Proxy v208 — Histórico da taxa de vacância no modal de FIIs",
-  "summary": "Proxy v208 evolui /api/v1/asset/fii-modal para contrato 26.asset-modal.fii.v16, adicionando Histórico da taxa de vacância com filtros 12m/anos, barras empilhadas de vacância/ocupação e fallback por dados do Investidor10.",
-  "publicVersion": "21.12.238",
-  "label": "fii-vacancy-history-v208",
+  "checkpoint": "fii-announcements-pdf-v213",
+  "title": "Proxy v213 — Comunicados e PDFs no modal de FIIs",
+  "summary": "Proxy v213 evolui para o contrato 26.asset-modal.fii.v20 e adiciona Comunicados do FII com links de documentos/PDF do Investidor10 para o modal único.",
+  "publicVersion": "21.12.243",
+  "label": "fii-announcements-pdf-v213",
   "updatedAt": "2026-07-03T00:00:00.000Z",
   "date": "2026-07-03",
   "notes": [
-    "Contrato 26.asset-modal.fii.v16 adiciona vacancyHistory ao modal único de FIIs.",
-    "Fonte principal: Investidor10, com parser do bloco Histórico da taxa de vacância e endpoints candidatos de vacância.",
-    "Mantém as seções anteriores do modal de FII."
+    "Contrato 26.asset-modal.fii.v20 adiciona o objeto announcements no modal único de FII.",
+    "Parser captura título, data, tipo, link de abrir e PDF direto quando disponível.",
+    "Fallback mantém link oficial quando o PDF direto não estiver exposto pelo Investidor10."
   ]
 }
