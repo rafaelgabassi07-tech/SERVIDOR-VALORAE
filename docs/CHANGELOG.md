@@ -1,4 +1,69 @@
 
+## 2026-07-03 — Proxy v227 / patch 21.12.257-stock-modal-balance-announcements-v227
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v13`.
+- Adicionado `balanceSheetStatement` com a seção **Balanço Patrimonial Petrobras**.
+- Adicionado `announcements` com **Comunicados do PETR4**, links Abrir/PDF e paginação.
+- Comunicados combinam a página principal do ativo com a rota pública `/communications/ticker/{TICKER}/?page=...`.
+- Mantidos todos os blocos anteriores do modal único de ação.
+
+
+## 2026-07-03 — Proxy v226 / patch 21.12.256-stock-modal-results-equity-v226
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v11`.
+- Adicionado `resultsStatement` com a tabela Resultados Petrobras/ação: Receita Líquida, Custos, Lucro Bruto, Lucro Líquido, EBITDA, EBIT, Imposto, Dívidas, Margens, ROE e ROIC.
+- Adicionado `equityEvolutionChart` com Patrimônio, Receita Líquida e Lucro Líquido, filtros 5A/10A/MAX.
+- Mantidos todos os blocos anteriores do modal único de ação.
+
+
+## 2026-07-03 — Proxy v225 / patch 21.12.255-stock-modal-financial-charts-v225
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v10`.
+- Adicionado `revenueProfitChart` com Receita Líquida e Lucro Líquido para o bloco **Receitas e Lucros**.
+- Adicionado `profitQuoteChart` com Lucro Líquido e Cotação para o bloco **Lucro x Cotação**.
+- Mantidos os blocos anteriores do modal único de ação e a política Investidor10-first.
+
+
+## 2026-07-03 — Proxy v224 / patch 21.12.254-stock-modal-shareholding-v224
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v9`.
+- Adicionado `shareholdingPosition` com a tabela de Posição acionária: Acionista, % ON, % PN e % Total.
+- Parser busca a seção `POSIÇÃO ACIONÁRIA` no HTML/canônico do Investidor10 e mantém fallback PETR4 quando a tabela for entregue como imagem.
+- Mantidas as seções anteriores do modal único de ações e a política Yahoo restrita a cotação/comparações.
+
+
+## 2026-07-03 — Proxy v223 / patch 21.12.253-stock-modal-company-revenue-v223
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v8`.
+- Adicionado `companyProfile` com a seção Sobre a empresa, histórico e informações adicionais da ação.
+- Adicionados `revenueByRegion` e `revenueByBusiness` com ano, total, valores e percentuais de participação.
+- Mantidos comparador de ações, comparação com índices, Brent, radar de dividendos, payout, histórico de dividendos, checklist, indicadores e rentabilidade.
+
+
+## 2026-07-03 — Proxy v222 / patch 21.12.252-stock-modal-comparisons-v222
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v7`.
+- Adicionado `peerComparison` com Comparador de Ações do Investidor10.
+- Adicionado `indexComparison` para PETR4/ação versus IBOV, IFIX, CDI, IPCA, SMLL, IDIV e IVVB11.
+- IFIX, IDIV e SMLL usam Yahoo Finance direto (`IFIX.SA`, `IDIV.SA`, `SMLL.SA`), reaproveitando a base do modal de FIIs.
+- Adicionado `commodityComparison` para comparar a ação com Petróleo Brent (`BZ=F`).
+
+
+## 2026-07-03 — Proxy v221 / patch 21.12.251-stock-modal-radar-payout-v221
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v6`.
+- Adicionado `dividendRadar` com Radar de Dividendos Inteligente, meses por Data Com/Data Pagamento e botão de radar completo.
+- Adicionado `payoutChart` com Lucro Líquido, Payout e Dividend Yield, além de filtros 5A/10A/MAX.
+- Mantidos checklist vertical, histórico de dividendos, indicadores, histórico de indicadores, cotação e rentabilidade do modal único de ações.
+
+
+## 2026-07-03 — Proxy v220 / patch 21.12.250-stock-modal-dividends-v220
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v5`.
+- Adicionado `dividendHistory` ao modal único de ações com Histórico de Dividendos do Investidor10.
+- O payload agora entrega DY atual, DY médio em 5 anos, séries anuais de Dividend Yield/Dividendos e tabela de proventos com tipo, data com, pagamento e valor.
+- Mantidos checklist vertical, indicadores completos, histórico de indicadores, rentabilidade e gráfico de cotação.
+
+
+## 2026-07-03 — Proxy v219 / patch 21.12.249-stock-modal-checklist-v219
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v4`.
+- Adicionado `checklist` ao modal único de ações com o Checklist do Investidor Buy and Hold do Investidor10.
+- Checklist entrega 10 critérios, contadores `passed/failed/unknown`, textos de ajuda e disclaimer para renderização vertical no APK.
+- Preservados indicadores completos, histórico de indicadores, cotação, rentabilidade e política Yahoo apenas para preço/gráfico.
+
+
 ## 2026-07-03 — Proxy v218 / patch 21.12.248-stock-modal-fundamentals-complete-v218
 - Reforçada a seção `fundamentalIndicators` do modal único de ações com a grade completa da referência PETR4/Investidor10.
 - Mantidos todos os 31 indicadores: P/L, PSR, P/VP, Dividend Yield, Payout, margens, EVs, P/Ebits, P/Ativo, P/Cap.Giro, P/Ativo Circ. Líq., VPA, LPA, Giro Ativos, ROE, ROIC, ROA, dívidas, estrutura patrimonial, liquidez corrente e CAGRs 5 anos.

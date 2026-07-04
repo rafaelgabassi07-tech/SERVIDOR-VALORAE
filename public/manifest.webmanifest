@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Contrato curado para APK: modal único de ações com indicadores fundamentalistas completos e sem omissão.",
+  "description": "Contrato curado para APK: modal único de ações com Balanço Patrimonial e Comunicados.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.248"
+  "version": "21.12.257"
 }
