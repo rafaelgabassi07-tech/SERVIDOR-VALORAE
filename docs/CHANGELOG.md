@@ -1,3 +1,40 @@
+## 2026-07-04 — Proxy v236 / patch 21.12.266-deep-cleanup-unused-residue-v236
+
+Limpeza profunda de resquícios e código abandonado pareada ao APK v355.
+
+- Removida a resposta antiga `modal-reset` de `/api/v1/analysis` para superfícies de modal.
+- Removida a injeção `assetAnalysisPage` no payload principal do motor legado.
+- Removidos metadados antigos de limpeza v207 que ainda apareciam no release atual.
+- Mantidos intactos `/api/v1/asset/fii-modal`, `/api/v1/asset/stock-modal`, `/api/v1/assets` em modo sugestão e `/api/v1/analysis` para a página Análise.
+- Sem alteração de layout, campos JSON ativos dos modais ou contrato de busca da Análise.
+
+## 2026-07-04 — Proxy v235 / patch 21.12.265-analysis-search-audit-v235
+
+Auditoria e otimização da página Análise e da busca inteligente pareada ao APK v354.
+
+- `/api/v1/assets?q=...&suggest=true&searchMode=analysis` agora força sugestão leve, inclusive quando `q` já é ticker completo como PETR4.
+- Contrato de sugestões declara `suggestionOnly` e `debounceRecommendedMs=320`, alinhando APK e Proxy.
+- Mantidos contratos de `/api/v1/analysis`, `/api/v1/asset/fii-modal` e `/api/v1/asset/stock-modal` sem alterações visuais ou de JSON dos modais.
+- Adicionado teste de regressão para garantir que ticker exato em modo sugestão não cai no batch pesado de `/assets`.
+
+## 2026-07-04 — Proxy v234 / patch 21.12.264-stock-modal-data-integrity-v234
+
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v17`.
+- Corrigida a origem da cotação do cabeçalho e de `Sobre o ativo`: o Proxy prioriza Yahoo Finance do ticker visualizado e só usa Investidor10 quando estiver escopado corretamente ao ativo.
+- Variação 12M ganha fallback por histórico Yahoo 1Y, além das fontes já existentes no Investidor10/retornos.
+- Radar de Dividendos Inteligente passa a carregar contagem, anos observados e score por mês para data com e pagamento, sem alterar o layout do APK.
+- Comparador de ações ganha fallback por catálogo setorial restrito ao mesmo grupo/segmento quando a tabela do Investidor10 não vier no HTML.
+- Regiões/negócios de receita e posição acionária receberam parsers adicionais para JSON/HTML do Investidor10; referências PETR4 continuam limitadas apenas ao ticker PETR4.
+- Pacote final mantém padrão AI Studio com arquivos diretamente na raiz.
+
+## 2026-07-04 — Proxy v233 / patch 21.12.263-asset-modal-contract-refactor-v233
+
+- Entrega pareada ao APK v352 para a refatoração segura da camada técnica dos modais.
+- Contrato de FII permanece isolado em `lib/analysis/fii-modal-contract.js` e endpoint `/api/v1/asset/fii-modal`.
+- Contrato de ação permanece isolado em `lib/analysis/stock-modal-contract.js` e endpoint `/api/v1/asset/stock-modal`.
+- Sem alteração de scraping, formato de resposta ou nomes de campos JSON; o objetivo é registrar compatibilidade e versionamento conjunto.
+- Pacote final mantém padrão AI Studio com arquivos diretamente na raiz.
+
 ## 2026-07-04 — Proxy v232 / patch 21.12.262-stock-modal-action-fixes-v232
 - Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v16`.
 - Corrigidos logotipo e bloco **Sobre a empresa** para não manter PETR4/Petrobras fixos em ativos diferentes.

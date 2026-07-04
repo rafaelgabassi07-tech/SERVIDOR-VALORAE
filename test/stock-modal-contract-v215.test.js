@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/stock-modal-contract.js';
 
-assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v16');
+assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v17');
 
 const html = `
 <html><body>
@@ -359,3 +359,29 @@ const shareholdingFallback = _test.buildStockShareholdingPayload({ ticker: 'PETR
 assert.equal(shareholdingFallback.status, 'OK');
 assert.equal(shareholdingFallback.rows.length, 6);
 assert.equal(shareholdingFallback.rows[0].shareholder, 'OUTROS');
+
+
+const wrongTickerHtml = `<html><body><h1>PETR4 Petrobras</h1><div>PETR4 Cotação R$ 37,92 -0,26%</div></body></html>`;
+const wrongQuick = _test.extractInvestidor10StockQuickMetrics(wrongTickerHtml, 'VALE3');
+assert.equal(wrongQuick.priceDisplay || '', '');
+
+const peerFallback = _test.extractInvestidor10StockPeerComparison('', 'BBAS3', { pl: 8.2, plDisplay: '8,20', pvp: 0.9, pvpDisplay: '0,90', dy: 7.1, dyDisplay: '7,10%' }, fundamentals);
+assert.equal(peerFallback.status, 'OK');
+assert.equal(peerFallback.rows.some(row => row.ticker === 'BBAS3' && row.isReference), true);
+assert.equal(peerFallback.rows.some(row => row.ticker === 'ITUB4'), true);
+assert.equal(peerFallback.rows.every(row => ['BBAS3', 'BBDC3', 'BBDC4', 'BPAC11', 'ITUB4', 'SANB11'].includes(row.ticker)), true);
+
+const revenueApiPayload = _test.buildStockRevenueBreakdownPayload({
+  ticker: 'TEST3',
+  name: 'Teste',
+  canonical: { revenueBreakdowns: { region: { totalAmountDisplay: 'R$ 10,00 Bilhões', data: [{ name: 'Brasil', y: 71, valorDisplay: 'R$ 7,10 Bilhões' }, { name: 'China', y: 11, valorDisplay: 'R$ 1,10 Bilhão' }] } } }
+}, 'region');
+assert.equal(revenueApiPayload.status, 'OK');
+assert.equal(revenueApiPayload.items[0].label, 'Brasil');
+assert.equal(revenueApiPayload.totalAmountDisplay, 'R$ 10,00 Bilhões');
+
+const shareholdingHtmlApi = `<section><h2>Posição acionária da TEST3</h2><table><tr><th>Acionista</th><th>% ON</th><th>% PN</th><th>% Total</th></tr><tr><td>OUTROS</td><td>40.77</td><td>67.21</td><td>52.03</td></tr><tr><td>UNIÃO FEDERAL</td><td>50.26</td><td>0.00</td><td>29.02</td></tr></table></section>`;
+const shareholdingApi = _test.buildStockShareholdingPayload({ html: shareholdingHtmlApi, ticker: 'TEST3' });
+assert.equal(shareholdingApi.status, 'OK');
+assert.equal(shareholdingApi.rows.length, 2);
+assert.equal(shareholdingApi.rows[1].shareholder, 'UNIÃO FEDERAL');

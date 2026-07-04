@@ -16,6 +16,15 @@ function looksLikeFullB3Ticker(rawQuery = '') {
   return /^(?:[A-Z]{4}[0-9]{1,2}[A-Z]?|[A-Z0-9]{3,6}[0-9]{1,2})$/.test(canonicalizeTicker(rawQuery));
 }
 
+function isSuggestionRequest(input = {}) {
+  const rawSuggest = String(input.suggest ?? input.suggestions ?? input.autocomplete ?? '').trim().toLowerCase();
+  const rawSearchMode = String(input.searchMode || input.mode || input.profile || '').trim().toLowerCase();
+  return ['1', 'true', 'yes', 'sim', 'on'].includes(rawSuggest)
+    || rawSearchMode.includes('analysis')
+    || rawSearchMode.includes('suggest')
+    || rawSearchMode.includes('autocomplete');
+}
+
 function normalizeSearchText(raw = '') {
   return String(raw || '')
     .normalize('NFD')
@@ -58,7 +67,7 @@ export function buildAssetSuggestions(rawQuery = '', max = 8) {
     suggestion: true,
     rank: index + 1,
     match: item.match,
-    searchPolicy: 'analysis_intelligent_search_v35',
+    searchPolicy: 'analysis_intelligent_search_v235',
     source: 'VALORAE_CATALOG',
     price: null,
     variationPercent: null,
@@ -151,7 +160,8 @@ export default async function handler(req, res) {
     let raw = parseList(rawInput).map(t => String(t).trim()).filter(Boolean);
     if (!raw.length && query) {
       const cleanQuery = canonicalizeTicker(query);
-      if (cleanQuery && looksLikeFullB3Ticker(cleanQuery) && !validarTicker(cleanQuery)) raw = [cleanQuery];
+      const suggestionOnly = isSuggestionRequest(input);
+      if (!suggestionOnly && cleanQuery && looksLikeFullB3Ticker(cleanQuery) && !validarTicker(cleanQuery)) raw = [cleanQuery];
       else {
         const max = clampNumber(input.max || input.limit, 8, 1, 25);
         const suggestions = buildAssetSuggestions(query, max);
@@ -164,9 +174,10 @@ export default async function handler(req, res) {
           assets: suggestions,
           results: suggestions,
           source: 'VALORAE_CATALOG',
-          searchPolicy: 'analysis_intelligent_search_v35',
+          searchPolicy: 'analysis_intelligent_search_v235',
           minQueryLength: 2,
-          debounceRecommendedMs: 360,
+          debounceRecommendedMs: 320,
+          suggestionOnly,
           analysisEndpoint: '/api/v1/analysis',
           message: suggestions.length ? 'Sugestões de ticker retornadas sem simular cotação.' : 'Nenhum ticker sugerido para a busca informada.',
         }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'assets-suggestions', cacheControl: 'private, max-age=300, stale-while-revalidate=900' });

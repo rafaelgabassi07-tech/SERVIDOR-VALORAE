@@ -1,31 +1,31 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.262-stock-modal-action-fixes-v232",
-  "patch": "21.12.262-stock-modal-action-fixes-v232",
-  "releasePatch": "21.12.262-stock-modal-action-fixes-v232",
-  "latestInternalPatch": "21.12.262-stock-modal-action-fixes-v232",
-  "description": "Proxy v232 acompanha o APK v351 com correções completas do modal único de ação: logo, variação 12M, radar, payout, comparadores, índices e gráficos/quadros do Investidor10.",
+  "release": "21.12.266-deep-cleanup-unused-residue-v236",
+  "patch": "21.12.266-deep-cleanup-unused-residue-v236",
+  "releasePatch": "21.12.266-deep-cleanup-unused-residue-v236",
+  "latestInternalPatch": "21.12.266-deep-cleanup-unused-residue-v236",
+  "description": "Proxy v236 limpa resquícios técnicos abandonados da página Análise e dos modais, sem mudar os contratos ativos.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Entrega pareada ao APK v351 para manter APK e Proxy sincronizados.",
-    "Contrato /api/v1/asset/stock-modal evoluído para 26.asset-modal.stock.v16.",
-    "Hidratação das APIs internas do Investidor10 para payout, histórico de indicadores, receitas e lucros, lucro x cotação, resultados e evolução patrimonial."
+    "Limpeza pareada ao APK v355 para remover fluxo antigo de modal via /analysis.",
+    "Remoção do modal-reset legado em /api/v1/analysis para superfícies de modal.",
+    "Remoção da injeção assetAnalysisPage nos payloads legados do motor principal."
   ],
-  "cleanup": "proxy-clean-v207-2026-07-03",
-  "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
+  "cleanup": "proxy-deep-clean-v236-2026-07-04",
+  "cleanupDescription": "Remove resquícios técnicos da antiga superfície de modal/análise: resposta modal-reset, injeção assetAnalysisPage no payload legado e metadados antigos de limpeza, preservando os endpoints ativos de ação, FII e busca da Análise.",
   "releaseDate": "2026-07-04",
-  "checkpoint": "stock-modal-action-fixes-v232",
-  "title": "Proxy v232 — Correções completas do modal único de ação",
-  "summary": "Entrega pareada ao APK v351 para corrigir o modal único de ação e hidratar seções do Investidor10 que estavam vazias no contrato.",
-  "publicVersion": "21.12.262",
-  "label": "stock-modal-action-fixes-v232",
+  "checkpoint": "deep-cleanup-unused-residue-v236",
+  "title": "Proxy v236 — Limpeza profunda de resquícios e rotas abandonadas",
+  "summary": "Remove resquícios técnicos da antiga superfície de modal/análise: resposta modal-reset, injeção assetAnalysisPage no payload legado e metadados antigos de limpeza, preservando os endpoints ativos de ação, FII e busca da Análise.",
+  "publicVersion": "21.12.266",
+  "label": "deep-cleanup-unused-residue-v236",
   "updatedAt": "2026-07-04T00:00:00.000Z",
   "date": "2026-07-04",
   "notes": [
-    "Corrigido vazamento de PETR4/Petrobras no logotipo e no Sobre a empresa para ativos diferentes.",
-    "Mantido Yahoo direto para IFIX.SA, IDIV.SA e SMLL.SA nos cards de comparação com índices.",
-    "Pacote pareado ao APK v351 no padrão AI Studio com arquivos na raiz."
+    "/api/v1/asset/fii-modal e /api/v1/asset/stock-modal permanecem como contratos oficiais dos modais.",
+    "/api/v1/analysis continua disponível para a página Análise, mas não retorna mais resposta RESET por superfície modal.",
+    "Código morto removido sem alterar visual, campos JSON ativos ou contratos de busca."
   ]
 }

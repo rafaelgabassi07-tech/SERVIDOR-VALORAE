@@ -25,6 +25,13 @@ assert.ok(Array.isArray(suggestions.body.assets), 'assets deve ser array');
 assert.ok(suggestions.body.assets.some(item => item.ticker === 'PETR4' || item.symbol === 'PETR4'), 'PETR deve sugerir PETR4');
 assert.equal(suggestions.body.source, 'VALORAE_CATALOG');
 
+const exactSuggestion = await callJson('/api/v1/assets?q=PETR4&suggest=true&searchMode=analysis&max=10');
+assert.equal(exactSuggestion.statusCode, 200, 'ticker exato em modo sugestão deve responder 200');
+assert.equal(exactSuggestion.body.status, 'SUGGESTIONS', 'ticker exato com suggest=true não deve cair no batch pesado de /assets');
+assert.equal(exactSuggestion.body.suggestionOnly, true, 'contrato deve declarar sugestão leve');
+assert.ok(Array.isArray(exactSuggestion.body.assets), 'assets de ticker exato deve ser array');
+assert.ok(exactSuggestion.body.assets.some(item => item.ticker === 'PETR4' || item.symbol === 'PETR4'), 'PETR4 exato deve permanecer nas sugestões');
+
 const peers = await callJson('/api/v1/assets?peerOf=PETR4&sameSector=true&searchMode=analysis_comparison&suggest=true&max=12');
 assert.equal(peers.statusCode, 200, 'router /api/v1/assets deve responder 200 para pares setoriais');
 assert.equal(peers.body.strictSameSector, true, 'pares devem declarar setor estrito');

@@ -6,7 +6,7 @@ const byName = buildAssetSuggestions('Banco do Brasil', 10);
 assert.ok(byName.some(item => item.symbol === 'BBAS3'), 'busca por nome deve sugerir BBAS3 para Banco do Brasil');
 assert.ok(byName.every(item => item.suggestion === true), 'sugestões não devem simular cotação');
 assert.ok(byName.every(item => item.price === null && item.variationPercent === null), 'sugestões devem retornar sem preço/variação simulados');
-assert.ok(byName.every(item => item.searchPolicy === 'analysis_intelligent_search_v35'), 'sugestões devem declarar política de busca inteligente');
+assert.ok(byName.every(item => item.searchPolicy === 'analysis_intelligent_search_v235'), 'sugestões devem declarar política de busca inteligente');
 
 const bySegment = buildAssetSuggestions('logistica', 10);
 assert.ok(bySegment.some(item => item.symbol === 'HGLG11'), 'busca por segmento sem acento deve encontrar FIIs de logística');
@@ -19,7 +19,7 @@ const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/Anal
 const client = readOptionalApkFile('../apk/app/src/main/java/com/example/data/proxy/ValoraeProxyClient.kt');
 assertOptionalMatch(screen, /submittedTicker/, 'APK deve separar texto digitado do ticker efetivamente consultado');
 assertOptionalMatch(screen, /recent_tickers/, 'APK deve persistir últimos pesquisados da Análise');
-assertOptionalMatch(screen, /delay\(360\)/, 'APK deve aplicar debounce antes de consultar sugestões');
+assertOptionalMatch(screen, /AnalysisSuggestionDebounceMs/, 'APK deve aplicar debounce antes de consultar sugestões');
 assertOptionalMatch(client, /searchMode" to "analysis"/, 'APK deve pedir sugestões em modo de busca da Análise');
 assertOptionalMatch(client, /suggest" to "true"/, 'APK deve usar endpoint de sugestões sem capturar análise completa');
 assertOptionalDoesNotMatch(screen, /getAnalysisPage\(normalizedQuery\)/, 'APK não deve carregar /api/v1/analysis automaticamente a cada ticker digitado');
