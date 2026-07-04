@@ -1,31 +1,31 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.257-stock-modal-balance-announcements-v227",
-  "patch": "21.12.257-stock-modal-balance-announcements-v227",
-  "releasePatch": "21.12.257-stock-modal-balance-announcements-v227",
-  "latestInternalPatch": "21.12.257-stock-modal-balance-announcements-v227",
-  "description": "Proxy v227 amplia o contrato 26.asset-modal.stock.v13 com Balanço Patrimonial Petrobras e Comunicados da PETR4 a partir do Investidor10.",
+  "release": "21.12.258-stock-modal-action-audit-fixes-v228",
+  "patch": "21.12.258-stock-modal-action-audit-fixes-v228",
+  "releasePatch": "21.12.258-stock-modal-action-audit-fixes-v228",
+  "latestInternalPatch": "21.12.258-stock-modal-action-audit-fixes-v228",
+  "description": "Proxy v228 corrige o modal único de ações para restaurar cards rápidos, histórico de indicadores, payout, comparadores, Brent, logo, receitas/negócios e gráficos financeiros.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Contrato /api/v1/asset/stock-modal evoluído para 26.asset-modal.stock.v13.",
-    "Adicionado balanceSheetStatement com tabela de Balanço Patrimonial anual.",
-    "Adicionado announcements com Comunicados do PETR4, links Abrir/PDF e rota paginada /communications/ticker/{TICKER}/."
+    "Contrato /api/v1/asset/stock-modal evoluído para 26.asset-modal.stock.v14.",
+    "Correção dos cards rápidos Variação 12M, P/L, P/VP e DY com fallback dos indicadores fundamentalistas.",
+    "Correções nos blocos histórico de indicadores, payout, comparadores, Brent, logo, receitas/negócios e gráficos financeiros."
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
-  "releaseDate": "2026-07-03",
-  "checkpoint": "stock-modal-balance-announcements-v227",
-  "title": "Proxy v227 — Modal único de ações: balanço patrimonial e comunicados",
-  "summary": "Inclui a tabela Balanço Patrimonial Petrobras e os Comunicados do PETR4 no contrato do modal único de ações, seguindo a referência PETR4/Investidor10.",
-  "publicVersion": "21.12.257",
-  "label": "stock-modal-balance-announcements-v227",
-  "updatedAt": "2026-07-03T00:00:00.000Z",
-  "date": "2026-07-03",
+  "releaseDate": "2026-07-04",
+  "checkpoint": "stock-modal-action-audit-fixes-v228",
+  "title": "Proxy v228 — Modal único de ações: auditoria e correções de funcionamento",
+  "summary": "Auditoria do modal único de ações com correções de contrato e fallbacks controlados para PETR4/Investidor10 nos blocos reportados.",
+  "publicVersion": "21.12.258",
+  "label": "stock-modal-action-audit-fixes-v228",
+  "updatedAt": "2026-07-04T00:00:00.000Z",
+  "date": "2026-07-04",
   "notes": [
-    "A tabela de balanço usa dados canônicos do Investidor10 e fallback seguro para PETR4 quando a tabela vier como imagem.",
-    "Comunicados combinam a página principal do ativo com a rota pública paginada /communications/ticker/{TICKER}/.",
-    "Mantém todos os blocos anteriores do modal único de ação."
+    "O contrato continua Investidor10-first e usa fallbacks controlados quando o HTML público não expõe dados estruturados suficientes.",
+    "IFIX, IDIV e SMLL continuam configurados por Yahoo Finance direto com IFIX.SA, IDIV.SA e SMLL.SA.",
+    "A UI do APK remove o card Referência de cotação e oculta os chips do checklist de ação."
   ]
 }

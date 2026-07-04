@@ -1,3 +1,9 @@
+## 2026-07-04 — Proxy v228 / patch 21.12.258-stock-modal-action-audit-fixes-v228
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v14`.
+- Corrigidos cards rápidos de ações com fallback dos indicadores fundamentalistas quando o bloco superior do Investidor10 não vier no HTML estático.
+- Reforçados histórico de indicadores fundamentalistas, payout, comparador de ações, comparação com índices, comparação com Brent, logo da empresa, regiões/negócios de receita, receitas e lucros e lucro x cotação.
+- Mantido Yahoo direto para IFIX.SA, IDIV.SA e SMLL.SA e adicionada proteção para retorno vazio em comparações.
+
 
 ## 2026-07-03 — Proxy v227 / patch 21.12.257-stock-modal-balance-announcements-v227
 - Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v13`.

@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.257: modal único de ações com Balanço Patrimonial e Comunicados PETR4/Investidor10.",
+  "description": "Valorae Proxy 21.12.258: modal único de ações com auditoria de funcionamento e correções do contrato PETR4/Investidor10.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.257-stock-modal-balance-announcements-v227",
+    "releasePatch": "21.12.258-stock-modal-action-audit-fixes-v228",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.257",
-    "checkpoint": "stock-modal-balance-announcements-v227",
-    "releaseLabel": "stock-modal-balance-announcements-v227"
+    "publicVersion": "21.12.258",
+    "checkpoint": "stock-modal-action-audit-fixes-v228",
+    "releaseLabel": "stock-modal-action-audit-fixes-v228"
   },
-  "releasePatch": "21.12.257-stock-modal-balance-announcements-v227"
+  "releasePatch": "21.12.258-stock-modal-action-audit-fixes-v228"
 }
