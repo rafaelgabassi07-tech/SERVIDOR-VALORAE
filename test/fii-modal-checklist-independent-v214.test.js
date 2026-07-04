@@ -41,7 +41,7 @@ assert.equal(checklist.failed, 0);
 assert.equal(checklist.unknown, 1);
 assert.equal(checklist.items.find(item => item.id === 'financial_vacancy_below_10').status, 'UNKNOWN');
 assert.equal(checklist.diagnostics.portfolioIndependent, true);
-assert.equal(checklist.diagnostics.derivation, 'fallback_from_investidor10_modal_metrics');
+assert.equal(checklist.diagnostics.derivation, 'derived_from_investidor10_modal_metrics');
 assert.ok(checklist.subtitle.includes('sem depender da carteira'));
 
 console.log('fii-modal-checklist-independent-v214 ok');

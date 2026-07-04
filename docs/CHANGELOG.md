@@ -1,13 +1,3 @@
-## 2026-07-04 — Proxy v236 / patch 21.12.266-deep-cleanup-unused-residue-v236
-
-Limpeza profunda de resquícios e código abandonado pareada ao APK v355.
-
-- Removida a resposta antiga `modal-reset` de `/api/v1/analysis` para superfícies de modal.
-- Removida a injeção `assetAnalysisPage` no payload principal do motor legado.
-- Removidos metadados antigos de limpeza v207 que ainda apareciam no release atual.
-- Mantidos intactos `/api/v1/asset/fii-modal`, `/api/v1/asset/stock-modal`, `/api/v1/assets` em modo sugestão e `/api/v1/analysis` para a página Análise.
-- Sem alteração de layout, campos JSON ativos dos modais ou contrato de busca da Análise.
-
 ## 2026-07-04 — Proxy v235 / patch 21.12.265-analysis-search-audit-v235
 
 Auditoria e otimização da página Análise e da busca inteligente pareada ao APK v354.

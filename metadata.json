@@ -1,31 +1,40 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.266-deep-cleanup-unused-residue-v236",
-  "patch": "21.12.266-deep-cleanup-unused-residue-v236",
-  "releasePatch": "21.12.266-deep-cleanup-unused-residue-v236",
-  "latestInternalPatch": "21.12.266-deep-cleanup-unused-residue-v236",
-  "description": "Proxy v236 limpa resquícios técnicos abandonados da página Análise e dos modais, sem mudar os contratos ativos.",
+  "release": "21.12.267-no-static-fallbacks-v238",
+  "patch": "21.12.267-no-static-fallbacks-v238",
+  "releasePatch": "21.12.267-no-static-fallbacks-v238",
+  "latestInternalPatch": "21.12.267-no-static-fallbacks-v238",
+  "description": "Proxy v238 remove fallbacks estáticos/dados de exemplo dos modais de ativos e da página Análise: PETR4/GGRC11 não são mais usados como substituição; bloco sem fonte fresca retorna EMPTY/ERROR.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Limpeza pareada ao APK v355 para remover fluxo antigo de modal via /analysis.",
-    "Remoção do modal-reset legado em /api/v1/analysis para superfícies de modal.",
-    "Remoção da injeção assetAnalysisPage nos payloads legados do motor principal."
+    "Entrega pareada ao APK v357 baseada no v356/v237 estável.",
+    "Política sem substituição estática nos contratos de ação e FII: sem PETR4, GGRC11, catálogo local ou tabela parcial inventada para preencher blocos ausentes.",
+    "Logotipo de ação/FII só é aceito quando a URL remota contém identidade compatível com o ticker; caso contrário o contrato deixa o campo vazio.",
+    "Comparadores, histórico de indicadores, regiões, negócios, posição acionária, receitas/lucros e demais blocos mantêm status EMPTY/ERROR quando a fonte fresca não entregar dados."
   ],
-  "cleanup": "proxy-deep-clean-v236-2026-07-04",
-  "cleanupDescription": "Remove resquícios técnicos da antiga superfície de modal/análise: resposta modal-reset, injeção assetAnalysisPage no payload legado e metadados antigos de limpeza, preservando os endpoints ativos de ação, FII e busca da Análise.",
+  "cleanup": "proxy-clean-v207-2026-07-03",
+  "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-04",
-  "checkpoint": "deep-cleanup-unused-residue-v236",
-  "title": "Proxy v236 — Limpeza profunda de resquícios e rotas abandonadas",
-  "summary": "Remove resquícios técnicos da antiga superfície de modal/análise: resposta modal-reset, injeção assetAnalysisPage no payload legado e metadados antigos de limpeza, preservando os endpoints ativos de ação, FII e busca da Análise.",
+  "checkpoint": "no-static-fallbacks-v238",
+  "title": "Proxy v238 — Sem fallbacks estáticos nos modais e Análise",
+  "summary": "Remove substituições silenciosas por PETR4/GGRC11/dados de exemplo em modais de ativos e na superfície de Análise. O Proxy passa a preferir vazio explícito a dado falso ou desatualizado.",
   "publicVersion": "21.12.266",
-  "label": "deep-cleanup-unused-residue-v236",
+  "label": "stock-modal-integrity-hotfix-v237",
   "updatedAt": "2026-07-04T00:00:00.000Z",
   "date": "2026-07-04",
   "notes": [
-    "/api/v1/asset/fii-modal e /api/v1/asset/stock-modal permanecem como contratos oficiais dos modais.",
-    "/api/v1/analysis continua disponível para a página Análise, mas não retorna mais resposta RESET por superfície modal.",
-    "Código morto removido sem alterar visual, campos JSON ativos ou contratos de busca."
-  ]
+    "Mantém /api/v1/asset/stock-modal e /api/v1/asset/fii-modal sem mudança de rota.",
+    "A comparação de ações com índices passa a usar a mesma estrutura por período do modal de FII.",
+    "Fora de PETR4, o Proxy não reaproveita referências fixas de Petrobras para regiões, negócios ou posição acionária."
+  ],
+  "releaseNotes": [
+    "Sem alteração de endpoints ativos.",
+    "Contrato de ação atualizado para 26.asset-modal.stock.v19.",
+    "Contrato de FII mantém fonte fresca e remove resquícios de reconstrução por pares relacionados quando a tabela do Investidor10 não vem no HTML capturado.",
+    "Dados ausentes permanecem indisponíveis até a fonte real responder."
+  ],
+  "apkPair": "apk_valorae_no_static_fallbacks_v357_AI_STUDIO_ROOT_OK_2026_07_04.zip",
+  "apkVersion": "2026.07.04.10"
 }

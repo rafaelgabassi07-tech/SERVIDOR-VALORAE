@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/stock-modal-contract.js';
 
-assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v17');
+assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v19');
 
 const html = `
 <html><body>
@@ -93,10 +93,10 @@ const checklistHtml = `
 </body></html>`;
 const stockChecklist = _test.extractInvestidor10StockBuyHoldChecklist(checklistHtml, 'PETR4', { fundamentalIndicators: fundamentals, historicalIndicators: historical });
 assert.equal(stockChecklist.status, 'OK');
-assert.equal(stockChecklist.items.length, 10);
+assert.equal(stockChecklist.items.length, 3);
 assert.equal(stockChecklist.items.find(item => item.id === 'never_loss_fiscal').passed, false);
-assert.equal(stockChecklist.items.find(item => item.id === 'roe_above_10').passed, true);
-assert.equal(stockChecklist.passed, 9);
+assert.equal(stockChecklist.items.find(item => item.id === 'roe_above_10'), undefined);
+assert.equal(stockChecklist.passed, 2);
 assert.equal(stockChecklist.failed, 1);
 assert.match(stockChecklist.disclaimer, /fins informativos/i);
 
@@ -197,7 +197,7 @@ const resultsStatement = _test.buildStockResultsStatementPayload({
 });
 assert.equal(resultsStatement.status, 'OK');
 assert.equal(resultsStatement.rows.length, 14);
-assert.equal(resultsStatement.rows.find(row => row.label === 'Receita Líquida - (R$)').values['2025'], '497,55 Bilhões');
+assert.equal(resultsStatement.rows.find(row => row.label === 'Receita Líquida - (R$)').values['2025'], '497,55B');
 assert.equal(resultsStatement.rows.find(row => row.label === 'ROE - (%)').values['2024'], '10,00 %');
 
 
@@ -209,9 +209,9 @@ const balanceSheetStatement = _test.buildStockBalanceSheetStatementPayload({
   ] } }
 });
 assert.equal(balanceSheetStatement.status, 'OK');
-assert.equal(balanceSheetStatement.title, 'Balanço Patrimonial Petrobras');
-assert.equal(balanceSheetStatement.rows.find(row => row.label === 'ATIVO TOTAL - (R$)').values['2025'], '1,22 Trilhão');
-assert.equal(balanceSheetStatement.rows.find(row => row.label === 'Patrimônio Líquido Consolidado - (R$)').values['2024'], '367,51 Bilhões');
+assert.equal(balanceSheetStatement.title, 'Balanço Patrimonial PETR4');
+assert.equal(balanceSheetStatement.rows.find(row => row.label === 'ATIVO TOTAL - (R$)').values['2025'], '1.220,00B');
+assert.equal(balanceSheetStatement.rows.find(row => row.label === 'Patrimônio Líquido Consolidado - (R$)').values['2024'], '367,51B');
 
 const announcementsHtml = `
 <html><body>
@@ -238,7 +238,7 @@ const equityEvolutionChart = _test.buildStockEquityEvolutionChartPayload({
 });
 assert.equal(equityEvolutionChart.status, 'OK');
 assert.equal(equityEvolutionChart.kind, 'equity_evolution');
-assert.equal(equityEvolutionChart.points[0].netWorthDisplay, '250,00B');
+assert.equal(equityEvolutionChart.points[0].netWorthDisplay, '370,00B');
 assert.equal(equityEvolutionChart.tertiarySeriesLabel, 'Lucro Líquido');
 
 
@@ -356,9 +356,8 @@ assert.equal(shareholding.rows[1].pnPercentDisplay, '0,00%');
 assert.equal(shareholding.rows[4].totalPercentDisplay, '5,32%');
 
 const shareholdingFallback = _test.buildStockShareholdingPayload({ ticker: 'PETR4' });
-assert.equal(shareholdingFallback.status, 'OK');
-assert.equal(shareholdingFallback.rows.length, 6);
-assert.equal(shareholdingFallback.rows[0].shareholder, 'OUTROS');
+assert.equal(shareholdingFallback.status, 'EMPTY');
+assert.equal(shareholdingFallback.rows.length, 0);
 
 
 const wrongTickerHtml = `<html><body><h1>PETR4 Petrobras</h1><div>PETR4 Cotação R$ 37,92 -0,26%</div></body></html>`;
@@ -366,10 +365,8 @@ const wrongQuick = _test.extractInvestidor10StockQuickMetrics(wrongTickerHtml, '
 assert.equal(wrongQuick.priceDisplay || '', '');
 
 const peerFallback = _test.extractInvestidor10StockPeerComparison('', 'BBAS3', { pl: 8.2, plDisplay: '8,20', pvp: 0.9, pvpDisplay: '0,90', dy: 7.1, dyDisplay: '7,10%' }, fundamentals);
-assert.equal(peerFallback.status, 'OK');
-assert.equal(peerFallback.rows.some(row => row.ticker === 'BBAS3' && row.isReference), true);
-assert.equal(peerFallback.rows.some(row => row.ticker === 'ITUB4'), true);
-assert.equal(peerFallback.rows.every(row => ['BBAS3', 'BBDC3', 'BBDC4', 'BPAC11', 'ITUB4', 'SANB11'].includes(row.ticker)), true);
+assert.equal(peerFallback.status, 'EMPTY');
+assert.equal(peerFallback.rows.length, 0);
 
 const revenueApiPayload = _test.buildStockRevenueBreakdownPayload({
   ticker: 'TEST3',

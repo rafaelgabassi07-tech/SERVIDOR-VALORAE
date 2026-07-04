@@ -1,13 +1,13 @@
-# Valorae Proxy — v236
+# Valorae Proxy — v209
 
 Core version: 21.12.0  
-Public version: 21.12.266  
-Patch: `21.12.266-deep-cleanup-unused-residue-v236`  
-Checkpoint: `deep-cleanup-unused-residue-v236`
+Public version: 21.12.265  
+Patch: `21.12.265-analysis-search-audit-v235`  
+Checkpoint: `fii-dividend-charts-fix-v209`
 
 ## Destaque
 
-Limpeza profunda de resquícios técnicos abandonados após a migração para modal único com contratos separados de FII e ação. A entrega remove o fluxo antigo de modal via `/api/v1/analysis`, a resposta `modal-reset` e a injeção `assetAnalysisPage` no motor legado, preservando `/api/v1/asset/fii-modal`, `/api/v1/asset/stock-modal` e a busca inteligente da página Análise.
+Evolui o contrato do modal único de FIIs para `26.asset-modal.fii.v16`, adicionando o objeto `vacancyHistory` com histórico da taxa de vacância, filtros por período e dados de vacância/ocupação para renderização mobile no APK v327.
 
 ### Checkpoint 2026-07-03 — v332/v213
 

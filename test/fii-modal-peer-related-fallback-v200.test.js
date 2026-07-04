@@ -15,24 +15,10 @@ const staticInvestidor10Html = `
 `;
 
 const direct = _test.extractInvestidor10FiiPeerComparison(staticInvestidor10Html, 'GGRC11');
-assert.equal(direct.status, 'EMPTY', 'HTML estático atual traz o cabeçalho do comparador, mas não traz as linhas renderizadas');
+assert.equal(direct.status, 'EMPTY', 'Quando a tabela renderizada do comparador não vem na fonte capturada, o contrato não reconstrói por FIIs relacionados.');
 assert.equal(direct.diagnostics.mode, 'rendered_table');
 assert.equal(direct.diagnostics.parsedRows, 0);
+assert.equal(_test.extractInvestidor10FiiRelatedPeers, undefined);
+assert.equal(_test.buildReferenceFiiPeerRow, undefined);
 
-const related = _test.extractInvestidor10FiiRelatedPeers(staticInvestidor10Html, 'GGRC11');
-assert.deepEqual(related.map(row => row.ticker), ['FIIB11', 'HGLG11', 'LVBI11', 'BTLG11']);
-assert.equal(related[0].dividendYieldDisplay, '8,75%');
-assert.equal(related[0].pvpDisplay, '0,74');
-
-const reference = _test.buildReferenceFiiPeerRow('GGRC11', { dy12m: 12.33, dy12mDisplay: '12,33%', pvp: 0.88, pvpDisplay: '0,88' }, [
-  { id: 'valor_patrimonial', value: 'R$ 2,36 Bilhões' },
-  { id: 'tipo_fundo', value: 'Fundo de Tijolo' },
-  { id: 'segmento', value: 'Logístico / Indústria / Galpões' }
-]);
-assert.equal(reference.ticker, 'GGRC11');
-assert.equal(reference.isReference, true);
-assert.equal(reference.patrimonialValue, 2360000000);
-assert.equal(reference.fundType, 'FUNDO DE TIJOLO');
-assert.match(reference.segment, /Logístico/);
-
-console.log('fii-modal-peer-related-fallback-v200 ok');
+console.log('fii-modal-peer-related-fallback-v200 no-static-substitution ok');
