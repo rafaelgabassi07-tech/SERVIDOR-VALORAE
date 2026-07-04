@@ -1,31 +1,31 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.258-stock-modal-action-audit-fixes-v228",
-  "patch": "21.12.258-stock-modal-action-audit-fixes-v228",
-  "releasePatch": "21.12.258-stock-modal-action-audit-fixes-v228",
-  "latestInternalPatch": "21.12.258-stock-modal-action-audit-fixes-v228",
-  "description": "Proxy v228 corrige o modal único de ações para restaurar cards rápidos, histórico de indicadores, payout, comparadores, Brent, logo, receitas/negócios e gráficos financeiros.",
+  "release": "21.12.261-asset-modal-accordions-v231",
+  "patch": "21.12.261-asset-modal-accordions-v231",
+  "releasePatch": "21.12.261-asset-modal-accordions-v231",
+  "latestInternalPatch": "21.12.261-asset-modal-accordions-v231",
+  "description": "Proxy v231 acompanha o APK v350 com acordeões nos modais de ativos; contratos de dados permanecem compatíveis com o v230.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Contrato /api/v1/asset/stock-modal evoluído para 26.asset-modal.stock.v14.",
-    "Correção dos cards rápidos Variação 12M, P/L, P/VP e DY com fallback dos indicadores fundamentalistas.",
-    "Correções nos blocos histórico de indicadores, payout, comparadores, Brent, logo, receitas/negócios e gráficos financeiros."
+    "Entrega pareada ao APK v350 para manter APK e Proxy sincronizados.",
+    "Contrato /api/v1/asset/stock-modal permanece compatível com 26.asset-modal.stock.v15.",
+    "Sem mudança de scraping/fonte; rodada focada em UI e organização visual do APK."
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-04",
-  "checkpoint": "stock-modal-action-audit-fixes-v228",
-  "title": "Proxy v228 — Modal único de ações: auditoria e correções de funcionamento",
-  "summary": "Auditoria do modal único de ações com correções de contrato e fallbacks controlados para PETR4/Investidor10 nos blocos reportados.",
-  "publicVersion": "21.12.258",
-  "label": "stock-modal-action-audit-fixes-v228",
+  "checkpoint": "asset-modal-accordions-v231",
+  "title": "Proxy v231 — Entrega pareada: acordeões nos modais de ativos",
+  "summary": "Entrega pareada ao APK v350 para organizar seções extensas dos modais de FIIs e ações com acordeões, sem alteração de contrato de dados.",
+  "publicVersion": "21.12.261",
+  "label": "asset-modal-accordions-v231",
   "updatedAt": "2026-07-04T00:00:00.000Z",
   "date": "2026-07-04",
   "notes": [
-    "O contrato continua Investidor10-first e usa fallbacks controlados quando o HTML público não expõe dados estruturados suficientes.",
-    "IFIX, IDIV e SMLL continuam configurados por Yahoo Finance direto com IFIX.SA, IDIV.SA e SMLL.SA.",
-    "A UI do APK remove o card Referência de cotação e oculta os chips do checklist de ação."
+    "Os dados e rotas permanecem os mesmos da entrega v230/v229.",
+    "A organização em acordeões é aplicada no APK v350 sobre o componente compartilhado dos modais.",
+    "Mantido versionamento pareado conforme regra de entrega APK + Proxy."
   ]
 }

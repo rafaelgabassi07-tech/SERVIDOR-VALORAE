@@ -1,3 +1,21 @@
+## 2026-07-04 — Proxy v231 / patch 21.12.261-asset-modal-accordions-v231
+- Entrega pareada ao APK v350 para organização visual dos modais de FIIs e ações com acordeões.
+- Contratos e scraping permanecem compatíveis com o Proxy v230/v229; sem mudança em fontes de dados.
+- Mantém versionamento pareado APK + Proxy para upload no AI Studio.
+
+
+## 2026-07-04 — Proxy v230 / patch 21.12.260-asset-modal-design-unified-v230
+- Entrega pareada ao APK v349 para padronização visual dos modais de ativos.
+- Contratos e fontes de dados permanecem compatíveis com o Proxy v229.
+- Sem alteração de scraping; rodada focada em manter versionamento conjunto APK + Proxy.
+
+
+## 2026-07-04 — Proxy v229 / patch 21.12.259-stock-modal-indices-pies-radar-scroll-v229
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v15`.
+- Revisada a comparação de ações com índices: IFIX.SA, SMLL.SA e IDIV.SA continuam via Yahoo direto e agora recebem série de segurança apenas quando a série real vier vazia.
+- Removido o bloco visual de comparação com Brent do modal único de ação.
+- Radar de Dividendos Inteligente passa a expor diagnóstico de origem a partir de `dividendHistory.events` do Investidor10.
+
 ## 2026-07-04 — Proxy v228 / patch 21.12.258-stock-modal-action-audit-fixes-v228
 - Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v14`.
 - Corrigidos cards rápidos de ações com fallback dos indicadores fundamentalistas quando o bloco superior do Investidor10 não vier no HTML estático.
