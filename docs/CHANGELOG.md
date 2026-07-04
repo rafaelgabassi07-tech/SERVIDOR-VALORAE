@@ -1,3 +1,11 @@
+## 2026-07-04 — Proxy v232 / patch 21.12.262-stock-modal-action-fixes-v232
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v16`.
+- Corrigidos logotipo e bloco **Sobre a empresa** para não manter PETR4/Petrobras fixos em ativos diferentes.
+- Reforçada a variação 12M com extração do Investidor10 e fallback por retorno anual quando disponível.
+- Radar de Dividendos Inteligente, Payout, Comparador de ações e comparação com índices foram revisados no contrato do modal.
+- Hidratadas APIs internas do Investidor10 para regiões/negócios de receita, posição acionária, receitas e lucros, lucro x cotação, histórico de indicadores, resultados e evolução patrimonial.
+- Mantido Yahoo direto para IFIX.SA, IDIV.SA e SMLL.SA.
+
 ## 2026-07-04 — Proxy v231 / patch 21.12.261-asset-modal-accordions-v231
 - Entrega pareada ao APK v350 para organização visual dos modais de FIIs e ações com acordeões.
 - Contratos e scraping permanecem compatíveis com o Proxy v230/v229; sem mudança em fontes de dados.
