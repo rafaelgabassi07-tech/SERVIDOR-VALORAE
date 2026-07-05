@@ -1,42 +1,44 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.273-stock-payout-chart-investidor10-v244",
-  "patch": "21.12.273-stock-payout-chart-investidor10-v244",
-  "releasePatch": "21.12.273-stock-payout-chart-investidor10-v244",
-  "latestInternalPatch": "21.12.273-stock-payout-chart-investidor10-v244",
-  "description": "Proxy v244 corrige o gráfico de Payout de ações: captura o payload real do Investidor10 para Lucro Líquido, Payout e Dividend Yield, preservando 5A/10A/MAX e mantendo EMPTY quando a fonte não entregar dados reais.",
+  "release": "21.12.274-stock-modal-i10-integrity-v245",
+  "patch": "21.12.274-stock-modal-i10-integrity-v245",
+  "releasePatch": "21.12.274-stock-modal-i10-integrity-v245",
+  "latestInternalPatch": "21.12.274-stock-modal-i10-integrity-v245",
+  "description": "Proxy v245 audita e corrige, em conjunto, Payout, Histórico de Indicadores Fundamentalistas e Checklist Buy and Hold do modal de ação usando somente dados reais do Investidor10.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Gráfico de Payout de ações agora prioriza o payload dedicado do Investidor10 quando disponível.",
-    "Parser aceita formatos series/categories, datasets, rows/linhas, arrays e objetos por período para Lucro Líquido, Payout e Dividend Yield.",
-    "Normalização corrige Lucro Líquido em formato brasileiro bruto, como 36.700.000.000, sem transformar em zero ou decimal errado.",
-    "Contrato /api/v1/asset/stock-modal evolui para 26.asset-modal.stock.v25 sem alterar a rota do modal.",
+    "Contrato /api/v1/asset/stock-modal evolui para 26.asset-modal.stock.v26.",
+    "Payout de ações: normalização de unidades explícitas do Investidor10, como Bilhões/B/BI, sem distorcer Lucro Líquido.",
+    "Payout Últ 12M não reaproveita lucro anual como fallback; só exibe Lucro Líquido real quando a fonte entregar.",
+    "Histórico de indicadores: merge real entre HTML, canonical charts e API /api/balancos/indicadores/chart, preservando 5A/10A.",
+    "Histórico de indicadores: percentuais numéricos de ROE, Payout, Margens, DY, ROIC, ROA e CAGR recebem % corretamente.",
+    "Checklist: janela HTML delimitada por item para capturar ícones/classes reais sem cortar no item de dividendos.",
     "Permanece proibido fallback estático/de exemplo para PETR4, GGRC11 ou qualquer ativo em modal e Análise."
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-04",
-  "checkpoint": "stock-payout-chart-investidor10-v244",
-  "title": "Proxy v244 — Gráfico de Payout de ações via Investidor10",
-  "summary": "Corrige o gráfico Payout do modal único de ação para priorizar a fonte dedicada do Investidor10, sem simular valores nem reutilizar dados de PETR4/GGRC11.",
-  "publicVersion": "21.12.273",
-  "label": "stock-payout-chart-investidor10-v244",
+  "checkpoint": "stock-modal-i10-integrity-v245",
+  "title": "Proxy v245 — Auditoria Investidor10 do modal de ação",
+  "summary": "Payout, Histórico de Indicadores e Checklist de ações foram reforçados contra estruturas reais do Investidor10, sem fallback PETR4/GGRC11, sem mock e sem valores fabricados.",
+  "publicVersion": "21.12.274",
+  "label": "stock-modal-i10-integrity-v245",
   "updatedAt": "2026-07-04T00:00:00.000Z",
   "date": "2026-07-04",
   "notes": [
     "Sem alteração de rota: /api/v1/asset/stock-modal continua sendo o endpoint do modal único de ação.",
-    "Contrato de ação atualizado para 26.asset-modal.stock.v25.",
-    "A tabela de histórico de indicadores continua real; o gráfico Payout agora usa o payload específico do Investidor10 quando ele existir.",
-    "Se a fonte não entregar Lucro Líquido/Payout/DY, o bloco não fabrica pontos."
+    "Contrato de ação atualizado para 26.asset-modal.stock.v26.",
+    "Se o Investidor10 não entregar o bloco real, os campos ficam EMPTY/UNKNOWN/indisponíveis; nenhum dado é inventado."
   ],
   "releaseNotes": [
     "Sem fallback estático para modal de ação/FII ou Análise.",
-    "Sem valores simulados no gráfico de Payout.",
-    "Lucro Líquido, Payout e Dividend Yield são normalizados separadamente por período.",
-    "Testes cobrem série 5A, Últ 12M, rows-like e lucro líquido bruto com separador brasileiro."
+    "Sem valores simulados no Payout, Histórico de Indicadores ou Checklist.",
+    "Regressão nova cobre Payout com unidade Bilhões, Últ 12M sem lucro inventado, Histórico 5A/10A com percentuais numéricos e Checklist com ícone em sibling HTML.",
+    "Testes completos do Proxy: 113 arquivos, 0 falhas."
   ],
-  "apkPair": "apk_valorae_stock_payout_chart_investidor10_v363_AI_STUDIO_ROOT_OK_2026_07_04.zip",
-  "apkVersion": "2026.07.04.16"
+  "apkPair": "apk_valorae_stock_modal_i10_integrity_v364_AI_STUDIO_ROOT_OK_2026_07_04.zip",
+  "apkVersion": "2026.07.04.17",
+  "fileSize": 1140020
 }

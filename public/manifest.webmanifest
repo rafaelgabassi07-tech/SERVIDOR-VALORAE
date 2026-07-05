@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Contrato curado para APK: gráfico de Payout de ações via Investidor10, sem fallback simulado, pareado ao APK v363.",
+  "description": "Contrato curado para APK: integridade do modal de ações via Investidor10 (Payout, Histórico e Checklist), sem fallback simulado, pareado ao APK v364.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.273"
+  "version": "21.12.274"
 }

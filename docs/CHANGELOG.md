@@ -1,3 +1,13 @@
+## 2026-07-04 — Proxy v245 / patch 21.12.274-stock-modal-i10-integrity-v245
+
+Auditoria reforçada do modal único de ação para Payout, Histórico de Indicadores Fundamentalistas e Checklist Buy and Hold via Investidor10.
+
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v26`.
+- Payout passa a respeitar unidade real do Investidor10 em séries dedicadas, diferencia Últ 12M de anos fechados e não converte ausência de lucro em zero.
+- Histórico de Indicadores Fundamentalistas combina HTML, canônico e payloads de API do Investidor10, preservando 5A/10A, ordenação de períodos e percentuais reais.
+- Checklist passa a capturar o status item a item sem vazar ícones/classes de linhas vizinhas e sem encerrar a seção antes dos 10 critérios.
+- Sem PETR4 fixo, sem GGRC11, sem mock e sem fabricação de dados; ausência real fica `EMPTY`/`UNKNOWN`.
+
 ## 2026-07-04 — Proxy v243 / patch 21.12.272-stock-historical-indicators-investidor10-v243
 
 - Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v24`.

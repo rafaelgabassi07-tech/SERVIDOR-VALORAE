@@ -1,3 +1,14 @@
+# Valorae Proxy — v245
+
+Core version: 21.12.0  
+Public version: 21.12.274  
+Patch: `21.12.274-stock-modal-i10-integrity-v245`  
+Checkpoint: `stock-modal-i10-integrity-v245`
+
+## Destaque
+
+Auditoria reforçada do modal único de ação: Payout, Histórico de Indicadores Fundamentalistas e Checklist Buy and Hold passam por leitura mais resiliente do Investidor10, sem fallback PETR4/GGRC11, sem mock e sem dado fabricado.
+
 # Valorae Proxy — v209
 
 Core version: 21.12.0  
@@ -33,3 +44,10 @@ Correção do gráfico **Comparação com índices** no modal único de FIIs: IF
 - Corrige o gráfico Payout do modal único de ação usando o payload real do Investidor10 para Lucro Líquido, Payout e Dividend Yield.
 - Sem fallback estático ou dados simulados.
 
+## Checkpoint v245 — Auditoria Investidor10 do modal de ação
+
+- Proxy `21.12.274-stock-modal-i10-integrity-v245`.
+- Contrato de ação `26.asset-modal.stock.v26`.
+- Corrige Payout, Histórico de Indicadores Fundamentalistas e Checklist Buy and Hold com dados reais do Investidor10.
+- Remove reaproveitamento de lucro anual como Últ 12M no Payout; se a fonte não entregar, fica indisponível.
+- Mantém política sem PETR4/GGRC11 fixo, sem mock e sem fallback simulado.
