@@ -53,10 +53,10 @@ for (const fixture of [
 
 const client = readOptionalApkFile('../apk/app/src/main/java/com/example/data/proxy/ValoraeProxyClient.kt');
 const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
-assertOptionalMatch(client, /readySectionIds/);
-assertOptionalMatch(client, /sanitizedSignals/);
-assertOptionalMatch(client, /items\.size \+ charts\.size/);
-assertOptionalMatch(client, /"26\.analysis\.v2"/);
+assertOptionalDoesNotMatch(client, /suspend fun getAnalysisPage/);
+assertOptionalDoesNotMatch(client, /analysisPageCache/);
+assertOptionalMatch(client, /getStockModalContract/);
+assertOptionalMatch(client, /getFiiModalContract/);
 assertOptionalDoesNotMatch(screen, /quoteOverview|assetSummary solto|appPayload\.assetAnalysisPage|appMobileSnapshot\.assetAnalysisPage/);
 
 console.log('Checkpoint 27 analysis contract audit test OK.');

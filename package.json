@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.267: remove fallbacks estáticos e dados de exemplo dos modais de ativos e da superfície de Análise, pareado ao APK v357.",
+  "description": "Valorae Proxy 21.12.270: auditoria Investidor10 do modal de ação, reforçando gráficos fundamentalistas, comparador, regiões, negócios e posição acionária sem fallbacks estáticos, pareado ao APK v360.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.267-no-static-fallbacks-v238",
+    "releasePatch": "21.12.270-stock-modal-investidor10-audit-v241",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.267",
-    "checkpoint": "no-static-fallbacks-v238",
-    "releaseLabel": "no-static-fallbacks-v238"
+    "publicVersion": "21.12.270",
+    "checkpoint": "stock-modal-investidor10-audit-v241",
+    "releaseLabel": "stock-modal-investidor10-audit-v241"
   },
-  "releasePatch": "21.12.267-no-static-fallbacks-v238"
+  "releasePatch": "21.12.270-stock-modal-investidor10-audit-v241"
 }

@@ -19,10 +19,11 @@ assert.match(analysisBuilder, /P\/Receita \(PSR\)/);
 assert.match(analysisBuilder, /CAGR Receitas 5 anos/);
 assert.doesNotMatch(analysisBuilder, /synthetic fallback|fake chart|mock chart/i);
 
-assertOptionalMatch(client, /suspend fun getAnalysisPage/);
-assertOptionalMatch(client, /"\/api\/v1\/analysis"/);
-assertOptionalMatch(client, /toAnalysisPageResponse/);
-assertOptionalMatch(models, /data class ValoraeAnalysisPageResponse/);
+assertOptionalDoesNotMatch(client, /suspend fun getAnalysisPage/);
+assertOptionalDoesNotMatch(client, /analysisPageCache/);
+assertOptionalMatch(client, /getStockModalContract/);
+assertOptionalMatch(client, /getFiiModalContract/);
+assertOptionalDoesNotMatch(models, /assetAnalysisPage/);
 
 assertOptionalMatch(analysisScreen, /fun AnalysisScreen/);
 assertOptionalDoesNotMatch(analysisScreen, /getAnalysisPage/);

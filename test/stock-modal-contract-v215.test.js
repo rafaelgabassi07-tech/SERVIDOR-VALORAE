@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/stock-modal-contract.js';
 
-assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v19');
+assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v22');
 
 const html = `
 <html><body>
@@ -260,6 +260,26 @@ assert.equal(stockPeers.rows[0].isReference, true);
 assert.equal(stockPeers.columns.length, 6);
 assert.equal(stockPeers.rows[2].dividendYieldDisplay, '5,23%');
 
+const noisyPeerHtml = `
+<html><body>
+  <nav>Ferramentas Comparador de Ações Comparador de FIIs Notícias Ranking</nav>
+  <h2>INDICADORES FUNDAMENTALISTAS VALE3</h2>
+  <div>P/L 7,22 P/VP 1,30</div>
+  <h2>COMPARADOR DE AÇÕES</h2>
+  <div>ARRASTE O QUADRO PARA VER MAIS DADOS P/L P/VP ROE DY Valor de Mercado Margem Líquida</div>
+  <div>VALE3 7,22 1,30 18,90% 7,00% R$ 392,00 B 21,00%</div>
+  <div>GGBR4 8,10 0,80 12,00% 6,00% R$ 15,00 B 9,00%</div>
+  <div>CSNA3 5,70 0,62 10,50% 3,10% R$ 8,50 B 6,20%</div>
+  <h2>COMPARAÇÃO DE VALE3 COM ÍNDICES</h2>
+</body></html>`;
+const noisyPeers = _test.extractInvestidor10StockPeerComparison(noisyPeerHtml, 'VALE3', {}, fundamentals);
+assert.equal(noisyPeers.status, 'OK');
+assert.equal(noisyPeers.rows.length, 3);
+assert.equal(noisyPeers.rows[0].ticker, 'VALE3');
+assert.equal(noisyPeers.rows[0].isReference, true);
+assert.equal(noisyPeers.rows[1].ticker, 'GGBR4');
+assert.equal(noisyPeers.diagnostics.policy, 'no_static_substitution');
+
 
 
 const rows = _test.returnsRowsFromInvestidor10Profitability({
@@ -377,8 +397,72 @@ assert.equal(revenueApiPayload.status, 'OK');
 assert.equal(revenueApiPayload.items[0].label, 'Brasil');
 assert.equal(revenueApiPayload.totalAmountDisplay, 'R$ 10,00 Bilhões');
 
+const valeRevenueHtml = `
+<html><body>
+  <h2>REGIÕES ONDE VALE GERA RECEITA</h2>
+  <div>2025 Brasil R$ 20,00 Bilhões 55% China R$ 10,00 Bilhões 28% Europa R$ 3,50 Bilhões 10% Total (trimestral) R$ 36,00 Bilhões</div>
+  <h2>NEGÓCIOS QUE GERAM RECEITA PARA VALE</h2>
+  <div>2025 Minério de ferro R$ 25,00 Bilhões 70% Níquel R$ 5,00 Bilhões 14% Cobre R$ 4,00 Bilhões 11% Total (trimestral) R$ 36,00 Bilhões</div>
+</body></html>`;
+const valeRegionBreakdown = _test.buildStockRevenueBreakdownPayload({ html: valeRevenueHtml, ticker: 'VALE3', name: 'Vale' }, 'region');
+assert.equal(valeRegionBreakdown.status, 'OK');
+assert.equal(valeRegionBreakdown.items[0].label, 'Brasil');
+assert.equal(valeRegionBreakdown.items[0].percent, 55);
+const valeBusinessBreakdown = _test.buildStockRevenueBreakdownPayload({ html: valeRevenueHtml, ticker: 'VALE3', name: 'Vale' }, 'business');
+assert.equal(valeBusinessBreakdown.status, 'OK');
+assert.equal(valeBusinessBreakdown.items[0].label, 'Minério de ferro');
+assert.equal(valeBusinessBreakdown.items[0].percent, 70);
+
+
+const embeddedRevenuePayload = _test.buildStockRevenueBreakdownPayload({
+  ticker: 'TEST3',
+  name: 'Teste',
+  canonical: { embedded: { revenueGeography: { labels: ['Brasil', 'China'], series: [71, 11], totalAmountDisplay: 'R$ 20,00 Bilhões' } } }
+}, 'region');
+assert.equal(embeddedRevenuePayload.status, 'OK');
+assert.equal(embeddedRevenuePayload.items[0].label, 'Brasil');
+assert.equal(embeddedRevenuePayload.items[0].percent, 71);
+assert.equal(embeddedRevenuePayload.totalAmountDisplay, 'R$ 20,00 Bilhões');
+
+const embeddedBusinessPayload = _test.buildStockRevenueBreakdownPayload({
+  ticker: 'TEST3',
+  name: 'Teste',
+  canonical: { embedded: { revenueSegment: { xAxis: { categories: ['Minério', 'Níquel'] }, series: [{ data: [70, 14] }] } } }
+}, 'business');
+assert.equal(embeddedBusinessPayload.status, 'OK');
+assert.equal(embeddedBusinessPayload.items[0].label, 'Minério');
+assert.equal(embeddedBusinessPayload.items[0].percent, 70);
+
 const shareholdingHtmlApi = `<section><h2>Posição acionária da TEST3</h2><table><tr><th>Acionista</th><th>% ON</th><th>% PN</th><th>% Total</th></tr><tr><td>OUTROS</td><td>40.77</td><td>67.21</td><td>52.03</td></tr><tr><td>UNIÃO FEDERAL</td><td>50.26</td><td>0.00</td><td>29.02</td></tr></table></section>`;
 const shareholdingApi = _test.buildStockShareholdingPayload({ html: shareholdingHtmlApi, ticker: 'TEST3' });
 assert.equal(shareholdingApi.status, 'OK');
 assert.equal(shareholdingApi.rows.length, 2);
 assert.equal(shareholdingApi.rows[1].shareholder, 'UNIÃO FEDERAL');
+
+const valeHistorical = _test.buildStockHistoricalIndicators({
+  '5y': {
+    columns: ['Atual', '2025', '2024'],
+    rows: [
+      { label: 'P/L', values: { Atual: '7,22', '2025': '8,10', '2024': '6,90' } },
+      { label: 'P/VP', values: { Atual: '1,30', '2025': '1,42', '2024': '1,20' } },
+      { label: 'Dividend Yield', values: { Atual: '7,00%', '2025': '6,20%', '2024': '8,10%' } }
+    ]
+  }
+}, 'VALE3');
+assert.equal(valeHistorical.status, 'OK');
+assert.equal(valeHistorical.rows[0].label, 'P/L');
+assert.equal(valeHistorical.rows[2].values['2024'], '8,10%');
+
+const valeShareholdingHtml = `
+<html><body>
+  <h2>POSIÇÃO ACIONÁRIA DA VALE3</h2>
+  <div>Acionista % ON % PN % Total</div>
+  <div>OUTROS 61.10 0.00 61.10</div>
+  <div>BLACKROCK INC 6.22 0.00 6.22</div>
+  <h2>Receitas e Lucros</h2>
+</body></html>`;
+const valeShareholding = _test.buildStockShareholdingPayload({ html: valeShareholdingHtml, ticker: 'VALE3' });
+assert.equal(valeShareholding.status, 'OK');
+assert.equal(valeShareholding.rows.length, 2);
+assert.equal(valeShareholding.rows[1].shareholder, 'BLACKROCK INC');
+assert.equal(valeShareholding.rows[1].onPercentDisplay, '6,22%');

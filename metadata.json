@@ -1,40 +1,41 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.267-no-static-fallbacks-v238",
-  "patch": "21.12.267-no-static-fallbacks-v238",
-  "releasePatch": "21.12.267-no-static-fallbacks-v238",
-  "latestInternalPatch": "21.12.267-no-static-fallbacks-v238",
-  "description": "Proxy v238 remove fallbacks estáticos/dados de exemplo dos modais de ativos e da página Análise: PETR4/GGRC11 não são mais usados como substituição; bloco sem fonte fresca retorna EMPTY/ERROR.",
+  "release": "21.12.270-stock-modal-investidor10-audit-v241",
+  "patch": "21.12.270-stock-modal-investidor10-audit-v241",
+  "releasePatch": "21.12.270-stock-modal-investidor10-audit-v241",
+  "latestInternalPatch": "21.12.270-stock-modal-investidor10-audit-v241",
+  "description": "Proxy v241 aprofunda a auditoria do modal de ação, reforçando a extração real do Investidor10 para gráficos fundamentalistas, histórico de indicadores, comparador de ações, regiões, negócios e posição acionária, sem fallbacks estáticos.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Entrega pareada ao APK v357 baseada no v356/v237 estável.",
-    "Política sem substituição estática nos contratos de ação e FII: sem PETR4, GGRC11, catálogo local ou tabela parcial inventada para preencher blocos ausentes.",
-    "Logotipo de ação/FII só é aceito quando a URL remota contém identidade compatível com o ticker; caso contrário o contrato deixa o campo vazio.",
-    "Comparadores, histórico de indicadores, regiões, negócios, posição acionária, receitas/lucros e demais blocos mantêm status EMPTY/ERROR quando a fonte fresca não entregar dados."
+    "Modal de ação passa a ler payloads inline/JSON reais do Investidor10 quando os blocos não aparecem como HTML simples.",
+    "Histórico de indicadores fundamentalistas reconhece estruturas de séries/categorias usadas por gráficos dinâmicos.",
+    "Regiões e negócios que geram receita aceitam formatos labels+series, xAxis.categories+series e coleções estruturadas.",
+    "Posição acionária aceita tabelas HTML e arrays estruturados com percentuais ON/PN/Total sem substituir dados de outro ativo.",
+    "Mantém política sem fallback estático: dados ausentes retornam EMPTY/indisponível, não PETR4/GGRC11 ou mocks."
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-04",
-  "checkpoint": "no-static-fallbacks-v238",
-  "title": "Proxy v238 — Sem fallbacks estáticos nos modais e Análise",
-  "summary": "Remove substituições silenciosas por PETR4/GGRC11/dados de exemplo em modais de ativos e na superfície de Análise. O Proxy passa a preferir vazio explícito a dado falso ou desatualizado.",
-  "publicVersion": "21.12.266",
-  "label": "stock-modal-integrity-hotfix-v237",
+  "checkpoint": "stock-modal-investidor10-audit-v241",
+  "title": "Proxy v241 — Auditoria Investidor10 do modal de ação",
+  "summary": "Fortalece a leitura de dados dinâmicos/embutidos do Investidor10 no modal de ação e mantém política de dados reais: quando a fonte não entrega, o bloco fica EMPTY/indisponível.",
+  "publicVersion": "21.12.270",
+  "label": "stock-modal-investidor10-audit-v241",
   "updatedAt": "2026-07-04T00:00:00.000Z",
   "date": "2026-07-04",
   "notes": [
-    "Mantém /api/v1/asset/stock-modal e /api/v1/asset/fii-modal sem mudança de rota.",
-    "A comparação de ações com índices passa a usar a mesma estrutura por período do modal de FII.",
-    "Fora de PETR4, o Proxy não reaproveita referências fixas de Petrobras para regiões, negócios ou posição acionária."
+    "Sem alteração dos endpoints ativos /api/v1/asset/stock-modal e /api/v1/asset/fii-modal.",
+    "Contrato de ação atualizado para 26.asset-modal.stock.v22.",
+    "Correções focadas no Proxy; APK v360 mantém consumo dedicado e metadados pareados."
   ],
   "releaseNotes": [
-    "Sem alteração de endpoints ativos.",
-    "Contrato de ação atualizado para 26.asset-modal.stock.v19.",
-    "Contrato de FII mantém fonte fresca e remove resquícios de reconstrução por pares relacionados quando a tabela do Investidor10 não vem no HTML capturado.",
-    "Dados ausentes permanecem indisponíveis até a fonte real responder."
+    "Sem fallback estático para modal de ação/FII ou Análise.",
+    "Sem alteração visual no APK.",
+    "Parsers do Investidor10 reforçados para se aproximar do funcionamento já estável no modal de FII.",
+    "Dados incompatíveis ou ausentes ficam indisponíveis até a fonte real responder."
   ],
-  "apkPair": "apk_valorae_no_static_fallbacks_v357_AI_STUDIO_ROOT_OK_2026_07_04.zip",
-  "apkVersion": "2026.07.04.10"
+  "apkPair": "apk_valorae_stock_modal_investidor10_audit_v360_AI_STUDIO_ROOT_OK_2026_07_04.zip",
+  "apkVersion": "2026.07.04.13"
 }

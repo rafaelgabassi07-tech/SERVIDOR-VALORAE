@@ -117,6 +117,8 @@ assertOptionalDoesNotMatch(screen, /getAnalysisPage\(normalizedQuery\)/, 'Análi
 assertOptionalDoesNotMatch(screen, /assetAnalysisPage|appMobileSnapshot\.assetAnalysisPage|appPayload\.assetAnalysisPage|quoteOverview|assetSummary/, 'AnalysisScreen não pode voltar a contratos antigos');
 assertOptionalMatch(screen, /isHorizontalBarAnalysisChart/, 'Análise precisa renderizar barras horizontais nativas quando o dado pede barras');
 assertOptionalDoesNotMatch(screen, /isBarLike|WebView|iframe|<html/i, 'Análise não pode usar renderização antiga, WebView ou HTML');
-assertOptionalMatch(client, /executeJsonGet\(\s*"\/api\/v1\/analysis"/, 'getAnalysisPage precisa chamar somente /api/v1/analysis');
+assertOptionalDoesNotMatch(client, /suspend fun getAnalysisPage/, 'APK não pode manter caminho legado getAnalysisPage para modal antigo');
+assertOptionalMatch(client, /getStockModalContract/, 'APK precisa manter contrato dedicado de ação');
+assertOptionalMatch(client, /getFiiModalContract/, 'APK precisa manter contrato dedicado de FII');
 
 console.log('Analysis final audit v37 test OK.');
