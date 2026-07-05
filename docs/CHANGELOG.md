@@ -1,3 +1,10 @@
+## 2026-07-04 — Proxy v243 / patch 21.12.272-stock-historical-indicators-investidor10-v243
+
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v24`.
+- Corrigido o Histórico de Indicadores Fundamentalistas de ações: a tabela 5A/10A do Investidor10 agora é normalizada quando vier como `columns/data`, `rows/linhas`, `categories/series` ou objeto por indicador.
+- Adicionado parser HTML oficial como segunda leitura quando a página já trouxer a seção renderizada.
+- Sem fallback, sem PETR4 fixo, sem GGRC11 fixo e sem valores fabricados; ausência da fonte real permanece `EMPTY`.
+
 ## 2026-07-04 — Proxy v242 / patch 21.12.271-stock-checklist-investidor10-v242
 
 Correção pontual do checklist Buy and Hold do modal único de ação via Investidor10.

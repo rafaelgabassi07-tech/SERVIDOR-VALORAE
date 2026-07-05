@@ -1,40 +1,42 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.271-stock-checklist-investidor10-v242",
-  "patch": "21.12.271-stock-checklist-investidor10-v242",
-  "releasePatch": "21.12.271-stock-checklist-investidor10-v242",
-  "latestInternalPatch": "21.12.271-stock-checklist-investidor10-v242",
-  "description": "Proxy v242 corrige o parser do checklist Buy and Hold de ações: o delimitador não corta mais a seção no item de dividendos, os 10 critérios públicos do Investidor10 são retornados ao modal e o estado do checkbox só vem da marcação real da fonte.",
+  "release": "21.12.273-stock-payout-chart-investidor10-v244",
+  "patch": "21.12.273-stock-payout-chart-investidor10-v244",
+  "releasePatch": "21.12.273-stock-payout-chart-investidor10-v244",
+  "latestInternalPatch": "21.12.273-stock-payout-chart-investidor10-v244",
+  "description": "Proxy v244 corrige o gráfico de Payout de ações: captura o payload real do Investidor10 para Lucro Líquido, Payout e Dividend Yield, preservando 5A/10A/MAX e mantendo EMPTY quando a fonte não entregar dados reais.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Checklist Buy and Hold de ações agora preserva a seção completa do Investidor10 e não encerra no critério com a palavra dividendos.",
-    "O contrato /api/v1/asset/stock-modal evolui para 26.asset-modal.stock.v23 e retorna até 10 critérios públicos da fonte.",
-    "Estados aprovado/reprovado/desconhecido não são simulados por métricas locais: dependem da marcação visual/HTML real do Investidor10.",
+    "Gráfico de Payout de ações agora prioriza o payload dedicado do Investidor10 quando disponível.",
+    "Parser aceita formatos series/categories, datasets, rows/linhas, arrays e objetos por período para Lucro Líquido, Payout e Dividend Yield.",
+    "Normalização corrige Lucro Líquido em formato brasileiro bruto, como 36.700.000.000, sem transformar em zero ou decimal errado.",
+    "Contrato /api/v1/asset/stock-modal evolui para 26.asset-modal.stock.v25 sem alterar a rota do modal.",
     "Permanece proibido fallback estático/de exemplo para PETR4, GGRC11 ou qualquer ativo em modal e Análise."
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-04",
-  "checkpoint": "stock-checklist-investidor10-v242",
-  "title": "Proxy v242 — Checklist Buy and Hold de ações via Investidor10",
-  "summary": "Corrige o checklist do modal único de ação para retornar todos os critérios exibidos pelo Investidor10, sem simular status nem usar fallback de PETR4/GGRC11.",
-  "publicVersion": "21.12.271",
-  "label": "stock-checklist-investidor10-v242",
+  "checkpoint": "stock-payout-chart-investidor10-v244",
+  "title": "Proxy v244 — Gráfico de Payout de ações via Investidor10",
+  "summary": "Corrige o gráfico Payout do modal único de ação para priorizar a fonte dedicada do Investidor10, sem simular valores nem reutilizar dados de PETR4/GGRC11.",
+  "publicVersion": "21.12.273",
+  "label": "stock-payout-chart-investidor10-v244",
   "updatedAt": "2026-07-04T00:00:00.000Z",
   "date": "2026-07-04",
   "notes": [
     "Sem alteração de rota: /api/v1/asset/stock-modal continua sendo o endpoint do modal único de ação.",
-    "Contrato de ação atualizado para 26.asset-modal.stock.v23.",
-    "Correção focada no Proxy; APK v361 mantém consumo dedicado e registra pareamento/changelog."
+    "Contrato de ação atualizado para 26.asset-modal.stock.v25.",
+    "A tabela de histórico de indicadores continua real; o gráfico Payout agora usa o payload específico do Investidor10 quando ele existir.",
+    "Se a fonte não entregar Lucro Líquido/Payout/DY, o bloco não fabrica pontos."
   ],
   "releaseNotes": [
     "Sem fallback estático para modal de ação/FII ou Análise.",
-    "Sem alteração visual no APK.",
-    "Checklist de ações agora segue o mesmo princípio do FII: seção pública do Investidor10 completa quando a fonte entrega.",
-    "Dados incompatíveis ou ausentes ficam indisponíveis/desconhecidos até a fonte real responder."
+    "Sem valores simulados no gráfico de Payout.",
+    "Lucro Líquido, Payout e Dividend Yield são normalizados separadamente por período.",
+    "Testes cobrem série 5A, Últ 12M, rows-like e lucro líquido bruto com separador brasileiro."
   ],
-  "apkPair": "apk_valorae_stock_checklist_investidor10_v361_AI_STUDIO_ROOT_OK_2026_07_04.zip",
-  "apkVersion": "2026.07.04.14"
+  "apkPair": "apk_valorae_stock_payout_chart_investidor10_v363_AI_STUDIO_ROOT_OK_2026_07_04.zip",
+  "apkVersion": "2026.07.04.16"
 }

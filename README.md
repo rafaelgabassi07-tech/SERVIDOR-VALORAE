@@ -1,8 +1,8 @@
 # Valorae Proxy — v209
 
 Core version: 21.12.0  
-Public version: 21.12.271  
-Patch: `21.12.271-stock-checklist-investidor10-v242`  
+Public version: 21.12.272  
+Patch: `21.12.272-stock-historical-indicators-investidor10-v243`  
 Checkpoint: `fii-dividend-charts-fix-v209`
 
 ## Destaque
@@ -26,4 +26,10 @@ Revisão de paridade do modal único de FII. O Proxy v212 mantém `26.asset-moda
 ### Checkpoint 2026-07-03 — v330/v211
 
 Correção do gráfico **Comparação com índices** no modal único de FIIs: IFIX, SMLL e IDIV passam a reutilizar a mesma camada `getAssetHistory` da página Retorno, mantendo os seletores fixos e a simulação de R$ 1.000,00 por período.
+## Checkpoint v244 — Gráfico de Payout de ações
+
+- Proxy `21.12.273-stock-payout-chart-investidor10-v244`.
+- Contrato de ação `26.asset-modal.stock.v25`.
+- Corrige o gráfico Payout do modal único de ação usando o payload real do Investidor10 para Lucro Líquido, Payout e Dividend Yield.
+- Sem fallback estático ou dados simulados.
 
