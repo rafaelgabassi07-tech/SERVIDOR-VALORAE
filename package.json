@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.270: auditoria Investidor10 do modal de ação, reforçando gráficos fundamentalistas, comparador, regiões, negócios e posição acionária sem fallbacks estáticos, pareado ao APK v360.",
+  "description": "Valorae Proxy 21.12.271: corrige o corte prematuro do checklist Buy and Hold de ações do Investidor10, entregando os 10 critérios reais ao modal sem fallback simulado, pareado ao APK v361.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.270-stock-modal-investidor10-audit-v241",
+    "releasePatch": "21.12.271-stock-checklist-investidor10-v242",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.270",
-    "checkpoint": "stock-modal-investidor10-audit-v241",
-    "releaseLabel": "stock-modal-investidor10-audit-v241"
+    "publicVersion": "21.12.271",
+    "checkpoint": "stock-checklist-investidor10-v242",
+    "releaseLabel": "stock-checklist-investidor10-v242"
   },
-  "releasePatch": "21.12.270-stock-modal-investidor10-audit-v241"
+  "releasePatch": "21.12.271-stock-checklist-investidor10-v242"
 }

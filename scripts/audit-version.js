@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const expectedCore = '21.12.0';
-const expectedPublic = '21.12.270';
-const expectedPatch = '21.12.270-stock-modal-investidor10-audit-v241';
+const expectedPublic = '21.12.271';
+const expectedPatch = '21.12.271-stock-checklist-investidor10-v242';
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
 const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
@@ -15,5 +15,6 @@ assert.equal(pkg.valorae.releasePatch, expectedPatch);
 assert.equal(metadata.version, expectedCore);
 assert.equal(metadata.releasePatch, expectedPatch);
 assert.equal(manifest.version, expectedPublic);
-assert.ok(sw.includes('v21-12-269'));  
+assert.ok(sw.includes('v21-12-271'));
+
 console.log('release audit OK:', expectedCore, expectedPatch);

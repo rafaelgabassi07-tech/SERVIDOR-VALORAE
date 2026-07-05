@@ -1,41 +1,40 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.270-stock-modal-investidor10-audit-v241",
-  "patch": "21.12.270-stock-modal-investidor10-audit-v241",
-  "releasePatch": "21.12.270-stock-modal-investidor10-audit-v241",
-  "latestInternalPatch": "21.12.270-stock-modal-investidor10-audit-v241",
-  "description": "Proxy v241 aprofunda a auditoria do modal de ação, reforçando a extração real do Investidor10 para gráficos fundamentalistas, histórico de indicadores, comparador de ações, regiões, negócios e posição acionária, sem fallbacks estáticos.",
+  "release": "21.12.271-stock-checklist-investidor10-v242",
+  "patch": "21.12.271-stock-checklist-investidor10-v242",
+  "releasePatch": "21.12.271-stock-checklist-investidor10-v242",
+  "latestInternalPatch": "21.12.271-stock-checklist-investidor10-v242",
+  "description": "Proxy v242 corrige o parser do checklist Buy and Hold de ações: o delimitador não corta mais a seção no item de dividendos, os 10 critérios públicos do Investidor10 são retornados ao modal e o estado do checkbox só vem da marcação real da fonte.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Modal de ação passa a ler payloads inline/JSON reais do Investidor10 quando os blocos não aparecem como HTML simples.",
-    "Histórico de indicadores fundamentalistas reconhece estruturas de séries/categorias usadas por gráficos dinâmicos.",
-    "Regiões e negócios que geram receita aceitam formatos labels+series, xAxis.categories+series e coleções estruturadas.",
-    "Posição acionária aceita tabelas HTML e arrays estruturados com percentuais ON/PN/Total sem substituir dados de outro ativo.",
-    "Mantém política sem fallback estático: dados ausentes retornam EMPTY/indisponível, não PETR4/GGRC11 ou mocks."
+    "Checklist Buy and Hold de ações agora preserva a seção completa do Investidor10 e não encerra no critério com a palavra dividendos.",
+    "O contrato /api/v1/asset/stock-modal evolui para 26.asset-modal.stock.v23 e retorna até 10 critérios públicos da fonte.",
+    "Estados aprovado/reprovado/desconhecido não são simulados por métricas locais: dependem da marcação visual/HTML real do Investidor10.",
+    "Permanece proibido fallback estático/de exemplo para PETR4, GGRC11 ou qualquer ativo em modal e Análise."
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-04",
-  "checkpoint": "stock-modal-investidor10-audit-v241",
-  "title": "Proxy v241 — Auditoria Investidor10 do modal de ação",
-  "summary": "Fortalece a leitura de dados dinâmicos/embutidos do Investidor10 no modal de ação e mantém política de dados reais: quando a fonte não entrega, o bloco fica EMPTY/indisponível.",
-  "publicVersion": "21.12.270",
-  "label": "stock-modal-investidor10-audit-v241",
+  "checkpoint": "stock-checklist-investidor10-v242",
+  "title": "Proxy v242 — Checklist Buy and Hold de ações via Investidor10",
+  "summary": "Corrige o checklist do modal único de ação para retornar todos os critérios exibidos pelo Investidor10, sem simular status nem usar fallback de PETR4/GGRC11.",
+  "publicVersion": "21.12.271",
+  "label": "stock-checklist-investidor10-v242",
   "updatedAt": "2026-07-04T00:00:00.000Z",
   "date": "2026-07-04",
   "notes": [
-    "Sem alteração dos endpoints ativos /api/v1/asset/stock-modal e /api/v1/asset/fii-modal.",
-    "Contrato de ação atualizado para 26.asset-modal.stock.v22.",
-    "Correções focadas no Proxy; APK v360 mantém consumo dedicado e metadados pareados."
+    "Sem alteração de rota: /api/v1/asset/stock-modal continua sendo o endpoint do modal único de ação.",
+    "Contrato de ação atualizado para 26.asset-modal.stock.v23.",
+    "Correção focada no Proxy; APK v361 mantém consumo dedicado e registra pareamento/changelog."
   ],
   "releaseNotes": [
     "Sem fallback estático para modal de ação/FII ou Análise.",
     "Sem alteração visual no APK.",
-    "Parsers do Investidor10 reforçados para se aproximar do funcionamento já estável no modal de FII.",
-    "Dados incompatíveis ou ausentes ficam indisponíveis até a fonte real responder."
+    "Checklist de ações agora segue o mesmo princípio do FII: seção pública do Investidor10 completa quando a fonte entrega.",
+    "Dados incompatíveis ou ausentes ficam indisponíveis/desconhecidos até a fonte real responder."
   ],
-  "apkPair": "apk_valorae_stock_modal_investidor10_audit_v360_AI_STUDIO_ROOT_OK_2026_07_04.zip",
-  "apkVersion": "2026.07.04.13"
+  "apkPair": "apk_valorae_stock_checklist_investidor10_v361_AI_STUDIO_ROOT_OK_2026_07_04.zip",
+  "apkVersion": "2026.07.04.14"
 }

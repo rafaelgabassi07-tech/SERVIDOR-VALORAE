@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/stock-modal-contract.js';
 
-assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v22');
+assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v23');
 
 const html = `
 <html><body>
@@ -93,10 +93,11 @@ const checklistHtml = `
 </body></html>`;
 const stockChecklist = _test.extractInvestidor10StockBuyHoldChecklist(checklistHtml, 'PETR4', { fundamentalIndicators: fundamentals, historicalIndicators: historical });
 assert.equal(stockChecklist.status, 'OK');
-assert.equal(stockChecklist.items.length, 3);
+assert.equal(stockChecklist.items.length, 10);
 assert.equal(stockChecklist.items.find(item => item.id === 'never_loss_fiscal').passed, false);
-assert.equal(stockChecklist.items.find(item => item.id === 'roe_above_10'), undefined);
-assert.equal(stockChecklist.passed, 2);
+assert.equal(stockChecklist.items.find(item => item.id === 'dividends_5y_above_5').passed, true);
+assert.equal(stockChecklist.items.find(item => item.id === 'roe_above_10').passed, true);
+assert.equal(stockChecklist.passed, 9);
 assert.equal(stockChecklist.failed, 1);
 assert.match(stockChecklist.disclaimer, /fins informativos/i);
 

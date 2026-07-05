@@ -1,11 +1,17 @@
 # Valorae Proxy — v209
 
 Core version: 21.12.0  
-Public version: 21.12.265  
-Patch: `21.12.265-analysis-search-audit-v235`  
+Public version: 21.12.271  
+Patch: `21.12.271-stock-checklist-investidor10-v242`  
 Checkpoint: `fii-dividend-charts-fix-v209`
 
 ## Destaque
+
+Corrige o checklist Buy and Hold de ações no modal único: o Proxy deixa de cortar a seção no item de dividendos e retorna os 10 critérios públicos do Investidor10 quando a fonte os disponibiliza, mantendo a política sem fallback estático.
+
+### Checkpoint 2026-07-04 — v361/v242
+
+Checklist Buy and Hold de ações via Investidor10 completo no contrato `26.asset-modal.stock.v23`; status dos critérios não é simulado por métricas locais, ficando `UNKNOWN` quando a marcação real não estiver presente.
 
 Evolui o contrato do modal único de FIIs para `26.asset-modal.fii.v16`, adicionando o objeto `vacancyHistory` com histórico da taxa de vacância, filtros por período e dados de vacância/ocupação para renderização mobile no APK v327.
 

@@ -1,3 +1,13 @@
+## 2026-07-04 — Proxy v242 / patch 21.12.271-stock-checklist-investidor10-v242
+
+Correção pontual do checklist Buy and Hold do modal único de ação via Investidor10.
+
+- Contrato `/api/v1/asset/stock-modal` evoluído para `26.asset-modal.stock.v23`.
+- Corrigido o delimitador da seção: a palavra **Dividendos** dentro do critério “Empresa pagou +5% de dividendos/ano nos últimos 5 anos” não encerra mais o bloco.
+- O checklist de ações passa a retornar os 10 critérios públicos exibidos no Investidor10 quando a fonte entrega a seção completa.
+- Removida a derivação/simulação de status por métricas locais: aprovado/reprovado/desconhecido só vem da marcação real do HTML do Investidor10.
+- Mantida a regra: sem fallback estático de PETR4, GGRC11 ou dados de exemplo; ausências ficam `EMPTY`/`UNKNOWN`.
+
 ## 2026-07-04 — Proxy v235 / patch 21.12.265-analysis-search-audit-v235
 
 Auditoria e otimização da página Análise e da busca inteligente pareada ao APK v354.
