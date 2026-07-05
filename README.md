@@ -1,3 +1,18 @@
+# VALORAE Proxy — Checkpoint v247
+
+Core version: 21.12.0  
+Public version: 21.12.276  
+Patch: `21.12.276-stock-shareholding-i10-v247`  
+Data: 2026-07-05
+
+## Alterações
+- Removido do modal de ação o bloco **Histórico de Indicadores Fundamentalistas**, por solicitação do usuário.
+- Corrigida a **Posição Acionária** de ações via Investidor10 com parser para HTML, texto, arrays com cabeçalho e payloads JS/JSON.
+- Adicionadas tentativas best-effort para rotas reais de `posicao-acionaria`, `acionistas`, `shareholders` e `ownership`.
+- Mantida a regra de integridade: sem fallback PETR4/GGRC11, sem mock e sem dado inventado.
+
+---
+
 # Valorae Proxy — v245
 
 Core version: 21.12.0  

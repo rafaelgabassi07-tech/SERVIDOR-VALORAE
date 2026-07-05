@@ -1,43 +1,41 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.275-stock-historical-indicators-i10-v246",
-  "patch": "21.12.275-stock-historical-indicators-i10-v246",
-  "releasePatch": "21.12.275-stock-historical-indicators-i10-v246",
-  "latestInternalPatch": "21.12.275-stock-historical-indicators-i10-v246",
-  "description": "Proxy v246 corrige de forma profunda o Histórico de Indicadores Fundamentalistas do modal de ação usando rotas e estruturas dinâmicas reais do Investidor10, sem fallback simulado.",
+  "release": "21.12.276-stock-shareholding-i10-v247",
+  "patch": "21.12.276-stock-shareholding-i10-v247",
+  "releasePatch": "21.12.276-stock-shareholding-i10-v247",
+  "latestInternalPatch": "21.12.276-stock-shareholding-i10-v247",
+  "description": "Proxy v247 remove o Histórico de Indicadores Fundamentalistas do modal de ação e corrige Posição Acionária via Investidor10 com parser/API robustos, sem fallback simulado.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Contrato /api/v1/asset/stock-modal evolui para 26.asset-modal.stock.v27.",
-    "Histórico de Indicadores Fundamentalistas de ações: Proxy agora resolve companyId/tickerId também por payloads de busca do Investidor10 quando o HTML não expõe o ID.",
-    "Histórico de Indicadores: chamadas adicionais para rotas /api/balancos/indicadores chart/table e /api/acoes/historico-indicadores, preservando múltiplas fontes reais.",
-    "Parser aceita Chart.js aninhado, datasets, labels/categories, objetos por indicador, arrays primitivos por período e linhas transpostas por ano.",
-    "APK reconhece aliases historicoIndicadores/historico_indicadores/fundamentalIndicatorHistory e revalida o seletor 5A/10A quando o payload muda.",
-    "Permanece proibido fallback estático/de exemplo para PETR4, GGRC11 ou qualquer ativo."
+    "Contrato de ação 26.asset-modal.stock.v28",
+    "Histórico de Indicadores Fundamentalistas removido do modal de ação por solicitação do usuário",
+    "Posição Acionária de ações via Investidor10 com suporte a cabeçalho Acionista/%ON/%PN/%Total",
+    "Normalização de HTML, arrays de arrays, objects por aliases e payloads JS/JSON de acionistas",
+    "Rotas best-effort de posicao-acionaria/acionistas/shareholders sem dados simulados"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-05",
-  "checkpoint": "stock-historical-indicators-i10-v246",
-  "title": "Proxy v246 — Histórico de Indicadores Fundamentalistas de ações via Investidor10",
-  "summary": "Resolve falhas do histórico de indicadores de ações ao buscar IDs/rotas do Investidor10, aceitar payloads Chart.js/data/tables e entregar 5A/10A reais ao APK.",
-  "publicVersion": "21.12.275",
-  "label": "stock-historical-indicators-i10-v246",
+  "checkpoint": "stock-shareholding-i10-v247",
+  "title": "Proxy v247 — Posição Acionária de ações via Investidor10",
+  "summary": "Remove o bloco Histórico de Indicadores Fundamentalistas do modal de ação e passa a entregar Posição Acionária a partir de HTML, payloads JS/JSON e rotas reais do Investidor10 quando disponíveis.",
+  "publicVersion": "21.12.276",
+  "label": "stock-shareholding-i10-v247",
   "updatedAt": "2026-07-05T00:00:00.000Z",
   "date": "2026-07-05",
   "notes": [
-    "Sem alteração de rota: /api/v1/asset/stock-modal continua sendo o endpoint do modal único de ação.",
-    "Contrato de ação atualizado para 26.asset-modal.stock.v27.",
-    "Se o Investidor10 não entregar o bloco real, o histórico fica EMPTY; nenhum valor é inventado."
+    "Sem fallback PETR4/GGRC11 e sem mock em produção.",
+    "Se o Investidor10 não entregar Posição Acionária real, o bloco retorna EMPTY.",
+    "O bloco removido permanece marcado como REMOVED no contrato para evitar renderização acidental no APK."
   ],
   "releaseNotes": [
-    "Sem fallback estático para modal de ação/FII ou Análise.",
-    "Sem simulação de P/L, DY, Payout, ROE, margens ou qualquer período.",
-    "Nova regressão cobre payload dinâmico Chart.js, linhas por ano e extração de companyId/tickerId de busca.",
-    "Testes completos do Proxy: 114 arquivos, 0 falhas."
+    "Remove Histórico de Indicadores Fundamentalistas do modal de ação.",
+    "Corrige a Posição Acionária com parser tolerante aos formatos reais do Investidor10.",
+    "Mantém política de dados reais: sem simulação e sem fallback estático."
   ],
-  "apkPair": "apk_valorae_stock_historical_indicators_i10_v365_AI_STUDIO_ROOT_OK_2026_07_05.zip",
-  "apkVersion": "2026.07.05.01",
+  "apkPair": "apk_valorae_stock_shareholding_i10_v366_AI_STUDIO_ROOT_OK_2026_07_05.zip",
+  "apkVersion": "2026.07.05.02",
   "fileSize": 0
 }

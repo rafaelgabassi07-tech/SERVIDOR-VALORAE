@@ -1,3 +1,9 @@
+## v247 — Posição Acionária de ações via Investidor10 — 2026-07-05
+
+- Remove Histórico de Indicadores Fundamentalistas do modal de ação.
+- Corrige Posição Acionária de ações com parsing real de Investidor10 e aliases `% ON`, `% PN`, `% Total`.
+- Sem fallback fixo, sem mock e sem dado fabricado.
+
 ## 2026-07-04 — Proxy v245 / patch 21.12.274-stock-modal-i10-integrity-v245
 
 Auditoria reforçada do modal único de ação para Payout, Histórico de Indicadores Fundamentalistas e Checklist Buy and Hold via Investidor10.

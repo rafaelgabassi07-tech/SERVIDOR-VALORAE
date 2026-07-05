@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.275: histórico de indicadores fundamentalistas de ações via Investidor10, com payloads dinâmicos reais e sem fallback simulado, pareado ao APK v365.",
+  "description": "Valorae Proxy 21.12.276: remove Histórico de Indicadores Fundamentalistas do modal de ação e corrige Posição Acionária via Investidor10, sem fallback simulado, pareado ao APK v366.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.275-stock-historical-indicators-i10-v246",
+    "releasePatch": "21.12.276-stock-shareholding-i10-v247",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.275",
-    "checkpoint": "stock-historical-indicators-i10-v246",
-    "releaseLabel": "stock-historical-indicators-i10-v246"
+    "publicVersion": "21.12.276",
+    "checkpoint": "stock-shareholding-i10-v247",
+    "releaseLabel": "stock-shareholding-i10-v247"
   },
-  "releasePatch": "21.12.275-stock-historical-indicators-i10-v246"
+  "releasePatch": "21.12.276-stock-shareholding-i10-v247"
 }
