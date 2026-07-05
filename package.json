@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.276: remove Histórico de Indicadores Fundamentalistas do modal de ação e corrige Posição Acionária via Investidor10, sem fallback simulado, pareado ao APK v366.",
+  "description": "Valorae Proxy 21.12.285: reativa Histórico de Indicadores Fundamentalistas do modal de ações usando endpoint REST Investidor10 /api/rest/assets/tickers/{TICKER}, sem fallback simulado.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.276-stock-shareholding-i10-v247",
+    "releasePatch": "21.12.285-stock-historical-indicators-rest-i10-v256",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.276",
-    "checkpoint": "stock-shareholding-i10-v247",
-    "releaseLabel": "stock-shareholding-i10-v247"
+    "publicVersion": "21.12.285",
+    "checkpoint": "stock-historical-indicators-rest-i10-v256",
+    "releaseLabel": "stock-historical-indicators-rest-i10-v256"
   },
-  "releasePatch": "21.12.276-stock-shareholding-i10-v247"
+  "releasePatch": "21.12.285-stock-historical-indicators-rest-i10-v256"
 }

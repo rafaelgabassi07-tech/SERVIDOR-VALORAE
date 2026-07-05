@@ -1,41 +1,45 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.276-stock-shareholding-i10-v247",
-  "patch": "21.12.276-stock-shareholding-i10-v247",
-  "releasePatch": "21.12.276-stock-shareholding-i10-v247",
-  "latestInternalPatch": "21.12.276-stock-shareholding-i10-v247",
-  "description": "Proxy v247 remove o Histórico de Indicadores Fundamentalistas do modal de ação e corrige Posição Acionária via Investidor10 com parser/API robustos, sem fallback simulado.",
+  "release": "21.12.285-stock-historical-indicators-rest-i10-v256",
+  "patch": "21.12.285-stock-historical-indicators-rest-i10-v256",
+  "releasePatch": "21.12.285-stock-historical-indicators-rest-i10-v256",
+  "latestInternalPatch": "21.12.285-stock-historical-indicators-rest-i10-v256",
+  "description": "Proxy v256 reativa Histórico de Indicadores Fundamentalistas do modal de ações via endpoint REST /api/rest/assets/tickers/{TICKER} do Investidor10, sem fallback simulado.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "Contrato de ação 26.asset-modal.stock.v28",
-    "Histórico de Indicadores Fundamentalistas removido do modal de ação por solicitação do usuário",
-    "Posição Acionária de ações via Investidor10 com suporte a cabeçalho Acionista/%ON/%PN/%Total",
-    "Normalização de HTML, arrays de arrays, objects por aliases e payloads JS/JSON de acionistas",
-    "Rotas best-effort de posicao-acionaria/acionistas/shareholders sem dados simulados"
+    "26.asset-modal.stock.v37",
+    "GET /api/rest/assets/tickers/{TICKER}",
+    "Histórico de Indicadores Fundamentalistas reativado",
+    "APK pareado v375"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-05",
-  "checkpoint": "stock-shareholding-i10-v247",
-  "title": "Proxy v247 — Posição Acionária de ações via Investidor10",
-  "summary": "Remove o bloco Histórico de Indicadores Fundamentalistas do modal de ação e passa a entregar Posição Acionária a partir de HTML, payloads JS/JSON e rotas reais do Investidor10 quando disponíveis.",
-  "publicVersion": "21.12.276",
-  "label": "stock-shareholding-i10-v247",
+  "checkpoint": "stock-historical-indicators-rest-i10-v256",
+  "title": "Proxy v256 — Histórico de Indicadores via REST Investidor10",
+  "summary": "Adiciona chamada concreta ao endpoint REST de ticker do Investidor10 e normalização recursiva para Histórico de Indicadores Fundamentalistas 5A/10A no modal de ação.",
+  "publicVersion": "21.12.285",
+  "label": "stock-historical-indicators-rest-i10-v256",
   "updatedAt": "2026-07-05T00:00:00.000Z",
   "date": "2026-07-05",
   "notes": [
     "Sem fallback PETR4/GGRC11 e sem mock em produção.",
-    "Se o Investidor10 não entregar Posição Acionária real, o bloco retorna EMPTY.",
-    "O bloco removido permanece marcado como REMOVED no contrato para evitar renderização acidental no APK."
+    "Endpoint REST oficial informado pelo usuário é tentado para cada ticker solicitado.",
+    "Se a resposta real não contiver histórico normalizável, o bloco fica EMPTY."
   ],
   "releaseNotes": [
-    "Remove Histórico de Indicadores Fundamentalistas do modal de ação.",
-    "Corrige a Posição Acionária com parser tolerante aos formatos reais do Investidor10.",
-    "Mantém política de dados reais: sem simulação e sem fallback estático."
+    "Adiciona assetTickerRest ao pipeline de API extras do Investidor10.",
+    "Reativa historicalIndicators no contrato de ação.",
+    "Inclui teste específico para payload REST de histórico de indicadores."
   ],
-  "apkPair": "apk_valorae_stock_shareholding_i10_v366_AI_STUDIO_ROOT_OK_2026_07_05.zip",
-  "apkVersion": "2026.07.05.02",
-  "fileSize": 0
+  "apkPair": "apk_valorae_stock_historical_indicators_rest_i10_v375_AI_STUDIO_ROOT_OK_2026_07_05.zip",
+  "apkVersion": "2026.07.05.11",
+  "fileSize": 0,
+  "highlights": [
+    "26.asset-modal.stock.v37",
+    "REST assets tickers",
+    "Histórico Fundamentalista 5A/10A"
+  ]
 }

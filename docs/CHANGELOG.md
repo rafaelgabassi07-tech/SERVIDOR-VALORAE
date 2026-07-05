@@ -1,3 +1,64 @@
+## 2026-07-05 — Proxy v255 / patch 21.12.284-stock-modal-integrated-i10-v255
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v36`.
+- Adicionado `sectionReadiness` no contrato do modal de ação para auditar Balanço Patrimonial, Regiões de Receita, Negócios de Receita, Dados sobre a Empresa, Informações sobre a Empresa e Posição Acionária.
+- `sectionReadiness` só marca `ready=true` quando há dados reais suficientes capturados do Investidor10.
+- Mantida a política sem fallback PETR4/GGRC11, sem mock e sem dado simulado em produção.
+
+# v254 — Posição acionária no modal de ações (2026-07-05)
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v35`.
+- Corrigido parser de `shareholdingPosition` para priorizar a seção real `POSIÇÃO ACIONÁRIA` do Investidor10.
+- Corrigida extração quando existe texto genérico de `acionistas` antes da seção do ativo.
+- Suporte reforçado para tabela HTML, texto indexado e payloads JS/API com Acionista, % ON, % PN e % Total.
+- Sem fallback PETR4/GGRC11, sem mock e sem dado simulado.
+
+# v253 — Informações sobre a empresa no modal de ações (2026-07-05)
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v34`.
+- Adicionado `companyInformation` com dados reais do bloco `INFORMAÇÕES SOBRE A EMPRESA` do Investidor10.
+- Normalização de valores simples/detalhados, percentuais e campos textuais.
+- Sem fallback fixo por ticker e sem dados simulados.
+
+# v253 — Informações sobre a empresa no modal de ações (2026-07-05)
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v34`.
+- Adicionado `companyData` para o bloco `DADOS SOBRE A EMPRESA` do Investidor10.
+- Campos normalizados: Nome da Empresa, CNPJ, Ano de estreia na bolsa, Número de funcionários, Ano de fundação, Papéis da empresa e Papéis Fracionados.
+- Sem fallback PETR4/GGRC11, sem mock e sem dado inventado.
+
+# v251 — Negócios que geram receita no modal de ações (2026-07-05)
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v32`.
+- Corrigida a extração de `companyBussinesRevenuesChartPie`/`companyBussinessRevenuesChartPie`/`companyBusinessRevenuesChartPie` do Investidor10 quando o bloco vem em JS inline, JSON.parse, Chart.js, Highcharts, tuplas ou objeto por negócio/produto.
+- Preservados negócio/produto, valor exibido, percentual, total e ano da seção `Negócios que geram receita`.
+- Adicionadas tentativas complementares para rotas de receita por negócio, segmento e produto sem fallback estático.
+- Política mantida: sem PETR4/GGRC11 fixo, sem mock e sem dado inventado.
+
+# v250 — Regiões onde gera receita no modal de ações (2026-07-05)
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v31`.
+- Corrigida a extração de `companyRevenuesChartPie`/`revenueGeography` do Investidor10 quando o bloco vem em JS inline, JSON.parse, Chart.js, Highcharts ou objeto por região.
+- Preservados valores, percentuais, total e ano da seção `Regiões onde a empresa gera receita`.
+- Sem fallback PETR4/GGRC11, sem mock e sem dado inventado.
+
+## v249 — Balanço Patrimonial de ações via Investidor10 — 2026-07-05
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v30`.
+- Corrige o Balanço Patrimonial de ações quando o modal recebia apenas `Patrimônio Líquido Consolidado - (R$)`.
+- Adiciona rotas reais/tabela dinâmica do Investidor10 para `ativospassivos/table`, `balancopatrimonial/table` e `patrimonial/table`.
+- Normaliza linhas `Ativo Total`, `Ativo Circulante`, `Ativo Não Circulante`, `Passivo Total`, `Passivo Circulante`, `Passivo Não Circulante` e `Patrimônio Líquido Consolidado`.
+- Ignora colunas percentuais AV%/AH% para não confundir percentual com valor financeiro.
+- Sem fallback PETR4/GGRC11, sem mock e sem dado fabricado.
+
+## v248 — Checklist de ações via ranking oficial Investidor10 — 2026-07-05
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v29`.
+- Corrigido o Checklist Buy and Hold de ações que aparecia com os 10 critérios, mas todos sem seleção.
+- O Proxy agora consulta o ranking oficial Buy and Hold do Investidor10 quando o HTML do ativo não expõe a marcação dos checkboxes.
+- Score oficial `100/100` marca os 10 critérios como atendidos; scores menores usam apenas evidências reais por métrica e mantêm `UNKNOWN` quando faltar prova.
+- Sem fallback PETR4/GGRC11, sem mock e sem dado fabricado.
+
 ## v247 — Posição Acionária de ações via Investidor10 — 2026-07-05
 
 - Remove Histórico de Indicadores Fundamentalistas do modal de ação.
