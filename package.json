@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.274: auditoria profunda do modal de ação no Investidor10, corrigindo Payout, Histórico de Indicadores e Checklist sem fallback simulado, pareado ao APK v364.",
+  "description": "Valorae Proxy 21.12.275: histórico de indicadores fundamentalistas de ações via Investidor10, com payloads dinâmicos reais e sem fallback simulado, pareado ao APK v365.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.274-stock-modal-i10-integrity-v245",
+    "releasePatch": "21.12.275-stock-historical-indicators-i10-v246",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.274",
-    "checkpoint": "stock-modal-i10-integrity-v245",
-    "releaseLabel": "stock-modal-i10-integrity-v245"
+    "publicVersion": "21.12.275",
+    "checkpoint": "stock-historical-indicators-i10-v246",
+    "releaseLabel": "stock-historical-indicators-i10-v246"
   },
-  "releasePatch": "21.12.274-stock-modal-i10-integrity-v245"
+  "releasePatch": "21.12.275-stock-historical-indicators-i10-v246"
 }

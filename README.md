@@ -51,3 +51,12 @@ Correção do gráfico **Comparação com índices** no modal único de FIIs: IF
 - Corrige Payout, Histórico de Indicadores Fundamentalistas e Checklist Buy and Hold com dados reais do Investidor10.
 - Remove reaproveitamento de lucro anual como Últ 12M no Payout; se a fonte não entregar, fica indisponível.
 - Mantém política sem PETR4/GGRC11 fixo, sem mock e sem fallback simulado.
+
+
+## Checkpoint v246 — Histórico de Indicadores Fundamentalistas de ações
+
+- Contrato de ação: `26.asset-modal.stock.v27`.
+- Corrige o histórico de indicadores fundamentalistas do modal de ação com busca de `companyId`/`tickerId` por payloads reais do Investidor10 quando o HTML não expõe os IDs.
+- Adiciona chamadas reais para rotas de indicadores `chart`, `table` e `historico-indicadores`, sem PETR4/GGRC11 fixo e sem mock.
+- Normalizador aceita Chart.js aninhado, datasets, arrays por período e linhas transpostas por ano.
+- Validação: `npm test` com 114 arquivos e 0 falhas.
