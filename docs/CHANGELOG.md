@@ -1,3 +1,11 @@
+## 2026-07-06 — Proxy v268 / patch 21.12.297-stock-modal-data-integrity-v268
+
+- Contrato do modal de ação atualizado para `26.asset-modal.stock.v47`.
+- Posição acionária passa a ser extraída somente da seção/tabelas específicas ou JSON de shareholding, sem fallback de página inteira.
+- Filtro estrito bloqueia vazamento de indicadores fundamentalistas/mercado/notícias/textos de comunidade como se fossem acionistas.
+- Histórico de indicadores fundamentalistas recebe endpoints e aliases adicionais para reduzir comportamento de funcionar só em um ticker específico.
+- Adicionado teste `stock-modal-data-integrity-v268.test.js`.
+
 ## 2026-07-06 — Proxy v267 / patch 21.12.296-modal-runtime-freshness-v267
 
 - Runtime de modais atualizado para `26.asset-modal.runtime.v3`.

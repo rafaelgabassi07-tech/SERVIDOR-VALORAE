@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.296-modal-runtime-freshness-v267",
-  "patch": "21.12.296-modal-runtime-freshness-v267",
-  "releasePatch": "21.12.296-modal-runtime-freshness-v267",
-  "latestInternalPatch": "21.12.296-modal-runtime-freshness-v267",
-  "description": "Proxy v267 aprofunda a rodada dos modais de Ação e FII com runtime v3: cache stale não é entregue direto, a fonte real é tentada primeiro e o stale só aparece como fallback se a renovação falhar.",
+  "release": "21.12.297-stock-modal-data-integrity-v268",
+  "patch": "21.12.297-stock-modal-data-integrity-v268",
+  "releasePatch": "21.12.297-stock-modal-data-integrity-v268",
+  "latestInternalPatch": "21.12.297-stock-modal-data-integrity-v268",
+  "description": "Proxy v268 corrige a integridade do modal de ação: posição acionária só sai da seção/tabelas oficiais, histórico fundamentalista aceita aliases mais amplos e os diagnósticos deixam claro quando dados foram descartados por ruído.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -13,7 +13,7 @@
     "paralelismo de fontes no modal de ações",
     "asset-modal-runtime cache/coalescing",
     "26.asset-modal.fii.v22",
-    "26.asset-modal.stock.v46",
+    "26.asset-modal.stock.v47",
     "GET /api/rest/assets/tickers/{TICKER}",
     "shareholdingPosition estrito no modal de ações",
     "revenueByRegion no modal de ações",
@@ -23,35 +23,38 @@
     "routeManifest /asset/stock-modal",
     "26.asset-modal.runtime.v3",
     "stale somente como fallback dos modais",
-    "runtime sem chave interna no diagnóstico público"
+    "runtime sem chave interna no diagnóstico público",
+    "shareholdingPosition sem varredura de página inteira",
+    "histórico fundamentalista com aliases/ticker endpoints adicionais",
+    "diagnóstico discardedRows para posição acionária"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-06",
-  "checkpoint": "modal-runtime-freshness-v267",
-  "title": "Proxy v267 — Runtime fresco dos modais",
-  "summary": "Refina o runtime compartilhado dos modais para preservar performance sem mascarar dados antigos: HIT fresco continua rápido, STALE tenta renovar antes de responder e só vira STALE_FALLBACK em falha real.",
-  "publicVersion": "21.12.296",
-  "label": "modal-runtime-freshness-v267",
+  "checkpoint": "stock-modal-data-integrity-v268",
+  "title": "Proxy v268 — Integridade do modal de ação",
+  "summary": "Endurece a captura de posição acionária da Ação, amplia a coleta do histórico de indicadores fundamentalistas entre tickers e preserva a separação dos contratos de Ação/FII.",
+  "publicVersion": "21.12.297",
+  "label": "stock-modal-data-integrity-v268",
   "updatedAt": "2026-07-06T00:00:00.000Z",
   "date": "2026-07-06",
   "notes": [
     "Sem fallback PETR4/GGRC11 e sem mock em produção.",
-    "Cache curto preserva performance; stale só protege contra falha temporária após tentativa de renovação.",
-    "Contratos de Ação e FII seguem com produtores e normalizadores separados."
+    "A posição acionária de ação só aceita linhas com acionista e percentuais ON/PN/Total em escopo de seção ou JSON específico.",
+    "Histórico de indicadores fundamentalistas aceita estruturas alternativas retornadas por endpoints do Investidor10."
   ],
   "releaseNotes": [
-    "Runtime de modais atualizado para 26.asset-modal.runtime.v3.",
-    "Cache stale dos modais não é mais retornado diretamente; o Proxy tenta renovar e só usa stale como fallback se a renovação falhar.",
-    "Diagnóstico público do modalRuntime deixa de expor a chave interna do cache.",
-    "Regressão modal-runtime-freshness-v267 cobre separação de chaves, cacheabilidade e diagnóstico."
+    "Contrato de ação atualizado para 26.asset-modal.stock.v47.",
+    "Parser da posição acionária deixa de usar fallback de página inteira e descarta ruídos como indicadores, notícias e textos de comunidade.",
+    "Histórico de indicadores fundamentalistas passa a consultar endpoints/tipos de payload alternativos para reduzir casos em que só um ticker funcionava.",
+    "Teste regressivo stock-modal-data-integrity-v268 cobre posição acionária, descarte de ruído e aliases de histórico."
   ],
-  "apkPair": "apk_valorae_modal_runtime_freshness_v386_AI_STUDIO_ROOT_OK_2026_07_06.zip",
-  "apkVersion": "2026.07.06.04",
+  "apkPair": "apk_valorae_stock_modal_data_integrity_v387_AI_STUDIO_ROOT_OK_2026_07_06.zip",
+  "apkVersion": "2026.07.06.05",
   "fileSize": 0,
   "highlights": [
-    "Mais frescor em reaberturas do modal após expiração do TTL.",
-    "Menos risco de dado antigo parecer atual.",
-    "Diagnóstico de cache mais limpo para o APK."
+    "Mais precisão na tabela Posição Acionária.",
+    "Menos risco de DY/ROE/P/VP/notícias entrarem como acionistas.",
+    "Histórico fundamentalista mais estável entre tickers."
   ]
 }

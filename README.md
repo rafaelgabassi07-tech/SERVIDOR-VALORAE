@@ -1,9 +1,9 @@
-# VALORAE Proxy — modal runtime freshness v267
+# VALORAE Proxy — stock modal data integrity v268
 
 Core: `21.12.0`  
-Patch: `21.12.296-modal-runtime-freshness-v267`
+Patch: `21.12.297-stock-modal-data-integrity-v268`
 
-Rodada incremental para os modais de Ação e FII. O runtime compartilhado preserva cache curto para performance, mas deixa de devolver cache stale diretamente: após o TTL fresco, o Proxy tenta renovar a fonte real e só usa `STALE_FALLBACK` quando a renovação falha.
+Rodada incremental para corrigir três pontos do modal de ação: posição acionária estrita no escopo correto do Investidor10, histórico de indicadores fundamentalistas com aliases/endpoints adicionais e diagnósticos mais claros quando linhas são descartadas por ruído.
 
 ## Validação esperada
 

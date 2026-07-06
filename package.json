@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.296: runtime fresco para modais de Ação/FII, stale somente como fallback e regressões contra cache/fallback falso.",
+  "description": "Valorae Proxy 21.12.297: integridade do modal de ação com posição acionária estrita, checklist coerente e histórico de indicadores mais tolerante entre tickers.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.296-modal-runtime-freshness-v267",
+    "releasePatch": "21.12.297-stock-modal-data-integrity-v268",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.296",
-    "checkpoint": "modal-runtime-freshness-v267",
-    "releaseLabel": "modal-runtime-freshness-v267"
+    "publicVersion": "21.12.297",
+    "checkpoint": "stock-modal-data-integrity-v268",
+    "releaseLabel": "stock-modal-data-integrity-v268"
   },
-  "releasePatch": "21.12.296-modal-runtime-freshness-v267"
+  "releasePatch": "21.12.297-stock-modal-data-integrity-v268"
 }
