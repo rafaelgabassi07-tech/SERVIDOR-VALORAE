@@ -1,3 +1,15 @@
+## 2026-07-06 — Proxy v272 / patch 21.12.301-yahoo-asset-logos-v272
+
+- Adiciona resolução canônica de logotipos via Yahoo Finance Quote API.
+- Publica `/api/v1/asset/logo` e `/api/v1/asset/yahoo-logo` para consumo direto pelo APK.
+- Inclui `logoUrl`/`logoSource` nos contratos dos modais de Ação e FII quando Yahoo retorna imagem.
+
+## 2026-07-06 — Proxy v271 / patch 21.12.300-stock-revenue-charts-amounts-v271
+
+- Corrigida a normalização de `revenueByRegion` e `revenueByBusiness` para aceitar payloads Highcharts/Chart.js com valores monetários absolutos.
+- O Proxy agora calcula a participação percentual pelo total da série, preserva `amountDisplay` em R$ e mantém o bloqueio contra campos fundamentalistas/metadata.
+- Adicionado teste `stock-modal-revenue-breakdown-amount-charts-v271.test.js` cobrindo charts de região/negócio do Investidor10.
+
 ## 2026-07-06 — Proxy v270 / patch 21.12.299-stock-revenue-breakdown-strict-v270
 
 - Contrato do modal de ação atualizado para `26.asset-modal.stock.v49`.

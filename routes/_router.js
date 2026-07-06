@@ -17,6 +17,7 @@ import { buildAssetDetails, getAssetHistory } from '../lib/sources/asset-details
 import { buildAnalysisPageResponse } from '../lib/analysis/analysis-page-response.js';
 import { buildFiiModalContract } from '../lib/analysis/fii-modal-contract.js';
 import { buildStockModalContract } from '../lib/analysis/stock-modal-contract.js';
+import { fetchYahooLogo } from '../lib/market/yahoo.js';
 import integrationManifestHandler from './integration/manifest.js';
 import integrationSdkHandler from './integration/sdk.js';
 import integrationPromptsHandler from './integration/prompts.js';
@@ -434,6 +435,27 @@ function assetPayload(payload = {}) {
 }
 
 
+
+async function assetLogoHandler(req, res, payload = {}) {
+  const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query || '');
+  if (!ticker) return sendJson(req, res, { ok: false, status: 'ERROR', error: 'Informe ticker ou symbol.', endpoint: 'asset/logo' }, { status: 400, cacheControl: 'no-store' });
+  const logo = await fetchYahooLogo(ticker, { timeoutMs: clampInt(payload.timeoutMs || 3500, 3500, 1000, 9000), cache: payload.cache !== 'false' });
+  if (payload.format === 'json' || payload.json === '1') {
+    return sendJson(req, res, { ok: Boolean(logo?.logoUrl), status: logo?.logoUrl ? 'OK' : 'EMPTY', endpoint: 'asset/logo', ticker, symbol: logo?.symbol, logoUrl: logo?.logoUrl || '', logoSource: logo?.source || 'Yahoo Finance Quote API', cache: logo?.cache, error: logo?.error || '' }, { cacheControl: logo?.logoUrl ? 'public, max-age=86400, stale-while-revalidate=604800' : 'private, max-age=300' });
+  }
+  if (!logo?.logoUrl) {
+    res.statusCode = 404;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'private, max-age=300');
+    return res.end('logo indisponível');
+  }
+  res.statusCode = 302;
+  res.setHeader('Location', logo.logoUrl);
+  res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+  res.setHeader('X-Valorae-Logo-Source', 'Yahoo Finance Quote API');
+  return res.end('');
+}
+
 async function mobileBootstrap(payload = {}) {
   const assets = await buildAssetsPayload(payload);
   const includeNews = payload.includeNews === undefined ? true : !['0','false','no','off'].includes(String(payload.includeNews).toLowerCase());
@@ -609,6 +631,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/portfolio/returns' || path === '/portfolio/return' || path === '/portfolio/performance') return sendJson(req, res, await buildPortfolioReturns(payload), { cacheControl: 'private, max-age=60' });
     if (path === '/portfolio/history') return sendJson(req, res, await buildRealMarketHistory(payload));
     if (path === '/asset/history') return assetHistoryHandler(req, res);
+    if (path === '/asset/logo' || path === '/asset/yahoo-logo') return assetLogoHandler(req, res, payload);
     if (path === '/asset/fii-modal' || path === '/fii/modal') return sendJson(req, res, await buildFiiModalContract(payload), { cacheControl: 'private, max-age=45, stale-while-revalidate=300' });
     if (path === '/asset/stock-modal' || path === '/asset/action-modal' || path === '/acao/modal') return sendJson(req, res, await buildStockModalContract(payload), { cacheControl: 'private, max-age=45, stale-while-revalidate=300' });
     if (path === '/analysis' || path === '/asset/analysis') {
@@ -699,7 +722,7 @@ export function routeManifest() {
     physicalFunctions: ['api/router.js'],
     legacyAliases: { '/ativo': '/asset', '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
     routes: [
-    '/health','/ready','/manifest','/env','/schema','/source/status','/release/readiness','/personal/readiness','/cache/stats','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
+    '/health','/ready','/manifest','/env','/schema','/source/status','/release/readiness','/personal/readiness','/cache/stats','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/asset/logo','/asset/yahoo-logo','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
   ].sort() };
 }
 

@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.299: auditoria estrita dos gráficos de Regiões/Negócios de Receita no modal de ação, bloqueando vazamento de indicadores/metadata como tag_along, free_float e margens.",
+  "description": "Valorae Proxy 21.12.301: prioriza logotipos de ativos via Yahoo Finance Quote API e expõe endpoint /asset/logo para APK.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.299-stock-revenue-breakdown-strict-v270",
+    "releasePatch": "21.12.301-yahoo-asset-logos-v272",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.299",
-    "checkpoint": "stock-revenue-breakdown-strict-v270",
-    "releaseLabel": "stock-revenue-breakdown-strict-v270"
+    "publicVersion": "21.12.301",
+    "checkpoint": "yahoo-asset-logos-v272",
+    "releaseLabel": "yahoo-asset-logos-v272"
   },
-  "releasePatch": "21.12.299-stock-revenue-breakdown-strict-v270"
+  "releasePatch": "21.12.301-yahoo-asset-logos-v272"
 }

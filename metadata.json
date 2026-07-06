@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.299-stock-revenue-breakdown-strict-v270",
-  "patch": "21.12.299-stock-revenue-breakdown-strict-v270",
-  "releasePatch": "21.12.299-stock-revenue-breakdown-strict-v270",
-  "latestInternalPatch": "21.12.299-stock-revenue-breakdown-strict-v270",
-  "description": "Proxy v270 audita e corrige a extração dos gráficos de Regiões onde gera receita e Negócios que geram receita no modal de ação, restringindo a fonte a blocos reais de distribuição de receita do Investidor10 e bloqueando campos fundamentalistas/mercado.",
+  "release": "21.12.301-yahoo-asset-logos-v272",
+  "patch": "21.12.301-yahoo-asset-logos-v272",
+  "releasePatch": "21.12.301-yahoo-asset-logos-v272",
+  "latestInternalPatch": "21.12.301-yahoo-asset-logos-v272",
+  "description": "Proxy v272 adiciona resolução canônica de logotipos por Yahoo Finance Quote API, publica /api/v1/asset/logo com redirect para a imagem Yahoo e inclui logoUrl/logoSource nos contratos de Ação e FII.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -32,35 +32,39 @@
     "parser HTML com separadores vírgula/ponto e vírgula",
     "varredura rawJson completa para chaves alternativas de histórico",
     "revenueByRegion/revenueByBusiness estritos",
-    "bloqueio de metadata financeira nos gráficos de receita"
+    "bloqueio de metadata financeira nos gráficos de receita",
+    "revenue charts com valores monetários",
+    "normalização Highcharts/Chart.js de receita",
+    "yahoo asset logos",
+    "GET /api/v1/asset/logo",
+    "logoUrl/logoSource nos contratos de Ação/FII"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-06",
-  "checkpoint": "stock-revenue-breakdown-strict-v270",
-  "title": "Proxy v270 — Receita por região e negócio estrita",
-  "summary": "Bloqueia vazamento de campos como is_active, tag_along, free_float, variation_30_days, gross_margin, p_l, ev_ebitda e margens nos gráficos de distribuição de receita.",
-  "publicVersion": "21.12.299",
-  "label": "stock-revenue-breakdown-strict-v270",
+  "checkpoint": "yahoo-asset-logos-v272",
+  "title": "Proxy v272 — Logotipos canônicos via Yahoo",
+  "summary": "Proxy v272 adiciona resolução canônica de logotipos por Yahoo Finance Quote API, publica /api/v1/asset/logo com redirect para a imagem Yahoo e inclui logoUrl/logoSource nos contratos de Ação e FII.",
+  "publicVersion": "21.12.301",
+  "label": "yahoo-asset-logos-v272",
   "updatedAt": "2026-07-06T00:00:00.000Z",
   "date": "2026-07-06",
   "notes": [
-    "Sem fallback PETR4/CRFB3/AURE3/GGRC11, sem WebView e sem mock em produção.",
-    "Os gráficos de receita só aceitam linhas com labels reais de região/país/mercado ou negócio/produto/segmento vindas de bloco de distribuição de receitas.",
-    "Quando a fonte real do Investidor10 não entrega o bloco, o contrato retorna EMPTY em vez de preencher com indicadores financeiros/metadata."
+    "Yahoo Finance Quote API é fonte prioritária para logotipos; quando não entrega imagem, o endpoint retorna 404/EMPTY sem inventar logo.",
+    "A rota /api/v1/asset/logo redireciona para o CDN de imagem do Yahoo para ser consumida diretamente pelo Coil no APK.",
+    "Contratos stock-modal/fii-modal incluem logoUrl/logoSource em quoteSummary e blocos de identidade."
   ],
   "releaseNotes": [
-    "Contrato de ação atualizado para 26.asset-modal.stock.v49.",
-    "Parser de revenueByRegion/revenueByBusiness rejeita chaves técnicas e indicadores fundamentalistas/mercado como tag_along, free_float, variation_30_days, gross_margin, p_l, ev_ebitda e ebitda_margin.",
-    "Fontes REST dedicadas de região e negócio deixam de contaminar uma à outra.",
-    "Teste regressivo v270 cobre o payload poluído reproduzido no APK e mantém casos válidos de Petrobras por negócio/região."
+    "Adicionado fetchYahooLogo com cache/coalescing usando fields=logoUrl,companyLogoUrl.",
+    "Adicionado /api/v1/asset/logo e /api/v1/asset/yahoo-logo ao roteador e manifesto.",
+    "Modal de Ação e FII passam a expor logoUrl e logoSource do Yahoo quando disponível."
   ],
-  "apkPair": "apk_valorae_stock_revenue_breakdown_strict_v389_AI_STUDIO_ROOT_OK_2026_07_06.zip",
-  "apkVersion": "2026.07.06.07",
-  "fileSize": 0,
+  "apkPair": "apk_valorae_search_animation_yahoo_logos_v396_AI_STUDIO_ROOT_OK_2026_07_06.zip",
+  "apkVersion": "2026.07.06.14",
+  "fileSize": 1214738,
   "highlights": [
-    "Sem indicadores fundamentalistas nos gráficos de receita.",
-    "Região e negócio isolados por fonte.",
-    "EMPTY seguro quando não há distribuição real."
+    "Logotipos priorizados pelo Yahoo.",
+    "Endpoint de imagem direto para o APK.",
+    "Fallbacks visuais deixam de ser a primeira opção."
   ]
 }
