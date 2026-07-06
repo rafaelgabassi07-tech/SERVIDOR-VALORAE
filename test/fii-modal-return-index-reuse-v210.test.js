@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/fii-modal-contract.js';
 
-assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v21');
+assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v22');
 assert.equal(_test.comparisonHistoryRangeForPeriod({ key: '2y', months: 24 }), '5Y');
 assert.equal(_test.comparisonHistoryRangeForPeriod({ key: '5y', months: 60 }), '5Y');
 assert.equal(_test.comparisonHistoryRangeForPeriod({ key: '10y', months: 120 }), 'MAX');

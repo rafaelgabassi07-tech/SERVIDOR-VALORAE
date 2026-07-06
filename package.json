@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.293: endurece a Posição Acionária do modal de ações para aceitar somente dados acionários reais do Investidor10 (% ON, % PN e % Total), rejeitando notícias, comentários e indicadores.",
+  "description": "Valorae Proxy 21.12.296: runtime fresco para modais de Ação/FII, stale somente como fallback e regressões contra cache/fallback falso.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.293-stock-shareholding-strict-v264",
+    "releasePatch": "21.12.296-modal-runtime-freshness-v267",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.293",
-    "checkpoint": "stock-shareholding-strict-v264",
-    "releaseLabel": "stock-shareholding-strict-v264"
+    "publicVersion": "21.12.296",
+    "checkpoint": "modal-runtime-freshness-v267",
+    "releaseLabel": "modal-runtime-freshness-v267"
   },
-  "releasePatch": "21.12.293-stock-shareholding-strict-v264"
+  "releasePatch": "21.12.296-modal-runtime-freshness-v267"
 }

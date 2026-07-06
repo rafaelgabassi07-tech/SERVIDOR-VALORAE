@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Contrato curado para APK: posição acionária do modal de ações com validação estrita contra notícias, comentários e indicadores.",
+  "description": "Contrato curado para APK: modais de Ação e FII com manifesto completo, runtime v3 e performance sem fallback falso.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.293"
+  "version": "21.12.296"
 }

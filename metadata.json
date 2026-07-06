@@ -1,46 +1,57 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.293-stock-shareholding-strict-v264",
-  "patch": "21.12.293-stock-shareholding-strict-v264",
-  "releasePatch": "21.12.293-stock-shareholding-strict-v264",
-  "latestInternalPatch": "21.12.293-stock-shareholding-strict-v264",
-  "description": "Proxy v264 corrige a Posição Acionária do modal de ação com validação estrita: aceita apenas fontes/containers acionários reais e linhas com acionista + percentuais ON/PN/Total, rejeitando notícias, comentários, indicadores como DY/ROE/P/VP e textos soltos.",
+  "release": "21.12.296-modal-runtime-freshness-v267",
+  "patch": "21.12.296-modal-runtime-freshness-v267",
+  "releasePatch": "21.12.296-modal-runtime-freshness-v267",
+  "latestInternalPatch": "21.12.296-modal-runtime-freshness-v267",
+  "description": "Proxy v267 aprofunda a rodada dos modais de Ação e FII com runtime v3: cache stale não é entregue direto, a fonte real é tentada primeiro e o stale só aparece como fallback se a renovação falhar.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "26.asset-modal.stock.v45",
+    "paralelismo de fontes no modal de FII",
+    "paralelismo de fontes no modal de ações",
+    "asset-modal-runtime cache/coalescing",
+    "26.asset-modal.fii.v22",
+    "26.asset-modal.stock.v46",
     "GET /api/rest/assets/tickers/{TICKER}",
     "shareholdingPosition estrito no modal de ações",
     "revenueByRegion no modal de ações",
     "revenueByBusiness no modal de ações",
-    "Sem fallback PETR4/GGRC11"
+    "Sem fallback PETR4/GGRC11",
+    "routeManifest /asset/fii-modal",
+    "routeManifest /asset/stock-modal",
+    "26.asset-modal.runtime.v3",
+    "stale somente como fallback dos modais",
+    "runtime sem chave interna no diagnóstico público"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-06",
-  "checkpoint": "stock-shareholding-strict-v264",
-  "title": "Proxy v264 — Posição acionária com validação estrita",
-  "summary": "Corrige a captura indevida da Posição Acionária, que podia aceitar notícias/comentários/indicadores do REST/HTML. O contrato agora só retorna shareholdingPosition quando há estrutura acionária real com acionista e percentuais ON/PN/Total.",
-  "publicVersion": "21.12.293",
-  "label": "stock-shareholding-strict-v264",
+  "checkpoint": "modal-runtime-freshness-v267",
+  "title": "Proxy v267 — Runtime fresco dos modais",
+  "summary": "Refina o runtime compartilhado dos modais para preservar performance sem mascarar dados antigos: HIT fresco continua rápido, STALE tenta renovar antes de responder e só vira STALE_FALLBACK em falha real.",
+  "publicVersion": "21.12.296",
+  "label": "modal-runtime-freshness-v267",
   "updatedAt": "2026-07-06T00:00:00.000Z",
   "date": "2026-07-06",
   "notes": [
     "Sem fallback PETR4/GGRC11 e sem mock em produção.",
-    "Se o Investidor10 não entregar dados reais normalizáveis, o status permanece EMPTY."
+    "Cache curto preserva performance; stale só protege contra falha temporária após tentativa de renovação.",
+    "Contratos de Ação e FII seguem com produtores e normalizadores separados."
   ],
   "releaseNotes": [
-    "Contrato de ação atualizado para 26.asset-modal.stock.v45.",
-    "Posição acionária agora só entra a partir de containers/chaves acionárias explícitas ou tabela com cabeçalhos Acionista/% ON/% PN/% Total.",
-    "Linhas de notícias, comentários, indicadores e campos genéricos value/valor são rejeitados."
+    "Runtime de modais atualizado para 26.asset-modal.runtime.v3.",
+    "Cache stale dos modais não é mais retornado diretamente; o Proxy tenta renovar e só usa stale como fallback se a renovação falhar.",
+    "Diagnóstico público do modalRuntime deixa de expor a chave interna do cache.",
+    "Regressão modal-runtime-freshness-v267 cobre separação de chaves, cacheabilidade e diagnóstico."
   ],
-  "apkPair": "apk_valorae_stock_shareholding_strict_v383_AI_STUDIO_ROOT_OK_2026_07_06.zip",
-  "apkVersion": "2026.07.06.01",
+  "apkPair": "apk_valorae_modal_runtime_freshness_v386_AI_STUDIO_ROOT_OK_2026_07_06.zip",
+  "apkVersion": "2026.07.06.04",
   "fileSize": 0,
   "highlights": [
-    "Regiões de receita restauradas no modal de ação.",
-    "Negócios de receita restaurados no modal de ação.",
-    "Parser REST/HTML/API interna mais tolerante sem dados falsos."
+    "Mais frescor em reaberturas do modal após expiração do TTL.",
+    "Menos risco de dado antigo parecer atual.",
+    "Diagnóstico de cache mais limpo para o APK."
   ]
 }

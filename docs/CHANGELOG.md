@@ -1,3 +1,27 @@
+## 2026-07-06 — Proxy v267 / patch 21.12.296-modal-runtime-freshness-v267
+
+- Runtime de modais atualizado para `26.asset-modal.runtime.v3`.
+- Cache stale dos modais deixa de ser resposta direta; após o TTL, o Proxy tenta renovar a fonte real primeiro.
+- Stale passa a ser usado apenas como `STALE_FALLBACK` quando a renovação falha, preservando performance sem mascarar dado antigo.
+- Diagnóstico público `modalRuntime` não expõe mais chave interna de cache.
+- Adicionado teste `modal-runtime-freshness-v267.test.js`.
+
+## 2026-07-06 — Proxy v266 / patch 21.12.295-modal-audit-polish-v266
+
+- `routeManifest()` passa a listar `/asset/fii-modal` e `/fii/modal`, deixando o manifesto público coerente com as rotas dedicadas já atendidas.
+- Runtime de modais atualizado para `26.asset-modal.runtime.v2` nos diagnósticos.
+- Removida condição GET duplicada em `bodyOrQuery()`.
+- Adicionado teste `modal-route-manifest-v266.test.js` para impedir regressão nas rotas dedicadas de Ação/FII.
+- Mantida a regra crítica: sem fallback PETR4/GGRC11 e sem dados artificiais em produção.
+
+## 2026-07-06 — Proxy v265 / patch 21.12.294-modal-runtime-performance-v265
+
+- Cria `lib/analysis/asset-modal-runtime.js` para cache curto, coalescing por ticker/família/superfície e diagnóstico de runtime dos modais.
+- Atualiza o contrato de ação para `26.asset-modal.stock.v46` e o de FII para `26.asset-modal.fii.v22`.
+- Reduz latência do modal de ação ao paralelizar comparação com índices, checklist/ranking e comunicados.
+- Reduz latência do modal de FII ao paralelizar histórico de indicadores, vacância e comunicados após a leitura base.
+- Mantém a regra crítica: sem fallback PETR4/GGRC11 e sem dados artificiais em produção.
+
 ## 2026-07-06 — Proxy v264 / patch 21.12.293-stock-shareholding-strict-v264
 
 - Contrato de ação atualizado para `26.asset-modal.stock.v45`.
