@@ -1,30 +1,30 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.294-stock-revenue-breakdown-strict-v265",
-  "patch": "21.12.294-stock-revenue-breakdown-strict-v265",
-  "releasePatch": "21.12.294-stock-revenue-breakdown-strict-v265",
-  "latestInternalPatch": "21.12.294-stock-revenue-breakdown-strict-v265",
-  "description": "Proxy v265 corrige Regiões onde gera receita e Negócios que geram receita no modal de ação: aceita séries de valores monetários do REST/Investidor10, calcula percentuais pelo total real e rejeita notícias, comentários e indicadores misturados.",
+  "release": "21.12.295-stock-modal-timeout-routing-v266",
+  "patch": "21.12.295-stock-modal-timeout-routing-v266",
+  "releasePatch": "21.12.295-stock-modal-timeout-routing-v266",
+  "latestInternalPatch": "21.12.295-stock-modal-timeout-routing-v266",
+  "description": "Proxy v266 corrige regressão que fazia o modal de ação demorar ou não chegar ao APK: resolução de IDs do Investidor10 agora é paralela e curta, o REST /api/rest/assets/tickers/{TICKER} é priorizado e blocos opcionais são limitados por orçamento.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "26.asset-modal.stock.v46",
+    "26.asset-modal.stock.v47",
     "GET /api/rest/assets/tickers/{TICKER}",
     "shareholdingPosition estrito no modal de ações",
     "revenueByRegion no modal de ações",
     "revenueByBusiness no modal de ações",
     "Sem fallback PETR4/GGRC11",
-    "revenueByRegion/revenueByBusiness com séries monetárias do REST"
+    "stock-modal com orçamento anti-timeout"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-06",
-  "checkpoint": "stock-revenue-breakdown-strict-v265",
-  "title": "Proxy v265 — Regiões e negócios de receita com validação estrita",
-  "summary": "Corrige a captura de revenueByRegion e revenueByBusiness para não misturar notícias, comentários ou indicadores. O contrato agora aceita séries monetárias labels+series/data do Investidor10 e normaliza percentuais/valores para o modal de ação.",
-  "publicVersion": "21.12.294",
-  "label": "stock-revenue-breakdown-strict-v265",
+  "checkpoint": "stock-modal-timeout-routing-v266",
+  "title": "Proxy v266 — Modal de ação sem regressão de timeout/classificação",
+  "summary": "Corrige a regressão em que dados do Proxy não chegavam ao modal: o endpoint de ação não espera mais buscas amplas/sequenciais do Investidor10, prioriza o REST de ticker e responde parcial com dados reais disponíveis em vez de estourar o tempo do APK.",
+  "publicVersion": "21.12.295",
+  "label": "stock-modal-timeout-routing-v266",
   "updatedAt": "2026-07-06T00:00:00.000Z",
   "date": "2026-07-06",
   "notes": [
@@ -32,16 +32,17 @@
     "Se o Investidor10 não entregar dados reais normalizáveis de receita, o status permanece EMPTY."
   ],
   "releaseNotes": [
-    "Contrato de ação atualizado para 26.asset-modal.stock.v46.",
-    "Regiões e negócios de receita agora aceitam labels+series/data monetários e calculam percentuais a partir do total real.",
-    "Filtros impedem que notícias, comentários, comunicados e indicadores como DY/ROE/P/VP entrem nos gráficos de receita."
+    "Contrato de ação atualizado para 26.asset-modal.stock.v47.",
+    "Resolução de companyId/tickerId pelo Investidor10 REST ficou paralela e com limite curto.",
+    "HTML, REST, Yahoo e comparação com índices rodam em paralelo; blocos opcionais não derrubam o modal inteiro.",
+    "Regiões/negócios de receita e posição acionária mantêm filtros estritos sem fallback falso."
   ],
-  "apkPair": "apk_valorae_stock_revenue_breakdown_strict_v384_AI_STUDIO_ROOT_OK_2026_07_06.zip",
-  "apkVersion": "2026.07.06.02",
+  "apkPair": "apk_valorae_stock_modal_timeout_routing_v385_AI_STUDIO_ROOT_OK_2026_07_06.zip",
+  "apkVersion": "2026.07.06.03",
   "fileSize": 0,
   "highlights": [
-    "Regiões de receita normalizadas por total monetário.",
-    "Negócios de receita normalizados por total monetário.",
-    "Filtros contra notícias, comentários e indicadores nas quebras de receita."
+    "Modal de ação deixa de depender do timeout do FII para classificar CSNA3/PETR4/etc.",
+    "Proxy evita buscas sequenciais lentas no Investidor10 antes de responder.",
+    "Resposta parcial mantém dados reais que chegaram e não inventa dados ausentes."
   ]
 }

@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.294: corrige Regiões e Negócios que geram receita no modal de ações com séries monetárias do Investidor10 e filtros contra ruído de notícias/comentários/indicadores.",
+  "description": "Valorae Proxy 21.12.295: corrige regressão de timeout/classificação no modal de ação, priorizando REST Investidor10 e limitando blocos opcionais sem derrubar o contrato.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.294-stock-revenue-breakdown-strict-v265",
+    "releasePatch": "21.12.295-stock-modal-timeout-routing-v266",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.294",
-    "checkpoint": "stock-revenue-breakdown-strict-v265",
-    "releaseLabel": "stock-revenue-breakdown-strict-v265"
+    "publicVersion": "21.12.295",
+    "checkpoint": "stock-modal-timeout-routing-v266",
+    "releaseLabel": "stock-modal-timeout-routing-v266"
   },
-  "releasePatch": "21.12.294-stock-revenue-breakdown-strict-v265"
+  "releasePatch": "21.12.295-stock-modal-timeout-routing-v266"
 }
