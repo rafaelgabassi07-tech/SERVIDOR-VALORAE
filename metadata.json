@@ -1,46 +1,47 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.292-stock-revenue-region-shareholding-v263",
-  "patch": "21.12.292-stock-revenue-region-shareholding-v263",
-  "releasePatch": "21.12.292-stock-revenue-region-shareholding-v263",
-  "latestInternalPatch": "21.12.292-stock-revenue-region-shareholding-v263",
-  "description": "Proxy v263 corrige Regiões onde gera receita e Posição Acionária no modal de ação: usa REST /api/rest/assets/tickers/{TICKER}, normaliza distribuição por região/negócio com valores monetários e porcentagens calculadas, e lê posição acionária real sem capturar linhas de outras seções.",
+  "release": "21.12.294-stock-revenue-breakdown-strict-v265",
+  "patch": "21.12.294-stock-revenue-breakdown-strict-v265",
+  "releasePatch": "21.12.294-stock-revenue-breakdown-strict-v265",
+  "latestInternalPatch": "21.12.294-stock-revenue-breakdown-strict-v265",
+  "description": "Proxy v265 corrige Regiões onde gera receita e Negócios que geram receita no modal de ação: aceita séries de valores monetários do REST/Investidor10, calcula percentuais pelo total real e rejeita notícias, comentários e indicadores misturados.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "26.asset-modal.stock.v44",
+    "26.asset-modal.stock.v46",
     "GET /api/rest/assets/tickers/{TICKER}",
+    "shareholdingPosition estrito no modal de ações",
     "revenueByRegion no modal de ações",
     "revenueByBusiness no modal de ações",
-    "shareholdingPosition no modal de ações",
-    "Sem fallback PETR4/GGRC11"
+    "Sem fallback PETR4/GGRC11",
+    "revenueByRegion/revenueByBusiness com séries monetárias do REST"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
-  "releaseDate": "2026-07-05",
-  "checkpoint": "stock-revenue-region-shareholding-v263",
-  "title": "Proxy v263 — Regiões de receita e posição acionária corrigidas",
-  "summary": "Restaura a entrega de revenueByRegion/revenueByBusiness no modal de ação e endurece a captura de shareholdingPosition pelo REST do Investidor10. Mantém política sem fallback PETR4/GGRC11 e sem dados simulados.",
-  "publicVersion": "21.12.292",
-  "label": "stock-revenue-region-shareholding-v263",
-  "updatedAt": "2026-07-05T00:00:00.000Z",
-  "date": "2026-07-05",
+  "releaseDate": "2026-07-06",
+  "checkpoint": "stock-revenue-breakdown-strict-v265",
+  "title": "Proxy v265 — Regiões e negócios de receita com validação estrita",
+  "summary": "Corrige a captura de revenueByRegion e revenueByBusiness para não misturar notícias, comentários ou indicadores. O contrato agora aceita séries monetárias labels+series/data do Investidor10 e normaliza percentuais/valores para o modal de ação.",
+  "publicVersion": "21.12.294",
+  "label": "stock-revenue-breakdown-strict-v265",
+  "updatedAt": "2026-07-06T00:00:00.000Z",
+  "date": "2026-07-06",
   "notes": [
     "Sem fallback PETR4/GGRC11 e sem mock em produção.",
-    "Se o Investidor10 não entregar dados reais normalizáveis, o status permanece EMPTY."
+    "Se o Investidor10 não entregar dados reais normalizáveis de receita, o status permanece EMPTY."
   ],
   "releaseNotes": [
-    "Contrato de ação atualizado para 26.asset-modal.stock.v44.",
-    "Distribuição de receita aceita arrays por ano, objetos aninhados e valores monetários com cálculo percentual por total.",
-    "Posição acionária passa a considerar também o REST de ticker e fontes brutas shareholdingSources."
+    "Contrato de ação atualizado para 26.asset-modal.stock.v46.",
+    "Regiões e negócios de receita agora aceitam labels+series/data monetários e calculam percentuais a partir do total real.",
+    "Filtros impedem que notícias, comentários, comunicados e indicadores como DY/ROE/P/VP entrem nos gráficos de receita."
   ],
-  "apkPair": "apk_valorae_stock_revenue_region_shareholding_v382_AI_STUDIO_ROOT_OK_2026_07_05.zip",
-  "apkVersion": "2026.07.05.18",
+  "apkPair": "apk_valorae_stock_revenue_breakdown_strict_v384_AI_STUDIO_ROOT_OK_2026_07_06.zip",
+  "apkVersion": "2026.07.06.02",
   "fileSize": 0,
   "highlights": [
-    "Regiões de receita restauradas no modal de ação.",
-    "Negócios de receita restaurados no modal de ação.",
-    "Parser REST/HTML/API interna mais tolerante sem dados falsos."
+    "Regiões de receita normalizadas por total monetário.",
+    "Negócios de receita normalizados por total monetário.",
+    "Filtros contra notícias, comentários e indicadores nas quebras de receita."
   ]
 }

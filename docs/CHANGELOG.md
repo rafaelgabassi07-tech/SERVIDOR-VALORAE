@@ -1,3 +1,18 @@
+## 2026-07-06 — Proxy v265 / patch 21.12.294-stock-revenue-breakdown-strict-v265
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v46`.
+- Corrigida a normalização de `revenueByRegion` e `revenueByBusiness` quando o Investidor10/REST entrega `labels + series/data` com valores monetários, calculando percentuais pelo total real.
+- Filtros reforçados para rejeitar notícias, comentários, comunicados e indicadores fundamentalistas misturados nas seções de receita.
+- Regressão adicionada: `stock-modal-revenue-breakdown-strict-i10-v265.test.js`.
+- Mantido: sem fallback PETR4/GGRC11, sem mock e sem dado simulado.
+
+## 2026-07-06 — Proxy v264 / patch 21.12.293-stock-shareholding-strict-v264
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v45`.
+- Posição acionária agora só aceita tabelas/containers explícitos de acionistas com `% ON`, `% PN` e `% Total`.
+- Rejeita falsos positivos vindos de notícias, comentários, indicadores (`DY`, `ROE`, `P/VP`) e campos genéricos `value`/`valor`.
+- Regressão adicionada: `stock-modal-shareholding-strict-i10-v264.test.js`.
+
 ## 2026-07-05 — Proxy v263 / patch 21.12.292-stock-revenue-region-shareholding-v263
 
 - Contrato de ação atualizado para `26.asset-modal.stock.v44`.
