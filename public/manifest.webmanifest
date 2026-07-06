@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Contrato curado para APK: modais de Ação e FII com manifesto completo, runtime v3 e performance sem fallback falso.",
+  "description": "Contrato curado para APK: modais de Ação e FII com histórico fundamentalista de ações reforçado pela API REST do Investidor10.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.297"
+  "version": "21.12.299"
 }

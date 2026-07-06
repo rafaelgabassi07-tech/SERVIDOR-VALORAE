@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.297-stock-modal-data-integrity-v268",
-  "patch": "21.12.297-stock-modal-data-integrity-v268",
-  "releasePatch": "21.12.297-stock-modal-data-integrity-v268",
-  "latestInternalPatch": "21.12.297-stock-modal-data-integrity-v268",
-  "description": "Proxy v268 corrige a integridade do modal de ação: posição acionária só sai da seção/tabelas oficiais, histórico fundamentalista aceita aliases mais amplos e os diagnósticos deixam claro quando dados foram descartados por ruído.",
+  "release": "21.12.299-stock-revenue-breakdown-strict-v270",
+  "patch": "21.12.299-stock-revenue-breakdown-strict-v270",
+  "releasePatch": "21.12.299-stock-revenue-breakdown-strict-v270",
+  "latestInternalPatch": "21.12.299-stock-revenue-breakdown-strict-v270",
+  "description": "Proxy v270 audita e corrige a extração dos gráficos de Regiões onde gera receita e Negócios que geram receita no modal de ação, restringindo a fonte a blocos reais de distribuição de receita do Investidor10 e bloqueando campos fundamentalistas/mercado.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -26,35 +26,41 @@
     "runtime sem chave interna no diagnóstico público",
     "shareholdingPosition sem varredura de página inteira",
     "histórico fundamentalista com aliases/ticker endpoints adicionais",
-    "diagnóstico discardedRows para posição acionária"
+    "diagnóstico discardedRows para posição acionária",
+    "26.asset-modal.stock.v49",
+    "histórico fundamentalista via API REST /api/rest/assets/tickers/{TICKER}",
+    "parser HTML com separadores vírgula/ponto e vírgula",
+    "varredura rawJson completa para chaves alternativas de histórico",
+    "revenueByRegion/revenueByBusiness estritos",
+    "bloqueio de metadata financeira nos gráficos de receita"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-06",
-  "checkpoint": "stock-modal-data-integrity-v268",
-  "title": "Proxy v268 — Integridade do modal de ação",
-  "summary": "Endurece a captura de posição acionária da Ação, amplia a coleta do histórico de indicadores fundamentalistas entre tickers e preserva a separação dos contratos de Ação/FII.",
-  "publicVersion": "21.12.297",
-  "label": "stock-modal-data-integrity-v268",
+  "checkpoint": "stock-revenue-breakdown-strict-v270",
+  "title": "Proxy v270 — Receita por região e negócio estrita",
+  "summary": "Bloqueia vazamento de campos como is_active, tag_along, free_float, variation_30_days, gross_margin, p_l, ev_ebitda e margens nos gráficos de distribuição de receita.",
+  "publicVersion": "21.12.299",
+  "label": "stock-revenue-breakdown-strict-v270",
   "updatedAt": "2026-07-06T00:00:00.000Z",
   "date": "2026-07-06",
   "notes": [
-    "Sem fallback PETR4/GGRC11 e sem mock em produção.",
-    "A posição acionária de ação só aceita linhas com acionista e percentuais ON/PN/Total em escopo de seção ou JSON específico.",
-    "Histórico de indicadores fundamentalistas aceita estruturas alternativas retornadas por endpoints do Investidor10."
+    "Sem fallback PETR4/CRFB3/AURE3/GGRC11, sem WebView e sem mock em produção.",
+    "Os gráficos de receita só aceitam linhas com labels reais de região/país/mercado ou negócio/produto/segmento vindas de bloco de distribuição de receitas.",
+    "Quando a fonte real do Investidor10 não entrega o bloco, o contrato retorna EMPTY em vez de preencher com indicadores financeiros/metadata."
   ],
   "releaseNotes": [
-    "Contrato de ação atualizado para 26.asset-modal.stock.v47.",
-    "Parser da posição acionária deixa de usar fallback de página inteira e descarta ruídos como indicadores, notícias e textos de comunidade.",
-    "Histórico de indicadores fundamentalistas passa a consultar endpoints/tipos de payload alternativos para reduzir casos em que só um ticker funcionava.",
-    "Teste regressivo stock-modal-data-integrity-v268 cobre posição acionária, descarte de ruído e aliases de histórico."
+    "Contrato de ação atualizado para 26.asset-modal.stock.v49.",
+    "Parser de revenueByRegion/revenueByBusiness rejeita chaves técnicas e indicadores fundamentalistas/mercado como tag_along, free_float, variation_30_days, gross_margin, p_l, ev_ebitda e ebitda_margin.",
+    "Fontes REST dedicadas de região e negócio deixam de contaminar uma à outra.",
+    "Teste regressivo v270 cobre o payload poluído reproduzido no APK e mantém casos válidos de Petrobras por negócio/região."
   ],
-  "apkPair": "apk_valorae_stock_modal_data_integrity_v387_AI_STUDIO_ROOT_OK_2026_07_06.zip",
-  "apkVersion": "2026.07.06.05",
+  "apkPair": "apk_valorae_stock_revenue_breakdown_strict_v389_AI_STUDIO_ROOT_OK_2026_07_06.zip",
+  "apkVersion": "2026.07.06.07",
   "fileSize": 0,
   "highlights": [
-    "Mais precisão na tabela Posição Acionária.",
-    "Menos risco de DY/ROE/P/VP/notícias entrarem como acionistas.",
-    "Histórico fundamentalista mais estável entre tickers."
+    "Sem indicadores fundamentalistas nos gráficos de receita.",
+    "Região e negócio isolados por fonte.",
+    "EMPTY seguro quando não há distribuição real."
   ]
 }

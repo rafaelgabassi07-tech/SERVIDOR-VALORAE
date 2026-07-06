@@ -1,3 +1,19 @@
+## 2026-07-06 — Proxy v270 / patch 21.12.299-stock-revenue-breakdown-strict-v270
+
+- Contrato do modal de ação atualizado para `26.asset-modal.stock.v49`.
+- Corrigida a extração de `revenueByRegion` e `revenueByBusiness` para não aceitar campos fundamentalistas/mercado como `is_active`, `tag_along`, `free_float`, `variation_30_days`, `gross_margin`, `p_l`, `ev_ebitda` e margens.
+- Fontes de região e negócio passaram a ser avaliadas de forma separada, evitando contaminação entre os gráficos.
+- Quando o Investidor10 não entrega dados reais da distribuição de receitas, o bloco retorna `EMPTY` em vez de montar gráfico falso com metadata.
+- Adicionado teste `stock-modal-revenue-breakdown-strict-v270.test.js` reproduzindo o payload poluído do APK e validando casos reais de Petrobras por região/negócio.
+
+## 2026-07-06 — Proxy v269 / patch 21.12.298-stock-historical-indicators-api-audit-v269
+
+- Contrato do modal de ação atualizado para `26.asset-modal.stock.v48`.
+- `GET /api/rest/assets/tickers/{TICKER}` passa a ser tratado como fonte prioritária do histórico fundamentalista, com tentativas em maiúsculo/minúsculo e com/sem barra final.
+- O normalizador agora varre o envelope `rawJson` completo do Investidor10 para encontrar chaves alternativas de histórico profundamente aninhadas.
+- Parser HTML da seção “Histórico de indicadores fundamentalistas” aceita linhas com valores separados por vírgula, ponto e vírgula, barra vertical e quebras de layout.
+- Adicionado teste `stock-modal-historical-indicators-api-audit-v269.test.js` cobrindo formatos REST/HTML diferentes para evitar tabela vazia ou limitada a P/L/PSR.
+
 ## 2026-07-06 — Proxy v268 / patch 21.12.297-stock-modal-data-integrity-v268
 
 - Contrato do modal de ação atualizado para `26.asset-modal.stock.v47`.
