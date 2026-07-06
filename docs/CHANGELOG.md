@@ -1,11 +1,3 @@
-## 2026-07-06 — Proxy v266 / patch 21.12.295-stock-modal-timeout-routing-v266
-
-- Contrato de ação atualizado para `26.asset-modal.stock.v47`.
-- Corrigida a normalização de `revenueByRegion` e `revenueByBusiness` quando o Investidor10/REST entrega `labels + series/data` com valores monetários, calculando percentuais pelo total real.
-- Filtros reforçados para rejeitar notícias, comentários, comunicados e indicadores fundamentalistas misturados nas seções de receita.
-- Regressão adicionada: `stock-modal-stock-modal-timeout-routing-i10-v266.test.js`.
-- Mantido: sem fallback PETR4/GGRC11, sem mock e sem dado simulado.
-
 ## 2026-07-06 — Proxy v264 / patch 21.12.293-stock-shareholding-strict-v264
 
 - Contrato de ação atualizado para `26.asset-modal.stock.v45`.

@@ -1,48 +1,46 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.295-stock-modal-timeout-routing-v266",
-  "patch": "21.12.295-stock-modal-timeout-routing-v266",
-  "releasePatch": "21.12.295-stock-modal-timeout-routing-v266",
-  "latestInternalPatch": "21.12.295-stock-modal-timeout-routing-v266",
-  "description": "Proxy v266 corrige regressão que fazia o modal de ação demorar ou não chegar ao APK: resolução de IDs do Investidor10 agora é paralela e curta, o REST /api/rest/assets/tickers/{TICKER} é priorizado e blocos opcionais são limitados por orçamento.",
+  "release": "21.12.293-stock-shareholding-strict-v264",
+  "patch": "21.12.293-stock-shareholding-strict-v264",
+  "releasePatch": "21.12.293-stock-shareholding-strict-v264",
+  "latestInternalPatch": "21.12.293-stock-shareholding-strict-v264",
+  "description": "Proxy v264 corrige a Posição Acionária do modal de ação com validação estrita: aceita apenas fontes/containers acionários reais e linhas com acionista + percentuais ON/PN/Total, rejeitando notícias, comentários, indicadores como DY/ROE/P/VP e textos soltos.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "26.asset-modal.stock.v47",
+    "26.asset-modal.stock.v45",
     "GET /api/rest/assets/tickers/{TICKER}",
     "shareholdingPosition estrito no modal de ações",
     "revenueByRegion no modal de ações",
     "revenueByBusiness no modal de ações",
-    "Sem fallback PETR4/GGRC11",
-    "stock-modal com orçamento anti-timeout"
+    "Sem fallback PETR4/GGRC11"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-06",
-  "checkpoint": "stock-modal-timeout-routing-v266",
-  "title": "Proxy v266 — Modal de ação sem regressão de timeout/classificação",
-  "summary": "Corrige a regressão em que dados do Proxy não chegavam ao modal: o endpoint de ação não espera mais buscas amplas/sequenciais do Investidor10, prioriza o REST de ticker e responde parcial com dados reais disponíveis em vez de estourar o tempo do APK.",
-  "publicVersion": "21.12.295",
-  "label": "stock-modal-timeout-routing-v266",
+  "checkpoint": "stock-shareholding-strict-v264",
+  "title": "Proxy v264 — Posição acionária com validação estrita",
+  "summary": "Corrige a captura indevida da Posição Acionária, que podia aceitar notícias/comentários/indicadores do REST/HTML. O contrato agora só retorna shareholdingPosition quando há estrutura acionária real com acionista e percentuais ON/PN/Total.",
+  "publicVersion": "21.12.293",
+  "label": "stock-shareholding-strict-v264",
   "updatedAt": "2026-07-06T00:00:00.000Z",
   "date": "2026-07-06",
   "notes": [
     "Sem fallback PETR4/GGRC11 e sem mock em produção.",
-    "Se o Investidor10 não entregar dados reais normalizáveis de receita, o status permanece EMPTY."
+    "Se o Investidor10 não entregar dados reais normalizáveis, o status permanece EMPTY."
   ],
   "releaseNotes": [
-    "Contrato de ação atualizado para 26.asset-modal.stock.v47.",
-    "Resolução de companyId/tickerId pelo Investidor10 REST ficou paralela e com limite curto.",
-    "HTML, REST, Yahoo e comparação com índices rodam em paralelo; blocos opcionais não derrubam o modal inteiro.",
-    "Regiões/negócios de receita e posição acionária mantêm filtros estritos sem fallback falso."
+    "Contrato de ação atualizado para 26.asset-modal.stock.v45.",
+    "Posição acionária agora só entra a partir de containers/chaves acionárias explícitas ou tabela com cabeçalhos Acionista/% ON/% PN/% Total.",
+    "Linhas de notícias, comentários, indicadores e campos genéricos value/valor são rejeitados."
   ],
-  "apkPair": "apk_valorae_stock_modal_timeout_routing_v385_AI_STUDIO_ROOT_OK_2026_07_06.zip",
-  "apkVersion": "2026.07.06.03",
+  "apkPair": "apk_valorae_stock_shareholding_strict_v383_AI_STUDIO_ROOT_OK_2026_07_06.zip",
+  "apkVersion": "2026.07.06.01",
   "fileSize": 0,
   "highlights": [
-    "Modal de ação deixa de depender do timeout do FII para classificar CSNA3/PETR4/etc.",
-    "Proxy evita buscas sequenciais lentas no Investidor10 antes de responder.",
-    "Resposta parcial mantém dados reais que chegaram e não inventa dados ausentes."
+    "Regiões de receita restauradas no modal de ação.",
+    "Negócios de receita restaurados no modal de ação.",
+    "Parser REST/HTML/API interna mais tolerante sem dados falsos."
   ]
 }

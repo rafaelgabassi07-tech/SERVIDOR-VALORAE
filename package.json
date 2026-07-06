@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.295: corrige regressão de timeout/classificação no modal de ação, priorizando REST Investidor10 e limitando blocos opcionais sem derrubar o contrato.",
+  "description": "Valorae Proxy 21.12.293: endurece a Posição Acionária do modal de ações para aceitar somente dados acionários reais do Investidor10 (% ON, % PN e % Total), rejeitando notícias, comentários e indicadores.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.295-stock-modal-timeout-routing-v266",
+    "releasePatch": "21.12.293-stock-shareholding-strict-v264",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.295",
-    "checkpoint": "stock-modal-timeout-routing-v266",
-    "releaseLabel": "stock-modal-timeout-routing-v266"
+    "publicVersion": "21.12.293",
+    "checkpoint": "stock-shareholding-strict-v264",
+    "releaseLabel": "stock-shareholding-strict-v264"
   },
-  "releasePatch": "21.12.295-stock-modal-timeout-routing-v266"
+  "releasePatch": "21.12.293-stock-shareholding-strict-v264"
 }
