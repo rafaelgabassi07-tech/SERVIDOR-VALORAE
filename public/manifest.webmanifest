@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Contrato curado para APK: Posição Acionária de ações via seção real/payload Investidor10, sem fallback simulado, pareado ao APK v373.",
+  "description": "Contrato curado para APK: Histórico de Indicadores Fundamentalistas REST Investidor10 auditado, cobrindo mapas por métrica/camelCase/aliases sem fallback simulado, pareado ao APK v376.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.285"
+  "version": "21.12.287"
 }

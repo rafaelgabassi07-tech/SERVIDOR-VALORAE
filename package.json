@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.285: reativa Histórico de Indicadores Fundamentalistas do modal de ações usando endpoint REST Investidor10 /api/rest/assets/tickers/{TICKER}, sem fallback simulado.",
+  "description": "Valorae Proxy 21.12.287: corrige a organização do Histórico de Indicadores Fundamentalistas, remove metadados/description da grade e separa 5A/10A por anos válidos sem fallback simulado.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.285-stock-historical-indicators-rest-i10-v256",
+    "releasePatch": "21.12.287-stock-historical-indicators-layout-v258",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.285",
-    "checkpoint": "stock-historical-indicators-rest-i10-v256",
-    "releaseLabel": "stock-historical-indicators-rest-i10-v256"
+    "publicVersion": "21.12.287",
+    "checkpoint": "stock-historical-indicators-layout-v258",
+    "releaseLabel": "stock-historical-indicators-layout-v258"
   },
-  "releasePatch": "21.12.285-stock-historical-indicators-rest-i10-v256"
+  "releasePatch": "21.12.287-stock-historical-indicators-layout-v258"
 }

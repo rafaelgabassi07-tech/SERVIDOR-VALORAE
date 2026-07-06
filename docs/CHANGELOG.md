@@ -1,3 +1,17 @@
+## 2026-07-05 — Proxy v258 / patch 21.12.287-stock-historical-indicators-layout-v258
+- Contrato de ação atualizado para `26.asset-modal.stock.v39`.
+- Histórico de Indicadores Fundamentalistas agora filtra metadados (`description`, descrição, tooltip, notas, source/status) antes de montar colunas e células.
+- Quando o REST entrega uma série longa, o Proxy separa automaticamente `5y` e `10y` com `Atual` + anos em ordem decrescente.
+- Adicionado teste regressivo para impedir descriptions dentro da tabela e validar os anos superiores 5A/10A.
+
+## 2026-07-05 — Proxy v257 / patch 21.12.286-stock-historical-indicators-rest-i10-audit-v257
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v38`.
+- Auditado o parser do Histórico de Indicadores Fundamentalistas via REST Investidor10 para corrigir o cenário em que somente `P/L` e `P/Receita (PSR)` eram aproveitados.
+- Adicionado suporte a payloads em objeto por métrica, chaves camelCase, linhas com `id`/`slug`/`code`/`metricName` e séries em `values`/`data` com colunas herdadas de `periods`/`years`.
+- Aliases reforçados para P/VP, Dividend Yield, Payout, margens, EV/Ebitda, P/Ebit, ROE, ROIC, endividamento, liquidez e CAGRs.
+- Mantida a política sem fallback PETR4/GGRC11, sem mock e sem dado simulado em produção.
+
 ## 2026-07-05 — Proxy v255 / patch 21.12.284-stock-modal-integrated-i10-v255
 
 - Contrato de ação atualizado para `26.asset-modal.stock.v36`.

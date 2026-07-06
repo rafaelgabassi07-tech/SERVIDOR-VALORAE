@@ -1,45 +1,45 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.285-stock-historical-indicators-rest-i10-v256",
-  "patch": "21.12.285-stock-historical-indicators-rest-i10-v256",
-  "releasePatch": "21.12.285-stock-historical-indicators-rest-i10-v256",
-  "latestInternalPatch": "21.12.285-stock-historical-indicators-rest-i10-v256",
-  "description": "Proxy v256 reativa Histórico de Indicadores Fundamentalistas do modal de ações via endpoint REST /api/rest/assets/tickers/{TICKER} do Investidor10, sem fallback simulado.",
+  "release": "21.12.287-stock-historical-indicators-layout-v258",
+  "patch": "21.12.287-stock-historical-indicators-layout-v258",
+  "releasePatch": "21.12.287-stock-historical-indicators-layout-v258",
+  "latestInternalPatch": "21.12.287-stock-historical-indicators-layout-v258",
+  "description": "Proxy v258 corrige o Histórico de Indicadores Fundamentalistas para exibir somente colunas Atual/anos, separar automaticamente 5A/10A quando o REST entrega muitos anos e impedir descriptions/metadados dentro da tabela.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "26.asset-modal.stock.v37",
+    "26.asset-modal.stock.v39",
     "GET /api/rest/assets/tickers/{TICKER}",
-    "Histórico de Indicadores Fundamentalistas reativado",
-    "APK pareado v375"
+    "Histórico Fundamentalista com anos 5A/10A e grade sem descriptions",
+    "APK pareado v376"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-05",
-  "checkpoint": "stock-historical-indicators-rest-i10-v256",
-  "title": "Proxy v256 — Histórico de Indicadores via REST Investidor10",
-  "summary": "Adiciona chamada concreta ao endpoint REST de ticker do Investidor10 e normalização recursiva para Histórico de Indicadores Fundamentalistas 5A/10A no modal de ação.",
-  "publicVersion": "21.12.285",
-  "label": "stock-historical-indicators-rest-i10-v256",
+  "checkpoint": "stock-historical-indicators-layout-v258",
+  "title": "Proxy v258 — Histórico de indicadores organizado 5A/10A",
+  "summary": "Corrige a montagem do histórico fundamentalista para usar apenas colunas temporais válidas, remover description/tooltip/notas da grade e criar tabelas 5A/10A quando o REST do Investidor10 retorna uma série longa de anos.",
+  "publicVersion": "21.12.287",
+  "label": "stock-historical-indicators-layout-v258",
   "updatedAt": "2026-07-05T00:00:00.000Z",
   "date": "2026-07-05",
   "notes": [
     "Sem fallback PETR4/GGRC11 e sem mock em produção.",
-    "Endpoint REST oficial informado pelo usuário é tentado para cada ticker solicitado.",
-    "Se a resposta real não contiver histórico normalizável, o bloco fica EMPTY."
+    "Campos description/descrição/help/tooltip/notas deixam de virar colunas ou células da tabela.",
+    "Quando a fonte entrega mais de 5 anos em uma única tabela, o Proxy separa 5A e 10A preservando Atual e anos em ordem decrescente."
   ],
   "releaseNotes": [
-    "Adiciona assetTickerRest ao pipeline de API extras do Investidor10.",
-    "Reativa historicalIndicators no contrato de ação.",
-    "Inclui teste específico para payload REST de histórico de indicadores."
+    "Contrato de ação atualizado para 26.asset-modal.stock.v39.",
+    "Normalização do histórico agora filtra metadados antes de enviar dados ao APK.",
+    "Teste regressivo cobre descriptions em linhas e split automático 5A/10A."
   ],
-  "apkPair": "apk_valorae_stock_historical_indicators_rest_i10_v375_AI_STUDIO_ROOT_OK_2026_07_05.zip",
-  "apkVersion": "2026.07.05.11",
+  "apkPair": "apk_valorae_stock_historical_indicators_layout_v377_AI_STUDIO_ROOT_OK_2026_07_05.zip",
+  "apkVersion": "2026.07.05.13",
   "fileSize": 0,
   "highlights": [
-    "26.asset-modal.stock.v37",
-    "REST assets tickers",
-    "Histórico Fundamentalista 5A/10A"
+    "Histórico fundamentalista organizado por anos válidos.",
+    "Descriptions removidas da grade histórica.",
+    "Períodos 5A/10A derivados de série longa do REST quando necessário."
   ]
 }
