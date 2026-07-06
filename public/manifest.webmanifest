@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Contrato curado para APK: Histórico de Indicadores Fundamentalistas REST Investidor10 auditado, cobrindo mapas por métrica/camelCase/aliases sem fallback simulado, pareado ao APK v376.",
+  "description": "Contrato curado para APK: regiões de receita e posição acionária do modal de ações via REST Investidor10, sem fallback simulado.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.290"
+  "version": "21.12.292"
 }

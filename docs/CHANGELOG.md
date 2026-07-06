@@ -1,3 +1,19 @@
+## 2026-07-05 — Proxy v263 / patch 21.12.292-stock-revenue-region-shareholding-v263
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v44`.
+- Corrige `revenueByRegion` e `revenueByBusiness` para ações quando o REST do Investidor10 entrega valores monetários por ano em vez de percentuais prontos.
+- `shareholdingPosition` agora usa também `/api/rest/assets/tickers/{TICKER}` e fontes `shareholdingSources`, sem capturar linhas de indicadores ou receitas como acionistas.
+- Mantida política sem fallback PETR4/GGRC11, sem mock e sem WebView.
+
+## 2026-07-05 — Proxy v262 / patch 21.12.291-stock-historical-indicators-rest-long-records-v262
+
+- Contrato de ação atualizado para `26.asset-modal.stock.v43`.
+- O resolvedor de IDs agora consulta explicitamente `https://investidor10.com.br/api/rest/assets/tickers/{TICKER}` antes dos endpoints internos, permitindo acionar `/api/balancos/indicadores/table|chart/{companyId}/3650/` mesmo quando o HTML não expõe o ID.
+- Corrigido parser do Histórico de Indicadores Fundamentalistas para payload REST em registros longos, exemplo `{ indicador, ano, valor }`, `{ indicator, period, value }` e `{ metricName, fiscalYear, metricValue }`.
+- Metadados como `description`, `value`, `valor`, `year/ano`, `source` e campos auxiliares continuam impedidos de virar colunas da tabela.
+- Chamada REST do Investidor10 reforçada com `User-Agent` explícito e `Referer` do ativo.
+- Mantida a política sem fallback PETR4/GGRC11, sem mock e sem dado simulado.
+
 ## 2026-07-05 — Proxy v258 / patch 21.12.287-stock-historical-indicators-layout-v258
 - Contrato de ação atualizado para `26.asset-modal.stock.v39`.
 - Histórico de Indicadores Fundamentalistas agora filtra metadados (`description`, descrição, tooltip, notas, source/status) antes de montar colunas e células.
