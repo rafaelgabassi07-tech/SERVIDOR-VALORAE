@@ -161,3 +161,40 @@ assert.ok(!Object.keys(longBuilt.tablesByPeriod['5y'].rows.find(row => row.label
 assert.equal(longBuilt.tablesByPeriod['10y'].rows.find(row => row.label === 'P/L')?.values['2019'], '16,62');
 
 console.log('stock-modal-historical-indicators-rest-i10-v256 visual-regression ok');
+
+const legacyCurrentDateShape = {
+  data: {
+    ticker: 'PETR4',
+    historicalIndicators: {
+      columns: ['current', '2025-12-31', '2024-12-31', 'description'],
+      rows: [
+        {
+          name: 'P/L',
+          current: 4.54,
+          '2025-12-31': 3.61,
+          '2024-12-31': 12.74,
+          description: 'metadado textual não deve entrar na tabela'
+        },
+        {
+          name: 'Dividend Yield',
+          unit: 'percent',
+          current: 7.78,
+          '2025-12-31': 10.49,
+          '2024-12-31': 21.49,
+          description: 'metadado textual não deve entrar na tabela'
+        }
+      ]
+    }
+  }
+};
+const legacyCurrentDateBuilt = _test.buildStockHistoricalIndicators(
+  _test.buildStockHistoricalIndicatorSources({ ticker: 'PETR4', apiExtras: { rawJson: { assetTickerRest: legacyCurrentDateShape } } }),
+  'PETR4',
+  {}
+);
+assert.deepEqual(legacyCurrentDateBuilt.tablesByPeriod['5y'].columns, ['Atual', '2025', '2024']);
+assert.equal(legacyCurrentDateBuilt.tablesByPeriod['5y'].rows.find(row => row.label === 'P/L')?.values['Atual'], '4,54');
+assert.equal(legacyCurrentDateBuilt.tablesByPeriod['5y'].rows.find(row => row.label === 'Dividend Yield')?.values['2024'], '21,49%');
+assert.ok(!legacyCurrentDateBuilt.tablesByPeriod['5y'].columns.some(column => /description|descri/i.test(column)), 'legacy description column must be removed');
+
+console.log('stock-modal-historical-indicators-rest-i10-v256 regression-fix ok');

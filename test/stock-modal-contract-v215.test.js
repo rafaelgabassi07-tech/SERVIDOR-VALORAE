@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/stock-modal-contract.js';
 
-assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v39');
+assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v41');
 
 const html = `
 <html><body>
