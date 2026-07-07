@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.309-analysis-subpage-active-tickers-v280",
-  "patch": "21.12.309-analysis-subpage-active-tickers-v280",
-  "releasePatch": "21.12.309-analysis-subpage-active-tickers-v280",
-  "latestInternalPatch": "21.12.309-analysis-subpage-active-tickers-v280",
-  "description": "Proxy v280 adiciona metadados de negociação ao contrato de cotações para que as subpáginas da Análise ocultem tickers sem negociação confirmada, evitando ativos históricos/inativos como linhas sem informação.",
+  "release": "21.12.310-cross-stack-portfolio-revenue-v281",
+  "patch": "21.12.310-cross-stack-portfolio-revenue-v281",
+  "releasePatch": "21.12.310-cross-stack-portfolio-revenue-v281",
+  "latestInternalPatch": "21.12.310-cross-stack-portfolio-revenue-v281",
+  "description": "Proxy v281 fortalece a origem dos dados usados pelo APK: preserva currentPrice no histórico da carteira, ancora o último ponto com cotação atual, aplica fallback quando o histórico remoto é insuficiente e expõe aliases canônicos para receitas por região/negócio no modal de ação.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -48,34 +48,38 @@
     "fiiPeerComparison via FIIs Relacionados reais",
     "Comparando com outros FIIs sem fallback estático",
     "quotes listingStatus/isTradable/partial",
-    "subpáginas da Análise com validação de negociação ativa"
+    "subpáginas da Análise com validação de negociação ativa",
+    "portfolio history currentPrice anchor",
+    "portfolio history CurrentPriceFallback",
+    "stockRevenueByRegion/stockRevenueByBusiness aliases",
+    "APK v418 cross-stack portfolio revenue contract"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
-  "releaseDate": "2026-07-06",
-  "checkpoint": "analysis-subpage-active-tickers-v280",
-  "title": "Proxy v280 — Validação de ativos negociados nas subpáginas da Análise",
-  "summary": "O contrato /api/v1/quotes agora informa status/listingStatus/isTradable/partial para diferenciar ativos com cotação negociada de tickers históricos, inativos ou indisponíveis.",
-  "publicVersion": "21.12.309",
-  "label": "analysis-subpage-active-tickers-v280",
-  "updatedAt": "2026-07-06T00:00:00.000Z",
-  "date": "2026-07-06",
+  "releaseDate": "2026-07-07",
+  "checkpoint": "cross-stack-portfolio-revenue-v281",
+  "title": "Proxy v281 — Histórico da carteira e receitas do modal de ação",
+  "summary": "Revisão cruzada APK + Proxy para Preço da carteira, cotações em tempo real e contrato de regiões/negócios de receita do modal de ação.",
+  "publicVersion": "21.12.310",
+  "label": "cross-stack-portfolio-revenue-v281",
+  "updatedAt": "2026-07-07T00:00:00.000Z",
+  "date": "2026-07-07",
   "notes": [
-    "O Proxy marca isTradable=true somente quando há preço negociado positivo no retorno de cotação.",
-    "Tickers sem preço negociado ficam com listingStatus INACTIVE_OR_UNAVAILABLE e partial=true para o APK filtrar nas subpáginas.",
-    "Não foi adicionada lista fixa, mock ou remoção manual por ticker; a validação ocorre pelo retorno real de cotação."
+    "O Proxy preserva currentPrice das posições normalizadas e usa esse valor para recalcular o último ponto do histórico da carteira.",
+    "Quando o histórico remoto retorna vazio ou com pontos insuficientes, a resposta inclui fallbackUsed=true e uma série mínima baseada no valor aplicado e valor atual.",
+    "O modal de ação passa a receber também stockRevenueByRegion e stockRevenueByBusiness, além dos campos revenueByRegion/revenueByBusiness."
   ],
   "releaseNotes": [
-    "quotes contract exposes status, listingStatus, isTradable and partial",
-    "analysis subpages can hide tickers without confirmed active trading",
-    "no static denylist and no invented market data"
+    "portfolio history preserves currentPrice and anchors the latest point with current portfolio value",
+    "portfolio history returns CurrentPriceFallback when remote chart data is insufficient",
+    "stock modal exposes stockRevenueByRegion and stockRevenueByBusiness aliases"
   ],
-  "apkPair": "apk_valorae_analysis_active_tickers_v411_AI_STUDIO_ROOT_OK_2026_07_06.zip",
-  "apkVersion": "2026.07.06.29",
-  "fileSize": 1240064,
+  "apkPair": "apk_valorae_cross_stack_portfolio_revenue_logo_review_v418_AI_STUDIO_ROOT_OK_2026_07_07.zip",
+  "apkVersion": "2026.07.07.07",
+  "fileSize": 1243555,
   "highlights": [
-    "Contrato de cotações agora diferencia ativo negociado de ticker sem negociação confirmada.",
-    "Subpáginas da Análise passam a ter base para ocultar ativos históricos/inativos.",
-    "Sem lista fixa de exclusão e sem dados inventados."
+    "Preço da carteira deixa de depender apenas do parser do APK e passa a ter suporte direto do Proxy.",
+    "Cotação atual da carteira passa a ancorar o último ponto do histórico.",
+    "Regiões e negócios de receita têm aliases canônicos pareados com o APK v418."
   ]
 }

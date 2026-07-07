@@ -1,3 +1,9 @@
+## 2026-07-07 — Proxy v281 / patch 21.12.310-cross-stack-portfolio-revenue-v281
+
+- Histórico da carteira preserva `currentPrice`, ancora o último ponto com a cotação atual e expõe `fallbackUsed` quando precisa sintetizar série mínima.
+- Modal de ação expõe aliases `stockRevenueByRegion` e `stockRevenueByBusiness`, mantendo compatibilidade com `revenueByRegion` e `revenueByBusiness`.
+- Testes adicionados: `portfolio-history-current-price-v281.test.js` e `stock-revenue-contract-aliases-v281.test.js`.
+
 ## 2026-07-06 — Proxy v280 / patch 21.12.309-analysis-subpage-active-tickers-v280
 
 - Adiciona `listingStatus`, `tradingStatus`, `isTradable`, `tradable`, `activeTrading` e `partial` ao contrato de `/api/v1/quotes`.
