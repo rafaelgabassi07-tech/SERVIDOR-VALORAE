@@ -1,3 +1,11 @@
+## 2026-07-07 — Proxy v282 / patch 21.12.311-portfolio-intraday-history-v282
+
+- Corrigida a causa raiz do gráfico **Preço da carteira**: o histórico intradiário não é mais agrupado apenas por data.
+- `/api/v1/portfolio/history` preserva `timestamp` em 1D/5D e em intervalos de minutos/horas.
+- A mesclagem da carteira agora usa buckets por timestamp com forward-fill por posição.
+- O ponto de cotação atual não remove mais todos os pontos do mesmo dia; ele substitui apenas ponto intradiário muito próximo ou é anexado ao final.
+- Adicionado teste `portfolio-history-intraday-v282.test.js` cobrindo múltiplos pontos Yahoo no mesmo dia sem `CurrentPriceFallback`.
+
 ## 2026-07-07 — Proxy v281 / patch 21.12.310-cross-stack-portfolio-revenue-v281
 
 - Histórico da carteira preserva `currentPrice`, ancora o último ponto com a cotação atual e expõe `fallbackUsed` quando precisa sintetizar série mínima.

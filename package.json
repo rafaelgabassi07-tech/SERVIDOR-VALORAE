@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.310: revisa a cadeia APK + Proxy para histórico da carteira, cotações atuais e aliases de receitas do modal de ação.",
+  "description": "Valorae Proxy 21.12.311: corrige a causa raiz do Preço da carteira preservando timestamps intradiários e evitando fallback linear indevido.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.310-cross-stack-portfolio-revenue-v281",
+    "releasePatch": "21.12.311-portfolio-intraday-history-v282",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.310",
-    "checkpoint": "cross-stack-portfolio-revenue-v281",
-    "releaseLabel": "cross-stack-portfolio-revenue-v281"
+    "publicVersion": "21.12.311",
+    "checkpoint": "portfolio-intraday-history-v282",
+    "releaseLabel": "portfolio-intraday-history-v282"
   },
-  "releasePatch": "21.12.310-cross-stack-portfolio-revenue-v281"
+  "releasePatch": "21.12.311-portfolio-intraday-history-v282"
 }
