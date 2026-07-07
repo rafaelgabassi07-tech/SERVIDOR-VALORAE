@@ -1,3 +1,11 @@
+## 2026-07-07 — Proxy v286 / patch 21.12.315-stock-revenue-js-discovery-v286
+
+- Corrigida a busca dos gráficos de Regiões e Negócios de receita de ações quando o HTML público mostra apenas títulos/anos e não expõe valores textuais.
+- Endpoints por slug/ticker agora são tentados mesmo sem `companyId`, incluindo rotas de região, negócio, segmento, geografia e REST de receitas/charts.
+- Adicionada segunda passada de receita após `/api/rest/assets/tickers/{TICKER}` para reaproveitar IDs encontrados no payload REST.
+- Contrato de ação atualizado para `26.asset-modal.stock.v53`.
+- Teste regressivo `stock-modal-revenue-endpoints-v286.test.js` garante que endpoints por slug e por `companyId` sejam tentados.
+
 ## 2026-07-07 — Proxy v284 / patch 21.12.313-stock-revenue-charts-v284
 
 - Reescrita da extração de Regiões e Negócios de receita no modal de ações, com leitura de payloads Highcharts, Chart.js e REST aninhado.

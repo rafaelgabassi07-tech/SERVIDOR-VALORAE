@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.313-stock-revenue-charts-v284",
-  "patch": "21.12.313-stock-revenue-charts-v284",
-  "releasePatch": "21.12.313-stock-revenue-charts-v284",
-  "latestInternalPatch": "21.12.313-stock-revenue-charts-v284",
-  "description": "Proxy v284 reescreve a extração e normalização dos gráficos de Regiões e Negócios de receita no modal de ações.",
+  "release": "21.12.315-stock-revenue-js-discovery-v286",
+  "patch": "21.12.315-stock-revenue-js-discovery-v286",
+  "releasePatch": "21.12.315-stock-revenue-js-discovery-v286",
+  "latestInternalPatch": "21.12.315-stock-revenue-js-discovery-v286",
+  "description": "Proxy v286 corrige a captura dos gráficos de Regiões e Negócios de receita em ações tentando descoberta de endpoints de receita em scripts do Investidor10 e fallback JS/API dinâmica para Regiões e Negócios de ações.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -60,23 +60,25 @@
     "portfolio history synthetic fallback rejected by APK",
     "stock revenue nested custom/meta payload parser",
     "stock revenue Highcharts/Chart.js extractor v284",
-    "stock revenue REST nested payload tests v284"
+    "stock revenue REST nested payload tests v284",
+    "stock revenue endpoint candidates without companyId",
+    "stock revenue secondary API pass after REST asset ticker",
+    "26.asset-modal.stock.v53"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-07",
-  "checkpoint": "stock-revenue-charts-v284",
-  "title": "Proxy v284 — Gráficos de receita de ações",
-  "summary": "Reforça o contrato de revenueByRegion/revenueByBusiness para ações com extração de Highcharts, Chart.js, payloads REST aninhados e aliases canônicos.",
-  "publicVersion": "21.12.313",
-  "label": "stock-revenue-charts-v284",
+  "checkpoint": "stock-revenue-js-discovery-v286",
+  "title": "Proxy v286 — Receita de ações por descoberta JS/API dinâmica",
+  "summary": "Corrige a origem dos gráficos de Regiões e Negócios de receita no modal de ações, adicionando tentativa por endpoints de receita via ticker/slug e segunda passada após resolver IDs pelo REST do ativo.",
+  "publicVersion": "21.12.315",
+  "label": "stock-revenue-js-discovery-v286",
   "updatedAt": "2026-07-07T00:00:00.000Z",
   "date": "2026-07-07",
   "notes": [
-    "A extração de Regiões e Negócios de receita passa a ler valores em objetos aninhados como custom, meta, payload e props.",
-    "O Proxy reconhece estruturas Highcharts/Chart.js e payloads REST aninhados usados nas páginas de ações.",
-    "O contrato preserva revenueByRegion/revenueByBusiness e os aliases stockRevenueByRegion/stockRevenueByBusiness para compatibilidade com o APK.",
-    "Novos testes cobrem cenários realistas de gráficos e payloads aninhados de receita."
+    "O Proxy tenta endpoints de Regiões/Negócios por slug do ticker mesmo quando o HTML não expõe companyId/tickerId.",
+    "Após receber /api/rest/assets/tickers/{TICKER}, o Proxy executa uma segunda passada de receita com IDs resolvidos, se necessário.",
+    "O contrato de Ação sobe para 26.asset-modal.stock.v53 mantendo revenueByRegion/revenueByBusiness e aliases stockRevenueByRegion/stockRevenueByBusiness."
   ],
   "releaseNotes": [
     "stock modal revenue charts read nested custom/meta/payload values",
@@ -94,12 +96,13 @@
     "Contrato pareado com APK v419 para Patrimônio atual, cards da Carteira e gráfico Preço da carteira."
   ],
   "validation": [
-    "node --check lib/analysis/stock-modal-contract.js",
+    "node test/stock-modal-revenue-endpoints-v286.test.js",
     "node test/stock-modal-revenue-highcharts-realistic-v284.test.js",
     "node test/stock-modal-revenue-rest-nested-custom-v284.test.js",
     "npm run build",
     "npm run check:syntax",
     "npm test",
-    "npm run audit:version"
+    "npm run audit:version",
+    "unzip -t"
   ]
 }

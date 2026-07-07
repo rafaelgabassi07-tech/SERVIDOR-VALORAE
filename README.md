@@ -13,6 +13,10 @@ Validações principais:
 - `node scripts/audit-version.js`
 
 
+## Release 21.12.315
+
+21.12.315-stock-revenue-js-discovery-v286: continua a correção de Regiões e Negócios de receita em ações com descoberta de endpoints em bundles JS/API dinâmica e aliases ampliados.
+
 ## Release 21.12.313
 
 21.12.313-stock-revenue-charts-v284: reforça os gráficos de receita por regiões e negócios no modal de ações.

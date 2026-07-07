@@ -3,7 +3,7 @@ import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8');
 
-assert.ok(source.includes("export const STOCK_MODAL_VERSION = '26.asset-modal.stock.v51'"));
+assert.ok(source.includes("export const STOCK_MODAL_VERSION = '26.asset-modal.stock.v53'"));
 assert.ok(source.includes('fetchInvestidor10StockBundle(ticker, Math.min(timeoutMs, 7000))'), 'stock modal must cap the Investidor10 bundle by a local timeout');
 assert.ok(source.includes('function metricCard'), 'stock modal must define metricCard used by the runtime contract');
 assert.ok(source.includes('Promise.all(['), 'stock modal must keep core providers in parallel');
