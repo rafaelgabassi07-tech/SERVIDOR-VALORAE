@@ -1,18 +1,18 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.301-yahoo-asset-logos-v272",
-  "patch": "21.12.301-yahoo-asset-logos-v272",
-  "releasePatch": "21.12.301-yahoo-asset-logos-v272",
-  "latestInternalPatch": "21.12.301-yahoo-asset-logos-v272",
-  "description": "Proxy v272 adiciona resolução canônica de logotipos por Yahoo Finance Quote API, publica /api/v1/asset/logo com redirect para a imagem Yahoo e inclui logoUrl/logoSource nos contratos de Ação e FII.",
+  "release": "21.12.309-analysis-subpage-active-tickers-v280",
+  "patch": "21.12.309-analysis-subpage-active-tickers-v280",
+  "releasePatch": "21.12.309-analysis-subpage-active-tickers-v280",
+  "latestInternalPatch": "21.12.309-analysis-subpage-active-tickers-v280",
+  "description": "Proxy v280 adiciona metadados de negociação ao contrato de cotações para que as subpáginas da Análise ocultem tickers sem negociação confirmada, evitando ativos históricos/inativos como linhas sem informação.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
     "paralelismo de fontes no modal de FII",
     "paralelismo de fontes no modal de ações",
     "asset-modal-runtime cache/coalescing",
-    "26.asset-modal.fii.v22",
+    "26.asset-modal.fii.v23",
     "26.asset-modal.stock.v47",
     "GET /api/rest/assets/tickers/{TICKER}",
     "shareholdingPosition estrito no modal de ações",
@@ -37,34 +37,45 @@
     "normalização Highcharts/Chart.js de receita",
     "yahoo asset logos",
     "GET /api/v1/asset/logo",
-    "logoUrl/logoSource nos contratos de Ação/FII"
+    "logoUrl/logoSource nos contratos de Ação/FII",
+    "histórico fundamentalista de ações com linhas indexadas/DataTables",
+    "revenueByBusiness com rows indexadas/DataTables",
+    "26.asset-modal.stock.v51",
+    "revenueByRegion/revenueByBusiness via SEO/meta do Investidor10",
+    "stock revenue text com separador ponto entre valor e percentual",
+    "fii peer comparison related-source collector",
+    "comparador de FIIs com pares relacionados reais",
+    "fiiPeerComparison via FIIs Relacionados reais",
+    "Comparando com outros FIIs sem fallback estático",
+    "quotes listingStatus/isTradable/partial",
+    "subpáginas da Análise com validação de negociação ativa"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-06",
-  "checkpoint": "yahoo-asset-logos-v272",
-  "title": "Proxy v272 — Logotipos canônicos via Yahoo",
-  "summary": "Proxy v272 adiciona resolução canônica de logotipos por Yahoo Finance Quote API, publica /api/v1/asset/logo com redirect para a imagem Yahoo e inclui logoUrl/logoSource nos contratos de Ação e FII.",
-  "publicVersion": "21.12.301",
-  "label": "yahoo-asset-logos-v272",
+  "checkpoint": "analysis-subpage-active-tickers-v280",
+  "title": "Proxy v280 — Validação de ativos negociados nas subpáginas da Análise",
+  "summary": "O contrato /api/v1/quotes agora informa status/listingStatus/isTradable/partial para diferenciar ativos com cotação negociada de tickers históricos, inativos ou indisponíveis.",
+  "publicVersion": "21.12.309",
+  "label": "analysis-subpage-active-tickers-v280",
   "updatedAt": "2026-07-06T00:00:00.000Z",
   "date": "2026-07-06",
   "notes": [
-    "Yahoo Finance Quote API é fonte prioritária para logotipos; quando não entrega imagem, o endpoint retorna 404/EMPTY sem inventar logo.",
-    "A rota /api/v1/asset/logo redireciona para o CDN de imagem do Yahoo para ser consumida diretamente pelo Coil no APK.",
-    "Contratos stock-modal/fii-modal incluem logoUrl/logoSource em quoteSummary e blocos de identidade."
+    "O Proxy marca isTradable=true somente quando há preço negociado positivo no retorno de cotação.",
+    "Tickers sem preço negociado ficam com listingStatus INACTIVE_OR_UNAVAILABLE e partial=true para o APK filtrar nas subpáginas.",
+    "Não foi adicionada lista fixa, mock ou remoção manual por ticker; a validação ocorre pelo retorno real de cotação."
   ],
   "releaseNotes": [
-    "Adicionado fetchYahooLogo com cache/coalescing usando fields=logoUrl,companyLogoUrl.",
-    "Adicionado /api/v1/asset/logo e /api/v1/asset/yahoo-logo ao roteador e manifesto.",
-    "Modal de Ação e FII passam a expor logoUrl e logoSource do Yahoo quando disponível."
+    "quotes contract exposes status, listingStatus, isTradable and partial",
+    "analysis subpages can hide tickers without confirmed active trading",
+    "no static denylist and no invented market data"
   ],
-  "apkPair": "apk_valorae_search_animation_yahoo_logos_v396_AI_STUDIO_ROOT_OK_2026_07_06.zip",
-  "apkVersion": "2026.07.06.14",
-  "fileSize": 1214738,
+  "apkPair": "apk_valorae_analysis_active_tickers_v411_AI_STUDIO_ROOT_OK_2026_07_06.zip",
+  "apkVersion": "2026.07.06.29",
+  "fileSize": 1240064,
   "highlights": [
-    "Logotipos priorizados pelo Yahoo.",
-    "Endpoint de imagem direto para o APK.",
-    "Fallbacks visuais deixam de ser a primeira opção."
+    "Contrato de cotações agora diferencia ativo negociado de ticker sem negociação confirmada.",
+    "Subpáginas da Análise passam a ter base para ocultar ativos históricos/inativos.",
+    "Sem lista fixa de exclusão e sem dados inventados."
   ]
 }

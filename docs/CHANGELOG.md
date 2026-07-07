@@ -1,3 +1,55 @@
+## 2026-07-06 — Proxy v280 / patch 21.12.309-analysis-subpage-active-tickers-v280
+
+- Adiciona `listingStatus`, `tradingStatus`, `isTradable`, `tradable`, `activeTrading` e `partial` ao contrato de `/api/v1/quotes`.
+- `isTradable=true` passa a depender de cotação positiva vinda do retorno de mercado; tickers sem preço ficam como `INACTIVE_OR_UNAVAILABLE` e `partial=true`.
+- Permite que o APK oculte ativos históricos/inativos nas subpáginas da Análise sem lista fixa, mock ou dado inventado.
+- Teste: `node test/analysis-subpage-trading-status-v280.test.js`.
+
+## 2026-07-06 — Proxy v279 / patch 21.12.308-fii-peer-comparison-related-v279
+
+- Corrige `Comparando com outros FIIs` no modal de FII quando o Investidor10 expõe apenas cabeçalho/filtros da tabela renderizada no HTML capturado.
+- Mantém a tabela renderizada como fonte prioritária; se ela vier sem linhas, usa `FIIs Relacionados` da mesma página como fonte real de pares.
+- A recuperação lê ticker, DY e P/VP reais e, quando disponível, aplica tipo/segmento extraídos da seção `Média do Tipo e Segmento`.
+- Campos ausentes na fonte, como Valor Patrimonial dos relacionados, permanecem como `—` para evitar dado inventado.
+- Contrato de FII sobe para `26.asset-modal.fii.v23`.
+- Atualizados testes `fii-modal-peer-comparison-v198.test.js` e `fii-modal-peer-related-fallback-v200.test.js`.
+
+## 2026-07-06 — Proxy v277 / patch 21.12.306-stock-revenue-seo-hidden-v277
+
+- Auditoria comparativa de Regiões/Negócios no modal de ação contra o modal de FII.
+- Identificado que ações podem expor valores de receita apenas em metadados/atributos/conteúdo indexável enquanto o corpo visível renderiza imagem; FII já chegava em texto/arrays parseáveis.
+- Adicionada extração segura de `content`, `alt`, `title`, `aria-label`, `data-*` e fragmentos de scripts contendo Regiões/Negócios ou pares monetários + percentual.
+- Ajustado parser textual para aceitar `R$ ... Bilhões. 71%` e evitar vazamento de linhas de Negócios dentro de Regiões em seções SEO curtas.
+- Adicionado teste `stock-modal-revenue-seo-hidden-v277.test.js`.
+
+## 2026-07-06 — Proxy v276 / patch 21.12.305-stock-revenue-business-indexed-v276
+
+- Corrigido `revenueByBusiness` do modal de ações para aceitar respostas DataTables/indexadas do Investidor10.
+- Normalizador agora interpreta `columns` + `data`/`rows` e linhas como `{0: Negócio, 1: Receita, 2: %}`.
+- `revenueByRegion` recebe o mesmo hardening para manter paridade entre Regiões e Negócios.
+- Adicionados aliases inline para variações de `companyBussinesRevenueChartPie`/`companyBussinessRevenueChartPie`/`companyBusinessRevenueChart`.
+- Adicionado teste `stock-modal-revenue-business-indexed-rows-v276.test.js`.
+
+## 2026-07-06 — Proxy v275 / patch 21.12.304-stock-shareholding-indexed-v275
+
+- Corrige a Posição Acionária do modal de ação quando o Investidor10 retorna `columns`/`data` em formato DataTables ou linhas com chaves numéricas `0`, `1`, `2`, `3`.
+- Mantém política estrita: sem fallback de PETR4/GGRC11, sem varredura genérica de página inteira e sem aceitar indicadores/notícias/comentários como acionistas.
+- Adiciona regressão `test/stock-modal-shareholding-indexed-rows-v275.test.js`.
+
+## 2026-07-06 — Proxy v274 / patch 21.12.303-stock-historical-indicators-v274
+
+- Checkpoint 2: correção do histórico de indicadores fundamentalistas no modal de ação.
+- Parser de ações aceita linhas indexadas/DataTables do Investidor10, onde a métrica vem em `0` e os valores vêm em `1`, `2`, `3` etc.
+- Colunas tabulares passam a reconhecer `label`, `name`, `title`, `text`, `key`, `data`, `field` e `value`.
+- Adicionado teste `stock-modal-historical-indicators-indexed-rows-v274.test.js`.
+- Sem fallback estático ou substituição por PETR4/GGRC11.
+
+## 2026-07-06 — Proxy v273 / patch 21.12.302-portfolio-history-range-v273
+
+- Corrigida a normalização de ranges vindos do APK (`1mo`, `3mo`, `6mo`, `1y`, `5y`, `max`) para evitar queda silenciosa em `1Y`.
+- `/api/v1/portfolio/history` fica alinhado aos seletores do gráfico Preço da carteira.
+- Adicionado teste `portfolio-history-range-aliases-v273.test.js` cobrindo aliases Yahoo/Compose e aliases em português.
+
 ## 2026-07-06 — Proxy v272 / patch 21.12.301-yahoo-asset-logos-v272
 
 - Adiciona resolução canônica de logotipos via Yahoo Finance Quote API.

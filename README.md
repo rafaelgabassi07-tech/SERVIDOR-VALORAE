@@ -1,17 +1,13 @@
-# VALORAE Proxy — stock modal data integrity v268
+# VALORAE Proxy — histórico fundamentalista de ações v274
 
 Core: `21.12.0`  
-Patch: `21.12.297-stock-modal-data-integrity-v268`
+Patch: `21.12.303-stock-historical-indicators-v274`
 
-Rodada incremental para corrigir três pontos do modal de ação: posição acionária estrita no escopo correto do Investidor10, histórico de indicadores fundamentalistas com aliases/endpoints adicionais e diagnósticos mais claros quando linhas são descartadas por ruído.
+Checkpoint v274 reforça o parser do histórico de indicadores fundamentalistas do modal de ação. O contrato passa a aceitar respostas tabulares/indexadas do Investidor10, incluindo formatos DataTables com colunas e linhas numéricas, sem fallback estático.
 
-## Validação esperada
-
-- `npm run build`
+Validações principais:
 - `npm run check:syntax`
 - `npm test`
-- `npm run audit:version`
-
-## Política mantida
-
-Sem fallback PETR4/GGRC11, sem mock em produção e com produtores de Ação e FII separados.
+- `node test/stock-modal-historical-indicators-indexed-rows-v274.test.js`
+- `node scripts/audit-version-consistency.js`
+- `node scripts/audit-version.js`

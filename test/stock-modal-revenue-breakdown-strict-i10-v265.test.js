@@ -41,7 +41,7 @@ assert.equal(region.status, 'OK');
 assert.equal(region.selectedYear, '2025');
 assert.equal(region.totalAmountDisplay, 'R$ 127,37 Bilhões');
 assert.deepEqual(region.items.map(item => item.label), ['Brasil', 'China', 'Ásia', 'Europa', 'Américas']);
-assert.deepEqual(region.items.map(item => item.percentDisplay), ['71%', '11%', '5%', '4%', '4%']);
+assert.deepEqual(region.items.map(item => item.percentDisplay), ['70,62%', '10,73%', '4,86%', '4,12%', '4,03%']);
 assert.ok(!JSON.stringify(region.items).includes('Negócios Petrobras'));
 assert.ok(!JSON.stringify(region.items).includes('DY'));
 assert.ok(!JSON.stringify(region.items).includes('Sou iniciante'));
@@ -51,7 +51,7 @@ assert.equal(business.status, 'OK');
 assert.equal(business.selectedYear, '2025');
 assert.equal(business.totalAmountDisplay, 'R$ 127,37 Bilhões');
 assert.deepEqual(business.items.map(item => item.label), ['Diesel', 'Petróleo', 'Gasolina', 'Óleo combustível (incluindo bunker)', 'Querosene de aviação (QAV)']);
-assert.deepEqual(business.items.map(item => item.percentDisplay), ['30%', '27%', '14%', '6%', '5%']);
+assert.deepEqual(business.items.map(item => item.percentDisplay), ['30,12%', '27,10%', '13,83%', '5,78%', '4,96%']);
 assert.ok(!JSON.stringify(business.items).includes('Vou vender'));
 assert.ok(!JSON.stringify(business.items).includes('ROE'));
 
