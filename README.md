@@ -11,3 +11,8 @@ Validações principais:
 - `node test/stock-modal-historical-indicators-indexed-rows-v274.test.js`
 - `node scripts/audit-version-consistency.js`
 - `node scripts/audit-version.js`
+
+
+## Release 21.12.313
+
+21.12.313-stock-revenue-charts-v284: reforça os gráficos de receita por regiões e negócios no modal de ações.

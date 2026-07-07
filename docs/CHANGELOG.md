@@ -1,3 +1,10 @@
+## 2026-07-07 — Proxy v284 / patch 21.12.313-stock-revenue-charts-v284
+
+- Reescrita da extração de Regiões e Negócios de receita no modal de ações, com leitura de payloads Highcharts, Chart.js e REST aninhado.
+- Normalização reforçada de campos aninhados em custom/meta/payload/props para rótulo, percentual e valor de receita.
+- Mantidos aliases canônicos revenueByRegion/revenueByBusiness e stockRevenueByRegion/stockRevenueByBusiness para o APK.
+- Adicionados testes `stock-modal-revenue-highcharts-realistic-v284.test.js` e `stock-modal-revenue-rest-nested-custom-v284.test.js`.
+
 ## 2026-07-07 — Proxy v283 / patch 21.12.312-portfolio-transaction-inception-v283
 
 - `/api/v1/portfolio/history` passa a aceitar `transactions[]` e montar o Preço da carteira pela composição histórica real.

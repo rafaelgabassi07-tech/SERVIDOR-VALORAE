@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.312-portfolio-transaction-inception-v283",
-  "patch": "21.12.312-portfolio-transaction-inception-v283",
-  "releasePatch": "21.12.312-portfolio-transaction-inception-v283",
-  "latestInternalPatch": "21.12.312-portfolio-transaction-inception-v283",
-  "description": "Proxy v283 corrige o Preço da carteira para montar a série pela composição histórica de transações, começando na primeira compra real da carteira.",
+  "release": "21.12.313-stock-revenue-charts-v284",
+  "patch": "21.12.313-stock-revenue-charts-v284",
+  "releasePatch": "21.12.313-stock-revenue-charts-v284",
+  "latestInternalPatch": "21.12.313-stock-revenue-charts-v284",
+  "description": "Proxy v284 reescreve a extração e normalização dos gráficos de Regiões e Negócios de receita no modal de ações.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -57,29 +57,33 @@
     "portfolio history timestamp forward-fill",
     "portfolio history transaction-aware composition",
     "portfolio history inception by first purchase",
-    "portfolio history synthetic fallback rejected by APK"
+    "portfolio history synthetic fallback rejected by APK",
+    "stock revenue nested custom/meta payload parser",
+    "stock revenue Highcharts/Chart.js extractor v284",
+    "stock revenue REST nested payload tests v284"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-07",
-  "checkpoint": "portfolio-transaction-inception-v283",
-  "title": "Proxy v283 — Histórico da carteira por transações",
-  "summary": "Corrige o histórico intradiário de /api/v1/portfolio/history para o gráfico Preço da carteira desenhar série real, não fallback linear.",
-  "publicVersion": "21.12.312",
-  "label": "portfolio-transaction-inception-v283",
+  "checkpoint": "stock-revenue-charts-v284",
+  "title": "Proxy v284 — Gráficos de receita de ações",
+  "summary": "Reforça o contrato de revenueByRegion/revenueByBusiness para ações com extração de Highcharts, Chart.js, payloads REST aninhados e aliases canônicos.",
+  "publicVersion": "21.12.313",
+  "label": "stock-revenue-charts-v284",
   "updatedAt": "2026-07-07T00:00:00.000Z",
   "date": "2026-07-07",
   "notes": [
-    "O Proxy preserva timestamp nos pontos intradiários de 1D/5D e nos intervalos em minutos/horas.",
-    "A mesclagem da carteira passa a ser por timestamp com forward-fill por posição, evitando perder pontos do mesmo dia.",
-    "O ponto atual substitui apenas o último ponto intradiário muito próximo; em outros casos ele é anexado sem apagar a série real.",
-    "O fallback linear só é usado quando realmente não há histórico remoto suficiente."
+    "A extração de Regiões e Negócios de receita passa a ler valores em objetos aninhados como custom, meta, payload e props.",
+    "O Proxy reconhece estruturas Highcharts/Chart.js e payloads REST aninhados usados nas páginas de ações.",
+    "O contrato preserva revenueByRegion/revenueByBusiness e os aliases stockRevenueByRegion/stockRevenueByBusiness para compatibilidade com o APK.",
+    "Novos testes cobrem cenários realistas de gráficos e payloads aninhados de receita."
   ],
   "releaseNotes": [
-    "portfolio history preserves intraday timestamps for 1D/5D",
-    "portfolio merge uses timestamp buckets with forward-filled position prices",
-    "current portfolio point no longer deletes all same-day intraday rows",
-    "test portfolio-history-intraday-v282 covers same-day Yahoo points without fallback"
+    "stock modal revenue charts read nested custom/meta/payload values",
+    "stock revenue region/business aliases expanded",
+    "Highcharts and Chart.js revenue payloads normalized",
+    "REST nested revenue payloads normalized for APK contract",
+    "stockRevenueByRegion/stockRevenueByBusiness compatibility kept"
   ],
   "apkPair": "apk_valorae_portfolio_price_realtime_root_cause_v419_AI_STUDIO_ROOT_OK_2026_07_07.zip",
   "apkVersion": "2026.07.07.08",
@@ -90,6 +94,12 @@
     "Contrato pareado com APK v419 para Patrimônio atual, cards da Carteira e gráfico Preço da carteira."
   ],
   "validation": [
-    "test portfolio-history-transaction-inception-v283 covers first-purchase start and transaction-aware composition"
+    "node --check lib/analysis/stock-modal-contract.js",
+    "node test/stock-modal-revenue-highcharts-realistic-v284.test.js",
+    "node test/stock-modal-revenue-rest-nested-custom-v284.test.js",
+    "npm run build",
+    "npm run check:syntax",
+    "npm test",
+    "npm run audit:version"
   ]
 }

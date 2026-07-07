@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.312: histórico Preço da carteira por transações, começando na primeira compra real e evitando fallback sintético como série principal.",
+  "description": "Valorae Proxy 21.12.313: reescrita robusta dos gráficos de Regiões e Negócios de receita do modal de ações.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.312-portfolio-transaction-inception-v283",
+    "releasePatch": "21.12.313-stock-revenue-charts-v284",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.312",
-    "checkpoint": "portfolio-transaction-inception-v283",
-    "releaseLabel": "portfolio-transaction-inception-v283"
+    "publicVersion": "21.12.313",
+    "checkpoint": "stock-revenue-charts-v284",
+    "releaseLabel": "stock-revenue-charts-v284"
   },
-  "releasePatch": "21.12.312-portfolio-transaction-inception-v283"
+  "releasePatch": "21.12.313-stock-revenue-charts-v284"
 }
