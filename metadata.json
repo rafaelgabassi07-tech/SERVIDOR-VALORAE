@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.311-portfolio-intraday-history-v282",
-  "patch": "21.12.311-portfolio-intraday-history-v282",
-  "releasePatch": "21.12.311-portfolio-intraday-history-v282",
-  "latestInternalPatch": "21.12.311-portfolio-intraday-history-v282",
-  "description": "Proxy v282 corrige a causa raiz do gráfico Preço da carteira: pontos intradiários do Yahoo não são mais colapsados por data, o último ponto é ancorado na cotação atual sem apagar a série real e o contrato retorna timestamps para 1D/5D.",
+  "release": "21.12.312-portfolio-transaction-inception-v283",
+  "patch": "21.12.312-portfolio-transaction-inception-v283",
+  "releasePatch": "21.12.312-portfolio-transaction-inception-v283",
+  "latestInternalPatch": "21.12.312-portfolio-transaction-inception-v283",
+  "description": "Proxy v283 corrige o Preço da carteira para montar a série pela composição histórica de transações, começando na primeira compra real da carteira.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -54,16 +54,19 @@
     "stockRevenueByRegion/stockRevenueByBusiness aliases",
     "APK v419 portfolio quote UI contract",
     "portfolio history intraday timestamp merge",
-    "portfolio history timestamp forward-fill"
+    "portfolio history timestamp forward-fill",
+    "portfolio history transaction-aware composition",
+    "portfolio history inception by first purchase",
+    "portfolio history synthetic fallback rejected by APK"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-07",
-  "checkpoint": "portfolio-intraday-history-v282",
-  "title": "Proxy v282 — Histórico intradiário da carteira",
+  "checkpoint": "portfolio-transaction-inception-v283",
+  "title": "Proxy v283 — Histórico da carteira por transações",
   "summary": "Corrige o histórico intradiário de /api/v1/portfolio/history para o gráfico Preço da carteira desenhar série real, não fallback linear.",
-  "publicVersion": "21.12.311",
-  "label": "portfolio-intraday-history-v282",
+  "publicVersion": "21.12.312",
+  "label": "portfolio-transaction-inception-v283",
   "updatedAt": "2026-07-07T00:00:00.000Z",
   "date": "2026-07-07",
   "notes": [
@@ -85,5 +88,8 @@
     "Preço da carteira passa a receber múltiplos pontos reais no mesmo dia.",
     "Cotação atual ancora o final da série sem transformar o gráfico em linha sintética.",
     "Contrato pareado com APK v419 para Patrimônio atual, cards da Carteira e gráfico Preço da carteira."
+  ],
+  "validation": [
+    "test portfolio-history-transaction-inception-v283 covers first-purchase start and transaction-aware composition"
   ]
 }

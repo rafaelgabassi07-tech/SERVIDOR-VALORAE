@@ -3,7 +3,7 @@ import { fetchYahooHistory } from '../../lib/market/yahoo.js';
 import { fetchIndicesSnapshot } from '../../lib/market/indices.js';
 import { fetchIpca } from '../../lib/market/bcb.js';
 import { fetchInvestidor10Rankings } from '../../lib/market/rankings-i10.js';
-import { buildPortfolioHistory, normalizePortfolioPositions } from '../../lib/portfolio/history.js';
+import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../../lib/portfolio/history.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute, boolParam, clampNumber, parseList, resolveSelfScrapeUrl, sendRouteError } from '../../lib/http/route.js';
 import { buildMobileScraperAssetContract, VALORAE_MOBILE_SCRAPER_CONTRACT_VERSION } from '../../lib/compat/mobile-scraper-contract.js';
@@ -146,7 +146,8 @@ export default async function handler(req, res) {
 
     if (mode === 'historico_portfolio') {
       const positions = normalizePortfolioPositions(payload);
-      const data = await buildPortfolioHistory(positions, { range: payload.range || '1Y', interval: payload.interval, maxConcurrency: clampNumber(payload.maxConcurrency || payload.concurrency, 4, 1, 8), limit: payload.limit });
+      const transactions = normalizePortfolioTransactions(payload);
+      const data = await buildPortfolioHistory(positions, { range: payload.range || '1Y', interval: payload.interval, maxConcurrency: clampNumber(payload.maxConcurrency || payload.concurrency, 4, 1, 8), limit: payload.limit, transactions });
       return sendJson(req, res, { json: data, _src: 'valorae-compat' }, { status: data.ok ? 200 : 502, engineVersion: ValoraeEngine.version, profile: 'compat' });
     }
 

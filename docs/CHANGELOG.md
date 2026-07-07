@@ -1,3 +1,9 @@
+## 2026-07-07 — Proxy v283 / patch 21.12.312-portfolio-transaction-inception-v283
+
+- `/api/v1/portfolio/history` passa a aceitar `transactions[]` e montar o Preço da carteira pela composição histórica real.
+- O range `MAX` começa na primeira compra informada, evitando curva genérica limitada por fallback.
+- Adicionado teste `portfolio-history-transaction-inception-v283.test.js` cobrindo primeira compra e entrada de segundo ativo somente na data correta.
+
 ## 2026-07-07 — Proxy v282 / patch 21.12.311-portfolio-intraday-history-v282
 
 - Corrigida a causa raiz do gráfico **Preço da carteira**: o histórico intradiário não é mais agrupado apenas por data.

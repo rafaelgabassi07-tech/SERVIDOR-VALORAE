@@ -1,5 +1,5 @@
 import { analyzePortfolio } from '../../lib/portfolio/analytics.js';
-import { buildPortfolioHistory, normalizePortfolioPositions } from '../../lib/portfolio/history.js';
+import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../../lib/portfolio/history.js';
 import { fetchIpca } from '../../lib/market/bcb.js';
 import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-dividend-agenda.js';
 import { fetchAndCompareTickers } from '../../lib/market/compare.js';
@@ -43,6 +43,7 @@ export default async function handler(req, res) {
   try {
     const q = route.input;
     const positionsRaw = normalizePortfolioPositions(q);
+    const portfolioTransactions = normalizePortfolioTransactions(q);
     if (!positionsRaw.length) {
       return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, error: 'Envie positions=[...] com ticker, quantity e averagePrice.' }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'portfolio' });
     }
@@ -105,7 +106,7 @@ export default async function handler(req, res) {
       ).catch(err => ({ ok: false, partial: true, warnings: [err?.message || String(err)] })) : Promise.resolve({ ok: true, skipped: true, assets: [], warnings: [] });
 
       const historyPromise = includeHistory ? withRouteDeadline(
-        () => buildPortfolioHistory(positions, { range, timeoutMs: deepMode ? 9000 : 2800, maxConcurrency: compactMode ? 3 : 4, limit: clampNumber(q.limit, 370, 60, 900) }),
+        () => buildPortfolioHistory(positions, { range, timeoutMs: deepMode ? 9000 : 2800, maxConcurrency: compactMode ? 3 : 4, limit: clampNumber(q.limit, 370, 60, 900), transactions: portfolioTransactions }),
         Math.min(routeDeadlineMs - 500, deepMode ? 9500 : 3400),
         () => ({ ok: false, partial: true, points: [], history: [], series: [], warnings: [`Histórico excedeu deadline do bundle; APK deve usar histórico local/cache.`] })
       ).catch(err => ({ ok: false, partial: true, points: [], history: [], series: [], warnings: [err?.message || String(err)] })) : Promise.resolve({ ok: true, skipped: true, points: [], history: [], series: [], warnings: [] });
