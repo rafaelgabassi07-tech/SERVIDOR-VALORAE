@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.320-engine-hardening-v291",
-  "patch": "21.12.320-engine-hardening-v291",
-  "releasePatch": "21.12.320-engine-hardening-v291",
-  "latestInternalPatch": "21.12.320-engine-hardening-v291",
-  "description": "Proxy v291 fortalece os motores de cotação, batch /quotes e histórico consolidado da carteira com quoteQuality, quoteCoverage, aliases de variação e série seed real antes de fallback sintético.",
+  "release": "21.12.321-portfolio-rebuild-v292",
+  "patch": "21.12.321-portfolio-rebuild-v292",
+  "releasePatch": "21.12.321-portfolio-rebuild-v292",
+  "latestInternalPatch": "21.12.321-portfolio-rebuild-v292",
+  "description": "Proxy v292 reconstrói /portfolio/history para usar motor real por posições/transações, fortalece cotações oficiais e preserva histórico mensal para Patrimônio Total.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -66,51 +66,47 @@
     "26.asset-modal.stock.v55",
     "asset history range aliases v289",
     "quote filters 1D/5D/1M live prices",
-    "portfolio history realtime router v290",
-    "portfolio price chart filters real intraday"
+    "portfolio history rebuild v292",
+    "daily quote official source only",
+    "Patrimônio Total monthly market history"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-07",
-  "checkpoint": "engine-hardening-v291",
-  "title": "Proxy v291 — Motores fortalecidos",
-  "summary": "Proxy v291 fortalece os motores de cotação, batch /quotes e histórico consolidado da carteira com quoteQuality, quoteCoverage, aliases de variação e série seed real antes de fallback sintético.",
-  "publicVersion": "21.12.320",
-  "label": "engine-hardening-v291",
-  "updatedAt": "2026-07-07",
+  "checkpoint": "portfolio-rebuild-v292",
+  "title": "Proxy v292 — motores de carteira reconstruídos",
+  "summary": "Reconstrução focada no gráfico Preço da carteira, cotação diária dos cards e histórico mensal real do modal Patrimônio Total.",
+  "publicVersion": "21.12.321",
+  "label": "portfolio-rebuild-v292",
+  "updatedAt": "2026-07-07T00:00:00.000Z",
   "date": "2026-07-07",
-  "notes": "Hardening de motores sem remover as correções v287-v290.",
-  "releaseNotes": [
-    "portfolio history router uses realtime intraday engine for positioned portfolios",
-    "legacy monthly history is only fallback without positions",
-    "routeEngine VALORAE_REALTIME_PORTFOLIO_HISTORY_V290 added",
-    "APK v430 live quote card contract preserved"
+  "notes": [
+    "/portfolio/history usa buildPortfolioHistory quando recebe posições/tickers.",
+    "Motor Yahoo prioriza regularMarketPrice, último close válido e só depois previousClose.",
+    "Resposta de cotação expõe dayChangePercent/dayChangeValue/regularMarketChangePercent para o APK.",
+    "Histórico mensal real passa a alimentar o modal Patrimônio Total pelo APK v432."
   ],
-  "apkPair": "apk_valorae_engine_hardening_v431_AI_STUDIO_ROOT_OK_2026_07_07.zip",
-  "apkVersion": "2026.07.07.20",
-  "fileSize": 1268979,
+  "releaseNotes": [
+    "portfolio history route rebuild",
+    "daily quote aliases hardened",
+    "monthly wealth retroactive quotes supported"
+  ],
+  "apkPair": "apk_valorae_portfolio_rebuild_v432_AI_STUDIO_ROOT_OK_2026_07_07.zip",
+  "apkVersion": "2026.07.07.21",
+  "fileSize": 1258859,
   "highlights": [
-    "getQuote expõe dayChangePercent, dayChangeValue, variationPct, updatedAt e quoteQuality.",
-    "buildAssetsPayload expõe quoteCoverage e quoteFailures para o APK decidir retries com segurança.",
-    "buildPortfolioHistory enriquece currentPrice com último fechamento remoto e usa seed series real antes de fallback sintético.",
-    "Roteador /portfolio/history identifica routeEngine VALORAE_REALTIME_PORTFOLIO_HISTORY_ENGINE_V291."
+    "Filtros 1D/5D/1M/3M/6M/1A/5A/MÁX recebem período normalizado corretamente.",
+    "Ativos comuns e índices usam aliases compatíveis com Yahoo/B3/Compose.",
+    "Correções do modal de ação v287/v288 são preservadas."
   ],
   "validation": [
-    "npm run build passou.",
-    "npm run check:syntax passou.",
-    "node test/quote-engine-hardening-v291.test.js passou.",
-    "node test/portfolio-history-router-realtime-v290.test.js passou com routeEngine v291.",
-    "npm test e audit:version executados no pacote final.",
-    "ZIP final validado com unzip -t."
-  ],
-  "validations": [
     "npm run build",
     "npm run check:syntax",
-    "node test/quote-engine-hardening-v291.test.js",
-    "node test/portfolio-history-router-realtime-v290.test.js",
     "npm test",
+    "node test/asset-history-range-aliases-v289.test.js",
     "npm run audit:version",
-    "unzip -t"
+    "unzip -t",
+    "node test/portfolio-rebuild-v292.test.js"
   ],
-  "file_size": 1268979
+  "proxyPair": "valorae_proxy_portfolio_rebuild_v292_AI_STUDIO_ROOT_OK_2026_07_07.zip"
 }

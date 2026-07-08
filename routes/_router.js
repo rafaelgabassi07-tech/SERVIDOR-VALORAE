@@ -4,7 +4,7 @@ import { cacheStats, clearCache } from '../lib/core/cache.js';
 import { buildMobilePortfolioSync } from '../lib/contracts/mobile.js';
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
 import { buildPortfolioAnalysis, buildRealMarketHistory, buildPortfolioReturns, buildRankings } from '../lib/portfolio/analysis.js';
-import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../lib/portfolio/history.js';
+import { buildPortfolioHistory } from '../lib/portfolio/history.js';
 import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.js';
 import { buildAssetsPayload, buildIndicesPayload, buildMarketMovers, getQuote } from '../lib/sources/quotes.js';
 import { fetchInvestidor10Rankings } from '../lib/market/rankings-i10.js';
@@ -217,6 +217,26 @@ function withRankingAliases(highs = [], lows = []) {
   };
 }
 
+
+function operationalRankingFallback(kind = 'ACAO', limit = 6) {
+  const defaults = String(kind || 'ACAO').toUpperCase() === 'FII'
+    ? ['GARE11','HGLG11','TRXF11','MXRF11','KNRI11','VISC11']
+    : ['PETR4','VALE3','ITUB4','BBAS3','PRIO3','WEGE3'];
+  const rows = defaults.slice(0, Math.max(1, Math.min(Number(limit || 6), defaults.length))).map((ticker, index) => ({
+    ticker,
+    symbol: ticker,
+    name: ticker,
+    price: 0,
+    changePercent: 0,
+    variationPercent: 0,
+    rank: index + 1,
+    fallback: true,
+    source: 'VALORAE_OPERATIONAL_STATIC_FALLBACK'
+  }));
+  const midpoint = Math.max(1, Math.ceil(rows.length / 2));
+  return withRankingAliases(rows.slice(0, midpoint), rows.slice(midpoint).length ? rows.slice(midpoint) : rows.slice(0, midpoint));
+}
+
 function rankingTickerInput(value) {
   if (Array.isArray(value)) return value;
   if (typeof value === 'string') return value.split(/[;,\s]+/).filter(Boolean);
@@ -270,12 +290,24 @@ async function buildCanonicalMarketRankings(payload = {}) {
       };
     }
 
-    const fallback = await buildMarketMovers({
-      ...payload,
-      source: 'compare',
-      limit: requestedLimit,
-      timeoutMs: clampInt(payload.fallbackTimeoutMs || payload.quoteTimeoutMs || payload.timeoutMs, 2600, 700, 8000),
-    });
+    let fallback;
+    try {
+      fallback = await buildMarketMovers({
+        ...payload,
+        source: 'compare',
+        limit: requestedLimit,
+        timeoutMs: clampInt(payload.fallbackTimeoutMs || payload.quoteTimeoutMs || payload.timeoutMs, 2600, 700, 8000),
+      });
+    } catch (err) {
+      fallback = {
+        ok: true,
+        status: 'FALLBACK',
+        fallbackUsed: true,
+        source: 'VALORAE_OPERATIONAL_STATIC_FALLBACK',
+        warning: err?.message || 'Fallback operacional estático ativado.',
+        rankings: operationalRankingFallback(kind, requestedLimit)
+      };
+    }
     const fallbackRows = rankingArraysFrom(fallback);
     const highs = mergeRankingRows(liveRows.highs, fallbackRows.highs, requestedLimit);
     const lows = mergeRankingRows(liveRows.lows, fallbackRows.lows, requestedLimit);
@@ -631,30 +663,19 @@ export async function dispatchRoute(req, res) {
     if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, buildPortfolioAnalysis(payload), { cacheControl: 'private, max-age=20' });
     if (path === '/portfolio/returns' || path === '/portfolio/return' || path === '/portfolio/performance') return sendJson(req, res, await buildPortfolioReturns(payload), { cacheControl: 'private, max-age=60' });
     if (path === '/portfolio/history') {
-      const positions = normalizePortfolioPositions(payload);
-      if (positions.length) {
-        const compactMode = ['mobile', 'fast', 'compact', 'boot'].includes(String(payload.mode || payload.profile || '').toLowerCase());
-        const timeoutMs = Math.max(1000, Math.min(Number(payload.timeoutMs || (compactMode ? 3500 : 9000)), 20000));
-        const maxConcurrency = Math.max(1, Math.min(Number(payload.maxConcurrency || payload.concurrency || (compactMode ? 3 : 4)), 8));
-        const limit = Number(payload.limit);
-        const history = await buildPortfolioHistory(positions, {
-          range: payload.range || payload.period || payload.window || '1M',
+      const hasPositions = Array.isArray(payload.positions) && payload.positions.length > 0;
+      const hasTickers = String(payload.tickers || payload.ticker || payload.symbols || payload.symbol || '').trim().length > 0;
+      if (hasPositions || hasTickers) {
+        return sendJson(req, res, await buildPortfolioHistory(payload.positions || [], {
+          ...payload,
+          transactions: payload.transactions || [],
+          range: payload.range || payload.period || '1M',
           interval: payload.interval,
-          timeoutMs,
-          maxConcurrency,
-          limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 1500) : undefined,
-          transactions: normalizePortfolioTransactions(payload)
-        });
-        return sendJson(req, res, {
-          version: RELEASE.version,
-          requestId: payload.requestId,
-          endpoint: 'portfolio-history',
-          status: history.ok ? (history.partial ? 'PARTIAL' : 'OK') : 'EMPTY',
-          routeEngine: 'VALORAE_REALTIME_PORTFOLIO_HISTORY_ENGINE_V291',
-          ...history
-        }, { cacheControl: history.ok ? 'private, max-age=45, stale-while-revalidate=180' : 'private, max-age=10, stale-while-revalidate=60' });
+          timeoutMs: payload.timeoutMs || 9000,
+          maxConcurrency: payload.maxConcurrency || 4
+        }), { cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
       }
-      return sendJson(req, res, await buildRealMarketHistory(payload));
+      return sendJson(req, res, await buildRealMarketHistory(payload), { cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
     }
     if (path === '/asset/history') return assetHistoryHandler(req, res);
     if (path === '/asset/logo' || path === '/asset/yahoo-logo') return assetLogoHandler(req, res, payload);

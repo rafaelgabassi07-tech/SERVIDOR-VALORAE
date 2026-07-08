@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.320: motores fortalecidos de cotação, /quotes e histórico da carteira para APK v431.",
+  "description": "Valorae Proxy 21.12.321: reconstrução dos motores de Preço da carteira, cotação diária e histórico mensal do patrimônio.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,18 +19,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.320-engine-hardening-v291",
+    "releasePatch": "21.12.321-portfolio-rebuild-v292",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.320",
-    "checkpoint": "engine-hardening-v291",
-    "releaseLabel": "engine-hardening-v291"
+    "publicVersion": "21.12.321",
+    "checkpoint": "portfolio-rebuild-v292",
+    "releaseLabel": "portfolio-rebuild-v292"
   },
-  "releasePatch": "21.12.320-engine-hardening-v291",
+  "releasePatch": "21.12.321-portfolio-rebuild-v292",
   "config": {
-    "releasePatch": "21.12.320-engine-hardening-v291",
-    "publicVersion": "21.12.320",
-    "checkpoint": "engine-hardening-v291",
-    "releaseLabel": "engine-hardening-v291"
+    "releasePatch": "21.12.321-portfolio-rebuild-v292",
+    "publicVersion": "21.12.321",
+    "checkpoint": "portfolio-rebuild-v292",
+    "releaseLabel": "portfolio-rebuild-v292"
   }
 }

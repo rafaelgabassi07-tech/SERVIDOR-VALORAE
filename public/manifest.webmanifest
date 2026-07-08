@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Contrato curado para APK: preço da carteira em tempo real, cotações dos cards e gráficos de ação.",
+  "description": "Motores de carteira reconstruídos para APK Valorae.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.320"
+  "version": "21.12.321"
 }

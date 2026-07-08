@@ -1,6 +1,8 @@
-## Release 21.12.320
+# VALORAE Proxy
 
-21.12.320-engine-hardening-v291: fortalece os motores de cotação, /quotes e histórico consolidado da carteira para o APK v431, com quoteQuality, quoteCoverage e seed series real antes de fallback sintético.
+## Release 21.12.321
+
+21.12.321-portfolio-rebuild-v292: reconstrói os motores de Preço da carteira, cotações diárias dos cards e histórico mensal do Patrimônio Total, preservando correções de receita, Lucro x Cotação e filtros de cotação.
 
 # VALORAE Proxy — histórico fundamentalista de ações v274
 
@@ -15,10 +17,6 @@ Validações principais:
 - `node test/stock-modal-historical-indicators-indexed-rows-v274.test.js`
 - `node scripts/audit-version-consistency.js`
 - `node scripts/audit-version.js`
-
-## Release 21.12.319
-
-21.12.319-portfolio-history-live-quotes-v290: corrige o filtro do gráfico Preço da carteira usando motor intraday em /portfolio/history quando há posições e preserva as correções de cotação em tempo real do APK v430.
 
 
 ## Release 21.12.318

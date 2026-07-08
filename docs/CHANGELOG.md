@@ -1,15 +1,8 @@
-## 21.12.320-engine-hardening-v291
+## 21.12.321-portfolio-rebuild-v292
 
-- Fortalece getQuote/buildAssetsPayload com aliases de variação, quoteQuality e quoteCoverage.
-- Fortalece buildPortfolioHistory com preço remoto por ativo, seed series real e routeEngine v291.
-- Mantém compatibilidade com os checkpoints v287-v290.
-
-## 21.12.319-portfolio-history-live-quotes-v290
-
-- Roteia /api/v1/portfolio/history para buildPortfolioHistory quando existem posições/tickers, recuperando filtros 1D/5D/1M do gráfico Preço da carteira.
-- Mantém buildRealMarketHistory apenas como fallback sem posições, evitando resposta mensal para gráfico em tempo real.
-- Adiciona teste regressivo portfolio-history-router-realtime-v290.
-- Preserva Regiões/Negócios v287, Lucro x Cotação v288 e aliases de período v289.
+- /portfolio/history passa a usar o motor real por posições/transações quando recebe carteira do APK.
+- Cotação diária expõe aliases oficiais para card do ativo e card Patrimônio Atual.
+- Histórico mensal real passa a alimentar o modal Patrimônio Total no APK pareado.
 
 
 ## 21.12.318-quote-history-range-aliases-v289
