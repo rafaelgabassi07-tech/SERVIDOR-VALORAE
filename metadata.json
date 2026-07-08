@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.318-quote-history-range-aliases-v289",
-  "patch": "21.12.318-quote-history-range-aliases-v289",
-  "releasePatch": "21.12.318-quote-history-range-aliases-v289",
-  "latestInternalPatch": "21.12.318-quote-history-range-aliases-v289",
-  "description": "Proxy v289 corrige aliases de período do histórico de cotação para que os filtros 1D/5D/1M/3M/6M/1A/5A/MÁX do APK consultem a janela correta.",
+  "release": "21.12.319-portfolio-history-live-quotes-v290",
+  "patch": "21.12.319-portfolio-history-live-quotes-v290",
+  "releasePatch": "21.12.319-portfolio-history-live-quotes-v290",
+  "latestInternalPatch": "21.12.319-portfolio-history-live-quotes-v290",
+  "description": "Proxy v290 corrige o histórico em tempo real do gráfico Preço da carteira, roteando /portfolio/history para o motor intraday quando há posições, preservando aliases de período e cotações do APK.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -65,33 +65,35 @@
     "stock revenue secondary API pass after REST asset ticker",
     "26.asset-modal.stock.v55",
     "asset history range aliases v289",
-    "quote filters 1D/5D/1M live prices"
+    "quote filters 1D/5D/1M live prices",
+    "portfolio history realtime router v290",
+    "portfolio price chart filters real intraday"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-07",
-  "checkpoint": "quote-history-range-aliases-v289",
-  "title": "Proxy v289 — aliases de histórico de cotação",
-  "summary": "Aceita aliases canônicos, Yahoo e português para histórico de ativos e índices, preservando os contratos de Lucro x Cotação e Regiões/Negócios.",
-  "publicVersion": "21.12.318",
-  "label": "quote-history-range-aliases-v289",
+  "checkpoint": "portfolio-history-live-quotes-v290",
+  "title": "Proxy v290 — Preço da carteira em tempo real",
+  "summary": "Roteia o histórico de carteira com posições para o motor intraday real, mantendo fallback legado apenas quando não há posições informadas.",
+  "publicVersion": "21.12.319",
+  "label": "portfolio-history-live-quotes-v290",
   "updatedAt": "2026-07-07T00:00:00.000Z",
   "date": "2026-07-07",
   "notes": [
-    "normalizeRange aceita 1D, 5D, 1M/1mo, 3M/3mo, 6M/6mo, 1Y/1A, 2Y/2A, 5Y/5A e MAX/MÁX.",
-    "PERIOD_MAP passa a incluir 2Y para impedir fallback silencioso para 1Y.",
-    "Histórico Yahoo continua retornando date ISO; o APK v429 passa a consumir esse formato corretamente.",
-    "Mantidas as correções anteriores de Lucro x Cotação v288 e Regiões/Negócios v287."
+    "GET/POST /api/v1/portfolio/history usa buildPortfolioHistory quando o payload contém posições, tickers/quantities ou carteira compatível.",
+    "O motor antigo buildRealMarketHistory fica restrito ao fallback sem posições, evitando comprimir filtros 1D/5D/1M em respostas mensais.",
+    "Resposta do histórico expõe routeEngine VALORAE_REALTIME_PORTFOLIO_HISTORY_V290 para diagnóstico.",
+    "Mantidas as correções v289 de aliases de período, v288 de Lucro x Cotação e v287 de Regiões/Negócios."
   ],
   "releaseNotes": [
-    "asset history range aliases for chart filters",
-    "2Y period map added",
-    "APK v429 quote date parser compatibility",
-    "stock profit quote and revenue fixes preserved"
+    "portfolio history router uses realtime intraday engine for positioned portfolios",
+    "legacy monthly history is only fallback without positions",
+    "routeEngine VALORAE_REALTIME_PORTFOLIO_HISTORY_V290 added",
+    "APK v430 live quote card contract preserved"
   ],
-  "apkPair": "apk_valorae_quote_filters_live_prices_v429_AI_STUDIO_ROOT_OK_2026_07_07.zip",
-  "apkVersion": "2026.07.07.18",
-  "fileSize": 1258859,
+  "apkPair": "apk_valorae_portfolio_price_live_quotes_v430_AI_STUDIO_ROOT_OK_2026_07_07.zip",
+  "apkVersion": "2026.07.07.19",
+  "fileSize": 1266617,
   "highlights": [
     "Filtros 1D/5D/1M/3M/6M/1A/5A/MÁX recebem período normalizado corretamente.",
     "Ativos comuns e índices usam aliases compatíveis com Yahoo/B3/Compose.",
@@ -104,5 +106,9 @@
     "node test/asset-history-range-aliases-v289.test.js",
     "npm run audit:version",
     "unzip -t"
-  ]
+  ],
+  "validations": [
+    "node test/portfolio-history-router-realtime-v290.test.js"
+  ],
+  "file_size": 1266617
 }

@@ -12,6 +12,10 @@ Validações principais:
 - `node scripts/audit-version-consistency.js`
 - `node scripts/audit-version.js`
 
+## Release 21.12.319
+
+21.12.319-portfolio-history-live-quotes-v290: corrige o filtro do gráfico Preço da carteira usando motor intraday em /portfolio/history quando há posições e preserva as correções de cotação em tempo real do APK v430.
+
 
 ## Release 21.12.318
 

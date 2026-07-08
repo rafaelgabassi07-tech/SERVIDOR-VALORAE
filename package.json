@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.318: aliases de período para histórico de cotação e suporte aos filtros 1D/5D/1M nos gráficos do APK.",
+  "description": "Valorae Proxy 21.12.319: histórico em tempo real do gráfico Preço da carteira e fallback individual de cotações no APK v430.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,18 +19,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.318-quote-history-range-aliases-v289",
+    "releasePatch": "21.12.319-portfolio-history-live-quotes-v290",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.318",
-    "checkpoint": "quote-history-range-aliases-v289",
-    "releaseLabel": "quote-history-range-aliases-v289"
+    "publicVersion": "21.12.319",
+    "checkpoint": "portfolio-history-live-quotes-v290",
+    "releaseLabel": "portfolio-history-live-quotes-v290"
   },
-  "releasePatch": "21.12.318-quote-history-range-aliases-v289",
+  "releasePatch": "21.12.319-portfolio-history-live-quotes-v290",
   "config": {
-    "releasePatch": "21.12.318-quote-history-range-aliases-v289",
-    "publicVersion": "21.12.318",
-    "checkpoint": "quote-history-range-aliases-v289",
-    "releaseLabel": "quote-history-range-aliases-v289"
+    "releasePatch": "21.12.319-portfolio-history-live-quotes-v290",
+    "publicVersion": "21.12.319",
+    "checkpoint": "portfolio-history-live-quotes-v290",
+    "releaseLabel": "portfolio-history-live-quotes-v290"
   }
 }

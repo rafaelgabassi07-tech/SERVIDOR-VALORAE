@@ -4,6 +4,7 @@ import { cacheStats, clearCache } from '../lib/core/cache.js';
 import { buildMobilePortfolioSync } from '../lib/contracts/mobile.js';
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
 import { buildPortfolioAnalysis, buildRealMarketHistory, buildPortfolioReturns, buildRankings } from '../lib/portfolio/analysis.js';
+import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../lib/portfolio/history.js';
 import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.js';
 import { buildAssetsPayload, buildIndicesPayload, buildMarketMovers, getQuote } from '../lib/sources/quotes.js';
 import { fetchInvestidor10Rankings } from '../lib/market/rankings-i10.js';
@@ -629,7 +630,32 @@ export async function dispatchRoute(req, res) {
     if (path === '/portfolio/equilibrium' || path === '/portfolio/balance') return sendJson(req, res, buildEquilibriumContract(payload), { cacheControl: 'private, max-age=20' });
     if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, buildPortfolioAnalysis(payload), { cacheControl: 'private, max-age=20' });
     if (path === '/portfolio/returns' || path === '/portfolio/return' || path === '/portfolio/performance') return sendJson(req, res, await buildPortfolioReturns(payload), { cacheControl: 'private, max-age=60' });
-    if (path === '/portfolio/history') return sendJson(req, res, await buildRealMarketHistory(payload));
+    if (path === '/portfolio/history') {
+      const positions = normalizePortfolioPositions(payload);
+      if (positions.length) {
+        const compactMode = ['mobile', 'fast', 'compact', 'boot'].includes(String(payload.mode || payload.profile || '').toLowerCase());
+        const timeoutMs = Math.max(1000, Math.min(Number(payload.timeoutMs || (compactMode ? 3500 : 9000)), 20000));
+        const maxConcurrency = Math.max(1, Math.min(Number(payload.maxConcurrency || payload.concurrency || (compactMode ? 3 : 4)), 8));
+        const limit = Number(payload.limit);
+        const history = await buildPortfolioHistory(positions, {
+          range: payload.range || payload.period || payload.window || '1M',
+          interval: payload.interval,
+          timeoutMs,
+          maxConcurrency,
+          limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 1500) : undefined,
+          transactions: normalizePortfolioTransactions(payload)
+        });
+        return sendJson(req, res, {
+          version: RELEASE.version,
+          requestId: payload.requestId,
+          endpoint: 'portfolio-history',
+          status: history.ok ? (history.partial ? 'PARTIAL' : 'OK') : 'EMPTY',
+          routeEngine: 'VALORAE_REALTIME_PORTFOLIO_HISTORY_V290',
+          ...history
+        }, { cacheControl: history.ok ? 'private, max-age=45, stale-while-revalidate=180' : 'private, max-age=10, stale-while-revalidate=60' });
+      }
+      return sendJson(req, res, await buildRealMarketHistory(payload));
+    }
     if (path === '/asset/history') return assetHistoryHandler(req, res);
     if (path === '/asset/logo' || path === '/asset/yahoo-logo') return assetLogoHandler(req, res, payload);
     if (path === '/asset/fii-modal' || path === '/fii/modal') return sendJson(req, res, await buildFiiModalContract(payload), { cacheControl: 'private, max-age=45, stale-while-revalidate=300' });

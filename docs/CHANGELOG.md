@@ -1,3 +1,10 @@
+## 21.12.319-portfolio-history-live-quotes-v290
+
+- Roteia /api/v1/portfolio/history para buildPortfolioHistory quando existem posições/tickers, recuperando filtros 1D/5D/1M do gráfico Preço da carteira.
+- Mantém buildRealMarketHistory apenas como fallback sem posições, evitando resposta mensal para gráfico em tempo real.
+- Adiciona teste regressivo portfolio-history-router-realtime-v290.
+- Preserva Regiões/Negócios v287, Lucro x Cotação v288 e aliases de período v289.
+
 
 ## 21.12.318-quote-history-range-aliases-v289
 

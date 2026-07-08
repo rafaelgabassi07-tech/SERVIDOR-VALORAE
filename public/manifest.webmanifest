@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Contrato curado para APK: gráficos de receita de ações com Regiões e Negócios normalizados.",
+  "description": "Contrato curado para APK: preço da carteira em tempo real, cotações dos cards e gráficos de ação.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.318"
+  "version": "21.12.319"
 }
