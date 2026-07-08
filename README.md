@@ -13,9 +13,9 @@ Validações principais:
 - `node scripts/audit-version.js`
 
 
-## Release 21.12.315
+## Release 21.12.316
 
-21.12.315-stock-revenue-js-discovery-v286: continua a correção de Regiões e Negócios de receita em ações com descoberta de endpoints em bundles JS/API dinâmica e aliases ampliados.
+21.12.316-stock-revenue-vesto-inline-map-v287: corrige a normalização do formato Vesto/Investidor10 ano → categoria → { value } para Regiões e Negócios de receita em ações.
 
 ## Release 21.12.313
 

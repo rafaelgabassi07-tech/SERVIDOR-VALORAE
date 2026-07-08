@@ -54,5 +54,5 @@ assert.equal(businessRows.length, 2, 'business rows must be extracted from neste
 assert.equal(businessRows[0].label, 'Diesel');
 assert.equal(businessRows[0].percent, 42);
 
-assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v53');
+assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v54');
 console.log('stock-modal-revenue-js-discovery-v286 ok');

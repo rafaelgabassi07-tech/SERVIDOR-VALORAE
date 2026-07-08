@@ -1,3 +1,11 @@
+## 2026-07-07 — Proxy v287 / patch 21.12.316-stock-revenue-vesto-inline-map-v287
+
+- Corrigida a causa raiz dos gráficos de Regiões e Negócios de receita em ações quando o Investidor10 expõe o formato usado pelo Vesto/AeroScrape: `ano -> categoria -> { value }`.
+- `value` entre 0 e 100 agora é convertido para `percent`/`percentDisplay`, sem virar valor monetário falso.
+- O ano mais recente é escolhido em payloads com múltiplos anos.
+- Contrato de ação atualizado para `26.asset-modal.stock.v54`.
+- Teste novo: `stock-modal-revenue-vesto-inline-map-v287.test.js`.
+
 ## 2026-07-07 — Proxy v286 / patch 21.12.315-stock-revenue-js-discovery-v286
 
 - Corrigida a busca dos gráficos de Regiões e Negócios de receita de ações quando o HTML público mostra apenas títulos/anos e não expõe valores textuais.

@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.315-stock-revenue-js-discovery-v286",
-  "patch": "21.12.315-stock-revenue-js-discovery-v286",
-  "releasePatch": "21.12.315-stock-revenue-js-discovery-v286",
-  "latestInternalPatch": "21.12.315-stock-revenue-js-discovery-v286",
-  "description": "Proxy v286 corrige a captura dos gráficos de Regiões e Negócios de receita em ações tentando descoberta de endpoints de receita em scripts do Investidor10 e fallback JS/API dinâmica para Regiões e Negócios de ações.",
+  "release": "21.12.316-stock-revenue-vesto-inline-map-v287",
+  "patch": "21.12.316-stock-revenue-vesto-inline-map-v287",
+  "releasePatch": "21.12.316-stock-revenue-vesto-inline-map-v287",
+  "latestInternalPatch": "21.12.316-stock-revenue-vesto-inline-map-v287",
+  "description": "Proxy v287 corrige a causa raiz dos gráficos de Regiões e Negócios de receita em ações ao converter o payload inline do Investidor10/Vesto ano → categoria → { value } para items[] normalizado.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -63,40 +63,41 @@
     "stock revenue REST nested payload tests v284",
     "stock revenue endpoint candidates without companyId",
     "stock revenue secondary API pass after REST asset ticker",
-    "26.asset-modal.stock.v53"
+    "26.asset-modal.stock.v54"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-07",
-  "checkpoint": "stock-revenue-js-discovery-v286",
-  "title": "Proxy v286 — Receita de ações por descoberta JS/API dinâmica",
-  "summary": "Corrige a origem dos gráficos de Regiões e Negócios de receita no modal de ações, adicionando tentativa por endpoints de receita via ticker/slug e segunda passada após resolver IDs pelo REST do ativo.",
-  "publicVersion": "21.12.315",
-  "label": "stock-revenue-js-discovery-v286",
+  "checkpoint": "stock-revenue-vesto-inline-map-v287",
+  "title": "Proxy v287 — Receita de ações compatível com formato Vesto/Investidor10",
+  "summary": "Normaliza explicitamente o mapa bruto usado pelo Vesto/AeroScrape nos gráficos de Diversificação de receita por região e segmentos, preservando fallback por JS/API dinâmica.",
+  "publicVersion": "21.12.316",
+  "label": "stock-revenue-vesto-inline-map-v287",
   "updatedAt": "2026-07-07T00:00:00.000Z",
   "date": "2026-07-07",
   "notes": [
-    "O Proxy tenta endpoints de Regiões/Negócios por slug do ticker mesmo quando o HTML não expõe companyId/tickerId.",
-    "Após receber /api/rest/assets/tickers/{TICKER}, o Proxy executa uma segunda passada de receita com IDs resolvidos, se necessário.",
-    "O contrato de Ação sobe para 26.asset-modal.stock.v53 mantendo revenueByRegion/revenueByBusiness e aliases stockRevenueByRegion/stockRevenueByBusiness."
+    "O Proxy converte objetos no formato 2025 → Brasil/Diesel → { value } para items[] com percent/percentDisplay.",
+    "O ano mais recente passa a ser selecionado corretamente quando o Investidor10 expõe múltiplos anos no mesmo payload.",
+    "value numérico em fatias de pizza passa a ser tratado como percentual, não como valor monetário, quando está entre 0 e 100.",
+    "O contrato de Ação sobe para 26.asset-modal.stock.v54 mantendo revenueByRegion/revenueByBusiness e aliases stockRevenueByRegion/stockRevenueByBusiness."
   ],
   "releaseNotes": [
-    "stock modal revenue charts read nested custom/meta/payload values",
-    "stock revenue region/business aliases expanded",
-    "Highcharts and Chart.js revenue payloads normalized",
-    "REST nested revenue payloads normalized for APK contract",
+    "stock revenue Vesto/Investidor10 inline year-map normalized",
+    "stock revenue selectedYear picks latest year bucket",
+    "value-only pie slices rendered as percent with amountDisplay empty",
     "stockRevenueByRegion/stockRevenueByBusiness compatibility kept"
   ],
-  "apkPair": "apk_valorae_portfolio_price_realtime_root_cause_v419_AI_STUDIO_ROOT_OK_2026_07_07.zip",
-  "apkVersion": "2026.07.07.08",
-  "fileSize": 1243555,
+  "apkPair": "apk_valorae_stock_revenue_vesto_inline_map_v427_AI_STUDIO_ROOT_OK_2026_07_07.zip",
+  "apkVersion": "2026.07.07.16",
+  "fileSize": 1226903,
   "highlights": [
-    "Preço da carteira passa a receber múltiplos pontos reais no mesmo dia.",
-    "Cotação atual ancora o final da série sem transformar o gráfico em linha sintética.",
-    "Contrato pareado com APK v419 para Patrimônio atual, cards da Carteira e gráfico Preço da carteira."
+    "Regiões de receita de ações aceitam payload inline do Investidor10/Vesto por ano.",
+    "Negócios/segmentos de receita de ações aceitam payload inline do Investidor10/Vesto por ano.",
+    "Contrato normalizado mantém items[] com percent/percentDisplay para o APK."
   ],
   "validation": [
-    "node test/stock-modal-revenue-endpoints-v286.test.js",
+    "node test/stock-modal-revenue-vesto-inline-map-v287.test.js",
+    "node test/stock-modal-revenue-js-discovery-v286.test.js",
     "node test/stock-modal-revenue-highcharts-realistic-v284.test.js",
     "node test/stock-modal-revenue-rest-nested-custom-v284.test.js",
     "npm run build",
