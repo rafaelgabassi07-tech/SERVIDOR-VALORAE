@@ -650,7 +650,7 @@ export async function dispatchRoute(req, res) {
           requestId: payload.requestId,
           endpoint: 'portfolio-history',
           status: history.ok ? (history.partial ? 'PARTIAL' : 'OK') : 'EMPTY',
-          routeEngine: 'VALORAE_REALTIME_PORTFOLIO_HISTORY_V290',
+          routeEngine: 'VALORAE_REALTIME_PORTFOLIO_HISTORY_ENGINE_V291',
           ...history
         }, { cacheControl: history.ok ? 'private, max-age=45, stale-while-revalidate=180' : 'private, max-age=10, stale-while-revalidate=60' });
       }

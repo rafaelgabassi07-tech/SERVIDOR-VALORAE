@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.319-portfolio-history-live-quotes-v290",
-  "patch": "21.12.319-portfolio-history-live-quotes-v290",
-  "releasePatch": "21.12.319-portfolio-history-live-quotes-v290",
-  "latestInternalPatch": "21.12.319-portfolio-history-live-quotes-v290",
-  "description": "Proxy v290 corrige o histórico em tempo real do gráfico Preço da carteira, roteando /portfolio/history para o motor intraday quando há posições, preservando aliases de período e cotações do APK.",
+  "release": "21.12.320-engine-hardening-v291",
+  "patch": "21.12.320-engine-hardening-v291",
+  "releasePatch": "21.12.320-engine-hardening-v291",
+  "latestInternalPatch": "21.12.320-engine-hardening-v291",
+  "description": "Proxy v291 fortalece os motores de cotação, batch /quotes e histórico consolidado da carteira com quoteQuality, quoteCoverage, aliases de variação e série seed real antes de fallback sintético.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -72,43 +72,45 @@
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-07",
-  "checkpoint": "portfolio-history-live-quotes-v290",
-  "title": "Proxy v290 — Preço da carteira em tempo real",
-  "summary": "Roteia o histórico de carteira com posições para o motor intraday real, mantendo fallback legado apenas quando não há posições informadas.",
-  "publicVersion": "21.12.319",
-  "label": "portfolio-history-live-quotes-v290",
-  "updatedAt": "2026-07-07T00:00:00.000Z",
+  "checkpoint": "engine-hardening-v291",
+  "title": "Proxy v291 — Motores fortalecidos",
+  "summary": "Proxy v291 fortalece os motores de cotação, batch /quotes e histórico consolidado da carteira com quoteQuality, quoteCoverage, aliases de variação e série seed real antes de fallback sintético.",
+  "publicVersion": "21.12.320",
+  "label": "engine-hardening-v291",
+  "updatedAt": "2026-07-07",
   "date": "2026-07-07",
-  "notes": [
-    "GET/POST /api/v1/portfolio/history usa buildPortfolioHistory quando o payload contém posições, tickers/quantities ou carteira compatível.",
-    "O motor antigo buildRealMarketHistory fica restrito ao fallback sem posições, evitando comprimir filtros 1D/5D/1M em respostas mensais.",
-    "Resposta do histórico expõe routeEngine VALORAE_REALTIME_PORTFOLIO_HISTORY_V290 para diagnóstico.",
-    "Mantidas as correções v289 de aliases de período, v288 de Lucro x Cotação e v287 de Regiões/Negócios."
-  ],
+  "notes": "Hardening de motores sem remover as correções v287-v290.",
   "releaseNotes": [
     "portfolio history router uses realtime intraday engine for positioned portfolios",
     "legacy monthly history is only fallback without positions",
     "routeEngine VALORAE_REALTIME_PORTFOLIO_HISTORY_V290 added",
     "APK v430 live quote card contract preserved"
   ],
-  "apkPair": "apk_valorae_portfolio_price_live_quotes_v430_AI_STUDIO_ROOT_OK_2026_07_07.zip",
-  "apkVersion": "2026.07.07.19",
-  "fileSize": 1266617,
+  "apkPair": "apk_valorae_engine_hardening_v431_AI_STUDIO_ROOT_OK_2026_07_07.zip",
+  "apkVersion": "2026.07.07.20",
+  "fileSize": 1268979,
   "highlights": [
-    "Filtros 1D/5D/1M/3M/6M/1A/5A/MÁX recebem período normalizado corretamente.",
-    "Ativos comuns e índices usam aliases compatíveis com Yahoo/B3/Compose.",
-    "Correções do modal de ação v287/v288 são preservadas."
+    "getQuote expõe dayChangePercent, dayChangeValue, variationPct, updatedAt e quoteQuality.",
+    "buildAssetsPayload expõe quoteCoverage e quoteFailures para o APK decidir retries com segurança.",
+    "buildPortfolioHistory enriquece currentPrice com último fechamento remoto e usa seed series real antes de fallback sintético.",
+    "Roteador /portfolio/history identifica routeEngine VALORAE_REALTIME_PORTFOLIO_HISTORY_ENGINE_V291."
   ],
   "validation": [
+    "npm run build passou.",
+    "npm run check:syntax passou.",
+    "node test/quote-engine-hardening-v291.test.js passou.",
+    "node test/portfolio-history-router-realtime-v290.test.js passou com routeEngine v291.",
+    "npm test e audit:version executados no pacote final.",
+    "ZIP final validado com unzip -t."
+  ],
+  "validations": [
     "npm run build",
     "npm run check:syntax",
+    "node test/quote-engine-hardening-v291.test.js",
+    "node test/portfolio-history-router-realtime-v290.test.js",
     "npm test",
-    "node test/asset-history-range-aliases-v289.test.js",
     "npm run audit:version",
     "unzip -t"
   ],
-  "validations": [
-    "node test/portfolio-history-router-realtime-v290.test.js"
-  ],
-  "file_size": 1266617
+  "file_size": 1268979
 }

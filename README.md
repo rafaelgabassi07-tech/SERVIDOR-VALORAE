@@ -1,3 +1,7 @@
+## Release 21.12.320
+
+21.12.320-engine-hardening-v291: fortalece os motores de cotação, /quotes e histórico consolidado da carteira para o APK v431, com quoteQuality, quoteCoverage e seed series real antes de fallback sintético.
+
 # VALORAE Proxy — histórico fundamentalista de ações v274
 
 Core: `21.12.0`  
