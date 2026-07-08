@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.321-portfolio-rebuild-v292",
-  "patch": "21.12.321-portfolio-rebuild-v292",
-  "releasePatch": "21.12.321-portfolio-rebuild-v292",
-  "latestInternalPatch": "21.12.321-portfolio-rebuild-v292",
-  "description": "Proxy v292 reconstrói /portfolio/history para usar motor real por posições/transações, fortalece cotações oficiais e preserva histórico mensal para Patrimônio Total.",
+  "release": "21.12.324-modal-deadline-disable-external-v295",
+  "patch": "21.12.324-modal-deadline-disable-external-v295",
+  "releasePatch": "21.12.324-modal-deadline-disable-external-v295",
+  "latestInternalPatch": "21.12.324-modal-deadline-disable-external-v295",
+  "description": "Proxy v295 protege os modais de ação/FII contra travamento sem bytes, preserva stale cache quando possível e impede chamadas externas ao Yahoo no modo desabilitado.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -68,16 +68,20 @@
     "quote filters 1D/5D/1M live prices",
     "portfolio history rebuild v292",
     "daily quote official source only",
-    "Patrimônio Total monthly market history"
+    "Patrimônio Total monthly market history",
+    "asset-modal-runtime deadline defensivo v295",
+    "stock-modal/fii-modal partial timeout payload",
+    "Yahoo respeita VALORAE_DISABLE_EXTERNAL",
+    "quoteCoverage/quoteFailures em /assets"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
-  "releaseDate": "2026-07-07",
-  "checkpoint": "portfolio-rebuild-v292",
-  "title": "Proxy v292 — motores de carteira reconstruídos",
-  "summary": "Reconstrução focada no gráfico Preço da carteira, cotação diária dos cards e histórico mensal real do modal Patrimônio Total.",
-  "publicVersion": "21.12.321",
-  "label": "portfolio-rebuild-v292",
+  "releaseDate": "2026-07-08",
+  "checkpoint": "modal-deadline-disable-external-v295",
+  "title": "Proxy v295 — deadline dos modais e Yahoo externo controlado",
+  "summary": "Adiciona deadline defensivo para stock-modal/fii-modal, retorno parcial em timeout e bloqueio explícito de chamadas Yahoo quando VALORAE_DISABLE_EXTERNAL=1.",
+  "publicVersion": "21.12.324",
+  "label": "modal-deadline-disable-external-v295",
   "updatedAt": "2026-07-07T00:00:00.000Z",
   "date": "2026-07-07",
   "notes": [
@@ -106,7 +110,12 @@
     "node test/asset-history-range-aliases-v289.test.js",
     "npm run audit:version",
     "unzip -t",
-    "node test/portfolio-rebuild-v292.test.js"
+    "node test/modal-deadline-disable-external-v295.test.js"
   ],
-  "proxyPair": "valorae_proxy_portfolio_rebuild_v292_AI_STUDIO_ROOT_OK_2026_07_07.zip"
+  "proxyPair": "valorae_proxy_portfolio_rebuild_v292_AI_STUDIO_ROOT_OK_2026_07_07.zip",
+  "validations": [
+    "npm run verify",
+    "node test/asset-modal-runtime-deadline-v295.test.js",
+    "node test/yahoo-disable-external-v295.test.js"
+  ]
 }

@@ -5,12 +5,12 @@ const router = fs.readFileSync(new URL('../routes/_router.js', import.meta.url),
 const history = fs.readFileSync(new URL('../lib/portfolio/history.js', import.meta.url), 'utf8');
 const quotes = fs.readFileSync(new URL('../lib/sources/quotes.js', import.meta.url), 'utf8');
 
-assert.match(router, /import \{ buildPortfolioHistory \} from '\.\.\/lib\/portfolio\/history\.js';/,
+assert.match(router, /import \{[^}]*buildPortfolioHistory[^}]*\} from '\.\.\/lib\/portfolio\/history\.js';/,
   'roteador deve importar motor novo de histórico da carteira');
-assert.match(router, /path === '\/portfolio\/history'[\s\S]*buildPortfolioHistory\(payload\.positions \|\| \[\],/,
-  'rota /portfolio/history deve usar buildPortfolioHistory quando recebe posições/tickers');
-assert.match(history, /PORTFOLIO_HISTORY_VERSION = '21\.12\.321-portfolio-rebuild-v292'/,
-  'motor deve expor versão v292');
+assert.match(router, /path === '\/portfolio\/history'[\s\S]*normalizePortfolioPositions[\s\S]*buildPortfolioHistory\(normalizedPositions,/,
+  'rota /portfolio/history deve normalizar posições/tickers e usar buildPortfolioHistory');
+assert.match(history, /PORTFOLIO_HISTORY_VERSION = '21\.12\.324-modal-deadline-disable-external-v295'/,
+  'motor deve expor versão atual v295 mantendo o engine v292');
 assert.match(history, /VALORAE_PORTFOLIO_HISTORY_REBUILD_V292/,
   'resposta deve identificar engine reconstruída v292');
 assert.equal((history.match(/const investedValue = Number\(currentPositions\.reduce/g) || []).length, 1,
@@ -25,4 +25,4 @@ for (const field of ['dayChangeValue', 'dayChangePercent', 'regularMarketChangeP
   assert.match(quotes, new RegExp(field), `cotação deve expor ${field}`);
 }
 
-console.log('portfolio-rebuild-v292 ok');
+console.log('modal-deadline-disable-external-v295 ok');

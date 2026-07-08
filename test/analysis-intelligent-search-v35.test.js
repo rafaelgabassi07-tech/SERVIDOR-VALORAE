@@ -25,6 +25,6 @@ assertOptionalMatch(client, /suggest" to "true"/, 'APK deve usar endpoint de sug
 assertOptionalDoesNotMatch(screen, /getAnalysisPage\(normalizedQuery\)/, 'APK não deve carregar /api/v1/analysis automaticamente a cada ticker digitado');
 assertOptionalDoesNotMatch(screen, /getAnalysisPage/, 'APK não deve carregar /api/v1/analysis pela página Análise; busca abre o modal único');
 assertOptionalMatch(screen, /openAssetAnalysisModal\(target, \"Busca da Análise\"\)/, 'Busca confirmada deve abrir o modal único do ativo');
-assertOptionalMatch(screen, /onSuggestionSelect = \{ openAssetAnalysisModal\(it, \"Sugestão da busca\"\) \}/, 'Sugestões da busca devem abrir o modal único');
+assertOptionalMatch(screen, /on(?:SuggestionSelect|SelectSuggestion)\s*=\s*(?:\{ openAssetAnalysisModal\(it, \"Sugestão da busca\"\) \}|analysisActions\.onSelectSuggestion)/, 'Sugestões da busca devem abrir o modal único');
 
 console.log('Analysis intelligent search v35 test OK.');

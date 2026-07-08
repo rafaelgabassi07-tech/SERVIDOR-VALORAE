@@ -3,6 +3,7 @@ import { dispatchRoute } from '../routes/_router.js';
 
 const now = Math.floor(Date.now() / 1000);
 const timestamps = [now - 3600, now - 1800, now - 300];
+const originalFetch = globalThis.fetch;
 
 globalThis.fetch = async () => new Response(JSON.stringify({
   chart: {
@@ -39,10 +40,11 @@ const res = mockResponse();
 await dispatchRoute(req, res);
 const payload = JSON.parse(res.body);
 assert.equal(payload.endpoint, 'portfolio-history');
-assert.equal(payload.routeEngine, 'VALORAE_REALTIME_PORTFOLIO_HISTORY_ENGINE_V291');
+assert.equal(payload.routeEngine, 'VALORAE_PORTFOLIO_HISTORY_REBUILD_V292');
 assert.equal(payload.range, '1D');
 assert.equal(payload.interval, '5m');
 assert.equal(payload.fallbackUsed, false);
 assert.ok(payload.series.length >= 3, `series.length=${payload.series?.length}`);
 assert.ok(payload.series.some(point => String(point.source || '').includes('Intraday')));
-console.log('portfolio-history-router-realtime-v291 ok');
+globalThis.fetch = originalFetch;
+console.log('portfolio-history-router-realtime-v292 ok');

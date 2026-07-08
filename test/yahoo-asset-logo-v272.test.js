@@ -3,6 +3,8 @@ import { fetchYahooLogo } from '../lib/market/yahoo.js';
 import { routeManifest, _test } from '../routes/_router.js';
 
 const originalFetch = globalThis.fetch;
+const originalDisableExternal = process.env.VALORAE_DISABLE_EXTERNAL;
+delete process.env.VALORAE_DISABLE_EXTERNAL;
 let requestedUrl = '';
 globalThis.fetch = async (url) => {
   requestedUrl = String(url);
@@ -34,6 +36,8 @@ try {
   assert.ok(requestedUrl.includes('fields=logoUrl%2CcompanyLogoUrl%2CshortName%2ClongName%2Csymbol'));
 } finally {
   globalThis.fetch = originalFetch;
+  if (originalDisableExternal === undefined) delete process.env.VALORAE_DISABLE_EXTERNAL;
+  else process.env.VALORAE_DISABLE_EXTERNAL = originalDisableExternal;
 }
 
 const routes = routeManifest().routes;

@@ -1,8 +1,9 @@
 # VALORAE Proxy
 
-## Release 21.12.321
+## Release 21.12.324
 
-21.12.321-portfolio-rebuild-v292: reconstrói os motores de Preço da carteira, cotações diárias dos cards e histórico mensal do Patrimônio Total, preservando correções de receita, Lucro x Cotação e filtros de cotação.
+21.12.324-modal-deadline-disable-external-v295: adiciona deadline defensivo aos modais de ação/FII, retorna payload parcial em timeout e faz Yahoo respeitar VALORAE_DISABLE_EXTERNAL sem chamadas externas.
+
 
 # VALORAE Proxy — histórico fundamentalista de ações v274
 

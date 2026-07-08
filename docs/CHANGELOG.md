@@ -1,9 +1,9 @@
-## 21.12.321-portfolio-rebuild-v292
+## 21.12.324-modal-deadline-disable-external-v295
 
-- /portfolio/history passa a usar o motor real por posições/transações quando recebe carteira do APK.
-- Cotação diária expõe aliases oficiais para card do ativo e card Patrimônio Atual.
-- Histórico mensal real passa a alimentar o modal Patrimônio Total no APK pareado.
-
+- `stock-modal` e `fii-modal` passam a ter deadline defensivo, retornando payload parcial em vez de travar sem bytes.
+- Yahoo Finance respeita `VALORAE_DISABLE_EXTERNAL=1`, usando cache stale quando disponível e payload `external-disabled` quando não há cache.
+- `/assets` expõe `quoteCoverage` e `quoteFailures` para o APK decidir retries com mais segurança.
+- Validação: `npm run verify` com 162 testes.
 
 ## 21.12.318-quote-history-range-aliases-v289
 

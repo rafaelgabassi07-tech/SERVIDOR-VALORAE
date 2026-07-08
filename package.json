@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.321: reconstrução dos motores de Preço da carteira, cotação diária e histórico mensal do patrimônio.",
+  "description": "Valorae Proxy 21.12.324: deadlines defensivos nos modais e Yahoo respeitando VALORAE_DISABLE_EXTERNAL.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,18 +19,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.321-portfolio-rebuild-v292",
+    "releasePatch": "21.12.324-modal-deadline-disable-external-v295",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.321",
-    "checkpoint": "portfolio-rebuild-v292",
-    "releaseLabel": "portfolio-rebuild-v292"
+    "publicVersion": "21.12.324",
+    "checkpoint": "modal-deadline-disable-external-v295",
+    "releaseLabel": "modal-deadline-disable-external-v295"
   },
-  "releasePatch": "21.12.321-portfolio-rebuild-v292",
+  "releasePatch": "21.12.324-modal-deadline-disable-external-v295",
   "config": {
-    "releasePatch": "21.12.321-portfolio-rebuild-v292",
-    "publicVersion": "21.12.321",
-    "checkpoint": "portfolio-rebuild-v292",
-    "releaseLabel": "portfolio-rebuild-v292"
+    "releasePatch": "21.12.324-modal-deadline-disable-external-v295",
+    "publicVersion": "21.12.324",
+    "checkpoint": "modal-deadline-disable-external-v295",
+    "releaseLabel": "modal-deadline-disable-external-v295"
   }
 }

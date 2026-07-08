@@ -4,7 +4,7 @@ import { cacheStats, clearCache } from '../lib/core/cache.js';
 import { buildMobilePortfolioSync } from '../lib/contracts/mobile.js';
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
 import { buildPortfolioAnalysis, buildRealMarketHistory, buildPortfolioReturns, buildRankings } from '../lib/portfolio/analysis.js';
-import { buildPortfolioHistory } from '../lib/portfolio/history.js';
+import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../lib/portfolio/history.js';
 import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.js';
 import { buildAssetsPayload, buildIndicesPayload, buildMarketMovers, getQuote } from '../lib/sources/quotes.js';
 import { fetchInvestidor10Rankings } from '../lib/market/rankings-i10.js';
@@ -662,18 +662,25 @@ export async function dispatchRoute(req, res) {
     if (path === '/portfolio/equilibrium' || path === '/portfolio/balance') return sendJson(req, res, buildEquilibriumContract(payload), { cacheControl: 'private, max-age=20' });
     if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, buildPortfolioAnalysis(payload), { cacheControl: 'private, max-age=20' });
     if (path === '/portfolio/returns' || path === '/portfolio/return' || path === '/portfolio/performance') return sendJson(req, res, await buildPortfolioReturns(payload), { cacheControl: 'private, max-age=60' });
+    // Compat marker: VALORAE_REALTIME_PORTFOLIO_HISTORY_ENGINE_V291 evoluído para VALORAE_PORTFOLIO_HISTORY_REBUILD_V292.
     if (path === '/portfolio/history') {
-      const hasPositions = Array.isArray(payload.positions) && payload.positions.length > 0;
+      const normalizedPositions = normalizePortfolioPositions({
+        ...payload,
+        tickers: payload.tickers || payload.ticker || payload.symbols || payload.symbol
+      });
+      const normalizedTransactions = normalizePortfolioTransactions(payload);
+      const hasPositions = normalizedPositions.length > 0;
       const hasTickers = String(payload.tickers || payload.ticker || payload.symbols || payload.symbol || '').trim().length > 0;
       if (hasPositions || hasTickers) {
-        return sendJson(req, res, await buildPortfolioHistory(payload.positions || [], {
+        const data = await buildPortfolioHistory(normalizedPositions, {
           ...payload,
-          transactions: payload.transactions || [],
+          transactions: normalizedTransactions,
           range: payload.range || payload.period || '1M',
           interval: payload.interval,
           timeoutMs: payload.timeoutMs || 9000,
           maxConcurrency: payload.maxConcurrency || 4
-        }), { cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
+        });
+        return sendJson(req, res, { endpoint: 'portfolio-history', ...data }, { cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
       }
       return sendJson(req, res, await buildRealMarketHistory(payload), { cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
     }

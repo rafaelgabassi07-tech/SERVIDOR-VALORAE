@@ -6,8 +6,8 @@ const portfolio = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/P
 
 assertOptionalMatch(screen, /fun openAssetAnalysisModal/, 'AnalysisScreen deve centralizar abertura no modal único');
 assertOptionalMatch(screen, /openAssetAnalysisModal\(target, \"Busca da Análise\"\)/, 'Busca por teclado deve abrir modal único');
-assertOptionalMatch(screen, /onSuggestionSelect = \{ openAssetAnalysisModal\(it, \"Sugestão da busca\"\) \}/, 'Sugestões da busca devem abrir modal único');
-assertOptionalMatch(screen, /onTickerSelect = \{ openAssetAnalysisModal\(it, \"Ativo da categoria\"\) \}/, 'Ranking/categorias da Análise devem abrir modal único');
+assertOptionalMatch(screen, /on(?:SuggestionSelect|SelectSuggestion)\s*=\s*(?:\{ openAssetAnalysisModal\(it, \"Sugestão da busca\"\) \}|analysisActions\.onSelectSuggestion)/, 'Sugestões da busca devem abrir modal único');
+assertOptionalMatch(screen, /on(?:TickerSelect|SelectCategoryTicker)\s*=\s*(?:\{ openAssetAnalysisModal\(it, \"Ativo da categoria\"\) \}|analysisActions\.onSelectCategoryTicker)/, 'Ranking/categorias da Análise devem abrir modal único');
 assertOptionalMatch(screen, /openAssetAnalysisModal\(ticker, group\.analysisDiscoveryShortTitle\(\)\)/, 'Subpáginas/listas da Análise devem abrir modal único');
 assertOptionalMatch(screen, /AssetDetailsModal\(/, 'Modal compartilhado precisa ser o AssetDetailsModal');
 assertOptionalDoesNotMatch(screen, /ValoraeProxyClient\.getAnalysisPage/, 'Página Análise não pode buscar detalhes completos de ativo');
