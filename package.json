@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.316: normalização do formato real do Investidor10/Vesto para gráficos de Regiões e Negócios de receita em ações.",
+  "description": "Valorae Proxy 21.12.318: aliases de período para histórico de cotação e suporte aos filtros 1D/5D/1M nos gráficos do APK.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,18 +19,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.316-stock-revenue-vesto-inline-map-v287",
+    "releasePatch": "21.12.318-quote-history-range-aliases-v289",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.316",
-    "checkpoint": "stock-revenue-vesto-inline-map-v287",
-    "releaseLabel": "stock-revenue-vesto-inline-map-v287"
+    "publicVersion": "21.12.318",
+    "checkpoint": "quote-history-range-aliases-v289",
+    "releaseLabel": "quote-history-range-aliases-v289"
   },
-  "releasePatch": "21.12.316-stock-revenue-vesto-inline-map-v287",
+  "releasePatch": "21.12.318-quote-history-range-aliases-v289",
   "config": {
-    "releasePatch": "21.12.316-stock-revenue-vesto-inline-map-v287",
-    "publicVersion": "21.12.316",
-    "checkpoint": "stock-revenue-vesto-inline-map-v287",
-    "releaseLabel": "stock-revenue-vesto-inline-map-v287"
+    "releasePatch": "21.12.318-quote-history-range-aliases-v289",
+    "publicVersion": "21.12.318",
+    "checkpoint": "quote-history-range-aliases-v289",
+    "releaseLabel": "quote-history-range-aliases-v289"
   }
 }

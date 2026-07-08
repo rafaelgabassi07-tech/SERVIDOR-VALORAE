@@ -1,3 +1,17 @@
+
+## 21.12.318-quote-history-range-aliases-v289
+
+- Corrige aliases de período do histórico de cotação para filtros 1D/5D/1M/3M/6M/1A/5A/MÁX.
+- Adiciona 2Y ao PERIOD_MAP para evitar fallback silencioso para 1Y.
+- Mantém Lucro x Cotação v288 e Regiões/Negócios v287.
+
+## 2026-07-07 — Proxy v288 / patch 21.12.317-stock-profit-quote-priority-v288
+
+- Corrigida regressão em **Lucro x Cotação** no modal de ação: `/api/cotacao-lucro/{ticker}/adjusted/` agora entra antes dos candidatos expansivos de Regiões/Negócios.
+- Mantida a correção v287 de Regiões e Negócios no formato Vesto/Investidor10 `ano -> categoria -> { value }`.
+- Contrato de ação atualizado para `26.asset-modal.stock.v55`.
+- Validação cobre a prioridade de `lucroCotacao` antes dos endpoints de receita e a preservação de `profitQuoteChart`.
+
 ## 2026-07-07 — Proxy v287 / patch 21.12.316-stock-revenue-vesto-inline-map-v287
 
 - Corrigida a causa raiz dos gráficos de Regiões e Negócios de receita em ações quando o Investidor10 expõe o formato usado pelo Vesto/AeroScrape: `ano -> categoria -> { value }`.

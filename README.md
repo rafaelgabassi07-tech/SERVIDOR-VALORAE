@@ -13,9 +13,13 @@ Validações principais:
 - `node scripts/audit-version.js`
 
 
-## Release 21.12.316
+## Release 21.12.318
 
-21.12.316-stock-revenue-vesto-inline-map-v287: corrige a normalização do formato Vesto/Investidor10 ano → categoria → { value } para Regiões e Negócios de receita em ações.
+21.12.318-quote-history-range-aliases-v289: corrige aliases de período do histórico de cotação para filtros 1D/5D/1M/3M/6M/1A/5A/MÁX e preserva Lucro x Cotação/Regiões/Negócios.
+
+## Release 21.12.317
+
+21.12.317-stock-profit-quote-priority-v288: corrige a normalização do formato Vesto/Investidor10 ano → categoria → { value } para Regiões e Negócios de receita em ações.
 
 ## Release 21.12.313
 

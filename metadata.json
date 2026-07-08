@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.316-stock-revenue-vesto-inline-map-v287",
-  "patch": "21.12.316-stock-revenue-vesto-inline-map-v287",
-  "releasePatch": "21.12.316-stock-revenue-vesto-inline-map-v287",
-  "latestInternalPatch": "21.12.316-stock-revenue-vesto-inline-map-v287",
-  "description": "Proxy v287 corrige a causa raiz dos gráficos de Regiões e Negócios de receita em ações ao converter o payload inline do Investidor10/Vesto ano → categoria → { value } para items[] normalizado.",
+  "release": "21.12.318-quote-history-range-aliases-v289",
+  "patch": "21.12.318-quote-history-range-aliases-v289",
+  "releasePatch": "21.12.318-quote-history-range-aliases-v289",
+  "latestInternalPatch": "21.12.318-quote-history-range-aliases-v289",
+  "description": "Proxy v289 corrige aliases de período do histórico de cotação para que os filtros 1D/5D/1M/3M/6M/1A/5A/MÁX do APK consultem a janela correta.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -63,46 +63,45 @@
     "stock revenue REST nested payload tests v284",
     "stock revenue endpoint candidates without companyId",
     "stock revenue secondary API pass after REST asset ticker",
-    "26.asset-modal.stock.v54"
+    "26.asset-modal.stock.v55",
+    "asset history range aliases v289",
+    "quote filters 1D/5D/1M live prices"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-07",
-  "checkpoint": "stock-revenue-vesto-inline-map-v287",
-  "title": "Proxy v287 — Receita de ações compatível com formato Vesto/Investidor10",
-  "summary": "Normaliza explicitamente o mapa bruto usado pelo Vesto/AeroScrape nos gráficos de Diversificação de receita por região e segmentos, preservando fallback por JS/API dinâmica.",
-  "publicVersion": "21.12.316",
-  "label": "stock-revenue-vesto-inline-map-v287",
+  "checkpoint": "quote-history-range-aliases-v289",
+  "title": "Proxy v289 — aliases de histórico de cotação",
+  "summary": "Aceita aliases canônicos, Yahoo e português para histórico de ativos e índices, preservando os contratos de Lucro x Cotação e Regiões/Negócios.",
+  "publicVersion": "21.12.318",
+  "label": "quote-history-range-aliases-v289",
   "updatedAt": "2026-07-07T00:00:00.000Z",
   "date": "2026-07-07",
   "notes": [
-    "O Proxy converte objetos no formato 2025 → Brasil/Diesel → { value } para items[] com percent/percentDisplay.",
-    "O ano mais recente passa a ser selecionado corretamente quando o Investidor10 expõe múltiplos anos no mesmo payload.",
-    "value numérico em fatias de pizza passa a ser tratado como percentual, não como valor monetário, quando está entre 0 e 100.",
-    "O contrato de Ação sobe para 26.asset-modal.stock.v54 mantendo revenueByRegion/revenueByBusiness e aliases stockRevenueByRegion/stockRevenueByBusiness."
+    "normalizeRange aceita 1D, 5D, 1M/1mo, 3M/3mo, 6M/6mo, 1Y/1A, 2Y/2A, 5Y/5A e MAX/MÁX.",
+    "PERIOD_MAP passa a incluir 2Y para impedir fallback silencioso para 1Y.",
+    "Histórico Yahoo continua retornando date ISO; o APK v429 passa a consumir esse formato corretamente.",
+    "Mantidas as correções anteriores de Lucro x Cotação v288 e Regiões/Negócios v287."
   ],
   "releaseNotes": [
-    "stock revenue Vesto/Investidor10 inline year-map normalized",
-    "stock revenue selectedYear picks latest year bucket",
-    "value-only pie slices rendered as percent with amountDisplay empty",
-    "stockRevenueByRegion/stockRevenueByBusiness compatibility kept"
+    "asset history range aliases for chart filters",
+    "2Y period map added",
+    "APK v429 quote date parser compatibility",
+    "stock profit quote and revenue fixes preserved"
   ],
-  "apkPair": "apk_valorae_stock_revenue_vesto_inline_map_v427_AI_STUDIO_ROOT_OK_2026_07_07.zip",
-  "apkVersion": "2026.07.07.16",
-  "fileSize": 1226903,
+  "apkPair": "apk_valorae_quote_filters_live_prices_v429_AI_STUDIO_ROOT_OK_2026_07_07.zip",
+  "apkVersion": "2026.07.07.18",
+  "fileSize": 1258859,
   "highlights": [
-    "Regiões de receita de ações aceitam payload inline do Investidor10/Vesto por ano.",
-    "Negócios/segmentos de receita de ações aceitam payload inline do Investidor10/Vesto por ano.",
-    "Contrato normalizado mantém items[] com percent/percentDisplay para o APK."
+    "Filtros 1D/5D/1M/3M/6M/1A/5A/MÁX recebem período normalizado corretamente.",
+    "Ativos comuns e índices usam aliases compatíveis com Yahoo/B3/Compose.",
+    "Correções do modal de ação v287/v288 são preservadas."
   ],
   "validation": [
-    "node test/stock-modal-revenue-vesto-inline-map-v287.test.js",
-    "node test/stock-modal-revenue-js-discovery-v286.test.js",
-    "node test/stock-modal-revenue-highcharts-realistic-v284.test.js",
-    "node test/stock-modal-revenue-rest-nested-custom-v284.test.js",
     "npm run build",
     "npm run check:syntax",
     "npm test",
+    "node test/asset-history-range-aliases-v289.test.js",
     "npm run audit:version",
     "unzip -t"
   ]
