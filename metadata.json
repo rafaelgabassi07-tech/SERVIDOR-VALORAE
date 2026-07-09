@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.324-modal-deadline-disable-external-v295",
-  "patch": "21.12.324-modal-deadline-disable-external-v295",
-  "releasePatch": "21.12.324-modal-deadline-disable-external-v295",
-  "latestInternalPatch": "21.12.324-modal-deadline-disable-external-v295",
-  "description": "Proxy v295 protege os modais de ação/FII contra travamento sem bytes, preserva stale cache quando possível e impede chamadas externas ao Yahoo no modo desabilitado.",
+  "release": "21.12.325-asset-modal-quality-cache-v296",
+  "patch": "21.12.325-asset-modal-quality-cache-v296",
+  "releasePatch": "21.12.325-asset-modal-quality-cache-v296",
+  "latestInternalPatch": "21.12.325-asset-modal-quality-cache-v296",
+  "description": "Proxy v296 adiciona quality gate nos modais de Ação/FII, evita cache HTTP de PARTIAL vazio e reduz TTL de PARTIAL útil para eliminar intermitência de modal sem dados.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -72,16 +72,19 @@
     "asset-modal-runtime deadline defensivo v295",
     "stock-modal/fii-modal partial timeout payload",
     "Yahoo respeita VALORAE_DISABLE_EXTERNAL",
-    "quoteCoverage/quoteFailures em /assets"
+    "quoteCoverage/quoteFailures em /assets",
+    "asset-modal quality gate v296",
+    "não cacheia PARTIAL vazio nos modais",
+    "Cache-Control no-store para stock-modal/fii-modal"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-08",
-  "checkpoint": "modal-deadline-disable-external-v295",
-  "title": "Proxy v295 — deadline dos modais e Yahoo externo controlado",
+  "checkpoint": "asset-modal-quality-cache-v296",
+  "title": "Proxy v296 — quality gate dos modais de Ação/FII",
   "summary": "Adiciona deadline defensivo para stock-modal/fii-modal, retorno parcial em timeout e bloqueio explícito de chamadas Yahoo quando VALORAE_DISABLE_EXTERNAL=1.",
-  "publicVersion": "21.12.324",
-  "label": "modal-deadline-disable-external-v295",
+  "publicVersion": "21.12.325",
+  "label": "asset-modal-quality-cache-v296",
   "updatedAt": "2026-07-07T00:00:00.000Z",
   "date": "2026-07-07",
   "notes": [
@@ -96,7 +99,7 @@
     "monthly wealth retroactive quotes supported"
   ],
   "apkPair": "apk_valorae_portfolio_rebuild_v432_AI_STUDIO_ROOT_OK_2026_07_07.zip",
-  "apkVersion": "2026.07.07.21",
+  "apkVersion": "2026.07.08.18",
   "fileSize": 1258859,
   "highlights": [
     "Filtros 1D/5D/1M/3M/6M/1A/5A/MÁX recebem período normalizado corretamente.",
@@ -110,7 +113,9 @@
     "node test/asset-history-range-aliases-v289.test.js",
     "npm run audit:version",
     "unzip -t",
-    "node test/modal-deadline-disable-external-v295.test.js"
+    "node test/modal-deadline-disable-external-v295.test.js",
+    "node test/asset-modal-quality-cache-v296.test.js",
+    "npm run verify"
   ],
   "proxyPair": "valorae_proxy_portfolio_rebuild_v292_AI_STUDIO_ROOT_OK_2026_07_07.zip",
   "validations": [

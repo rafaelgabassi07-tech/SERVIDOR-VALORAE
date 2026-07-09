@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.324: deadlines defensivos nos modais e Yahoo respeitando VALORAE_DISABLE_EXTERNAL.",
+  "description": "Valorae Proxy 21.12.325: quality gate dos modais de Ação/FII para não cachear PARTIAL vazio.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,18 +19,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.324-modal-deadline-disable-external-v295",
+    "releasePatch": "21.12.325-asset-modal-quality-cache-v296",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.324",
-    "checkpoint": "modal-deadline-disable-external-v295",
-    "releaseLabel": "modal-deadline-disable-external-v295"
+    "publicVersion": "21.12.325",
+    "checkpoint": "asset-modal-quality-cache-v296",
+    "releaseLabel": "asset-modal-quality-cache-v296"
   },
-  "releasePatch": "21.12.324-modal-deadline-disable-external-v295",
+  "releasePatch": "21.12.325-asset-modal-quality-cache-v296",
   "config": {
-    "releasePatch": "21.12.324-modal-deadline-disable-external-v295",
-    "publicVersion": "21.12.324",
-    "checkpoint": "modal-deadline-disable-external-v295",
-    "releaseLabel": "modal-deadline-disable-external-v295"
+    "releasePatch": "21.12.325-asset-modal-quality-cache-v296",
+    "publicVersion": "21.12.325",
+    "checkpoint": "asset-modal-quality-cache-v296",
+    "releaseLabel": "asset-modal-quality-cache-v296"
   }
 }

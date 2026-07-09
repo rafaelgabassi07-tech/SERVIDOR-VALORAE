@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Modais com deadline defensivo e Yahoo controlado por VALORAE_DISABLE_EXTERNAL.",
+  "description": "Quality gate dos modais para evitar cache de respostas parciais vazias.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.324"
+  "version": "21.12.325"
 }

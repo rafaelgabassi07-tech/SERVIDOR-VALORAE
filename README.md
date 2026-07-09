@@ -1,3 +1,7 @@
+## Release 21.12.325
+
+21.12.325-asset-modal-quality-cache-v296: adiciona quality gate aos modais de Ação/FII, impede cache de payload PARTIAL vazio e deixa o cache HTTP desses endpoints em no-store para eliminar intermitência de modal sem dados.
+
 # VALORAE Proxy
 
 ## Release 21.12.324

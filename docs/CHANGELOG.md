@@ -1,3 +1,9 @@
+## 21.12.325-asset-modal-quality-cache-v296
+
+- Modais de Ação/FII deixam de cachear respostas PARTIAL sem dados úteis.
+- Respostas PARTIAL úteis passam a ter TTL interno curto.
+- Rotas /asset/stock-modal e /asset/fii-modal usam Cache-Control no-store; o runtime do Proxy continua responsável pelo cache seguro.
+
 ## 21.12.324-modal-deadline-disable-external-v295
 
 - `stock-modal` e `fii-modal` passam a ter deadline defensivo, retornando payload parcial em vez de travar sem bytes.

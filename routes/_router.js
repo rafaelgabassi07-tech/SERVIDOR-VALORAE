@@ -686,8 +686,8 @@ export async function dispatchRoute(req, res) {
     }
     if (path === '/asset/history') return assetHistoryHandler(req, res);
     if (path === '/asset/logo' || path === '/asset/yahoo-logo') return assetLogoHandler(req, res, payload);
-    if (path === '/asset/fii-modal' || path === '/fii/modal') return sendJson(req, res, await buildFiiModalContract(payload), { cacheControl: 'private, max-age=45, stale-while-revalidate=300' });
-    if (path === '/asset/stock-modal' || path === '/asset/action-modal' || path === '/acao/modal') return sendJson(req, res, await buildStockModalContract(payload), { cacheControl: 'private, max-age=45, stale-while-revalidate=300' });
+    if (path === '/asset/fii-modal' || path === '/fii/modal') return sendJson(req, res, await buildFiiModalContract(payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
+    if (path === '/asset/stock-modal' || path === '/asset/action-modal' || path === '/acao/modal') return sendJson(req, res, await buildStockModalContract(payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
     if (path === '/analysis' || path === '/asset/analysis') {
       const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query);
       if (!ticker) return sendJson(req, res, { status: 'ERROR', ok: false, endpoint: 'analysis', error: 'Informe ticker=PETR4 ou symbol=PETR4.' }, { status: 400, cacheControl: 'no-store' });

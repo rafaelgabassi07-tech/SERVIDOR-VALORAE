@@ -21,7 +21,7 @@ const first = await withAssetModalRuntime({
   payload: { surface: 'runtime-test' },
   ttlMs: 1000,
   staleMs: 1000,
-  producer: async () => ({ ok: true, status: 'OK', ticker: 'V267A', value: ++calls, updatedAt: '2026-07-06T00:00:00.000Z' })
+  producer: async () => ({ ok: true, status: 'OK', ticker: 'V267A', value: ++calls, updatedAt: '2026-07-06T00:00:00.000Z', quoteSummary: { price: 10.5, priceDisplay: 'R$ 10,50' } })
 });
 assert.equal(first.value, 1);
 assert.equal(first.diagnostics.modalRuntime.cacheStatus, 'MISS');
@@ -32,7 +32,7 @@ const second = await withAssetModalRuntime({
   family: 'stock',
   ticker: 'V267A',
   payload: { surface: 'runtime-test' },
-  producer: async () => ({ ok: true, status: 'OK', ticker: 'V267A', value: ++calls })
+  producer: async () => ({ ok: true, status: 'OK', ticker: 'V267A', value: ++calls, quoteSummary: { price: 10.5, priceDisplay: 'R$ 10,50' } })
 });
 assert.equal(second.value, 1);
 assert.equal(second.diagnostics.modalRuntime.cacheStatus, 'HIT');
@@ -42,7 +42,7 @@ const bypass = await withAssetModalRuntime({
   family: 'stock',
   ticker: 'V267A',
   payload: { surface: 'runtime-test', refresh: 'true' },
-  producer: async () => ({ ok: true, status: 'OK', ticker: 'V267A', value: ++calls })
+  producer: async () => ({ ok: true, status: 'OK', ticker: 'V267A', value: ++calls, quoteSummary: { price: 10.5, priceDisplay: 'R$ 10,50' } })
 });
 assert.equal(bypass.value, 2);
 assert.equal(bypass.diagnostics.modalRuntime.cacheStatus, 'BYPASS');
@@ -55,7 +55,7 @@ await withAssetModalRuntime({
   payload: { surface: 'runtime-stale-test' },
   ttlMs: 1,
   staleMs: 1000,
-  producer: async () => ({ ok: true, status: 'OK', ticker: 'V267B', value: ++staleCalls, updatedAt: '2026-07-06T00:00:01.000Z' })
+  producer: async () => ({ ok: true, status: 'OK', ticker: 'V267B', value: ++staleCalls, updatedAt: '2026-07-06T00:00:01.000Z', quoteSummary: { price: 99.9, priceDisplay: 'R$ 99,90' } })
 });
 await sleep(5);
 const staleFallback = await withAssetModalRuntime({
