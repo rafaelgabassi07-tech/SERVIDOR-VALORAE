@@ -1,4 +1,32 @@
-## 21.12.326-full-modal-portfolio-history-alignment-v297
+## 21.12.331 — v302 stock modal signed chart visuals (2026-07-09)
+
+- Preserva e audita lucro líquido negativo nos contratos de gráficos de ação.
+- Adiciona diagnósticos `negativeNetIncome` para Payout, Receitas e Lucros, Lucro x Cotação e Evolução do Patrimônio.
+- Adiciona teste `stock-modal-signed-chart-contract-v302` para impedir regressão que transforme prejuízo em valor positivo.
+- Pareado com APK v456.
+
+## 21.12.330 — v301 analysis logo cache optimization (2026-07-09)
+
+- Adiciona cache negativo curto para `/api/v1/asset/logo` quando Yahoo não retorna logo oficial.
+- Reduz repetição de chamadas query1/query2 em ativos sem `companyLogoUrl`, acelerando as subpáginas da Análise quando o APK já possui fallback local.
+- Preserva cache positivo/stale de logos oficiais e contratos full-only dos modais.
+- Adiciona teste `yahoo-logo-negative-cache-v301`.
+
+## 21.12.330 — v301 modal full speed optimization (2026-07-09)
+
+- Mantém os modais de Ação/FII em modo full-only, sem retorno progressivo/PARTIAL para a UI.
+- Normaliza a chave de cache do runtime para reutilizar o mesmo contrato entre Carteira, Ranking e Análise.
+- Aumenta o TTL seguro do contrato completo dos modais para reduzir recomputação em reaberturas rápidas.
+- Paraleliza batches de histórico fundamentalista de ações, candidatos de vacância de FII e resolução limitada de comunicados/PDFs.
+- Adiciona teste `asset-modal-speed-full-v300`.
+
+## 21.12.327 — v298 portfolio intraday full coverage (2026-07-09)
+
+- Corrige `/api/v1/portfolio/history` para não emitir pontos intradiários parciais quando nem todos os ativos com posição têm candle no timestamp.
+- Alinha a série intradiária ao `currentPrice` recebido do APK quando a divergência é pequena e plausível, evitando salto final no gráfico Preço da carteira.
+- Adiciona testes `portfolio-history-intraday-full-coverage-v298` e `portfolio-history-intraday-live-alignment-v298`.
+
+## 21.12.327-portfolio-intraday-full-coverage-v298
 
 - `stock-modal` e `fii-modal` deixam de converter timeout de rota em payload `PARTIAL`; a resposta passa a ser full-only.
 - Os wrappers dos modais forçam `stage=full`, `mode=full`, `priority=full` e anulam deadlines progressivos.
