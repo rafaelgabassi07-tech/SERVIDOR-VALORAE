@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.325: quality gate dos modais de Ação/FII para não cachear PARTIAL vazio.",
+  "description": "Valorae Proxy 21.12.326: modais full-only e histórico de carteira alinhado ao histórico completo/transações.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,18 +19,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.325-asset-modal-quality-cache-v296",
+    "releasePatch": "21.12.326-full-modal-portfolio-history-alignment-v297",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.325",
-    "checkpoint": "asset-modal-quality-cache-v296",
-    "releaseLabel": "asset-modal-quality-cache-v296"
+    "publicVersion": "21.12.326",
+    "checkpoint": "full-modal-portfolio-history-alignment-v297",
+    "releaseLabel": "full-modal-portfolio-history-alignment-v297"
   },
-  "releasePatch": "21.12.325-asset-modal-quality-cache-v296",
+  "releasePatch": "21.12.326-full-modal-portfolio-history-alignment-v297",
   "config": {
-    "releasePatch": "21.12.325-asset-modal-quality-cache-v296",
-    "publicVersion": "21.12.325",
-    "checkpoint": "asset-modal-quality-cache-v296",
-    "releaseLabel": "asset-modal-quality-cache-v296"
+    "releasePatch": "21.12.326-full-modal-portfolio-history-alignment-v297",
+    "publicVersion": "21.12.326",
+    "checkpoint": "full-modal-portfolio-history-alignment-v297",
+    "releaseLabel": "full-modal-portfolio-history-alignment-v297"
   }
 }

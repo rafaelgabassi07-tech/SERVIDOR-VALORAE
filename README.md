@@ -1,3 +1,7 @@
+## Release 21.12.326
+
+21.12.326-full-modal-portfolio-history-alignment-v297: remove o retorno progressivo/PARTIAL por deadline dos modais de Ação/FII, força contrato full-only e alinha o histórico de carteira às transações completas para evitar divergência e salto artificial no ponto vivo.
+
 ## Release 21.12.325
 
 21.12.325-asset-modal-quality-cache-v296: adiciona quality gate aos modais de Ação/FII, impede cache de payload PARTIAL vazio e deixa o cache HTTP desses endpoints em no-store para eliminar intermitência de modal sem dados.

@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Quality gate dos modais para evitar cache de respostas parciais vazias.",
+  "description": "Proxy full-only para modais e histórico de carteira alinhado às transações.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.325"
+  "version": "21.12.326"
 }

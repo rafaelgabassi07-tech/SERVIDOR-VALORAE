@@ -671,13 +671,14 @@ export async function dispatchRoute(req, res) {
       const normalizedTransactions = normalizePortfolioTransactions(payload);
       const hasPositions = normalizedPositions.length > 0;
       const hasTickers = String(payload.tickers || payload.ticker || payload.symbols || payload.symbol || '').trim().length > 0;
-      if (hasPositions || hasTickers) {
+      const hasTransactions = normalizedTransactions.length > 0;
+      if (hasPositions || hasTickers || hasTransactions) {
         const data = await buildPortfolioHistory(normalizedPositions, {
           ...payload,
           transactions: normalizedTransactions,
           range: payload.range || payload.period || '1M',
           interval: payload.interval,
-          timeoutMs: payload.timeoutMs || 9000,
+          timeoutMs: payload.timeoutMs || 12000,
           maxConcurrency: payload.maxConcurrency || 4
         });
         return sendJson(req, res, { endpoint: 'portfolio-history', ...data }, { cacheControl: 'private, max-age=30, stale-while-revalidate=120' });

@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.325-asset-modal-quality-cache-v296",
-  "patch": "21.12.325-asset-modal-quality-cache-v296",
-  "releasePatch": "21.12.325-asset-modal-quality-cache-v296",
-  "latestInternalPatch": "21.12.325-asset-modal-quality-cache-v296",
-  "description": "Proxy v296 adiciona quality gate nos modais de Ação/FII, evita cache HTTP de PARTIAL vazio e reduz TTL de PARTIAL útil para eliminar intermitência de modal sem dados.",
+  "release": "21.12.326-full-modal-portfolio-history-alignment-v297",
+  "patch": "21.12.326-full-modal-portfolio-history-alignment-v297",
+  "releasePatch": "21.12.326-full-modal-portfolio-history-alignment-v297",
+  "latestInternalPatch": "21.12.326-full-modal-portfolio-history-alignment-v297",
+  "description": "Proxy v297 remove timeout progressivo/PARTIAL dos modais de Ação/FII e alinha /portfolio/history ao histórico completo de transações usado pelo APK v451.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -75,31 +75,38 @@
     "quoteCoverage/quoteFailures em /assets",
     "asset-modal quality gate v296",
     "não cacheia PARTIAL vazio nos modais",
-    "Cache-Control no-store para stock-modal/fii-modal"
+    "Cache-Control no-store para stock-modal/fii-modal",
+    "asset-modal full-only v297",
+    "stock-modal/fii-modal sem PARTIAL de deadline",
+    "portfolio history aceita transactions-only",
+    "portfolio history inclui ativos vendidos/históricos",
+    "portfolio current anchor com composição histórica alinhada",
+    "APK v451 full modal portfolio history alignment"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-08",
-  "checkpoint": "asset-modal-quality-cache-v296",
-  "title": "Proxy v296 — quality gate dos modais de Ação/FII",
-  "summary": "Adiciona deadline defensivo para stock-modal/fii-modal, retorno parcial em timeout e bloqueio explícito de chamadas Yahoo quando VALORAE_DISABLE_EXTERNAL=1.",
-  "publicVersion": "21.12.325",
-  "label": "asset-modal-quality-cache-v296",
-  "updatedAt": "2026-07-07T00:00:00.000Z",
-  "date": "2026-07-07",
+  "checkpoint": "full-modal-portfolio-history-alignment-v297",
+  "title": "Proxy v297 — modais full-only e histórico de carteira completo",
+  "summary": "Modais stock/fii passam a responder somente o contrato full; o histórico da carteira aceita transações como fonte primária, inclui ativos históricos/vendidos e ancora o ponto vivo com a mesma composição para evitar salto final artificial.",
+  "publicVersion": "21.12.326",
+  "label": "full-modal-portfolio-history-alignment-v297",
+  "updatedAt": "2026-07-08T23:59:00.000Z",
+  "date": "2026-07-08",
   "notes": [
-    "/portfolio/history usa buildPortfolioHistory quando recebe posições/tickers.",
-    "Motor Yahoo prioriza regularMarketPrice, último close válido e só depois previousClose.",
-    "Resposta de cotação expõe dayChangePercent/dayChangeValue/regularMarketChangePercent para o APK.",
-    "Histórico mensal real passa a alimentar o modal Patrimônio Total pelo APK v432."
+    "stock-modal e fii-modal forçam stage/mode/priority full e anulam routeDeadlineMs/modalDeadlineMs/deadlineMs.",
+    "/portfolio/history usa transactions[] mesmo quando não há positions[]/tickers atuais.",
+    "Ativos vendidos ou apenas presentes no histórico entram na série enquanto possuem posição pela reconstrução por data.",
+    "O ponto vivo da carteira usa posições atuais mais ativos positivos reconstruídos do histórico para evitar base divergente no fim do gráfico."
   ],
   "releaseNotes": [
-    "portfolio history route rebuild",
-    "daily quote aliases hardened",
-    "monthly wealth retroactive quotes supported"
+    "asset modal full-only runtime",
+    "portfolio history transaction-only support",
+    "current price anchor composition aligned",
+    "sold assets retained in historical series"
   ],
-  "apkPair": "apk_valorae_portfolio_rebuild_v432_AI_STUDIO_ROOT_OK_2026_07_07.zip",
-  "apkVersion": "2026.07.08.18",
+  "apkPair": "apk_valorae_checkpoint41_full_modals_portfolio_history_alignment_v451_AI_STUDIO_ROOT_OK_2026_07_08.zip",
+  "apkVersion": "2026.07.08.19",
   "fileSize": 1258859,
   "highlights": [
     "Filtros 1D/5D/1M/3M/6M/1A/5A/MÁX recebem período normalizado corretamente.",
@@ -110,17 +117,25 @@
     "npm run build",
     "npm run check:syntax",
     "npm test",
-    "node test/asset-history-range-aliases-v289.test.js",
     "npm run audit:version",
-    "unzip -t",
-    "node test/modal-deadline-disable-external-v295.test.js",
-    "node test/asset-modal-quality-cache-v296.test.js",
-    "npm run verify"
-  ],
-  "proxyPair": "valorae_proxy_portfolio_rebuild_v292_AI_STUDIO_ROOT_OK_2026_07_07.zip",
-  "validations": [
-    "npm run verify",
     "node test/asset-modal-runtime-deadline-v295.test.js",
-    "node test/yahoo-disable-external-v295.test.js"
+    "node test/asset-modal-quality-cache-v296.test.js",
+    "node test/modal-runtime-freshness-v267.test.js",
+    "node test/portfolio-active-history-v293.test.js",
+    "node test/portfolio-query-contract-v294.test.js",
+    "unzip -t"
+  ],
+  "proxyPair": "valorae_proxy_full_modals_portfolio_history_alignment_v297_AI_STUDIO_ROOT_OK_2026_07_08.zip",
+  "validations": [
+    "npm run build",
+    "npm run check:syntax",
+    "npm test",
+    "npm run audit:version",
+    "node test/asset-modal-runtime-deadline-v295.test.js",
+    "node test/asset-modal-quality-cache-v296.test.js",
+    "node test/modal-runtime-freshness-v267.test.js",
+    "node test/portfolio-active-history-v293.test.js",
+    "node test/portfolio-query-contract-v294.test.js",
+    "unzip -t"
   ]
 }

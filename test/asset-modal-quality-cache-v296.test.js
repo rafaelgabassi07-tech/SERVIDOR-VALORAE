@@ -22,8 +22,8 @@ const usefulPartial = {
 };
 
 assert.equal(_test.modalPayloadHasUsefulData(usefulPartial), true);
-assert.equal(_test.isModalPayloadCacheable(usefulPartial), true);
-assert.equal(_test.modalCacheTtlMs(usefulPartial, 45_000), 10_000);
+assert.equal(_test.isModalPayloadCacheable(usefulPartial), false);
+assert.equal(_test.modalCacheTtlMs(usefulPartial, 45_000), 45_000);
 
 const okPayload = {
   ok: true,

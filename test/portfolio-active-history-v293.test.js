@@ -27,7 +27,8 @@ const result = await buildPortfolioHistory([
   range: 'MAX',
   interval: '1d',
   transactions: [
-    { ticker: 'OLD4', date: '2020-01-01', operation: 'COMPRA', quantity: 100, price: 100, grossValue: 10000 },
+    { ticker: 'OLD4', date: '2024-01-01', operation: 'COMPRA', quantity: 100, price: 100, grossValue: 10000 },
+    { ticker: 'OLD4', date: '2024-01-02', operation: 'VENDA', quantity: 100, price: 100, grossValue: 10000 },
     { ticker: 'KEEP3', date: '2024-01-02', operation: 'COMPRA', quantity: 2, price: 10, grossValue: 20 },
   ],
   timeoutMs: 1000,
@@ -35,10 +36,12 @@ const result = await buildPortfolioHistory([
 });
 
 assert.equal(result.ok, true);
-assert.deepEqual(result.historyTickers, ['KEEP3']);
+assert.deepEqual(result.historyTickers, ['KEEP3', 'OLD4']);
 assert.deepEqual(result.activeTickers, ['KEEP3']);
-assert.equal(result.ignoredTransactionCount, 1);
-assert.equal(result.transactionCount, 1);
-assert.ok(result.series.every(row => !row.positions || !('OLD4' in row.positions)), 'ativo antigo/deletado não deve compor o gráfico');
-assert.ok(result.series[0].timestamp >= jan2, 'série deve iniciar no ativo atualmente mantido, não no primeiro ativo histórico');
-console.log('portfolio-active-history-v293 ok');
+assert.deepEqual(result.transactionOnlyTickers, ['OLD4']);
+assert.equal(result.ignoredTransactionCount, 0);
+assert.equal(result.transactionCount, 3);
+assert.ok(result.series.some(row => row.positions && 'OLD4' in row.positions), 'ativo vendido precisa aparecer no histórico enquanto existia');
+assert.ok(!('OLD4' in (result.series.at(-1)?.positions || {})), 'ativo vendido não deve entrar no ponto vivo atual');
+assert.ok(result.series.some(row => row.positions && 'KEEP3' in row.positions), 'ativo atual deve compor histórico a partir da compra');
+console.log('portfolio-active-history-v297 ok');

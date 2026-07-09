@@ -1,3 +1,11 @@
+## 21.12.326-full-modal-portfolio-history-alignment-v297
+
+- `stock-modal` e `fii-modal` deixam de converter timeout de rota em payload `PARTIAL`; a resposta passa a ser full-only.
+- Os wrappers dos modais forçam `stage=full`, `mode=full`, `priority=full` e anulam deadlines progressivos.
+- `/portfolio/history` aceita `transactions[]` mesmo sem posições atuais, preservando ativos históricos/vendidos na série.
+- O ponto vivo da carteira passa a usar a mesma composição reconstruída por histórico/transações, reduzindo divergência e salto final artificial.
+- Validação direcionada: runtime de modal, cache de modal, roteamento/normalização do histórico e histórico com ativo vendido.
+
 ## 21.12.325-asset-modal-quality-cache-v296
 
 - Modais de Ação/FII deixam de cachear respostas PARTIAL sem dados úteis.
