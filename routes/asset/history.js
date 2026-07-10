@@ -3,6 +3,7 @@ import { getAssetHistory } from '../../lib/sources/asset-details.js';
 import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute, clampNumber, sendRouteError } from '../../lib/http/route.js';
+import { VALORAE_MOBILE_CACHE_POLICY_SECONDS } from '../../lib/core/mobile-protocol.js';
 
 function normalizeHistoryTicker(raw = '') {
   const text = String(raw || '').trim().toUpperCase();
@@ -50,7 +51,7 @@ export default async function handler(req, res) {
       },
     };
     delete payload.error;
-    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, endpoint: 'asset-history', ...payload }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'history', cacheControl: data.ok ? 'private, max-age=60, stale-while-revalidate=300' : 'private, max-age=15, stale-while-revalidate=120' });
+    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, endpoint: 'asset-history', ...payload }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'history', cacheControl: data.ok ? `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.assetHistory}, stale-while-revalidate=300` : 'private, max-age=15, stale-while-revalidate=120' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'history' });
   }

@@ -107,8 +107,8 @@ if (colorKt && themeKt && settingsKt && agendaKt && dividendsKt && hapticKt && m
   assert.ok(dividendsKt.includes('valueColor = ValoraeYellow'), 'métrica A receber deve manter amarelo semântico');
   assert.ok(manifest.includes('android.permission.VIBRATE'), 'APK deve declarar permissão de vibração');
   assert.ok(hapticKt.includes('VibratorManager') && hapticKt.includes('VibrationEffect.createOneShot'), 'retorno tátil deve possuir execução física explícita');
-  assert.ok(loaderKt.includes('resolveWithControlledFullRetry') && loaderKt.includes('delay(850L)'), 'APK deve recuperar uma vez o full incompleto');
-  assert.ok(qualityKt.includes('delivery.completenessPercent.coerceIn(0, 100) >= 45'), 'full básico não pode entrar no cache estável do APK');
+  assert.ok(loaderKt.includes('AssetModalFullRecoveryDelaysMs') && loaderKt.includes('700L, 1_500L, 2_800L') && loaderKt.includes('recovery = true'), 'APK deve recuperar o full incompleto enquanto o modal permanece aberto');
+  assert.ok(qualityKt.includes('StockModalStableCachePercent = 62') && qualityKt.includes('FiiModalStableCachePercent = 58'), 'full básico não pode entrar no cache estável do APK');
 }
 
 console.log('asset-modal-theme-haptic-full-recovery-v306 ok');

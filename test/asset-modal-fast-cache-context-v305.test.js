@@ -47,7 +47,11 @@ const fullCached = {
   historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
   checklist: { items: [{ id: 'dy', passed: true, status: 'PASSED' }] },
   companyProfile: { facts: [{ id: 'segment', value: 'Petróleo' }], sections: [] },
-  dividendHistory: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} }
+  dividendHistory: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
+  revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
+  returns: { rows: [{ label: '12M', value: '10%' }] },
+  resultsStatement: { rows: [{ label: 'Receita', value: '100' }], tablesByPeriod: {} },
+  balanceSheetStatement: { rows: [], tablesByPeriod: {} }
 };
 
 clearCache();

@@ -33,9 +33,9 @@ try {
   const news = await callJson('/api/v1/news?limit=4&timeoutMs=700');
   assert.equal(news.statusCode, 200, 'notícias devem responder HTTP 200 com fallback');
   assert.ok(Array.isArray(news.body.news), 'news deve ser array');
-  assert.ok(news.body.news.length > 0, 'fallback de notícias deve entregar ao menos um card acionável');
-  assert.match(news.body.news[0].url, /^https:\/\//, 'fallback de notícias deve usar URL absoluta válida para o navegador do APK');
-  assert.equal(news.body.news[0].openInBrowser, true, 'notícias devem preservar política de abrir no navegador');
+  assert.equal(news.body.status, 'EMPTY', 'falha do RSS deve produzir estado vazio, não artigo sintético');
+  assert.equal(news.body.news.length, 0, 'link de busca não pode ser inserido como notícia');
+  assert.match(news.body.searchUrl, /^https:\/\//, 'a busca manual permanece disponível como metadado separado');
 } finally {
   globalThis.fetch = originalFetch;
 }

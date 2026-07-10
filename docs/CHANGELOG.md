@@ -1,3 +1,33 @@
+## 21.12.344 — 2026-07-10 — Protocol negotiation and stale harmony v312
+
+- Pareado ao APK v476 / `versionCode 26071006`.
+- Publica protocolo móvel `2026.07.10.6` e delivery schema em respostas normais/performance.
+- Define TTL fresco e stale grace específicos para `fast` e `full`.
+- Limita runtime e cache da Análise aos valores canônicos do manifesto.
+- Adiciona teste cruzado de negociação e semântica de cache.
+
+## 21.12.343 — 2026-07-10 — APK/Proxy cache protocol harmony v311
+
+- Pareado ao APK v475 / `versionCode 26071005`.
+- Protocolo móvel, métodos, headers, CORS, requestId e Cache-Control centralizados.
+- Correção da seção `information` no quality profile de FIIs.
+- Teste cruzado de políticas e compatibilidade.
+
+## 21.12.342 — 2026-07-10 — APK/Proxy contract harmony v310
+
+- Corrige divergência de método `/api/sync` no catálogo móvel.
+- Harmoniza headers, TTLs fast/full e metadados de qualidade do delivery.
+- Separa `stableForCache` de `completeForDelivery`; cache útil não encerra prematuramente o modal.
+- Define metas finais específicas para Ação e FII.
+- Adiciona teste cruzado de rotas, métodos e contrato de qualidade.
+- Pareado com APK v474 / `versionCode 26071004`.
+
+## 21.12.340 — APK v472 compatibility audit
+
+- Proxy v308 revalida integralmente as rotas e contratos para o APK v472; as mudanças desta rodada são locais ao tema, estado de UI e importação B3 e não alteram o contrato HTTP.
+- Rotas de modais, histórico, transações, logos, notícias e sync preservadas.
+- Teste autônomo `apk-v472-contract-compatibility-v308.test.js` adicionado.
+
 ## 21.12.337 — 2026-07-09 — Asset modal fast/cache/context v305
 
 - Stage `fast` deixa de bloquear em fontes lentas além do orçamento de preview; a captura original continua aquecendo o cache do `full`.

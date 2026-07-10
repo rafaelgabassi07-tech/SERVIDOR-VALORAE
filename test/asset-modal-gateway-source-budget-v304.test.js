@@ -13,7 +13,7 @@ const apkFallback = readSiblingApkFile('app/src/main/java/com/example/ui/AssetMo
 const apkMerge = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalMergePolicy.kt');
 const apkRuntimeCache = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyRuntime.kt');
 
-assert.equal(ASSET_MODAL_GATEWAY_VERSION, '26.asset-modal.gateway.v1');
+assert.equal(ASSET_MODAL_GATEWAY_VERSION, '26.asset-modal.gateway.v2-protocol-harmony');
 assert.equal(resolveAssetModalFamily({ ticker: 'PETR4' }).family, 'stock');
 assert.equal(resolveAssetModalFamily({ ticker: 'MXRF11' }).family, 'fii');
 assert.equal(resolveAssetModalFamily({ ticker: 'TAEE11' }).family, 'stock', 'unit terminada em 11 não pode abrir rota de FII primeiro');

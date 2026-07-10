@@ -1,15 +1,54 @@
-## Release 21.12.338
+# VALORAE Proxy 21.12.344 — v312
 
-`21.12.338-asset-modal-late-producer-quality-v306`: producer profundo persistente após deadline, cache `full` por qualidade e recuperação progressiva alinhada ao APK v470.
+Proxy v312 pareado ao APK `2026.07.10.6` / v476. Negocia o protocolo móvel, publica protocolo/schema em todas as respostas relevantes e alinha TTL fresco e stale grace dos modais por estágio.
 
-### Destaques
-- Deadline HTTP não descarta nem duplica a captura profunda em andamento.
-- `full` parcial não se declara final e pode ser recuperado pelo APK.
-- Cache `full` rejeita contratos com menos de 40% das seções.
-- HTML fundamentalista é entregue sem aguardar indefinidamente extras REST, ranking e comunicados.
-- Pareado com APK v470 / Checkpoint 60.
+- `fast`: 35 s fresco + 120 s de stale grace.
+- `full`: 180 s fresco + 900 s de stale grace.
+- cache da Análise: 60 s exatos.
+- runtime `26.asset-modal.runtime.v13-protocol-negotiation`.
 
-## Release 21.12.337
+Validação: build Vercel-safe, 380 arquivos JavaScript, 187 arquivos de teste e auditoria de versão.
+
+# VALORAE Proxy 21.12.343 — v311
+
+Proxy v311 pareado ao APK `2026.07.10.5` / v475. Centraliza o protocolo móvel, publica métodos reais de `/sync`, aplica CORS em respostas normais, correlaciona `requestId` e alinha TTLs de cache.
+
+Validação: build Vercel-safe, 379 arquivos JavaScript, 186 arquivos de teste e auditoria de versão.
+
+# VALORAE Proxy 21.12.342 — v310
+
+Proxy v310 harmoniza rotas, headers, TTLs e semântica de qualidade do delivery com o APK v474, separando cache estável de entrega completa.
+
+- Pareado ao APK `2026.07.10.4` / v474.
+- `/api/sync` e demais rotas auditados por método.
+- Delivery v2 com qualidade consumida integralmente pelo APK.
+- Cache fast/full e metas de recuperação alinhados.
+- Runtime `26.asset-modal.runtime.v11-contract-harmony`.
+
+# VALORAE Proxy 21.12.341 — v309
+
+Proxy v309 reforça a qualidade do contrato full, permite recuperação sem cache conectada ao producer profundo e limita fontes auxiliares para que as seções principais do modal de Ação não fiquem bloqueadas.
+
+## Destaques
+- Contrato full só entra no cache quando é realmente expandido.
+- `recovery/resume` ignora cache insuficiente e se conecta à captura profunda existente.
+- Resposta básica permanece utilizável e retryable, sem se declarar final.
+- Comparação com índices não bloqueia indicadores, histórico e demonstrativos.
+- Pareado ao APK `2026.07.10.3` / v473.
+
+## Validação
+- 184 arquivos de teste, 0 falhas.
+- Build, sintaxe e auditoria de versão.
+- Execução isolada a partir do ZIP final.
+
+## Release 21.12.340
+
+`21.12.340-apk-v472-compatibility-audit-v308`: Proxy v308 revalida integralmente as rotas e contratos para o APK v472; as mudanças desta rodada são locais ao tema, estado de UI e importação B3 e não alteram o contrato HTTP.
+
+- Pareado com APK v472 / Checkpoint 62.
+- Gateway universal e delivery schema v2 permanecem compatíveis.
+- Histórico intradiário, logos oficiais e notícias reais possuem testes próprios.
+- `npm run verify` executa build, sintaxe, suíte e auditoria de versão.
 
 `21.12.337-asset-modal-fast-cache-context-v305`: auditoria cruzada dos modais com preview `fast` não bloqueante, preferência por cache `full` completo e contexto de solicitação isolado após coalescing.
 

@@ -25,7 +25,7 @@ if (apkHttp && apkService && apkLoader && apkParser && apkFallback) {
   assert.ok(apkParser.includes('toAssetModalDelivery'), 'APK deve interpretar metadados do contrato progressivo v2');
   assert.ok(apkFallback.includes('deliveryQualityScore'), 'troca fast/full deve comparar completude antes de substituir conteúdo útil');
   assert.ok(apkFallback.includes('fullState.deliveryQualityScore() >= fastState.deliveryQualityScore()'), 'full parcial não deve substituir fast mais completo');
-  assert.ok(apkLoader.includes('!fullState.hasRetryableDelivery()'), 'full incompleto deve aguardar a resposta fast antes da decisão final');
+  assert.ok(apkLoader.includes('needsControlledFullRecovery()') && apkLoader.includes('recoverFullContractWhileOpen'), 'full incompleto deve manter o fast e continuar a recuperação enquanto o modal está aberto');
 }
 assert.ok(fiiContract.includes('stage,\n    mode: stage,\n    fullOnly: !fastMode'), 'FII deve expor stage/mode explicitamente como Ação');
 assert.equal(runtimeTest.assetModalDeadlineMs({ stage: 'full', timeoutMs: 12000 }), 12000, 'full deve ter deadline defensivo alinhado ao orçamento');
@@ -63,7 +63,16 @@ const fullForFastDelivery = runtimeTest.buildModalDelivery({
   stage: 'full',
   quoteSummary: { price: 10, priceDisplay: 'R$ 10,00' },
   chart: { points: [{ close: 9.9 }, { close: 10 }] },
-  metrics: [{ id: 'price', value: 'R$ 10,00' }]
+  metrics: [{ id: 'price', value: 'R$ 10,00' }],
+  comparison: { items: [{ id: 'ifix', value: '7%' }], series: [], seriesByPeriod: {} },
+  peerComparison: { rows: [{ ticker: 'HGLG11', value: '8%' }] },
+  aboutFund: { summary: 'Fundo', sections: [{ title: 'Sobre', paragraphs: ['Fundo'] }], highlights: [] },
+  distributions12m: { items: [{ month: '2026-06', value: 0.1 }], months: [] },
+  dividendCharts: { events: [{ date: '2026-06-01', value: 0.1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
+  propertyPortfolio: { properties: [{ name: 'Imóvel' }], states: [] },
+  patrimonialInfo: { metrics: [{ id: 'vp', value: 'R$ 10,10' }], bars: [] },
+  historicalIndicators: { rows: [{ label: 'P/VP' }], tablesByPeriod: {} },
+  returns: { rows: [{ label: '12M', value: '8%' }] }
 }, { family: 'fii', requestedMode: 'fast', mode: 'full', cacheStatus: 'HIT_FULL_FOR_FAST', requestId: 'req-cache' });
 assert.equal(fullForFastDelivery.requestedStage, 'fast');
 assert.equal(fullForFastDelivery.deliveredStage, 'full');
@@ -84,6 +93,10 @@ const cachedFull = {
   distributions12m: { items: [{ month: '2026-06', value: 0.1 }], months: [] },
   dividendCharts: { events: [{ date: '2026-06-01', value: 0.1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
   patrimonialInfo: { metrics: [{ id: 'vp', value: 'R$ 10,10' }], bars: [] },
+  comparison: { items: [{ id: 'ifix', value: '7%' }], series: [], seriesByPeriod: {} },
+  peerComparison: { rows: [{ ticker: 'HGLG11', value: '8%' }] },
+  propertyPortfolio: { properties: [{ name: 'Imóvel' }], states: [] },
+  historicalIndicators: { rows: [{ label: 'P/VP' }], tablesByPeriod: {} },
   returns: { rows: [{ label: '12M', value: '8,2%' }] }
 };
 setCache(runtimeTest.modalCacheKey({ family: 'fii', ticker: 'MXRF11', payload: fullFii }), cachedFull, 180000, 900000);
