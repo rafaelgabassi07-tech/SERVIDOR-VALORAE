@@ -79,7 +79,12 @@ const cachedFull = {
   ticker: 'MXRF11',
   quoteSummary: { price: 10, priceDisplay: 'R$ 10,00' },
   chart: { points: [{ close: 9.9 }, { close: 10 }] },
-  metrics: [{ id: 'price', value: 'R$ 10,00' }]
+  metrics: [{ id: 'price', value: 'R$ 10,00' }],
+  aboutFund: { summary: 'Fundo imobiliário', sections: [{ title: 'Sobre', paragraphs: ['Fundo'] }], highlights: [] },
+  distributions12m: { items: [{ month: '2026-06', value: 0.1 }], months: [] },
+  dividendCharts: { events: [{ date: '2026-06-01', value: 0.1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
+  patrimonialInfo: { metrics: [{ id: 'vp', value: 'R$ 10,10' }], bars: [] },
+  returns: { rows: [{ label: '12M', value: '8,2%' }] }
 };
 setCache(runtimeTest.modalCacheKey({ family: 'fii', ticker: 'MXRF11', payload: fullFii }), cachedFull, 180000, 900000);
 let producerCalls = 0;

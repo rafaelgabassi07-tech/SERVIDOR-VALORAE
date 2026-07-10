@@ -18,7 +18,7 @@ assert.equal(payload.ok, true);
 assert.equal(payload.status, 'OK');
 assert.equal(payload.ticker, 'PETR4');
 assert.equal(payload.diagnostics.modalRuntime.cacheStatus, 'BYPASS');
-assert.equal(payload.diagnostics.modalRuntime.version, '26.asset-modal.runtime.v8-fast-preview-context-cache');
+assert.equal(payload.diagnostics.modalRuntime.version, '26.asset-modal.runtime.v9-late-producer-cache-retryable-full');
 assert.equal(payload.diagnostics.modalDeadline, undefined);
 
 const fullTimeout = _test.modalTimeoutPayload({ family: 'stock', ticker: 'PETR4', stage: 'full', deadlineMs: 12000, elapsedMs: 12001 });

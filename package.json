@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v305 torna o preview fast não bloqueante, prioriza cache full completo e isola o contexto de cada solicitação coalescida dos modais de Ação/FII.",
+  "description": "Proxy v306 preserva producers profundos após o deadline, rejeita cache full básico e entrega seções HTML sem aguardar todas as fontes auxiliares, alinhado ao APK v470.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,18 +19,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.337-asset-modal-fast-cache-context-v305",
+    "releasePatch": "21.12.338-asset-modal-late-producer-quality-v306",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.337",
-    "checkpoint": "asset-modal-fast-cache-context-v305",
-    "releaseLabel": "asset-modal-fast-cache-context-v305"
+    "publicVersion": "21.12.338",
+    "checkpoint": "asset-modal-late-producer-quality-v306",
+    "releaseLabel": "asset-modal-late-producer-quality-v306"
   },
-  "releasePatch": "21.12.337-asset-modal-fast-cache-context-v305",
+  "releasePatch": "21.12.338-asset-modal-late-producer-quality-v306",
   "config": {
-    "releasePatch": "21.12.337-asset-modal-fast-cache-context-v305",
-    "publicVersion": "21.12.337",
-    "checkpoint": "asset-modal-fast-cache-context-v305",
-    "releaseLabel": "asset-modal-fast-cache-context-v305"
+    "releasePatch": "21.12.338-asset-modal-late-producer-quality-v306",
+    "publicVersion": "21.12.338",
+    "checkpoint": "asset-modal-late-producer-quality-v306",
+    "releaseLabel": "asset-modal-late-producer-quality-v306"
   }
 }

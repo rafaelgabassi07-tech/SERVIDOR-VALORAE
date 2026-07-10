@@ -1,3 +1,14 @@
+## Release 21.12.338
+
+`21.12.338-asset-modal-late-producer-quality-v306`: producer profundo persistente após deadline, cache `full` por qualidade e recuperação progressiva alinhada ao APK v470.
+
+### Destaques
+- Deadline HTTP não descarta nem duplica a captura profunda em andamento.
+- `full` parcial não se declara final e pode ser recuperado pelo APK.
+- Cache `full` rejeita contratos com menos de 40% das seções.
+- HTML fundamentalista é entregue sem aguardar indefinidamente extras REST, ranking e comunicados.
+- Pareado com APK v470 / Checkpoint 60.
+
 ## Release 21.12.337
 
 `21.12.337-asset-modal-fast-cache-context-v305`: auditoria cruzada dos modais com preview `fast` não bloqueante, preferência por cache `full` completo e contexto de solicitação isolado após coalescing.

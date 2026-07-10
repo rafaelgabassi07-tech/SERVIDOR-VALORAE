@@ -42,7 +42,12 @@ const fullCached = {
   ticker,
   quoteSummary: { price: 32.8, priceDisplay: 'R$ 32,80' },
   chart: { points: [{ close: 32.1 }, { close: 32.8 }] },
-  historicalIndicators: { rows: [{ label: 'P/L' }] }
+  metrics: [{ id: 'price', value: 'R$ 32,80' }],
+  fundamentalIndicators: { items: [{ id: 'pl', value: '5,8' }] },
+  historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+  checklist: { items: [{ id: 'dy', passed: true, status: 'PASSED' }] },
+  companyProfile: { facts: [{ id: 'segment', value: 'Petróleo' }], sections: [] },
+  dividendHistory: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} }
 };
 
 clearCache();

@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Proxy com preview fast não bloqueante, preferência por cache full e contexto isolado nos modais de Ação e FII.",
+  "description": "Proxy com producer tardio reutilizável, cache full por qualidade e recuperação progressiva dos modais de Ação/FII.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.337"
+  "version": "21.12.338"
 }

@@ -1,11 +1,11 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.337-asset-modal-fast-cache-context-v305",
-  "patch": "21.12.337-asset-modal-fast-cache-context-v305",
-  "releasePatch": "21.12.337-asset-modal-fast-cache-context-v305",
-  "latestInternalPatch": "21.12.337-asset-modal-fast-cache-context-v305",
-  "description": "Proxy v305 torna o preview fast não bloqueante, prioriza cache full completo e isola requestId/requestedStage por consumidor coalescido, alinhando o quality gate ao APK v469.",
+  "release": "21.12.338-asset-modal-late-producer-quality-v306",
+  "patch": "21.12.338-asset-modal-late-producer-quality-v306",
+  "releasePatch": "21.12.338-asset-modal-late-producer-quality-v306",
+  "latestInternalPatch": "21.12.338-asset-modal-late-producer-quality-v306",
+  "description": "Proxy v306 preserva producers profundos após o deadline, rejeita cache full básico e entrega seções HTML sem aguardar todas as fontes auxiliares, alinhado ao APK v470.",
   "contract": "valorae-mobile-portfolio-sync",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
@@ -27,64 +27,64 @@
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com modal único de FIIs, comparação completa, comparador, checklist, distribuições 12M, gráficos Dividend Yield/Dividendos e Sobre o fundo.",
   "releaseDate": "2026-07-09",
-  "checkpoint": "asset-modal-fast-cache-context-v305",
-  "title": "Proxy v305 — Preview fast, cache completo e contexto isolado",
-  "summary": "Proxy v305 torna o preview fast não bloqueante, prioriza cache full completo e isola requestId/requestedStage por consumidor coalescido, alinhando o quality gate ao APK v469.",
-  "publicVersion": "21.12.337",
-  "label": "asset-modal-fast-cache-context-v305",
-  "updatedAt": "2026-07-10T01:49:36.000Z",
+  "checkpoint": "asset-modal-late-producer-quality-v306",
+  "title": "Proxy v306 — Producer tardio, cache full por qualidade e recuperação profunda",
+  "summary": "Proxy v306 preserva producers profundos após o deadline, rejeita cache full básico e entrega seções HTML sem aguardar todas as fontes auxiliares, alinhado ao APK v470.",
+  "publicVersion": "21.12.338",
+  "label": "asset-modal-late-producer-quality-v306",
+  "updatedAt": "2026-07-10T03:15:00.000Z",
   "date": "2026-07-09",
   "notes": [
-    "Gateway e delivery v2 permanecem compatíveis com clientes anteriores.",
-    "O preview não cancela a origem pesada; somente deixa de aguardá-la além do orçamento curto.",
-    "Sem fallback estático de dados financeiros."
+    "Gateway /api/v1/asset/modal e delivery schema v2 permanecem compatíveis.",
+    "Nenhum dado financeiro estático foi adicionado; ausência real continua representada como EMPTY/PARTIAL.",
+    "Disponibilidade final das seções depende das fontes externas, mas o runtime não perde mais o trabalho concluído após o deadline."
   ],
   "releaseNotes": [
-    "non-blocking fast modal preview",
-    "full cache precedence over partial fast cache",
-    "request-scoped metadata after coalescing",
-    "cross-stack quality gate alignment"
+    "late producer cache",
+    "full quality gate",
+    "retryable partial delivery",
+    "bounded source enrichment"
   ],
-  "apkPair": "apk_valorae_checkpoint59_asset_modal_fast_cache_context_v469_AI_STUDIO_ROOT_OK_2026_07_09.zip",
-  "apkVersion": "2026.07.09.18",
-  "fileSize": 1278544,
+  "apkPair": "apk_valorae_checkpoint60_gold_semantic_haptic_modal_recovery_v470_AI_STUDIO_ROOT_OK_2026_07_09.zip",
+  "apkVersion": "2026.07.09.19",
+  "fileSize": 1279582,
   "highlights": [
-    "Preview fast conclui sem esperar toda a tentativa de Investidor10/Yahoo.",
-    "Reabertura usa o contrato full já pronto em vez do fast parcial.",
-    "Coalescing preserva o requestId de cada consumidor.",
-    "Valores ausentes permanecem nulos e não viram cotação/variação zero."
+    "Deadline não perde o producer profundo.",
+    "Full básico não entra no cache estável.",
+    "Nova tentativa reutiliza o trabalho em andamento.",
+    "Seções HTML profundas chegam antes dos extras opcionais."
   ],
   "validation": [
     "npm run build — Vercel-safe OK",
-    "npm run check:syntax — 368 arquivos JS",
-    "npm test — 177 arquivos, 0 falhas",
-    "npm run audit:version — release 21.12.337 consistente",
-    "node test/asset-modal-fast-cache-context-v305.test.js",
-    "gateway offline: PETR4, TAEE11 e MXRF11 sem zeros sintéticos/cache vazio",
-    "validadores estruturais/release e parser Kotlin (186 arquivos) do APK v469",
-    "unzip -t e teste do Proxy extraído isoladamente"
+    "npm run check:syntax — 368 arquivos JavaScript",
+    "npm test — 178 arquivos, 0 falhas",
+    "npm run audit:version — release 21.12.338 consistente",
+    "node test/asset-modal-theme-haptic-full-recovery-v306.test.js",
+    "harness Kotlin do APK confirmou fast → full vazio → retry full com somente duas chamadas full",
+    "unzip -t e npm run verify no Proxy extraído isoladamente"
   ],
-  "proxyPair": "valorae_proxy_checkpoint337_asset_modal_fast_cache_context_v305_AI_STUDIO_ROOT_OK_2026_07_09.zip",
+  "proxyPair": "valorae_proxy_checkpoint338_asset_modal_late_producer_quality_v306_AI_STUDIO_ROOT_OK_2026_07_09.zip",
   "validations": [
     "npm run build — Vercel-safe OK",
-    "npm run check:syntax — 368 arquivos JS",
-    "npm test — 177 arquivos, 0 falhas",
-    "npm run audit:version — release 21.12.337 consistente",
-    "node test/asset-modal-fast-cache-context-v305.test.js",
-    "gateway offline: PETR4, TAEE11 e MXRF11 sem zeros sintéticos/cache vazio",
-    "validadores estruturais/release e parser Kotlin (186 arquivos) do APK v469",
-    "unzip -t e teste do Proxy extraído isoladamente"
+    "npm run check:syntax — 368 arquivos JavaScript",
+    "npm test — 178 arquivos, 0 falhas",
+    "npm run audit:version — release 21.12.338 consistente",
+    "node test/asset-modal-theme-haptic-full-recovery-v306.test.js",
+    "harness Kotlin do APK confirmou fast → full vazio → retry full com somente duas chamadas full",
+    "unzip -t e npm run verify no Proxy extraído isoladamente"
   ],
   "changes": [
-    "Adicionada espera suave não cancelável para fontes lentas do stage fast de Ação e FII.",
-    "Cache cross-stage passa a consultar full útil antes de fast parcial fresco.",
-    "Metadados requestId/requestedStage são recontextualizados depois do coalescing.",
-    "Quality gate inclui comparadores, posição acionária, demonstrativos, payout, comunicados e distribuições.",
-    "Coerções numéricas preservam null e contratos compostos apenas por zeros sintéticos não são cacheados.",
-    "Teste v305 cobre tempo de preview, aquecimento em segundo plano, precedência de cache, contexto concorrente e alinhamento estático com o APK."
+    "Producer real do modal permanece vivo e registrado após o deadline HTTP; a conclusão tardia aquece o cache automaticamente.",
+    "Nova tentativa do APK se conecta ao mesmo producer em andamento, evitando duplicar scraping e chamadas externas.",
+    "Resposta full PARTIAL/deadline passa a declarar isFinal=false, retryable=true e seções faltantes como deferred.",
+    "Cache full exige pelo menos 40% das seções úteis; contratos apenas com cotação, gráfico e métricas não congelam a experiência básica.",
+    "Leituras HIT/STALE também revalidam a qualidade antes de servir o cache cross-stage.",
+    "Extras REST do Investidor10, ranking e comunicados têm espera limitada; o HTML já capturado continua entregando fundamentos, empresa, dividendos e comparadores disponíveis.",
+    "Captura HTML usa User-Agent móvel completo e Accept-Language pt-BR.",
+    "Teste v306 cobre deadline não final, cache de qualidade, producer tardio sem duplicação, Ouro Classic, cores semânticas, vibração e retry do APK."
   ],
-  "contractVersion": "APK v469 / Proxy 21.12.337 asset modal gateway v1 + delivery v2 hardened",
-  "latestVersion": "21.12.337",
-  "latest_version": "21.12.337",
-  "versionName": "21.12.337"
+  "contractVersion": "APK v470 / Proxy 21.12.338 asset modal gateway v1 + delivery v2 recovery",
+  "latestVersion": "21.12.338",
+  "latest_version": "21.12.338",
+  "versionName": "21.12.338"
 }

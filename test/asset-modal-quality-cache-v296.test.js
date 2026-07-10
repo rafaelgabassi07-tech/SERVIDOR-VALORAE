@@ -28,11 +28,18 @@ assert.equal(_test.modalCacheTtlMs(usefulPartial, 45_000), 45_000);
 const okPayload = {
   ok: true,
   status: 'OK',
+  stage: 'full',
   ticker: 'PETR4',
-  quoteSummary: { price: 30.5, priceDisplay: 'R$ 30,50' }
+  quoteSummary: { price: 30.5, priceDisplay: 'R$ 30,50' },
+  chart: { points: [{ close: 30.1 }, { close: 30.5 }] },
+  metrics: [{ id: 'price', value: 'R$ 30,50' }],
+  fundamentalIndicators: { items: [{ id: 'pl', value: '5,2' }] },
+  historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+  checklist: { items: [{ id: 'dy', passed: true, status: 'PASSED' }] },
+  companyProfile: { facts: [{ id: 'segment', value: 'Petróleo' }], sections: [] }
 };
 assert.equal(_test.isModalPayloadCacheable(okPayload), true);
-assert.equal(_test.modalCacheTtlMs(okPayload, 45_000), 45_000);
+assert.equal(_test.modalCacheTtlMs(okPayload, 45_000), 180_000);
 
 const timeoutPayload = _test.modalTimeoutPayload({ family: 'stock', ticker: 'AESB3', deadlineMs: 1500, elapsedMs: 1501 });
 assert.equal(_test.isModalPayloadCacheable(timeoutPayload), false);

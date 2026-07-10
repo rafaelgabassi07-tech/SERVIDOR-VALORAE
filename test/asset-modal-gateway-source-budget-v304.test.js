@@ -36,7 +36,7 @@ if (apkRuntime && apkService && apkUniversalService && apkFallback && apkMerge &
   assert.ok(apkUniversalService.includes('"/api/v1/asset/modal"'), 'núcleo universal APK deve consultar o gateway universal');
   assert.ok(apkUniversalService.includes('APK_STALE_IF_ERROR'), 'APK deve preservar cache stale útil em falha transitória');
   assert.ok(apkRuntimeCache.includes('assetModalCache = ConcurrentHashMap'), 'cache universal deve ser isolado dos caches legados por família');
-  assert.ok(apkUniversalService.includes('cached.value.hasUsefulUniversalModalData()'), 'cache universal não deve aceitar contratos vazios ou classificação terminal');
+  assert.ok(apkUniversalService.includes('cached.value.shouldCacheUniversalModalContract()'), 'cache universal não deve aceitar contratos vazios nem full de baixa completude');
   assert.ok(apkFallback.includes('mergeSingleAssetModalPayload'), 'resolver progressivo deve aplicar o merge real');
   assert.ok(apkMerge.includes('companyProfile = preferNonDefault'), 'merge deve preservar seções profundas de ação');
   assert.ok(apkMerge.includes('propertyPortfolio = preferNonDefault'), 'merge deve preservar seções profundas de FII');
