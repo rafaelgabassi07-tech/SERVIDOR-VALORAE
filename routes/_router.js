@@ -33,6 +33,7 @@ import syncHandler from './sync.js';
 import serverMetricsHandler from './server/metrics.js';
 import { TtlLruCache } from '../lib/cache/memory.js';
 import { getRequestId } from '../lib/security/guard.js';
+import { attachProxyMetricsInterceptor } from '../lib/observability/server-metrics.js';
 import { coalesce } from '../lib/resilience/inflight.js';
 import {
   VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION,
@@ -690,20 +691,25 @@ function emptyCompatible(status = 'OK') {
 }
 
 export async function dispatchRoute(req, res) {
-  const parsed = new URL(req.url || '/api', 'https://valorae.local');
-  const path = stripApi(parsed.pathname);
-  applyRuntimeCors(req, res);
-  if (String(req.method || 'GET').toUpperCase() === 'OPTIONS') return sendCorsPreflight(req, res);
-  const payload = await bodyOrQuery(req, parsed);
-  const incomingRequestId = String(req?.headers?.['x-request-id'] || '').trim();
-  const payloadRequestId = String(payload?.requestId || '').trim();
-  const requestId = safeRequestId(incomingRequestId || payloadRequestId || getRequestId(req)) || safeRequestId(getRequestId(req));
-  payload.requestId = requestId;
-  res.setHeader('X-Request-Id', requestId);
-  req.query = { ...(req.query || {}), ...payload };
-  if (req.body === undefined || req.body === null || (typeof req.body === 'object' && !Array.isArray(req.body) && Object.keys(req.body).length === 0)) req.body = payload;
-
+  // Instala a captura antes de CORS, preflight, leitura de body e qualquer handler.
+  // Isso garante que JSON, texto, binário, redirect, streaming, HEAD, OPTIONS e erros
+  // sejam observados pelo mesmo interceptador central, sem depender de cada rota.
+  attachProxyMetricsInterceptor(req, res);
+  let path = '/';
   try {
+    const parsed = new URL(req.url || '/api', 'https://valorae.local');
+    path = stripApi(parsed.pathname);
+    applyRuntimeCors(req, res);
+    if (String(req.method || 'GET').toUpperCase() === 'OPTIONS') return sendCorsPreflight(req, res);
+    const payload = await bodyOrQuery(req, parsed);
+    const incomingRequestId = String(req?.headers?.['x-request-id'] || '').trim();
+    const payloadRequestId = String(payload?.requestId || '').trim();
+    const requestId = safeRequestId(incomingRequestId || payloadRequestId || getRequestId(req)) || safeRequestId(getRequestId(req));
+    payload.requestId = requestId;
+    res.setHeader('X-Request-Id', requestId);
+    req.query = { ...(req.query || {}), ...payload };
+    if (req.body === undefined || req.body === null || (typeof req.body === 'object' && !Array.isArray(req.body) && Object.keys(req.body).length === 0)) req.body = payload;
+
     if (path === '/') return sendJson(req, res, rootPayload());
     if (path === '/health' || path === '/ready') return sendJson(req, res, health(), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.ready}` });
     if (path === '/env') return sendJson(req, res, { status: 'OK', env: { node: process.version, runtime: 'node' }, version: RELEASE.version });

@@ -3,11 +3,11 @@
   "short_name": "VALORAE Proxy",
   "start_url": "/server.html#command",
   "display": "standalone",
-  "background_color": "#07110d",
-  "theme_color": "#0f1d17",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "id": "/server.html",
-  "description": "Proxy compatível com APK v474, com rotas, headers, cache e qualidade progressiva harmonizados.",
+  "description": "Monitor clean do VALORAE Proxy com captura central e histórico da carteira pareado ao APK v479.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.344"
+  "version": "21.12.348"
 }

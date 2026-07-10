@@ -1,3 +1,36 @@
+## 21.12.348 — Portfolio price chart integrity v316 (2026-07-10)
+
+- Preserva o ponto oficial atual do gráfico da carteira.
+- Reconcilia estoque inicial quando as transações importadas são parciais.
+- Mantém histórico remoto anterior à primeira transação conhecida.
+- Adiciona cobertura e reconciliação ao contrato de diagnóstico.
+- Pareamento APK v479 / protocolo `2026.07.10.9`.
+
+# 21.12.347 — Asset modal race-safe refresh v315 (2026-07-10)
+
+- Recovery, refresh e tráfego normal usam coalescência externa independente.
+- Refresh forçado promove conteúdo útil ao cache.
+- Cache completo não é rebaixado por producers tardios parciais.
+- Snapshots stale mais ricos são entregues imediatamente com revalidação em segundo plano.
+- Protocolo móvel atualizado para 2026.07.10.8 e pareamento APK v478.
+
+## 21.12.346 — 2026-07-10 — Asset modal recovery cache upgrade v314
+
+- Pareado ao APK v477 / `versionCode 26071007` e protocolo móvel `2026.07.10.7`.
+- Recovery passa a comparar a qualidade já exibida pelo APK com o cache atual do Proxy.
+- Resultado full concluído depois do deadline é devolvido imediatamente, eliminando a necessidade de reabrir o modal.
+- Cache melhor, porém ainda parcial, é retornado sem bloquear enquanto o producer continua em segundo plano.
+- Adiciona teste cruzado `asset-modal-recovery-cache-upgrade-v314.test.js`.
+
+## 21.12.345 — 2026-07-10 — Monitor capture clean Gold v313
+
+- Instala o interceptador de métricas antes do roteamento central e passa a cobrir JSON, respostas diretas, streaming, HEAD, OPTIONS e erros.
+- `sendJson` registra o payload completo sem duplicar o evento emitido por `res.end`.
+- Corrige duas strings truncadas que impediam o JavaScript do `index.html`/`server.html` de executar.
+- Exibe cobertura, lacuna, interceptador, requestId, instância e polling interno separado.
+- Renova o monitor com superfícies sólidas e paleta Gold Classic alinhada ao APK v476.
+- Adiciona teste de regressão `proxy-monitor-central-capture-v313.test.js`.
+
 ## 21.12.344 — 2026-07-10 — Protocol negotiation and stale harmony v312
 
 - Pareado ao APK v476 / `versionCode 26071006`.

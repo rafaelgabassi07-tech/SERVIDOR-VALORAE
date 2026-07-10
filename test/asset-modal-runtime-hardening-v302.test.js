@@ -13,7 +13,7 @@ if (apkHttp && apkUi) {
   assert.ok(apkHttp.includes('modalHttpCallTimeoutMs'), 'APK deve limitar timeout HTTP por chamada do modal');
   assert.ok(apkHttp.includes('call.timeout().timeout(requestTimeoutMs, TimeUnit.MILLISECONDS)'), 'APK deve usar timeout total por Call');
   assert.ok(!apkHttp.includes('.newBuilder()\n            .callTimeout(requestTimeoutMs'), 'APK deve reutilizar o OkHttpClient em vez de cloná-lo por request');
-  assert.ok(apkUi.includes('loadSingleAssetModalProgressively') && apkUi.includes('onIntermediate = { fastReady -> state = fastReady }'), 'UI não deve trocar loading por erro temporário do fast enquanto full ainda está em andamento');
+  assert.ok(apkUi.includes('loadSingleAssetModalProgressively') && apkUi.includes('previousReady?.copy(isRefreshingDetails = true)') && apkUi.includes('resolveSingleAssetModalProgressiveResult(visible, incoming)'), 'UI deve preservar dados visíveis e não substituí-los por erro temporário enquanto o full continua em andamento');
 }
 
 assert.ok(stockContract.includes('fastStageDeferred: true'), 'stock fast deve evitar canonical pesado');

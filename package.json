@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v312 negocia protocolo móvel, uniformiza metadados de resposta e alinha TTL fresco/stale grace com o APK v476.",
+  "description": "Proxy v316 corrige histórico, ponto atual e reconciliação do gráfico Preço da carteira, pareado ao APK v479.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,18 +19,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.344-protocol-negotiation-stale-harmony-v312",
+    "releasePatch": "21.12.348-portfolio-price-chart-integrity-v316",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.344",
-    "checkpoint": "protocol-negotiation-stale-harmony-v312",
-    "releaseLabel": "protocol-negotiation-stale-harmony-v312"
+    "publicVersion": "21.12.348",
+    "checkpoint": "portfolio-price-chart-integrity-v316",
+    "releaseLabel": "portfolio-price-chart-integrity-v316"
   },
-  "releasePatch": "21.12.344-protocol-negotiation-stale-harmony-v312",
+  "releasePatch": "21.12.348-portfolio-price-chart-integrity-v316",
   "config": {
-    "releasePatch": "21.12.344-protocol-negotiation-stale-harmony-v312",
-    "publicVersion": "21.12.344",
-    "checkpoint": "protocol-negotiation-stale-harmony-v312",
-    "releaseLabel": "protocol-negotiation-stale-harmony-v312"
+    "releasePatch": "21.12.348-portfolio-price-chart-integrity-v316",
+    "publicVersion": "21.12.348",
+    "checkpoint": "portfolio-price-chart-integrity-v316",
+    "releaseLabel": "portfolio-price-chart-integrity-v316"
   }
 }

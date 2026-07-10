@@ -13,12 +13,12 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.344');
-assert.equal(packageJson.valorae.releasePatch, '21.12.344-protocol-negotiation-stale-harmony-v312');
-assert.equal(metadata.apkVersion, '2026.07.10.6');
-assert.ok(metadata.contractVersion.includes('APK v476 / Proxy 21.12.344'));
+assert.equal(packageJson.valorae.publicVersion, '21.12.348');
+assert.equal(packageJson.valorae.releasePatch, '21.12.348-portfolio-price-chart-integrity-v316');
+assert.equal(metadata.apkVersion, '2026.07.10.9');
+assert.ok(metadata.contractVersion.includes('APK v479 / Proxy 21.12.348'));
 
-assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.6');
+assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.9');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '2');
 assert.deepEqual(routerTest.routeMethods('/sync'), ['GET', 'POST', 'DELETE']);
 assert.equal(routerTest.routeMethod('/sync'), 'POST', 'POST permanece método primário para writes');

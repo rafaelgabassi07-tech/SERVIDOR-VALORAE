@@ -14,14 +14,14 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.344');
-assert.equal(packageJson.valorae.releasePatch, '21.12.344-protocol-negotiation-stale-harmony-v312');
-assert.equal(metadata.apkVersion, '2026.07.10.6');
-assert.ok(metadata.contractVersion.includes('APK v476 / Proxy 21.12.344'));
+assert.equal(packageJson.valorae.publicVersion, '21.12.348');
+assert.equal(packageJson.valorae.releasePatch, '21.12.348-portfolio-price-chart-integrity-v316');
+assert.equal(metadata.apkVersion, '2026.07.10.9');
+assert.ok(metadata.contractVersion.includes('APK v479 / Proxy 21.12.348'));
 
-assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.6');
+assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.9');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '2');
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v13-protocol-negotiation');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v15-race-safe-refresh');
 assert.ok(VALORAE_REQUEST_HEADERS.includes('X-Valorae-Mobile-Protocol'));
 assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Mobile-Protocol'));
 assert.equal(VALORAE_MOBILE_CACHE_POLICY_SECONDS.assetModalFast, 35);
@@ -93,7 +93,7 @@ const apkUniversal = readSiblingApkFile('app/src/main/java/com/example/data/prox
 const apkHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const apkSync = readSiblingApkFile('app/src/main/java/com/example/data/sync/ValoraeSyncClient.kt');
 if (apkProtocol && apkCache && apkRuntime && apkUniversal && apkHttp && apkSync) {
-  assert.ok(apkProtocol.includes('const val Version = "2026.07.10.6"'));
+  assert.ok(apkProtocol.includes('const val Version = "2026.07.10.9"'));
   assert.ok(apkProtocol.includes('const val HeaderMobileProtocol = "X-Valorae-Mobile-Protocol"'));
   assert.ok(apkCache.includes('const val AssetModalFastStaleGraceMs = 2L * 60L * 1000L'));
   assert.ok(apkCache.includes('const val AssetModalFullStaleGraceMs = 15L * 60L * 1000L'));

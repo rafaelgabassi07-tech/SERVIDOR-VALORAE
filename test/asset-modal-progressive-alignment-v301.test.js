@@ -26,7 +26,7 @@ if (apkService && apkLoader && apkUi) {
   assert.ok(apkService.includes('val normalizedStage = stage.normalizedModalStage()'), 'APK deve preservar stage fast/full recebido pela UI');
   assert.ok(apkService.includes('"stage" to stage'), 'APK deve enviar stage real para o Proxy');
   assert.ok(apkLoader.includes('loadSingleAssetModalFast') && apkLoader.includes('loadSingleAssetModalFull'), 'APK deve preservar os dois estágios fast/full');
-  assert.ok(apkUi.includes('loadSingleAssetModalProgressively') && apkUi.includes('onIntermediate = { fastReady -> state = fastReady }'), 'UI deve renderizar a primeira resposta útil e manter atualização progressiva');
+  assert.ok(apkUi.includes('loadSingleAssetModalProgressively') && apkUi.includes('onIntermediate = { incoming ->') && apkUi.includes('resolveSingleAssetModalProgressiveResult(visible, incoming)'), 'UI deve renderizar e mesclar cada resposta útil sem rebaixar o conteúdo já visível');
 }
 
 console.log('asset-modal-progressive-alignment-v301 ok');

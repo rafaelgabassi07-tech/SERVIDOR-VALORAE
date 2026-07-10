@@ -9,13 +9,13 @@ assert.match(router, /import \{[^}]*buildPortfolioHistory[^}]*\} from '\.\.\/lib
   'roteador deve importar motor novo de histórico da carteira');
 assert.match(router, /path === '\/portfolio\/history'[\s\S]*normalizePortfolioPositions[\s\S]*buildPortfolioHistory\(normalizedPositions,/,
   'rota /portfolio/history deve normalizar posições/tickers e usar buildPortfolioHistory');
-assert.match(history, /PORTFOLIO_HISTORY_VERSION = '21\.12\.328-full-regression-corrections-improvements-v299'/,
-  'motor deve expor versão atual v299 mantendo o engine v292');
+assert.match(history, /PORTFOLIO_HISTORY_VERSION = '21\.12\.348-portfolio-price-chart-integrity-v316'/,
+  'motor deve expor versão atual v316 mantendo o engine v292');
 assert.match(history, /VALORAE_PORTFOLIO_HISTORY_REBUILD_V292/,
   'resposta deve identificar engine reconstruída v292');
 assert.equal((history.match(/const investedValue = Number\(currentPositions\.reduce/g) || []).length, 1,
   'não pode haver declaração duplicada de investedValue no buildPortfolioHistory');
-assert.match(history, /stateAtTimestamp\(entry\.position, entry\.transactions, timestamp\)/,
+assert.match(history, /stateAtTimestamp\(entry\.position, entry\.transactions, timestamp, entry\.openingInventory\)/,
   'histórico consolidado deve recalcular quantidade/custo por data usando transações');
 assert.match(history, /fetchYahooHistory\(p\.ticker, \{ range, interval, timeoutMs, limit: options\.limit \}\)/,
   'motor deve buscar histórico real por ticker no Yahoo/proxy');

@@ -1,6 +1,33 @@
-# VALORAE Proxy 21.12.344 — v312
+## Release 21.12.348 — v316 / Checkpoint 348
 
-Proxy v312 pareado ao APK `2026.07.10.6` / v476. Negocia o protocolo móvel, publica protocolo/schema em todas as respostas relevantes e alinha TTL fresco e stale grace dos modais por estágio.
+- Corrige regressões do gráfico **Preço da carteira**.
+- Preserva o ponto oficial atual após o saneamento de bordas.
+- Reconcilia estoque inicial em históricos de transações incompletos.
+- Expõe cobertura e tickers reconciliados no contrato.
+- Pareado ao APK v479 / protocolo móvel `2026.07.10.9`.
+
+## Release 21.12.347 — v315 / Checkpoint 347
+
+- Corridas entre normal, recovery e refresh eliminadas.
+- Cache promovido por qualidade e protegido contra downgrade tardio.
+- Refresh forçado volta a aquecer o cache.
+- Upgrade stale imediato com revalidação em segundo plano.
+- Pareado ao APK v478 / protocolo móvel `2026.07.10.8`.
+
+# VALORAE Proxy 21.12.347 — v314
+
+Proxy v314 pareado ao APK `2026.07.10.8` / v477. Corrige a recuperação dos modais de Ação e FII: resultados profundos concluídos após o deadline passam a ser reutilizados imediatamente, sem exigir fechar e reabrir a tela.
+
+Principais mudanças:
+- handshake de recuperação com completude, seções disponíveis e requestId conhecido;
+- estados `RECOVERY_CACHE_COMPLETE` e `RECOVERY_CACHE_UPGRADE`;
+- producer profundo permanece aquecendo o cache sem bloquear respostas parciais;
+- compatibilidade mantida para clientes legados sem contexto;
+- runtime `26.asset-modal.runtime.v14-recovery-cache-upgrade`.
+
+# VALORAE Proxy 21.12.345 — v313
+
+Proxy v313 pareado ao APK `2026.07.10.6` / v476. Corrige a captura central do monitor, cobre respostas JSON/diretas/streaming e renova o cockpit no visual Gold Classic do APK, sem alterar o contrato móvel.
 
 - `fast`: 35 s fresco + 120 s de stale grace.
 - `full`: 180 s fresco + 900 s de stale grace.

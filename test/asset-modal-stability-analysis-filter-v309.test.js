@@ -28,7 +28,7 @@ function richStockPayload(ticker = 'PETR4', price = 31.5) {
   };
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v13-protocol-negotiation');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v15-race-safe-refresh');
 
 const basicFull = {
   ok: true,
@@ -109,7 +109,7 @@ if (loaderKt && qualityKt && universalKt && analysisKt && dividendsKt) {
   assert.ok(qualityKt.includes('completeness < StockModalStableCachePercent'));
   assert.ok(qualityKt.includes('StockModalStableCachePercent = 62'));
   assert.ok(!qualityKt.includes('(delivery.isFinal && !delivery.retryable)'), 'proxy antigo não pode promover full pobre por isFinal isolado');
-  assert.ok(universalKt.includes('if (!recovery)') && universalKt.includes('"resume" to recovery.toString()'));
+  assert.ok(universalKt.includes('if (!recovery)') && universalKt.includes('put("resume", recovery.toString())'));
   assert.ok(!analysisKt.includes('LaunchedEffect(group.title, normalizedLocalQuery, sortMode)'));
   assert.ok(analysisKt.includes('LaunchedEffect(filteredItems.size)'));
   assert.ok(analysisKt.includes('contentType = { _, _ -> "analysis_discovery_asset_row" }'));
