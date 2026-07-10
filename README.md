@@ -1,3 +1,14 @@
+## Release 21.12.337
+
+`21.12.337-asset-modal-fast-cache-context-v305`: auditoria cruzada dos modais com preview `fast` não bloqueante, preferência por cache `full` completo e contexto de solicitação isolado após coalescing.
+
+### Destaques
+- Investidor10, histórico e logo deixam de bloquear o preview além do orçamento curto; as Promises originais continuam aquecendo os caches usados pelo `full`.
+- Cache `full` válido é servido antes de um `fast` parcial ainda fresco.
+- Cada consumidor recebe seu próprio `requestId` e `requestedStage`, mesmo compartilhando a execução.
+- Quality gate do Proxy reconhece todas as seções profundas também aceitas pelo APK.
+- Pareado com APK v469 / Checkpoint 59.
+
 ## Release 21.12.336
 
 `21.12.336-asset-modal-gateway-source-budget-v304`: gateway universal para modais de Ação/FII, classificação canônica no servidor e orçamento resiliente das fontes compartilhadas entre `fast` e `full`.

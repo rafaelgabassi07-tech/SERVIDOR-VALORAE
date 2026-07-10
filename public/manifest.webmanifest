@@ -6,8 +6,8 @@
   "background_color": "#07110d",
   "theme_color": "#0f1d17",
   "id": "/server.html",
-  "description": "Proxy com contrato progressivo v2, cache cross-stage e deadline defensivo para modais de Ação e FII.",
+  "description": "Proxy com preview fast não bloqueante, preferência por cache full e contexto isolado nos modais de Ação e FII.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.336"
+  "version": "21.12.337"
 }

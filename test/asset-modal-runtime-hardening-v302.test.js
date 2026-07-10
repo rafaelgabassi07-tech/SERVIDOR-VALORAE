@@ -11,8 +11,8 @@ const fiiContract = fs.readFileSync(new URL('../lib/analysis/fii-modal-contract.
 
 if (apkHttp && apkUi) {
   assert.ok(apkHttp.includes('modalHttpCallTimeoutMs'), 'APK deve limitar timeout HTTP por chamada do modal');
-  assert.ok(apkHttp.includes('.callTimeout(requestTimeoutMs, TimeUnit.MILLISECONDS)'), 'APK deve usar callTimeout por request');
-  assert.ok(apkHttp.includes('.readTimeout(requestTimeoutMs, TimeUnit.MILLISECONDS)'), 'APK deve alinhar readTimeout ao orçamento do request');
+  assert.ok(apkHttp.includes('call.timeout().timeout(requestTimeoutMs, TimeUnit.MILLISECONDS)'), 'APK deve usar timeout total por Call');
+  assert.ok(!apkHttp.includes('.newBuilder()\n            .callTimeout(requestTimeoutMs'), 'APK deve reutilizar o OkHttpClient em vez de cloná-lo por request');
   assert.ok(apkUi.includes('loadSingleAssetModalProgressively') && apkUi.includes('onIntermediate = { fastReady -> state = fastReady }'), 'UI não deve trocar loading por erro temporário do fast enquanto full ainda está em andamento');
 }
 

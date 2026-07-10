@@ -1,3 +1,13 @@
+## 21.12.337 — 2026-07-09 — Asset modal fast/cache/context v305
+
+- Stage `fast` deixa de bloquear em fontes lentas além do orçamento de preview; a captura original continua aquecendo o cache do `full`.
+- Cache `full` útil passa a prevalecer sobre `fast` parcial ainda fresco.
+- `requestId` e `requestedStage` são isolados por consumidor depois do coalescing.
+- Quality gate reconhece comparadores, posição acionária, demonstrativos, payout, comunicados e distribuições.
+- Corrige coerção de `null` para zero em cotação, variação, checklist, proventos e comparadores de Ação/FII, impedindo cache de placeholders zerados.
+- Adiciona teste cruzado `asset-modal-fast-cache-context-v305.test.js`.
+- Pareado com APK v469 / `versionCode 26070918`.
+
 ## 21.12.335 — 2026-07-09 — Asset modal delivery contract v2 / v303
 
 - Publica metadados `delivery` aditivos: estágio pedido/entregue, conclusão, completude, seções e retry.

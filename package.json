@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v304 publica o gateway universal dos modais de Ação/FII, resolve a família do ativo no servidor, impede que o fast encurte capturas compartilhadas do full e alinha cache/stale das fontes pesadas para reduzir dupla tentativa, timeout e regressão de dados.",
+  "description": "Proxy v305 torna o preview fast não bloqueante, prioriza cache full completo e isola o contexto de cada solicitação coalescida dos modais de Ação/FII.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,18 +19,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.336-asset-modal-gateway-source-budget-v304",
+    "releasePatch": "21.12.337-asset-modal-fast-cache-context-v305",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.336",
-    "checkpoint": "asset-modal-gateway-source-budget-v304",
-    "releaseLabel": "asset-modal-gateway-source-budget-v304"
+    "publicVersion": "21.12.337",
+    "checkpoint": "asset-modal-fast-cache-context-v305",
+    "releaseLabel": "asset-modal-fast-cache-context-v305"
   },
-  "releasePatch": "21.12.336-asset-modal-gateway-source-budget-v304",
+  "releasePatch": "21.12.337-asset-modal-fast-cache-context-v305",
   "config": {
-    "releasePatch": "21.12.336-asset-modal-gateway-source-budget-v304",
-    "publicVersion": "21.12.336",
-    "checkpoint": "asset-modal-gateway-source-budget-v304",
-    "releaseLabel": "asset-modal-gateway-source-budget-v304"
+    "releasePatch": "21.12.337-asset-modal-fast-cache-context-v305",
+    "publicVersion": "21.12.337",
+    "checkpoint": "asset-modal-fast-cache-context-v305",
+    "releaseLabel": "asset-modal-fast-cache-context-v305"
   }
 }
