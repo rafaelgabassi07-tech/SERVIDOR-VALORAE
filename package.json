@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Valorae Proxy 21.12.332: /portfolio/returns reconhece filtros 3Y e 5Y para o novo seletor de anos da página Retorno, mantendo comparação da carteira com índices e contrato compatível com APK v460.",
+  "description": "Proxy v304 publica o gateway universal dos modais de Ação/FII, resolve a família do ativo no servidor, impede que o fast encurte capturas compartilhadas do full e alinha cache/stale das fontes pesadas para reduzir dupla tentativa, timeout e regressão de dados.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,18 +19,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.332-portfolio-returns-year-ranges-v303",
+    "releasePatch": "21.12.336-asset-modal-gateway-source-budget-v304",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.332",
-    "checkpoint": "portfolio-returns-year-ranges-v303",
-    "releaseLabel": "portfolio-returns-year-ranges-v303"
+    "publicVersion": "21.12.336",
+    "checkpoint": "asset-modal-gateway-source-budget-v304",
+    "releaseLabel": "asset-modal-gateway-source-budget-v304"
   },
-  "releasePatch": "21.12.332-portfolio-returns-year-ranges-v303",
+  "releasePatch": "21.12.336-asset-modal-gateway-source-budget-v304",
   "config": {
-    "releasePatch": "21.12.332-portfolio-returns-year-ranges-v303",
-    "publicVersion": "21.12.332",
-    "checkpoint": "portfolio-returns-year-ranges-v303",
-    "releaseLabel": "portfolio-returns-year-ranges-v303"
+    "releasePatch": "21.12.336-asset-modal-gateway-source-budget-v304",
+    "publicVersion": "21.12.336",
+    "checkpoint": "asset-modal-gateway-source-budget-v304",
+    "releaseLabel": "asset-modal-gateway-source-budget-v304"
   }
 }

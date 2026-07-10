@@ -11,7 +11,9 @@ assert.ok(stock.includes('strategy: \'parallel_batches_of_6_v300\''), 'históric
 assert.ok(stock.includes('pdfResolutionStrategy: \'parallel_top_8_v300\''), 'PDFs/comunicados de ação devem resolver em paralelo limitado');
 assert.ok(fii.includes('strategy: \'parallel_v300\''), 'vacância de FII deve consultar candidatos em paralelo');
 assert.ok(fii.includes('pdfResolutionStrategy: \'parallel_top_8_v300\''), 'PDFs/comunicados de FII devem resolver em paralelo limitado');
-assert.ok(stock.includes('ttlMs: 180_000') && fii.includes('ttlMs: 180_000'), 'modais devem usar TTL full-only ampliado');
-assert.ok(!runtime.includes('status: \'PARTIAL\',\n    partial: true,\n    ticker: cleanTicker,\n    assetType') || runtime.includes('Full-only: não devolver payload PARTIAL'), 'runtime deve preservar full-only sem renderizar parcial por timeout');
+assert.ok(stock.includes("ttlMs: modalPayload.stage === 'fast' ? 35_000 : 180_000") && fii.includes("ttlMs: modalPayload.stage === 'fast' ? 35_000 : 180_000"), 'modais devem separar TTL fast/full');
+assert.ok(runtime.includes("return Math.min(12500, Math.max(7000, safe))"), 'stage full deve ter deadline defensivo antes do teto serverless');
+assert.ok(runtime.includes("if (isModalDeadlineError(error))"), 'deadline deve ser convertido em resposta parcial controlada, preservando o fast no APK');
+assert.ok(stock.includes('deferredStockIndexComparison') && fii.includes('deferredFiiIndexComparison'), 'stage fast deve adiar comparadores pesados');
 
 console.log('asset-modal-speed-full-v300 ok');

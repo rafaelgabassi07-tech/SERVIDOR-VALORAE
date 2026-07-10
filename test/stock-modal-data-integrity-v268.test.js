@@ -57,7 +57,7 @@ assert.equal(history.rows.find(row => row.label === 'P/VP')?.values['2024'], '1,
 assert.equal(history.rows.find(row => row.label === 'ROE')?.values['2025'], '26,49%');
 
 const source = fs.readFileSync('lib/analysis/stock-modal-contract.js', 'utf8');
-assert.ok(source.includes("26.asset-modal.stock.v55"), 'contrato de ação deve avançar para v54');
+assert.ok(source.includes("26.asset-modal.stock.v56-progressive-fast-full"), 'contrato de ação deve avançar para v54');
 assert.ok(source.includes('/api/acoes/historico-indicadores/${symbol.toLowerCase()}'), 'deve consultar endpoint histórico por ticker como fallback real');
 assert.ok(!source.includes('parseStockShareholdingRowsFromSection(plain);'), 'shareholding não pode usar fallback de página inteira');
 assert.ok(source.includes('historicalIndicatorRows: (investidor10?.historicalIndicators?.rows || []).length'), 'diagnóstico de histórico deve refletir rows reais');

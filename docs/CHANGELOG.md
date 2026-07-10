@@ -1,3 +1,28 @@
+## 21.12.335 — 2026-07-09 — Asset modal delivery contract v2 / v303
+
+- Publica metadados `delivery` aditivos: estágio pedido/entregue, conclusão, completude, seções e retry.
+- Corrige cache cross-stage de FIIs entre períodos internos `1M` e `1Y`.
+- Aplica deadline defensivo também ao `full`, retornando PARTIAL controlado/stale fallback antes do teto serverless.
+- Alinha Ação e FII em `stage`, `mode`, `fullOnly`, `progressive` e deadlines explícitos.
+- Adiciona teste cruzado `asset-modal-delivery-cancellation-v303.test.js`; suíte com 175 arquivos e 0 falhas.
+- Pareado com APK v467 / `versionCode 26070916`.
+
+## 21.12.334 — 2026-07-09 — Modal runtime hardening v302
+
+- Reaproveita cache full em chamadas fast equivalentes dos modais.
+- Reduz peso do stage fast em ações e FIIs sem remover o contrato completo do stage full.
+- Adiciona teste `asset-modal-runtime-hardening-v302.test.js`.
+
+## 21.12.333 — v301 asset modal progressive fast/full alignment (2026-07-09)
+
+- Corrige desalinhamento em que o APK voltava a aguardar somente o contrato completo e o Proxy forçava `stage=full` nos modais.
+- Reativa abertura progressiva dos modais: `stage=fast` renderiza rapidamente cotação/gráfico/resumo/indicadores básicos e `stage=full` completa os blocos pesados.
+- Ação: adia comparadores, REST extras de receita/posição e comunicados/PDFs para o stage completo, reduzindo a chance de timeout percebido.
+- FII: passa a respeitar o mesmo contrato `fast/full` para manter alinhamento de runtime.
+- Runtime do Proxy separa cache/TTL/deadline por modo e só usa fallback parcial de deadline no stage rápido.
+- Adiciona teste `asset-modal-progressive-alignment-v301` cobrindo alinhamento APK + Proxy.
+- Pareado com APK v465 / `versionCode 26070914`.
+
 ## 21.12.331 — v302 stock modal signed chart visuals (2026-07-09)
 
 - Preserva e audita lucro líquido negativo nos contratos de gráficos de ação.

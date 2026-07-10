@@ -4,7 +4,7 @@ import { clearCache } from '../lib/core/cache.js';
 import { ASSET_MODAL_RUNTIME_VERSION, withAssetModalRuntime, _test } from '../lib/analysis/asset-modal-runtime.js';
 
 clearCache();
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v5-full-only');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v7-delivery-contract-cancellable');
 assert.notEqual(
   _test.modalCacheKey({ family: 'stock', ticker: 'PETR4', payload: { surface: 'modal' } }),
   _test.modalCacheKey({ family: 'fii', ticker: 'PETR4', payload: { surface: 'modal' } }),
@@ -25,7 +25,8 @@ const first = await withAssetModalRuntime({
 });
 assert.equal(first.value, 1);
 assert.equal(first.diagnostics.modalRuntime.cacheStatus, 'MISS');
-assert.equal(first.diagnostics.modalRuntime.version, '26.asset-modal.runtime.v5-full-only');
+assert.equal(first.diagnostics.modalRuntime.version, '26.asset-modal.runtime.v7-delivery-contract-cancellable');
+assert.equal(first.diagnostics.modalRuntime.mode, 'full');
 assert.equal('key' in first.diagnostics.modalRuntime, false, 'diagnóstico público não deve expor chave interna de cache');
 
 const second = await withAssetModalRuntime({

@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const expectedCore = '21.12.0';
-const expectedPublic = '21.12.332';
-const expectedPatch = '21.12.332-portfolio-returns-year-ranges-v303';
+const expectedPublic = '21.12.336';
+const expectedPatch = '21.12.336-asset-modal-gateway-source-budget-v304';
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
 const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
@@ -17,10 +17,10 @@ assert.equal(pkg.valorae.releasePatch, expectedPatch);
 assert.equal(metadata.version, expectedCore);
 assert.equal(metadata.releasePatch, expectedPatch);
 assert.equal(manifest.version, expectedPublic);
-assert.ok(sw.includes('v21-12-332'));
+assert.ok(sw.includes('v21-12-336'));
 assert.ok(coreRelease.includes(expectedPatch));
-assert.ok(coreRelease.includes('valorae-proxy-server-v21-12-332'));
-assert.ok(currentRelease.includes("VALORAE_PUBLIC_VERSION = '21.12.332'"));
+assert.ok(coreRelease.includes('valorae-proxy-server-v21-12-336'));
+assert.ok(currentRelease.includes("VALORAE_PUBLIC_VERSION = '21.12.336'"));
 assert.ok(currentRelease.includes(expectedPatch));
 
 console.log('release audit OK:', expectedCore, expectedPatch);
