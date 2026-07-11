@@ -35,6 +35,7 @@ import { TtlLruCache } from '../lib/cache/memory.js';
 import { getRequestId } from '../lib/security/guard.js';
 import { attachProxyMetricsInterceptor } from '../lib/observability/server-metrics.js';
 import { coalesce } from '../lib/resilience/inflight.js';
+import { withRouteDeadline } from '../lib/http/route.js';
 import {
   VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION,
   VALORAE_MOBILE_CACHE_POLICY_SECONDS,
@@ -510,6 +511,34 @@ function assetPayload(payload = {}) {
   };
 }
 
+function legacyAssetTimeoutPayload(payload = {}, routeDeadlineMs = 8_500) {
+  const base = assetPayload(payload);
+  return {
+    ...base,
+    ok: false,
+    status: 'PARTIAL',
+    partial: true,
+    timeout: true,
+    retryable: true,
+    source: 'VALORAE_ROUTE_DEADLINE',
+    error: `Deadline da rota asset atingido em ${routeDeadlineMs}ms.`,
+    message: 'Preserve o último snapshot válido e revalide a rota em segundo plano.',
+    appResponseIntegrity: {
+      renderSafe: true,
+      cacheSafe: false,
+      canReplacePreviousSnapshot: false,
+    },
+    appDataContract: {
+      canReplacePreviousSnapshot: false,
+      preservePreviousSnapshot: true,
+    },
+    performance: {
+      routeDeadlineMs,
+      timedOut: true,
+    },
+  };
+}
+
 
 
 async function assetLogoHandler(req, res, payload = {}) {
@@ -821,8 +850,23 @@ export async function dispatchRoute(req, res) {
       }), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.quotes}, stale-while-revalidate=300` });
     }
     if (path === '/asset' || path === '/asset/coverage' || path === '/asset/fundamentals' || path === '/asset/profile' || path === '/asset/valuation' || path === '/asset/profitability' || path === '/asset/debt' || path === '/asset/statements' || path === '/asset/peers' || path === '/asset/source-map' || path === '/asset/indicators' || path === '/asset/quality' || path === '/asset/action-plan') {
-      const enriched = await buildAssetDetails(payload);
-      return sendJson(req, res, { ...assetPayload(payload), ...enriched }, { cacheControl: 'private, max-age=60' });
+      const deepRequested = ['complete', 'full', 'deep', 'precise', 'max'].includes(String(payload.mode || payload.profile || '').toLowerCase())
+        || boolParamLocal(payload.complete || payload.full || payload.precise, false);
+      const routeDeadlineMs = clampInt(
+        payload.routeDeadlineMs || payload.deadlineMs || payload.timeoutMs,
+        deepRequested ? 22_000 : 8_500,
+        500,
+        deepRequested ? 28_000 : 15_000
+      );
+      const enriched = await withRouteDeadline(
+        () => buildAssetDetails(payload),
+        routeDeadlineMs,
+        () => legacyAssetTimeoutPayload(payload, routeDeadlineMs)
+      );
+      const degradedAsset = Boolean(
+        enriched?.timeout || enriched?.partial || String(enriched?.status || '').toUpperCase() === 'PARTIAL' || enriched?.appResponseIntegrity?.cacheSafe === false
+      );
+      return sendJson(req, res, { ...assetPayload(payload), ...enriched }, { cacheControl: degradedAsset ? 'no-store' : 'private, max-age=60' });
     }
     if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
     if (path === '/assets') return assetsHandler(req, res);

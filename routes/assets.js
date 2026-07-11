@@ -244,25 +244,42 @@ export default async function handler(req, res) {
       profile: input.profile || input.performance || (completeRequested ? 'deep' : undefined),
     }, { endpoint: 'assets', batchSize: valid.length });
 
+    const externalDisabled = String(process.env.VALORAE_DISABLE_EXTERNAL || '').trim() === '1';
     const routeDeadlineMs = clampNumber(
-      input.routeDeadlineMs || input.deadlineMs,
+      input.routeDeadlineMs || input.deadlineMs || input.timeoutMs,
       completeRequested ? 19_000 : 3_200,
-      750,
+      500,
       completeRequested ? 26_000 : 8_000
     );
-    const batch = await withRouteDeadline(
-      () => ValoraeEngine.fetchAtivosBatch(valid, perfOptions),
-      routeDeadlineMs,
-      () => ({
-        assets: [],
-        stats: {
-          partial: true,
-          timeout: true,
+    const timeoutFallback = () => ({
+      assets: [],
+      stats: {
+        partial: true,
+        timeout: !externalDisabled,
+        externalDisabled,
+        routeDeadlineMs: externalDisabled ? 0 : routeDeadlineMs,
+        message: externalDisabled
+          ? 'Fontes externas desativadas por configuração operacional; resposta degradada imediata.'
+          : 'Deadline mobile atingido; o APK deve preservar snapshot/cache local e revalidar em background.',
+      },
+      errors: valid.map(ticker => ({
+        ticker,
+        code: externalDisabled ? 'EXTERNAL_SOURCES_DISABLED' : 'ASSETS_ROUTE_DEADLINE',
+        error: externalDisabled
+          ? 'Fontes externas desativadas para esta instância.'
+          : `Deadline da rota assets atingido em ${routeDeadlineMs}ms.`,
+      })),
+    });
+    const batch = externalDisabled
+      ? timeoutFallback()
+      : await withRouteDeadline(
+          () => ValoraeEngine.fetchAtivosBatch(valid, perfOptions),
           routeDeadlineMs,
-          message: 'Deadline mobile atingido; o APK deve preservar snapshot/cache local e revalidar em background.',
-        },
-        errors: valid.map(ticker => ({ ticker, error: `Deadline da rota assets atingido em ${routeDeadlineMs}ms.` })),
-      })
+          timeoutFallback
+        );
+    const degradedBatch = Boolean(
+      batch.stats?.timeout || batch.stats?.externalDisabled || batch.stats?.partial ||
+      errors.length || (batch.errors || []).length
     );
     return sendJson(req, res, {
       version: ValoraeEngine.version,
@@ -273,7 +290,13 @@ export default async function handler(req, res) {
       stats: batch.stats || {},
       assets: batch.assets || [],
       errors: [...errors, ...(batch.errors || [])],
-    }, { status: 200, engineVersion: ValoraeEngine.version, profile: perfOptions.performanceProfile, cachePolicy: perfOptions.cachePolicy, cacheControl: 'private, max-age=15, stale-while-revalidate=60' });
+    }, {
+      status: 200,
+      engineVersion: ValoraeEngine.version,
+      profile: perfOptions.performanceProfile,
+      cachePolicy: perfOptions.cachePolicy,
+      cacheControl: degradedBatch ? 'no-store' : 'private, max-age=15, stale-while-revalidate=60',
+    });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'assets' });
   }

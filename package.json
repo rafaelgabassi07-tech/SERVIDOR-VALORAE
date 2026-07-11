@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v316 corrige histórico, ponto atual e reconciliação do gráfico Preço da carteira, pareado ao APK v479.",
+  "description": "Proxy v318 endurece deadlines globais, fail-fast degradado e testes cross-stack estritos, pareado ao APK v482.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,8 @@
     "check:syntax": "node scripts/check-syntax.js",
     "test": "node scripts/run-tests.js",
     "audit:version": "node scripts/audit-version-consistency.js && node scripts/audit-version.js",
-    "verify": "npm run build && npm run check:syntax && npm test && npm run audit:version"
+    "verify": "npm run build && npm run check:syntax && npm test && npm run audit:version",
+    "test:cross-stack": "node scripts/run-cross-stack-tests.js"
   },
   "engines": {
     "node": "24.x"
@@ -19,18 +20,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.348-portfolio-price-chart-integrity-v316",
+    "releasePatch": "21.12.350-full-audit-integration-hardening-v318",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.348",
-    "checkpoint": "portfolio-price-chart-integrity-v316",
-    "releaseLabel": "portfolio-price-chart-integrity-v316"
+    "publicVersion": "21.12.350",
+    "checkpoint": "full-audit-integration-hardening-v318",
+    "releaseLabel": "full-audit-integration-hardening-v318"
   },
-  "releasePatch": "21.12.348-portfolio-price-chart-integrity-v316",
+  "releasePatch": "21.12.350-full-audit-integration-hardening-v318",
   "config": {
-    "releasePatch": "21.12.348-portfolio-price-chart-integrity-v316",
-    "publicVersion": "21.12.348",
-    "checkpoint": "portfolio-price-chart-integrity-v316",
-    "releaseLabel": "portfolio-price-chart-integrity-v316"
+    "releasePatch": "21.12.350-full-audit-integration-hardening-v318",
+    "publicVersion": "21.12.350",
+    "checkpoint": "full-audit-integration-hardening-v318",
+    "releaseLabel": "full-audit-integration-hardening-v318"
   }
 }

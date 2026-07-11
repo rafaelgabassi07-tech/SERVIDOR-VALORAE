@@ -6,8 +6,8 @@
   "background_color": "#000000",
   "theme_color": "#000000",
   "id": "/server.html",
-  "description": "Monitor clean do VALORAE Proxy com captura central e histórico da carteira pareado ao APK v479.",
+  "description": "Monitor clean do VALORAE Proxy com readiness completo dos modais e skeleton progressivo pareado ao APK v482.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.348"
+  "version": "21.12.350"
 }

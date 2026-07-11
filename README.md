@@ -1,3 +1,23 @@
+# VALORAE Proxy
+
+## Release atual — 21.12.350 / v318 (2026-07-10)
+
+Auditoria integral e hardening de integração: deadlines globais impedem hangs nas rotas legadas, `timeoutMs` explícito limita a duração total, batches parciais não são cacheados e a suíte cross-stack exige o APK real no modo de release sem ler checkouts globais por acidente. Pareado ao APK v482 / `2026.07.10.12`; protocolo móvel preservado em `2026.07.10.10`.
+
+### Evidência desta entrega
+
+- Build Vercel-safe, auditoria de sintaxe/versão e 194 arquivos de teste Node.
+- Runtime declarado, `.nvmrc` e monitor operacional alinhados em Node.js 24.
+- 13 testes cross-stack estritos apontando para o checkpoint 72 do APK.
+- Smoke tests HTTP locais de health, ready, manifest, modais, análise, batch, carteira e rota legada.
+- Empacotamento limpo, sem `node_modules`, pronto para AI Studio.
+
+## Release 21.12.349 — v317 / Checkpoint 349
+
+- Readiness composto para os modais de AÇÃO e FII.
+- Entrega full só conclui quando todos os subblocos visuais realmente possuem conteúdo.
+- Pareado ao APK v480 / protocolo móvel `2026.07.10.10`.
+
 ## Release 21.12.348 — v316 / Checkpoint 348
 
 - Corrige regressões do gráfico **Preço da carteira**.

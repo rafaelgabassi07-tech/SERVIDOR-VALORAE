@@ -37,5 +37,5 @@ assert.equal(result.fallbackUsed, false);
 assert.ok(result.series.length >= 3, `series.length=${result.series.length}`);
 assert.ok(result.summary.firstValue >= 95, `isolated edge outlier must not drive firstValue: ${JSON.stringify(result.series)}`);
 assert.ok(Math.min(...result.series.map(point => point.totalValue)) >= 95, `edge outlier remained in series: ${JSON.stringify(result.series)}`);
-assert.equal(result.version, '21.12.348-portfolio-price-chart-integrity-v316');
+assert.equal(result.version, '21.12.350-full-audit-integration-hardening-v318');
 console.log('portfolio-history-intraday-edge-stability-v299 ok');

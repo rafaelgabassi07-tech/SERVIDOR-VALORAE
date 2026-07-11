@@ -59,7 +59,7 @@ function completeFiiPayload(ticker = 'HGLG11', price = 160.2) {
   };
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v15-race-safe-refresh');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v16-section-complete-skeleton');
 
 const family = 'stock';
 const ticker = 'PETR4';

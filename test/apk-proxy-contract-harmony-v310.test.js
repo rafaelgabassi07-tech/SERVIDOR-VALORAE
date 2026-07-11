@@ -79,8 +79,20 @@ assert.equal(incompleteDelivery.recoveryTargetPercent, 82);
 
 const completeStock = {
   ...incompleteStock,
+  dividendRadar: { status: 'OK', months: [{ activeDateCom: true, dateComCount: 1 }] },
+  payoutChart: { points: [{ period: '2025' }] },
+  peerComparison: { rows: [{ ticker: 'TEST3' }] },
+  indexComparison: { items: [{ code: 'IBOV' }], series: [], seriesByPeriod: {} },
+  companyData: { facts: [{ id: 'sector', value: 'Serviços' }], companyPapers: [], fractionalPapers: [], sections: [] },
+  companyInformation: { facts: [{ id: 'activity', value: 'Operação' }], groups: [] },
   revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
-  resultsStatement: { rows: [{ label: 'Receita', value: '100' }], tablesByPeriod: {} }
+  revenueByBusiness: { items: [{ label: 'Serviços', value: 100 }] },
+  shareholdingPosition: { rows: [{ shareholder: 'Mercado' }] },
+  revenueProfitChart: { points: [{ period: '2025' }] },
+  profitQuoteChart: { points: [{ period: '2025' }] },
+  equityEvolutionChart: { points: [{ period: '2025' }] },
+  resultsStatement: { rows: [{ label: 'Receita', value: '100' }], tablesByPeriod: {} },
+  balanceSheetStatement: { rows: [{ label: 'Patrimônio', value: '100' }], tablesByPeriod: {} }
 };
 const completeStockProfile = modalRuntimeTest.modalPayloadQualityProfile(completeStock, 'stock');
 assert.equal(completeStockProfile.completeForDelivery, true);

@@ -1,3 +1,23 @@
+## 21.12.350 — Full audit integration hardening v318 (2026-07-10)
+
+- Adiciona deadline global às rotas legadas de ativo, evitando requisições indefinidamente pendentes sob falha de origem.
+- Retorna PARTIAL retryable e preserva snapshot anterior quando o deadline é atingido.
+- Faz `/api/v1/assets` responder imediatamente quando `VALORAE_DISABLE_EXTERNAL=1`.
+- Torna a suíte cross-stack configurável por `VALORAE_APK_ROOT` e estrita por `VALORAE_REQUIRE_APK=1`.
+- Isola a suíte autônoma de checkouts APK globais/desatualizados; leitura cruzada só ocorre com raiz explícita ou modo estrito.
+- Adiciona regressão real para Promise que nunca resolve e para latência do modo degradado.
+- Faz `timeoutMs` explícito limitar também o deadline total da rota legada e marca qualquer batch parcial/com erros como `no-store`.
+- Alinha `.nvmrc` e o monitor operacional ao runtime Node.js 24 declarado em `package.json`, com auditoria automática contra regressão.
+- Pareamento APK v482 / `2026.07.10.12`; protocolo móvel `2026.07.10.10` preservado.
+
+## 21.12.349 — asset-modal-section-skeleton-v317 (2026-07-10)
+
+- Readiness de grupos compostos alinhado aos skeletons por seção do APK v480.
+- Dividendos exigem histórico, radar e payout; empresa exige seus três blocos.
+- Receitas, gráficos financeiros e demonstrações só concluem quando todas as subseções renderizadas chegam.
+- FII reconhece média por segmento como conteúdo patrimonial válido.
+- Protocolo móvel atualizado para 2026.07.10.10.
+
 ## 21.12.348 — Portfolio price chart integrity v316 (2026-07-10)
 
 - Preserva o ponto oficial atual do gráfico da carteira.

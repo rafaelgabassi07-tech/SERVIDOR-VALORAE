@@ -1,8 +1,41 @@
 import { ValoraeEngine, canonicalizeTicker, inferAssetType, validarTicker } from '../lib/Valorae-engine.js';
 import { resolvePerformanceOptions } from '../lib/performance/profile.js';
 import { sendJson } from '../lib/performance/http.js';
-import { beginRoute, boolParam, falseParam, clampNumber, resolveSelfScrapeUrl, sendRouteError } from '../lib/http/route.js';
+import { beginRoute, boolParam, falseParam, clampNumber, resolveSelfScrapeUrl, sendRouteError, withRouteDeadline } from '../lib/http/route.js';
 import { attachPartialDataGuidance } from '../lib/quality/partial-data-guidance.js';
+
+export function buildAssetRouteTimeoutPayload({ ticker, type, view, routeDeadlineMs, requestId, profile } = {}) {
+  return {
+    ok: false,
+    status: 'PARTIAL',
+    partial: true,
+    timeout: true,
+    retryable: true,
+    requestId,
+    ticker,
+    symbol: ticker,
+    type,
+    assetClass: type,
+    view,
+    source: 'VALORAE_ROUTE_DEADLINE',
+    error: `Deadline da rota asset atingido em ${routeDeadlineMs}ms.`,
+    message: 'A coleta profunda continua limitada pelo orçamento da rota; preserve o último snapshot válido e revalide em segundo plano.',
+    performance: {
+      profile,
+      routeDeadlineMs,
+      timedOut: true,
+    },
+    appResponseIntegrity: {
+      renderSafe: true,
+      cacheSafe: false,
+      canReplacePreviousSnapshot: false,
+    },
+    appDataContract: {
+      canReplacePreviousSnapshot: false,
+      preservePreviousSnapshot: true,
+    },
+  };
+}
 
 export default async function handler(req, res) {
   const route = beginRoute(req, res, {
@@ -75,15 +108,38 @@ export default async function handler(req, res) {
       profile: input.profile || input.performance || (completeRequested ? 'deep' : undefined),
     }, { endpoint: 'asset', ticker, type });
 
-    const payload = attachPartialDataGuidance(await ValoraeEngine.fetchAtivo(ticker, type, perfOptions), { endpoint: 'asset', ticker, view });
+    const routeDeadlineMs = clampNumber(
+      input.routeDeadlineMs || input.deadlineMs || input.timeoutMs,
+      completeRequested ? 22_000 : 8_500,
+      500,
+      completeRequested ? 28_000 : 15_000
+    );
+    const fetched = await withRouteDeadline(
+      () => ValoraeEngine.fetchAtivo(ticker, type, perfOptions),
+      routeDeadlineMs,
+      () => buildAssetRouteTimeoutPayload({
+        ticker,
+        type,
+        view,
+        routeDeadlineMs,
+        requestId: route.requestId,
+        profile: perfOptions.performanceProfile,
+      })
+    );
+    const payload = attachPartialDataGuidance(fetched, { endpoint: 'asset', ticker, view });
+    const degradedPayload = Boolean(
+      payload?.timeout || payload?.partial || String(payload?.status || '').toUpperCase() === 'PARTIAL' || payload?.appResponseIntegrity?.cacheSafe === false
+    );
     return sendJson(req, res, payload, {
       status: 200,
       engineVersion: ValoraeEngine.version,
       profile: payload?.performance?.profile || perfOptions.performanceProfile,
       cachePolicy: perfOptions.cachePolicy,
-      cacheControl: ['fast','chartfast','portfolio'].includes(perfOptions.performanceProfile) || view === 'compact'
-        ? 'private, max-age=15, stale-while-revalidate=60'
-        : 'no-store, no-cache, max-age=0, must-revalidate',
+      cacheControl: degradedPayload
+        ? 'no-store, no-cache, max-age=0, must-revalidate'
+        : (['fast','chartfast','portfolio'].includes(perfOptions.performanceProfile) || view === 'compact'
+          ? 'private, max-age=15, stale-while-revalidate=60'
+          : 'no-store, no-cache, max-age=0, must-revalidate'),
     });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'asset' });

@@ -13,12 +13,12 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.348');
-assert.equal(packageJson.valorae.releasePatch, '21.12.348-portfolio-price-chart-integrity-v316');
-assert.equal(metadata.apkVersion, '2026.07.10.9');
-assert.ok(metadata.contractVersion.includes('APK v479 / Proxy 21.12.348'));
+assert.equal(packageJson.valorae.publicVersion, '21.12.350');
+assert.equal(packageJson.valorae.releasePatch, '21.12.350-full-audit-integration-hardening-v318');
+assert.equal(metadata.apkVersion, '2026.07.10.12');
+assert.ok(metadata.contractVersion.includes('APK v482 / Proxy 21.12.350'));
 
-assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.9');
+assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '2');
 assert.deepEqual(routerTest.routeMethods('/sync'), ['GET', 'POST', 'DELETE']);
 assert.equal(routerTest.routeMethod('/sync'), 'POST', 'POST permanece método primário para writes');
@@ -80,7 +80,9 @@ assert.equal(fiiProfile.deepSectionCount, 7, 'information deve contar como seç�
 assert.equal(fiiProfile.completeForDelivery, true, 'FII com seis+ seções profundas deve poder concluir');
 const fiiDelivery = modalRuntimeTest.buildModalDelivery(fiiWithInformation, { family: 'fii', requestedMode: 'full', mode: 'full' });
 assert.ok(fiiDelivery.availableSections.includes('information'));
-assert.equal(fiiDelivery.isFinal, true);
+assert.equal(fiiDelivery.isFinal, false, 'seções visuais ausentes mantêm a entrega full recuperável');
+assert.ok(fiiDelivery.deferredSections.includes('propertyPortfolio'));
+assert.equal(fiiDelivery.completeForDelivery, false);
 
 const apkCache = readSiblingApkFile('app/src/main/java/com/example/data/cache/ValoraeCachePolicy.kt');
 const apkProtocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
