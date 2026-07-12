@@ -23,7 +23,9 @@ const criticalStock = {
   companyData: { facts: [{ value: 'Brasil' }] },
   companyInformation: { facts: [{ value: 'Listada' }] },
   resultsStatement: { rows: [{ label: 'Receita' }] },
-  balanceSheetStatement: { rows: [{ label: 'Patrimônio' }] }
+  balanceSheetStatement: { rows: [{ label: 'Patrimônio' }] },
+  indexComparison: { series: [{ code: 'PETR4', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }] },
+  announcements: { items: [{ id: 'notice-1', title: 'Comunicado ao mercado' }] }
 };
 
 const incomplete = structuredClone(criticalStock);
@@ -39,7 +41,7 @@ const delivery = runtime.buildModalDelivery(incomplete, {
   requestPayload: { requiredSections: 'profitQuoteChart' },
   requestId: 'cp351-target'
 });
-assert.deepEqual(delivery.requiredSections, ['profitQuoteChart']);
+assert.deepEqual(delivery.requiredSections, ['historicalIndicators', 'revenueProfitChart', 'profitQuoteChart', 'equityEvolutionChart', 'indexComparison', 'announcements']);
 assert.deepEqual(delivery.missingRequiredSections, ['profitQuoteChart']);
 assert.equal(delivery.isFinal, false);
 assert.equal(delivery.retryable, true);

@@ -54,6 +54,7 @@ const fullCached = {
   revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
   returns: { rows: [{ label: '12M', value: '10%' }] },
   resultsStatement: { rows: [{ label: 'Receita', value: '100' }], tablesByPeriod: {} },
+  indexComparison: { items: [{ code: 'IBOV', returnPercent: 2 }], series: [{ code: 'PETR4', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }], seriesByPeriod: {} }, announcements: { items: [{ id: 'notice', title: 'Comunicado' }] },
   balanceSheetStatement: { rows: [], tablesByPeriod: {} }
 };
 

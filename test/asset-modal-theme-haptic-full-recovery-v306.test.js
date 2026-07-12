@@ -45,7 +45,8 @@ const richFull = {
   dividendHistory: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
   companyProfile: { facts: [{ id: 'segment', value: 'Petróleo' }], sections: [] },
   revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
-  returns: { rows: [{ label: '12M', value: '10%' }] }
+  returns: { rows: [{ label: '12M', value: '10%' }] },
+  indexComparison: { items: [{ code: 'IBOV', returnPercent: 2 }], series: [{ code: 'PETR4', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }], seriesByPeriod: {} }, announcements: { items: [{ id: 'notice', title: 'Comunicado' }] },
 };
 assert.equal(_test.isModalPayloadCacheable(richFull, 'stock'), true, 'full com seções profundas deve ser reutilizado');
 
@@ -110,7 +111,7 @@ if (colorKt && themeKt && settingsKt && agendaKt && dividendsKt && hapticKt && m
   assert.ok(dividendsKt.includes('valueColor = ValoraeYellow'), 'métrica A receber deve manter amarelo semântico');
   assert.ok(manifest.includes('android.permission.VIBRATE'), 'APK deve declarar permissão de vibração');
   assert.ok(hapticKt.includes('VibratorManager') && hapticKt.includes('VibrationEffect.createOneShot'), 'retorno tátil deve possuir execução física explícita');
-  assert.ok(loaderKt.includes('AssetModalFullRecoveryDelaysMs') && loaderKt.includes('450L, 1_100L, 2_300L') && loaderKt.includes('recovery = true'), 'APK deve recuperar o full incompleto enquanto o modal permanece aberto');
+  assert.ok(loaderKt.includes('AssetModalFullRecoveryDelaysMs') && loaderKt.includes('450L, 1_100L, 2_300L, 4_200L') && loaderKt.includes('recovery = true'), 'APK deve recuperar o full incompleto enquanto o modal permanece aberto');
   assert.ok(qualityKt.includes('StockModalStableCachePercent = 62') && qualityKt.includes('FiiModalStableCachePercent = 58'), 'full básico não pode entrar no cache estável do APK');
 }
 

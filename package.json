@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v319 entrega recuperação completa por seção para modais de Ação e FII, cache incremental seguro e fallbacks financeiros reais, pareado ao APK v498.",
+  "description": "Proxy v321 mantém requisitos críticos imutáveis, separa hints opcionais de recovery e permanece pareado ao APK v500.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,18 +20,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.351-asset-modal-section-complete-recovery-v319",
+    "releasePatch": "21.12.353-asset-modal-required-sections-hardening-v321",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.351",
-    "checkpoint": "asset-modal-section-complete-recovery-v319",
-    "releaseLabel": "asset-modal-section-complete-recovery-v319"
+    "publicVersion": "21.12.353",
+    "checkpoint": "asset-modal-required-sections-hardening-v321",
+    "releaseLabel": "asset-modal-required-sections-hardening-v321"
   },
-  "releasePatch": "21.12.351-asset-modal-section-complete-recovery-v319",
+  "releasePatch": "21.12.353-asset-modal-required-sections-hardening-v321",
   "config": {
-    "releasePatch": "21.12.351-asset-modal-section-complete-recovery-v319",
-    "publicVersion": "21.12.351",
-    "checkpoint": "asset-modal-section-complete-recovery-v319",
-    "releaseLabel": "asset-modal-section-complete-recovery-v319"
+    "releasePatch": "21.12.353-asset-modal-required-sections-hardening-v321",
+    "publicVersion": "21.12.353",
+    "checkpoint": "asset-modal-required-sections-hardening-v321",
+    "releaseLabel": "asset-modal-required-sections-hardening-v321"
   }
 }

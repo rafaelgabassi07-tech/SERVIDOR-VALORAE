@@ -1,6 +1,29 @@
 # VALORAE Proxy
 
-## Release atual — 21.12.351 / v319 (2026-07-11)
+## Release atual — 21.12.353 / v321 (2026-07-12)
+
+Requisitos críticos do modal imutáveis por família, hints opcionais restritos ao direcionamento de produtores e pareamento com o APK v500.
+
+### Validação desta entrega
+
+- `requiredSections` não reduz o contrato completo.
+- `missingSections` e `deferredSections` opcionais não entram em `missingRequiredSections`.
+- Recuperação dirigida, cache incremental e separação stock/fii permanecem ativos.
+- Pareamento: APK v500 / protocolo móvel `2026.07.10.10`.
+
+## Release atual — 21.12.352 / v320 (2026-07-12)
+
+Família de ativo protegida ponta a ponta, comunicados próprios para Ações/FIIs e comparação com índices alinhada por timestamps reais.
+
+### Destaques
+
+- Tipo explícito da solicitação prevalece sobre heurísticas ambíguas; UNITs conhecidas continuam classificadas como Ação.
+- Cache, snapshots e single-flight são separados por `stock` e `fii`.
+- `announcements` e `indexComparison` entram na recuperação dirigida por seção.
+- Períodos são processados em paralelo; séries usam a interseção temporal real e rebasing sem interpolação.
+- Pareamento: APK v499 / protocolo móvel `2026.07.10.10`.
+
+## Release atual — 21.12.352 / v319 (2026-07-11)
 
 Recuperação completa por seção para modais de Ação e FII, com cache incremental que não rebaixa dados válidos, contratos full estritos e fallbacks financeiros baseados somente em fontes reais.
 
@@ -10,7 +33,7 @@ Recuperação completa por seção para modais de Ação e FII, com cache increm
 - Ações exigem histórico e os três gráficos financeiros críticos para cache full.
 - FIIs exigem histórico e informações patrimoniais para cache full.
 - Recuperações consultam apenas os blocos ausentes.
-- Pareamento: APK v498 / protocolo móvel `2026.07.10.10`.
+- Pareamento: APK v499 / protocolo móvel `2026.07.10.10`.
 
 ## Release atual — 21.12.350 / v318 (2026-07-10)
 

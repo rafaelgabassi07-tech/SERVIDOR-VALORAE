@@ -13,10 +13,10 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.351');
-assert.equal(packageJson.valorae.releasePatch, '21.12.351-asset-modal-section-complete-recovery-v319');
-assert.equal(metadata.apkVersion, '2026.07.11.05');
-assert.ok(metadata.contractVersion.includes('APK v498 / Proxy 21.12.351'));
+assert.equal(packageJson.valorae.publicVersion, '21.12.353');
+assert.equal(packageJson.valorae.releasePatch, '21.12.353-asset-modal-required-sections-hardening-v321');
+assert.equal(metadata.apkVersion, '2026.07.12.02');
+assert.ok(metadata.contractVersion.includes('APK v500 / Proxy 21.12.353'));
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '3');
@@ -76,6 +76,7 @@ const fiiWithInformation = {
   patrimonialInfo: { metrics: [{ label: 'P/VP', value: '0,98' }], bars: [] },
   historicalIndicators: { rows: [{ label: 'P/VP' }], tablesByPeriod: {} },
   infoSections: [{ id: 'manager', items: [{ label: 'Gestor', value: 'Teste' }] }],
+  announcements: { items: [{ id: 'notice', title: 'Comunicado do fundo' }] },
 };
 const fiiProfile = modalRuntimeTest.modalPayloadQualityProfile(fiiWithInformation, 'fii');
 assert.equal(fiiProfile.deepSectionCount, 9, 'information e as duas seções críticas devem contar no perfil profundo do FII');

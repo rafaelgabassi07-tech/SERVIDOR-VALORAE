@@ -10,7 +10,7 @@ assert.equal(index, server, 'index.html e server.html precisam permanecer idênt
 const inlineScripts = [...index.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(match => match[1]);
 assert.equal(inlineScripts.length, 1, 'monitor deve manter um bloco inline principal auditável');
 assert.doesNotThrow(() => new vm.Script(inlineScripts[0], { filename: 'valorae-proxy-monitor-inline.js' }));
-assert.ok(index.includes("launchPatch:'21.12.351-asset-modal-section-complete-recovery-v319'"));
+assert.ok(index.includes("launchPatch:'21.12.353-asset-modal-required-sections-hardening-v321'"));
 assert.ok(index.includes('id="captureKpis"'));
 assert.ok(index.includes('id="captureAudit"'));
 assert.ok(index.includes('id="captureScopeBox"'));

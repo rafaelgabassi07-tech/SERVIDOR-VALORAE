@@ -27,6 +27,7 @@ function richStockPayload(ticker = 'PETR4', price = 31.5) {
     revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
     returns: { rows: [{ label: '12M', value: '10%' }] },
     resultsStatement: { rows: [{ label: 'Receita', value: '100' }], tablesByPeriod: {} },
+    indexComparison: { items: [{ code: 'IBOV', returnPercent: 2 }], series: [{ code: 'PETR4', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }], seriesByPeriod: {} }, announcements: { items: [{ id: 'notice', title: 'Comunicado' }] },
     balanceSheetStatement: { rows: [], tablesByPeriod: {} }
   };
 }
@@ -99,7 +100,7 @@ assert.equal(recoveryResult.quoteSummary.price, 22);
 
 const stockSource = fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8');
 assert.ok(stockSource.includes('const stockIndexComparisonTask = fastMode'));
-assert.ok(stockSource.includes('settleFastModalSource(\n      stockIndexComparisonPromise'), 'comparação com índices não pode bloquear indefinidamente o full principal');
+assert.ok(stockSource.includes('recoveryTarget.targeted') && stockSource.includes('settleFastModalSource('), 'comparação deve aguardar recuperação dirigida e manter deadline no full inicial');
 
 const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
 const qualityKt = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
@@ -107,7 +108,7 @@ const universalKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy
 const analysisKt = readSiblingApkFile('app/src/main/java/com/example/ui/AnalysisDiscoveryUi.kt');
 const dividendsKt = readSiblingApkFile('app/src/main/java/com/example/ui/DividendsEvolutionModalComponents.kt');
 if (loaderKt && qualityKt && universalKt && analysisKt && dividendsKt) {
-  assert.ok(loaderKt.includes('longArrayOf(450L, 1_100L, 2_300L)'));
+  assert.ok(loaderKt.includes('longArrayOf(450L, 1_100L, 2_300L, 4_200L)'));
   assert.ok(loaderKt.includes('recovery = true'));
   assert.ok(qualityKt.includes('completeness < StockModalStableCachePercent'));
   assert.ok(qualityKt.includes('StockModalStableCachePercent = 62'));

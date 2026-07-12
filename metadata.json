@@ -1,83 +1,80 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.351-asset-modal-section-complete-recovery-v319",
-  "patch": "21.12.351-asset-modal-section-complete-recovery-v319",
-  "releasePatch": "21.12.351-asset-modal-section-complete-recovery-v319",
-  "latestInternalPatch": "21.12.351-asset-modal-section-complete-recovery-v319",
-  "description": "Proxy v319 reestrutura os modais de Ação e FII por seção crítica, impede promoção de contratos financeiros incompletos, preserva snapshots válidos e recupera somente blocos ausentes.",
-  "contract": "APK v498 / Proxy 21.12.351 mobile protocol 2026.07.10.10 + asset modal delivery v3; recuperação por seção, cache incremental seguro e completude crítica alinhados",
+  "release": "21.12.353-asset-modal-required-sections-hardening-v321",
+  "patch": "21.12.353-asset-modal-required-sections-hardening-v321",
+  "releasePatch": "21.12.353-asset-modal-required-sections-hardening-v321",
+  "latestInternalPatch": "21.12.353-asset-modal-required-sections-hardening-v321",
+  "description": "Proxy v321 mantém o conjunto crítico completo por família e impede que hints opcionais enfraqueçam ou prendam a entrega do modal.",
+  "contract": "APK v500 / Proxy 21.12.353 mobile protocol 2026.07.10.10 + asset modal delivery v3; família canônica, requisitos críticos imutáveis e startup DataStore não bloqueante.",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "asset modal delivery schema v3 com requiredSections e missingRequiredSections",
-    "snapshots incrementais por seção sem downgrade do full estável",
-    "recuperação direcionada de histórico e gráficos financeiros críticos",
-    "cache full estrito por conteúdo real de Ação e FII",
-    "fallback real de Lucro x Cotação com Investidor10 + Yahoo Finance",
-    "resolução resiliente de fiiId e múltiplas rotas de histórico de FII",
-    "cross-stack alinhado aos contratos canônicos em domain/model, sem DTOs duplicados no APK"
+    "família explícita da solicitação prevalece sobre heurísticas ambíguas de ticker",
+    "cache, snapshots e single-flight separados por família stock/fii",
+    "comunicados de Ação e FII com produtores e semântica próprios",
+    "announcements e indexComparison recuperáveis por requiredSections",
+    "períodos de comparação processados em paralelo e alinhados à janela temporal comum",
+    "séries ordenadas, deduplicadas e rebaseadas sem interpolação ou dados sintéticos",
+    "cross-stack pareado ao APK v499 com rejeição de contrato de família divergente"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com gateway único, monitor central e entrega progressiva dos modais de AÇÃO e FII.",
-  "releaseDate": "2026-07-11",
-  "checkpoint": "asset-modal-section-complete-recovery-v319",
-  "title": "Proxy v319 — Recuperação completa dos modais de Ação e FII",
-  "summary": "Históricos e gráficos financeiros críticos passam a ter recuperação dirigida, snapshots independentes e cache full estrito em todas as superfícies do APK.",
-  "publicVersion": "21.12.351",
-  "label": "asset-modal-section-complete-recovery-v319",
-  "updatedAt": "2026-07-11",
-  "date": "2026-07-11",
+  "releaseDate": "2026-07-12",
+  "checkpoint": "asset-modal-required-sections-hardening-v321",
+  "title": "Proxy v321 — Requisitos críticos imutáveis do modal",
+  "summary": "Corrige classificação e cache entre Ações/FIIs, recupera comunicados e comparação individualmente e entrega séries comparáveis pela data real.",
+  "publicVersion": "21.12.353",
+  "label": "asset-modal-required-sections-hardening-v321",
+  "updatedAt": "2026-07-12",
+  "date": "2026-07-12",
   "notes": [
-    "Pareado ao APK v498. O protocolo móvel permanece 2026.07.10.10; apenas o schema especializado do delivery do modal evolui para v3."
+    "Pareado ao APK v499. O protocolo móvel permanece 2026.07.10.10 e o schema asset modal delivery permanece v3."
   ],
   "releaseNotes": [
-    "Ação só é completa com histórico, receitas/lucros, lucro/cotação e evolução patrimonial.",
-    "FII só é completo com histórico fundamentalista e informações patrimoniais.",
-    "Respostas parciais atualizam snapshots de seção sem apagar conteúdo válido.",
-    "requiredSections limita chamadas de recuperação aos produtores necessários.",
-    "Nenhum fallback usa dado simulado."
+    "O tipo explícito stock/fii governa o contrato e a chave de cache.",
+    "Comunicados e comparação entram nas seções críticas e na recuperação dirigida.",
+    "Ações UNIT não são convertidas em FII apenas por terminarem em 11.",
+    "Séries do ativo e índices usam a interseção temporal real e são rebaseadas no primeiro ponto retido.",
+    "Nenhum ponto é interpolado ou simulado."
   ],
-  "apkPair": "apk_valorae_checkpoint88_asset_modal_section_complete_recovery_v498_AI_STUDIO_ROOT_OK_2026_07_11.zip",
-  "apkVersion": "2026.07.11.05",
-  "fileSize": 1351680,
+  "apkPair": "apk_valorae_checkpoint90_asset_modal_recovery_startup_resilience_v500_AI_STUDIO_ROOT_OK_2026_07_12.zip",
+  "apkVersion": "2026.07.12.02",
+  "fileSize": 1361376,
   "highlights": [
-    "Ação só é completa com histórico, receitas/lucros, lucro/cotação e evolução patrimonial.",
-    "FII só é completo com histórico fundamentalista e informações patrimoniais.",
-    "Respostas parciais atualizam snapshots de seção sem apagar conteúdo válido.",
-    "requiredSections limita chamadas de recuperação aos produtores necessários.",
-    "Nenhum fallback usa dado simulado."
+    "Família protegida em classificação, cache e resposta.",
+    "Comunicados próprios e recuperáveis para Ação e FII.",
+    "Comparação por data real com períodos paralelos.",
+    "Preservação de snapshots válidos sem downgrade.",
+    "Nenhum dado sintético."
   ],
   "validation": [
-    "npm test: 195 arquivos de teste sem falhas.",
-    "npm run build: build Vercel seguro aprovado.",
-    "test:cross-stack aprovado contra APK v498.",
-    "Teste v319 cobre cache estrito, snapshots, endpoints direcionados, fallback Yahoo e resolução de FII.",
-    "13 testes cross-stack aprovados contra APK v498 com 196 fontes Kotlin e fronteira CP79 preservada."
+    "Build seguro Vercel, sintaxe, suíte completa e auditoria de versão.",
+    "Teste v321 cobre contrato estreitado, seção opcional ausente e seção crítica realmente ausente.",
+    "Testes cross-stack validam o classificador e os marcadores de startup do APK v500."
   ],
-  "proxyPair": "valorae_proxy_checkpoint351_asset_modal_section_complete_recovery_v319_AI_STUDIO_ROOT_OK_2026_07_11.zip",
+  "proxyPair": "valorae_proxy_checkpoint353_asset_modal_required_sections_hardening_v321_AI_STUDIO_ROOT_OK_2026_07_12.zip",
   "validations": [
-    "npm test: 195 arquivos de teste sem falhas.",
-    "npm run build: build Vercel seguro aprovado.",
-    "test:cross-stack aprovado contra APK v498.",
-    "Teste v319 cobre cache estrito, snapshots, endpoints direcionados, fallback Yahoo e resolução de FII.",
-    "13 testes cross-stack aprovados contra APK v498 com 196 fontes Kotlin e fronteira CP79 preservada."
+    "npm test: 196 arquivos de teste sem falhas.",
+    "npm run build e check:syntax aprovados.",
+    "audit:version aprovado para 21.12.353.",
+    "Teste v320 cobre classificação, recovery, cache e alinhamento temporal.",
+    "Testes cross-stack aprovados contra APK v499 com 196 fontes Kotlin."
   ],
   "changes": [
-    "asset-modal-runtime promove primeiro snapshots por seção e bloqueia downgrade do full estável",
-    "stock-modal-contract prioriza seções ausentes e adiciona fallback real de lucro x cotação",
-    "fii-modal-contract resolve fiiId por cache/HTML/REST e tenta múltiplos endpoints de histórico",
-    "asset modal delivery schema atualizado para v3 nos headers e manifesto de integração",
-    "cross-stack atualizado para validar delivery, quality e endpoint catalog na camada domain/model do APK"
+    "O conjunto obrigatório de Ação e FII é imutável por família.",
+    "requiredSections, missingSections e deferredSections continuam direcionando produtores, mas não podem enfraquecer a entrega nem promover blocos opcionais.",
+    "Recovery de seção mantém cache incremental e exige todas as seções críticas antes de marcar o contrato full como final.",
+    "Pareamento atualizado para APK v500 com família canônica e startup DataStore não bloqueante."
   ],
-  "contractVersion": "APK v498 / Proxy 21.12.351 mobile protocol 2026.07.10.10 + asset modal delivery v3; recuperação por seção, cache incremental seguro e completude crítica alinhados",
-  "latestVersion": "21.12.351",
-  "latest_version": "21.12.351",
-  "versionName": "21.12.351",
+  "contractVersion": "APK v500 / Proxy 21.12.353 mobile protocol 2026.07.10.10 + asset modal delivery v3; família canônica, requisitos críticos imutáveis e startup DataStore não bloqueante.",
+  "latestVersion": "21.12.353",
+  "latest_version": "21.12.353",
+  "versionName": "21.12.353",
   "packageValidation": [
     "project files at ZIP root",
     "npm test",
     "npm run build",
     "npm run audit:version",
-    "cross-stack APK v498"
+    "cross-stack APK v499"
   ]
 }
