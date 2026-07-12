@@ -1,5 +1,17 @@
 # VALORAE Proxy
 
+## Release atual — 21.12.354 / v322 (2026-07-12)
+
+Chegada tardia de informações corrigida para os modais de Ação e FII: o contrato crítico continua utilizável, mas blocos opcionais lentos recebem recuperação limitada no mesmo modal.
+
+### Validação desta entrega
+
+- `settlementPending` separa entrega utilizável de seções opcionais ainda em chegada.
+- Cache idêntico não é mais aceito como upgrade apenas por ser `completeForDelivery`.
+- `knownMissingSections` direciona recuperação opcional para Ação e FII sem alterar requisitos críticos, inclusive cotação, gráfico e métricas quando necessário.
+- Teste v322 simula atraso real de `peerComparison` e `vacancyHistory`.
+- Pareamento: APK v501 / protocolo móvel `2026.07.10.10`.
+
 ## Release atual — 21.12.353 / v321 (2026-07-12)
 
 Requisitos críticos do modal imutáveis por família, hints opcionais restritos ao direcionamento de produtores e pareamento com o APK v500.

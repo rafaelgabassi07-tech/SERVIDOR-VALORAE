@@ -1,3 +1,12 @@
+## 21.12.354 — Asset modal late-arrival settlement v322 (2026-07-12)
+
+- Publica `settlementPending`, `settlementSections` e `settlementAttemptAfterMs` em entregas full críticas com blocos opcionais ausentes.
+- Impede cache final idêntico de encerrar recovery sem ganho mensurável.
+- Prioriza lacunas conhecidas do APK e aceita recuperação dirigida de seções opcionais de Ação e FII.
+- Reconsulta cotação, gráfico, métricas, checklist, proventos, empresa, receitas, demonstrativos e vacância quando informados como ausentes.
+- Mantém requisitos críticos imutáveis, merge incremental e ausência de dados sintéticos.
+- Pareamento APK v501 / `2026.07.12.03`; protocolo móvel `2026.07.10.10`.
+
 ## 21.12.350 — Full audit integration hardening v318 (2026-07-10)
 
 - Adiciona deadline global às rotas legadas de ativo, evitando requisições indefinidamente pendentes sob falha de origem.
