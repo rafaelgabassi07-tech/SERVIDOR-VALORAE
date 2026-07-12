@@ -9,7 +9,7 @@ assert.match(router, /import \{[^}]*buildPortfolioHistory[^}]*\} from '\.\.\/lib
   'roteador deve importar motor novo de histórico da carteira');
 assert.match(router, /path === '\/portfolio\/history'[\s\S]*normalizePortfolioPositions[\s\S]*buildPortfolioHistory\(normalizedPositions,/,
   'rota /portfolio/history deve normalizar posições/tickers e usar buildPortfolioHistory');
-assert.match(history, /PORTFOLIO_HISTORY_VERSION = '21.12.350-full-audit-integration-hardening-v318'/,
+assert.match(history, /PORTFOLIO_HISTORY_VERSION = '21.12.351-asset-modal-section-complete-recovery-v319'/,
   'motor deve expor versão atual v317 mantendo o engine v292');
 assert.match(history, /VALORAE_PORTFOLIO_HISTORY_REBUILD_V292/,
   'resposta deve identificar engine reconstruída v292');

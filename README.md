@@ -1,5 +1,17 @@
 # VALORAE Proxy
 
+## Release atual — 21.12.351 / v319 (2026-07-11)
+
+Recuperação completa por seção para modais de Ação e FII, com cache incremental que não rebaixa dados válidos, contratos full estritos e fallbacks financeiros baseados somente em fontes reais.
+
+### Destaques
+
+- Asset modal delivery v3 com `requiredSections` e `missingRequiredSections`.
+- Ações exigem histórico e os três gráficos financeiros críticos para cache full.
+- FIIs exigem histórico e informações patrimoniais para cache full.
+- Recuperações consultam apenas os blocos ausentes.
+- Pareamento: APK v498 / protocolo móvel `2026.07.10.10`.
+
 ## Release atual — 21.12.350 / v318 (2026-07-10)
 
 Auditoria integral e hardening de integração: deadlines globais impedem hangs nas rotas legadas, `timeoutMs` explícito limita a duração total, batches parciais não são cacheados e a suíte cross-stack exige o APK real no modo de release sem ler checkouts globais por acidente. Pareado ao APK v482 / `2026.07.10.12`; protocolo móvel preservado em `2026.07.10.10`.

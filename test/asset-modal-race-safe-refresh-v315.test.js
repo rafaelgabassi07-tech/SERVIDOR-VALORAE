@@ -24,6 +24,8 @@ function completeStockPayload(ticker = 'PETR4', price = 31.5) {
     revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
     shareholdingPosition: { rows: [{ shareholder: 'Controlador' }] },
     revenueProfitChart: { points: [{ period: '2025', primaryValue: 100 }] },
+    profitQuoteChart: { points: [{ period: '2025', primaryValue: 100, secondaryValue: price }] },
+    equityEvolutionChart: { points: [{ period: '2025', primaryValue: 100 }] },
     resultsStatement: { rows: [{ label: 'Receita', value: '100' }], tablesByPeriod: {} },
     returns: { rows: [{ label: '12M', value: '10%' }] },
     announcements: { items: [{ title: 'Comunicado' }] }
@@ -125,7 +127,7 @@ clearCache();
 const rich = completeStockPayload(ticker, 50.0);
 setCache(key, rich, 180_000, 900_000);
 const poorer = stablePartialStockPayload(ticker, 49.0);
-assert.equal(_test.modalPayloadQualityProfile(poorer, family).stableForCache, true);
+assert.equal(_test.modalPayloadQualityProfile(poorer, family).stableForCache, false, 'resposta sem todas as seções críticas não pode substituir o full');
 assert.equal(_test.modalPayloadQualityProfile(poorer, family).completeForDelivery, false);
 const promoted = _test.promoteModalCache({
   key,
@@ -140,7 +142,7 @@ assert.equal(getCache(key, { allowStale: true }).value.quoteSummary.price, 50.0)
 
 const apkUniversal = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
 const apkLegacy = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalService.kt');
-const apkQuality = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeAssetModalQuality.kt');
+const apkQuality = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
 const apkMerge = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalMergePolicy.kt');
 if (apkUniversal && apkLegacy && apkQuality && apkMerge) {
   assert.ok(apkUniversal.includes('APK_MEMORY_RECOVERY_STALE_UPGRADE'));

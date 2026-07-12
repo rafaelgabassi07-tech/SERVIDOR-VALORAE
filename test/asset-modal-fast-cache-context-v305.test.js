@@ -45,6 +45,9 @@ const fullCached = {
   metrics: [{ id: 'price', value: 'R$ 32,80' }],
   fundamentalIndicators: { items: [{ id: 'pl', value: '5,8' }] },
   historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+  revenueProfitChart: { points: [{ period: '2025', primaryValue: 100 }] },
+  profitQuoteChart: { points: [{ period: '2025', primaryValue: 100, secondaryValue: 32.8 }] },
+  equityEvolutionChart: { points: [{ period: '2025', primaryValue: 100 }] },
   checklist: { items: [{ id: 'dy', passed: true, status: 'PASSED' }] },
   companyProfile: { facts: [{ id: 'segment', value: 'Petróleo' }], sections: [] },
   dividendHistory: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
@@ -121,10 +124,10 @@ assert.equal(second.delivery.requestId, 'request-b', 'consumidor coalescido não
 assert.equal(first.requestId, 'request-a');
 assert.equal(second.requestId, 'request-b');
 
-const apkCatalog = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyEndpointCatalog.kt');
+const apkCatalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
 const apkUniversal = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
 const apkHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-const apkQuality = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeAssetModalQuality.kt');
+const apkQuality = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
 if (apkCatalog && apkUniversal && apkHttp && apkQuality) {
   assert.ok(apkCatalog.includes('ProxyEndpointStatus("/api/v1/asset/modal"'), 'diagnóstico do APK deve testar o gateway realmente consumido');
   assert.ok(apkUniversal.includes('APK_MEMORY_HIT') && apkUniversal.includes('requestId = requestId'), 'cache universal do APK deve recontextualizar cada solicitação');

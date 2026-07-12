@@ -25,6 +25,8 @@ function completeStockPayload(ticker = 'PETR4', price = 31.5) {
     revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
     shareholdingPosition: { rows: [{ shareholder: 'Controlador' }] },
     revenueProfitChart: { points: [{ period: '2025', primaryValue: 100 }] },
+    profitQuoteChart: { points: [{ period: '2025', primaryValue: 100, secondaryValue: price }] },
+    equityEvolutionChart: { points: [{ period: '2025', primaryValue: 100 }] },
     resultsStatement: { rows: [{ label: 'Receita', value: '100' }], tablesByPeriod: {} },
     returns: { rows: [{ label: '12M', value: '10%' }] },
     announcements: { items: [{ title: 'Comunicado' }] }
@@ -141,7 +143,8 @@ const partial = completeStockPayload(ticker, 32.8);
 delete partial.companyProfile;
 delete partial.revenueByRegion;
 delete partial.shareholdingPosition;
-delete partial.revenueProfitChart;
+delete partial.dividendHistory;
+delete partial.peerComparison;
 delete partial.resultsStatement;
 delete partial.returns;
 const partialProfile = _test.modalPayloadQualityProfile(partial, family);
@@ -203,7 +206,10 @@ if (apkUniversal && apkLoader && apkUi) {
   assert.ok(apkUniversal.includes('put("knownCompletenessPercent"'));
   assert.ok(apkUniversal.includes('put("knownDeepSectionCount"'));
   assert.ok(apkUniversal.includes('put("knownAvailableSections"'));
-  assert.ok(apkUniversal.includes('recovery -> "7000"'));
+  assert.ok(apkUniversal.includes('recovery -> "15000"'));
+  assert.ok(apkUniversal.includes('put("requiredSections"'));
+  assert.ok(apkUniversal.includes('put("knownMissingSections"'));
+  assert.ok(apkUniversal.includes('put("sectionRecovery", "true")'));
   assert.ok(apkUniversal.includes('if (recovery && recoveryContext != null)'));
   assert.ok(apkUniversal.includes('isUniversalRecoveryUpgrade'));
   assert.ok(apkUniversal.includes('APK_MEMORY_RECOVERY_UPGRADE'));

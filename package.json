@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v318 endurece deadlines globais, fail-fast degradado e testes cross-stack estritos, pareado ao APK v482.",
+  "description": "Proxy v319 entrega recuperação completa por seção para modais de Ação e FII, cache incremental seguro e fallbacks financeiros reais, pareado ao APK v498.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,18 +20,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.350-full-audit-integration-hardening-v318",
+    "releasePatch": "21.12.351-asset-modal-section-complete-recovery-v319",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.350",
-    "checkpoint": "full-audit-integration-hardening-v318",
-    "releaseLabel": "full-audit-integration-hardening-v318"
+    "publicVersion": "21.12.351",
+    "checkpoint": "asset-modal-section-complete-recovery-v319",
+    "releaseLabel": "asset-modal-section-complete-recovery-v319"
   },
-  "releasePatch": "21.12.350-full-audit-integration-hardening-v318",
+  "releasePatch": "21.12.351-asset-modal-section-complete-recovery-v319",
   "config": {
-    "releasePatch": "21.12.350-full-audit-integration-hardening-v318",
-    "publicVersion": "21.12.350",
-    "checkpoint": "full-audit-integration-hardening-v318",
-    "releaseLabel": "full-audit-integration-hardening-v318"
+    "releasePatch": "21.12.351-asset-modal-section-complete-recovery-v319",
+    "publicVersion": "21.12.351",
+    "checkpoint": "asset-modal-section-complete-recovery-v319",
+    "releaseLabel": "asset-modal-section-complete-recovery-v319"
   }
 }

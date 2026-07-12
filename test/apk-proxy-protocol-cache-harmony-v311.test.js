@@ -13,13 +13,13 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.350');
-assert.equal(packageJson.valorae.releasePatch, '21.12.350-full-audit-integration-hardening-v318');
-assert.equal(metadata.apkVersion, '2026.07.10.12');
-assert.ok(metadata.contractVersion.includes('APK v482 / Proxy 21.12.350'));
+assert.equal(packageJson.valorae.publicVersion, '21.12.351');
+assert.equal(packageJson.valorae.releasePatch, '21.12.351-asset-modal-section-complete-recovery-v319');
+assert.equal(metadata.apkVersion, '2026.07.11.05');
+assert.ok(metadata.contractVersion.includes('APK v498 / Proxy 21.12.351'));
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
-assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '2');
+assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '3');
 assert.deepEqual(routerTest.routeMethods('/sync'), ['GET', 'POST', 'DELETE']);
 assert.equal(routerTest.routeMethod('/sync'), 'POST', 'POST permanece método primário para writes');
 assert.equal(routerTest.safeRequestId(' req\nunsafe / id '), 'req-unsafe-id');
@@ -73,22 +73,24 @@ const fiiWithInformation = {
   distributions12m: { items: [{ month: '2026-06', value: 1 }], months: [] },
   dividendCharts: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
   aboutFund: { summary: 'Fundo de teste', sections: [], highlights: [] },
+  patrimonialInfo: { metrics: [{ label: 'P/VP', value: '0,98' }], bars: [] },
+  historicalIndicators: { rows: [{ label: 'P/VP' }], tablesByPeriod: {} },
   infoSections: [{ id: 'manager', items: [{ label: 'Gestor', value: 'Teste' }] }],
 };
 const fiiProfile = modalRuntimeTest.modalPayloadQualityProfile(fiiWithInformation, 'fii');
-assert.equal(fiiProfile.deepSectionCount, 7, 'information deve contar como seção profunda do FII');
+assert.equal(fiiProfile.deepSectionCount, 9, 'information e as duas seções críticas devem contar no perfil profundo do FII');
 assert.equal(fiiProfile.completeForDelivery, true, 'FII com seis+ seções profundas deve poder concluir');
 const fiiDelivery = modalRuntimeTest.buildModalDelivery(fiiWithInformation, { family: 'fii', requestedMode: 'full', mode: 'full' });
 assert.ok(fiiDelivery.availableSections.includes('information'));
-assert.equal(fiiDelivery.isFinal, false, 'seções visuais ausentes mantêm a entrega full recuperável');
-assert.ok(fiiDelivery.deferredSections.includes('propertyPortfolio'));
-assert.equal(fiiDelivery.completeForDelivery, false);
+assert.equal(fiiDelivery.isFinal, true, 'seções críticas presentes permitem finalizar; opcionais ficam indisponíveis sem loop infinito');
+assert.ok(fiiDelivery.unavailableSections.includes('propertyPortfolio'), 'seção opcional ausente deve ser declarada como indisponível após finalização');
+assert.equal(fiiDelivery.completeForDelivery, true);
 
 const apkCache = readSiblingApkFile('app/src/main/java/com/example/data/cache/ValoraeCachePolicy.kt');
 const apkProtocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 const apkHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const apkSync = readSiblingApkFile('app/src/main/java/com/example/data/sync/ValoraeSyncClient.kt');
-const apkCatalog = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyEndpointCatalog.kt');
+const apkCatalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
 const apkParser = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalParsers.kt');
 if (apkCache && apkProtocol && apkHttp && apkSync && apkCatalog && apkParser) {
   assert.ok(apkProtocol.includes(`const val Version = "${VALORAE_MOBILE_PROTOCOL_VERSION}"`));

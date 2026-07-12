@@ -30,7 +30,7 @@ assert.ok(fiiContract.includes('ttlMs: 10 * 60_000') && fiiContract.includes('st
 assert.ok(stockContract.includes('fetchYahooLogo(ticker, { timeoutMs: Math.min(3800'), 'logo oficial da ação deve ter orçamento resiliente equivalente ao FII');
 
 if (apkRuntime && apkService && apkUniversalService && apkFallback && apkMerge && apkRuntimeCache) {
-  assert.ok(apkRuntime.includes('ValoraeProxyClient.getAssetModalContract'), 'APK deve consumir uma única rota universal');
+  assert.ok(apkRuntime.includes('ValoraeAppGraph.remoteRepository.getAssetModalContract'), 'UI deve consumir uma única rota universal pela interface de domínio');
   assert.ok(apkRuntime.includes('isUniversalAssetModalRouteUnavailable'), 'fallback legado deve ocorrer apenas quando o Proxy antigo não possui a rota');
   assert.ok(apkService.includes('ValoraeUniversalAssetModalService.getAssetModalContract'), 'fachada APK deve delegar ao núcleo universal isolado');
   assert.ok(apkUniversalService.includes('"/api/v1/asset/modal"'), 'núcleo universal APK deve consultar o gateway universal');

@@ -61,7 +61,7 @@ export function assertSiblingApkAvailable() {
   const required = [
     'app/build.gradle.kts',
     'app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt',
-    'app/src/main/java/com/example/data/proxy/ValoraeProxyEndpointCatalog.kt',
+    'app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt',
   ];
   const missing = required.filter(relativePath => !fs.existsSync(path.join(apkRoot, relativePath)));
   if (missing.length) {

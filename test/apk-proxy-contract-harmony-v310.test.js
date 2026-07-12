@@ -60,7 +60,7 @@ function stableButIncompleteStock() {
 
 const incompleteStock = stableButIncompleteStock();
 const incompleteProfile = modalRuntimeTest.modalPayloadQualityProfile(incompleteStock, 'stock');
-assert.equal(incompleteProfile.stableForCache, true, 'contrato expandido deve poder aquecer cache');
+assert.equal(incompleteProfile.stableForCache, false, 'contrato sem gráficos críticos não pode aquecer o cache full');
 assert.equal(incompleteProfile.completeForDelivery, false, 'cache estável não pode ser confundido com entrega final');
 assert.equal(incompleteProfile.recoveryTargetPercent, 82);
 const incompleteDelivery = modalRuntimeTest.buildModalDelivery(incompleteStock, {
@@ -69,11 +69,11 @@ const incompleteDelivery = modalRuntimeTest.buildModalDelivery(incompleteStock, 
   mode: 'full',
   requestId: 'harmony-stock-incomplete'
 });
-assert.equal(incompleteDelivery.stableForCache, true);
+assert.equal(incompleteDelivery.stableForCache, false);
 assert.equal(incompleteDelivery.completeForDelivery, false);
 assert.equal(incompleteDelivery.isFinal, false);
 assert.equal(incompleteDelivery.retryable, true);
-assert.equal(incompleteDelivery.qualityTier, 'expanded');
+assert.equal(incompleteDelivery.qualityTier, 'basic');
 assert.equal(incompleteDelivery.minimumDeepSections, 7);
 assert.equal(incompleteDelivery.recoveryTargetPercent, 82);
 
@@ -122,7 +122,7 @@ const stableButIncompleteFii = {
   announcements: { items: [{ title: 'Relatório', url: 'https://example.test' }] }
 };
 const incompleteFiiProfile = modalRuntimeTest.modalPayloadQualityProfile(stableButIncompleteFii, 'fii');
-assert.equal(incompleteFiiProfile.stableForCache, true);
+assert.equal(incompleteFiiProfile.stableForCache, false, 'FII sem histórico/patrimônio não pode aquecer o cache full');
 assert.equal(incompleteFiiProfile.completeForDelivery, false);
 assert.equal(incompleteFiiProfile.recoveryTargetPercent, 76);
 const incompleteFiiDelivery = modalRuntimeTest.buildModalDelivery(stableButIncompleteFii, {
@@ -138,11 +138,11 @@ for (const header of ['X-Valorae-App', 'X-Valorae-Channel', 'X-Valorae-App-Versi
   assert.ok(protocolSource.includes(header), `protocolo móvel deve reconhecer ${header}`);
 }
 
-const endpointCatalog = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyEndpointCatalog.kt');
+const endpointCatalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
 const httpKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-const deliveryKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeAssetModalDelivery.kt');
+const deliveryKt = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalDelivery.kt');
 const parserKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalParsers.kt');
-const qualityKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeAssetModalQuality.kt');
+const qualityKt = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
 const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
 const runtimeKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyRuntime.kt');
 const mobileProtocolKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');

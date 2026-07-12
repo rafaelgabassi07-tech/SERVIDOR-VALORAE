@@ -18,6 +18,9 @@ function richStockPayload(ticker = 'PETR4', price = 31.5) {
     metrics: [{ id: 'price', value: `R$ ${price.toFixed(2).replace('.', ',')}` }],
     fundamentalIndicators: { items: [{ id: 'pl', value: '6,2' }] },
     historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+  revenueProfitChart: { points: [{ period: '2025', primaryValue: 100 }] },
+  profitQuoteChart: { points: [{ period: '2025', primaryValue: 100, secondaryValue: 31.5 }] },
+  equityEvolutionChart: { points: [{ period: '2025', primaryValue: 100 }] },
     checklist: { items: [{ id: 'dy', passed: true, status: 'PASSED' }] },
     dividendHistory: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
     companyProfile: { facts: [{ id: 'segment', value: 'Petróleo' }], sections: [] },
@@ -99,12 +102,12 @@ assert.ok(stockSource.includes('const stockIndexComparisonTask = fastMode'));
 assert.ok(stockSource.includes('settleFastModalSource(\n      stockIndexComparisonPromise'), 'comparação com índices não pode bloquear indefinidamente o full principal');
 
 const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
-const qualityKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeAssetModalQuality.kt');
+const qualityKt = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
 const universalKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
 const analysisKt = readSiblingApkFile('app/src/main/java/com/example/ui/AnalysisDiscoveryUi.kt');
 const dividendsKt = readSiblingApkFile('app/src/main/java/com/example/ui/DividendsEvolutionModalComponents.kt');
 if (loaderKt && qualityKt && universalKt && analysisKt && dividendsKt) {
-  assert.ok(loaderKt.includes('longArrayOf(700L, 1_500L, 2_800L)'));
+  assert.ok(loaderKt.includes('longArrayOf(450L, 1_100L, 2_300L)'));
   assert.ok(loaderKt.includes('recovery = true'));
   assert.ok(qualityKt.includes('completeness < StockModalStableCachePercent'));
   assert.ok(qualityKt.includes('StockModalStableCachePercent = 62'));
