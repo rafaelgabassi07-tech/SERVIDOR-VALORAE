@@ -6,8 +6,8 @@
   "background_color": "#000000",
   "theme_color": "#000000",
   "id": "/server.html",
-  "description": "Monitor do VALORAE Proxy v329, auditado e pareado ao APK v509.",
+  "description": "Monitor do VALORAE Proxy v330, com fontes dos modais reparadas e pareado ao APK v510.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.361"
+  "version": "21.12.362"
 }

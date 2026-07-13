@@ -1,5 +1,16 @@
 # VALORAE Proxy
 
+## Release atual — 21.12.362 / v330 (2026-07-13)
+
+Reparo das fontes e do contrato de entrega dos modais de FII e Ação.
+
+- A API real do comparador entrega Tipo e Segmento dos FIIs relacionados.
+- Checklists preservam o estado marcado pela fonte e publicam evidência por critério.
+- O Payout associa o lucro líquido retroativo pelo ano efetivo do registro.
+- IBOV, IFIX, SMLL e IDIV usam séries históricas diretas, sem ETFs ou interpolação.
+- Coletas independentes iniciam em paralelo e os limites de entrega foram alinhados ao APK.
+- Pareamento: APK v510 / protocolo 2026.07.10.10 / delivery v4.
+
 ## Release atual — 21.12.361 / v329 (2026-07-13)
 
 Auditoria integral do APK e do Proxy, com segurança uniforme, contratos sincronizados e ciclo de rede fortalecido.

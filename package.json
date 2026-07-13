@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v329 audita segurança, contratos, rede, metadados e integração com o APK v509.",
+  "description": "Proxy v330 repara fontes, evidências e séries históricas dos modais de FII e Ação, pareado ao APK v510.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,24 +20,24 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.361-full-stack-alignment-audit-v329",
+    "releasePatch": "21.12.362-modal-source-repair-v330",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.361",
-    "checkpoint": "full-stack-alignment-audit-v329",
-    "releaseLabel": "full-stack-alignment-audit-v329"
+    "publicVersion": "21.12.362",
+    "checkpoint": "modal-source-repair-v330",
+    "releaseLabel": "modal-source-repair-v330"
   },
-  "releasePatch": "21.12.361-full-stack-alignment-audit-v329",
+  "releasePatch": "21.12.362-modal-source-repair-v330",
   "config": {
-    "releasePatch": "21.12.361-full-stack-alignment-audit-v329",
-    "publicVersion": "21.12.361",
-    "checkpoint": "full-stack-alignment-audit-v329",
-    "releaseLabel": "full-stack-alignment-audit-v329"
+    "releasePatch": "21.12.362-modal-source-repair-v330",
+    "publicVersion": "21.12.362",
+    "checkpoint": "modal-source-repair-v330",
+    "releaseLabel": "modal-source-repair-v330"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.361-full-stack-alignment-audit-v329",
-    "publicVersion": "21.12.361",
-    "checkpoint": "full-stack-alignment-audit-v329",
-    "releaseLabel": "full-stack-alignment-audit-v329"
+    "releasePatch": "21.12.362-modal-source-repair-v330",
+    "publicVersion": "21.12.362",
+    "checkpoint": "modal-source-repair-v330",
+    "releaseLabel": "modal-source-repair-v330"
   }
 }

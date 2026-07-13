@@ -43,7 +43,8 @@ const stockSource = fs.readFileSync(new URL('../lib/analysis/stock-modal-contrac
 const fiiSource = fs.readFileSync(new URL('../lib/analysis/fii-modal-contract.js', import.meta.url), 'utf8');
 assert.match(stockSource, /wantsAnnouncements/);
 assert.match(stockSource, /wantsIndexComparison/);
-assert.match(stockSource, /Promise\.all\(STOCK_COMPARISON_PERIODS\.map/);
+assert.match(stockSource, /const periodMarketTasks = STOCK_COMPARISON_PERIODS\.map/);
+assert.match(stockSource, /Promise\.all\(periodMarketTasks\.map/);
 assert.match(fiiSource, /recoveryTarget\.sections\.has\('announcements'\)/);
 assert.match(fiiSource, /recoveryTarget\.sections\.has\('indexComparison'\)/);
 console.log('asset-modal-family-announcements-index-alignment-v320 ok');

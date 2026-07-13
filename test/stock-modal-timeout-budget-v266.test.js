@@ -3,8 +3,8 @@ import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8');
 
-assert.ok(source.includes("export const STOCK_MODAL_VERSION = '26.asset-modal.stock.v57-data-truth'"));
-assert.ok(source.includes('const stockBundlePromise = fetchInvestidor10StockBundle(') && source.includes('Math.min(timeoutMs, fastMode ? 3200 : 10500)'), 'stock modal must cap Investidor10 bundle differently for fast/full stages');
+assert.ok(source.includes("export const STOCK_MODAL_VERSION = '26.asset-modal.stock.v58-modal-source-repair'"));
+assert.ok(source.includes('const stockBundlePromise = fetchInvestidor10StockBundle(') && source.includes('Math.min(timeoutMs, fastMode ? 3200 : 18000)'), 'stock modal must cap Investidor10 bundle differently for fast/full stages');
 assert.ok(source.includes('settleFastModalSource(stockBundlePromise, 2500'), 'fast preview must stop waiting without cancelling the shared source');
 assert.ok(source.includes('function metricCard'), 'stock modal must define metricCard used by the runtime contract');
 assert.ok(source.includes('Promise.all(['), 'stock modal must keep core providers in parallel');

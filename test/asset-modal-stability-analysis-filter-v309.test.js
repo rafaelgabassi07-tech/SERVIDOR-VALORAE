@@ -32,7 +32,7 @@ function richStockPayload(ticker = 'PETR4', price = 31.5) {
   };
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v18-source-arrival-integrity');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v19-modal-source-repair');
 
 const basicFull = {
   ok: true,

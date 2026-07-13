@@ -61,7 +61,7 @@ function completeFiiPayload(ticker = 'HGLG11', price = 160.2) {
   };
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v18-source-arrival-integrity');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v19-modal-source-repair');
 
 const family = 'stock';
 const ticker = 'PETR4';
@@ -206,7 +206,7 @@ if (apkUniversal && apkLoader && apkUi) {
   assert.ok(apkUniversal.includes('put("knownCompletenessPercent"'));
   assert.ok(apkUniversal.includes('put("knownDeepSectionCount"'));
   assert.ok(apkUniversal.includes('put("knownAvailableSections"'));
-  assert.ok(apkUniversal.includes('recovery -> "15000"'));
+  assert.ok(apkUniversal.includes('recovery -> "22000"'));
   assert.ok(apkUniversal.includes('put("requiredSections"'));
   assert.ok(apkUniversal.includes('put("knownMissingSections"'));
   assert.ok(apkUniversal.includes('put("sectionRecovery", "true")'));

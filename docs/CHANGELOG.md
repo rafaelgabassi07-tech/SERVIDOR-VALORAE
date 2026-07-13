@@ -1,3 +1,12 @@
+## 21.12.362 — v330 — 2026-07-13
+
+- Comparador de FIIs passou a usar a API de tabela da fonte, restaurando Tipo e Segmento.
+- Checklists de FII e Ação leem o estado real dos marcadores e publicam evidência direta por critério.
+- Payout de Ações associa o lucro líquido retroativo ao campo `year` real da API.
+- IBOV, IFIX, SMLL e IDIV usam séries diretas dos índices, sem ETF substituto, proxy ticker ou interpolação.
+- Checklist, Payout e comparação de FIIs têm prontidão própria e participam da recuperação dirigida sem bloquear o restante do modal.
+- Fontes independentes iniciam em paralelo e os deadlines foram pareados ao APK v510 / Checkpoint 100.
+
 ## 21.12.361 — v329 — 2026-07-13
 
 - Auditoria integral dos contratos APK/Proxy.

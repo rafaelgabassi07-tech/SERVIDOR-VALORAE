@@ -29,11 +29,11 @@ if (apkHttp && apkService && apkLoader && apkParser && apkFallback) {
 }
 assert.ok(fiiContract.includes('stage,\n    mode: stage,\n    fullOnly: !fastMode'), 'FII deve expor stage/mode explicitamente como Ação');
 assert.equal(runtimeTest.assetModalDeadlineMs({ stage: 'full', timeoutMs: 12000 }), 12000, 'full deve ter deadline defensivo alinhado ao orçamento');
-assert.equal(runtimeTest.assetModalDeadlineMs({ stage: 'full', timeoutMs: 18000 }), 12500, 'full deve terminar antes do teto serverless');
+assert.equal(runtimeTest.assetModalDeadlineMs({ stage: 'full', timeoutMs: 18000 }), 18000, 'full deve aguardar as APIs históricas reais dentro do orçamento móvel');
 assert.equal(stockModalTest.normalizeStockModalStage({ stage: 'full' }), 'full');
 assert.equal(fiiModalTest.normalizeFiiModalStage({ stage: 'full' }), 'full');
-assert.ok(fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8').includes(': Math.min(12500, Math.max(7000, timeoutMs))'), 'contrato de ação deve declarar deadline full explicitamente');
-assert.ok(fiiContract.includes(': Math.min(12500, Math.max(7000, timeoutMs))'), 'contrato de FII deve declarar deadline full explicitamente');
+assert.ok(fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8').includes(': Math.min(23000, Math.max(9000, timeoutMs))'), 'contrato de ação deve declarar deadline full explícito para APIs históricas reais');
+assert.ok(fiiContract.includes(': Math.min(23000, Math.max(9000, timeoutMs))'), 'contrato de FII deve declarar deadline full explícito para APIs históricas reais');
 
 const fastFii = { stage: 'fast', range: '1M', interval: '1d', mobile: 'true', surface: 'single_asset_modal_fii' };
 const fullFii = { stage: 'full', range: '1Y', interval: '1d', mobile: 'true', surface: 'single_asset_modal_fii' };

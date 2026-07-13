@@ -14,14 +14,14 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.361');
-assert.equal(packageJson.valorae.releasePatch, '21.12.361-full-stack-alignment-audit-v329');
-assert.equal(metadata.apkVersion, '2026.07.13.05');
-assert.ok(metadata.contractVersion.includes('APK v509 / Proxy 21.12.361'));
+assert.equal(packageJson.valorae.publicVersion, '21.12.362');
+assert.equal(packageJson.valorae.releasePatch, '21.12.362-modal-source-repair-v330');
+assert.equal(metadata.apkVersion, '2026.07.13.06');
+assert.ok(metadata.contractVersion.includes('APK v510 / Proxy 21.12.362'));
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v18-source-arrival-integrity');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v19-modal-source-repair');
 assert.ok(VALORAE_REQUEST_HEADERS.includes('X-Valorae-Mobile-Protocol'));
 assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Mobile-Protocol'));
 assert.equal(VALORAE_MOBILE_CACHE_POLICY_SECONDS.assetModalFast, 35);
