@@ -8,7 +8,7 @@ const firstRevenueCandidates = source.indexOf('for (const [revenueKey, revenueUr
 assert.ok(firstLucro > 0, 'lucroCotacao precisa estar presente na fila de APIs do modal de ação');
 assert.ok(firstRevenueCandidates > 0, 'candidatos de receita por ticker precisam existir');
 assert.ok(firstLucro < firstRevenueCandidates, 'lucroCotacao deve ser priorizado antes da expansão de endpoints de receita');
-assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v56-progressive-fast-full');
+assert.equal(_test.STOCK_MODAL_VERSION, '26.asset-modal.stock.v57-data-truth');
 
 const profitQuoteChart = _test.buildStockProfitQuoteChartPayload({
   ticker: 'PETR4',

@@ -1,5 +1,19 @@
 # VALORAE Proxy
 
+## Release atual — 21.12.358 / v326 (2026-07-13)
+
+Auditoria de procedência dos dados dos modais de Ação e FII, com política fail-closed e identificação explícita de cálculos.
+
+### Validação desta entrega
+
+- Checklist sem evidência permanece `UNKNOWN`.
+- DY histórico não é reconstruído usando cotação atual.
+- Identidade do ticker é validada antes de aceitar página de FII.
+- FIIs relacionados não herdam tipo/segmento nem geram médias falsas.
+- Ocupação derivada é marcada como calculada.
+- `dataTruth` descreve dados diretos, cálculos e substituições proibidas.
+- Pareamento: APK v506 / protocolo móvel `2026.07.10.10`.
+
 ## Release atual — 21.12.357 / v325 (2026-07-13)
 
 Integridade real das séries de índices, enriquecimento do valor patrimonial dos pares de FII e saneamento temporal do histórico de indicadores das ações.

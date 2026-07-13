@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v325 valida séries temporais reais, enriquece o valor patrimonial dos FIIs comparáveis e saneia o histórico de indicadores das ações, pareado ao APK v505.",
+  "description": "Proxy v326 audita procedência dos dados dos modais, elimina inferências enganosas e identifica cálculos, pareado ao APK v506.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,18 +20,18 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.357-real-indices-peer-patrimony-history-v325",
+    "releasePatch": "21.12.358-modal-data-truth-audit-v326",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.357",
-    "checkpoint": "real-indices-peer-patrimony-history-v325",
-    "releaseLabel": "real-indices-peer-patrimony-history-v325"
+    "publicVersion": "21.12.358",
+    "checkpoint": "modal-data-truth-audit-v326",
+    "releaseLabel": "modal-data-truth-audit-v326"
   },
-  "releasePatch": "21.12.357-real-indices-peer-patrimony-history-v325",
+  "releasePatch": "21.12.358-modal-data-truth-audit-v326",
   "config": {
-    "releasePatch": "21.12.357-real-indices-peer-patrimony-history-v325",
-    "publicVersion": "21.12.357",
-    "checkpoint": "real-indices-peer-patrimony-history-v325",
-    "releaseLabel": "real-indices-peer-patrimony-history-v325"
+    "releasePatch": "21.12.358-modal-data-truth-audit-v326",
+    "publicVersion": "21.12.358",
+    "checkpoint": "modal-data-truth-audit-v326",
+    "releaseLabel": "modal-data-truth-audit-v326"
   }
 }

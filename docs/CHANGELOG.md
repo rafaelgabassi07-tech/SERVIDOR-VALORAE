@@ -1,3 +1,13 @@
+## 21.12.358 — v326 — 2026-07-13
+
+- Auditoria de procedência e identidade dos dados dos modais.
+- Checklists com `DIRECT`, `CALCULATED` e `UNKNOWN`.
+- Removida reconstrução de DY histórico pela cotação atual.
+- Páginas de FII com ticker divergente são descartadas.
+- FIIs relacionados não herdam tipo/segmento nem produzem falsa média.
+- Ocupação calculada é identificada no contrato.
+- Contratos publicam `dataTruth` e falham fechados.
+
 ## 21.12.357 — v325 — 2026-07-13
 
 - Validação central de histórico real para Retorno e comparadores dos modais.

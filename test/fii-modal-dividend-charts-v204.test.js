@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/fii-modal-contract.js';
 
-assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v23');
+assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v24-data-truth');
 
 const canonical = {
   fii: {
@@ -57,8 +57,8 @@ const derived = _test.buildFiiDividendChartsPayload({
   referencePrice: 10
 });
 assert.equal(derived.status, 'OK');
-assert.equal(derived.diagnostics.dyDerivedFromDividends, true);
-assert.equal(derived.yieldSeriesByFrequency.monthly[0].yieldDisplay, '1,00%');
+assert.equal(derived.diagnostics.dyDerivedFromDividends, false);
+assert.deepEqual(derived.yieldSeriesByFrequency.monthly, [], 'DY histórico não pode ser fabricado usando dividendo antigo e cotação atual');
 
 const empty = _test.buildFiiDividendChartsPayload({ canonical: {}, ticker: 'GGRC11' });
 assert.equal(empty.status, 'EMPTY');

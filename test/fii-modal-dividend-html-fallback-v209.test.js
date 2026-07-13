@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/fii-modal-contract.js';
 
-assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v23');
+assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v24-data-truth');
 
 const html = `
   <h2>DIVIDEND YIELD GGRC11</h2>
@@ -45,8 +45,7 @@ assert.equal(payload.events[0].paymentDateDisplay, '08/07/2026');
 assert.equal(payload.events[0].valueDisplay, '0,10000000');
 assert.equal(payload.dividendSeriesByFrequency.monthly.length, 10);
 assert.equal(payload.dividendSeriesByFrequency.yearly.length, 2);
-assert.equal(payload.yieldSeriesByFrequency.monthly.length, 10);
-assert.ok(payload.yieldSeriesByFrequency.monthly.at(-1).yieldDisplay.includes('1,03'));
+assert.equal(payload.yieldSeriesByFrequency.monthly.length, 0, 'HTML sem série explícita de DY não pode gerar DY histórico pela cotação atual');
 assert.ok(payload.summary.includes('GGRC11 pagou o total de R$ 1,21'));
 
 const direct = _test.extractFiiDividendChartsFromHtml(html, 'GGRC11', { referencePrice: 9.73 });

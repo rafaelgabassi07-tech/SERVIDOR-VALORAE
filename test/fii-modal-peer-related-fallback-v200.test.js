@@ -30,8 +30,8 @@ assert.deepEqual(direct.rows.map(row => row.ticker), ['GGRC11', 'FIIB11', 'HGLG1
 assert.equal(direct.rows[0].isReference, true);
 assert.equal(direct.rows.find(row => row.ticker === 'FIIB11').pvpDisplay, '0,74');
 assert.equal(direct.rows.find(row => row.ticker === 'BTLG11').dividendYieldDisplay, '9,30%');
-assert.equal(direct.rows.find(row => row.ticker === 'HGLG11').fundType, 'FUNDO DE TIJOLO');
-assert.equal(direct.rows.find(row => row.ticker === 'LVBI11').segment, 'Logístico / Indústria / Galpões');
+assert.equal(direct.rows.find(row => row.ticker === 'HGLG11').fundType, '—', 'FII relacionado não herda o tipo do fundo de referência');
+assert.equal(direct.rows.find(row => row.ticker === 'LVBI11').segment, '—', 'FII relacionado não herda o segmento do fundo de referência');
 assert.equal(direct.rows.find(row => row.ticker === 'FIIB11').patrimonialValueDisplay, '—');
 assert.ok(direct.diagnostics.policy.includes('no_static_substitution_no_mock'));
 

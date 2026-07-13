@@ -84,6 +84,6 @@ const source = fs.readFileSync('lib/analysis/stock-modal-contract.js', 'utf8');
 assert.ok(source.includes('/api/rest/assets/tickers/${encodeURIComponent(symbol)}'), 'deve manter a API REST principal enviada pelo usuário');
 assert.ok(source.includes('/api/rest/assets/tickers/${encodeURIComponent(symbol)}/'), 'deve tentar também a API REST com barra final');
 assert.ok(source.includes('collectStockHistoricalIndicatorCandidates(raw, { maxDepth: 12 })'), 'deve varrer o envelope rawJson completo do Investidor10');
-assert.ok(source.includes("26.asset-modal.stock.v56-progressive-fast-full"), 'contrato de ação deve subir para v54');
+assert.ok(source.includes("26.asset-modal.stock.v57-data-truth"), 'contrato de ação deve subir para v54');
 
 console.log('stock-modal-historical-indicators-api-audit-v270 ok');

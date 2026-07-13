@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { _test } from '../lib/analysis/fii-modal-contract.js';
 
-assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v23');
+assert.equal(_test.FII_MODAL_VERSION, '26.asset-modal.fii.v24-data-truth');
 
 const html = `
   <h2>INFORMAÇÕES SOBRE VALOR PATRIMONIAL</h2>
