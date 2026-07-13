@@ -1,5 +1,17 @@
 # VALORAE Proxy
 
+## Release atual — 21.12.359 / v327 (2026-07-13)
+
+Integridade da chegada efetiva das fontes nos modais de Ação e FII.
+
+### Validação desta entrega
+
+- Containers vazios não contam como seção recebida.
+- Histórico e demonstrativos exigem valores renderizáveis.
+- Comparações com índices exigem séries temporais reais.
+- Delivery schema v4 publica estado e settlement por seção.
+- Pareamento: APK v507 / protocolo móvel `2026.07.10.10`.
+
 ## Release atual — 21.12.358 / v326 (2026-07-13)
 
 Auditoria de procedência dos dados dos modais de Ação e FII, com política fail-closed e identificação explícita de cálculos.

@@ -1,78 +1,83 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.358-modal-data-truth-audit-v326",
-  "patch": "21.12.358-modal-data-truth-audit-v326",
-  "releasePatch": "21.12.358-modal-data-truth-audit-v326",
-  "latestInternalPatch": "21.12.358-modal-data-truth-audit-v326",
-  "description": "Proxy v326 aplica política fail-closed aos modais, identifica dados calculados e remove inferências sem evidência.",
-  "contract": "APK v506 / Proxy 21.12.358 mobile protocol 2026.07.10.10 + asset modal delivery v3; procedência fail-closed, identidade por ticker, cálculos identificados e ausência de reconstruções enganosas.",
+  "release": "21.12.359-modal-source-arrival-integrity-v327",
+  "patch": "21.12.359-modal-source-arrival-integrity-v327",
+  "releasePatch": "21.12.359-modal-source-arrival-integrity-v327",
+  "latestInternalPatch": "21.12.359-modal-source-arrival-integrity-v327",
+  "description": "Proxy v327 valida conteúdo utilizável por seção e elimina falsos positivos de chegada causados por containers vazios.",
+  "contract": "APK v507 / Proxy 21.12.359 mobile protocol 2026.07.10.10 + asset modal delivery v4; diagnóstico de chegada por seção, vazio confirmado, seção não aplicável e recuperação explícita de falhas.",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "auditoria de procedência dos modais",
-    "checklists com evidência e natureza do dado",
-    "sem DY histórico reconstruído pela cotação atual",
-    "identidade de ticker para FIIs",
-    "pares sem herança de tipo/segmento",
-    "ocupação calculada identificada"
+    "diagnóstico de chegada por seção",
+    "containers vazios não contam como dados",
+    "vazio confirmado e não aplicável estabilizam",
+    "falhas continuam recuperáveis",
+    "séries comparativas exigem dois pontos reais"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com gateway único, monitor central e entrega progressiva dos modais de AÇÃO e FII.",
   "releaseDate": "2026-07-13",
-  "checkpoint": "modal-data-truth-audit-v326",
-  "title": "Proxy v326 — Auditoria de veracidade dos modais",
-  "summary": "Pareia o APK v506 e impede que ausência, inferência ou transformação seja apresentada como dado direto da fonte.",
-  "publicVersion": "21.12.358",
-  "label": "modal-data-truth-audit-v326",
+  "checkpoint": "modal-source-arrival-integrity-v327",
+  "title": "Proxy v327 — Integridade da chegada das fontes",
+  "summary": "Pareia o APK v507 e só declara uma seção recebida quando há conteúdo renderizável ou ausência/não aplicabilidade confirmada.",
+  "publicVersion": "21.12.359",
+  "label": "modal-source-arrival-integrity-v327",
   "updatedAt": "2026-07-13",
   "date": "2026-07-13",
   "notes": [
-    "Pareado ao APK v506. Protocolo móvel 2026.07.10.10 e asset modal delivery v3 permanecem compatíveis."
+    "Pareado ao APK v507. Protocolo móvel 2026.07.10.10 e asset modal delivery v4 com estados por seção."
   ],
   "releaseNotes": [
-    "Checklist sem evidência permanece UNKNOWN; nunca é aprovado ou reprovado automaticamente.",
-    "Histórico de DY não é reconstruído com a cotação atual.",
-    "Página de FII de ticker diferente é descartada.",
-    "FIIs relacionados não herdam tipo/segmento nem geram falsa média.",
-    "Ocupação derivada de vacância é marcada como cálculo.",
-    "Contratos expõem dataTruth e falham fechados."
+    "Histórico de indicadores só é considerado recebido quando contém linhas e valores efetivamente renderizáveis; mapas ou tabelas vazias não finalizam o modal.",
+    "Comparação com índices só é considerada recebida quando existe série temporal real com pelo menos dois pontos; cards ou objetos sem histórico não contam como gráfico disponível.",
+    "DRE, resultados e balanço patrimonial exigem linhas com valores úteis; containers estruturais vazios permanecem pendentes.",
+    "Delivery schema v4 adiciona settledSections, emptyConfirmedSections, notApplicableSections, failedSections e sectionStates.",
+    "Comunicados com ausência confirmada podem estabilizar como EMPTY_CONFIRMED, sem repetir chamadas indefinidamente.",
+    "Portfólio imobiliário de FII de papel, recebíveis ou FOF pode estabilizar como NOT_APPLICABLE sem mostrar conteúdo incorreto.",
+    "Falhas reais permanecem recuperáveis; seções vazias confirmadas e não aplicáveis deixam de consumir novas tentativas.",
+    "Proxy publica diagnostics.sourceArrival e capabilities de diagnóstico de chegada; APK interpreta o mesmo estado para qualidade, cache e recovery.",
+    "Completude e finalização passam a usar a mesma semântica de settlement, evitando resposta declarada completa sem conteúdo utilizável."
   ],
-  "apkPair": "apk_valorae_checkpoint96_modal_data_truth_audit_v506_AI_STUDIO_ROOT_OK_2026_07_13.zip",
-  "apkVersion": "2026.07.13.02",
-  "fileSize": 1390460,
+  "apkPair": "apk_valorae_checkpoint97_modal_source_arrival_integrity_v507_AI_STUDIO_ROOT_OK_2026_07_13.zip",
+  "apkVersion": "2026.07.13.03",
+  "fileSize": 1403028,
   "highlights": [
-    "Procedência e identidade auditadas.",
-    "Cálculos explicitamente identificados.",
-    "Ausência de evidência vira UNKNOWN/EMPTY.",
-    "Nenhum histórico de DY pela cotação atual."
+    "Chegada real por seção.",
+    "Containers vazios não finalizam o modal.",
+    "Vazio confirmado e N/A não geram retry infinito.",
+    "Falha real continua recuperável."
   ],
   "validation": [
-    "Teste v326 cobre identidade, checklist, DY, pares, médias, vacância e séries reconstruídas.",
+    "Teste v327 cobre todos os estados de chegada e falsos positivos de containers vazios.",
     "Suíte completa, build, sintaxe, auditoria e cross-stack obrigatórios."
   ],
-  "proxyPair": "valorae_proxy_checkpoint358_modal_data_truth_audit_v326_AI_STUDIO_ROOT_OK_2026_07_13.zip",
+  "proxyPair": "valorae_proxy_checkpoint359_modal_source_arrival_integrity_v327_AI_STUDIO_ROOT_OK_2026_07_13.zip",
   "validations": [
     "npm test, build, check:syntax e audit:version.",
-    "Teste cross-stack contra APK v506.",
+    "Teste cross-stack contra APK v507.",
     "Validação do ZIP final após extração."
   ],
   "changes": [
-    "Adicionado dataTruth aos contratos de Ação e FII.",
-    "Checklist passa a transportar evidência e natureza.",
-    "Removida reconstrução de DY histórico pela cotação atual.",
-    "Adicionada validação de identidade para página de FII.",
-    "Removida herança de tipo/segmento em FIIs relacionados.",
-    "Ocupação calculada é identificada."
+    "Histórico de indicadores só é considerado recebido quando contém linhas e valores efetivamente renderizáveis; mapas ou tabelas vazias não finalizam o modal.",
+    "Comparação com índices só é considerada recebida quando existe série temporal real com pelo menos dois pontos; cards ou objetos sem histórico não contam como gráfico disponível.",
+    "DRE, resultados e balanço patrimonial exigem linhas com valores úteis; containers estruturais vazios permanecem pendentes.",
+    "Delivery schema v4 adiciona settledSections, emptyConfirmedSections, notApplicableSections, failedSections e sectionStates.",
+    "Comunicados com ausência confirmada podem estabilizar como EMPTY_CONFIRMED, sem repetir chamadas indefinidamente.",
+    "Portfólio imobiliário de FII de papel, recebíveis ou FOF pode estabilizar como NOT_APPLICABLE sem mostrar conteúdo incorreto.",
+    "Falhas reais permanecem recuperáveis; seções vazias confirmadas e não aplicáveis deixam de consumir novas tentativas.",
+    "Proxy publica diagnostics.sourceArrival e capabilities de diagnóstico de chegada; APK interpreta o mesmo estado para qualidade, cache e recovery.",
+    "Completude e finalização passam a usar a mesma semântica de settlement, evitando resposta declarada completa sem conteúdo utilizável."
   ],
-  "contractVersion": "APK v506 / Proxy 21.12.358 mobile protocol 2026.07.10.10 + asset modal delivery v3; procedência fail-closed, identidade por ticker, cálculos identificados e ausência de reconstruções enganosas.",
-  "latestVersion": "21.12.358",
-  "latest_version": "21.12.358",
-  "versionName": "21.12.358",
+  "contractVersion": "APK v507 / Proxy 21.12.359 mobile protocol 2026.07.10.10 + asset modal delivery v4; diagnóstico de chegada por seção, vazio confirmado, seção não aplicável e recuperação explícita de falhas.",
+  "latestVersion": "21.12.359",
+  "latest_version": "21.12.359",
+  "versionName": "21.12.359",
   "packageValidation": [
     "project files at ZIP root",
     "npm test",
     "npm run build",
     "npm run audit:version",
-    "cross-stack APK v506"
+    "cross-stack APK v507"
   ]
 }

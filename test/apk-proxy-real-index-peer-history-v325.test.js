@@ -4,10 +4,10 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.ok(['21.12.357', '21.12.358'].includes(pkg.valorae.publicVersion));
-assert.ok(['21.12.357-real-indices-peer-patrimony-history-v325', '21.12.358-modal-data-truth-audit-v326'].includes(pkg.valorae.releasePatch));
-assert.ok(['2026.07.13.01', '2026.07.13.02'].includes(metadata.apkVersion));
-assert.match(metadata.contractVersion, /APK v50[56] \/ Proxy 21\.12\.35[78]/);
+assert.ok(['21.12.357', '21.12.358', '21.12.359'].includes(pkg.valorae.publicVersion));
+assert.ok(['21.12.357-real-indices-peer-patrimony-history-v325', '21.12.358-modal-data-truth-audit-v326', '21.12.359-modal-source-arrival-integrity-v327'].includes(pkg.valorae.releasePatch));
+assert.ok(['2026.07.13.01', '2026.07.13.02', '2026.07.13.03'].includes(metadata.apkVersion));
+assert.match(metadata.contractVersion, /APK v50[5-7] \/ Proxy 21\.12\.35[7-9]/);
 
 const returnsUi = readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioDashboardReturnsUi.kt');
 const readiness = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalSectionReadiness.kt');
@@ -22,8 +22,8 @@ if (returnsUi && readiness && merge && quality && build) {
   assert.match(readiness, /PeerComparison -> peerComparison\.hasUsefulPatrimonialCoverage\(\)/);
   assert.match(merge, /mergeFiiPeerComparison\(fast\.peerComparison, full\.peerComparison\)/);
   assert.match(quality, /peerComparison\.hasUsefulPatrimonialCoverage\(\)/);
-  assert.match(build, /versionCode = 2607130[12]/);
-  assert.match(build, /versionName = "2026\.07\.13\.0[12]"/);
+  assert.match(build, /versionCode = 2607130[1-3]/);
+  assert.match(build, /versionName = "2026\.07\.13\.0[1-3]"/);
 }
 
 const integrity = fs.readFileSync(new URL('../lib/sources/history-integrity.js', import.meta.url), 'utf8');

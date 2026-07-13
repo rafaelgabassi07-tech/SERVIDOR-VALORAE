@@ -79,10 +79,11 @@ assert.equal(incompleteDelivery.recoveryTargetPercent, 82);
 
 const completeStock = {
   ...incompleteStock,
+  historicalIndicators: { rows: [{ label: 'P/L', values: { Atual: '8,2', 2025: '9,1' } }], tablesByPeriod: {} },
   dividendRadar: { status: 'OK', months: [{ activeDateCom: true, dateComCount: 1 }] },
   payoutChart: { points: [{ period: '2025' }] },
   peerComparison: { rows: [{ ticker: 'TEST3' }] },
-  indexComparison: { items: [{ code: 'IBOV' }], series: [], seriesByPeriod: {} },
+  indexComparison: { items: [{ code: 'IBOV' }], series: [{ code: 'HARM3', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }], seriesByPeriod: {} },
   companyData: { facts: [{ id: 'sector', value: 'Serviços' }], companyPapers: [], fractionalPapers: [], sections: [] },
   companyInformation: { facts: [{ id: 'activity', value: 'Operação' }], groups: [] },
   revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },

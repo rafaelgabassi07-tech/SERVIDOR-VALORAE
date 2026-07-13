@@ -68,14 +68,14 @@ const fullForFastDelivery = runtimeTest.buildModalDelivery({
   vacancyHistory: { points: [{ period: '2026-06', value: 5 }] },
   announcements: { items: [{ title: 'Relatório gerencial' }] },
   infoSections: [{ id: 'manager', items: [{ label: 'Gestor', value: 'Teste' }] }],
-  comparison: { items: [{ id: 'ifix', value: '7%' }], series: [], seriesByPeriod: {} },
-  peerComparison: { rows: [{ ticker: 'HGLG11', value: '8%' }] },
+  comparison: { items: [{ id: 'ifix', value: '7%' }], series: [{ code: 'MXRF11', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IFIX', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 0.7 }] }], seriesByPeriod: {} },
+  peerComparison: { rows: [{ ticker: 'HGLG11', value: '8%', patrimonialValue: 5000000000, patrimonialValueDisplay: 'R$ 5 bi' }] },
   aboutFund: { summary: 'Fundo', sections: [{ title: 'Sobre', paragraphs: ['Fundo'] }], highlights: [] },
   distributions12m: { items: [{ month: '2026-06', value: 0.1 }], months: [] },
   dividendCharts: { events: [{ date: '2026-06-01', value: 0.1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
   propertyPortfolio: { properties: [{ name: 'Imóvel' }], states: [] },
   patrimonialInfo: { metrics: [{ id: 'vp', value: 'R$ 10,10' }], bars: [] },
-  historicalIndicators: { rows: [{ label: 'P/VP' }], tablesByPeriod: {} },
+  historicalIndicators: { rows: [{ label: 'P/VP', values: { Atual: '0,95', 2025: '0,92' } }], tablesByPeriod: {} },
   returns: { rows: [{ label: '12M', value: '8%' }] }
 }, { family: 'fii', requestedMode: 'fast', mode: 'full', cacheStatus: 'HIT_FULL_FOR_FAST', requestId: 'req-cache' });
 assert.equal(fullForFastDelivery.requestedStage, 'fast');
@@ -101,10 +101,10 @@ const cachedFull = {
   distributions12m: { items: [{ month: '2026-06', value: 0.1 }], months: [] },
   dividendCharts: { events: [{ date: '2026-06-01', value: 0.1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
   patrimonialInfo: { metrics: [{ id: 'vp', value: 'R$ 10,10' }], bars: [] },
-  comparison: { items: [{ id: 'ifix', value: '7%' }], series: [], seriesByPeriod: {} },
-  peerComparison: { rows: [{ ticker: 'HGLG11', value: '8%' }] },
+  comparison: { items: [{ id: 'ifix', value: '7%' }], series: [{ code: 'MXRF11', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IFIX', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 0.7 }] }], seriesByPeriod: {} },
+  peerComparison: { rows: [{ ticker: 'HGLG11', value: '8%', patrimonialValue: 5000000000, patrimonialValueDisplay: 'R$ 5 bi' }] },
   propertyPortfolio: { properties: [{ name: 'Imóvel' }], states: [] },
-  historicalIndicators: { rows: [{ label: 'P/VP' }], tablesByPeriod: {} },
+  historicalIndicators: { rows: [{ label: 'P/VP', values: { Atual: '0,95', 2025: '0,92' } }], tablesByPeriod: {} },
   returns: { rows: [{ label: '12M', value: '8,2%' }] }
 };
 setCache(runtimeTest.modalCacheKey({ family: 'fii', ticker: 'MXRF11', payload: fullFii }), cachedFull, 180000, 900000);

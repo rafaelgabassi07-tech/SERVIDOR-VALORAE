@@ -17,7 +17,7 @@ function richStockPayload(ticker = 'PETR4', price = 31.5) {
     chart: { points: [{ close: price - 0.4 }, { close: price }] },
     metrics: [{ id: 'price', value: `R$ ${price.toFixed(2).replace('.', ',')}` }],
     fundamentalIndicators: { items: [{ id: 'pl', value: '6,2' }] },
-    historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+    historicalIndicators: { rows: [{ label: 'P/L', values: { Atual: '8,0', 2025: '9,0' } }], tablesByPeriod: {} },
   revenueProfitChart: { points: [{ period: '2025', primaryValue: 100 }] },
   profitQuoteChart: { points: [{ period: '2025', primaryValue: 100, secondaryValue: 31.5 }] },
   equityEvolutionChart: { points: [{ period: '2025', primaryValue: 100 }] },
@@ -32,7 +32,7 @@ function richStockPayload(ticker = 'PETR4', price = 31.5) {
   };
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v17-late-arrival-settlement');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v18-source-arrival-integrity');
 
 const basicFull = {
   ok: true,

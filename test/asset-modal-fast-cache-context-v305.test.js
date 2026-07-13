@@ -44,7 +44,7 @@ const fullCached = {
   chart: { points: [{ close: 32.1 }, { close: 32.8 }] },
   metrics: [{ id: 'price', value: 'R$ 32,80' }],
   fundamentalIndicators: { items: [{ id: 'pl', value: '5,8' }] },
-  historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+  historicalIndicators: { rows: [{ label: 'P/L', values: { Atual: '8,0', 2025: '9,0' } }], tablesByPeriod: {} },
   revenueProfitChart: { points: [{ period: '2025', primaryValue: 100 }] },
   profitQuoteChart: { points: [{ period: '2025', primaryValue: 100, secondaryValue: 32.8 }] },
   equityEvolutionChart: { points: [{ period: '2025', primaryValue: 100 }] },
@@ -135,7 +135,7 @@ if (apkCatalog && apkUniversal && apkHttp && apkQuality) {
   assert.ok(apkUniversal.includes('.firstOrNull()') && !apkUniversal.includes('.maxByOrNull { it.storedAtMs }'), 'APK deve priorizar full útil sobre preview fast mais recente');
   assert.ok(apkHttp.includes('call.timeout().timeout(requestTimeoutMs, TimeUnit.MILLISECONDS)'), 'APK deve aplicar timeout na Call compartilhando o OkHttpClient');
   assert.ok(!apkHttp.includes('.newBuilder()\n            .callTimeout(requestTimeoutMs'), 'APK não deve construir um OkHttpClient por GET do modal');
-  assert.ok(apkQuality.includes('historicalIndicators.tablesByPeriod.values.any { it.rows.isNotEmpty() }'), 'quality gate FII deve exigir linhas reais no histórico tabular igual ao Proxy');
+  assert.ok(apkQuality.includes('historicalIndicators.hasRenderableHistoricalData()'), 'quality gate FII deve exigir linhas reais no histórico tabular igual ao Proxy');
   assert.equal(apkQuality.includes('shareholdingPosition.rows.isNotEmpty()'), false, 'posição acionária desativada não pode influenciar o quality gate do APK');
   assert.ok(apkQuality.includes('"0,00%"') && apkQuality.includes('value.isFinite() && value != 0.0'), 'APK deve rejeitar contrato vazio disfarçado por zeros sintéticos');
 }

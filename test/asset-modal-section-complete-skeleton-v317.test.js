@@ -14,7 +14,7 @@ const baseStock = {
   dividendRadar: { status: 'EMPTY', months: Array.from({ length: 12 }, () => ({ activeDateCom: false, activePayment: false })) },
   payoutChart: { points: [] },
   peerComparison: { rows: [{ ticker: 'TEST3' }] },
-  indexComparison: { items: [{ code: 'IBOV' }] },
+  indexComparison: { items: [{ code: 'IBOV' }], series: [{ code: 'TEST3', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }] },
   companyProfile: { sections: [{ paragraphs: ['Perfil'] }], facts: [] },
   companyData: { facts: [], companyPapers: [], fractionalPapers: [], sections: [] },
   companyInformation: { facts: [], groups: [] },
@@ -24,7 +24,7 @@ const baseStock = {
   revenueProfitChart: { points: [{ period: '2025' }] },
   profitQuoteChart: { points: [] },
   equityEvolutionChart: { points: [] },
-  resultsStatement: { rows: [{ label: 'Receita' }] },
+  resultsStatement: { rows: [{ label: 'Receita', value: '100' }] },
   balanceSheetStatement: { rows: [] },
   announcements: { items: [] },
   returns: { rows: [{ label: '12M' }] }
@@ -53,7 +53,7 @@ completeStock.companyInformation.facts = [{ value: 'Concessionária' }];
 completeStock.revenueByBusiness.items = [{ label: 'Distribuição' }];
 completeStock.profitQuoteChart.points = [{ period: '2025' }];
 completeStock.equityEvolutionChart.points = [{ period: '2025' }];
-completeStock.balanceSheetStatement.rows = [{ label: 'Patrimônio' }];
+completeStock.balanceSheetStatement.rows = [{ label: 'Patrimônio', value: '200' }];
 completeStock.shareholdingPosition = { rows: [{ shareholder: 'Mercado' }] };
 completeStock.announcements = { items: [{ title: 'Comunicado' }] };
 completeStock.returns = { rows: [{ label: '12M' }] };

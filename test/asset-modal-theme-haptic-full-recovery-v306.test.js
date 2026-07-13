@@ -37,7 +37,7 @@ assert.equal(_test.isModalPayloadCacheable(basicOnlyFull, 'stock'), false, 'full
 const richFull = {
   ...basicOnlyFull,
   fundamentalIndicators: { items: [{ id: 'pl', value: '6,2' }] },
-  historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+  historicalIndicators: { rows: [{ label: 'P/L', values: { Atual: '8,0', 2025: '9,0' } }], tablesByPeriod: {} },
   revenueProfitChart: { points: [{ period: '2025', primaryValue: 100 }] },
   profitQuoteChart: { points: [{ period: '2025', primaryValue: 100, secondaryValue: 31.5 }] },
   equityEvolutionChart: { points: [{ period: '2025', primaryValue: 100 }] },

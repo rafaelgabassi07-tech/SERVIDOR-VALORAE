@@ -39,7 +39,7 @@ const completeStock = {
   chart: { points: [{ close: 24 }, { close: 25 }] },
   metrics: [{ value: 'R$ 25,00' }],
   fundamentalIndicators: { items: [{ value: '8,0' }] },
-  historicalIndicators: { rows: [{ label: 'P/L' }] },
+  historicalIndicators: { rows: [{ label: 'P/L', values: { Atual: '8,0', 2025: '9,0' } }] },
   revenueProfitChart: { points: [{ year: 2025, netIncome: 10 }] },
   profitQuoteChart: { points: [{ year: 2025, quote: 25, netIncome: 10 }] },
   equityEvolutionChart: { points: [{ year: 2025, netWorth: 100 }] },
@@ -47,14 +47,14 @@ const completeStock = {
   returns: { rows: [{ label: '12M' }] },
   dividends: { events: [{ value: 1 }] },
   peerComparison: { rows: [{ ticker: 'PAIR3' }] },
-  indexComparison: { items: [{ code: 'IBOV' }] },
+  indexComparison: { items: [{ code: 'IBOV' }], series: [{ code: 'TEST3', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }] },
   companyProfile: { facts: [{ value: 'Setor' }] },
   companyData: { facts: [{ value: 'Brasil' }] },
   companyInformation: { facts: [{ value: 'Listada' }] },
   revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
   shareholdingPosition: { rows: [{ shareholder: 'Mercado' }] },
-  resultsStatement: { rows: [{ label: 'Receita' }] },
-  balanceSheetStatement: { rows: [{ label: 'Patrimônio' }] },
+  resultsStatement: { rows: [{ label: 'Receita', value: '100' }] },
+  balanceSheetStatement: { rows: [{ label: 'Patrimônio', value: '200' }] },
   announcements: { items: [{ title: 'Comunicado' }] }
 };
 const delivery = runtime.buildModalDelivery(completeStock, {

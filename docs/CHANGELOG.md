@@ -1,3 +1,12 @@
+## 21.12.359 — v327 — 2026-07-13
+
+- Seções só ficam READY quando contêm conteúdo utilizável.
+- Histórico, demonstrativos e séries comparativas rejeitam containers vazios.
+- Delivery schema v4 publica estados READY, EMPTY_CONFIRMED, NOT_APPLICABLE, ERROR, DEFERRED e MISSING.
+- Ausência confirmada e não aplicabilidade deixam de gerar retry infinito.
+- Falhas reais continuam recuperáveis pelo APK.
+- Pareamento atualizado para APK v507 / Checkpoint 97.
+
 ## 21.12.358 — v326 — 2026-07-13
 
 - Auditoria de procedência e identidade dos dados dos modais.

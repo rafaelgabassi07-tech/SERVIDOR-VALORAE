@@ -15,11 +15,11 @@ function completeStockPayload(ticker = 'PETR4', price = 31.5) {
     chart: { points: [{ close: price - 0.2 }, { close: price }] },
     metrics: [{ id: 'price', value: `R$ ${price.toFixed(2).replace('.', ',')}` }],
     fundamentalIndicators: { items: [{ id: 'pl', value: '6,2' }] },
-    historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+    historicalIndicators: { rows: [{ label: 'P/L', values: { Atual: '8,0', 2025: '9,0' } }], tablesByPeriod: {} },
     checklist: { items: [{ id: 'dy', passed: true, status: 'PASSED' }] },
     dividendHistory: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
     peerComparison: { rows: [{ ticker: 'PRIO3' }] },
-    indexComparison: { items: [{ id: 'ibov' }], series: [], seriesByPeriod: {} },
+    indexComparison: { items: [{ id: 'ibov' }], series: [{ code: ticker, points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }], seriesByPeriod: {} },
     companyProfile: { facts: [{ id: 'segment', value: 'Petróleo' }], sections: [] },
     revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
     shareholdingPosition: { rows: [{ shareholder: 'Controlador' }] },
@@ -43,7 +43,7 @@ function stablePartialStockPayload(ticker = 'PETR4', price = 30.1) {
   return payload;
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v17-late-arrival-settlement');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v18-source-arrival-integrity');
 
 const family = 'stock';
 const ticker = 'PETR4';

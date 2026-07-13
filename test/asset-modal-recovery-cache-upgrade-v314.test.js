@@ -16,11 +16,11 @@ function completeStockPayload(ticker = 'PETR4', price = 31.5) {
     chart: { points: [{ close: price - 0.2 }, { close: price }] },
     metrics: [{ id: 'price', value: `R$ ${price.toFixed(2).replace('.', ',')}` }],
     fundamentalIndicators: { items: [{ id: 'pl', value: '6,2' }] },
-    historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+    historicalIndicators: { rows: [{ label: 'P/L', values: { Atual: '8,0', 2025: '9,0' } }], tablesByPeriod: {} },
     checklist: { items: [{ id: 'dy', passed: true, status: 'PASSED' }] },
     dividendHistory: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
     peerComparison: { rows: [{ ticker: 'PRIO3' }] },
-    indexComparison: { items: [{ id: 'ibov' }], series: [], seriesByPeriod: {} },
+    indexComparison: { items: [{ id: 'ibov' }], series: [{ code: ticker, points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }], seriesByPeriod: {} },
     companyProfile: { facts: [{ id: 'segment', value: 'Petróleo' }], sections: [] },
     revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
     shareholdingPosition: { rows: [{ shareholder: 'Controlador' }] },
@@ -45,7 +45,7 @@ function completeFiiPayload(ticker = 'HGLG11', price = 160.2) {
     quoteSummary: { price, priceDisplay: `R$ ${price.toFixed(2).replace('.', ',')}` },
     chart: { points: [{ close: price - 0.4 }, { close: price }] },
     metrics: [{ id: 'dy', value: '8,5%' }],
-    comparison: { items: [{ id: 'ifix' }], series: [], seriesByPeriod: {} },
+    comparison: { items: [{ id: 'ifix' }], series: [{ code: ticker, points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IFIX', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 0.7 }] }], seriesByPeriod: {} },
     peerComparison: { rows: [{ ticker: 'XPLG11' }] },
     checklist: { items: [{ id: 'vacancy', passed: true, status: 'PASSED' }] },
     distributions12m: { items: [{ month: '2026-06', value: 1.1 }], months: [] },
@@ -57,11 +57,11 @@ function completeFiiPayload(ticker = 'HGLG11', price = 160.2) {
     announcements: { items: [{ title: 'Relatório gerencial' }] },
     returns: { rows: [{ label: '12M', value: '9,2%' }] },
     infoSections: [{ title: 'Informações', items: [{ label: 'Segmento', value: 'Logística' }] }],
-    historicalIndicators: { rows: [{ label: 'P/VP' }], tablesByPeriod: {} }
+    historicalIndicators: { rows: [{ label: 'P/VP', values: { Atual: '0,98', 2025: '0,95' } }], tablesByPeriod: {} }
   };
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v17-late-arrival-settlement');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v18-source-arrival-integrity');
 
 const family = 'stock';
 const ticker = 'PETR4';

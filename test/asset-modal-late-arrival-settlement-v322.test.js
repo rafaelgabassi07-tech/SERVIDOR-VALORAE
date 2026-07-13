@@ -19,7 +19,7 @@ function fullStock(ticker = 'LATE3', includePeer = true) {
     chart: { points: [{ close: 24 }, { close: 25 }] },
     metrics: [{ id: 'price', value: 'R$ 25,00' }],
     fundamentalIndicators: { items: [{ id: 'pl', value: '8,0' }] },
-    historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+    historicalIndicators: { rows: [{ label: 'P/L', values: { Atual: '8,0', 2025: '9,0' } }], tablesByPeriod: {} },
     revenueProfitChart: { points: [{ period: '2025', primaryValue: 100 }] },
     profitQuoteChart: { points: [{ period: '2025', primaryValue: 100, secondaryValue: 25 }] },
     equityEvolutionChart: { points: [{ period: '2025', primaryValue: 500 }] },
@@ -28,7 +28,7 @@ function fullStock(ticker = 'LATE3', includePeer = true) {
     dividendRadar: { status: 'OK', months: [{ month: 6, activePayment: true, paymentCount: 1 }] },
     payoutChart: { points: [{ period: '2025', value: 45 }] },
     ...(includePeer ? { peerComparison: { rows: [{ ticker: 'PAIR3' }] } } : {}),
-    indexComparison: { items: [{ id: 'ibov' }], series: [], seriesByPeriod: {} },
+    indexComparison: { items: [{ id: 'ibov' }], series: [{ code: ticker, points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }], seriesByPeriod: {} },
     companyProfile: { facts: [{ id: 'segment', value: 'Indústria' }], sections: [] },
     companyData: { facts: [{ id: 'country', value: 'Brasil' }], companyPapers: [], fractionalPapers: [] },
     companyInformation: { facts: [{ id: 'listing', value: 'B3' }], groups: [] },
@@ -54,7 +54,7 @@ function fullFii(ticker = 'LATE11', includeVacancy = true) {
     quoteSummary: { price: 100, priceDisplay: 'R$ 100,00' },
     chart: { points: [{ close: 99 }, { close: 100 }] },
     metrics: [{ id: 'dy', value: '9,0%' }],
-    comparison: { items: [{ id: 'ifix' }], series: [], seriesByPeriod: {} },
+    comparison: { items: [{ id: 'ifix' }], series: [{ code: ticker, points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IFIX', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 0.7 }] }], seriesByPeriod: {} },
     peerComparison: { rows: [{ ticker, patrimonialValue: 100000000, patrimonialValueDisplay: 'R$ 100 mi' }, { ticker: 'PAIR11', patrimonialValue: 90000000, patrimonialValueDisplay: 'R$ 90 mi' }] },
     checklist: { items: [{ id: 'vacancy', passed: true, status: 'PASSED' }] },
     distributions12m: { items: [{ month: '2026-06', value: 1 }], months: [] },
@@ -66,11 +66,11 @@ function fullFii(ticker = 'LATE11', includeVacancy = true) {
     announcements: { items: [{ title: 'Relatório gerencial' }] },
     returns: { rows: [{ label: '12M', value: '9%' }] },
     infoSections: [{ title: 'Informações', items: [{ label: 'Segmento', value: 'Logística' }] }],
-    historicalIndicators: { rows: [{ label: 'P/VP' }], tablesByPeriod: {} }
+    historicalIndicators: { rows: [{ label: 'P/VP', values: { Atual: '0,98', 2025: '0,95' } }], tablesByPeriod: {} }
   };
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '26.asset-modal.runtime.v17-late-arrival-settlement');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v18-source-arrival-integrity');
 
 const firstStock = fullStock('LATE3', false);
 const firstStockDelivery = runtime.buildModalDelivery(firstStock, { family: 'stock', requestedMode: 'full', mode: 'full', requestId: 'late-stock-first' });

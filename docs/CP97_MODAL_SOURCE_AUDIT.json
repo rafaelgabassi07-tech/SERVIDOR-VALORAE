@@ -1,0 +1,663 @@
+{
+  "auditId": "CP97_MODAL_SOURCE_ARRIVAL_INTEGRITY",
+  "generatedAt": "2026-07-13T00:00:00Z",
+  "apk": {
+    "versionName": "2026.07.13.03",
+    "versionCode": 26071303,
+    "checkpoint": "v507-checkpoint97-modal-source-arrival-integrity"
+  },
+  "proxy": {
+    "publicVersion": "21.12.359",
+    "patch": "21.12.359-modal-source-arrival-integrity-v327"
+  },
+  "deliverySchema": "4",
+  "objective": "Verificar a chegada de conteúdo utilizável das fontes até os modais, sem confundir chaves ou containers vazios com dados recebidos.",
+  "sectionStates": [
+    "READY",
+    "EMPTY_CONFIRMED",
+    "NOT_APPLICABLE",
+    "ERROR",
+    "DEFERRED",
+    "EMPTY_UNCONFIRMED",
+    "MISSING"
+  ],
+  "summary": {
+    "uiBlocksAudited": 40,
+    "stockUiBlocks": 23,
+    "fiiUiBlocks": 17,
+    "proxyTestFilesPassed": 209,
+    "crossStackTestsPassed": 20,
+    "apkCheckpointTestsPassed": 37,
+    "httpSmokeRoutesPassed": 7,
+    "proxyJavaScriptFilesSyntaxChecked": 405,
+    "apkProductionKotlinFilesAudited": 197,
+    "liveExternalTraversal": "Not completed because external DNS was unavailable in the execution container.",
+    "publicSourceSpotCheck": "PETR4 and HGLG11 public source pages expose the expected families of data."
+  },
+  "corrections": [
+    "Containers vazios de histórico de indicadores não contam mais como seção recebida.",
+    "Comparação com índices exige pelo menos dois pontos temporais reais.",
+    "DRE, resultados e balanço exigem valores renderizáveis.",
+    "Ausência confirmada e não aplicabilidade são diferenciadas de erro e adiamento.",
+    "APK recupera apenas lacunas reais; vazio confirmado e N/A não geram repetição infinita.",
+    "Diagnóstico por seção é publicado no Proxy e consumido pelo APK."
+  ],
+  "blocks": [
+    {
+      "family": "STOCK",
+      "order": 1,
+      "uiBlock": "Informações rápidas",
+      "contractSection": "quote + metrics",
+      "source": "Yahoo Finance Quote API + Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Preço positivo/formatado e métricas com valor significativo. Zero, traço ou container vazio não contam.",
+      "testEvidence": [
+        "stock-modal-contract-v215",
+        "stock-modal-data-integrity-v268",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 2,
+      "uiBlock": "Cotação em tempo real",
+      "contractSection": "chart",
+      "source": "Yahoo Finance Chart API",
+      "nature": "Direto",
+      "arrivalRule": "Série temporal com pelo menos 2 pontos datados e numéricos.",
+      "testEvidence": [
+        "stock-modal-contract-v215",
+        "real-index-integrity-v325",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 3,
+      "uiBlock": "Rentabilidade do ativo",
+      "contractSection": "returns",
+      "source": "Histórico real do ativo + IPCA/CDI quando aplicável",
+      "nature": "Calculado sobre série real",
+      "arrivalRule": "Linhas reais de retorno; sem série suficiente fica pendente/indisponível.",
+      "testEvidence": [
+        "stock-modal-contract-v215",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 4,
+      "uiBlock": "Indicadores do ativo",
+      "contractSection": "fundamentalIndicators",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Itens/grupos devem conter valores úteis; estrutura vazia não é recebimento.",
+      "testEvidence": [
+        "stock-modal-i10-integrity-v245",
+        "stock-modal-integrated-sections-i10-v255",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 5,
+      "uiBlock": "Histórico de indicadores",
+      "contractSection": "historicalIndicators",
+      "source": "Investidor10 (HTML/REST dedicado)",
+      "nature": "Direto",
+      "arrivalRule": "Exige linhas e pelo menos valores históricos renderizáveis; anos inválidos/futuros e containers vazios são rejeitados.",
+      "testEvidence": [
+        "stock-modal-historical-indicators-integrity-v325",
+        "stock-modal-historical-indicators-api-audit-v269",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 6,
+      "uiBlock": "Checklist Buy and Hold",
+      "contractSection": "checklist",
+      "source": "Investidor10 + regras transparentes somente quando há evidência",
+      "nature": "Misto: direto/cálculo explícito",
+      "arrivalRule": "Item só é resolvido com boolean/status explícito; sem evidência permanece Não informado.",
+      "testEvidence": [
+        "stock-modal-checklist-ranking-i10-v248",
+        "modal-data-truth-audit-v326"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 7,
+      "uiBlock": "Histórico de dividendos",
+      "contractSection": "dividendHistory",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Eventos ou séries de dividendos/DY reais; ausência não vira série artificial.",
+      "testEvidence": [
+        "stock-modal-contract-v215",
+        "news-real-feed-no-synthetic-v307",
+        "modal-data-truth-audit-v326"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 8,
+      "uiBlock": "Radar de dividendos",
+      "contractSection": "dividendRadar",
+      "source": "Eventos históricos reais do Investidor10",
+      "nature": "Projeção identificada",
+      "arrivalRule": "Somente meses derivados de datas-com/pagamentos reais; é projeção, não promessa.",
+      "testEvidence": [
+        "stock-modal-contract-v215",
+        "modal-data-truth-audit-v326"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 9,
+      "uiBlock": "Payout",
+      "contractSection": "payoutChart",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Exige pontos reais do histórico de payout.",
+      "testEvidence": [
+        "stock-modal-payout-chart-investidor10-v244",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 10,
+      "uiBlock": "Comparador de ações",
+      "contractSection": "peerComparison",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Exige linhas reais de pares; sem linhas não finaliza.",
+      "testEvidence": [
+        "stock-modal-contract-v215",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 11,
+      "uiBlock": "Comparação com índices",
+      "contractSection": "indexComparison",
+      "source": "Yahoo Finance Chart API; Banco Central SGS CDI/IPCA",
+      "nature": "Calculado sobre séries reais",
+      "arrivalRule": "Cada benchmark precisa de ao menos 2 pontos reais e janela compartilhada; snapshot, ticker substituto e série estática são rejeitados.",
+      "testEvidence": [
+        "real-index-integrity-v325",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 12,
+      "uiBlock": "Sobre a empresa",
+      "contractSection": "companyProfile",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Seções/fatos úteis obrigatórios.",
+      "testEvidence": [
+        "investidor10-about-source-coverage-v182",
+        "stock-modal-integrated-sections-i10-v255"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 13,
+      "uiBlock": "Dados da empresa",
+      "contractSection": "companyData",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Fatos, papéis ou grupos com valores úteis.",
+      "testEvidence": [
+        "stock-modal-company-data-i10-v252",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 14,
+      "uiBlock": "Informações da empresa",
+      "contractSection": "companyInformation",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Fatos/grupos com valores úteis.",
+      "testEvidence": [
+        "stock-modal-company-information-i10-v253",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 15,
+      "uiBlock": "Regiões onde gera receita",
+      "contractSection": "revenueByRegion",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Exige itens reais; parser cobre HTML, REST e mapas embutidos.",
+      "testEvidence": [
+        "stock-modal-revenue-region-i10-v250",
+        "stock-modal-revenue-endpoints-v285",
+        "stock-modal-revenue-highcharts-realistic-v284"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 16,
+      "uiBlock": "Negócios que geram receita",
+      "contractSection": "revenueByBusiness",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Exige itens reais; parser cobre HTML, REST e mapas embutidos.",
+      "testEvidence": [
+        "stock-modal-revenue-business-i10-v251",
+        "stock-modal-revenue-endpoints-v285",
+        "stock-modal-revenue-highcharts-realistic-v284"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 17,
+      "uiBlock": "Receitas e lucros",
+      "contractSection": "revenueProfitChart",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Exige pontos reais; container de gráfico sem pontos não conta.",
+      "testEvidence": [
+        "stock-modal-revenue-highcharts-realistic-v284",
+        "investidor10-source-chart-contract-v176",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 18,
+      "uiBlock": "Lucro x cotação",
+      "contractSection": "profitQuoteChart",
+      "source": "Investidor10 + Yahoo Finance histórico",
+      "nature": "Composição identificada de fontes reais",
+      "arrivalRule": "Lucro anual real combinado com preço anual real; sem ambos não inventa curva.",
+      "testEvidence": [
+        "stock-modal-profit-quote-priority-v288",
+        "modal-data-truth-audit-v326"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 19,
+      "uiBlock": "Resultados",
+      "contractSection": "resultsStatement",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "DRE/resultados exigem linhas com valores renderizáveis; períodos vazios não contam.",
+      "testEvidence": [
+        "stock-modal-integrated-sections-i10-v255",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 20,
+      "uiBlock": "Evolução do patrimônio",
+      "contractSection": "equityEvolutionChart",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Exige pontos reais.",
+      "testEvidence": [
+        "investidor10-source-chart-contract-v176",
+        "stock-modal-balance-sheet-i10-v249",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 21,
+      "uiBlock": "Balanço patrimonial",
+      "contractSection": "balanceSheetStatement",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Exige linhas/tabelas com valores úteis; containers vazios permanecem pendentes.",
+      "testEvidence": [
+        "stock-modal-balance-sheet-i10-v249",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 22,
+      "uiBlock": "Comunicados",
+      "contractSection": "announcements",
+      "source": "Investidor10/B3 exposto pela página do ativo",
+      "nature": "Direto",
+      "arrivalRule": "Itens reais ficam READY; ausência explicitamente confirmada fica EMPTY_CONFIRMED.",
+      "testEvidence": [
+        "asset-modal-family-announcements-index-alignment",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "STOCK",
+      "order": 23,
+      "uiBlock": "Notícias sobre o ativo",
+      "contractSection": "/api/v1/news strict asset",
+      "source": "Feeds reais filtrados por ticker/nome",
+      "nature": "Direto",
+      "arrivalRule": "assetOnly=true e strictAsset=true; notícia geral/sintética é rejeitada.",
+      "testEvidence": [
+        "news-asset-only-v324",
+        "news-real-feed-no-synthetic-v307"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 1,
+      "uiBlock": "Informações rápidas",
+      "contractSection": "quote + metrics",
+      "source": "Yahoo Finance Quote API + Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Cotação positiva/formatada e métricas úteis.",
+      "testEvidence": [
+        "fii-modal-investidor10-info-v193",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 2,
+      "uiBlock": "Cotação em tempo real",
+      "contractSection": "chart",
+      "source": "Yahoo Finance Chart API",
+      "nature": "Direto",
+      "arrivalRule": "Série com pelo menos 2 pontos reais.",
+      "testEvidence": [
+        "fii-modal-yahoo-comparison-v196",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 3,
+      "uiBlock": "Rentabilidade do ativo",
+      "contractSection": "returns",
+      "source": "Histórico real do FII + IPCA/CDI quando aplicável",
+      "nature": "Calculado sobre série real",
+      "arrivalRule": "Linhas reais de retorno; sem histórico suficiente fica indisponível.",
+      "testEvidence": [
+        "fii-modal-return-index-reuse-v210",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 4,
+      "uiBlock": "Informações sobre o ativo",
+      "contractSection": "information",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Seções com itens úteis; objeto vazio não finaliza.",
+      "testEvidence": [
+        "fii-modal-investidor10-info-v193",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 5,
+      "uiBlock": "Histórico de indicadores",
+      "contractSection": "historicalIndicators",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Exige linhas/tabelas com valores renderizáveis.",
+      "testEvidence": [
+        "fii-modal-historical-indicators-v194",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 6,
+      "uiBlock": "Comparação com índices",
+      "contractSection": "comparison",
+      "source": "Yahoo Finance Chart API; Banco Central SGS CDI/IPCA",
+      "nature": "Calculado sobre séries reais",
+      "arrivalRule": "Cada série precisa de pelo menos 2 pontos; snapshots e curvas simuladas são rejeitados.",
+      "testEvidence": [
+        "fii-modal-yahoo-comparison-v196",
+        "real-index-integrity-v325",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 7,
+      "uiBlock": "Comparando com outros FIIs",
+      "contractSection": "peerComparison",
+      "source": "Investidor10 + enriquecimento da página individual de cada FII",
+      "nature": "Direto",
+      "arrivalRule": "Exige linhas e cobertura patrimonial mínima real; P/VP não é usado para estimar patrimônio.",
+      "testEvidence": [
+        "fii-modal-peer-comparison-v198",
+        "fii-modal-peer-patrimonial-enrichment-v325",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 8,
+      "uiBlock": "Checklist Buy and Hold",
+      "contractSection": "checklist",
+      "source": "Investidor10 + regras transparentes somente com evidência",
+      "nature": "Misto: direto/cálculo explícito",
+      "arrivalRule": "Status só é resolvido com evidência; sem marcador fica Não informado.",
+      "testEvidence": [
+        "modal-data-truth-audit-v326",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 9,
+      "uiBlock": "Distribuição nos últimos 12 meses",
+      "contractSection": "distributions12m",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Itens/meses reais.",
+      "testEvidence": [
+        "fii-modal-dividend-html-fallback-v209",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 10,
+      "uiBlock": "Histórico de dividendos",
+      "contractSection": "dividendCharts",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Eventos ou séries reais de dividendos/DY; DY histórico não usa cotação atual.",
+      "testEvidence": [
+        "fii-modal-dividend-html-fallback-v209",
+        "modal-data-truth-audit-v326"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 11,
+      "uiBlock": "Sobre o ativo",
+      "contractSection": "aboutFund",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Resumo, destaques ou seções úteis.",
+      "testEvidence": [
+        "fii-modal-investidor10-info-v193",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 12,
+      "uiBlock": "Lista de imóveis",
+      "contractSection": "propertyPortfolio",
+      "source": "Investidor10",
+      "nature": "Direto/condicional",
+      "arrivalRule": "Imóveis/estados reais; FII de papel, recebíveis ou FOF pode finalizar como NOT_APPLICABLE.",
+      "testEvidence": [
+        "fii-modal-property-portfolio-v207",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 13,
+      "uiBlock": "Histórico da taxa de vacância",
+      "contractSection": "vacancyHistory",
+      "source": "Investidor10",
+      "nature": "Direto; ocupação pode ser cálculo identificado",
+      "arrivalRule": "Exige pontos reais; ocupação = 100% - vacância é marcada como cálculo.",
+      "testEvidence": [
+        "fii-modal-vacancy-history-v208",
+        "modal-data-truth-audit-v326"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 14,
+      "uiBlock": "Comunicados",
+      "contractSection": "announcements",
+      "source": "Investidor10/B3 exposto pela página do FII",
+      "nature": "Direto",
+      "arrivalRule": "Itens reais READY; ausência confirmada EMPTY_CONFIRMED.",
+      "testEvidence": [
+        "asset-modal-family-announcements-index-alignment",
+        "asset-modal-source-arrival-integrity-v327"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 15,
+      "uiBlock": "Informações sobre valor patrimonial",
+      "contractSection": "patrimonialInfo",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Métricas/barras reais; valor não é inferido por P/VP.",
+      "testEvidence": [
+        "fii-modal-patrimonial-info-v211",
+        "modal-data-truth-audit-v326"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 16,
+      "uiBlock": "Média do tipo e segmento",
+      "contractSection": "patrimonialInfo.segmentAverage",
+      "source": "Investidor10",
+      "nature": "Direto",
+      "arrivalRule": "Linhas reais e sem herdar tipo/segmento do ativo principal para pares.",
+      "testEvidence": [
+        "fii-modal-patrimonial-info-v211",
+        "modal-data-truth-audit-v326"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    },
+    {
+      "family": "FII",
+      "order": 17,
+      "uiBlock": "Notícias sobre o ativo",
+      "contractSection": "/api/v1/news strict asset",
+      "source": "Feeds reais filtrados por ticker/nome",
+      "nature": "Direto",
+      "arrivalRule": "assetOnly=true e strictAsset=true; sem fallback geral/sintético.",
+      "testEvidence": [
+        "news-asset-only-v324",
+        "news-real-feed-no-synthetic-v307"
+      ],
+      "status": "VERIFIED_BY_CONTRACT_FIXTURES_AND_FAIL_CLOSED_SMOKE",
+      "liveSourceTraversalInContainer": "BLOCKED_BY_EXTERNAL_DNS"
+    }
+  ],
+  "limitations": [
+    "A auditoria prova o caminho fonte-parser-contrato-cache-recovery-renderização por fixtures e smoke fail-closed; não prova que terceiros nunca publiquem dados atrasados ou incorretos.",
+    "O container não resolveu DNS das fontes externas, impedindo um percurso ao vivo completo das 40 seções.",
+    "O binário Android não foi compilado porque Android SDK e distribuição Gradle não estavam disponíveis."
+  ]
+}

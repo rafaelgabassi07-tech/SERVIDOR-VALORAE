@@ -4,10 +4,10 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(pkg.valorae.publicVersion, '21.12.358');
-assert.equal(pkg.valorae.releasePatch, '21.12.358-modal-data-truth-audit-v326');
-assert.equal(metadata.apkVersion, '2026.07.13.02');
-assert.match(metadata.contractVersion, /APK v506 \/ Proxy 21\.12\.358/);
+assert.ok(['21.12.358', '21.12.359'].includes(pkg.valorae.publicVersion));
+assert.ok(['21.12.358-modal-data-truth-audit-v326', '21.12.359-modal-source-arrival-integrity-v327'].includes(pkg.valorae.releasePatch));
+assert.ok(['2026.07.13.02', '2026.07.13.03'].includes(metadata.apkVersion));
+assert.match(metadata.contractVersion, /APK v50[67] \/ Proxy 21\.12\.35[89]/);
 
 const models = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeFiiModalModels.kt');
 const parser = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalFundamentalParsers.kt');
@@ -27,8 +27,8 @@ if ([models, parser, fiiParser, checklistUi, vacancyUi, build].every(Boolean)) {
   assert.match(checklistUi, /Calculado pelo VALORAE com dados da fonte/);
   assert.match(fiiParser, /directOccupancy == null/);
   assert.match(vacancyUi, /Ocupação calculada/);
-  assert.match(build, /versionCode = 26071302/);
-  assert.match(build, /versionName = "2026\.07\.13\.02"/);
+  assert.match(build, /versionCode = 2607130[23]/);
+  assert.match(build, /versionName = "2026\.07\.13\.0[23]"/);
 }
 
 const stock = fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8');

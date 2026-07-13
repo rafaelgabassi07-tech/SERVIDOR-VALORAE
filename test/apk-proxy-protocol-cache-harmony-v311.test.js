@@ -13,13 +13,13 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.358');
-assert.equal(packageJson.valorae.releasePatch, '21.12.358-modal-data-truth-audit-v326');
-assert.equal(metadata.apkVersion, '2026.07.13.02');
-assert.ok(metadata.contractVersion.includes('APK v506 / Proxy 21.12.358'));
+assert.equal(packageJson.valorae.publicVersion, '21.12.359');
+assert.equal(packageJson.valorae.releasePatch, '21.12.359-modal-source-arrival-integrity-v327');
+assert.equal(metadata.apkVersion, '2026.07.13.03');
+assert.ok(metadata.contractVersion.includes('APK v507 / Proxy 21.12.359'));
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
-assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '3');
+assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');
 assert.deepEqual(routerTest.routeMethods('/sync'), ['GET', 'POST', 'DELETE']);
 assert.equal(routerTest.routeMethod('/sync'), 'POST', 'POST permanece método primário para writes');
 assert.equal(routerTest.safeRequestId(' req\nunsafe / id '), 'req-unsafe-id');
@@ -67,14 +67,14 @@ const fiiWithInformation = {
   quoteSummary: { price: 100, priceDisplay: 'R$ 100,00' },
   chart: { points: [{ close: 99 }, { close: 100 }] },
   metrics: [{ id: 'dy', value: '10%' }],
-  comparison: { items: [{ label: 'IFIX', value: '5%' }], series: [], seriesByPeriod: {} },
+  comparison: { items: [{ label: 'IFIX', value: '5%' }], series: [{ code: 'INFO11', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IFIX', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 0.8 }] }], seriesByPeriod: {} },
   peerComparison: { rows: [{ ticker: 'INFO11', patrimonialValue: 100000000, patrimonialValueDisplay: 'R$ 100 mi' }, { ticker: 'PEER11', patrimonialValue: 90000000, patrimonialValueDisplay: 'R$ 90 mi' }] },
   checklist: { items: [{ id: 'quality', passed: true, status: 'PASSED' }] },
   distributions12m: { items: [{ month: '2026-06', value: 1 }], months: [] },
   dividendCharts: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
   aboutFund: { summary: 'Fundo de teste', sections: [], highlights: [] },
   patrimonialInfo: { metrics: [{ label: 'P/VP', value: '0,98' }], bars: [] },
-  historicalIndicators: { rows: [{ label: 'P/VP' }], tablesByPeriod: {} },
+  historicalIndicators: { rows: [{ label: 'P/VP', values: { Atual: '0,98', 2025: '0,95' } }], tablesByPeriod: {} },
   infoSections: [{ id: 'manager', items: [{ label: 'Gestor', value: 'Teste' }] }],
   announcements: { items: [{ id: 'notice', title: 'Comunicado do fundo' }] },
 };

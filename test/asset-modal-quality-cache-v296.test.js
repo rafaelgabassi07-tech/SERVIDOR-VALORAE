@@ -34,7 +34,7 @@ const okPayload = {
   chart: { points: [{ close: 30.1 }, { close: 30.5 }] },
   metrics: [{ id: 'price', value: 'R$ 30,50' }],
   fundamentalIndicators: { items: [{ id: 'pl', value: '5,2' }] },
-  historicalIndicators: { rows: [{ label: 'P/L' }], tablesByPeriod: {} },
+  historicalIndicators: { rows: [{ label: 'P/L', values: { Atual: '8,0', 2025: '9,0' } }], tablesByPeriod: {} },
   revenueProfitChart: { points: [{ period: '2025', primaryValue: 100 }] },
   profitQuoteChart: { points: [{ period: '2025', primaryValue: 100, secondaryValue: 30.5 }] },
   equityEvolutionChart: { points: [{ period: '2025', primaryValue: 100 }] },
