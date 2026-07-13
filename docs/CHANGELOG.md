@@ -1,3 +1,10 @@
+## 21.12.361 — v329 — 2026-07-13
+
+- Auditoria integral dos contratos APK/Proxy.
+- Guards globais e administração protegida.
+- Regex, receitas e prioridade de logos corrigidas.
+- Pareamento APK v509 / Checkpoint 99.
+
 ## 21.12.359 — v327 — 2026-07-13
 
 - Seções só ficam READY quando contêm conteúdo utilizável.

@@ -32,7 +32,17 @@ import compatScraperHandler from './compat/scraper4.js';
 import syncHandler from './sync.js';
 import serverMetricsHandler from './server/metrics.js';
 import { TtlLruCache } from '../lib/cache/memory.js';
-import { getRequestId } from '../lib/security/guard.js';
+import {
+  applyRateLimitHeaders,
+  applySecurityHeaders,
+  assertBodySize,
+  assertUrlAndQueryBudget,
+  checkRateLimit,
+  getRequestId,
+  requireAdmin,
+  sanitizeError,
+} from '../lib/security/guard.js';
+import { resolveClientAuth, shouldRequireClientAuth } from '../lib/security/client-auth.js';
 import { attachProxyMetricsInterceptor } from '../lib/observability/server-metrics.js';
 import { coalesce } from '../lib/resilience/inflight.js';
 import { withRouteDeadline } from '../lib/http/route.js';
@@ -95,18 +105,16 @@ function stripApiPrefix(pathname) {
   return path;
 }
 
-function applyRuntimeCors(req, res) {
-  const origin = req?.headers?.origin || '*';
-  res.setHeader('Access-Control-Allow-Origin', origin === '*' ? '*' : String(origin));
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', corsMethodsCsv());
-  res.setHeader('Access-Control-Allow-Headers', requestHeadersCsv());
-  res.setHeader('Access-Control-Expose-Headers', exposeHeadersCsv());
-  res.setHeader('Access-Control-Max-Age', '600');
+function applyRuntimeCors(req, res, path = '/') {
+  const methods = routeMethods(path);
+  const effectiveMethods = methods.includes('GET') ? [...new Set([...methods, 'HEAD'])] : methods;
+  return applySecurityHeaders(req, res, {
+    methods: [...new Set([...effectiveMethods, 'OPTIONS'])].join(', '),
+    cacheControl: false,
+  });
 }
 
 function sendCorsPreflight(req, res) {
-  applyRuntimeCors(req, res);
   res.statusCode = 200;
   res.setHeader('Cache-Control', 'private, max-age=600');
   return res.end('');
@@ -153,6 +161,8 @@ export function shouldReplaceLocalCache(data) {
 function routeMethods(path = '') {
   const normalized = String(path || '').replace(/^\/api(?:\/v[12])?/, '') || '/';
   if (normalized === '/sync') return ['GET', 'POST', 'DELETE'];
+  if (normalized === '/portfolio/history') return ['GET', 'POST'];
+  if (normalized === '/admin/cache' || normalized === '/cache/clear') return ['POST', 'DELETE'];
   const postRoutes = new Set([
     '/mobile/bootstrap', '/app/bootstrap',
     '/mobile/practical-sync', '/app/practical-sync',
@@ -406,7 +416,13 @@ async function bodyOrQuery(req, parsed) {
   const query = queryObject(parsed.searchParams);
   const method = String(req.method || 'GET').toUpperCase();
   if (method === 'GET') return { ...query };
-  const body = await readJsonBody(req).catch(err => { throw err; });
+  const maxBodyBytes = clampInt(
+    process.env.MAX_LOCAL_BODY_BYTES || process.env.VALORAE_MAX_BODY_BYTES,
+    512 * 1024,
+    1024,
+    10 * 1024 * 1024
+  );
+  const body = await readJsonBody(req, maxBodyBytes);
   return typeof body === 'object' && !Array.isArray(body) ? { ...query, ...body } : { ...query, body };
 }
 
@@ -546,9 +562,9 @@ async function assetLogoHandler(req, res, payload = {}) {
   if (!ticker) return sendJson(req, res, { ok: false, status: 'ERROR', error: 'Informe ticker ou symbol.', endpoint: 'asset/logo' }, { status: 400, cacheControl: 'no-store' });
   const timeoutMs = clampInt(payload.timeoutMs || 3500, 3500, 1000, 9000);
   const useCache = payload.cache !== 'false';
-  const logo = await fetchYahooLogo(ticker, { timeoutMs, cache: useCache });
   const officialCandidates = officialStatusInvestLogoCandidates(ticker);
   if (payload.format === 'json' || payload.json === '1') {
+    const logo = await fetchYahooLogo(ticker, { timeoutMs, cache: useCache });
     const fallbackUrl = officialCandidates[0] || '';
     return sendJson(req, res, {
       ok: Boolean(logo?.logoUrl || fallbackUrl),
@@ -563,13 +579,7 @@ async function assetLogoHandler(req, res, payload = {}) {
       error: logo?.logoUrl || fallbackUrl ? '' : (logo?.error || 'Logo oficial indisponível')
     }, { cacheControl: logo?.logoUrl || fallbackUrl ? 'public, max-age=86400, stale-while-revalidate=604800' : 'private, max-age=300' });
   }
-  if (logo?.logoUrl) {
-    res.statusCode = 302;
-    res.setHeader('Location', logo.logoUrl);
-    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
-    res.setHeader('X-Valorae-Logo-Source', 'Yahoo Finance Quote API');
-    return res.end('');
-  }
+  // O APK consome bytes. A fonte oficial vem primeiro; o Yahoo é contingência.
   const officialImage = await fetchOfficialStatusInvestLogo(ticker, { timeoutMs: Math.min(timeoutMs, 2600), cache: useCache });
   if (officialImage?.bytes?.length) {
     res.statusCode = 200;
@@ -579,6 +589,14 @@ async function assetLogoHandler(req, res, payload = {}) {
     res.setHeader('X-Valorae-Logo-Source', officialImage.source || 'Status Invest company ticker image');
     res.setHeader('X-Valorae-Logo-Cache', officialImage.cache || 'MISS');
     return res.end(officialImage.bytes);
+  }
+  const logo = await fetchYahooLogo(ticker, { timeoutMs, cache: useCache });
+  if (logo?.logoUrl) {
+    res.statusCode = 302;
+    res.setHeader('Location', logo.logoUrl);
+    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    res.setHeader('X-Valorae-Logo-Source', 'Yahoo Finance Quote API');
+    return res.end('');
   }
   res.statusCode = 404;
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -725,15 +743,73 @@ export async function dispatchRoute(req, res) {
   // sejam observados pelo mesmo interceptador central, sem depender de cada rota.
   attachProxyMetricsInterceptor(req, res);
   let path = '/';
+  let requestId = '';
   try {
     const parsed = new URL(req.url || '/api', 'https://valorae.local');
     path = stripApi(parsed.pathname);
-    applyRuntimeCors(req, res);
+    const securityRequestId = applyRuntimeCors(req, res, path);
     if (String(req.method || 'GET').toUpperCase() === 'OPTIONS') return sendCorsPreflight(req, res);
-    const payload = await bodyOrQuery(req, parsed);
+    assertUrlAndQueryBudget(req);
     const incomingRequestId = String(req?.headers?.['x-request-id'] || '').trim();
+    requestId = safeRequestId(incomingRequestId || securityRequestId || getRequestId(req)) || safeRequestId(getRequestId(req));
+    res.setHeader('X-Request-Id', requestId);
+    req.query = { ...(req.query || {}), ...queryObject(parsed.searchParams) };
+
+    const clientAuth = resolveClientAuth(req);
+    req.valoraeClientAuth = clientAuth;
+    res.setHeader('X-Valorae-Auth-Mode', clientAuth.mode || 'open');
+    if (clientAuth.appId) res.setHeader('X-Valorae-App-Id', String(clientAuth.appId).slice(0, 80));
+    if (shouldRequireClientAuth() && !clientAuth.ok) {
+      return sendJson(req, res, {
+        version: RELEASE.version,
+        status: 'UNAUTHORIZED',
+        requestId,
+        code: 'VALORAE_CLIENT_AUTH_REQUIRED',
+        error: 'Autenticação do app/cliente é necessária para este deploy.',
+        auth: { mode: clientAuth.mode, configured: clientAuth.configured, appId: clientAuth.appId, reason: clientAuth.reason, required: true }
+      }, { status: 401, cacheControl: 'no-store' });
+    }
+
+    const method = String(req.method || 'GET').toUpperCase();
+    const allowedMethods = routeMethods(path);
+    const effectiveMethods = allowedMethods.includes('GET') ? [...new Set([...allowedMethods, 'HEAD'])] : allowedMethods;
+    if (!effectiveMethods.includes(method)) {
+      return sendJson(req, res, {
+        version: RELEASE.version,
+        status: 'ERROR',
+        requestId,
+        code: 'METHOD_NOT_ALLOWED',
+        error: `Método não permitido. Use ${effectiveMethods.join(' ou ')}.`,
+      }, { status: 405, cacheControl: 'no-store' });
+    }
+
+    const rate = checkRateLimit(req, {
+      route: `router:${path}`,
+      max: Number(path.startsWith('/admin/') || path === '/cache/clear'
+        ? (process.env.VALORAE_ADMIN_RATE_LIMIT_MAX || 20)
+        : (process.env.VALORAE_RATE_LIMIT_MAX || 90)),
+      windowMs: Number(process.env.VALORAE_RATE_LIMIT_WINDOW_MS || 60_000),
+    });
+    applyRateLimitHeaders(res, rate);
+    if (rate.limited) {
+      return sendJson(req, res, { version: RELEASE.version, status: 'RATE_LIMITED', requestId, rate }, { status: 429, cacheControl: 'no-store' });
+    }
+    req.valoraeGlobalRateApplied = true;
+
+    const payload = await bodyOrQuery(req, parsed);
+    const maxBodyBytes = clampInt(
+      process.env.MAX_LOCAL_BODY_BYTES || process.env.VALORAE_MAX_BODY_BYTES,
+      512 * 1024,
+      1024,
+      10 * 1024 * 1024
+    );
+    if (!['GET', 'HEAD'].includes(method)) {
+      const originalBody = req.body;
+      req.body = originalBody === undefined ? payload : originalBody;
+      assertBodySize(req, maxBodyBytes);
+    }
     const payloadRequestId = String(payload?.requestId || '').trim();
-    const requestId = safeRequestId(incomingRequestId || payloadRequestId || getRequestId(req)) || safeRequestId(getRequestId(req));
+    requestId = safeRequestId(incomingRequestId || payloadRequestId || requestId) || requestId;
     payload.requestId = requestId;
     res.setHeader('X-Request-Id', requestId);
     req.query = { ...(req.query || {}), ...payload };
@@ -756,7 +832,11 @@ export async function dispatchRoute(req, res) {
     if (path === '/sync') return syncHandler(req, res);
     if (path === '/admin/status') return sendJson(req, res, { status: 'OK', admin: false, version: RELEASE.version, cache: cacheStats() });
     if (path === '/compat/scraper4' || path === '/scraper4' || path === '/scraper') return compatScraperHandler(req, res);
-    if (path === '/cache/clear' || path === '/admin/cache') { clearCache(); return sendJson(req, res, { status: 'OK', cleared: true }); }
+    if (path === '/cache/clear' || path === '/admin/cache') {
+      requireAdmin(req);
+      clearCache();
+      return sendJson(req, res, { status: 'OK', cleared: true, requestId }, { cacheControl: 'no-store' });
+    }
 
     if (path === '/mobile/bootstrap' || path === '/app/bootstrap') return sendJson(req, res, await mobileBootstrap(payload), { cacheControl: 'private, max-age=45' });
     if (path === '/mobile/practical-sync' || path === '/app/practical-sync') return sendJson(req, res, await buildMobilePortfolioSync({ ...payload, practicalMode: true, includeDividendsInBundle: payload.includeDividendsInBundle ?? false, includeRankings: payload.includeRankings ?? false }), { cacheControl: 'private, max-age=20' });
@@ -890,8 +970,8 @@ export async function dispatchRoute(req, res) {
 
     return sendJson(req, res, { status: 'NOT_FOUND', error: 'Rota não encontrada no contrato enxuto VALORAE.', path, available: routeManifest().routes }, { status: 404, cacheControl: 'no-store' });
   } catch (error) {
-    const status = Number(error?.status || 500);
-    return sendJson(req, res, { status: 'ERROR', code: error?.code || 'ROUTE_ERROR', error: status >= 500 ? 'Erro interno no Proxy VALORAE.' : error?.message, path }, { status, cacheControl: 'no-store' });
+    const safe = sanitizeError(error);
+    return sendJson(req, res, { status: 'ERROR', requestId, code: safe.code, error: safe.message, path }, { status: safe.status, cacheControl: 'no-store' });
   }
 }
 
@@ -900,7 +980,7 @@ export function routeManifest() {
     physicalFunctions: ['api/router.js'],
     legacyAliases: { '/ativo': '/asset', '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
     routes: [
-    '/health','/ready','/manifest','/env','/schema','/source/status','/release/readiness','/personal/readiness','/cache/stats','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/asset/logo','/asset/yahoo-logo','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/modal','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
+    '/health','/ready','/manifest','/env','/schema','/source/status','/release/readiness','/personal/readiness','/cache/stats','/cache/clear','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/asset/logo','/asset/yahoo-logo','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/modal','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
   ].sort() };
 }
 

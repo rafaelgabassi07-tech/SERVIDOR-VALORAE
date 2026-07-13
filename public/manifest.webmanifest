@@ -6,8 +6,8 @@
   "background_color": "#000000",
   "theme_color": "#000000",
   "id": "/server.html",
-  "description": "Monitor do VALORAE Proxy com família segura, comunicados recuperáveis e comparação temporal pareada ao APK v499.",
+  "description": "Monitor do VALORAE Proxy v329, auditado e pareado ao APK v509.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.359"
+  "version": "21.12.361"
 }

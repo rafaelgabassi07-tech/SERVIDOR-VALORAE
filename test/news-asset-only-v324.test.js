@@ -85,7 +85,8 @@ try {
   const strictSource = await getNews({ symbols: ['SNAG11'], query: 'Suno Agro', assetOnly: true, refresh: true, timeoutMs: 1000 });
   assert.equal(strictSource.status, 'EMPTY');
   assert.equal(strictSource.assetOnly, true);
-  assert.equal(sourceRequests.length, 1, 'assetOnly não pode consultar feed amplo como fallback');
+  assert.equal(sourceRequests.length, 2, 'assetOnly deve tentar somente as duas janelas específicas, sem consultar feed amplo');
+  assert.ok(sourceRequests.every(url => !decodeURIComponent(url).includes('mercado financeiro OR B3')), 'retry estrito não pode virar busca geral');
 
   sourceRequests = [];
   const legacySource = await getNews({ symbols: ['SNAG11'], query: 'Suno Agro', assetOnly: false, refresh: true, timeoutMs: 1000 });

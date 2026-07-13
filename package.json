@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v327 valida a chegada efetiva de cada seção dos modais e publica estados explícitos para vazio confirmado, não aplicável, erro e adiamento.",
+  "description": "Proxy v329 audita segurança, contratos, rede, metadados e integração com o APK v509.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,18 +20,24 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.359-modal-source-arrival-integrity-v327",
+    "releasePatch": "21.12.361-full-stack-alignment-audit-v329",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.359",
-    "checkpoint": "modal-source-arrival-integrity-v327",
-    "releaseLabel": "modal-source-arrival-integrity-v327"
+    "publicVersion": "21.12.361",
+    "checkpoint": "full-stack-alignment-audit-v329",
+    "releaseLabel": "full-stack-alignment-audit-v329"
   },
-  "releasePatch": "21.12.359-modal-source-arrival-integrity-v327",
+  "releasePatch": "21.12.361-full-stack-alignment-audit-v329",
   "config": {
-    "releasePatch": "21.12.359-modal-source-arrival-integrity-v327",
-    "publicVersion": "21.12.359",
-    "checkpoint": "modal-source-arrival-integrity-v327",
-    "releaseLabel": "modal-source-arrival-integrity-v327"
+    "releasePatch": "21.12.361-full-stack-alignment-audit-v329",
+    "publicVersion": "21.12.361",
+    "checkpoint": "full-stack-alignment-audit-v329",
+    "releaseLabel": "full-stack-alignment-audit-v329"
+  },
+  "releaseMetadata": {
+    "releasePatch": "21.12.361-full-stack-alignment-audit-v329",
+    "publicVersion": "21.12.361",
+    "checkpoint": "full-stack-alignment-audit-v329",
+    "releaseLabel": "full-stack-alignment-audit-v329"
   }
 }

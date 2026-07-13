@@ -1,5 +1,25 @@
 # VALORAE Proxy
 
+## Release atual — 21.12.361 / v329 (2026-07-13)
+
+Auditoria integral do APK e do Proxy, com segurança uniforme, contratos sincronizados e ciclo de rede fortalecido.
+
+- 32 endpoints literais conferidos.
+- CORS, autenticação, rate limit, métodos, URL e payload protegidos.
+- Cache administrativo exige token.
+- Pareamento: APK v509 / protocolo 2026.07.10.10 / delivery v4.
+
+## Release atual — 21.12.360 / v328 (2026-07-13)
+
+Notícias específicas dos ativos, logotipos compatíveis com o APK e Dividend Yield histórico de FII baseado em séries reais.
+
+### Validação desta entrega
+
+- Busca por ticker e nome com retry estrito, sem fallback para feed geral.
+- Endpoint de logo entrega bytes pelo Proxy antes de recorrer a redirecionamento.
+- Dividend Yield usa dividendo real e fechamento histórico do mesmo período.
+- Pareamento: APK v508 / protocolo móvel 2026.07.10.10.
+
 ## Release atual — 21.12.359 / v327 (2026-07-13)
 
 Integridade da chegada efetiva das fontes nos modais de Ação e FII.

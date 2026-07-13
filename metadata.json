@@ -1,83 +1,72 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.359-modal-source-arrival-integrity-v327",
-  "patch": "21.12.359-modal-source-arrival-integrity-v327",
-  "releasePatch": "21.12.359-modal-source-arrival-integrity-v327",
-  "latestInternalPatch": "21.12.359-modal-source-arrival-integrity-v327",
-  "description": "Proxy v327 valida conteúdo utilizável por seção e elimina falsos positivos de chegada causados por containers vazios.",
-  "contract": "APK v507 / Proxy 21.12.359 mobile protocol 2026.07.10.10 + asset modal delivery v4; diagnóstico de chegada por seção, vazio confirmado, seção não aplicável e recuperação explícita de falhas.",
+  "release": "21.12.361-full-stack-alignment-audit-v329",
+  "patch": "21.12.361-full-stack-alignment-audit-v329",
+  "releasePatch": "21.12.361-full-stack-alignment-audit-v329",
+  "latestInternalPatch": "21.12.361-full-stack-alignment-audit-v329",
+  "description": "Proxy v329 audita segurança, contratos, rede, metadados e integração com o APK v509.",
+  "contract": "APK v509 / Proxy 21.12.361 + mobile protocol 2026.07.10.10 + asset modal delivery v4; roteador protegido, ciclo de rede cancelável, metadados e contratos auditados.",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "diagnóstico de chegada por seção",
-    "containers vazios não contam como dados",
-    "vazio confirmado e não aplicável estabilizam",
-    "falhas continuam recuperáveis",
-    "séries comparativas exigem dois pontos reais"
+    "segurança uniforme",
+    "contratos alinhados",
+    "logo oficial prioritário",
+    "auditoria automática"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com gateway único, monitor central e entrega progressiva dos modais de AÇÃO e FII.",
   "releaseDate": "2026-07-13",
-  "checkpoint": "modal-source-arrival-integrity-v327",
-  "title": "Proxy v327 — Integridade da chegada das fontes",
-  "summary": "Pareia o APK v507 e só declara uma seção recebida quando há conteúdo renderizável ou ausência/não aplicabilidade confirmada.",
-  "publicVersion": "21.12.359",
-  "label": "modal-source-arrival-integrity-v327",
+  "checkpoint": "full-stack-alignment-audit-v329",
+  "title": "Proxy v329 — Auditoria e alinhamento integral APK/Proxy",
+  "summary": "Endurece o roteador, corrige parsing e confirma o contrato integral com o APK v509.",
+  "publicVersion": "21.12.361",
+  "label": "full-stack-alignment-audit-v329",
   "updatedAt": "2026-07-13",
   "date": "2026-07-13",
   "notes": [
-    "Pareado ao APK v507. Protocolo móvel 2026.07.10.10 e asset modal delivery v4 com estados por seção."
+    "Pareado ao APK v509.",
+    "Rotas mutáveis exigem token."
   ],
   "releaseNotes": [
-    "Histórico de indicadores só é considerado recebido quando contém linhas e valores efetivamente renderizáveis; mapas ou tabelas vazias não finalizam o modal.",
-    "Comparação com índices só é considerada recebida quando existe série temporal real com pelo menos dois pontos; cards ou objetos sem histórico não contam como gráfico disponível.",
-    "DRE, resultados e balanço patrimonial exigem linhas com valores úteis; containers estruturais vazios permanecem pendentes.",
-    "Delivery schema v4 adiciona settledSections, emptyConfirmedSections, notApplicableSections, failedSections e sectionStates.",
-    "Comunicados com ausência confirmada podem estabilizar como EMPTY_CONFIRMED, sem repetir chamadas indefinidamente.",
-    "Portfólio imobiliário de FII de papel, recebíveis ou FOF pode estabilizar como NOT_APPLICABLE sem mostrar conteúdo incorreto.",
-    "Falhas reais permanecem recuperáveis; seções vazias confirmadas e não aplicáveis deixam de consumir novas tentativas.",
-    "Proxy publica diagnostics.sourceArrival e capabilities de diagnóstico de chegada; APK interpreta o mesmo estado para qualidade, cache e recovery.",
-    "Completude e finalização passam a usar a mesma semântica de settlement, evitando resposta declarada completa sem conteúdo utilizável."
+    "Guards globais no roteador.",
+    "Regex e receitas corrigidas.",
+    "Logo oficial prioritário."
   ],
-  "apkPair": "apk_valorae_checkpoint97_modal_source_arrival_integrity_v507_AI_STUDIO_ROOT_OK_2026_07_13.zip",
-  "apkVersion": "2026.07.13.03",
-  "fileSize": 1403028,
+  "apkPair": "apk_valorae_checkpoint99_full_stack_alignment_audit_v509_AI_STUDIO_ROOT_OK_2026_07_13.zip",
+  "apkVersion": "2026.07.13.05",
+  "fileSize": 0,
   "highlights": [
-    "Chegada real por seção.",
-    "Containers vazios não finalizam o modal.",
-    "Vazio confirmado e N/A não geram retry infinito.",
-    "Falha real continua recuperável."
+    "Notícias por ativo restauradas.",
+    "Logos compatíveis com Coil/Android.",
+    "Dividend Yield histórico operacional.",
+    "Sem fallback sintético."
   ],
   "validation": [
-    "Teste v327 cobre todos os estados de chegada e falsos positivos de containers vazios.",
-    "Suíte completa, build, sintaxe, auditoria e cross-stack obrigatórios."
+    "Suíte completa.",
+    "Testes HTTP de segurança.",
+    "Cross-stack APK v509."
   ],
-  "proxyPair": "valorae_proxy_checkpoint359_modal_source_arrival_integrity_v327_AI_STUDIO_ROOT_OK_2026_07_13.zip",
+  "proxyPair": "valorae_proxy_checkpoint361_full_stack_alignment_audit_v329_AI_STUDIO_ROOT_OK_2026_07_13.zip",
   "validations": [
-    "npm test, build, check:syntax e audit:version.",
-    "Teste cross-stack contra APK v507.",
-    "Validação do ZIP final após extração."
+    "Suíte completa.",
+    "Testes HTTP de segurança.",
+    "Cross-stack APK v509."
   ],
   "changes": [
-    "Histórico de indicadores só é considerado recebido quando contém linhas e valores efetivamente renderizáveis; mapas ou tabelas vazias não finalizam o modal.",
-    "Comparação com índices só é considerada recebida quando existe série temporal real com pelo menos dois pontos; cards ou objetos sem histórico não contam como gráfico disponível.",
-    "DRE, resultados e balanço patrimonial exigem linhas com valores úteis; containers estruturais vazios permanecem pendentes.",
-    "Delivery schema v4 adiciona settledSections, emptyConfirmedSections, notApplicableSections, failedSections e sectionStates.",
-    "Comunicados com ausência confirmada podem estabilizar como EMPTY_CONFIRMED, sem repetir chamadas indefinidamente.",
-    "Portfólio imobiliário de FII de papel, recebíveis ou FOF pode estabilizar como NOT_APPLICABLE sem mostrar conteúdo incorreto.",
-    "Falhas reais permanecem recuperáveis; seções vazias confirmadas e não aplicáveis deixam de consumir novas tentativas.",
-    "Proxy publica diagnostics.sourceArrival e capabilities de diagnóstico de chegada; APK interpreta o mesmo estado para qualidade, cache e recovery.",
-    "Completude e finalização passam a usar a mesma semântica de settlement, evitando resposta declarada completa sem conteúdo utilizável."
+    "Roteador protegido.",
+    "Headers e endpoints alinhados.",
+    "Metadados sincronizados."
   ],
-  "contractVersion": "APK v507 / Proxy 21.12.359 mobile protocol 2026.07.10.10 + asset modal delivery v4; diagnóstico de chegada por seção, vazio confirmado, seção não aplicável e recuperação explícita de falhas.",
-  "latestVersion": "21.12.359",
-  "latest_version": "21.12.359",
-  "versionName": "21.12.359",
+  "contractVersion": "APK v509 / Proxy 21.12.361 + mobile protocol 2026.07.10.10 + asset modal delivery v4; roteador protegido, ciclo de rede cancelável, metadados e contratos auditados.",
+  "latestVersion": "21.12.361",
+  "latest_version": "21.12.361",
+  "versionName": "21.12.361",
   "packageValidation": [
     "project files at ZIP root",
     "npm test",
     "npm run build",
     "npm run audit:version",
-    "cross-stack APK v507"
+    "cross-stack APK v509"
   ]
 }
