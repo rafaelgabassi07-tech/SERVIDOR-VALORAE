@@ -44,11 +44,11 @@ try {
 
   for (const ticker of ['SMLL', 'IFIX', 'IDIV']) {
     const benchmark = contract.benchmarks.find(item => item.ticker === ticker);
-    assert.equal(benchmark?.status, 'OK', `${ticker} should use direct Yahoo index source when available`);
+    assert.equal(benchmark?.status, 'SNAPSHOT_ONLY', `${ticker} deve aguardar série histórica real quando o Yahoo entrega apenas meta`);
     assert.equal(benchmark?.simulated, false, `${ticker} must not be simulated`);
     assert.equal(benchmark?.proxyTickerUsed, false, `${ticker} must not use proxy ticker`);
     assert.ok(String(benchmark?.source || '').includes('Yahoo Finance Chart API'), `${ticker} should show Yahoo direct source`);
-    assert.ok((benchmark?.points || []).length >= 2, `${ticker} should have comparison points`);
+    assert.equal((benchmark?.points || []).length, 0, `${ticker} não pode fabricar curva com current/previousClose`);
   }
   assert.equal(requests.some(url => url.includes('maisretorno.com/indice/')), false, 'IFIX/SMLL/IDIV policy must not call Mais Retorno while Yahoo direct is available');
   console.log('Portfolio returns direct-index policy regression test OK.');

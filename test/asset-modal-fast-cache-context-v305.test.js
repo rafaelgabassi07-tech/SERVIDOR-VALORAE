@@ -136,7 +136,7 @@ if (apkCatalog && apkUniversal && apkHttp && apkQuality) {
   assert.ok(apkHttp.includes('call.timeout().timeout(requestTimeoutMs, TimeUnit.MILLISECONDS)'), 'APK deve aplicar timeout na Call compartilhando o OkHttpClient');
   assert.ok(!apkHttp.includes('.newBuilder()\n            .callTimeout(requestTimeoutMs'), 'APK não deve construir um OkHttpClient por GET do modal');
   assert.ok(apkQuality.includes('historicalIndicators.tablesByPeriod.values.any { it.rows.isNotEmpty() }'), 'quality gate FII deve exigir linhas reais no histórico tabular igual ao Proxy');
-  assert.ok(apkQuality.includes('shareholdingPosition.rows.isNotEmpty()'), 'quality gate de ação deve reconhecer seções profundas entregues pelo Proxy');
+  assert.equal(apkQuality.includes('shareholdingPosition.rows.isNotEmpty()'), false, 'posição acionária desativada não pode influenciar o quality gate do APK');
   assert.ok(apkQuality.includes('"0,00%"') && apkQuality.includes('value.isFinite() && value != 0.0'), 'APK deve rejeitar contrato vazio disfarçado por zeros sintéticos');
 }
 

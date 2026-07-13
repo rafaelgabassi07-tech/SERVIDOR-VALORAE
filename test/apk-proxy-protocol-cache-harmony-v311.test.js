@@ -13,10 +13,10 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.354');
-assert.equal(packageJson.valorae.releasePatch, '21.12.354-asset-modal-late-arrival-settlement-v322');
-assert.equal(metadata.apkVersion, '2026.07.12.03');
-assert.ok(metadata.contractVersion.includes('APK v501 / Proxy 21.12.354'));
+assert.equal(packageJson.valorae.publicVersion, '21.12.357');
+assert.equal(packageJson.valorae.releasePatch, '21.12.357-real-indices-peer-patrimony-history-v325');
+assert.equal(metadata.apkVersion, '2026.07.13.01');
+assert.ok(metadata.contractVersion.includes('APK v505 / Proxy 21.12.357'));
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '3');
@@ -68,7 +68,7 @@ const fiiWithInformation = {
   chart: { points: [{ close: 99 }, { close: 100 }] },
   metrics: [{ id: 'dy', value: '10%' }],
   comparison: { items: [{ label: 'IFIX', value: '5%' }], series: [], seriesByPeriod: {} },
-  peerComparison: { rows: [{ ticker: 'PEER11' }] },
+  peerComparison: { rows: [{ ticker: 'INFO11', patrimonialValue: 100000000, patrimonialValueDisplay: 'R$ 100 mi' }, { ticker: 'PEER11', patrimonialValue: 90000000, patrimonialValueDisplay: 'R$ 90 mi' }] },
   checklist: { items: [{ id: 'quality', passed: true, status: 'PASSED' }] },
   distributions12m: { items: [{ month: '2026-06', value: 1 }], months: [] },
   dividendCharts: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },

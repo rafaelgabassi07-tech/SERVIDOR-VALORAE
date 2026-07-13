@@ -217,7 +217,7 @@ if (apkUniversal && apkLoader && apkUi) {
   assert.ok(apkUniversal.includes('contract.hasUsefulFiiModalData()'));
   assert.ok(apkLoader.includes('recoveryContext = best.recoveryContextOrNull()'));
   assert.ok(apkUi.includes('AssetModalRetryDetailsPill'));
-  assert.ok(apkUi.includes('StockShareholdingPositionSection(position = contract.shareholdingPosition)'));
+  assert.equal(apkUi.includes('StockShareholdingPositionSection(position = contract.shareholdingPosition)'), false);
 }
 
 await sleep(5);

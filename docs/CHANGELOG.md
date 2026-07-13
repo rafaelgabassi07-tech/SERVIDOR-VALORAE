@@ -1,3 +1,26 @@
+## 21.12.357 — v325 — 2026-07-13
+
+- Validação central de histórico real para Retorno e comparadores dos modais.
+- Remoção de snapshots fixos e curvas reconstruídas de índices.
+- Enriquecimento do valor patrimonial dos FIIs comparáveis por fonte individual.
+- Saneamento temporal e prioridade de fontes no histórico de indicadores das ações.
+- Pareamento atualizado para APK v505 / Checkpoint 95.
+
+## 21.12.356 — v324 — 2026-07-12
+
+- Adiciona modo estrito de notícias por ativo com `assetOnly`/`strictAsset`.
+- Bloqueia fallback amplo de mercado e filtra itens sem correspondência com ticker, nome ou aliases do ativo.
+- Separa o cache de notícias gerais e notícias por ativo.
+- Pareamento atualizado para APK v504 / Checkpoint 94.
+- Regressão cross-stack garante sequência determinística dos modais e seção final de notícias.
+
+## 21.12.355 — v323 — 2026-07-12
+
+- Posição acionária removida do pipeline operacional dos modais de Ação.
+- Chamadas dedicadas, recuperação, readiness, resposta e quality profile desativados.
+- Pareamento atualizado para APK v503 / Checkpoint 93.
+- Teste de regressão cross-stack garante os três ajustes solicitados nos modais.
+
 ## 21.12.354 — Asset modal late-arrival settlement v322 (2026-07-12)
 
 - Publica `settlementPending`, `settlementSections` e `settlementAttemptAfterMs` em entregas full críticas com blocos opcionais ausentes.

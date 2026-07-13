@@ -75,6 +75,7 @@ export default async function handler(req, res) {
       ...(typeof input.aliases === 'string' ? input.aliases.split(/[,;\s]+/) : []),
       ...requestedSymbols.filter(symbol => symbol !== ticker),
     ].map(s => String(s || '').trim()).filter(Boolean).slice(0, 48);
+    const assetOnly = boolParam(input.assetOnly || input.strictAsset || input.assetNewsOnly);
     const timeoutMs = input.timeoutMs ? clampNumber(input.timeoutMs, undefined, 350, 12000) : 3000;
     const newsTimeoutMs = input.newsTimeoutMs ? clampNumber(input.newsTimeoutMs, undefined, 350, 12000) : timeoutMs;
     const news = await ValoraeEngine.fetchNews(ticker, aliases, {
@@ -86,9 +87,11 @@ export default async function handler(req, res) {
       bypassCache: boolParam(input.refresh || input.nocache),
       lowLatencyBudget: timeoutMs !== undefined && timeoutMs <= 1000,
       searchQuery,
+      assetOnly,
+      strictAsset: assetOnly,
     });
     const normalizedNews = withBrowserOpenPolicy(news);
-    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, ...normalizedNews, ticker, searchQuery, userQuery: searchQuery, symbols: requestedSymbols }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'news', cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
+    return sendJson(req, res, { version: ValoraeEngine.version, requestId: route.requestId, ...normalizedNews, ticker, searchQuery, userQuery: searchQuery, symbols: requestedSymbols, assetOnly }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'news', cacheControl: 'private, max-age=30, stale-while-revalidate=120' });
   } catch (err) {
     return sendRouteError(req, res, err, { version: ValoraeEngine.version, requestId: route.requestId, profile: 'news' });
   }

@@ -14,10 +14,10 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.354');
-assert.equal(packageJson.valorae.releasePatch, '21.12.354-asset-modal-late-arrival-settlement-v322');
-assert.equal(metadata.apkVersion, '2026.07.12.03');
-assert.ok(metadata.contractVersion.includes('APK v501 / Proxy 21.12.354'));
+assert.equal(packageJson.valorae.publicVersion, '21.12.357');
+assert.equal(packageJson.valorae.releasePatch, '21.12.357-real-indices-peer-patrimony-history-v325');
+assert.equal(metadata.apkVersion, '2026.07.13.01');
+assert.ok(metadata.contractVersion.includes('APK v505 / Proxy 21.12.357'));
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '3');

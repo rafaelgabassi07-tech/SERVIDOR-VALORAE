@@ -1,81 +1,74 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.354-asset-modal-late-arrival-settlement-v322",
-  "patch": "21.12.354-asset-modal-late-arrival-settlement-v322",
-  "releasePatch": "21.12.354-asset-modal-late-arrival-settlement-v322",
-  "latestInternalPatch": "21.12.354-asset-modal-late-arrival-settlement-v322",
-  "description": "Proxy v322 mantém o modal utilizável após a entrega crítica e revalida seções opcionais lentas sem exigir reabertura.",
-  "contract": "APK v501 / Proxy 21.12.354 mobile protocol 2026.07.10.10 + asset modal delivery v3 com late-arrival settlement; recuperação mensurável e direcionada para seções lentas de Ação/FII.",
+  "release": "21.12.357-real-indices-peer-patrimony-history-v325",
+  "patch": "21.12.357-real-indices-peer-patrimony-history-v325",
+  "releasePatch": "21.12.357-real-indices-peer-patrimony-history-v325",
+  "latestInternalPatch": "21.12.357-real-indices-peer-patrimony-history-v325",
+  "description": "Proxy v325 remove séries estáticas ou reconstruídas, valida histórico real, enriquece Valor patrimonial dos pares de FII e saneia o histórico de indicadores das ações.",
+  "contract": "APK v505 / Proxy 21.12.357 mobile protocol 2026.07.10.10 + asset modal delivery v3; índices reais sem curva reconstruída, pares de FII enriquecidos e histórico de indicadores sanitizado.",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "entrega crítica utilizável com sinal separado de chegada tardia para seções opcionais",
-    "cache local/remoto aceito como recovery somente quando há melhoria mensurável",
-    "recuperação dirigida de seções opcionais de Ação e FII sem alterar requisitos críticos",
-    "cache, snapshots e single-flight separados por família stock/fii",
-    "producer profundo preservado após deadline e merge incremental por seção",
-    "séries financeiras reais sem interpolação ou dados sintéticos"
+    "integridade temporal central para índices",
+    "sem snapshots fixos ou curvas reconstruídas",
+    "valor patrimonial real dos FIIs comparáveis",
+    "histórico de indicadores com prioridade e saneamento temporal",
+    "chegada tardia preservada para seções incompletas"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com gateway único, monitor central e entrega progressiva dos modais de AÇÃO e FII.",
-  "releaseDate": "2026-07-12",
-  "checkpoint": "asset-modal-late-arrival-settlement-v322",
-  "title": "Proxy v322 — Chegada tardia resiliente nos modais",
-  "summary": "Corrige finalização prematura e caches sem ganho real; Ações e FIIs recebem recuperação opcional direcionada no mesmo modal.",
-  "publicVersion": "21.12.354",
-  "label": "asset-modal-late-arrival-settlement-v322",
-  "updatedAt": "2026-07-12",
-  "date": "2026-07-12",
+  "releaseDate": "2026-07-13",
+  "checkpoint": "real-indices-peer-patrimony-history-v325",
+  "title": "Proxy v325 — Índices reais, pares patrimoniais e histórico íntegro",
+  "summary": "Pareia o APK v505 e impede dados de índice simulados, completa a coluna patrimonial dos pares e corrige o histórico de indicadores de ações.",
+  "publicVersion": "21.12.357",
+  "label": "real-indices-peer-patrimony-history-v325",
+  "updatedAt": "2026-07-13",
+  "date": "2026-07-13",
   "notes": [
-    "Pareado ao APK v501. O protocolo móvel permanece 2026.07.10.10 e o schema asset modal delivery v3 recebe extensão compatível de late-arrival settlement."
+    "Pareado ao APK v505. Protocolo móvel 2026.07.10.10 e asset modal delivery v3 permanecem compatíveis."
   ],
   "releaseNotes": [
-    "Full crítico com blocos opcionais ausentes publica settlementPending e settlementSections.",
-    "Cache completo idêntico não encerra recovery; precisa resolver lacuna ou aumentar qualidade.",
-    "Recovery de Ação aceita cotação, gráfico, métricas, pares, empresa, receitas, demonstrativos, dividendos, checklist e retornos.",
-    "Recovery de FII aceita cotação, gráfico, métricas, vacância, fundo, imóveis, distribuições, pares, checklist e retornos.",
-    "O conjunto crítico por família permanece imutável."
+    "Históricos com origem simulada, sintética, proxy ticker ou snapshot reconstruído são rejeitados.",
+    "Fallbacks estáticos de índices foram removidos.",
+    "Pares de FII são enriquecidos por páginas individuais do Investidor10, sem inferência.",
+    "Histórico de indicadores exige dois períodos reais e preserva a fonte prioritária."
   ],
-  "apkPair": "apk_valorae_checkpoint91_asset_modal_late_arrival_settlement_v501_AI_STUDIO_ROOT_OK_2026_07_12.zip",
-  "apkVersion": "2026.07.12.03",
-  "fileSize": 1364486,
+  "apkPair": "apk_valorae_checkpoint95_real_indices_peer_patrimony_history_integrity_v505_AI_STUDIO_ROOT_OK_2026_07_13.zip",
+  "apkVersion": "2026.07.13.01",
+  "fileSize": 1400832,
   "highlights": [
-    "Informações atrasadas chegam sem fechar e reabrir o modal.",
-    "Duas revalidações limitadas no APK, sem loop infinito.",
-    "Cache mensurável e sem falso upgrade.",
-    "Recuperação opcional direcionada para Ação e FII.",
+    "Índices reais em Retorno e modais.",
+    "Valor patrimonial total nos pares de FII.",
+    "Histórico de indicadores temporalmente coerente.",
     "Nenhum dado sintético."
   ],
   "validation": [
-    "Teste v322 simula atraso de peerComparison em Ação e vacancyHistory em FII.",
-    "Teste comprova que cache idêntico não bloqueia o producer e que o settlement termina após a seção chegar.",
-    "Testes cross-stack validam modelo, parser, loader, merge e cache local do APK v501."
+    "Testes v325 cobrem integridade dos índices, enriquecimento patrimonial e histórico de indicadores.",
+    "Regressão de settlement valida chegada tardia da coluna patrimonial.",
+    "Suíte completa, build, sintaxe, auditoria e cross-stack obrigatórios."
   ],
-  "proxyPair": "valorae_proxy_checkpoint354_asset_modal_late_arrival_settlement_v322_AI_STUDIO_ROOT_OK_2026_07_12.zip",
+  "proxyPair": "valorae_proxy_checkpoint357_real_indices_peer_patrimony_history_integrity_v325_AI_STUDIO_ROOT_OK_2026_07_13.zip",
   "validations": [
-    "npm test: 198 arquivos de teste sem falhas.",
-    "npm run build e check:syntax aprovados.",
-    "audit:version aprovado para 21.12.354.",
-    "Teste v322 cobre entrega final prematura, cache sem ganho e recuperação opcional dirigida.",
-    "Testes cross-stack aprovados contra APK v501 com 196 fontes Kotlin."
+    "npm test, build, check:syntax e audit:version.",
+    "Teste cross-stack contra APK v505.",
+    "Validação do ZIP final após extração."
   ],
   "changes": [
-    "Delivery v3 publica settlementPending, settlementSections e settlementAttemptAfterMs para blocos opcionais tardios.",
-    "recoveryCacheUpgrade deixa de aceitar completeForDelivery como melhoria quando o cliente já possui a mesma qualidade.",
-    "Targets de recovery priorizam knownMissingSections e aceitam seções opcionais e blocos básicos recuperáveis sem promovê-los a críticos.",
-    "Ações reconsultam cotação, gráfico, métricas, checklist, proventos, empresa, receitas, posição acionária e demonstrativos quando ausentes.",
-    "FIIs reconsultam cotação, gráfico, métricas, vacância e demais blocos opcionais indicados pelo APK.",
-    "Relatórios internos foram removidos da raiz e renomeados no arquivo histórico para cumprir higiene do release."
+    "Adicionado history-integrity.js como barreira compartilhada.",
+    "Removidos snapshots fixos e curva de dois pontos criada a partir de uma cotação.",
+    "Adicionado enriquecimento patrimonial real para pares de FII.",
+    "Sanitização e prioridade de fontes no histórico de indicadores de ações."
   ],
-  "contractVersion": "APK v501 / Proxy 21.12.354 mobile protocol 2026.07.10.10 + asset modal delivery v3 com late-arrival settlement; recuperação mensurável e direcionada para seções lentas de Ação/FII.",
-  "latestVersion": "21.12.354",
-  "latest_version": "21.12.354",
-  "versionName": "21.12.354",
+  "contractVersion": "APK v505 / Proxy 21.12.357 mobile protocol 2026.07.10.10 + asset modal delivery v3; índices reais sem curva reconstruída, pares de FII enriquecidos e histórico de indicadores sanitizado.",
+  "latestVersion": "21.12.357",
+  "latest_version": "21.12.357",
+  "versionName": "21.12.357",
   "packageValidation": [
     "project files at ZIP root",
     "npm test",
     "npm run build",
     "npm run audit:version",
-    "cross-stack APK v501"
+    "cross-stack APK v505"
   ]
 }

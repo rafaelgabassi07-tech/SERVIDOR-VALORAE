@@ -1,5 +1,39 @@
 # VALORAE Proxy
 
+## Release atual — 21.12.357 / v325 (2026-07-13)
+
+Integridade real das séries de índices, enriquecimento do valor patrimonial dos pares de FII e saneamento temporal do histórico de indicadores das ações.
+
+- Retorno e modais rejeitam séries simuladas, snapshots reconstruídos, proxy ticker e fallback estático.
+- IFIX, IDIV e SMLL não recebem mais valores fixos embutidos.
+- Valor patrimonial dos pares vem da página individual de cada FII, sem inferência.
+- Histórico de indicadores exige períodos reais e respeita prioridade de fonte.
+- Pareamento: APK v505 / protocolo móvel `2026.07.10.10`.
+
+## Release atual — 21.12.357 / v324 (2026-07-12)
+
+Notícias por ativo pareadas ao APK v505. Solicitações dos modais usam `assetOnly=true`, preservam apenas itens relacionados ao ticker e não recorrem a notícias gerais de mercado quando a fonte específica não retorna conteúdo.
+
+### Validação desta entrega
+
+- `assetOnly`, `strictAsset` e `assetNewsOnly` ativam o modo estrito.
+- O fallback amplo de mercado é bloqueado no modo estrito.
+- Cache e política de aplicativo distinguem notícias gerais de notícias do ativo.
+- A sequência visual de Ação e FII é validada no teste cross-stack do APK v505.
+- Pareamento: APK v505 / protocolo móvel `2026.07.10.10`.
+
+## Release atual — 21.12.355 / v323 (2026-07-12)
+
+Limpeza de conteúdo dos modais pareada ao APK v503. A posição acionária foi desativada em toda a cadeia operacional de Ações: não é chamada, entregue, recuperada nem considerada para cache/completude.
+
+### Validação desta entrega
+
+- Nenhum endpoint dedicado de posição acionária, acionistas ou shareholders é agendado.
+- `shareholdingPosition` foi removido de recovery, readiness, resposta principal e quality profile.
+- Solicitações legadas exclusivamente para essa seção são ignoradas sem coleta profunda genérica.
+- As demais seções e o settlement de chegada tardia permanecem preservados.
+- Pareamento: APK v503 / protocolo móvel `2026.07.10.10`.
+
 ## Release atual — 21.12.354 / v322 (2026-07-12)
 
 Chegada tardia de informações corrigida para os modais de Ação e FII: o contrato crítico continua utilizável, mas blocos opcionais lentos recebem recuperação limitada no mesmo modal.

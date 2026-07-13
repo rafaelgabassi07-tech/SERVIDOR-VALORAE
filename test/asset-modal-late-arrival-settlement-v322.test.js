@@ -55,7 +55,7 @@ function fullFii(ticker = 'LATE11', includeVacancy = true) {
     chart: { points: [{ close: 99 }, { close: 100 }] },
     metrics: [{ id: 'dy', value: '9,0%' }],
     comparison: { items: [{ id: 'ifix' }], series: [], seriesByPeriod: {} },
-    peerComparison: { rows: [{ ticker: 'PAIR11' }] },
+    peerComparison: { rows: [{ ticker, patrimonialValue: 100000000, patrimonialValueDisplay: 'R$ 100 mi' }, { ticker: 'PAIR11', patrimonialValue: 90000000, patrimonialValueDisplay: 'R$ 90 mi' }] },
     checklist: { items: [{ id: 'vacancy', passed: true, status: 'PASSED' }] },
     distributions12m: { items: [{ month: '2026-06', value: 1 }], months: [] },
     dividendCharts: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },

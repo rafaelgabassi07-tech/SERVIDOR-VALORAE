@@ -52,13 +52,13 @@ try {
 
   for (const ticker of ['SMLL', 'IFIX', 'IDIV']) {
     const benchmark = contract.benchmarks.find(item => item.ticker === ticker);
-    assert.equal(benchmark?.status, 'OK', `${ticker} should recover using Yahoo-only snapshot comparison points`);
+    assert.equal(benchmark?.status, 'SNAPSHOT_ONLY', `${ticker} must remain unavailable for charting when Yahoo returns only one real snapshot`);
     assert.equal(benchmark?.simulated, false, `${ticker} must not be simulated`);
     assert.equal(benchmark?.proxyTickerUsed, false, `${ticker} must not use proxy ticker`);
     assert.equal(benchmark?.directIndexSymbol, true, `${ticker} must use a direct Yahoo index symbol`);
     assert.ok(String(benchmark?.source || '').includes('Yahoo Finance Chart API'), `${ticker} should show Yahoo Finance source`);
-    assert.ok((benchmark?.points || []).length >= 2, `${ticker} should expose at least two comparison points from Yahoo metadata`);
-    assert.ok(contract.series.some(point => point[`${ticker.toLowerCase()}ReturnPercent`] != null || (ticker === 'SMLL' && point.smal11ReturnPercent != null)), `${ticker} should be visible in chart series`);
+    assert.equal((benchmark?.points || []).length, 0, `${ticker} must not fabricate a second historical point from previousClose metadata`);
+    assert.equal(contract.series.some(point => point[`${ticker.toLowerCase()}ReturnPercent`] != null || (ticker === 'SMLL' && point.smal11ReturnPercent != null)), false, `${ticker} should stay out of the chart until a real historical series arrives`);
   }
   assert.ok(requests.some(url => url.includes('IFIX.SA')), 'IFIX.SA must be requested');
   assert.ok(requests.some(url => url.includes('IDIV.SA')), 'IDIV.SA must be requested');

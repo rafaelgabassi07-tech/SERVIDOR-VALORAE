@@ -75,15 +75,15 @@ assert.equal(investidor10.shareholdingPosition.rows.length, 2);
 
 const readiness = _test.buildStockModalSectionReadiness({ investidor10 });
 assert.equal(readiness.status, 'OK');
-assert.equal(readiness.readyCount, 6);
-assert.equal(readiness.totalCount, 6);
+assert.equal(readiness.readyCount, 5);
+assert.equal(readiness.totalCount, 5);
 assert.deepEqual(readiness.missing, []);
 assert.ok(readiness.sections.every(section => section.source === 'Investidor10'));
 
 const emptyReadiness = _test.buildStockModalSectionReadiness({ investidor10: {} });
 assert.equal(emptyReadiness.status, 'PARTIAL');
 assert.equal(emptyReadiness.readyCount, 0);
-assert.equal(emptyReadiness.missing.length, 6);
+assert.equal(emptyReadiness.missing.length, 5);
 assert.ok(emptyReadiness.sections.every(section => section.message.includes('sem fallback simulado')));
 
 console.log('stock-modal-integrated-sections-i10-v255 ok');
