@@ -1,73 +1,76 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.362-modal-source-repair-v330",
-  "patch": "21.12.362-modal-source-repair-v330",
-  "releasePatch": "21.12.362-modal-source-repair-v330",
-  "latestInternalPatch": "21.12.362-modal-source-repair-v330",
-  "description": "Proxy v330 repara fontes, evidências e séries históricas dos modais de FII e Ação, pareado ao APK v510.",
-  "contract": "APK v510 / Proxy 21.12.362 + mobile protocol 2026.07.10.10 + asset modal delivery v4; fontes diretas, evidência por checklist, Payout retroativo e índices reais sincronizados.",
+  "release": "21.12.363-portfolio-chart-regression-repair-v331",
+  "patch": "21.12.363-portfolio-chart-regression-repair-v331",
+  "releasePatch": "21.12.363-portfolio-chart-regression-repair-v331",
+  "latestInternalPatch": "21.12.363-portfolio-chart-regression-repair-v331",
+  "description": "Proxy v331 corrige a composição temporal dos gráficos da carteira e do patrimônio, pareado ao APK v511.",
+  "contract": "APK v511 / Proxy 21.12.363 + mobile protocol 2026.07.10.10 + asset modal delivery v4 + portfolio history v331; fechamento por bucket, estoque inicial reconciliado e séries sem reescala global.",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "comparador de FIIs com tipo e segmento",
-    "checklists com evidência direta",
-    "Payout com lucro retroativo",
-    "históricos diretos de índices"
+    "fechamento mensal por estado no fim do bucket",
+    "estoque inicial reconciliado com histórico parcial",
+    "séries transacionais sem reescala global",
+    "composição de patrimônio aplicada/ganho/perda"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com gateway único, monitor central e entrega progressiva dos modais de AÇÃO e FII.",
   "releaseDate": "2026-07-13",
-  "checkpoint": "modal-source-repair-v330",
-  "title": "Proxy v330 — Fontes reparadas nos modais de FII e Ação",
-  "summary": "Restaura Tipo e Segmento dos FIIs comparáveis, checklists com evidência, lucro retroativo do Payout e séries diretas de IBOV, IFIX, SMLL e IDIV.",
-  "publicVersion": "21.12.362",
-  "label": "modal-source-repair-v330",
+  "checkpoint": "portfolio-chart-regression-repair-v331",
+  "title": "Proxy v331 — Reparo dos gráficos da carteira e do patrimônio",
+  "summary": "Corrige o fechamento mensal, preserva estoque anterior ao histórico importado e impede distorção da série transacional da carteira.",
+  "publicVersion": "21.12.363",
+  "label": "portfolio-chart-regression-repair-v331",
   "updatedAt": "2026-07-13",
   "date": "2026-07-13",
   "notes": [
-    "Pareado ao APK v510.",
-    "Nenhum dado financeiro sintético ou interpolado."
+    "Pareado ao APK v511.",
+    "Nenhuma cotação histórica sintética ou interpolada."
   ],
   "releaseNotes": [
-    "API real do comparador de FIIs.",
-    "Estado checked/unchecked e evidência por critério.",
-    "Índices diretos e Payout retroativo corrigido."
+    "Compras no meio do mês passam a compor o fechamento mensal.",
+    "A data da primeira transação conhecida não corta estoque preexistente.",
+    "O ponto vivo atualiza somente a extremidade da série no APK."
   ],
-  "apkPair": "apk_valorae_checkpoint100_modal_sources_repair_v510_AI_STUDIO_ROOT_OK_2026_07_13.zip",
-  "apkInstallable": "Valorae_v510_2026.07.13.06_android7plus_debug_signed.apk",
-  "apkVersion": "2026.07.13.06",
+  "apkPair": "apk_valorae_checkpoint101_portfolio_chart_regression_repair_v511_AI_STUDIO_ROOT_OK_2026_07_13.zip",
+  "apkInstallable": "Valorae_v511_2026.07.13.07_android7plus_debug_signed.apk",
+  "apkVersion": "2026.07.13.07",
   "fileSize": 0,
   "highlights": [
-    "Tipo e Segmento por linha do comparador de FIIs.",
-    "Checklists de FII e Ação com evidência direta.",
-    "Lucro líquido retroativo associado pelo ano real.",
-    "IBOV, IFIX, SMLL e IDIV sem ETF substituto."
+    "Fechamento mensal coerente com a composição da carteira.",
+    "Custo de abertura preservado em importações parciais.",
+    "Sem multiplicação retroativa da série para encaixar a cotação atual.",
+    "APK e Proxy usam a mesma regra de disponibilidade da posição."
   ],
   "validation": [
-    "Suíte completa e testes de parsers.",
-    "Fontes reais verificadas com MXRF11 e PETR4.",
-    "Cross-stack APK v510."
+    "Teste de compra no meio do mês e fechamento mensal.",
+    "Teste de estoque anterior ao primeiro lançamento importado.",
+    "Build Vercel, sintaxe e suíte completa do Proxy.",
+    "Cross-stack APK v511."
   ],
-  "proxyPair": "valorae_proxy_checkpoint362_modal_source_repair_v330_AI_STUDIO_ROOT_OK_2026_07_13.zip",
+  "proxyPair": "valorae_proxy_checkpoint363_portfolio_chart_regression_repair_v331_AI_STUDIO_ROOT_OK_2026_07_13.zip",
   "validations": [
-    "Suíte completa e testes de parsers.",
-    "Fontes reais verificadas com MXRF11 e PETR4.",
-    "Cross-stack APK v510."
+    "Teste de compra no meio do mês e fechamento mensal.",
+    "Teste de estoque anterior ao primeiro lançamento importado.",
+    "Build Vercel, sintaxe e suíte completa do Proxy.",
+    "Cross-stack APK v511."
   ],
   "changes": [
-    "Comparador de FIIs consome a API de tabela da própria fonte.",
-    "Checklists preservam o estado real e publicam evidência por item.",
-    "Payout cruza lucro líquido pelo campo year e índices usam séries diretas."
+    "Novo cálculo de timestamp de estado para buckets mensal, semanal e diário.",
+    "Primeira compra efetiva deixa a série aberta quando há estoque inicial reconciliado.",
+    "Versão do motor de histórico elevada para v331.",
+    "Pareamento com o Checkpoint 101 do APK."
   ],
-  "contractVersion": "APK v510 / Proxy 21.12.362 + mobile protocol 2026.07.10.10 + asset modal delivery v4; fontes diretas, evidência por checklist, Payout retroativo e índices reais sincronizados.",
-  "latestVersion": "21.12.362",
-  "latest_version": "21.12.362",
-  "versionName": "21.12.362",
+  "contractVersion": "APK v511 / Proxy 21.12.363 + mobile protocol 2026.07.10.10 + asset modal delivery v4 + portfolio history v331; fechamento por bucket, estoque inicial reconciliado e séries sem reescala global.",
+  "latestVersion": "21.12.363",
+  "latest_version": "21.12.363",
+  "versionName": "21.12.363",
   "packageValidation": [
-    "project files at ZIP root",
-    "npm test",
     "npm run build",
+    "npm run check:syntax",
+    "npm test",
     "npm run audit:version",
-    "cross-stack APK v510"
+    "npm run test:cross-stack"
   ]
 }

@@ -1,3 +1,11 @@
+## 21.12.363 — v331 — 2026-07-13
+
+- Estado da posição calculado no fechamento real dos buckets mensal, semanal e diário.
+- Compras intramês deixam de ser excluídas pelo timestamp inicial do candle mensal.
+- Estoque preexistente é reconciliado quando o histórico importado começa no meio da vida da carteira.
+- Motor `PORTFOLIO_HISTORY_VERSION` atualizado para `21.12.363-portfolio-chart-regression-repair-v331`.
+- Pareamento: APK v511 / Checkpoint 101.
+
 ## 21.12.362 — v330 — 2026-07-13
 
 - Comparador de FIIs passou a usar a API de tabela da fonte, restaurando Tipo e Segmento.

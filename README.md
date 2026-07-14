@@ -1,5 +1,15 @@
 # VALORAE Proxy
 
+## Release atual — 21.12.363 / v331 (2026-07-13)
+
+Reparo pareado dos gráficos **Preços da carteira** e **Patrimônio total**.
+
+- Candles mensais e semanais usam o fim do bucket para calcular a posição que compõe o fechamento.
+- Compras realizadas no meio do mês entram no fechamento daquele mês.
+- Estoque anterior ao primeiro lançamento importado mantém a série aberta e o custo reconciliado.
+- O APK deixa de reescalar retroativamente a série para coincidir com a cotação atual.
+- Pareamento: APK v511 / protocolo 2026.07.10.10 / portfolio history v331.
+
 ## Release atual — 21.12.362 / v330 (2026-07-13)
 
 Reparo das fontes e do contrato de entrega dos modais de FII e Ação.
