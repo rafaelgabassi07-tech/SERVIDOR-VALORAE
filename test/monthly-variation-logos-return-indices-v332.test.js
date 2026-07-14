@@ -140,8 +140,8 @@ try {
     assert.match(avatar, /\.headers\s*\(/);
     assert.match(avatar, /Headers\.Builder\(\)/);
     assert.match(avatar, /X-Valorae-Mobile-Protocol/);
-    assert.match(avatar, /asset\/logo\?ticker=\$ticker&v=3/);
-    assert.match(discovery, /asset\/logo\?ticker=\$cleanTicker&v=3/);
+    assert.match(avatar, /asset\/logo\?ticker=\$ticker&v=4/);
+    assert.match(discovery, /asset\/logo\?ticker=\$cleanTicker&v=4/);
     assert.ok(
       /historyMonths", range\.toPortfolioReturnsHistoryMonths\(\)/.test(service)
         || (/val historyMonths = range\.toPortfolioReturnsHistoryMonths\(\)/.test(service) && /put\("historyMonths", historyMonths\)/.test(service)),

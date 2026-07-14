@@ -9,11 +9,11 @@ import { readSiblingApkFile, resolveSiblingApkRoot } from './helpers/cross-stack
 
 const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),'utf8'));
 const metadata=JSON.parse(fs.readFileSync(new URL('../metadata.json',import.meta.url),'utf8'));
-assert.equal(pkg.valorae.publicVersion,'21.12.365');
-assert.equal(pkg.valorae.releasePatch,'21.12.365-return-index-provider-parity-v333');
+assert.equal(pkg.valorae.publicVersion,'21.12.366');
+assert.equal(pkg.valorae.releasePatch,'21.12.366-multisource-official-logo-v334');
 assert.equal(pkg.releasePatch,pkg.valorae.releasePatch);
 for(const block of [pkg.config,pkg.releaseMetadata]) assert.deepEqual({releasePatch:block.releasePatch,publicVersion:block.publicVersion,checkpoint:block.checkpoint,releaseLabel:block.releaseLabel},{releasePatch:pkg.valorae.releasePatch,publicVersion:pkg.valorae.publicVersion,checkpoint:pkg.valorae.checkpoint,releaseLabel:pkg.valorae.releaseLabel});
-assert.equal(metadata.apkVersion,'2026.07.13.09');
+assert.equal(metadata.apkVersion,'2026.07.14.01');
 for(const header of ['X-Valorae-Delivery-Schema','X-Valorae-Signature','X-Valorae-Timestamp'])assert.ok(VALORAE_REQUEST_HEADERS.includes(header));
 for(const [input,expected] of [['1m','1m'],['3 meses','3m'],['6m','6m'],['1 ano','12m']])assert.equal(fiiTest.distributionPeriodKey(input),expected);
 const revenue=stockTest.buildStockRevenueBreakdownPayload({ticker:'AUDT3',canonical:{revenueByRegion:{totalAmountDisplay:'127 mi',rows:[{label:'Brasil',percent:100}]}}},'region');
@@ -42,13 +42,13 @@ try{
   process.env.VALORAE_ADMIN_TOKEN='audit-admin-token';assert.equal((await invoke('/api/v1/admin/cache')).statusCode,405);assert.equal((await invoke('/api/v1/admin/cache',{method:'POST',body:{}})).statusCode,401);
   admin=await invoke('/api/v1/admin/cache',{method:'POST',headers:{'x-valorae-admin-token':'audit-admin-token'},body:{}});assert.equal(admin.statusCode,200);assert.equal(json(admin).cleared,true);delete process.env.VALORAE_ADMIN_TOKEN;
   process.env.VALORAE_MAX_BODY_BYTES='1024';const oversized=await invoke('/api/v1/mobile/bootstrap',{method:'POST',body:{payload:'x'.repeat(3000)}});assert.equal(oversized.statusCode,413);assert.equal(json(oversized).code,'PAYLOAD_TOO_LARGE');delete process.env.VALORAE_MAX_BODY_BYTES;
-  const calls=[];globalThis.fetch=async url=>{calls.push(String(url));if(String(url).includes('statusinvest.com.br'))return new Response(Buffer.alloc(512,7),{status:200,headers:{'content-type':'image/png'}});throw new Error(`unexpected ${url}`);};
-  const logo=await invoke('/api/v1/asset/logo?ticker=AUDT3&cache=false');assert.equal(logo.statusCode,200);assert.equal(Buffer.isBuffer(logo.body),true);assert.ok(calls[0].includes('statusinvest.com.br'));assert.equal(calls.some(u=>u.includes('finance.yahoo.com')),false);
+  const calls=[];globalThis.fetch=async url=>{calls.push(String(url));if(String(url).includes('statusinvest.com.br')){const image=Buffer.alloc(512,7);Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]).copy(image,0);image.writeUInt32BE(32,16);image.writeUInt32BE(32,20);return new Response(image,{status:200,headers:{'content-type':'image/png'}});}throw new Error(`unexpected ${url}`);};
+  const logo=await invoke('/api/v1/asset/logo?ticker=AUDT3&cache=false');assert.equal(logo.statusCode,200);assert.equal(Buffer.isBuffer(logo.body),true);assert.ok(calls.some(u=>u.includes('statusinvest.com.br')));assert.match(logo.getHeader('x-valorae-logo-source')||'',/Status Invest/i);
 }finally{globalThis.fetch=originalFetch;for(const k of keys){if(saved[k]===undefined)delete process.env[k];else process.env[k]=saved[k];}}
 
 const application=readSiblingApkFile('app/src/main/java/com/example/ValoraeApplication.kt'),feed=readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyPublicFeedService.kt'),manifest=readSiblingApkFile('app/src/main/AndroidManifest.xml'),build=readSiblingApkFile('app/build.gradle.kts');
 if([application,feed,manifest,build].every(Boolean)){
-  assert.match(application,/ValoraeAppGraph\.installHttpCache\(this\)/);assert.equal((feed.match(/executeJsonGetCancellable\(/g)||[]).length,2);assert.equal(feed.includes('executeJsonGet('),false);assert.match(manifest,/ValoraeNotificationRescheduleReceiver[\s\S]{0,160}android:exported="false"/);assert.match(build,/versionCode = 26071309/);
+  assert.match(application,/ValoraeAppGraph\.installHttpCache\(this\)/);assert.equal((feed.match(/executeJsonGetCancellable\(/g)||[]).length,2);assert.equal(feed.includes('executeJsonGet('),false);assert.match(manifest,/ValoraeNotificationRescheduleReceiver[\s\S]{0,160}android:exported="false"/);assert.match(build,/versionCode = 26071401/);
   const endpoints=new Set();const walk=current=>{for(const e of fs.readdirSync(current,{withFileTypes:true})){const f=path.join(current,e.name);if(e.isDirectory())walk(f);else if(e.name.endsWith('.kt'))for(const m of fs.readFileSync(f,'utf8').matchAll(/["'](\/api\/v1\/[A-Za-z0-9_./-]+)(?:\?[^"']*)?["']/g))endpoints.add(m[1].replace(/^\/api\/v1/,'')||'/');}};walk(path.join(resolveSiblingApkRoot(),'app/src/main/java'));
   const routes=new Set(routeManifest().routes),missing=[...endpoints].filter(e=>!routes.has(e));assert.deepEqual(missing,[]);assert.ok(endpoints.size>=30);
 }

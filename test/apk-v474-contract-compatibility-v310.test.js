@@ -21,7 +21,7 @@ for (const marker of [
 }
 assert.match(router, /buildAssetModalContract\(payload\)/);
 assert.match(router, /buildPortfolioHistory\(/);
-assert.match(router, /fetchOfficialStatusInvestLogo/);
+assert.match(router, /fetchOfficialAssetLogo/);
 assert.match(router, /getNews\(payload\)/);
 
 // O atalho B3 do APK continua usando o contrato de transações existente.

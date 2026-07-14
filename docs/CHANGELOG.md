@@ -1,3 +1,12 @@
+# Changelog
+
+## 2026-07-14 — 21.12.366 / v334
+
+- Resolver multi-fonte para logos oficiais de ações e FIIs.
+- Validação por ticker, host, assinatura binária, dimensões e descritores genéricos.
+- Contrato `official-asset-logo-v4`, cache renovado e diagnóstico de fonte/cache.
+- Pareamento com APK v514 / Checkpoint 104.
+
 ## 21.12.365 — v333 — 2026-07-13
 
 - Página Retorno passa a usar a mesma cadeia dos modais: API direta de cotações dos índices antes da contingência geral.

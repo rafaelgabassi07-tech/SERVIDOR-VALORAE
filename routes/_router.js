@@ -19,8 +19,7 @@ import { buildAnalysisPageResponse } from '../lib/analysis/analysis-page-respons
 import { buildFiiModalContract } from '../lib/analysis/fii-modal-contract.js';
 import { buildStockModalContract } from '../lib/analysis/stock-modal-contract.js';
 import { buildAssetModalContract } from '../lib/analysis/asset-modal-contract.js';
-import { fetchYahooLogo } from '../lib/market/yahoo.js';
-import { fetchOfficialStatusInvestLogo, officialStatusInvestLogoCandidates } from '../lib/market/official-logo.js';
+import { OFFICIAL_ASSET_LOGO_VERSION, fetchOfficialAssetLogo } from '../lib/market/official-logo.js';
 import integrationManifestHandler from './integration/manifest.js';
 import integrationSdkHandler from './integration/sdk.js';
 import integrationPromptsHandler from './integration/prompts.js';
@@ -560,47 +559,49 @@ function legacyAssetTimeoutPayload(payload = {}, routeDeadlineMs = 8_500) {
 async function assetLogoHandler(req, res, payload = {}) {
   const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query || '');
   if (!ticker) return sendJson(req, res, { ok: false, status: 'ERROR', error: 'Informe ticker ou symbol.', endpoint: 'asset/logo' }, { status: 400, cacheControl: 'no-store' });
-  const timeoutMs = clampInt(payload.timeoutMs || 3500, 3500, 1000, 9000);
+  const timeoutMs = clampInt(payload.timeoutMs || 6500, 6500, 1800, 9000);
   const useCache = payload.cache !== 'false';
-  const officialCandidates = officialStatusInvestLogoCandidates(ticker);
+  const logo = await fetchOfficialAssetLogo(ticker, { timeoutMs, cache: useCache });
+
   if (payload.format === 'json' || payload.json === '1') {
-    const logo = await fetchYahooLogo(ticker, { timeoutMs, cache: useCache });
-    const fallbackUrl = officialCandidates[0] || '';
     return sendJson(req, res, {
-      ok: Boolean(logo?.logoUrl || fallbackUrl),
-      status: logo?.logoUrl || fallbackUrl ? 'OK' : 'EMPTY',
+      ok: Boolean(logo?.bytes?.length),
+      status: logo?.bytes?.length ? 'OK' : 'EMPTY',
       endpoint: 'asset/logo',
+      contractVersion: OFFICIAL_ASSET_LOGO_VERSION,
       ticker,
-      symbol: logo?.symbol || ticker,
-      logoUrl: logo?.logoUrl || fallbackUrl,
-      logoSource: logo?.logoUrl ? (logo?.source || 'Yahoo Finance Quote API') : (fallbackUrl ? 'Status Invest company ticker image' : ''),
-      candidates: [logo?.logoUrl, ...officialCandidates].filter(Boolean),
-      cache: logo?.cache,
-      error: logo?.logoUrl || fallbackUrl ? '' : (logo?.error || 'Logo oficial indisponível')
-    }, { cacheControl: logo?.logoUrl || fallbackUrl ? 'public, max-age=86400, stale-while-revalidate=604800' : 'private, max-age=300' });
+      symbol: ticker,
+      logoUrl: logo?.bytes?.length ? `/api/v1/asset/logo?ticker=${encodeURIComponent(ticker)}&v=4` : '',
+      logoSource: logo?.source || '',
+      sourceUrl: logo?.sourceUrl || '',
+      contentType: logo?.contentType || '',
+      dimensions: logo?.width && logo?.height ? { width: logo.width, height: logo.height } : undefined,
+      fingerprint: logo?.fingerprint || '',
+      cache: logo?.cache || 'MISS',
+      error: logo?.bytes?.length ? '' : 'Logo oficial indisponível nas fontes validadas.'
+    }, { cacheControl: logo?.bytes?.length ? 'public, max-age=86400, stale-while-revalidate=604800' : 'private, max-age=120' });
   }
-  // O APK consome bytes. A fonte oficial vem primeiro; o Yahoo é contingência.
-  const officialImage = await fetchOfficialStatusInvestLogo(ticker, { timeoutMs: Math.min(timeoutMs, 2600), cache: useCache });
-  if (officialImage?.bytes?.length) {
+
+  if (logo?.bytes?.length) {
     res.statusCode = 200;
-    res.setHeader('Content-Type', officialImage.contentType || 'image/png');
-    res.setHeader('Content-Length', String(officialImage.bytes.length));
+    res.setHeader('Content-Type', logo.contentType || 'image/png');
+    res.setHeader('Content-Length', String(logo.bytes.length));
     res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
-    res.setHeader('X-Valorae-Logo-Source', officialImage.source || 'Status Invest company ticker image');
-    res.setHeader('X-Valorae-Logo-Cache', officialImage.cache || 'MISS');
-    return res.end(officialImage.bytes);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Valorae-Logo-Contract', OFFICIAL_ASSET_LOGO_VERSION);
+    res.setHeader('X-Valorae-Logo-Ticker', ticker);
+    res.setHeader('X-Valorae-Logo-Source', logo.source || 'official-asset-logo-resolver');
+    res.setHeader('X-Valorae-Logo-Cache', logo.cache || 'MISS');
+    if (logo.fingerprint) res.setHeader('ETag', `"${logo.fingerprint}"`);
+    if (String(req.method || 'GET').toUpperCase() === 'HEAD') return res.end('');
+    return res.end(logo.bytes);
   }
-  const logo = await fetchYahooLogo(ticker, { timeoutMs, cache: useCache });
-  if (logo?.logoUrl) {
-    res.statusCode = 302;
-    res.setHeader('Location', logo.logoUrl);
-    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
-    res.setHeader('X-Valorae-Logo-Source', 'Yahoo Finance Quote API');
-    return res.end('');
-  }
+
   res.statusCode = 404;
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Cache-Control', 'private, max-age=300');
+  res.setHeader('Cache-Control', 'private, max-age=120');
+  res.setHeader('X-Valorae-Logo-Contract', OFFICIAL_ASSET_LOGO_VERSION);
+  res.setHeader('X-Valorae-Logo-Ticker', ticker);
   return res.end('logo oficial indisponível');
 }
 

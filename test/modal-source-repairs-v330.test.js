@@ -7,9 +7,9 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(pkg.valorae.publicVersion, '21.12.365');
-assert.equal(pkg.valorae.releasePatch, '21.12.365-return-index-provider-parity-v333');
-assert.equal(metadata.apkVersion, '2026.07.13.09');
+assert.equal(pkg.valorae.publicVersion, '21.12.366');
+assert.equal(pkg.valorae.releasePatch, '21.12.366-multisource-official-logo-v334');
+assert.equal(metadata.apkVersion, '2026.07.14.01');
 assert.equal(fii.FII_MODAL_VERSION, '26.asset-modal.fii.v25-modal-source-repair');
 assert.equal(stock.STOCK_MODAL_VERSION, '26.asset-modal.stock.v58-modal-source-repair');
 
@@ -108,7 +108,7 @@ if ([apkHttp, apkService, apkQuality, apkReadiness, apkBuild].every(Boolean)) {
   assert.match(apkReadiness, /FiiAssetModalSection\.Checklist -> checklist/);
   assert.match(apkReadiness, /StockAssetModalSection\.Payout -> payoutChart/);
   assert.match(apkQuality, /val hasPayout = payoutChart\.points\.isNotEmpty\(\)/);
-  assert.match(apkBuild, /versionCode = 26071309/);
+  assert.match(apkBuild, /versionCode = 26071401/);
 }
 
 console.log('modal source repairs v330 ok');

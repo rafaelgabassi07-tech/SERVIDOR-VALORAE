@@ -23,13 +23,13 @@ assert.doesNotMatch(news, /articleStatus: 'fallback-search'/);
 const logos = read('lib/market/official-logo.js');
 assert.match(logos, /classifyTicker\(ticker\)/);
 assert.match(logos, /companytickerimage\?ticker=/);
-assert.match(logos, /contentType\.startsWith\('image\/'\)/);
-assert.match(logos, /LOGO_CACHE_TTL_MS = 24 \* 60 \* 60 \* 1000/);
+assert.match(logos, /sniffImage\(bytes, contentType/);
+assert.match(logos, /VALORAE_ASSET_LOGO_TTL_MS \|\| 24 \* 60 \* 60 \* 1000/);
 
 const router = read('routes/_router.js');
-assert.match(router, /fetchOfficialStatusInvestLogo/);
+assert.match(router, /fetchOfficialAssetLogo/);
 assert.match(router, /X-Valorae-Logo-Source/);
-assert.match(router, /return res\.end\(officialImage\.bytes\)/);
+assert.match(router, /return res\.end\(logo\.bytes\)/);
 
 const forbiddenNames = /(?:\.tmp|\.bak|~|\.pyc|\.DS_Store)$/;
 const ignoredDirs = new Set(['.git', 'node_modules']);

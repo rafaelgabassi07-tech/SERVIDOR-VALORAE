@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const expectedCore = '21.12.0';
-const expectedPublic = '21.12.365';
-const expectedPatch = '21.12.365-return-index-provider-parity-v333';
+const expectedPublic = '21.12.366';
+const expectedPatch = '21.12.366-multisource-official-logo-v334';
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
 const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
@@ -20,8 +20,8 @@ assert.equal(pkg.releasePatch, expectedPatch);
 for (const block of [pkg.config, pkg.releaseMetadata]) {
   assert.equal(block.releasePatch, expectedPatch);
   assert.equal(block.publicVersion, expectedPublic);
-  assert.equal(block.checkpoint, 'return-index-provider-parity-v333');
-  assert.equal(block.releaseLabel, 'return-index-provider-parity-v333');
+  assert.equal(block.checkpoint, 'multisource-official-logo-v334');
+  assert.equal(block.releaseLabel, 'multisource-official-logo-v334');
 }
 assert.equal(metadata.version, expectedCore);
 assert.equal(metadata.releasePatch, expectedPatch);
@@ -29,7 +29,7 @@ assert.equal(manifest.version, expectedPublic);
 assert.ok(sw.includes('v21-12-365'));
 assert.ok(coreRelease.includes(expectedPatch));
 assert.ok(coreRelease.includes('valorae-proxy-server-v21-12-365'));
-assert.ok(currentRelease.includes("VALORAE_PUBLIC_VERSION = '21.12.365'"));
+assert.ok(currentRelease.includes("VALORAE_PUBLIC_VERSION = '21.12.366'"));
 assert.ok(currentRelease.includes(expectedPatch));
 const expectedNodeMajor = String(pkg.engines?.node || '').match(/\d+/)?.[0];
 assert.ok(expectedNodeMajor, 'package.json precisa declarar engines.node');
