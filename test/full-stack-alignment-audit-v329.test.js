@@ -9,11 +9,11 @@ import { readSiblingApkFile, resolveSiblingApkRoot } from './helpers/cross-stack
 
 const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),'utf8'));
 const metadata=JSON.parse(fs.readFileSync(new URL('../metadata.json',import.meta.url),'utf8'));
-assert.equal(pkg.valorae.publicVersion,'21.12.363');
-assert.equal(pkg.valorae.releasePatch,'21.12.363-portfolio-chart-regression-repair-v331');
+assert.equal(pkg.valorae.publicVersion,'21.12.364');
+assert.equal(pkg.valorae.releasePatch,'21.12.364-monthly-variation-logos-return-indices-v332');
 assert.equal(pkg.releasePatch,pkg.valorae.releasePatch);
 for(const block of [pkg.config,pkg.releaseMetadata]) assert.deepEqual({releasePatch:block.releasePatch,publicVersion:block.publicVersion,checkpoint:block.checkpoint,releaseLabel:block.releaseLabel},{releasePatch:pkg.valorae.releasePatch,publicVersion:pkg.valorae.publicVersion,checkpoint:pkg.valorae.checkpoint,releaseLabel:pkg.valorae.releaseLabel});
-assert.equal(metadata.apkVersion,'2026.07.13.07');
+assert.equal(metadata.apkVersion,'2026.07.13.08');
 for(const header of ['X-Valorae-Delivery-Schema','X-Valorae-Signature','X-Valorae-Timestamp'])assert.ok(VALORAE_REQUEST_HEADERS.includes(header));
 for(const [input,expected] of [['1m','1m'],['3 meses','3m'],['6m','6m'],['1 ano','12m']])assert.equal(fiiTest.distributionPeriodKey(input),expected);
 const revenue=stockTest.buildStockRevenueBreakdownPayload({ticker:'AUDT3',canonical:{revenueByRegion:{totalAmountDisplay:'127 mi',rows:[{label:'Brasil',percent:100}]}}},'region');
@@ -48,8 +48,8 @@ try{
 
 const application=readSiblingApkFile('app/src/main/java/com/example/ValoraeApplication.kt'),feed=readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyPublicFeedService.kt'),manifest=readSiblingApkFile('app/src/main/AndroidManifest.xml'),build=readSiblingApkFile('app/build.gradle.kts');
 if([application,feed,manifest,build].every(Boolean)){
-  assert.match(application,/ValoraeAppGraph\.installHttpCache\(this\)/);assert.equal((feed.match(/executeJsonGetCancellable\(/g)||[]).length,2);assert.equal(feed.includes('executeJsonGet('),false);assert.match(manifest,/ValoraeNotificationRescheduleReceiver[\s\S]{0,160}android:exported="false"/);assert.match(build,/versionCode = 26071307/);
+  assert.match(application,/ValoraeAppGraph\.installHttpCache\(this\)/);assert.equal((feed.match(/executeJsonGetCancellable\(/g)||[]).length,2);assert.equal(feed.includes('executeJsonGet('),false);assert.match(manifest,/ValoraeNotificationRescheduleReceiver[\s\S]{0,160}android:exported="false"/);assert.match(build,/versionCode = 26071308/);
   const endpoints=new Set();const walk=current=>{for(const e of fs.readdirSync(current,{withFileTypes:true})){const f=path.join(current,e.name);if(e.isDirectory())walk(f);else if(e.name.endsWith('.kt'))for(const m of fs.readFileSync(f,'utf8').matchAll(/["'](\/api\/v1\/[A-Za-z0-9_./-]+)(?:\?[^"']*)?["']/g))endpoints.add(m[1].replace(/^\/api\/v1/,'')||'/');}};walk(path.join(resolveSiblingApkRoot(),'app/src/main/java'));
   const routes=new Set(routeManifest().routes),missing=[...endpoints].filter(e=>!routes.has(e));assert.deepEqual(missing,[]);assert.ok(endpoints.size>=30);
 }
-console.log('portfolio-chart-regression-repair-v331 ok');
+console.log('monthly-variation-logos-return-indices-v332 ok');

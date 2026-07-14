@@ -737,6 +737,11 @@ function emptyCompatible(status = 'OK') {
   return { status, items: [], events: [], data: [], partial: false, source: 'VALORAE Proxy' };
 }
 
+function isPublicAssetLogoRoute(path = '', method = 'GET') {
+  const normalizedMethod = String(method || 'GET').toUpperCase();
+  return (path === '/asset/logo' || path === '/asset/yahoo-logo') && ['GET', 'HEAD'].includes(normalizedMethod);
+}
+
 export async function dispatchRoute(req, res) {
   // Instala a captura antes de CORS, preflight, leitura de body e qualquer handler.
   // Isso garante que JSON, texto, binário, redirect, streaming, HEAD, OPTIONS e erros
@@ -759,7 +764,9 @@ export async function dispatchRoute(req, res) {
     req.valoraeClientAuth = clientAuth;
     res.setHeader('X-Valorae-Auth-Mode', clientAuth.mode || 'open');
     if (clientAuth.appId) res.setHeader('X-Valorae-App-Id', String(clientAuth.appId).slice(0, 80));
-    if (shouldRequireClientAuth() && !clientAuth.ok) {
+    const publicAssetLogoRoute = isPublicAssetLogoRoute(path, req.method);
+    if (publicAssetLogoRoute) res.setHeader('X-Valorae-Auth-Bypass', 'public-asset-logo');
+    if (shouldRequireClientAuth() && !publicAssetLogoRoute && !clientAuth.ok) {
       return sendJson(req, res, {
         version: RELEASE.version,
         status: 'UNAUTHORIZED',

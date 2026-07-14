@@ -1,71 +1,75 @@
 {
   "name": "VALORAE Proxy",
   "version": "21.12.0",
-  "release": "21.12.363-portfolio-chart-regression-repair-v331",
-  "patch": "21.12.363-portfolio-chart-regression-repair-v331",
-  "releasePatch": "21.12.363-portfolio-chart-regression-repair-v331",
-  "latestInternalPatch": "21.12.363-portfolio-chart-regression-repair-v331",
-  "description": "Proxy v331 corrige a composição temporal dos gráficos da carteira e do patrimônio, pareado ao APK v511.",
-  "contract": "APK v511 / Proxy 21.12.363 + mobile protocol 2026.07.10.10 + asset modal delivery v4 + portfolio history v331; fechamento por bucket, estoque inicial reconciliado e séries sem reescala global.",
+  "release": "21.12.364-monthly-variation-logos-return-indices-v332",
+  "patch": "21.12.364-monthly-variation-logos-return-indices-v332",
+  "releasePatch": "21.12.364-monthly-variation-logos-return-indices-v332",
+  "latestInternalPatch": "21.12.364-monthly-variation-logos-return-indices-v332",
+  "description": "Proxy v332 restaura variações mensais históricas, logotipos oficiais e índices do Retorno, pareado ao APK v512.",
+  "contract": "APK v512 / Proxy 21.12.364 + mobile protocol 2026.07.10.10 + asset modal delivery v4 + portfolio history v332; variação mensal ancorada, logos binários públicos e benchmarks por janela real.",
   "primaryMobileRoute": "/api/v1/mobile/practical-sync",
   "majorCapabilities": [
-    "fechamento mensal por estado no fim do bucket",
-    "estoque inicial reconciliado com histórico parcial",
-    "séries transacionais sem reescala global",
-    "composição de patrimônio aplicada/ganho/perda"
+    "variação mensal histórica com mês-âncora",
+    "avaliação mensal parcial explicitamente sinalizada",
+    "logos oficiais binários compatíveis com Coil",
+    "índices reais por janela do Retorno"
   ],
   "cleanup": "proxy-clean-v207-2026-07-03",
   "cleanupDescription": "Pacote limpo com gateway único, monitor central e entrega progressiva dos modais de AÇÃO e FII.",
   "releaseDate": "2026-07-13",
-  "checkpoint": "portfolio-chart-regression-repair-v331",
-  "title": "Proxy v331 — Reparo dos gráficos da carteira e do patrimônio",
-  "summary": "Corrige o fechamento mensal, preserva estoque anterior ao histórico importado e impede distorção da série transacional da carteira.",
-  "publicVersion": "21.12.363",
-  "label": "portfolio-chart-regression-repair-v331",
+  "checkpoint": "monthly-variation-logos-return-indices-v332",
+  "title": "Proxy v332 — Variação mensal, logotipos oficiais e índices do Retorno",
+  "summary": "Preserva fechamentos mensais anteriores, libera a rota binária de logos para o APK e dimensiona os benchmarks pelo período exibido.",
+  "publicVersion": "21.12.364",
+  "label": "monthly-variation-logos-return-indices-v332",
   "updatedAt": "2026-07-13",
   "date": "2026-07-13",
   "notes": [
-    "Pareado ao APK v511.",
-    "Nenhuma cotação histórica sintética ou interpolada."
+    "Pareado ao APK v512.",
+    "Nenhuma cotação ou rentabilidade de índice simulada."
   ],
   "releaseNotes": [
-    "Compras no meio do mês passam a compor o fechamento mensal.",
-    "A data da primeira transação conhecida não corta estoque preexistente.",
-    "O ponto vivo atualiza somente a extremidade da série no APK."
+    "Mês-âncora permite calcular a primeira variação visível.",
+    "Ativo sem histórico não elimina toda a série mensal.",
+    "A rota de logo atravessa somente o gate incompatível com o Coil.",
+    "Benchmarks do Retorno usam a janela selecionada."
   ],
-  "apkPair": "apk_valorae_checkpoint101_portfolio_chart_regression_repair_v511_AI_STUDIO_ROOT_OK_2026_07_13.zip",
-  "apkInstallable": "Valorae_v511_2026.07.13.07_android7plus_debug_signed.apk",
-  "apkVersion": "2026.07.13.07",
+  "apkPair": "apk_valorae_checkpoint102_monthly_variation_logos_return_indices_v512_AI_STUDIO_ROOT_OK_2026_07_13.zip",
+  "apkInstallable": "Valorae_v512_2026.07.13.08_android7plus_debug_signed.apk",
+  "apkVersion": "2026.07.13.08",
   "fileSize": 0,
   "highlights": [
-    "Fechamento mensal coerente com a composição da carteira.",
-    "Custo de abertura preservado em importações parciais.",
-    "Sem multiplicação retroativa da série para encaixar a cotação atual.",
-    "APK e Proxy usam a mesma regra de disponibilidade da posição."
+    "Variações históricas do Patrimônio total restauradas.",
+    "Logos oficiais em Análise, Ativos e Histórico.",
+    "IBOV, IFIX, SMLL, IDIV e IVVB11 alinhados ao período exibido.",
+    "Intraday continua exigindo cotação real de todas as posições."
   ],
   "validation": [
-    "Teste de compra no meio do mês e fechamento mensal.",
-    "Teste de estoque anterior ao primeiro lançamento importado.",
-    "Build Vercel, sintaxe e suíte completa do Proxy.",
-    "Cross-stack APK v511."
+    "Teste mensal com componente sem histórico.",
+    "Teste intraday de cobertura integral.",
+    "Teste de logo público com demais rotas protegidas.",
+    "Teste de índices e aliases no Retorno.",
+    "Build Vercel, sintaxe, suíte completa e cross-stack APK v512."
   ],
-  "proxyPair": "valorae_proxy_checkpoint363_portfolio_chart_regression_repair_v331_AI_STUDIO_ROOT_OK_2026_07_13.zip",
+  "proxyPair": "valorae_proxy_checkpoint364_monthly_variation_logos_return_indices_v332_AI_STUDIO_ROOT_OK_2026_07_13.zip",
   "validations": [
-    "Teste de compra no meio do mês e fechamento mensal.",
-    "Teste de estoque anterior ao primeiro lançamento importado.",
-    "Build Vercel, sintaxe e suíte completa do Proxy.",
-    "Cross-stack APK v511."
+    "Teste mensal com componente sem histórico.",
+    "Teste intraday de cobertura integral.",
+    "Teste de logo público com demais rotas protegidas.",
+    "Teste de índices e aliases no Retorno.",
+    "Build Vercel, sintaxe, suíte completa e cross-stack APK v512."
   ],
   "changes": [
-    "Novo cálculo de timestamp de estado para buckets mensal, semanal e diário.",
-    "Primeira compra efetiva deixa a série aberta quando há estoque inicial reconciliado.",
-    "Versão do motor de histórico elevada para v331.",
-    "Pareamento com o Checkpoint 101 do APK."
+    "Carry contábil restrito a componentes mensais/semanais indisponíveis e marcado como parcial.",
+    "Rota /asset/logo liberada do gate de autenticação global para GET/HEAD.",
+    "Profundidade de benchmarks separada da profundidade da carteira.",
+    "Aliases SMLL/SMAL11 e IDIV/DIVO11 normalizados e deduplicados.",
+    "Pareamento com o Checkpoint 102 do APK."
   ],
-  "contractVersion": "APK v511 / Proxy 21.12.363 + mobile protocol 2026.07.10.10 + asset modal delivery v4 + portfolio history v331; fechamento por bucket, estoque inicial reconciliado e séries sem reescala global.",
-  "latestVersion": "21.12.363",
-  "latest_version": "21.12.363",
-  "versionName": "21.12.363",
+  "contractVersion": "APK v512 / Proxy 21.12.364 + mobile protocol 2026.07.10.10 + asset modal delivery v4 + portfolio history v332; variação mensal ancorada, logos binários públicos e benchmarks por janela real.",
+  "latestVersion": "21.12.364",
+  "latest_version": "21.12.364",
+  "versionName": "21.12.364",
   "packageValidation": [
     "npm run build",
     "npm run check:syntax",

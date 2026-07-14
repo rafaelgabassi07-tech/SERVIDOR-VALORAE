@@ -1,5 +1,18 @@
 # VALORAE Proxy
 
+## Release atual — 21.12.364 / v332 (2026-07-13)
+
+Variação mensal histórica, logotipos oficiais e índices do modal Retorno.
+
+- O fechamento anterior oculto serve de âncora para a primeira variação visível.
+- Uma posição mensal sem histórico não elimina as demais cotações reais; a avaliação parcial é sinalizada.
+- Intraday só publica pontos com cobertura real de todas as posições ativas.
+- `/api/v1/asset/logo` aceita GET/HEAD do APK sem chave privada, mantendo rate limit e validações.
+- Os benchmarks do Retorno usam a janela selecionada, com aliases deduplicados.
+- Validação: 411 arquivos JavaScript, 214 arquivos de teste e 23 testes cross-stack aprovados.
+- Pareamento: APK v512 / protocolo 2026.07.10.10 / portfolio history v332.
+
+
 ## Release atual — 21.12.363 / v331 (2026-07-13)
 
 Reparo pareado dos gráficos **Preços da carteira** e **Patrimônio total**.

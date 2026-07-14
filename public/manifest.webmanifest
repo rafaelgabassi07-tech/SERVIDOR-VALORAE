@@ -6,8 +6,8 @@
   "background_color": "#000000",
   "theme_color": "#000000",
   "id": "/server.html",
-  "description": "Monitor do VALORAE Proxy v331, com gráficos da carteira e patrimônio reparados e pareado ao APK v511.",
+  "description": "Monitor do VALORAE Proxy v331, com gráficos da carteira e patrimônio reparados e pareado ao APK v512.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.363"
+  "version": "21.12.364"
 }

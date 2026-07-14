@@ -1,3 +1,14 @@
+## 21.12.364 — v332 — 2026-07-13
+
+- Variação mensal das janelas fixas recebe um mês anterior de âncora no APK.
+- Série mensal preserva ativos com histórico real quando outra componente está indisponível, sinalizando `partialValuation`.
+- Série intradiária mantém cobertura integral e não retropropaga custo ou cotação futura.
+- Rota binária de logotipos é pública para GET/HEAD, sem liberar as rotas de dados.
+- Benchmarks do Retorno usam profundidade independente da carteira e janela compatível com o período exibido.
+- SMLL/SMAL11 e IDIV/DIVO11 são normalizados e deduplicados.
+- Validação final: build Vercel, 411 arquivos JavaScript, 214 arquivos de teste e 23 testes cross-stack aprovados.
+- Pareamento: APK v512 / Checkpoint 102.
+
 ## 21.12.363 — v331 — 2026-07-13
 
 - Estado da posição calculado no fechamento real dos buckets mensal, semanal e diário.
