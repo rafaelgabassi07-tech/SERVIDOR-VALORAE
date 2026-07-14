@@ -142,8 +142,16 @@ try {
     assert.match(avatar, /X-Valorae-Mobile-Protocol/);
     assert.match(avatar, /asset\/logo\?ticker=\$ticker&v=3/);
     assert.match(discovery, /asset\/logo\?ticker=\$cleanTicker&v=3/);
-    assert.match(service, /historyMonths", range\.toPortfolioReturnsHistoryMonths\(\)/);
-    assert.match(service, /benchmarkMonths", range\.toPortfolioReturnsHistoryMonths\(\)/);
+    assert.ok(
+      /historyMonths", range\.toPortfolioReturnsHistoryMonths\(\)/.test(service)
+        || (/val historyMonths = range\.toPortfolioReturnsHistoryMonths\(\)/.test(service) && /put\("historyMonths", historyMonths\)/.test(service)),
+      'profundidade da carteira deve continuar vinculada ao período'
+    );
+    assert.ok(
+      /benchmarkMonths", range\.toPortfolioReturnsHistoryMonths\(\)/.test(service)
+        || (/val benchmarkMonths = historyMonths/.test(service) && /put\("benchmarkMonths", benchmarkMonths\)/.test(service)),
+      'profundidade dos benchmarks deve continuar explícita'
+    );
     assert.match(calculator, /val calculationMonthKeys/);
     assert.match(calculator, /filter \{ it\.monthKey in displayMonthKeySet \}/);
   }

@@ -32,8 +32,11 @@ global.fetch = async (url) => {
     const symbol = decodeURIComponent(textUrl.match(/chart\/([^?]+)/)?.[1] || '');
     return new Response(JSON.stringify(yahooPayload(symbol)), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
-  if (textUrl.includes('sistemaswebb3-listados.b3.com.br') || textUrl.includes('maisretorno.com') || textUrl.includes('investidor10.com.br')) {
-    throw new Error(`Fallback externo não deveria ser chamado para índices Yahoo-only: ${textUrl}`);
+  if (textUrl.includes('investidor10.com.br/api/indices/cotacoes/')) {
+    return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
+  if (textUrl.includes('sistemaswebb3-listados.b3.com.br') || textUrl.includes('maisretorno.com')) {
+    throw new Error(`Fonte não prevista na cadeia direta + Yahoo: ${textUrl}`);
   }
   return new Response('', { status: 404 });
 };
@@ -64,8 +67,8 @@ try {
   assert.ok(requests.some(url => url.includes('IDIV.SA')), 'IDIV.SA must be requested');
   assert.ok(requests.some(url => url.includes('SMLL.SA')), 'SMLL.SA must be requested');
   assert.equal(requests.some(url => url.includes('maisretorno.com')), false, 'Mais Retorno must not be called');
-  assert.equal(requests.some(url => url.includes('investidor10.com.br')), false, 'Investidor10 must not be called');
-  console.log('Portfolio returns Yahoo-only direct index test OK.');
+  assert.equal(requests.some(url => url.includes('investidor10.com.br/api/indices/cotacoes/')), true, 'A fonte direta usada pelos modais deve ser tentada antes do Yahoo');
+  console.log('Portfolio returns direct-index-first with Yahoo snapshot fallback test OK.');
 } finally {
   clearCache();
   global.fetch = originalFetch;

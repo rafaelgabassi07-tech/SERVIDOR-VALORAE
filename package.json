@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v332 restaura variações mensais históricas, logotipos oficiais e índices do Retorno, pareado ao APK v512.",
+  "description": "Proxy v333 corrige a página Retorno para usar a mesma cadeia real de índices dos modais, pareado ao APK v513.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,24 +20,24 @@
   "dependencies": {},
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.364-monthly-variation-logos-return-indices-v332",
+    "releasePatch": "21.12.365-return-index-provider-parity-v333",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.364",
-    "checkpoint": "monthly-variation-logos-return-indices-v332",
-    "releaseLabel": "monthly-variation-logos-return-indices-v332"
+    "publicVersion": "21.12.365",
+    "checkpoint": "return-index-provider-parity-v333",
+    "releaseLabel": "return-index-provider-parity-v333"
   },
-  "releasePatch": "21.12.364-monthly-variation-logos-return-indices-v332",
+  "releasePatch": "21.12.365-return-index-provider-parity-v333",
   "config": {
-    "releasePatch": "21.12.364-monthly-variation-logos-return-indices-v332",
-    "publicVersion": "21.12.364",
-    "checkpoint": "monthly-variation-logos-return-indices-v332",
-    "releaseLabel": "monthly-variation-logos-return-indices-v332"
+    "releasePatch": "21.12.365-return-index-provider-parity-v333",
+    "publicVersion": "21.12.365",
+    "checkpoint": "return-index-provider-parity-v333",
+    "releaseLabel": "return-index-provider-parity-v333"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.364-monthly-variation-logos-return-indices-v332",
-    "publicVersion": "21.12.364",
-    "checkpoint": "monthly-variation-logos-return-indices-v332",
-    "releaseLabel": "monthly-variation-logos-return-indices-v332"
+    "releasePatch": "21.12.365-return-index-provider-parity-v333",
+    "publicVersion": "21.12.365",
+    "checkpoint": "return-index-provider-parity-v333",
+    "releaseLabel": "return-index-provider-parity-v333"
   }
 }

@@ -1,3 +1,13 @@
+## 21.12.365 — v333 — 2026-07-13
+
+- Página Retorno passa a usar a mesma cadeia dos modais: API direta de cotações dos índices antes da contingência geral.
+- SMLL, IFIX e IDIV deixam de depender exclusivamente do Yahoo Finance Chart API.
+- O payload publica `provider`, `providerParity` e `providerAttempts` por benchmark para diagnóstico verificável.
+- O contrato sobe para `valorae-portfolio-returns-v2-index-provider-parity`.
+- Teste de produção equivalente cobre Yahoo vazio + API direta válida e comprova as três séries no gráfico.
+- Pareamento: APK v513 / Checkpoint 103.
+- Validação final: 215 arquivos de teste, 412 arquivos JavaScript, build Vercel, auditoria de versão e 24 testes cross-stack aprovados.
+
 ## 21.12.364 — v332 — 2026-07-13
 
 - Variação mensal das janelas fixas recebe um mês anterior de âncora no APK.

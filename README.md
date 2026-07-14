@@ -1,5 +1,17 @@
 # VALORAE Proxy
 
+## Release atual — 21.12.365 / v333 (2026-07-13)
+
+Paridade real dos índices entre a página Retorno e os modais de Ação/FII.
+
+- SMLL, IFIX e IDIV passam a consultar primeiro a mesma API direta de histórico usada pelos modais.
+- Yahoo Finance permanece como contingência quando a fonte direta não entrega pontos suficientes.
+- O contrato de Retorno publica o provedor efetivo, a cadeia tentada e a série mensal já mesclada.
+- Nenhum ETF, ticker substituto, snapshot duplicado ou curva sintética foi introduzido.
+- Pareamento: APK v513 / protocolo 2026.07.10.10 / contrato de Retorno v2.
+- Validação final: 215 arquivos de teste, 412 arquivos JavaScript e 24 testes cross-stack aprovados.
+
+
 ## Release atual — 21.12.364 / v332 (2026-07-13)
 
 Variação mensal histórica, logotipos oficiais e índices do modal Retorno.

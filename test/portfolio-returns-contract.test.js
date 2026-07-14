@@ -13,7 +13,7 @@ const payload = {
 };
 
 const contract = await buildPortfolioReturns(payload);
-assert.equal(contract.contractVersion, 'valorae-portfolio-returns-v1');
+assert.equal(contract.contractVersion, 'valorae-portfolio-returns-v2-index-provider-parity');
 assert.equal(contract.status, 'OK');
 assert.equal(contract.series.length, 3);
 assert.equal(contract.summary.totalReturnPercent, 5);
