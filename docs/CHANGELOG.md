@@ -1,3 +1,10 @@
+## Hotfix de deploy — Checkpoint 116 / Proxy 21.12.378 — 2026-07-15
+
+- Corrigido `ERR_PNPM_OUTDATED_LOCKFILE` no Vercel.
+- `undici@^7.28.0` foi sincronizado no importador raiz do `pnpm-lock.yaml`; o pacote e seu snapshot já estavam registrados no lockfile.
+- Adicionado teste automático de consistência entre `package.json`, `package-lock.json` e `pnpm-lock.yaml`.
+- Release funcional, contratos, rotas e pareamento com o APK v526 permanecem inalterados.
+
 ## 21.12.378 — Checkpoint 116: decomposição final
 
 - Transporte HTTP mantém a fachada pública e separa perfis/configuração em módulo puro.
