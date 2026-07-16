@@ -1,5 +1,5 @@
 import { ValoraeEngine } from '../../lib/Valorae-engine.js';
-import { fetchIpca } from '../../lib/market/bcb.js';
+import { fetchIpca } from '../../lib/sources/adapters/index.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute, boolParam, clampNumber, sendRouteError, withRouteDeadline } from '../../lib/http/route.js';
 

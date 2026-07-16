@@ -1,6 +1,6 @@
 import { analyzePortfolio } from '../../lib/portfolio/analytics.js';
 import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../../lib/portfolio/history.js';
-import { fetchIpca } from '../../lib/market/bcb.js';
+import { fetchIpca } from '../../lib/sources/adapters/index.js';
 import { fetchInvestidor10DividendAgenda } from '../../lib/market/investidor10-dividend-agenda.js';
 import { fetchAndCompareTickers } from '../../lib/market/compare.js';
 import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../../lib/Valorae-engine.js';

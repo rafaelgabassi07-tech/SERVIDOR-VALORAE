@@ -24,7 +24,7 @@ const logos = read('lib/market/official-logo.js');
 assert.match(logos, /classifyTicker\(ticker\)/);
 assert.match(logos, /companytickerimage\?ticker=/);
 assert.match(logos, /sniffImage\(bytes, contentType/);
-assert.match(logos, /VALORAE_ASSET_LOGO_TTL_MS \|\| 24 \* 60 \* 60 \* 1000/);
+assert.match(logos, /VALORAE_ASSET_LOGO_TTL_MS \|\| 30 \* 24 \* 60 \* 60 \* 1000/);
 
 const router = read('routes/_router.js');
 assert.match(router, /fetchOfficialAssetLogo/);

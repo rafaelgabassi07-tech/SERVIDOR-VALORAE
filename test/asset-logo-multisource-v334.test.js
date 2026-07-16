@@ -63,9 +63,6 @@ const calls = [];
 globalThis.fetch = async (url) => {
   const raw = String(url);
   calls.push(raw);
-  if (raw.includes('brapi.dev')) {
-    return new Response(JSON.stringify({ error: 'token-required' }), { status: 401, headers: { 'content-type': 'application/json' } });
-  }
   if (raw.includes('/v6/finance/quote')) {
     const isPetr = raw.includes('PETR4.SA');
     return new Response(JSON.stringify({
@@ -108,23 +105,25 @@ try {
     assert.match(logo?.sourceUrl || '', new RegExp(ticker, 'i'));
   }
 
-  const routeLogo = await invoke('/api/v1/asset/logo?ticker=VALE3&cache=false&v=4');
+  const routeLogo = await invoke('/api/v1/asset/logo?ticker=VALE3&cache=false&v=5');
   assert.equal(routeLogo.statusCode, 200);
   assert.equal(routeLogo.getHeader('X-Valorae-Auth-Bypass'), 'public-asset-logo');
   assert.equal(routeLogo.getHeader('X-Valorae-Logo-Contract'), OFFICIAL_ASSET_LOGO_VERSION);
   assert.equal(routeLogo.getHeader('X-Valorae-Logo-Ticker'), 'VALE3');
   assert.match(routeLogo.getHeader('X-Valorae-Logo-Source') || '', /Investidor10/);
+  assert.equal(routeLogo.getHeader('X-Valorae-Logo-Provider'), 'investidor10');
+  assert.equal(routeLogo.getHeader('X-Valorae-Logo-Tier'), 'ASSET_PAGE');
   assert.equal(routeLogo.getHeader('Content-Type'), 'image/png');
   assert.equal(Buffer.isBuffer(routeLogo.body), true);
 
-  const headLogo = await invoke('/api/v1/asset/logo?ticker=HGLG11&cache=false&v=4', 'HEAD');
+  const headLogo = await invoke('/api/v1/asset/logo?ticker=HGLG11&cache=false&v=5', 'HEAD');
   assert.equal(headLogo.statusCode, 200);
   assert.equal(headLogo.body, '');
   assert.equal(headLogo.getHeader('X-Valorae-Logo-Ticker'), 'HGLG11');
 
   assert.equal(calls.some(url => url.includes('investidor10.com.br/acoes/vale3/')), true);
   assert.equal(calls.some(url => url.includes('investidor10.com.br/fiis/hglg11/')), true);
-  console.log('asset-logo-multisource-v334 ok');
+  console.log('asset-logo-multisource-v335 fallback ok');
 } finally {
   globalThis.fetch = originalFetch;
   clearCache();

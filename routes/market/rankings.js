@@ -1,5 +1,5 @@
 import { fetchAndCompareTickers } from '../../lib/market/compare.js';
-import { fetchInvestidor10Rankings } from '../../lib/market/rankings-i10.js';
+import { fetchInvestidor10Rankings } from '../../lib/sources/adapters/index.js';
 import { buildMarketMovers } from '../../lib/sources/quotes.js';
 import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';

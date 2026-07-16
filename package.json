@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v334 resolve logos oficiais de ações e FIIs por múltiplas fontes validadas, pareado ao APK v514.",
+  "description": "Proxy v346 conclui a decomposição do transporte, estado compartilhado e canários em módulos coesos, preservando fachadas, contratos e o pareamento com o APK v526.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,27 +17,34 @@
   "engines": {
     "node": "24.x"
   },
-  "dependencies": {},
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "cheerio": "^1.2.0",
+    "undici": "^7.28.0"
+  },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.366-multisource-official-logo-v334",
+    "releasePatch": "21.12.378-final-decomposition-v346",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.366",
-    "checkpoint": "multisource-official-logo-v334",
-    "releaseLabel": "multisource-official-logo-v334"
+    "publicVersion": "21.12.378",
+    "checkpoint": "final-decomposition-v346",
+    "releaseLabel": "final-decomposition-v346"
   },
-  "releasePatch": "21.12.366-multisource-official-logo-v334",
+  "releasePatch": "21.12.378-final-decomposition-v346",
   "config": {
-    "releasePatch": "21.12.366-multisource-official-logo-v334",
-    "publicVersion": "21.12.366",
-    "checkpoint": "multisource-official-logo-v334",
-    "releaseLabel": "multisource-official-logo-v334"
+    "releasePatch": "21.12.378-final-decomposition-v346",
+    "publicVersion": "21.12.378",
+    "checkpoint": "final-decomposition-v346",
+    "releaseLabel": "final-decomposition-v346"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.366-multisource-official-logo-v334",
-    "publicVersion": "21.12.366",
-    "checkpoint": "multisource-official-logo-v334",
-    "releaseLabel": "multisource-official-logo-v334"
+    "releasePatch": "21.12.378-final-decomposition-v346",
+    "publicVersion": "21.12.378",
+    "checkpoint": "final-decomposition-v346",
+    "releaseLabel": "final-decomposition-v346"
+  },
+  "optionalDependencies": {
+    "playwright-core": "^1.61.1"
   }
 }

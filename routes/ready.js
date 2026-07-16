@@ -1,5 +1,6 @@
 import { ValoraeEngine, getValoraeRuntimeStats } from '../lib/Valorae-engine.js';
 import { cacheDriverInfo } from '../lib/cache/memory.js';
+import { sharedStateDriverInfo } from '../lib/state/shared-runtime-state.js';
 import { sendJson } from '../lib/performance/http.js';
 import { beginRoute } from '../lib/http/route.js';
 import { routeManifest } from './_router.js';
@@ -14,6 +15,7 @@ function buildReadiness() {
     { name: 'physicalFunctions', ok: manifest.physicalFunctions.includes('api/router.js') && manifest.physicalFunctions.length === 1, detail: `consolidado: ${manifest.physicalFunctions.join(', ')}` },
     { name: 'router', ok: manifest.routes.includes('/asset') && manifest.routes.includes('/ready'), detail: `${manifest.routes.length} rotas internas` },
     { name: 'cacheDriver', ok: cacheDriverInfo().driver === 'memory', detail: 'memory' },
+    { name: 'sharedState', ok: true, detail: `${sharedStateDriverInfo().driver}; recurso opcional com rollback seguro e fallback em memória` },
     { name: 'engineVersion', ok: ValoraeEngine.version.includes(version), detail: ValoraeEngine.version },
     { name: 'requiredCatalogs', ok: ['/fields','/errors','/openapi','/manifest','/env','/schema','/source/status'].every(r => manifest.routes.includes(r)), detail: 'fields/errors/openapi/manifest/env/schema/source-status' },
   ];
@@ -34,6 +36,6 @@ export default async function handler(req, res) {
     checks: readiness.checks,
     freeOnly: true,
     githubVercelReady: readiness.ready,
-    note: 'Readiness local não chama fontes externas; valida contrato, roteamento, cache e política free-only.',
+    note: 'Readiness local não chama fontes financeiras externas; valida contrato, roteamento, cache, estado compartilhado e política free-only.',
   }, { status: readiness.ready ? 200 : 503, engineVersion: ValoraeEngine.version, profile: 'ready', cachePolicy: 'etag', cacheControl: 'private, max-age=10' });
 }

@@ -1,8 +1,6 @@
 import { ValoraeEngine, canonicalizeTicker, inferAssetType, validarTicker } from '../../lib/Valorae-engine.js';
-import { fetchYahooHistory } from '../../lib/market/yahoo.js';
+import { fetchYahooHistory, fetchInvestidor10Rankings, fetchIpca } from '../../lib/sources/adapters/index.js';
 import { fetchIndicesSnapshot } from '../../lib/market/indices.js';
-import { fetchIpca } from '../../lib/market/bcb.js';
-import { fetchInvestidor10Rankings } from '../../lib/market/rankings-i10.js';
 import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../../lib/portfolio/history.js';
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute, boolParam, clampNumber, parseList, resolveSelfScrapeUrl, sendRouteError } from '../../lib/http/route.js';

@@ -1,0 +1,28 @@
+{
+  "version": "2026.07.14-checkpoint107-v1",
+  "policyVersion": "field-source-evidence-v1",
+  "mode": "additive-internal-observability",
+  "uiContractChanged": false,
+  "rules": [
+    "Metadados de observabilidade são aditivos e não substituem valores financeiros.",
+    "Nenhum HTML bruto, segredo, token ou identificador de usuário pode entrar no envelope.",
+    "Cada campo rastreado informa fonte, método, confiança, cache, fallback e horário quando disponíveis.",
+    "O traceId deve coincidir com X-Request-Id ou X-Valorae-Trace-Id.",
+    "A coleta possui limites de profundidade, nós visitados, campos e tempos de fonte para preservar desempenho."
+  ],
+  "headers": {
+    "request": "X-Valorae-Observability-Accept: field-lineage-v1",
+    "responseVersion": "X-Valorae-Field-Observability",
+    "responseTrace": "X-Valorae-Trace-Id"
+  },
+  "protectedEndpoints": [
+    "analysis",
+    "asset",
+    "assetModal",
+    "stockModal",
+    "fiiModal",
+    "portfolioReturns",
+    "portfolioHistory",
+    "mobileSync"
+  ]
+}

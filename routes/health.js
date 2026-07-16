@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     security: securityRuntimeStats(),
     capabilities: [
       'audit-hardening-v21.5.1','fields-catalog','errors-catalog','static-inspector','host-header-hardening','free-only-cache-enforcement','professional-refinement-v21.5','universal-financial-normalization','parser-resilience','schema-stability','payload-controls','compare-intelligence','advanced-portfolio-series','scraper-supremacy-audit','custom-selectors','market-cache-inflight','scraper4-get-post-compat','scraper-gap-boost','route-guard','consistent-json-errors','scrape-url-lockdown','security-headers','request-id','rate-limit','admin-status','admin-cache-control',
-      'performance-profiles','etag-304','stale-if-error-cache','true-selector-only-fast-profile','adaptive-batch-concurrency',
+      'performance-profiles','etag-304','stale-if-error-cache','true-selector-only-fast-profile','adaptive-batch-concurrency','provider-http-pools','bounded-provider-backpressure','http-transport-rollback','shared-runtime-state','cross-instance-contract-continuity','shared-provider-health','atomic-shared-leases','deterministic-real-canaries','additive-canary-promotion','shared-canary-circuit-breaker',
       'schema-validation','quality-score','field-confidence','valorae-score','debug=1',
       'portfolio-stats','financial-summary','golden-tests','multi-source-fallback','circuit-breaker',
       'market-history','compact-standard-full-views','compare-api',
@@ -32,6 +32,8 @@ export default async function handler(req, res) {
       'b3-calendar','range-aliases-1A-5A-Tudo','investidor10-live-rankings','scraper4-compat-mode'
     ],
     endpoints: [
+      '/api/v1/contract/shared-state',
+      '/api/v1/contract/real-canaries',
       '/api/fields',
       '/api/errors',
       '/inspector.html',

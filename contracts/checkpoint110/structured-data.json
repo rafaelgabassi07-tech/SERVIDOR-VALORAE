@@ -1,0 +1,23 @@
+{
+  "version": "2026.07.15-checkpoint110-v1",
+  "policyVersion": "structured-data-first-shadow-v1",
+  "implementation": "cheerio-script-discovery-safe-json-v1",
+  "defaultMode": "shadow",
+  "contractImpact": "none",
+  "discoveryOrder": [
+    "json-ld",
+    "__NEXT_DATA__",
+    "application-json",
+    "inline-assignments",
+    "chart-configurations",
+    "internal-endpoints",
+    "html-parser-fallback"
+  ],
+  "safety": {
+    "executesPageJavaScript": false,
+    "usesEval": false,
+    "followsDiscoveredEndpointsAutomatically": false,
+    "knownInternalEndpointAllowlistOnly": true,
+    "legacyOutputPreservedByDefault": true
+  }
+}

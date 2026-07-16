@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { RELEASE } from '../lib/core/release.js';
 import { sendJson, queryObject, readJsonBody } from '../lib/core/http.js';
 import { cacheStats, clearCache } from '../lib/core/cache.js';
@@ -7,12 +8,17 @@ import { buildPortfolioAnalysis, buildRealMarketHistory, buildPortfolioReturns, 
 import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../lib/portfolio/history.js';
 import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.js';
 import { buildAssetsPayload, buildIndicesPayload, buildMarketMovers, getQuote } from '../lib/sources/quotes.js';
-import { fetchInvestidor10Rankings } from '../lib/market/rankings-i10.js';
+import { fetchInvestidor10Rankings, getIpcaSeries, getConfirmedDividendsByTicker, buildSourceAdapterManifest, VALORAE_SOURCE_ADAPTER_VERSION } from '../lib/sources/adapters/index.js';
 import { getNews } from '../lib/sources/news.js';
-import { getIpcaSeries } from '../lib/sources/ipca.js';
+import { buildHtmlParserShadowManifest } from '../lib/scrape/standard-html-parser.js';
+import { buildStructuredDataManifest } from '../lib/scrape/structured-data-discovery.js';
+import { buildDynamicRenderManifest } from '../lib/scrape/dynamic-render-fallback.js';
+import { buildProviderTransportManifest } from '../lib/http/provider-transport.js';
+import { buildSharedStateManifest } from '../lib/state/shared-runtime-state.js';
+import { buildRealCanaryManifest } from '../lib/canary/real-canary.js';
+import { buildFinalDecompositionManifest } from '../lib/architecture/final-decomposition.js';
 import { fetchText } from '../lib/sources/fetch.js';
 import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tickers.js';
-import { getConfirmedDividendsByTicker } from '../lib/sources/status-dividends.js';
 import { getAgendaDividends } from '../lib/sources/agenda-dividends.js';
 import { buildAssetDetails, getAssetHistory } from '../lib/sources/asset-details.js';
 import { buildAnalysisPageResponse } from '../lib/analysis/analysis-page-response.js';
@@ -20,6 +26,14 @@ import { buildFiiModalContract } from '../lib/analysis/fii-modal-contract.js';
 import { buildStockModalContract } from '../lib/analysis/stock-modal-contract.js';
 import { buildAssetModalContract } from '../lib/analysis/asset-modal-contract.js';
 import { OFFICIAL_ASSET_LOGO_VERSION, fetchOfficialAssetLogo } from '../lib/market/official-logo.js';
+import { buildContractBaselineManifest } from '../lib/contract/baseline.js';
+import { contractContinuityStats, stabilizeContractPayloadShared } from '../lib/contract/continuity-store.js';
+import {
+  buildFormalSchemaManifest,
+  formalRequestSchemaMode,
+  validateFormalRequestPayload,
+} from '../lib/contract/formal-schema-validation.js';
+import { attachFieldObservability, buildFieldObservabilityManifest, fieldObservabilityStats, getFieldObservabilityTrace } from '../lib/observability/field-observability.js';
 import integrationManifestHandler from './integration/manifest.js';
 import integrationSdkHandler from './integration/sdk.js';
 import integrationPromptsHandler from './integration/prompts.js';
@@ -77,6 +91,46 @@ function analysisRouteCacheKey(ticker, payload = {}) {
   ].join(':');
 }
 
+
+function contractIdentity(endpoint, payload = {}) {
+  const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query || '');
+  const positions = Array.isArray(payload.positions) ? payload.positions : [];
+  const transactions = Array.isArray(payload.transactions) ? payload.transactions : [];
+  const positionSignature = positions
+    .map(item => [normalizeTicker(item?.ticker || item?.symbol), Number(item?.quantity || item?.qty || 0), Number(item?.avgPrice || item?.averagePrice || 0)].join(':'))
+    .sort()
+    .join('|');
+  const transactionSignature = transactions
+    .map(item => [normalizeTicker(item?.ticker || item?.symbol), String(item?.date || item?.timestamp || ''), String(item?.side || item?.operation || ''), Number(item?.quantity || item?.qty || 0), Number(item?.price || 0)].join(':'))
+    .sort()
+    .join('|');
+  const dividendEvents = Array.isArray(payload.dividendEvents) ? payload.dividendEvents : [];
+  const dividendSignature = dividendEvents
+    .map(item => [normalizeTicker(item?.ticker || item?.symbol), String(item?.paymentDate || item?.datePayment || item?.date || ''), Number(item?.valuePerShare || item?.amount || 0), Number(item?.quantityAtDate || item?.quantity || 0)].join(':'))
+    .sort()
+    .join('|');
+  const ownerIdentity = String(payload.userId || payload.accountId || payload.portfolioId || payload.ownerId || payload.deviceId || 'anonymous');
+  const rawIdentity = [
+    endpoint,
+    ownerIdentity,
+    ticker,
+    String(payload.stage || payload.mode || ''),
+    String(payload.range || payload.period || ''),
+    String(payload.interval || ''),
+    String(payload.assetFilter || ''),
+    positionSignature,
+    transactionSignature,
+    dividendSignature,
+  ].join('::');
+  return `${endpoint}:${ticker || 'portfolio'}:${createHash('sha256').update(rawIdentity).digest('hex')}`;
+}
+
+async function withContractBaseline(endpoint, payload, requestPayload = {}) {
+  const stable = await stabilizeContractPayloadShared(endpoint, contractIdentity(endpoint, requestPayload), payload);
+  return attachFieldObservability(endpoint, stable, {
+    traceId: requestPayload.requestId || stable?.requestId,
+  });
+}
 
 function safeRequestId(value = '') {
   return String(value || '')
@@ -137,6 +191,8 @@ function buildIntegrationSdkPayload() {
 }
 export function shouldReplaceLocalCache(data) {
   if (!data || data.status === 'ERROR') return false;
+  if (data.contractBaseline?.canReplacePrevious === false) return false;
+  if (data.contractSchemaValidation?.canReplacePrevious === false) return false;
   if (data.appResponseIntegrity?.cacheSafe === false) return false;
   if (data.engineLaunchGate?.decision === 'hold_previous_snapshot') return false;
   return true;
@@ -146,7 +202,7 @@ export function shouldReplaceLocalCache(data) {
     version: RELEASE.version,
     endpoint: 'integration/sdk',
     recommendedView: 'app',
-    stableRoots: ['appMobileSnapshot', 'appPayload', 'appSyncEnvelope', 'appResponseIntegrity', 'engineLaunchGate', 'engineRuntimeProfiler'],
+    stableRoots: ['contractBaseline', 'contractSchemaValidation', 'fieldObservability', 'appMobileSnapshot', 'appPayload', 'appSyncEnvelope', 'appResponseIntegrity', 'engineLaunchGate', 'engineRuntimeProfiler'],
     headers: requestHeadersCsv().split(', ').map(header => header.toLowerCase()),
     mobileProtocolVersion: VALORAE_MOBILE_PROTOCOL_VERSION,
     mobileCachePolicySeconds: VALORAE_MOBILE_CACHE_POLICY_SECONDS,
@@ -209,7 +265,7 @@ function buildIntegrationManifestPayload() {
     requestHeaders: requestHeadersCsv().split(', '),
     exposedResponseHeaders: exposeHeadersCsv().split(', '),
     stableRoots: {
-      firstPaint: 'appMobileSnapshot', detail: 'appPayload', cacheDecision: 'appSyncEnvelope', safety: 'appResponseIntegrity', quality: 'fieldConsistencyGuard', action: 'assetActionPlan'
+      formalSchema: 'contractSchemaValidation', observability: 'fieldObservability', firstPaint: 'appMobileSnapshot', detail: 'appPayload', cacheDecision: 'appSyncEnvelope', safety: 'appResponseIntegrity', quality: 'fieldConsistencyGuard', action: 'assetActionPlan'
     },
     endpoints: routeManifest().routes.map(path => ({
       path: `/api/v1${path}`,
@@ -431,7 +487,7 @@ function rootPayload() {
     version: RELEASE.version,
     status: 'online',
     contract: RELEASE.contract,
-    routes: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/dividends/batch', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/analysis', '/api/v1/monitor/summary', '/api/v1/monitor/self-test', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health'],
+    routes: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/dividends/batch', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/analysis', '/api/v1/monitor/summary', '/api/v1/monitor/self-test', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health', '/api/v1/contract/baseline', '/api/v1/contract/observability', '/api/v1/contract/source-adapters', '/api/v1/contract/html-parser-shadow', '/api/v1/contract/structured-data', '/api/v1/contract/dynamic-render', '/api/v1/contract/formal-schemas', '/api/v1/contract/http-transport', '/api/v1/contract/shared-state', '/api/v1/contract/real-canaries', '/api/v1/contract/final-decomposition'],
     router: routeManifest(),
     monitor: '/server.html'
   };
@@ -571,35 +627,50 @@ async function assetLogoHandler(req, res, payload = {}) {
       contractVersion: OFFICIAL_ASSET_LOGO_VERSION,
       ticker,
       symbol: ticker,
-      logoUrl: logo?.bytes?.length ? `/api/v1/asset/logo?ticker=${encodeURIComponent(ticker)}&v=4` : '',
+      logoUrl: logo?.bytes?.length ? `/api/v1/asset/logo?ticker=${encodeURIComponent(ticker)}&v=5` : '',
       logoSource: logo?.source || '',
       sourceUrl: logo?.sourceUrl || '',
       contentType: logo?.contentType || '',
       dimensions: logo?.width && logo?.height ? { width: logo.width, height: logo.height } : undefined,
       fingerprint: logo?.fingerprint || '',
       cache: logo?.cache || 'MISS',
+      providerKey: logo?.providerKey || '',
+      providerTier: logo?.providerTier || '',
+      providerStrategy: logo?.providerStrategy || '',
+      providerAttempts: Array.isArray(logo?.providerAttempts) ? logo.providerAttempts : [],
+      elapsedMs: Number(logo?.elapsedMs || 0),
       error: logo?.bytes?.length ? '' : 'Logo oficial indisponível nas fontes validadas.'
-    }, { cacheControl: logo?.bytes?.length ? 'public, max-age=86400, stale-while-revalidate=604800' : 'private, max-age=120' });
+    }, { cacheControl: logo?.bytes?.length ? 'public, max-age=604800, stale-while-revalidate=2592000, immutable' : 'private, max-age=90' });
   }
 
   if (logo?.bytes?.length) {
-    res.statusCode = 200;
+    const etag = logo.fingerprint ? `"${logo.fingerprint}"` : '';
     res.setHeader('Content-Type', logo.contentType || 'image/png');
-    res.setHeader('Content-Length', String(logo.bytes.length));
-    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=2592000, immutable');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Valorae-Logo-Contract', OFFICIAL_ASSET_LOGO_VERSION);
     res.setHeader('X-Valorae-Logo-Ticker', ticker);
     res.setHeader('X-Valorae-Logo-Source', logo.source || 'official-asset-logo-resolver');
+    res.setHeader('X-Valorae-Logo-Provider', logo.providerKey || 'unknown');
+    res.setHeader('X-Valorae-Logo-Tier', logo.providerTier || 'unknown');
     res.setHeader('X-Valorae-Logo-Cache', logo.cache || 'MISS');
-    if (logo.fingerprint) res.setHeader('ETag', `"${logo.fingerprint}"`);
+    res.setHeader('X-Valorae-Logo-Elapsed-Ms', String(Math.max(0, Number(logo.elapsedMs || 0))));
+    res.setHeader('Server-Timing', `logo;dur=${Math.max(0, Number(logo.elapsedMs || 0))}`);
+    if (etag) res.setHeader('ETag', etag);
+    const ifNoneMatch = String(req?.headers?.['if-none-match'] || req?.headers?.['If-None-Match'] || '');
+    if (etag && ifNoneMatch.split(',').map(value => value.trim()).includes(etag)) {
+      res.statusCode = 304;
+      return res.end('');
+    }
+    res.statusCode = 200;
+    res.setHeader('Content-Length', String(logo.bytes.length));
     if (String(req.method || 'GET').toUpperCase() === 'HEAD') return res.end('');
     return res.end(logo.bytes);
   }
 
   res.statusCode = 404;
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Cache-Control', 'private, max-age=120');
+  res.setHeader('Cache-Control', 'private, max-age=90');
   res.setHeader('X-Valorae-Logo-Contract', OFFICIAL_ASSET_LOGO_VERSION);
   res.setHeader('X-Valorae-Logo-Ticker', ticker);
   return res.end('logo oficial indisponível');
@@ -820,6 +891,17 @@ export async function dispatchRoute(req, res) {
     requestId = safeRequestId(incomingRequestId || payloadRequestId || requestId) || requestId;
     payload.requestId = requestId;
     res.setHeader('X-Request-Id', requestId);
+    const formalRequestValidation = validateFormalRequestPayload(path, payload);
+    req.valoraeFormalRequestValidation = formalRequestValidation;
+    if (formalRequestSchemaMode() === 'enforce' && formalRequestValidation.applicable && !formalRequestValidation.ok) {
+      return sendJson(req, res, {
+        status: 'ERROR',
+        code: 'FORMAL_REQUEST_SCHEMA_INVALID',
+        error: 'A requisição não corresponde ao schema formal desta rota.',
+        requestId,
+        contractSchemaValidation: { ...formalRequestValidation, hiddenFromUi: true, canReplacePrevious: false },
+      }, { status: 400, cacheControl: 'no-store' });
+    }
     req.query = { ...(req.query || {}), ...payload };
     if (req.body === undefined || req.body === null || (typeof req.body === 'object' && !Array.isArray(req.body) && Object.keys(req.body).length === 0)) req.body = payload;
 
@@ -829,6 +911,23 @@ export async function dispatchRoute(req, res) {
     if (path === '/integration/manifest') return sendJson(req, res, buildIntegrationManifestPayload(), { cacheControl: 'private, max-age=120' });
     if (path === '/integration/sdk') return sendJson(req, res, buildIntegrationSdkPayload(), { cacheControl: 'private, max-age=120' });
     if (path === '/integration/prompts') return sendJson(req, res, buildIntegrationPromptsPayload(), { cacheControl: 'private, max-age=120' });
+    if (path === '/contract/baseline') return sendJson(req, res, { ...buildContractBaselineManifest(), release: RELEASE.patch, continuityStore: contractContinuityStats() }, { cacheControl: 'private, max-age=120' });
+    if (path === '/contract/source-adapters') return sendJson(req, res, { ...buildSourceAdapterManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
+    if (path === '/contract/html-parser-shadow') return sendJson(req, res, { ...buildHtmlParserShadowManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
+    if (path === '/contract/structured-data') return sendJson(req, res, { ...buildStructuredDataManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
+    if (path === '/contract/dynamic-render') return sendJson(req, res, { ...buildDynamicRenderManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=15' });
+    if (path === '/contract/formal-schemas') return sendJson(req, res, { ...buildFormalSchemaManifest({ includeSchemas: String(payload.includeSchemas || payload.full || '').toLowerCase() === 'true' || payload.includeSchemas === '1' }), release: RELEASE.patch }, { cacheControl: 'private, max-age=120' });
+    if (path === '/contract/http-transport') return sendJson(req, res, { ...buildProviderTransportManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=15' });
+    if (path === '/contract/shared-state') return sendJson(req, res, { ...buildSharedStateManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=10' });
+    if (path === '/contract/real-canaries') return sendJson(req, res, { ...buildRealCanaryManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=10' });
+    if (path === '/contract/final-decomposition') return sendJson(req, res, { ...buildFinalDecompositionManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=60' });
+    if (path === '/contract/observability') {
+      const trace = getFieldObservabilityTrace(payload.traceId || payload.requestId || '');
+      return sendJson(req, res, trace
+        ? { status: 'OK', endpoint: 'contract/observability/trace', trace, release: RELEASE.patch }
+        : { ...buildFieldObservabilityManifest(), release: RELEASE.patch, traceStore: fieldObservabilityStats() },
+      { cacheControl: trace ? 'no-store' : 'private, max-age=120' });
+    }
     if (path === '/release/readiness' || path === '/personal/readiness') return releaseReadinessHandler(req, res);
     if (path === '/manifest' || path === '/schema' || path === '/source/status' || path === '/deploy/status') return sendJson(req, res, manifest());
     if (path === '/cache/stats') return sendJson(req, res, { status: 'OK', cache: cacheStats() });
@@ -846,9 +945,9 @@ export async function dispatchRoute(req, res) {
       return sendJson(req, res, { status: 'OK', cleared: true, requestId }, { cacheControl: 'no-store' });
     }
 
-    if (path === '/mobile/bootstrap' || path === '/app/bootstrap') return sendJson(req, res, await mobileBootstrap(payload), { cacheControl: 'private, max-age=45' });
-    if (path === '/mobile/practical-sync' || path === '/app/practical-sync') return sendJson(req, res, await buildMobilePortfolioSync({ ...payload, practicalMode: true, includeDividendsInBundle: payload.includeDividendsInBundle ?? false, includeRankings: payload.includeRankings ?? false }), { cacheControl: 'private, max-age=20' });
-    if (path === '/mobile/portfolio-sync' || path === '/app/portfolio-sync' || path === '/portfolio/insights-bundle') return sendJson(req, res, await buildMobilePortfolioSync(payload), { cacheControl: 'private, max-age=20' });
+    if (path === '/mobile/bootstrap' || path === '/app/bootstrap') return sendJson(req, res, await withContractBaseline('mobileSync', await mobileBootstrap(payload), payload), { cacheControl: 'private, max-age=45' });
+    if (path === '/mobile/practical-sync' || path === '/app/practical-sync') return sendJson(req, res, await withContractBaseline('mobileSync', await buildMobilePortfolioSync({ ...payload, practicalMode: true, includeDividendsInBundle: payload.includeDividendsInBundle ?? false, includeRankings: payload.includeRankings ?? false }), payload), { cacheControl: 'private, max-age=20' });
+    if (path === '/mobile/portfolio-sync' || path === '/app/portfolio-sync' || path === '/portfolio/insights-bundle') return sendJson(req, res, await withContractBaseline('mobileSync', await buildMobilePortfolioSync(payload), payload), { cacheControl: 'private, max-age=20' });
 
     if (path === '/dividends/batch') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
     if (path === '/portfolio/dividends' || path === '/portfolio/next-dividends' || path === '/portfolio/events') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
@@ -856,7 +955,7 @@ export async function dispatchRoute(req, res) {
 
     if (path === '/portfolio/equilibrium' || path === '/portfolio/balance') return sendJson(req, res, buildEquilibriumContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioEquilibrium}` });
     if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, buildPortfolioAnalysis(payload), { cacheControl: 'private, max-age=20' });
-    if (path === '/portfolio/returns' || path === '/portfolio/return' || path === '/portfolio/performance') return sendJson(req, res, await buildPortfolioReturns(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioReturns}` });
+    if (path === '/portfolio/returns' || path === '/portfolio/return' || path === '/portfolio/performance') return sendJson(req, res, await withContractBaseline('portfolioReturns', await buildPortfolioReturns(payload), payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioReturns}` });
     // Compat marker: VALORAE_REALTIME_PORTFOLIO_HISTORY_ENGINE_V291 evoluído para VALORAE_PORTFOLIO_HISTORY_REBUILD_V292.
     if (path === '/portfolio/history') {
       const normalizedPositions = normalizePortfolioPositions({
@@ -876,15 +975,15 @@ export async function dispatchRoute(req, res) {
           timeoutMs: payload.timeoutMs || 12000,
           maxConcurrency: payload.maxConcurrency || 4
         });
-        return sendJson(req, res, { endpoint: 'portfolio-history', ...data }, { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioHistory}, stale-while-revalidate=120` });
+        return sendJson(req, res, await withContractBaseline('portfolioHistory', { endpoint: 'portfolio-history', ...data }, payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioHistory}, stale-while-revalidate=120` });
       }
-      return sendJson(req, res, await buildRealMarketHistory(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioHistory}, stale-while-revalidate=120` });
+      return sendJson(req, res, await withContractBaseline('portfolioHistory', await buildRealMarketHistory(payload), payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioHistory}, stale-while-revalidate=120` });
     }
     if (path === '/asset/history') return assetHistoryHandler(req, res);
     if (path === '/asset/logo' || path === '/asset/yahoo-logo') return assetLogoHandler(req, res, payload);
-    if (path === '/asset/modal') return sendJson(req, res, await buildAssetModalContract(payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
-    if (path === '/asset/fii-modal' || path === '/fii/modal') return sendJson(req, res, await buildFiiModalContract(payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
-    if (path === '/asset/stock-modal' || path === '/asset/action-modal' || path === '/acao/modal') return sendJson(req, res, await buildStockModalContract(payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
+    if (path === '/asset/modal') return sendJson(req, res, await withContractBaseline('assetModal', await buildAssetModalContract(payload), payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
+    if (path === '/asset/fii-modal' || path === '/fii/modal') return sendJson(req, res, await withContractBaseline('fiiModal', await buildFiiModalContract(payload), payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
+    if (path === '/asset/stock-modal' || path === '/asset/action-modal' || path === '/acao/modal') return sendJson(req, res, await withContractBaseline('stockModal', await buildStockModalContract(payload), payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
     if (path === '/analysis' || path === '/asset/analysis') {
       const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query);
       if (!ticker) return sendJson(req, res, { status: 'ERROR', ok: false, endpoint: 'analysis', error: 'Informe ticker=PETR4 ou symbol=PETR4.' }, { status: 400, cacheControl: 'no-store' });
@@ -896,7 +995,7 @@ export async function dispatchRoute(req, res) {
       if (!refreshRequested) {
         const cached = analysisRouteCache.get(cacheKey);
         if (cached) {
-          return sendJson(req, res, { ...cached, requestId: payload.requestId || cached.requestId, cache: { ...(cached.cache || {}), routeCache: 'hit' } }, { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.analysis}, stale-while-revalidate=300` });
+          return sendJson(req, res, await withContractBaseline('analysis', { ...cached, requestId: payload.requestId || cached.requestId, cache: { ...(cached.cache || {}), routeCache: 'hit' } }, payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.analysis}, stale-while-revalidate=300` });
         }
       }
       const responsePayload = await coalesce(cacheKey, async () => {
@@ -921,7 +1020,7 @@ export async function dispatchRoute(req, res) {
         analysisRouteCache.set(cacheKey, built, VALORAE_MOBILE_CACHE_POLICY_SECONDS.analysis * 1000);
         return { ...built, cache: { ...(built.cache || {}), routeCache: 'miss' } };
       });
-      return sendJson(req, res, { ...responsePayload, requestId: payload.requestId || responsePayload.requestId }, { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.analysis}, stale-while-revalidate=300` });
+      return sendJson(req, res, await withContractBaseline('analysis', { ...responsePayload, requestId: payload.requestId || responsePayload.requestId }, payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.analysis}, stale-while-revalidate=300` });
     }
     if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.historyMonths || payload.months || 12), { cacheControl: 'private, max-age=300' });
     if (path === '/market/rankings') return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, ...(await buildCanonicalMarketRankings(payload)) }, { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.marketRankings}, stale-while-revalidate=300` });
@@ -954,7 +1053,7 @@ export async function dispatchRoute(req, res) {
       const degradedAsset = Boolean(
         enriched?.timeout || enriched?.partial || String(enriched?.status || '').toUpperCase() === 'PARTIAL' || enriched?.appResponseIntegrity?.cacheSafe === false
       );
-      return sendJson(req, res, { ...assetPayload(payload), ...enriched }, { cacheControl: degradedAsset ? 'no-store' : 'private, max-age=60' });
+      return sendJson(req, res, await withContractBaseline('asset', { ...assetPayload(payload), ...enriched }, payload), { cacheControl: degradedAsset ? 'no-store' : 'private, max-age=60' });
     }
     if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
     if (path === '/assets') return assetsHandler(req, res);
@@ -988,8 +1087,8 @@ export function routeManifest() {
     physicalFunctions: ['api/router.js'],
     legacyAliases: { '/ativo': '/asset', '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
     routes: [
-    '/health','/ready','/manifest','/env','/schema','/source/status','/release/readiness','/personal/readiness','/cache/stats','/cache/clear','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/asset/logo','/asset/yahoo-logo','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/modal','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
+    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/source/status','/release/readiness','/personal/readiness','/cache/stats','/cache/clear','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/asset/logo','/asset/yahoo-logo','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/modal','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
   ].sort() };
 }
 
-export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetPayload, comparisonTickers, buildComparisonPayload };
+export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetPayload, comparisonTickers, buildComparisonPayload, contractIdentity };

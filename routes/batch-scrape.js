@@ -1,8 +1,8 @@
 import { ValoraeEngine } from '../lib/Valorae-engine.js';
 import { sendJson } from '../lib/performance/http.js';
 import { beginRoute, sendRouteError } from '../lib/http/route.js';
-import { extractCustomSelectors, parseSelectorsInput } from '../lib/scrape/custom-selectors.js';
-import { canUseFastSelectors, extractFastSelectors } from '../lib/scrape/fast-selectors.js';
+import { parseSelectorsInput } from '../lib/scrape/custom-selectors.js';
+import { extractSelectorsWithDynamicFallback } from '../lib/scrape/selector-engine.js';
 import { normalizeScrapeInput, buildFetchKey, buildResultKey } from '../lib/scrape/scrape-input.js';
 import { getScrapeResult, setScrapeResult, shapeScrapeResultCacheHit } from '../lib/cache/scrape-result-cache.js';
 import { startScrapeMetrics, markMetric, finishScrapeMetrics, mergeFetchMetrics } from '../lib/performance/scrape-metrics.js';
@@ -55,19 +55,7 @@ function batchProfile(input = {}) {
 }
 
 function buildExtraction(html, selectors, normalized, result) {
-  if (!selectors) return { results: result.selectorResults || {}, warnings: [], sourceDrift: undefined, metrics: { selectorTimeMs: 0, nodesFound: 0, parseStrategy: 'none' }, strategy: 'none' };
-  if (canUseFastSelectors(selectors, normalized)) {
-    const fast = extractFastSelectors(html || '', selectors, normalized);
-    if (fast.ok && fast.safe) return { results: fast.results, warnings: fast.warnings || [], sourceDrift: undefined, metrics: fast.metrics || {}, strategy: 'single-pass' };
-  }
-  const custom = extractCustomSelectors(html || '', selectors, {
-    maxSelectors: normalized.maxSelectors,
-    maxPerSelector: normalized.maxPerSelector,
-    provider: normalized.provider || 'direct',
-    url: result.url || normalized.url,
-    minCoverage: normalized.minCoverage,
-  });
-  return { results: custom.results || {}, warnings: custom.warnings || [], sourceDrift: custom.sourceDrift, metrics: custom.metrics || {}, strategy: custom.metrics?.parseStrategy || 'css-lite' };
+  return extractSelectorsWithDynamicFallback(html, selectors, { ...normalized, realCanaryEndpoint: 'batch-scrape' }, result);
 }
 
 async function mapWithConcurrency(items, concurrency, fn) {
@@ -180,7 +168,7 @@ export default async function handler(req, res) {
       for (const sameResultItems of resultGroups.values()) {
         const item = sameResultItems[0];
         markMetric(metric, 'extractStart');
-        const extraction = buildExtraction(fetched.html || '', item.selectors, item.normalized, fetched);
+        const extraction = await buildExtraction(fetched.html || '', item.selectors, item.normalized, fetched);
         markMetric(metric, 'extractEnd');
         parseRuns += extraction.strategy === 'single-pass' || extraction.strategy === 'none' ? 0 : 1;
         selectorRuns += 1;
@@ -231,6 +219,10 @@ export default async function handler(req, res) {
       chartSeries: chartSeries.count ? chartSeries : undefined,
           customSelectorWarnings: extraction.warnings?.length ? extraction.warnings : undefined,
           sourceDrift: extraction.sourceDrift,
+          htmlParserShadow: extraction.htmlParserShadow,
+      structuredDataDiscovery: extraction.structuredDataDiscovery,
+      dynamicRenderFallback: extraction.dynamicRenderFallback,
+      realCanary: extraction.realCanary,
           elapsedMs: fetched.elapsedMs,
           cache: fetched.cache || 'MISS',
           cacheLayers: { result: 'MISS', ...(fetched.cacheLayers || {}) },

@@ -1,0 +1,46 @@
+{
+  "version": "2026.07.14-checkpoint106-v1",
+  "analysisPETR4": {
+    "shapeSha256": "c537c01b300802abfff2f55fcdfb2a014020410f5de7d08bc74cf6ec553d0dc5",
+    "contract": "AnalysisPageResponse",
+    "contractVersion": "26.analysis.v2",
+    "sectionIds": [
+      "summary",
+      "fundamental_indicators",
+      "dividends_summary",
+      "dividends_history",
+      "dividend_radar",
+      "market_context",
+      "valuation_models",
+      "source_comparatives",
+      "peer_fundamental_comparator",
+      "indices_events",
+      "governance_events",
+      "historical_indicators",
+      "financial_statements",
+      "asset_charts",
+      "company_profile",
+      "ownership",
+      "checklist",
+      "revenue_breakdown",
+      "comparisons"
+    ],
+    "minimumReadySections": 4
+  },
+  "portfolioReturns": {
+    "shapeSha256": "b9833e79b77f3f2eef32ad0107090895b9f73ea26a4dd8fca818aa203edc5dab",
+    "contractVersion": "valorae-portfolio-returns-v2-index-provider-parity",
+    "requiredBenchmarkCodes": [
+      "IBOV",
+      "SMLL",
+      "IFIX",
+      "IDIV",
+      "IVVB11"
+    ],
+    "minimumSeriesPoints": 3
+  },
+  "existingAssetGoldenFixtures": [
+    "test/fixtures/PETR4_golden.json",
+    "test/fixtures/GARE11_golden.json"
+  ]
+}

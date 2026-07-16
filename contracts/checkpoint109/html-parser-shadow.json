@@ -1,0 +1,13 @@
+{
+  "version": "2026.07.15-checkpoint109-v1",
+  "policyVersion": "standards-html-shadow-v1",
+  "mode": "shadow",
+  "implementation": "cheerio-1.2.0-parse5",
+  "contractImpact": "none",
+  "outputPolicy": "legacy-output-always-preserved",
+  "promotionRule": "standard parser may replace legacy output only when explicitly enabled and no previously populated key is lost",
+  "rollback": [
+    "VALORAE_STANDARD_HTML_PARSER_ENABLED=0",
+    "VALORAE_STANDARD_HTML_PARSER_MODE=legacy-only"
+  ]
+}

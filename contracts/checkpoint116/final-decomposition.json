@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2026.07.15-checkpoint116-v1",
+  "policyVersion": "stable-facades-cohesive-internals-v1",
+  "implementation": "contract-preserving-module-boundaries-v1",
+  "facades": [
+    "lib/http/provider-transport.js",
+    "lib/state/shared-runtime-state.js",
+    "lib/canary/real-canary.js"
+  ],
+  "invariants": {
+    "publicImportPathsPreserved": true,
+    "publicExportsPreserved": true,
+    "financialPayloadShapeUnchanged": true,
+    "routePathsUnchanged": true,
+    "runtimeFlagsPreserved": true,
+    "circularDependenciesForbidden": true
+  }
+}

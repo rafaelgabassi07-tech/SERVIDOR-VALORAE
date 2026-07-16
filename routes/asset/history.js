@@ -1,4 +1,4 @@
-import { fetchYahooHistory } from '../../lib/market/yahoo.js';
+import { fetchYahooHistory } from '../../lib/sources/adapters/index.js';
 import { getAssetHistory } from '../../lib/sources/asset-details.js';
 import { ValoraeEngine, canonicalizeTicker, validarTicker } from '../../lib/Valorae-engine.js';
 import { sendJson } from '../../lib/performance/http.js';

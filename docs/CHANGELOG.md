@@ -1,4 +1,120 @@
+## 21.12.378 — Checkpoint 116: decomposição final
+
+- Transporte HTTP mantém a fachada pública e separa perfis/configuração em módulo puro.
+- Estado compartilhado mantém a API pública e separa fundação local do driver Supabase.
+- Canários reais mantêm comportamento e isolam política de seleção/segurança da coordenação.
+- Testes verificam exports, rotas, ausência de ciclos, imports proibidos e I/O indevido.
+- Endpoint `/api/v1/contract/final-decomposition` e header `X-Valorae-Final-Decomposition` pareados ao APK v526.
+- Campos financeiros, cache, ETags, schema Supabase e flags operacionais permanecem inalterados.
+- Validação final: 454 arquivos JavaScript, 233 arquivos de teste, 34 testes cross-stack, 56 checkpoints do APK e 212 arquivos Kotlin principais aprovados.
+
+## 21.12.377 — Checkpoint 115: canários reais controlados
+
+- Coorte determinística de tráfego real com amostragem inicial de 1% e identidade armazenada somente como SHA-256.
+- Modo padrão `shadow`; `safe-promote` requer ativação operacional explícita.
+- Promoção só preenche chaves declaradas e ausentes no resultado legado; valores presentes nunca são substituídos.
+- Pipelines candidatos: parser HTML padrão, dados estruturados e renderização dinâmica.
+- Leases, outcomes e circuit breaker são coordenados pelo estado compartilhado do Checkpoint 114.
+- Limites de concorrência, frequência, TTL, cooldown, estrutura e bytes impedem expansão descontrolada.
+- Falhas e candidatos inseguros retornam o resultado legado com rollback imediato por ambiente.
+- Endpoint `/api/v1/contract/real-canaries` e header `X-Valorae-Real-Canary` pareados ao APK v525.
+
+## 21.12.376 — Checkpoint 114: estado operacional compartilhado
+
+- Continuidade do último payload formalmente válido compartilhada entre instâncias serverless.
+- Circuit breaker, cooldown, score e latência dos provedores persistidos com TTL.
+- Cache negativo curto compartilhado reduz insistência simultânea em fontes indisponíveis.
+- Escrita remota versionada rejeita atualizações atrasadas e preserva o registro mais novo.
+- Leases atômicos preparados para os canários reais do Checkpoint 115.
+- Supabase é opcional; memória limitada permanece como espelho e fallback.
+- Endpoint `/api/v1/contract/shared-state` e header `X-Valorae-Shared-State` pareados ao APK v524.
+- Service role permanece no Proxy; contratos financeiros e tabelas pessoais não foram alterados.
+
+## 21.12.375 — Checkpoint 113: transporte HTTP por provedor e backpressure
+
+- Pools Undici por origem/provedor com keep-alive e reutilização de conexões.
+- Limites de concorrência e fila independentes por fonte, com rejeição controlada de excesso.
+- Timeouts separados para conexão, headers, corpo, espera em fila e prazo total.
+- Cancelamento propagado para fila e requisição ativa.
+- Fallback imediato para o transporte legado em falhas do dispatcher e rollback por variável de ambiente.
+- `fetchText`, motor principal, Yahoo, Banco Central, rankings, agenda e logos usam a camada central; Supabase/sync permanece isolado.
+- Endpoint `/api/v1/contract/http-transport` e header `X-Valorae-Http-Transport` pareados ao APK v523.
+- Contrato financeiro e formatos de resposta preservados integralmente.
+
+## 21.12.374 — Checkpoint 112: schemas formais e guardião de continuidade
+
+- Ajv 8.20.0 em modo estrito com JSON Schema Draft 2020-12.
+- Schemas formais para Análise, ativo, modais, Retorno, Histórico e sincronização móvel.
+- Resposta inválida não substitui o último payload válido da mesma identidade.
+- Primeira resposta inválida é marcada como insegura, sem inventar valores.
+- Validação de entrada em modo sombra por padrão; enforcement somente por feature flag.
+- Endpoint `/api/v1/contract/formal-schemas` e headers pareados com APK v522.
+- Validação final: build Vercel, 440 arquivos JavaScript, 227 arquivos de teste, 30 testes APK↔Proxy e 52 checkpoints do APK aprovados.
+
+## 21.12.373 — Checkpoint 111: renderização dinâmica controlada
+
+- Playwright/Chromium opcional para páginas que dependem de JavaScript e apresentam baixa cobertura estática.
+- Modo padrão `shadow`; promoção somente preenche chaves ausentes quando nenhum campo estático é perdido.
+- Orçamento rígido de concorrência, frequência, timeout, cache e tamanho de HTML.
+- Allowlist HTTPS, bloqueio de rede privada, contexto isolado e rejeição de WAF.
+- APK v521 negocia o manifesto oculto sem alterar o contrato financeiro.
+- Validação final: build Vercel, 436 arquivos JavaScript, 225 arquivos de teste, 30 testes cross-stack e 51 checkpoints do APK aprovados.
+
+
+## 21.12.372 — Checkpoint 110: dados estruturados e APIs internas
+
+- Descoberta segura de JSON-LD, `__NEXT_DATA__`, scripts `application/json`, estados inline e configurações de gráficos.
+- Identificação de endpoints internos conhecidos sem executar JavaScript nem seguir URLs arbitrárias.
+- Saída legada preservada por padrão; promoção somente para `structuredPath` explícito e sem perda de chaves.
+- APK v520 negocia o contrato `2026.07.15-checkpoint110-v1` apenas para diagnóstico oculto.
+- Validação final: 223 arquivos de teste, 433 arquivos JavaScript, build Vercel, auditoria de versão, 29 testes cross-stack e 50 checkpoints do APK aprovados.
+## 2026-07-15 — 21.12.371 / v339
+
+- Cheerio 1.2.0/parse5 adicionado como parser HTML padrão em modo sombra.
+- Parser legado permanece como saída oficial; promoção exige feature flag e zero perda de chaves.
+- Comparação automática de cobertura, paridade, ganhos, perdas e divergências por seletor.
+- Novo endpoint `/api/v1/contract/html-parser-shadow` e header de negociação com o APK v519.
+- Baseline, observabilidade e adaptadores anteriores preservados.
+- Validação final: 222 arquivos de teste, 431 arquivos JavaScript, build Vercel, auditoria de versão, 28 testes cross-stack e 49 checkpoints do APK aprovados.
+
+## 2026-07-14 — 21.12.370 / v338
+
+- Criada fronteira de adaptadores independentes para Yahoo, Investidor10, StatusInvest, B3 e BCB.
+- Consumidores críticos migrados sem mudança de contratos financeiros.
+- Feature flags, métricas e fallback por operação adicionados.
+- Endpoint e header de compatibilidade do Checkpoint 108 adicionados.
+- APK pareado atualizado para v518.
+- Validação final: build Vercel, 428 arquivos JavaScript, 221 arquivos de teste e 27 testes cross-stack aprovados.
+
 # Changelog
+
+## 2026-07-14 — 21.12.369 / v337
+
+- Observabilidade aditiva por campo e por fonte nos contratos críticos.
+- Evidência de provedor, método, confiança, cache, fallback, tempo e instante observado.
+- Envelope móvel compacto, limitado e oculto da interface; trilha completa temporária por `traceId`.
+- Headers `X-Valorae-Field-Observability` e `X-Valorae-Trace-Id`.
+- Endpoint `/api/v1/contract/observability` para manifesto, estatísticas e consulta da trilha.
+- ETag financeiro preservado ao ignorar metadados voláteis.
+- Pareamento com APK v517 / Checkpoint 107, mantendo o baseline do Checkpoint 106.
+
+## 2026-07-14 — 21.12.368 / v336
+
+- Baseline contratual versionado para endpoints críticos do APK.
+- Comparação campo a campo e snapshots dourados de forma.
+- Recuperação do último payload compatível somente para a mesma identidade SHA-256.
+- Header `X-Valorae-Baseline-Contract` e manifesto `/api/v1/contract/baseline`.
+- APK v516 impede substituição de caches válidos por respostas incompletas, incompatíveis ou inseguras em Análise, modal universal, modais tipados, Retorno e Histórico.
+- Store de continuidade não renova a idade do snapshot nativo quando entrega uma resposta recuperada.
+- Validação final: build Vercel, 418 arquivos JavaScript, 219 arquivos de teste, 25 testes cross-stack e 46 checkpoints APK aprovados.
+
+## 2026-07-14 — 21.12.367 / v335
+
+- Remoção integral da integração que exigia token privado do resolver, configurações, hosts, testes e documentação ativa.
+- Corrida primária Yahoo + Investidor10, com StatusInvest apenas como contingência.
+- Cache positivo de 30 dias, stale-if-error de 90 dias, miss de 90 segundos e deduplicação em voo.
+- ETag, resposta 304, Server-Timing e diagnóstico do provedor efetivo.
+- Pareamento com APK v515 / Checkpoint 105 / contrato `official-asset-logo-v5`.
 
 ## 2026-07-14 — 21.12.366 / v334
 

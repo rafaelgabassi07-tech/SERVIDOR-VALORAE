@@ -1,4 +1,75 @@
+# VALORAE Proxy 21.12.378 — Checkpoint 378 / v346
+
+## Release atual — 21.12.378 / v346 (2026-07-15)
+
+Decomposição final dos módulos modernizados, pareada ao APK v526 / Checkpoint 116.
+
+- Fachadas públicas de transporte, estado compartilhado e canários preservadas.
+- Configuração HTTP isolada em módulo puro sem rede ou criação de pools.
+- Fundação do estado local separada do driver Supabase.
+- Política de coorte e segurança separada da coordenação dos canários.
+- Grafo interno validado sem dependências circulares ou imports de rotas.
+- Rotas, exports, campos financeiros, cache, ETags, flags e schema Supabase mantidos.
+- Diagnóstico oculto: `/api/v1/contract/final-decomposition`.
+- APK aceita a ausência do novo header para continuar compatível com Proxies anteriores.
+- Validação: 454 arquivos JavaScript, 233 testes do Proxy, 34 testes cross-stack e 56 checkpoints do APK aprovados.
+
+# VALORAE Proxy 21.12.377 — Checkpoint 377 / v345
+
+## Release atual — 21.12.377 / v345 (2026-07-15)
+
+Canários determinísticos em tráfego real, pareados ao APK v525 / Checkpoint 115.
+
+- Modo padrão `shadow` com amostragem determinística inicial de 1%.
+- Identidades de coorte persistidas somente como SHA-256.
+- Promoção `safe-promote` opcional e estritamente aditiva: apenas chaves declaradas e ausentes no legado.
+- Valores legados existentes nunca são substituídos.
+- Leases e circuit breaker usam o estado compartilhado do Checkpoint 114.
+- Concorrência, frequência, TTL, payload e cooldown possuem limites rígidos.
+- Falha, candidato inválido ou orçamento excedido retornam a resposta legada.
+- Diagnóstico oculto: `/api/v1/contract/real-canaries`.
+- Rollback: desativação, modo `shadow` ou amostragem zero.
+- Nenhum campo financeiro, layout, cache ou tabela pessoal foi alterado.
+
+# VALORAE Proxy 21.12.376 — Checkpoint 376 / v344
+
+## Release atual — 21.12.376 / v344 (2026-07-15)
+
+Estado operacional compartilhado entre instâncias serverless, pareado ao APK v524 / Checkpoint 114.
+
+- Continuidade do último payload formalmente válido por identidade anonimizada.
+- Saúde, cooldown e score das fontes compartilhados com TTL.
+- Backoff negativo compartilhado para falhas repetidas de scraping.
+- Leases atômicos preparados para os canários reais do Checkpoint 115.
+- Supabase opcional com escrita versionada, RLS e acesso exclusivo de `service_role`.
+- Espelho em memória limitado e fallback não bloqueante quando o remoto está ausente.
+- Diagnóstico oculto: `/api/v1/contract/shared-state`.
+- Rollback: `VALORAE_SHARED_STATE_MODE=memory` ou `VALORAE_SHARED_STATE_ENABLED=0`.
+- Nenhum campo financeiro, layout, tabela pessoal ou contrato existente foi alterado.
+
+# VALORAE Proxy — Checkpoint 370 / v338
+
+## Release atual — 21.12.370 / v338 (2026-07-14)
+
+Isolamento dos provedores em adaptadores independentes, pareado ao APK v518.
+
+- Yahoo, Investidor10, StatusInvest, B3 e Banco Central possuem módulos e operações próprios.
+- Feature flags globais, por adaptador e por operação permitem desligamento e rollback localizado.
+- Métricas e fallback ficam fora do contrato financeiro; os objetos retornados permanecem inalterados.
+- Diagnóstico: `/api/v1/contract/source-adapters`.
+- Baseline 106 e observabilidade 107 permanecem ativos.
+
 # VALORAE Proxy
+
+## Release atual — 21.12.369 / v337 (2026-07-14)
+
+Rastreabilidade por campo e por fonte pareada ao APK v517, sem alteração do contrato financeiro.
+
+- Cada resposta crítica recebe um envelope compacto `fieldObservability`, oculto da interface.
+- Origem, método, confiança, cache, fallback e tempos são resumidos sem incluir HTML bruto ou segredos.
+- A trilha completa permanece temporariamente disponível por `traceId` em `/api/v1/contract/observability`.
+- O baseline `2026.07.14-checkpoint106-v1` continua estabilizando os dados antes da coleta.
+- O APK negocia `field-lineage-v1`, valida a versão e usa os metadados somente para diagnóstico.
 
 ## Release atual — 21.12.366 / v334 (2026-07-13)
 

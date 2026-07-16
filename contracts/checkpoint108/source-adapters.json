@@ -1,0 +1,15 @@
+{
+  "version": "2026.07.14-checkpoint108-v1",
+  "policyVersion": "isolated-provider-adapters-v1",
+  "compatibility": "additive-hidden-from-ui",
+  "contractImpact": "none",
+  "requiredAdapters": ["yahoo", "investidor10", "statusinvest", "b3", "bcb"],
+  "guarantees": {
+    "financialPayloadUnchanged": true,
+    "featureFlagPerAdapter": true,
+    "featureFlagPerOperation": true,
+    "fallbackIsolation": true,
+    "metricsOutsideFinancialContract": true,
+    "apkCompatibilityHeader": "X-Valorae-Source-Adapters"
+  }
+}

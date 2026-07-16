@@ -1,0 +1,22 @@
+{
+  "version": "2026.07.14-checkpoint106-v1",
+  "policyVersion": "no-regression-field-continuity-v1",
+  "mode": "baseline-and-shadow-ready",
+  "rules": [
+    "Mudanças de contrato devem ser aditivas durante a modernização.",
+    "Um campo previamente preenchido não pode ser substituído por nulo, string vazia, objeto vazio ou lista vazia sem evidência de remoção legítima.",
+    "Falhas de transporte nunca podem ser convertidas em valor financeiro zero.",
+    "Respostas incompatíveis não podem substituir o último snapshot compatível no APK.",
+    "Promoção futura será feita por campo ou seção e permanecerá reversível por endpoint."
+  ],
+  "referenceAssets": {
+    "stocksOn": ["VALE3", "WEGE3", "BBAS3"],
+    "stocksPn": ["PETR4", "ITUB4"],
+    "units": ["SANB11", "TAEE11"],
+    "fiisBrick": ["HGLG11", "KNRI11"],
+    "fiisPaper": ["MXRF11", "KNCR11"],
+    "etfs": ["BOVA11", "IVVB11"],
+    "bdrs": ["AAPL34", "MSFT34"],
+    "indices": ["IBOV", "IFIX", "IDIV", "SMLL"]
+  }
+}

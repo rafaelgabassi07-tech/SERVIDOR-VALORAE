@@ -1,8 +1,8 @@
 import { ValoraeEngine } from '../lib/Valorae-engine.js';
 import { sendJson, sendPreparedJson } from '../lib/performance/http.js';
 import { beginRoute, sendRouteError } from '../lib/http/route.js';
-import { extractCustomSelectors, parseSelectorsInput } from '../lib/scrape/custom-selectors.js';
-import { canUseFastSelectors, extractFastSelectors } from '../lib/scrape/fast-selectors.js';
+import { parseSelectorsInput } from '../lib/scrape/custom-selectors.js';
+import { extractSelectorsWithDynamicFallback } from '../lib/scrape/selector-engine.js';
 import { normalizeScrapeInput, buildResultKey, buildFetchKey } from '../lib/scrape/scrape-input.js';
 import { getScrapeResult, setScrapeResult, shapeScrapeResultCacheHit, getScrapePreparedResponse, setScrapePreparedResponse, SCRAPE_RESPONSE_REQUEST_ID_TOKEN } from '../lib/cache/scrape-result-cache.js';
 import { startScrapeMetrics, markMetric, finishScrapeMetrics, mergeFetchMetrics } from '../lib/performance/scrape-metrics.js';
@@ -56,19 +56,7 @@ function lightPrecisionReport({ results = {}, selectors = {}, htmlLength = 0, st
 }
 
 function buildExtraction(html, selectors, normalized, result) {
-  if (!selectors) return { results: result.selectorResults || {}, warnings: [], sourceDrift: undefined, metrics: { selectorTimeMs: 0, nodesFound: 0, parseStrategy: 'none' }, strategy: 'none' };
-  if (canUseFastSelectors(selectors, normalized)) {
-    const fast = extractFastSelectors(html || '', selectors, normalized);
-    if (fast.ok && fast.safe) return { results: fast.results, warnings: fast.warnings || [], sourceDrift: undefined, metrics: fast.metrics || {}, strategy: 'single-pass' };
-  }
-  const custom = extractCustomSelectors(html || '', selectors, {
-    maxSelectors: normalized.maxSelectors,
-    maxPerSelector: normalized.maxPerSelector,
-    provider: normalized.provider || 'direct',
-    url: result.url || normalized.url,
-    minCoverage: normalized.minCoverage,
-  });
-  return { results: custom.results || {}, warnings: custom.warnings || [], sourceDrift: custom.sourceDrift, metrics: custom.metrics || {}, strategy: custom.metrics?.parseStrategy || 'css-lite' };
+  return extractSelectorsWithDynamicFallback(html, selectors, { ...normalized, realCanaryEndpoint: 'scrape' }, result);
 }
 
 export default async function handler(req, res) {
@@ -140,7 +128,7 @@ export default async function handler(req, res) {
     engineMs = performance.now() - engineStartedAt;
 
     markMetric(scrapeMetrics, 'extractStart');
-    const extraction = buildExtraction(result.html || '', selectors, normalized, result);
+    const extraction = await buildExtraction(result.html || '', selectors, normalized, result);
     markMetric(scrapeMetrics, 'extractEnd');
 
     const mergedResults = selectors ? { ...(result.selectorResults || {}), ...extraction.results } : (result.selectorResults || {});
@@ -199,6 +187,10 @@ export default async function handler(req, res) {
       chartSeries: chartSeries.count ? chartSeries : undefined,
       customSelectorWarnings: extraction.warnings?.length ? extraction.warnings : undefined,
       sourceDrift: extraction.sourceDrift,
+      htmlParserShadow: extraction.htmlParserShadow,
+      structuredDataDiscovery: extraction.structuredDataDiscovery,
+      dynamicRenderFallback: extraction.dynamicRenderFallback,
+      realCanary: extraction.realCanary,
       elapsedMs: result.elapsedMs,
       cache: result.cache || 'MISS',
       cacheLayers: { result: 'MISS', ...(result.cacheLayers || {}) },

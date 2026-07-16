@@ -1,0 +1,13 @@
+{
+  "version": "2026.07.15-checkpoint111-v1",
+  "policyVersion": "controlled-browser-fallback-shadow-v1",
+  "mode": "shadow",
+  "outputPolicy": "static-output-preserved",
+  "runtimeOptional": true,
+  "browserMandatory": false,
+  "promotionRule": "fill-only-missing-keys-when-no-static-loss",
+  "rollback": [
+    "VALORAE_DYNAMIC_RENDER_ENABLED=0",
+    "VALORAE_DYNAMIC_RENDER_MODE=disabled"
+  ]
+}

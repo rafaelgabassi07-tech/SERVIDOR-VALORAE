@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2026.07.15-checkpoint115-v1",
+  "policyVersion": "deterministic-real-traffic-additive-promotion-v1",
+  "defaultMode": "shadow",
+  "defaultSampleBasisPoints": 100,
+  "eligibleEndpoints": ["scrape", "batch-scrape"],
+  "candidatePipelines": ["standards-html", "structured-data", "dynamic-render"],
+  "promotionRule": "selected real traffic may only fill a declared selector key that is empty in the legacy output",
+  "guarantees": {
+    "legacyValuesNeverOverwritten": true,
+    "deterministicCohort": true,
+    "identityStoredAsSha256Only": true,
+    "sharedLeaseCoordination": true,
+    "sharedCircuitBreaker": true,
+    "automaticRollback": true,
+    "hiddenFromApkUi": true
+  }
+}

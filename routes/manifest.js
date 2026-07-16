@@ -1,6 +1,7 @@
 import { ValoraeEngine } from '../lib/Valorae-engine.js';
 import { performanceCapabilities } from '../lib/performance/profile.js';
 import { cacheDriverInfo } from '../lib/cache/memory.js';
+import { sharedStateDriverInfo } from '../lib/state/shared-runtime-state.js';
 import { sendJson } from '../lib/performance/http.js';
 import { beginRoute } from '../lib/http/route.js';
 import { routeManifest } from './_router.js';
@@ -32,7 +33,8 @@ export default async function handler(req, res) {
       launchEndpoints: ['/api/v1/asset?view=app','/api/v1/asset/coverage','/api/v1/asset/fundamentals','/api/v1/integration/sdk','/api/v1/integration/prompts'],
       optionalAuth: ['VALORAE_CLIENT_KEYS','VALORAE_REQUIRE_CLIENT_AUTH','x-valorae-app-id','x-valorae-client-key','x-valorae-signature'],
       portfolio: ['summary','allocation','risk','income','rebalance','history','events','transactions','intelligence','narrative','positionRanking'],
-      reliability: ['sourceDrift','parserResilience','schemaStability','cacheStats','ready','manifest','sourceStatus','qualityMatrix','schemaCatalog'],
+      sharedState: sharedStateDriverInfo(),
+      reliability: ['sharedRuntimeState','crossInstanceContractContinuity','sharedProviderHealth','sharedFailureBackoff','atomicLeases','finalDecomposition','stableFacades','sourceDrift','parserResilience','schemaStability','cacheStats','ready','manifest','sourceStatus','qualityMatrix','schemaCatalog'],
       scraperCompat: ['multi-selector','batch-dedup','selector-coverage','compat/scraper4','selector-fallbacks','source-drift-fixtures'],
       ttlMatrix: TTL_MATRIX,
       sourceProviders: SOURCE_PROVIDERS,
@@ -41,7 +43,8 @@ export default async function handler(req, res) {
     cache: cacheDriverInfo(),
     releaseChecks: {
       noRequiredDependencies: true,
-      noExternalStorage: true,
+      noRequiredExternalStorage: true,
+      optionalSupabaseSharedState: true,
       noPaidCron: true,
       noWebSocket: true,
       noPermanentWorker: true,

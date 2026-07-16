@@ -40,6 +40,7 @@ export function pickFirstPaint(data) {
 
 export function shouldReplaceLocalCache(data) {
   if (!data || data.status === 'ERROR') return false;
+  if (data.contractBaseline?.canReplacePrevious === false) return false;
   if (data.appResponseIntegrity?.cacheSafe === false) return false;
   if (data.engineLaunchGate?.decision === 'hold_previous_snapshot') return false;
   return true;
@@ -72,14 +73,15 @@ export default async function handler(req, res) {
     status: 'OK',
     recommendedView: 'app',
     readinessEndpoint: '/api/v1/release/readiness',
-    stableRoots: ['appMobileSnapshot', 'appPayload', 'appSyncEnvelope', 'appResponseIntegrity', 'engineLaunchGate', 'engineRuntimeProfiler'],
-    headers: ['x-valorae-app', 'x-valorae-channel', 'x-valorae-app-version', 'x-valorae-build', 'x-valorae-app-id', 'x-valorae-client-key'],
+    stableRoots: ['contractBaseline', 'fieldObservability', 'appMobileSnapshot', 'appPayload', 'appSyncEnvelope', 'appResponseIntegrity', 'engineLaunchGate', 'engineRuntimeProfiler'],
+    headers: ['x-valorae-observability-accept', 'x-valorae-app', 'x-valorae-channel', 'x-valorae-app-version', 'x-valorae-build', 'x-valorae-app-id', 'x-valorae-client-key'],
     examples: { javascript: jsClient, kotlinAndroid: kotlinClient },
     personalUseDefaults: { view: 'app', keepLastGoodSnapshot: true, sendAppHeaders: true, optionalAuthEnv: ['VALORAE_CLIENT_KEYS','VALORAE_REQUIRE_CLIENT_AUTH'], monitorEndpoint: '/api/server/metrics' },
     rules: [
       'Use view=app para produção e view=full/debug apenas para diagnóstico.',
       'Renderize appMobileSnapshot primeiro e hidrate com appPayload.',
-      'Não substitua cache local quando appResponseIntegrity.cacheSafe=false.',
+      'Não substitua cache local quando contractBaseline.canReplacePrevious=false ou appResponseIntegrity.cacheSafe=false.',
+      'Use fieldObservability apenas para diagnóstico; respeite hiddenFromUi=true.',
       'Envie x-valorae-app e x-valorae-channel para o monitor separar apps e canais.',
       'Antes de compartilhar com pessoas próximas, verifique /api/v1/release/readiness.',
       'Use timeout no cliente e preserve o último snapshot bom quando a decisão do gate for hold_previous_snapshot.'
