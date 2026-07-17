@@ -131,8 +131,8 @@ if (apkContract !== null || apkProtocol !== null || apkMetadataText !== null) {
   assert.ok(apkContract?.includes('serverVersion.isNullOrBlank() || serverVersion == Version'));
   assert.ok(apkProtocol?.includes('ScrapingEngineHardeningVersion'));
   const apkMetadata = JSON.parse(apkMetadataText || '{}');
-  assert.equal(apkMetadata.versionCode, 26071701);
-  assert.equal(apkMetadata.proxyPatch, '21.12.380-scraping-runtime-hardening-v348');
+  assert.equal(apkMetadata.versionCode, 26071702);
+  assert.equal(apkMetadata.proxyPatch, '21.12.382-quote-state-resilience-v350');
 }
 
 console.log('scraping-runtime-hardening-checkpoint118-v348 ok');

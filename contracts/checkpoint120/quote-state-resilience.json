@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2026.07.17-checkpoint120-v1",
+  "extends": "2026.07.17-checkpoint119-v1",
+  "compatibility": "additive-backward-compatible",
+  "contractVersionUnchanged": true,
+  "quoteRuntime": {
+    "yahooHosts": ["query1.finance.yahoo.com", "query2.finance.yahoo.com"],
+    "staleIfSourceUnavailable": true,
+    "batchConcurrencyDefault": 6,
+    "batchConcurrencyMaximum": 8,
+    "fastModeSkipsFundamentals": true,
+    "zeroPricePromoted": false
+  },
+  "apkPersistence": {
+    "publicMarketDataOnly": true,
+    "priceRetentionDays": 14,
+    "dailyVariationRetentionHours": 36,
+    "refreshOnForeground": true,
+    "lastGoodMerge": true
+  },
+  "invariants": {
+    "existingRoutesPreserved": true,
+    "existingResponseFieldsPreserved": true,
+    "financialPayloadShapeBackwardCompatible": true,
+    "mobileProtocolUnchanged": true,
+    "apkV529Compatible": true,
+    "previousApkVersionsCompatible": true,
+    "checkpoint117ScrapingContractPreserved": true,
+    "checkpoint118HardeningPreserved": true,
+    "checkpoint119MonitorPreserved": true
+  }
+}

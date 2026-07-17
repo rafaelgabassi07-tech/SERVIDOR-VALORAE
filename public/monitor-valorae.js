@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const RELEASE_PATCH = '21.12.381-monitor-live-stream-v349';
+  const RELEASE_PATCH = '21.12.382-quote-state-resilience-v350';
   const STORAGE = {
     theme: 'valorae:monitor:theme',
     apiBase: 'valorae:monitor:apiBase',

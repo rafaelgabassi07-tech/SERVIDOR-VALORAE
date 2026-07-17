@@ -1028,7 +1028,14 @@ export async function dispatchRoute(req, res) {
     if (path === '/market/rankings') return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, ...(await buildCanonicalMarketRankings(payload)) }, { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.marketRankings}, stale-while-revalidate=300` });
     if (path === '/market/indices') return marketIndicesHandler(req, res);
 
-    if (path === '/asset/quote' || path === '/quote') return sendJson(req, res, await getQuote(payload.ticker || payload.symbol || payload.q), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.quote}, stale-while-revalidate=300` });
+    if (path === '/asset/quote' || path === '/quote') {
+      const bypassQuoteCache = boolParamLocal(payload.refresh || payload.nocache || payload.forceRefresh, false);
+      return sendJson(req, res, await getQuote(payload.ticker || payload.symbol || payload.q, {
+        timeoutMs: Number(payload.timeoutMs || 3500),
+        bypassCache: bypassQuoteCache,
+        cache: !bypassQuoteCache
+      }), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.quote}, stale-while-revalidate=300` });
+    }
     if (path === '/quotes') {
       const rawBatch = payload.tickers || payload.symbols || payload.assets || payload.positions || payload.ticker || payload.symbol || payload.q;
       return sendJson(req, res, await buildAssetsPayload({

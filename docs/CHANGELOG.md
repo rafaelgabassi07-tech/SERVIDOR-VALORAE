@@ -1,3 +1,11 @@
+## 21.12.382 — Checkpoint 382: cotações resilientes e persistentes
+
+- Yahoo `query1` e `query2` passam a formar uma cadeia de fallback com cache stale seguro.
+- O lote rápido dispensa fundamentos e aumenta a concorrência de cotações de forma limitada.
+- Respostas preservam aliases de preço, fechamento anterior, variação e qualidade.
+- A rota individual encaminha refresh e bypass de cache ao adaptador.
+- Pareamento atualizado para o APK v529, sem quebra de endpoints ou payloads existentes.
+
 ## 21.12.381 — Checkpoint 119: monitor plano de tráfego ao vivo
 
 - O monitor foi reduzido a quatro superfícies operacionais: tráfego ao vivo, rotas/fontes, saúde e ajustes.

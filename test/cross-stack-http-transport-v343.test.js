@@ -19,7 +19,7 @@ if (protocol && http && contract && catalog && build) {
   assert.ok(http.includes('httpTransportVersion = header(ValoraeMobileProtocol.HeaderHttpTransport)'));
   assert.ok(http.includes('fun httpTransport()'));
   assert.ok(catalog.includes('/api/v1/contract/http-transport'));
-  assert.ok(build.includes('versionCode = 26071701'));
+  assert.ok(build.includes('versionCode = 26071702'));
 }
 assert.ok(fs.existsSync(new URL('./test/http-provider-transport-checkpoint113-v343.test.js', new URL('../', import.meta.url))));
 console.log('cross-stack-http-transport-v343 ok');

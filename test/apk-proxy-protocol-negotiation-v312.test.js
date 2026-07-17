@@ -14,10 +14,10 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.381');
-assert.equal(packageJson.valorae.releasePatch, '21.12.381-monitor-live-stream-v349');
-assert.equal(metadata.apkVersion, '2026.07.17.01');
-assert.ok(metadata.contractVersion.includes('APK v528 / Proxy 21.12.381'));
+assert.equal(packageJson.valorae.publicVersion, '21.12.382');
+assert.equal(packageJson.valorae.releasePatch, '21.12.382-quote-state-resilience-v350');
+assert.equal(metadata.apkVersion, '2026.07.17.02');
+assert.ok(metadata.contractVersion.includes('APK v529 / Proxy 21.12.382'));
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');

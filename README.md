@@ -1,6 +1,16 @@
-# VALORAE Proxy 21.12.381 — Checkpoint 381 / v349
+# VALORAE Proxy 21.12.382 — Checkpoint 382 / v350
 
-## Release atual — 21.12.381 / v349 (2026-07-17)
+## Release atual — 21.12.382 / v350 (2026-07-17)
+
+O caminho de cotações agora usa fallback entre os hosts `query1` e `query2` do Yahoo, cache stale seguro, lotes menores e modo rápido sem fundamentos. Respostas vazias não substituem uma cotação válida no APK v529.
+
+- `/api/v1/assets` respeita `includeFundamentals=false` e `mode=fast_quotes`;
+- lotes processam até seis cotações em paralelo, com limite máximo de oito;
+- `refresh`, `nocache` e `forceRefresh` atravessam a rota de cotação individual;
+- aliases de preço, fechamento anterior e variação diária permanecem compatíveis;
+- o monitor plano do v349 permanece funcional e sem novos containers.
+
+## Release anterior — 21.12.381 / v349 (2026-07-17)
 
 Monitor operacional renovado, plano e centrado no que realmente atravessa o Proxy, mantendo intacto o contrato consumido pelo APK v528.
 
