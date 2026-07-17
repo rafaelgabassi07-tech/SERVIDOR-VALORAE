@@ -1,0 +1,63 @@
+{
+  "benchmark": "valorae-scraping-engines",
+  "release": "21.12.379-scraping-engine-hybrid-v347",
+  "runtime": "Node.js v24.14.0",
+  "fixture": {
+    "htmlBytes": 255208,
+    "rows": 900,
+    "iterations": 12,
+    "warmups": 3,
+    "selectorSpecs": 10,
+    "duplicateSelectorSpecs": 4
+  },
+  "baselineBeforeImplementation": {
+    "valoraeStandardsEngineAverageMs": 69.944,
+    "valoraeStandardsEngineOperationsPerSecond": 14.3
+  },
+  "afterImplementation": [
+    {
+      "engine": "cheerio-parse5",
+      "averageMs": 107.128,
+      "operationsPerSecond": 9.33,
+      "parityWithParse5": true
+    },
+    {
+      "engine": "cheerio-htmlparser2",
+      "averageMs": 43.308,
+      "operationsPerSecond": 23.09,
+      "parityWithParse5": true
+    },
+    {
+      "engine": "valorae-hybrid-adaptive",
+      "averageMs": 33.369,
+      "operationsPerSecond": 29.97,
+      "parityWithParse5": true
+    },
+    {
+      "engine": "valorae-hybrid-force-parse5",
+      "averageMs": 66.715,
+      "operationsPerSecond": 14.99,
+      "parityWithParse5": true
+    },
+    {
+      "engine": "valorae-css-lite-legacy",
+      "averageMs": 8.406,
+      "operationsPerSecond": 118.97,
+      "parityWithParse5": null,
+      "note": "Caminho parcial; retornou menos dados e não é comparável ao DOM completo."
+    }
+  ],
+  "simpleFastPath": {
+    "engine": "valorae-single-pass-fast",
+    "averageMs": 7.282,
+    "operationsPerSecond": 137.33,
+    "parityWithItsBaseline": true
+  },
+  "measuredImprovement": {
+    "hybridLatencyReductionVersusPreviousValoraeStandardsEnginePercent": 52.29,
+    "hybridThroughputMultiplierVersusPreviousValoraeStandardsEngine": 2.1,
+    "hybridLatencyReductionVersusDirectParse5Percent": 68.85
+  },
+  "command": "node --expose-gc scripts/benchmark-scraping-engines.js --quick",
+  "caveat": "Microbenchmark sintético reproduzível; não representa latência de rede nem garante o mesmo ganho para toda página real."
+}

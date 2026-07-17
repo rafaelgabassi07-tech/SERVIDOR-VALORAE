@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2026.07.17-checkpoint118-v1",
+  "extends": "2026.07.16-checkpoint117-v1",
+  "compatibility": "additive-backward-compatible",
+  "contractVersionUnchanged": true,
+  "invariants": {
+    "existingRoutesPreserved": true,
+    "existingResponseFieldsPreserved": true,
+    "financialPayloadShapeUnchanged": true,
+    "checkpoint117HeaderStillAccepted": true,
+    "olderProxyWithoutManifestAcceptedByApk": true
+  },
+  "hardening": [
+    "selector-aware-parse5-browser-tree-fallback",
+    "non-2xx-fresh-cache-poisoning-blocked",
+    "outbound-headers-sanitized-after-final-merge",
+    "invalid-undeclared-utf8-text-windows1252-fallback",
+    "abort-aware-retry-backoff"
+  ]
+}

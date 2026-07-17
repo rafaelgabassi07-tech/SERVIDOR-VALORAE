@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2026.07.16-checkpoint117-v1",
+  "policyVersion": "adaptive-htmlparser2-parse5-shared-dom-v1",
+  "implementation": "cheerio-1.2.0-htmlparser2-fast-parse5-compat",
+  "compatibility": "additive-backward-compatible",
+  "invariants": {
+    "existingRoutesPreserved": true,
+    "existingResponseFieldsPreserved": true,
+    "financialPayloadShapeUnchanged": true,
+    "olderProxyWithoutManifestAcceptedByApk": true,
+    "legacyOutputPreservedUnlessExistingSafePromotionFlagsAreEnabled": true
+  },
+  "features": [
+    "adaptive-htmlparser2-fast-path",
+    "parse5-standards-fallback",
+    "shared-lazy-dom",
+    "identical-selector-query-deduplication",
+    "bounded-response-charset-detection",
+    "isolated-playwright-contexts-with-local-browser-reuse",
+    "explicit-missing-selector-wait"
+  ]
+}

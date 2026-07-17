@@ -1,13 +1,13 @@
 {
   "name": "VALORAE Proxy Monitor",
   "short_name": "VALORAE Proxy",
-  "start_url": "/server.html#command",
+  "start_url": "/server.html#live",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "id": "/server.html",
-  "description": "Monitor do VALORAE Proxy v346, com decomposição final, fachadas estáveis e contratos preservados.",
+  "description": "Monitor plano do VALORAE Proxy v349, com tráfego ao vivo, rotas, fontes, saúde e contratos preservados.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.378"
+  "version": "21.12.381"
 }

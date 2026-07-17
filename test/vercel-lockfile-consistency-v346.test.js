@@ -8,6 +8,14 @@ const root = path.resolve(here, '..');
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 const packageLock = JSON.parse(fs.readFileSync(path.join(root, 'package-lock.json'), 'utf8'));
 const pnpmLock = fs.readFileSync(path.join(root, 'pnpm-lock.yaml'), 'utf8');
+const packageLockText = JSON.stringify(packageLock);
+
+assert.doesNotMatch(
+  packageLockText,
+  /packages\.applied-caas-gateway1\.internal\.api\.openai\.org/i,
+  'package-lock.json must not depend on the audit environment internal registry',
+);
+assert.match(packageLockText, /https:\/\/registry\.npmjs\.org\//i);
 
 function parsePnpmRootImporter(text) {
   const lines = text.split(/\r?\n/);

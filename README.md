@@ -1,18 +1,43 @@
-# VALORAE Proxy 21.12.378 — Checkpoint 378 / v346
+# VALORAE Proxy 21.12.381 — Checkpoint 381 / v349
 
-## Release atual — 21.12.378 / v346 (2026-07-15)
+## Release atual — 21.12.381 / v349 (2026-07-17)
 
-Decomposição final dos módulos modernizados, pareada ao APK v526 / Checkpoint 116.
+Monitor operacional renovado, plano e centrado no que realmente atravessa o Proxy, mantendo intacto o contrato consumido pelo APK v528.
 
-- Fachadas públicas de transporte, estado compartilhado e canários preservadas.
-- Configuração HTTP isolada em módulo puro sem rede ou criação de pools.
-- Fundação do estado local separada do driver Supabase.
-- Política de coorte e segurança separada da coordenação dos canários.
-- Grafo interno validado sem dependências circulares ou imports de rotas.
-- Rotas, exports, campos financeiros, cache, ETags, flags e schema Supabase mantidos.
-- Diagnóstico oculto: `/api/v1/contract/final-decomposition`.
-- APK aceita a ausência do novo header para continuar compatível com Proxies anteriores.
-- Validação: 454 arquivos JavaScript, 233 testes do Proxy, 34 testes cross-stack e 56 checkpoints do APK aprovados.
+- Linha do tempo única para respostas externas, com método, rota, status, latência, bytes, consumidor, fonte, cache e request ID.
+- Requisições em voo aparecem com idade, entrada, tipo de conteúdo, app/canal, ticker e parâmetros explicitamente seguros.
+- Valores arbitrários de query, tokens, IPs e hashes de cliente não são expostos pela interface.
+- Rotas e fontes, saúde/erros e preferências essenciais substituem as páginas antigas de documentação, arquitetura e benchmark.
+- Interface sem cards decorativos, gradientes, blur ou sidebar; layout responsivo com temas claro, escuro e sistema.
+- Polling do próprio monitor continua separado dos totais externos, evitando recursão e inflação de métricas.
+- Exportação JSON/CSV, filtros, pausa, atualização manual e snapshot técnico permanecem disponíveis.
+- Rotas, formatos de resposta, campos financeiros, headers móveis e negociação Proxy/APK permanecem inalterados.
+
+## Checkpoint 380 — 21.12.380 / v348 (2026-07-17)
+
+Hardening do runtime de scraping pareado ao APK v528 / Checkpoint 118, mantendo o contrato do Checkpoint 117 para compatibilidade com o APK v527.
+
+- Seletores que dependem da árvore `html/head/body`, de seções implícitas de tabela ou de formulários usam parse5 automaticamente.
+- HTML comum e tabelas consultadas por seletores simples continuam no htmlparser2 rápido.
+- Respostas remotas 4xx/5xx não podem renovar o cache fresco.
+- Headers são combinados antes da sanitização final; headers hop-by-hop permanecem bloqueados.
+- Texto sem charset e com UTF-8 inválido recebe fallback Windows-1252.
+- O cancelamento da requisição interrompe também o backoff entre tentativas.
+- Rotas, campos financeiros, schemas, ETags e políticas de promoção permanecem inalterados.
+- Diagnóstico aditivo: `hardeningVersion=2026.07.17-checkpoint118-v1` no endpoint `/api/v1/contract/scraping-engine`.
+
+## Checkpoint 379 — 21.12.379 / v347 (2026-07-16)
+
+Motor híbrido de scraping pareado ao APK v527 / Checkpoint 117, com o contrato existente preservado.
+
+- Cheerio 1.2.0 usa htmlparser2 no caminho rápido e parse5 em HTML sensível a regras do navegador.
+- Um DOM preguiçoso é compartilhado por seletores CSS e descoberta de JSON estruturado.
+- Seletores idênticos são consultados e extraídos uma única vez, preservando a ordem das chaves.
+- Respostas HTML respeitam BOM, `Content-Type` e `<meta charset>` dentro do limite de corpo existente.
+- Playwright reutiliza apenas o processo Chromium local; cada execução recebe contexto isolado novo.
+- Fallback dinâmico espera primeiro o seletor ausente, reduzindo dependência de `networkidle`.
+- Rotas, campos financeiros, cache, ETags, schemas e políticas de promoção existentes permanecem inalterados.
+- Diagnóstico aditivo: `/api/v1/contract/scraping-engine`; Proxies anteriores sem o header continuam aceitos pelo APK.
 
 # VALORAE Proxy 21.12.377 — Checkpoint 377 / v345
 

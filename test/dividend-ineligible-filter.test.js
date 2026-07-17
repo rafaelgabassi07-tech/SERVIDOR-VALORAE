@@ -1,9 +1,16 @@
 import assert from 'node:assert/strict';
 import { __testBuildDividendResult } from '../lib/portfolio/dividends-contract.js';
 
+const utcDate = offsetDays => {
+  const value = new Date();
+  value.setUTCHours(12, 0, 0, 0);
+  value.setUTCDate(value.getUTCDate() + offsetDays);
+  return value.toISOString().slice(0, 10);
+};
+
 const result = __testBuildDividendResult({
   payload: {
-    positions: [{ ticker: 'BTCI11', quantity: 10, firstPurchaseDate: '2026-07-01', assetClass: 'FII' }],
+    positions: [{ ticker: 'BTCI11', quantity: 10, firstPurchaseDate: utcDate(0), assetClass: 'FII' }],
     transactions: []
   },
   tickers: ['BTCI11'],
@@ -11,8 +18,8 @@ const result = __testBuildDividendResult({
     {
       ticker: 'BTCI11',
       assetClass: 'FII',
-      dateCom: '2026-06-20',
-      paymentDate: '2026-07-15',
+      dateCom: utcDate(-1),
+      paymentDate: utcDate(1),
       dividendType: 'RENDIMENTO',
       grossValuePerShare: 0.10,
       netValuePerShare: 0.10,

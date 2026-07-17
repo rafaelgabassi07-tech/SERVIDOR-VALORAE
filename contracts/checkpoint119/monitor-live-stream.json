@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2026.07.17-checkpoint119-v1",
+  "extends": "2026.07.17-checkpoint118-v1",
+  "compatibility": "additive-backward-compatible",
+  "contractVersionUnchanged": true,
+  "surface": {
+    "views": [
+      "live-traffic",
+      "routes-and-sources",
+      "health-and-errors",
+      "local-settings"
+    ],
+    "pollingEndpoint": "/api/server/metrics",
+    "internalPollingExcludedFromExternalTotals": true,
+    "exports": ["json", "csv"]
+  },
+  "capture": {
+    "centralInterceptorRequired": true,
+    "responsePaths": ["sendJson", "res.end", "res.write+end", "close"],
+    "activeRequestsVisible": true,
+    "inboundBytesVisible": true,
+    "requestContentTypeVisible": true,
+    "correlationIdVisible": true,
+    "queryNamesVisible": true,
+    "queryValuesPolicy": "explicit-non-secret-allowlist"
+  },
+  "privacy": {
+    "rawIpExposed": false,
+    "clientHashExposed": false,
+    "arbitraryQueryValuesExposed": false,
+    "requestBodyExposed": false,
+    "responsePreviewBounded": true
+  },
+  "invariants": {
+    "existingRoutesPreserved": true,
+    "existingResponseFieldsPreserved": true,
+    "financialPayloadShapeUnchanged": true,
+    "mobileProtocolUnchanged": true,
+    "apkV528Compatible": true,
+    "checkpoint117ScrapingContractPreserved": true,
+    "checkpoint118HardeningPreserved": true
+  }
+}

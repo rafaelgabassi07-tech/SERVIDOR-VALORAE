@@ -27,7 +27,11 @@ function mockResponse() {
 resetServerMetricsForTests();
 
 // JSON/erro emitido pelo roteador deve ser capturado uma única vez por sendJson.
-const jsonReq = { method: 'GET', url: '/api/v1/monitor-capture-missing-route', headers: { 'x-request-id': 'capture-json-v313' } };
+const jsonReq = {
+  method: 'GET',
+  url: '/api/v1/monitor-capture-missing-route?ticker=PETR4&view=app&range=1y&token=segredo',
+  headers: { 'x-request-id': 'capture-json-v313' },
+};
 const jsonRes = mockResponse();
 await dispatchRoute(jsonReq, jsonRes);
 assert.equal(jsonRes.statusCode, 404);
@@ -41,6 +45,11 @@ assert.equal(snapshot.proxyOutputMonitor.outputFeed[0].route, '/api/v1/monitor-c
 assert.equal(snapshot.proxyOutputMonitor.outputFeed[0].interceptor, 'sendJson');
 assert.equal(snapshot.proxyOutputMonitor.outputFeed[0].requestId, 'capture-json-v313');
 assert.ok(snapshot.proxyOutputMonitor.outputFeed[0].bytesOut > 0);
+assert.equal(snapshot.proxyOutputMonitor.outputFeed[0].ticker, 'PETR4');
+assert.equal(snapshot.proxyOutputMonitor.outputFeed[0].view, 'app');
+assert.deepEqual(snapshot.proxyOutputMonitor.outputFeed[0].safeQuery, { ticker: 'PETR4', view: 'app', range: '1y' });
+assert.ok(snapshot.proxyOutputMonitor.outputFeed[0].queryKeys.includes('token'));
+assert.equal(snapshot.proxyOutputMonitor.outputFeed[0].safeQuery.token, undefined, 'valor secreto não pode aparecer no monitor');
 
 // Resposta direta/streaming que não usa sendJson também precisa entrar no feed.
 const streamReq = { method: 'GET', url: '/api/v1/direct-stream-v313', headers: {} };
@@ -56,6 +65,38 @@ assert.equal(streamed.interceptor, 'res.write+end');
 assert.ok(streamed.bytesOut > 0);
 assert.ok(streamed.payloadRoots.includes('stream'));
 assert.match(String(streamed.payloadPreview), /\"stream\":true/);
+
+// Entrada em processamento precisa aparecer sem expor valores de query arbitrários.
+const activeReq = {
+  method: 'POST',
+  url: '/api/v1/active-capture-v349?ticker=VALE3&mode=compact&apiKey=nao-expor',
+  headers: {
+    'content-length': '128',
+    'content-type': 'application/json',
+    'x-correlation-id': 'active-v349',
+    'user-agent': 'okhttp/4.12 Android',
+  },
+};
+const activeRes = mockResponse();
+attachProxyMetricsInterceptor(activeReq, activeRes);
+snapshot = getServerMetricsSnapshot();
+const active = snapshot.activeRequests.find(request => request.route === '/api/v1/active-capture-v349');
+assert.ok(active, 'requisição em voo não apareceu no snapshot');
+assert.equal(active.bytesIn, 128);
+assert.equal(active.requestContentType, 'application/json');
+assert.equal(active.requestId, 'active-v349');
+assert.equal(active.ticker, 'VALE3');
+assert.equal(active.safeQuery.mode, 'compact');
+assert.ok(active.queryKeys.includes('apiKey'));
+assert.equal(active.safeQuery.apiKey, undefined);
+activeRes.end('{"ok":true}');
+snapshot = getServerMetricsSnapshot();
+const posted = snapshot.proxyOutputMonitor.outputFeed.find(event => event.route === '/api/v1/active-capture-v349');
+assert.ok(posted, 'resposta POST não apareceu no feed');
+assert.equal(posted.bytesIn, 128);
+assert.equal(posted.requestContentType, 'application/json');
+assert.equal(posted.requestId, 'active-v349');
+assert.equal(snapshot.activeRequests.some(request => request.route === '/api/v1/active-capture-v349'), false);
 
 // HEAD precisa ser contabilizado, mas sem bytes de corpo enviados.
 const headReq = { method: 'HEAD', url: '/api/v1/head-capture-v313', headers: {} };
@@ -94,5 +135,24 @@ assert.equal(snapshot.proxyOutputMonitor.totals.captureHealth, 'complete');
 assert.equal(snapshot.proxyOutputMonitor.totals.centralInterceptorInstalled, true);
 assert.ok(snapshot.distributions.interceptors.some(item => item.name === 'sendJson'));
 assert.ok(snapshot.distributions.interceptors.some(item => item.name === 'res.write+end'));
+
+// Rotas operacionais chamadas por um consumidor real também precisam aparecer.
+const readyReq = { method: 'GET', url: '/api/v1/ready', headers: { 'x-valorae-app': 'VALORAE APK' } };
+const readyRes = mockResponse();
+await dispatchRoute(readyReq, readyRes);
+snapshot = getServerMetricsSnapshot();
+const readyEvent = snapshot.proxyOutputMonitor.outputFeed.find(event => event.route === '/api/v1/ready');
+assert.ok(readyEvent, 'chamada externa a /ready não apareceu no feed');
+assert.equal(readyEvent.appName, 'VALORAE APK');
+assert.equal(readyEvent.payloadPreview, undefined, 'diagnóstico operacional não deve replicar payload sensível');
+
+// A mesma rota usada por um probe identificado continua isolada dos totais externos.
+const beforeProbe = snapshot.summary.requests;
+const probeReq = { method: 'GET', url: '/api/v1/ready', headers: { 'x-valorae-telemetry': 'probe' } };
+const probeRes = mockResponse();
+await dispatchRoute(probeReq, probeRes);
+snapshot = getServerMetricsSnapshot();
+assert.equal(snapshot.summary.requests, beforeProbe);
+assert.equal(snapshot.summary.internalTelemetryRequests, 2);
 
 console.log('proxy-monitor-central-capture-v313 ok');

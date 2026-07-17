@@ -1,3 +1,36 @@
+## 21.12.381 — Checkpoint 119: monitor plano de tráfego ao vivo
+
+- O monitor foi reduzido a quatro superfícies operacionais: tráfego ao vivo, rotas/fontes, saúde e ajustes.
+- Cards, sidebar, gradientes, blur, páginas de arquitetura, benchmark e documentação foram removidos da interface principal.
+- Respostas externas exibem rota, método, status, latência, entrada/saída, consumidor, origem, cache, correlação e sinais do payload.
+- Requisições em processamento aparecem separadamente e somem quando finalizadas.
+- Parâmetros de consulta usam allowlist; nomes podem ser auditados, mas tokens e valores arbitrários não são expostos.
+- Filtros, pausa, atualização manual, temas, exportação JSON/CSV e snapshot técnico permanecem funcionais.
+- Polling administrativo segue isolado dos totais reais e a cobertura do interceptador central continua auditável.
+- Nenhum endpoint, campo financeiro, schema, política de cache ou contrato do APK v528 foi alterado.
+
+## 21.12.380 — Checkpoint 118: hardening do runtime de scraping
+
+- Fallback parse5 passa a considerar seletores que dependem da árvore implícita de navegador.
+- Tabelas simples continuam no htmlparser2; `tbody` implícito e foster parenting usam parse5.
+- Respostas 4xx/5xx deixam de ser armazenadas como cache fresco.
+- Sanitização de headers ocorre depois da mesclagem final e bloqueia headers hop-by-hop.
+- Texto sem charset e com UTF-8 inválido pode recuperar Windows-1252.
+- Cancelamento da chamada encerra também a espera de retry/backoff.
+- O contrato `2026.07.16-checkpoint117-v1` foi preservado; o hardening é aditivo e pareado ao APK v528.
+- Endpoints, campos financeiros, cache válido, ETags, schemas e APKs anteriores permanecem compatíveis.
+
+## 21.12.379 — Checkpoint 117: motor híbrido de scraping
+
+- Parser adaptativo usa htmlparser2 para desempenho e parse5 quando o HTML exige correção compatível com navegador.
+- DOM preguiçoso compartilhado elimina a segunda análise entre seletores padrão e descoberta de dados estruturados.
+- Consultas idênticas de seletor, extração e limite são deduplicadas sem reordenar chaves do contrato.
+- Decodificação limitada reconhece BOM, charset HTTP e `<meta charset>`, com fallback seguro para UTF-8.
+- Chromium local pode ser reutilizado com rotação; páginas, cookies e storage continuam isolados em um contexto novo por execução.
+- Espera explícita pelo primeiro seletor ausente reduz latência e flakiness do fallback dinâmico.
+- Endpoint `/api/v1/contract/scraping-engine` e header `X-Valorae-Scraping-Engine` pareados ao APK v527.
+- Campos financeiros, endpoints existentes, políticas de promoção, cache, ETags e compatibilidade com Proxies/APKs anteriores foram preservados.
+
 ## Hotfix de deploy — Checkpoint 116 / Proxy 21.12.378 — 2026-07-15
 
 - Corrigido `ERR_PNPM_OUTDATED_LOCKFILE` no Vercel.

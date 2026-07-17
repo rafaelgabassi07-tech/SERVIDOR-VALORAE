@@ -1,0 +1,76 @@
+{
+  "benchmark": "valorae-scraping-engines",
+  "release": "21.12.380-scraping-runtime-hardening-v348",
+  "runtime": "Node.js v24.14.0",
+  "fixture": {
+    "htmlBytes": 255208,
+    "rows": 900,
+    "iterations": 12,
+    "warmups": 3
+  },
+  "complexSelectors": [
+    {
+      "engine": "cheerio-parse5",
+      "averageMs": 113.83,
+      "operationsPerSecond": 8.79,
+      "heapDeltaKiB": 78.4,
+      "parityWithParse5": true
+    },
+    {
+      "engine": "cheerio-htmlparser2",
+      "averageMs": 41.824,
+      "operationsPerSecond": 23.91,
+      "heapDeltaKiB": 29.0,
+      "parityWithParse5": true
+    },
+    {
+      "engine": "valorae-hybrid-adaptive",
+      "averageMs": 29.588,
+      "operationsPerSecond": 33.8,
+      "heapDeltaKiB": 96.2,
+      "parityWithParse5": true
+    },
+    {
+      "engine": "valorae-hybrid-force-parse5",
+      "averageMs": 57.208,
+      "operationsPerSecond": 17.48,
+      "heapDeltaKiB": 145.4,
+      "parityWithParse5": true
+    },
+    {
+      "engine": "valorae-css-lite-legacy",
+      "averageMs": 8.608,
+      "operationsPerSecond": 116.17,
+      "heapDeltaKiB": 49.9,
+      "parityWithParse5": null,
+      "note": "Caminho parcial: retornou menos dados e não é comparável ao DOM completo."
+    }
+  ],
+  "simpleSelectors": [
+    {
+      "engine": "valorae-single-pass-fast",
+      "averageMs": 8.708,
+      "operationsPerSecond": 114.83,
+      "parityWithParse5": true
+    },
+    {
+      "engine": "cheerio-parse5-simple",
+      "averageMs": 53.522,
+      "operationsPerSecond": 18.68
+    },
+    {
+      "engine": "cheerio-htmlparser2-simple",
+      "averageMs": 28.91,
+      "operationsPerSecond": 34.59
+    }
+  ],
+  "measuredImprovement": {
+    "adaptiveLatencyReductionVersusDirectParse5Percent": 74.01,
+    "adaptiveThroughputMultiplierVersusDirectParse5": 3.85,
+    "adaptiveLatencyReductionVersusDirectHtmlparser2Percent": 29.26,
+    "adaptiveThroughputMultiplierVersusDirectHtmlparser2": 1.41,
+    "singlePassLatencyReductionVersusSimpleParse5Percent": 83.73
+  },
+  "command": "node --expose-gc scripts/benchmark-scraping-engines.js --quick",
+  "caveat": "Microbenchmark sintético reproduzível; mede CPU local do parser, não latência de rede, e não garante o mesmo ganho para toda página real."
+}
