@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#080808">
-  <meta name="valorae-ui" content="valorae-monitor-navigation-benchmark-architecture-v352">
+  <meta name="valorae-ui" content="valorae-monitor-visual-audit-v353">
   <meta name="valorae-latest-patch" content="21.12.382-quote-state-resilience-v350">
   <meta name="valorae-readiness-endpoint" content="/api/v1/release/readiness">
   <title>VALORAE Proxy · Monitor operacional</title>
@@ -29,18 +29,22 @@
       <i aria-hidden="true"></i><span>Conectando</span>
     </div>
     <div class="header-actions">
-      <button class="icon-button" id="themeToggle" type="button" aria-label="Alternar tema" title="Alternar tema">
+      <button class="icon-button" id="themeToggle" type="button" aria-label="Alternar tema" aria-pressed="false" title="Alternar tema">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9c0-1-.2-2-.5-2.8A7 7 0 0 1 12 3Z"/></svg>
       </button>
-      <button class="icon-button" id="refreshButton" type="button" aria-label="Atualizar agora" title="Atualizar agora">
+      <button class="icon-button" id="refreshButton" type="button" aria-label="Atualizar agora" aria-busy="false" title="Atualizar agora">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5"/><path d="M19 11a7 7 0 1 0 .2 3"/></svg>
       </button>
-      <button class="text-button" id="pauseButton" type="button">Pausar</button>
+      <button class="pause-button" id="pauseButton" type="button" aria-label="Pausar atualização automática" aria-pressed="false" title="Pausar atualização automática">
+        <svg class="pause-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg>
+        <svg class="play-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>
+        <span>Pausar</span>
+      </button>
     </div>
   </header>
 
   <div class="menu-backdrop" id="menuBackdrop" aria-hidden="true"></div>
-  <aside class="app-drawer" id="appDrawer" aria-label="Menu principal" aria-hidden="true">
+  <aside class="app-drawer" id="appDrawer" role="dialog" aria-modal="true" aria-label="Menu principal" aria-hidden="true" inert>
     <header class="drawer-header">
       <div class="drawer-brand">
         <img src="/assets/valorae-logo.svg" alt="" width="48" height="48">
@@ -78,11 +82,11 @@
         <span><strong>Ajustes</strong><small>Tema, origem e atualização</small></span>
       </button>
     </nav>
-    <footer class="drawer-footer"><span>Contrato protegido para o APK</span><strong>v350 · checkpoint 382</strong></footer>
+    <footer class="drawer-footer"><span>Contrato protegido para o APK</span><strong id="drawerReleaseLabel">Core v350 · UI v353</strong></footer>
   </aside>
 
-  <main id="monitorMain" class="monitor-main">
-    <section class="view active" id="view-live" data-view-panel="live">
+  <main id="monitorMain" class="monitor-main" aria-busy="false">
+    <section class="view active" id="view-live" data-view-panel="live" tabindex="-1">
       <header class="page-heading">
         <div>
           <span class="eyebrow">Fluxo externo da instância</span>
@@ -127,10 +131,10 @@
         <section class="feed-pane" aria-labelledby="feedTitle">
           <header class="section-heading feed-heading">
             <div><span class="eyebrow">Mais recentes primeiro</span><h2 id="feedTitle">Linha do tempo</h2></div>
-            <span id="feedCount">0 eventos</span>
+            <span id="feedCount" role="status" aria-live="polite">0 eventos</span>
           </header>
           <div class="feed-columns" aria-hidden="true"><span>Hora</span><span>Rota e consumidor</span><span>Entrega</span></div>
-          <div class="event-feed" id="eventFeed" role="list" aria-live="polite"></div>
+          <div class="event-feed" id="eventFeed" aria-label="Eventos recentes do Proxy"></div>
         </section>
 
         <aside class="event-detail" id="eventDetail" aria-labelledby="detailTitle">
@@ -148,7 +152,7 @@
       </footer>
     </section>
 
-    <section class="view" id="view-routes" data-view-panel="routes" hidden>
+    <section class="view" id="view-routes" data-view-panel="routes" tabindex="-1" hidden>
       <header class="page-heading">
         <div><span class="eyebrow">Distribuição operacional</span><h1>Rotas, fontes e consumidores</h1><p>Onde o tráfego entra, quem consome, quanto cada rota entrega e quais fontes ou caches sustentam as respostas.</p></div>
       </header>
@@ -156,7 +160,7 @@
       <div class="filter-line compact-filter"><label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="sr-only">Buscar rota</span><input id="routeSearch" type="search" autocomplete="off" placeholder="Filtrar rotas"></label></div>
       <section aria-labelledby="routesTitle">
         <header class="section-heading"><div><span class="eyebrow">Inventário observado</span><h2 id="routesTitle">Rotas</h2></div><span id="routeCount">0 rotas</span></header>
-        <div class="table-scroll"><table><thead><tr><th>Rota</th><th>Volume</th><th>Status</th><th>Latência</th><th>Payload</th><th>Fonte / cache</th><th>Consumidor</th></tr></thead><tbody id="routeTable"></tbody></table></div>
+        <div class="table-scroll" tabindex="0" aria-label="Tabela de rotas observadas"><table><thead><tr><th>Rota</th><th>Volume</th><th>Status</th><th>Latência</th><th>Payload</th><th>Fonte / cache</th><th>Consumidor</th></tr></thead><tbody id="routeTable"></tbody></table></div>
       </section>
       <div class="distribution-grid">
         <section><header class="section-heading"><div><span class="eyebrow">Origem dos dados</span><h2>Fontes</h2></div></header><div class="distribution-list" id="sourceDistribution"></div></section>
@@ -165,14 +169,14 @@
       </div>
     </section>
 
-    <section class="view" id="view-health" data-view-panel="health" hidden>
+    <section class="view" id="view-health" data-view-panel="health" tabindex="-1" hidden>
       <header class="page-heading">
         <div><span class="eyebrow">Estado da instância</span><h1>Saúde, erros e desempenho</h1><p>Sinais que exigem ação, sem misturar documentação ou dados que não ajudam a operar o Proxy.</p></div>
       </header>
       <div class="metric-strip" id="healthMetrics" aria-label="Resumo de saúde"></div>
       <section class="chart-section" aria-labelledby="trafficChartTitle">
         <header class="section-heading"><div><span class="eyebrow">Janela recente</span><h2 id="trafficChartTitle">Tráfego e erros</h2></div><span id="chartLegend">requisições · respostas · erros</span></header>
-        <canvas id="trafficChart" height="190" aria-label="Gráfico de tráfego e erros"></canvas>
+        <canvas id="trafficChart" height="210" role="img" aria-label="Gráfico de tráfego, respostas e erros">Seu navegador não oferece suporte ao gráfico em canvas.</canvas>
       </section>
       <div class="health-grid">
         <section><header class="section-heading"><div><span class="eyebrow">Prioridade</span><h2>Alertas</h2></div></header><div class="plain-list" id="alertList"></div></section>
@@ -187,10 +191,10 @@
     </section>
 
 
-    <section class="view" id="view-benchmark" data-view-panel="benchmark" hidden>
+    <section class="view" id="view-benchmark" data-view-panel="benchmark" tabindex="-1" hidden>
       <header class="page-heading">
         <div><span class="eyebrow">Evidência reproduzível</span><h1>Benchmark de motores de scraping</h1><p>Comparação executada sobre o mesmo HTML, os mesmos seletores e o mesmo processo. Resultados incompletos são identificados e não entram como equivalentes.</p></div>
-        <div class="instance-meta"><span id="benchmarkStatus">carregando medições</span></div>
+        <div class="instance-meta"><span id="benchmarkStatus" role="status" aria-live="polite">carregando medições</span></div>
       </header>
       <div class="metric-strip" id="benchmarkMetrics" aria-label="Resumo do benchmark"></div>
       <section class="benchmark-lead" aria-labelledby="benchmarkLeadTitle">
@@ -201,14 +205,14 @@
         <section class="benchmark-panel" aria-labelledby="complexBenchmarkTitle"><header class="section-heading"><div><span class="eyebrow">Seletores complexos</span><h2 id="complexBenchmarkTitle">DOM completo e extrações estruturadas</h2></div><span>menor é melhor</span></header><div class="benchmark-bars" id="complexBenchmarkBars"></div></section>
         <section class="benchmark-panel" aria-labelledby="simpleBenchmarkTitle"><header class="section-heading"><div><span class="eyebrow">Seletores simples</span><h2 id="simpleBenchmarkTitle">Caminho rápido de passagem única</h2></div><span>menor é melhor</span></header><div class="benchmark-bars" id="simpleBenchmarkBars"></div></section>
       </div>
-      <section aria-labelledby="benchmarkTableTitle"><header class="section-heading"><div><span class="eyebrow">Resultado integral</span><h2 id="benchmarkTableTitle">Medições por motor</h2></div><span id="benchmarkRunLabel">—</span></header><div class="table-scroll"><table class="benchmark-table"><thead><tr><th>Motor</th><th>Cenário</th><th>Latência média</th><th>Operações/s</th><th>Paridade</th><th>Saída</th></tr></thead><tbody id="benchmarkTable"></tbody></table></div></section>
+      <section aria-labelledby="benchmarkTableTitle"><header class="section-heading"><div><span class="eyebrow">Resultado integral</span><h2 id="benchmarkTableTitle">Medições por motor</h2></div><span id="benchmarkRunLabel">—</span></header><div class="table-scroll" tabindex="0" aria-label="Tabela comparativa dos motores de scraping"><table class="benchmark-table"><thead><tr><th>Motor</th><th>Cenário</th><th>Latência média</th><th>Operações/s</th><th>Paridade</th><th>Saída</th></tr></thead><tbody id="benchmarkTable"></tbody></table></div></section>
       <div class="benchmark-evidence-grid">
         <section><header class="section-heading"><div><span class="eyebrow">Metodologia</span><h2>Condições da execução</h2></div></header><dl class="fact-list" id="benchmarkFacts"></dl></section>
         <section><header class="section-heading"><div><span class="eyebrow">Interpretação correta</span><h2>O que os números provam</h2></div></header><div class="evidence-copy"><p><strong>Comparável:</strong> motores com paridade confirmada retornaram a mesma estrutura do baseline Parse5.</p><p><strong>Não comparável:</strong> o caminho CSS Lite é mostrado por transparência, mas retorna menos dados e não pode ser tratado como vencedor.</p><p><strong>Escopo:</strong> o teste mede CPU local de parsing; rede, bloqueios do provedor e tempo de renderização remota ficam fora desta medição.</p></div></section>
       </div>
     </section>
 
-    <section class="view" id="view-architecture" data-view-panel="architecture" hidden>
+    <section class="view" id="view-architecture" data-view-panel="architecture" tabindex="-1" hidden>
       <header class="page-heading">
         <div><span class="eyebrow">Sistema explicado</span><h1>Arquitetura do VALORAE Proxy</h1><p>Do contrato solicitado pelo APK até a resposta normalizada, com cache, fallback, scraping híbrido, observabilidade e persistência isolados por responsabilidade.</p></div>
       </header>
@@ -236,13 +240,13 @@
       <section class="architecture-contract" aria-labelledby="architectureContractTitle"><span class="eyebrow">Contrato principal</span><h2 id="architectureContractTitle"><code>/api/v1/mobile/portfolio-sync</code></h2><p>Agrega análise, histórico, IPCA, proventos e rankings opcionais. Cada bloco remoto mantém timeout e fallback próprios para que uma fonte lenta não derrube a resposta inteira.</p></section>
     </section>
 
-    <section class="view" id="view-settings" data-view-panel="settings" hidden>
+    <section class="view" id="view-settings" data-view-panel="settings" tabindex="-1" hidden>
       <header class="page-heading">
         <div><span class="eyebrow">Preferências locais</span><h1>Ajustes essenciais</h1><p>Somente controles que mudam a forma de acompanhar o Proxy. Nenhuma configuração altera o contrato consumido pelo APK.</p></div>
       </header>
       <div class="settings-list">
         <section class="setting-row"><div><h2>Tema</h2><p>Claro, escuro ou de acordo com o sistema.</p></div><div class="segmented" id="themeChoices"><button type="button" data-theme="dark">Escuro</button><button type="button" data-theme="light">Claro</button><button type="button" data-theme="system">Sistema</button></div></section>
-        <section class="setting-row"><div><h2>Origem da API</h2><p>Deixe vazio para monitorar o mesmo deploy que abriu esta página.</p></div><div class="setting-control api-control"><input id="apiBaseInput" type="url" inputmode="url" placeholder="https://seu-proxy.vercel.app"><button class="text-button" id="saveApiBase" type="button">Salvar</button><button class="text-button" id="clearApiBase" type="button">Usar atual</button></div></section>
+        <section class="setting-row"><div><h2>Origem da API</h2><p>Deixe vazio para monitorar o mesmo deploy que abriu esta página.</p></div><div class="setting-control api-control"><input id="apiBaseInput" type="url" inputmode="url" aria-label="Origem da API do Proxy" autocomplete="url" spellcheck="false" placeholder="https://seu-proxy.vercel.app"><button class="text-button" id="saveApiBase" type="button">Salvar</button><button class="text-button" id="clearApiBase" type="button">Usar atual</button></div></section>
         <section class="setting-row"><div><h2>Atualização</h2><p>Polling HTTP isolado da telemetria externa.</p></div><div class="setting-control"><select id="pollInterval"><option value="2000">2 segundos</option><option value="3000">3 segundos</option><option value="5000">5 segundos</option><option value="10000">10 segundos</option></select></div></section>
         <section class="setting-row"><div><h2>Eventos visíveis</h2><p>Limite apenas da interface; a retenção do servidor não é alterada.</p></div><div class="setting-control"><select id="feedLimit"><option value="30">30 eventos</option><option value="60">60 eventos</option><option value="80">80 eventos</option></select></div></section>
         <section class="setting-row"><div><h2>Estado local</h2><p id="settingsState">Aguardando conexão.</p></div><div class="setting-control"><button class="text-button" id="resetPreferences" type="button">Restaurar preferências</button></div></section>

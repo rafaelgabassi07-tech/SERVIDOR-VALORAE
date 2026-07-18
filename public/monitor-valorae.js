@@ -118,6 +118,23 @@
     return `${apiBase()}${path}`;
   }
 
+  function compactRelease(value) {
+    const release = String(value || RELEASE_PATCH);
+    const semantic = release.match(/(?:^|-)v(\d+)(?:$|[-.])/i);
+    return semantic ? `Proxy v${semantic[1]}` : release;
+  }
+
+  function normalizeApiBase(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const parsed = new URL(raw);
+    if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('Use uma origem HTTP ou HTTPS.');
+    if (parsed.username || parsed.password) throw new Error('A origem não pode conter usuário ou senha.');
+    if (parsed.search || parsed.hash) throw new Error('Remova parâmetros e fragmentos da origem.');
+    const pathname = parsed.pathname.replace(/\/+$/, '');
+    return `${parsed.origin}${pathname === '/' ? '' : pathname}`;
+  }
+
   function monitorAnalytics() {
     const analytics = state.data?.monitorAnalytics;
     return analytics?.active ? analytics : null;
@@ -170,16 +187,27 @@
   }
 
   async function refresh({ manual = false } = {}) {
-    if (state.loading || (state.paused && !manual)) return;
+    if (state.loading) {
+      if (manual) toast('Uma atualização já está em andamento.');
+      return;
+    }
+    if (state.paused && !manual) return;
     if (document.hidden && !manual) {
       schedule();
       return;
     }
     state.loading = true;
+    $('refreshButton')?.classList.add('is-loading');
+    $('refreshButton')?.setAttribute('aria-busy', 'true');
+    $('monitorMain')?.setAttribute('aria-busy', 'true');
     state.requestController?.abort();
     const controller = new AbortController();
     state.requestController = controller;
-    const timeout = setTimeout(() => controller.abort(), 12000);
+    let timedOut = false;
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 12000);
     if (!state.data) setConnection('', 'Conectando');
     try {
       const response = await fetch(apiUrl('/api/server/metrics'), {
@@ -207,16 +235,29 @@
       setConnection('online', state.paused ? 'Pausado' : 'Ao vivo');
       renderAll();
     } catch (error) {
-      if (error?.name !== 'AbortError' || manual) state.error = error?.message || 'Falha de conexão';
-      if (state.data) setConnection('stale', 'Dados anteriores');
-      else setConnection('offline', 'Sem conexão');
+      if (timedOut) state.error = 'Tempo limite de 12 s ao consultar as métricas';
+      else if (error?.name !== 'AbortError' || manual) state.error = error?.message || 'Falha de conexão';
+      if (state.data) setConnection('stale', timedOut ? 'Tempo limite' : 'Dados anteriores');
+      else setConnection('offline', timedOut ? 'Tempo limite' : 'Sem conexão');
       renderHeader();
     } finally {
       clearTimeout(timeout);
       state.loading = false;
+      $('refreshButton')?.classList.remove('is-loading');
+      $('refreshButton')?.setAttribute('aria-busy', 'false');
+      $('monitorMain')?.setAttribute('aria-busy', 'false');
       if (state.requestController === controller) state.requestController = null;
       schedule();
     }
+  }
+
+  function clearRemoteSnapshot() {
+    state.data = null;
+    state.events = [];
+    state.filteredEvents = [];
+    state.selectedId = null;
+    state.rawRenderedAt = '';
+    renderAll();
   }
 
   function renderAll() {
@@ -234,7 +275,12 @@
     const data = state.data;
     const summary = data?.summary || {};
     if ($('currentPageLabel')) $('currentPageLabel').textContent = PAGE_TITLES[state.view] || PAGE_TITLES.live;
-    if ($('releaseLabel')) $('releaseLabel').textContent = data?.releasePatch || RELEASE_PATCH;
+    const fullRelease = data?.releasePatch || RELEASE_PATCH;
+    if ($('releaseLabel')) {
+      $('releaseLabel').textContent = compactRelease(fullRelease);
+      $('releaseLabel').title = fullRelease;
+    }
+    if ($('drawerReleaseLabel')) $('drawerReleaseLabel').textContent = `${compactRelease(fullRelease)} · UI v353`;
     if ($('instanceLabel')) $('instanceLabel').textContent = data?.instance?.id ? `instância ${compactId(data.instance.id, 8)}` : 'instância —';
     if ($('updatedLabel')) $('updatedLabel').textContent = state.error
       ? `falha: ${state.error}`
@@ -252,7 +298,12 @@
     const data = state.data;
     if (!data) {
       $('liveMetrics').innerHTML = Array.from({ length: 6 }, (_, index) => metric(['Requisições', 'Respostas', 'Em voo', 'Erros', 'Latência p95', 'Dados enviados'][index], '—', 'aguardando')).join('');
-      $('eventFeed').innerHTML = '<div class="empty-copy">Conectando ao endpoint de métricas…</div>';
+      $('captureLine').className = 'capture-line';
+      $('captureLine').innerHTML = '<span class="capture-state"><i aria-hidden="true"></i><strong>Captura aguardando</strong></span><span>Conectando ao endpoint de métricas do Proxy.</span>';
+      renderInflight([]);
+      populateFeedFilters();
+      renderFeed();
+      $('retentionNote').textContent = 'A retenção será informada após a conexão.';
       return;
     }
     const summary = data.summary || {};
@@ -334,6 +385,7 @@
   }
 
   function renderFeed() {
+    const focusedEventId = document.activeElement?.dataset?.eventId || null;
     state.filteredEvents = filteredEvents();
     $('feedCount').textContent = `${formatNumber(state.filteredEvents.length)} de ${formatNumber(state.events.length)} eventos`;
     if (!state.filteredEvents.length) {
@@ -354,12 +406,17 @@
         event.partial?.detected ? `<span class="flag${event.partial.classification === 'critical' ? ' danger' : ''}">parcial ${escapeHtml(event.partial.classification || '')}</span>` : '',
         event.aborted || event.clientClosed ? '<span class="flag danger">cancelada</span>' : event.slow ? '<span class="flag danger">lenta</span>' : '',
       ].filter(Boolean).join('');
-      return `<button class="event-row${selected ? ' selected' : ''}" type="button" role="listitem" data-event-id="${escapeHtml(id)}" aria-pressed="${selected}"><time class="event-time" datetime="${escapeHtml(event.at || '')}">${escapeHtml(formatTime(event.at))}</time><span class="event-main"><span class="event-route"><span class="method">${escapeHtml(event.method || 'GET')}</span><strong>${escapeHtml(event.route || '/')}</strong></span><span class="event-consumer">${escapeHtml(`${event.appName || event.device || 'Consumidor API'}${event.appChannel ? ` · ${event.appChannel}` : ''}`)}</span></span><span class="event-delivery"><strong class="status-code ${tone}">${escapeHtml(event.status || '—')}</strong><small>${escapeHtml(`${formatMs(event.latencyMs)} · ${formatBytes(event.bytesOut)}`)}</small><span class="event-flags">${flags}</span></span></button>`;
+      const accessibleLabel = `${event.method || 'GET'} ${event.route || '/'}, status ${event.status || 'não informado'}, ${formatMs(event.latencyMs)}`;
+      return `<button class="event-row${selected ? ' selected' : ''}" type="button" data-event-id="${escapeHtml(id)}" aria-pressed="${selected}" aria-label="${escapeHtml(accessibleLabel)}"><time class="event-time" datetime="${escapeHtml(event.at || '')}">${escapeHtml(formatTime(event.at))}</time><span class="event-main"><span class="event-route"><span class="method">${escapeHtml(event.method || 'GET')}</span><strong>${escapeHtml(event.route || '/')}</strong></span><span class="event-consumer">${escapeHtml(`${event.appName || event.device || 'Consumidor API'}${event.appChannel ? ` · ${event.appChannel}` : ''}`)}</span></span><span class="event-delivery"><strong class="status-code ${tone}">${escapeHtml(event.status || '—')}</strong><small>${escapeHtml(`${formatMs(event.latencyMs)} · ${formatBytes(event.bytesOut)}`)}</small><span class="event-flags">${flags}</span></span></button>`;
     }).join('');
     $$('.event-row').forEach(button => button.addEventListener('click', () => {
       state.selectedId = button.dataset.eventId;
       renderFeed();
     }));
+    if (focusedEventId) {
+      const focusedReplacement = $$('.event-row').find(button => button.dataset.eventId === focusedEventId);
+      focusedReplacement?.focus({ preventScroll: true });
+    }
     renderEventDetail();
   }
 
@@ -413,7 +470,15 @@
 
   function renderRoutes() {
     const data = state.data;
-    if (!data) return;
+    if (!data) {
+      $('routeMetrics').innerHTML = Array.from({ length: 6 }, (_, index) => metric(['Rotas observadas', 'Clientes ativos', 'Cache hit', 'Fonte confiável', 'Entrada', 'Saída'][index], '—', 'aguardando')).join('');
+      $('routeCount').textContent = '0 rotas';
+      $('routeTable').innerHTML = '<tr><td colspan="7">Conectando ao inventário de rotas.</td></tr>';
+      renderDistribution('sourceDistribution', [], 'Aguardando fontes');
+      renderDistribution('cacheDistribution', [], 'Aguardando cache');
+      renderDistribution('appDistribution', [], 'Aguardando consumidores');
+      return;
+    }
     const localSummary = data.summary || {};
     const analytics = monitorAnalytics();
     const summary = analytics?.summary || localSummary;
@@ -454,7 +519,17 @@
 
   function renderHealth() {
     const data = state.data;
-    if (!data) return;
+    if (!data) {
+      $('healthMetrics').innerHTML = Array.from({ length: 6 }, (_, index) => metric(['Saúde da instância', 'Disponibilidade', 'Latência p95', 'Qualidade dos dados', 'Heap / limite V8', 'SLO'][index], '—', 'aguardando')).join('');
+      renderPlainList('alertList', [], item => item);
+      renderPlainList('runbookList', [], item => item);
+      $('captureFacts').innerHTML = facts([['Estado', 'aguardando conexão']]);
+      $('runtimeFacts').innerHTML = facts([['Estado', 'aguardando conexão']]);
+      $('errorCount').textContent = '0';
+      $('errorList').innerHTML = '<div class="empty-copy">Aguardando o feed de erros.</div>';
+      $('rawSnapshot').textContent = 'Abra após a conexão para carregar o JSON.';
+      return;
+    }
     const localSummary = data.summary || {};
     const summary = observedSummary();
     const heap = Number(localSummary.heapLimitUsagePercent || localSummary.heapUsagePercent || 0);
@@ -741,13 +816,25 @@
     ]);
   }
 
+  function drawerFocusableElements() {
+    const drawer = $('appDrawer');
+    if (!drawer) return [];
+    return [...drawer.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')]
+      .filter(element => !element.disabled && !element.hidden && element.getClientRects().length > 0);
+  }
+
   function openMenu() {
     if (state.menuOpen) return;
     state.menuOpen = true;
     state.menuReturnFocus = document.activeElement;
     document.body.classList.add('menu-open');
     $('menuButton')?.setAttribute('aria-expanded', 'true');
-    $('appDrawer')?.setAttribute('aria-hidden', 'false');
+    const drawer = $('appDrawer');
+    if (drawer) {
+      drawer.inert = false;
+      drawer.setAttribute('aria-hidden', 'false');
+    }
+    $('monitorMain').inert = true;
     $('menuBackdrop')?.setAttribute('aria-hidden', 'false');
     requestAnimationFrame(() => $('menuCloseButton')?.focus());
   }
@@ -757,10 +844,30 @@
     state.menuOpen = false;
     document.body.classList.remove('menu-open');
     $('menuButton')?.setAttribute('aria-expanded', 'false');
-    $('appDrawer')?.setAttribute('aria-hidden', 'true');
+    const drawer = $('appDrawer');
+    if (drawer) {
+      drawer.setAttribute('aria-hidden', 'true');
+      drawer.inert = true;
+    }
+    $('monitorMain').inert = false;
     $('menuBackdrop')?.setAttribute('aria-hidden', 'true');
-    if (restoreFocus && state.menuReturnFocus?.focus) state.menuReturnFocus.focus();
+    if (restoreFocus && state.menuReturnFocus?.focus) state.menuReturnFocus.focus({ preventScroll: true });
     state.menuReturnFocus = null;
+  }
+
+  function trapMenuFocus(event) {
+    if (!state.menuOpen || event.key !== 'Tab') return;
+    const focusable = drawerFocusableElements();
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   function renderSettings() {
@@ -777,15 +884,21 @@
     renderThemeChoices();
   }
 
-  function setView(rawView, { updateHash = true } = {}) {
+  function setView(rawView, { updateHash = true, focusPage = false } = {}) {
     const candidate = VIEW_ALIASES[rawView] || rawView || 'live';
     const view = ['live', 'routes', 'health', 'benchmark', 'architecture', 'settings'].includes(candidate) ? candidate : 'live';
+    const wasMenuOpen = state.menuOpen;
     state.view = view;
-    $$('[data-view]').forEach(button => button.setAttribute('aria-current', button.dataset.view === view ? 'page' : 'false'));
+    $$('[data-view]').forEach(button => {
+      if (button.dataset.view === view) button.setAttribute('aria-current', 'page');
+      else button.removeAttribute('aria-current');
+    });
+    let activePanel = null;
     $$('[data-view-panel]').forEach(panel => {
       const active = panel.dataset.viewPanel === view;
       panel.hidden = !active;
       panel.classList.toggle('active', active);
+      if (active) activePanel = panel;
     });
     safeStorage.set(STORAGE.view, view);
     if (updateHash) history.replaceState(null, '', `#${view}`);
@@ -794,7 +907,8 @@
     if (view === 'benchmark') loadBenchmarkData();
     if (view === 'architecture') renderArchitecture();
     closeMenu({ restoreFocus: false });
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    if ((focusPage || wasMenuOpen) && activePanel) requestAnimationFrame(() => activePanel.focus({ preventScroll: true }));
   }
 
   function themeMode() {
@@ -807,13 +921,26 @@
     const resolved = normalized === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : normalized;
     document.body.dataset.theme = resolved;
     document.documentElement.style.colorScheme = resolved;
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.content = resolved === 'light' ? '#fbfaf7' : '#0c0c0d';
+    const toggle = $('themeToggle');
+    if (toggle) {
+      const next = resolved === 'dark' ? 'claro' : 'escuro';
+      toggle.setAttribute('aria-label', `Usar tema ${next}`);
+      toggle.setAttribute('title', `Usar tema ${next}`);
+      toggle.setAttribute('aria-pressed', String(resolved === 'light'));
+    }
     renderThemeChoices();
     if (state.view === 'health') requestAnimationFrame(drawTrafficChart);
   }
 
   function renderThemeChoices() {
     const mode = themeMode();
-    $$('[data-theme]').forEach(button => button.classList.toggle('active', button.dataset.theme === mode));
+    $$('[data-theme]').forEach(button => {
+      const active = button.dataset.theme === mode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
   }
 
   function downloadFile(name, content, type) {
@@ -829,7 +956,9 @@
   }
 
   function csvValue(value) {
-    return `"${String(value ?? '').replaceAll('"', '""')}"`;
+    let text = String(value ?? '');
+    if (/^[\s]*[=+\-@]/.test(text)) text = `'${text}`;
+    return `"${text.replaceAll('"', '""')}"`;
   }
 
   function exportEvents(format) {
@@ -846,22 +975,46 @@
 
   async function copyText(text, message) {
     try {
-      await navigator.clipboard.writeText(text);
+      if (navigator.clipboard?.writeText && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.append(area);
+        area.select();
+        const copied = document.execCommand('copy');
+        area.remove();
+        if (!copied) throw new Error('copy unsupported');
+      }
       toast(message);
     } catch {
       toast('Não foi possível copiar neste navegador.');
     }
   }
 
+  function setPauseState() {
+    const button = $('pauseButton');
+    if (!button) return;
+    button.classList.toggle('is-paused', state.paused);
+    button.setAttribute('aria-pressed', String(state.paused));
+    button.setAttribute('aria-label', state.paused ? 'Retomar atualização automática' : 'Pausar atualização automática');
+    button.setAttribute('title', state.paused ? 'Retomar atualização automática' : 'Pausar atualização automática');
+    const text = button.querySelector('span');
+    if (text) text.textContent = state.paused ? 'Retomar' : 'Pausar';
+  }
+
   function bindEvents() {
-    $$('[data-view]').forEach(button => button.addEventListener('click', () => setView(button.dataset.view)));
+    $$('[data-view]').forEach(button => button.addEventListener('click', () => setView(button.dataset.view, { focusPage: state.menuOpen })));
     $('menuButton').addEventListener('click', openMenu);
     $('menuCloseButton').addEventListener('click', () => closeMenu());
     $('menuBackdrop').addEventListener('click', () => closeMenu());
     $('refreshButton').addEventListener('click', () => refresh({ manual: true }));
     $('pauseButton').addEventListener('click', () => {
       state.paused = !state.paused;
-      $('pauseButton').textContent = state.paused ? 'Retomar' : 'Pausar';
+      setPauseState();
       if (state.paused) {
         clearTimeout(state.timer);
         state.requestController?.abort();
@@ -883,7 +1036,7 @@
       $('appFilter').value = 'all';
       renderFeed();
     });
-    $('routeSearch').addEventListener('input', () => renderRouteTable(state.data?.routeDetails || []));
+    $('routeSearch').addEventListener('input', () => renderRouteTable(monitorAnalytics()?.routeDetails || state.data?.routeDetails || []));
     $('copyEventButton').addEventListener('click', () => {
       const event = selectedEvent();
       if (event) copyText(JSON.stringify(event, null, 2), 'Evento copiado.');
@@ -906,22 +1059,22 @@
       renderSettings();
     });
     $('saveApiBase').addEventListener('click', () => {
-      const raw = String($('apiBaseInput').value || '').trim().replace(/\/$/, '');
-      if (raw && !/^https?:\/\//i.test(raw)) {
-        toast('Informe uma URL iniciada por http:// ou https://.');
+      let raw;
+      try {
+        raw = normalizeApiBase($('apiBaseInput').value);
+      } catch (error) {
+        toast(error?.message || 'Origem inválida.');
         return;
       }
       safeStorage.set(STORAGE.apiBase, raw);
-      state.data = null;
-      state.events = [];
+      clearRemoteSnapshot();
       toast('Origem atualizada.');
       refresh({ manual: true });
     });
     $('clearApiBase').addEventListener('click', () => {
       safeStorage.remove(STORAGE.apiBase);
       $('apiBaseInput').value = '';
-      state.data = null;
-      state.events = [];
+      clearRemoteSnapshot();
       toast('Monitorando a origem atual.');
       refresh({ manual: true });
     });
@@ -929,6 +1082,8 @@
       Object.values(STORAGE).forEach(key => safeStorage.remove(key));
       state.pollMs = 3000;
       state.feedLimit = 60;
+      state.paused = false;
+      setPauseState();
       applyTheme('system');
       setView('live');
       renderSettings();
@@ -938,6 +1093,7 @@
     window.addEventListener('hashchange', () => setView(location.hash.slice(1), { updateHash: false }));
     window.addEventListener('keydown', event => {
       if (event.key === 'Escape' && state.menuOpen) closeMenu();
+      else trapMenuFocus(event);
     });
     window.addEventListener('resize', () => { if (state.view === 'health') requestAnimationFrame(drawTrafficChart); });
     window.addEventListener('online', () => refresh({ manual: true }));
@@ -949,6 +1105,8 @@
   function init() {
     applyTheme(themeMode());
     bindEvents();
+    setPauseState();
+    $('appDrawer').inert = true;
     $('pollInterval').value = String(state.pollMs);
     $('feedLimit').value = String(state.feedLimit);
     const initial = VIEW_ALIASES[location.hash.slice(1)] || location.hash.slice(1) || safeStorage.get(STORAGE.view, 'live');
