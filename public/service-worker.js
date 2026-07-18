@@ -1,4 +1,4 @@
-const CACHE = 'valorae-proxy-monitor-v21-12-382-ui-v353';
+const CACHE = 'valorae-proxy-monitor-v21-12-382-ui-v354';
 const SHELL = [
   '/server.html',
   '/monitor-valorae.css',
@@ -7,6 +7,8 @@ const SHELL = [
   '/assets/valorae-logo.svg',
   '/assets/valorae-icon-192.png',
   '/assets/valorae-icon-512.png',
+  '/assets/valorae-icon-1024.png',
+  '/assets/valorae-favicon-48.png',
   '/assets/valorae-monitor-benchmarks.json',
 ];
 

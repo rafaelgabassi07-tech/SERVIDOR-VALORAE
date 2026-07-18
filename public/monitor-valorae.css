@@ -1,4 +1,4 @@
-/* VALORAE Monitor v353 — refinamento visual, acessibilidade e responsividade auditada. */
+/* VALORAE Monitor v354 — identidade visual exclusiva do Proxy aplicada em todas as superfícies. */
 :root{
   color-scheme:dark;
   --bg:#080808;
@@ -74,7 +74,7 @@ svg{display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:
 
 .app-header{position:sticky;top:0;z-index:40;height:var(--header-height);display:flex;align-items:center;gap:10px;padding:0 max(18px,env(safe-area-inset-left)) 0 max(18px,env(safe-area-inset-right));background:var(--header);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:11px;min-width:194px}
-.brand img{width:42px;height:42px;object-fit:contain;border-radius:12px}
+.brand img{width:42px;height:42px;object-fit:contain;display:block;flex:0 0 auto}
 .brand span{display:grid;line-height:1.06}
 .brand strong{font-size:13px;font-weight:820;letter-spacing:.16em}
 .brand small{margin-top:5px;color:var(--accent);font-size:11px;font-weight:720;letter-spacing:.02em}
@@ -251,7 +251,7 @@ body.menu-open .menu-backdrop{opacity:1;pointer-events:auto}
 body.menu-open .app-drawer{transform:none;visibility:visible;transition-delay:0s}
 .drawer-header{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:82px;padding:14px 15px;border-bottom:1px solid var(--line)}
 .drawer-brand{display:flex;align-items:center;gap:12px;min-width:0}
-.drawer-brand img{width:50px;height:50px;border-radius:14px}
+.drawer-brand img{width:50px;height:50px;object-fit:contain;display:block;flex:0 0 auto}
 .drawer-brand div{display:grid;line-height:1.08}
 .drawer-brand strong{font-size:14px;letter-spacing:.15em}
 .drawer-brand span{margin-top:6px;color:var(--accent);font-size:11px;font-weight:740}

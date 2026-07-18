@@ -38,17 +38,13 @@ assert.match(runtime, /\['live', 'routes', 'health', 'benchmark', 'architecture'
 assert.match(runtime, /function renderLive\([\s\S]*?const localSummary = summary;/);
 assert.match(runtime, /function renderCapture\([\s\S]*?const localSummary = summary;/);
 
-// O núcleo da marca deve replicar os quatro paths do launcher Android.
-for (const path of [
-  'M45 58h35v14H45z',
-  'M54 18h16l24 64H78z',
-  'M30 82h16l24-64H54z',
-  'M6 18h16l24 64H30z',
-]) assert.ok(logo.includes(path), `path da marca APK ausente: ${path}`);
-assert.match(logo, /Identificador do Proxy/);
-assert.match(logo, /#FFC107/);
-assert.equal(manifest.icons.length, 2);
-assert.ok(manifest.icons.every(icon => icon.purpose.includes('maskable')));
+// A marca mantém a família VALORAE, mas usa uma geometria exclusiva do Proxy.
+assert.match(logo, /Símbolo exclusivo do VALORAE Proxy/);
+assert.match(logo, /Gateway \/ ponte de dados/);
+assert.match(logo, /Rotas do Proxy/);
+assert.doesNotMatch(logo, /Identificador do Proxy/);
+assert.equal(manifest.icons.length, 3);
+assert.ok(manifest.icons.slice(0, 2).every(icon => icon.purpose.includes('maskable')));
 
 const run = benchmark.currentRun;
 assert.equal(benchmark.command, 'node --expose-gc scripts/benchmark-scraping-engines.js --quick');

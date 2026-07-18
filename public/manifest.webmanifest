@@ -6,7 +6,7 @@
   "background_color": "#080808",
   "theme_color": "#0C0C0D",
   "id": "/server.html",
-  "description": "Monitor operacional do VALORAE Proxy com tráfego persistido, benchmark reproduzível e arquitetura explicada.",
+  "description": "Monitor operacional do VALORAE Proxy com identidade própria, tráfego persistido, benchmark reproduzível e arquitetura explicada.",
   "scope": "/",
   "orientation": "any",
   "version": "21.12.382",
@@ -22,6 +22,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/valorae-icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

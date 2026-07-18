@@ -280,7 +280,7 @@
       $('releaseLabel').textContent = compactRelease(fullRelease);
       $('releaseLabel').title = fullRelease;
     }
-    if ($('drawerReleaseLabel')) $('drawerReleaseLabel').textContent = `${compactRelease(fullRelease)} · UI v353`;
+    if ($('drawerReleaseLabel')) $('drawerReleaseLabel').textContent = `${compactRelease(fullRelease)} · UI v354`;
     if ($('instanceLabel')) $('instanceLabel').textContent = data?.instance?.id ? `instância ${compactId(data.instance.id, 8)}` : 'instância —';
     if ($('updatedLabel')) $('updatedLabel').textContent = state.error
       ? `falha: ${state.error}`
