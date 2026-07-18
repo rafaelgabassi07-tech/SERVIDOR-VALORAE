@@ -3,11 +3,25 @@
   "short_name": "VALORAE Proxy",
   "start_url": "/server.html#live",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#18181B",
+  "theme_color": "#18181B",
   "id": "/server.html",
-  "description": "Monitor plano do VALORAE Proxy v350, com cotações resilientes, tráfego ao vivo e contratos preservados.",
+  "description": "Monitor operacional do VALORAE Proxy com tráfego persistido, benchmark reproduzível e arquitetura explicada.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.382"
+  "version": "21.12.382",
+  "icons": [
+    {
+      "src": "/assets/valorae-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/valorae-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }

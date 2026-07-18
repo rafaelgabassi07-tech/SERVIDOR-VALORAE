@@ -11,9 +11,19 @@
   };
   const VIEW_ALIASES = {
     command: 'live', output: 'live', feed: 'live', overview: 'live',
-    performance: 'health', quality: 'health', diagnostics: 'health', benchmark: 'health',
-    architecture: 'routes', integration: 'routes', io: 'routes', technology: 'routes',
+    performance: 'health', quality: 'health', diagnostics: 'health',
+    benchmarks: 'benchmark', comparison: 'benchmark', compare: 'benchmark',
+    integration: 'architecture', io: 'architecture', technology: 'architecture', system: 'architecture',
   };
+  const PAGE_TITLES = {
+    live: 'Ao vivo',
+    routes: 'Rotas e fontes',
+    health: 'Saúde',
+    benchmark: 'Benchmark',
+    architecture: 'Arquitetura',
+    settings: 'Ajustes',
+  };
+  const BENCHMARK_DATA_URL = '/assets/valorae-monitor-benchmarks.json';
 
   const $ = id => document.getElementById(id);
   const $$ = selector => [...document.querySelectorAll(selector)];
@@ -37,6 +47,11 @@
     lastSuccessAt: 0,
     error: '',
     rawRenderedAt: '',
+    benchmark: null,
+    benchmarkError: '',
+    benchmarkLoading: false,
+    menuOpen: false,
+    menuReturnFocus: null,
   };
   let toastTimer;
 
@@ -103,6 +118,15 @@
     return `${apiBase()}${path}`;
   }
 
+  function monitorAnalytics() {
+    const analytics = state.data?.monitorAnalytics;
+    return analytics?.active ? analytics : null;
+  }
+
+  function observedSummary() {
+    return monitorAnalytics()?.summary || state.data?.summary || {};
+  }
+
   function metric(label, value, note = '', tone = '') {
     return `<div class="metric-item"><span class="metric-label">${escapeHtml(label)}</span><strong class="metric-value ${tone ? `tone-${tone}` : ''}">${escapeHtml(value)}</strong><span class="metric-note">${escapeHtml(note)}</span></div>`;
   }
@@ -128,7 +152,7 @@
   }
 
   function eventIdentity(event) {
-    return String(event?.id ?? `${event?.at || ''}-${event?.route || ''}-${event?.requestId || ''}`);
+    return String(event?.eventKey ?? event?.id ?? `${event?.at || ''}-${event?.route || ''}-${event?.requestId || ''}`);
   }
 
   function setConnection(kind, label) {
@@ -200,6 +224,8 @@
     renderLive();
     renderRoutes();
     renderHealth();
+    renderBenchmark();
+    renderArchitecture();
     renderSettings();
     if (state.view === 'health') requestAnimationFrame(drawTrafficChart);
   }
@@ -207,6 +233,7 @@
   function renderHeader() {
     const data = state.data;
     const summary = data?.summary || {};
+    if ($('currentPageLabel')) $('currentPageLabel').textContent = PAGE_TITLES[state.view] || PAGE_TITLES.live;
     if ($('releaseLabel')) $('releaseLabel').textContent = data?.releasePatch || RELEASE_PATCH;
     if ($('instanceLabel')) $('instanceLabel').textContent = data?.instance?.id ? `instância ${compactId(data.instance.id, 8)}` : 'instância —';
     if ($('updatedLabel')) $('updatedLabel').textContent = state.error
@@ -214,7 +241,10 @@
       : state.lastSuccessAt ? `atualizado ${formatTime(state.lastSuccessAt)}` : 'aguardando dados';
     if ($('liveDescription') && data) {
       const stateText = String(summary.trafficState || 'aguardando').replaceAll('_', ' ');
-      $('liveDescription').textContent = `${stateText} · ${formatNumber(summary.responses || 0)} respostas registradas desde o início desta instância.`;
+      const analytics = monitorAnalytics();
+      const persistent = Number(summary.persistentEventsStored || 0);
+      const analyzed = Number(analytics?.eventCount || 0);
+      $('liveDescription').textContent = `${stateText} · ${formatNumber(summary.responses || 0)} respostas nesta instância${analyzed ? ` · ${formatNumber(analyzed)} analisadas na janela persistida` : ''}${persistent ? ` · ${formatNumber(persistent)} armazenadas no Supabase` : ''}.`;
     }
   }
 
@@ -226,30 +256,35 @@
       return;
     }
     const summary = data.summary || {};
+    const localSummary = summary;
+    const analytics = monitorAnalytics();
+    const observed = analytics?.summary || summary;
+    const latencyTone = (observed.p95LatencyMs || 0) > (observed.sloP95TargetMs || 2500) && observed.latencyAlertEligible ? 'warning' : '';
     $('liveMetrics').innerHTML = [
-      metric('Requisições', formatNumber(summary.requests || 0), `${formatNumber(summary.requestsPerMinute1m || 0)}/min agora`),
-      metric('Respostas', formatNumber(summary.responses || 0), `${formatNumber(summary.successRatePercent ?? 100)}% sucesso`, (summary.errorRatePercent || 0) > 5 ? 'warning' : 'success'),
+      metric('Requisições', formatNumber(summary.requests || 0), `${formatNumber(summary.requestsPerMinute1m || 0)}/min nesta instância`),
+      metric('Respostas analisadas', formatNumber(observed.responses || 0), analytics ? `${formatNumber(summary.responses || 0)} nesta instância · janela persistida` : `${formatNumber(observed.successRatePercent ?? 100)}% sucesso`, (observed.errorRatePercent || 0) > 5 ? 'warning' : 'success'),
       metric('Em voo', formatNumber(summary.inFlight || 0), summary.oldestActiveRoute || 'nenhuma pendência', summary.inFlight ? 'info' : ''),
-      metric('Erros', formatNumber(summary.errors || 0), `${formatNumber(summary.errorRatePercent || 0)}% do total`, summary.errors ? 'danger' : 'success'),
-      metric('Latência p95', formatMs(summary.p95LatencyMs), `média ${formatMs(summary.avgLatencyMs)}`, (summary.p95LatencyMs || 0) > (summary.sloP95TargetMs || 2500) ? 'warning' : ''),
-      metric('Dados enviados', formatBytes(summary.bytesOut || 0), `média ${formatBytes(summary.avgBytesOut || 0)}`),
+      metric('Erros', formatNumber(observed.errors || 0), `${formatNumber(observed.errorRatePercent || 0)}% da janela`, observed.errors ? 'danger' : 'success'),
+      metric('Latência p95', formatMs(observed.p95LatencyMs), `${formatNumber(observed.measuredLatencySamples || 0)} amostras · confiança ${observed.latencyConfidence || '—'}`, latencyTone),
+      metric('Dados enviados', formatBytes(observed.bytesOut || 0), `p95 ${formatBytes(observed.payloadP95BytesOut || 0)}`),
     ].join('');
     renderCapture(data);
     renderInflight(data.activeRequests || []);
     populateFeedFilters();
     renderFeed();
     const scope = data.proxyOutputMonitor?.scope;
-    $('retentionNote').textContent = scope?.persistence || `Até ${formatNumber(summary.eventsStored || state.events.length)} eventos na memória desta instância.`;
+    $('retentionNote').textContent = scope?.persistence || `Até ${formatNumber(localSummary.eventsStored || state.events.length)} eventos na memória desta instância.`;
   }
 
   function renderCapture(data) {
     const summary = data.summary || {};
-    const percent = Number(summary.captureCompletenessPercent ?? 100);
-    const gap = Number(summary.captureGap || 0);
+    const localSummary = summary;
+    const percent = Number(localSummary.captureCompletenessPercent ?? 100);
+    const gap = Number(localSummary.captureGap || 0);
     const kind = gap > 0 || percent < 95 ? 'degraded' : percent < 100 ? 'attention' : 'complete';
     const line = $('captureLine');
     line.className = `capture-line ${kind}`;
-    line.innerHTML = `<span class="capture-state"><i aria-hidden="true"></i><strong>${escapeHtml(percent >= 100 && !gap ? 'Captura central íntegra' : 'Captura requer atenção')}</strong></span><span>${escapeHtml(`${formatNumber(percent)}% · ${formatNumber(summary.responses || 0)} eventos · ${formatNumber(gap)} lacunas · ${formatNumber(summary.internalTelemetryRequests || 0)} leituras internas isoladas`)}</span>`;
+    line.innerHTML = `<span class="capture-state"><i aria-hidden="true"></i><strong>${escapeHtml(percent >= 100 && !gap ? 'Captura central íntegra' : 'Captura requer atenção')}</strong></span><span>${escapeHtml(`${formatNumber(percent)}% · ${formatNumber(summary.responses || 0)} eventos · ${formatNumber(gap)} lacunas · ${formatNumber(localSummary.internalTelemetryRequests || 0)} leituras internas isoladas`)}</span>`;
   }
 
   function renderInflight(activeRequests) {
@@ -316,6 +351,7 @@
         event.ticker ? `<span class="flag">${escapeHtml(event.ticker)}</span>` : '',
         `<span class="flag">${escapeHtml(source)}</span>`,
         `<span class="flag">${escapeHtml(cache)}</span>`,
+        event.partial?.detected ? `<span class="flag${event.partial.classification === 'critical' ? ' danger' : ''}">parcial ${escapeHtml(event.partial.classification || '')}</span>` : '',
         event.aborted || event.clientClosed ? '<span class="flag danger">cancelada</span>' : event.slow ? '<span class="flag danger">lenta</span>' : '',
       ].filter(Boolean).join('');
       return `<button class="event-row${selected ? ' selected' : ''}" type="button" role="listitem" data-event-id="${escapeHtml(id)}" aria-pressed="${selected}"><time class="event-time" datetime="${escapeHtml(event.at || '')}">${escapeHtml(formatTime(event.at))}</time><span class="event-main"><span class="event-route"><span class="method">${escapeHtml(event.method || 'GET')}</span><strong>${escapeHtml(event.route || '/')}</strong></span><span class="event-consumer">${escapeHtml(`${event.appName || event.device || 'Consumidor API'}${event.appChannel ? ` · ${event.appChannel}` : ''}`)}</span></span><span class="event-delivery"><strong class="status-code ${tone}">${escapeHtml(event.status || '—')}</strong><small>${escapeHtml(`${formatMs(event.latencyMs)} · ${formatBytes(event.bytesOut)}`)}</small><span class="event-flags">${flags}</span></span></button>`;
@@ -360,6 +396,7 @@
         ['Saída', formatBytes(event.bytesOut || 0)],
         ['Fonte', event.sourceStatus || 'unknown'],
         ['Cache', event.cacheStatus || 'unknown'],
+        ['Parcial', event.partial?.detected ? `${event.partial.classification || 'degraded'} · ${event.partial.reason || 'sem motivo classificado'}` : 'não'],
         ['Entrega', event.deliveryDecision || event.payloadKind || '—'],
         ['Região / host', [event.platform?.region, event.platform?.host].filter(Boolean).join(' · ') || '—'],
       ])}</dl>
@@ -377,20 +414,23 @@
   function renderRoutes() {
     const data = state.data;
     if (!data) return;
-    const summary = data.summary || {};
-    const routes = Array.isArray(data.routeDetails) ? data.routeDetails : [];
+    const localSummary = data.summary || {};
+    const analytics = monitorAnalytics();
+    const summary = analytics?.summary || localSummary;
+    const routes = analytics?.routeDetails || (Array.isArray(data.routeDetails) ? data.routeDetails : []);
+    const distributions = analytics?.distributions || data.distributions || {};
     $('routeMetrics').innerHTML = [
-      metric('Rotas observadas', formatNumber(summary.routesTracked || routes.length), 'instância atual'),
-      metric('Clientes ativos', formatNumber(summary.activeClients5m || 0), 'últimos 5 minutos'),
-      metric('Cache hit', `${formatNumber(summary.cacheHitRatePercent || 0)}%`, `${formatNumber(summary.cacheHits || 0)} hits`),
-      metric('Fonte confiável', `${formatNumber(summary.sourceReliabilityScore ?? 100)}/100`, `${formatNumber(summary.blockedSources || 0)} bloqueios`, (summary.sourceReliabilityScore ?? 100) < 80 ? 'warning' : 'success'),
+      metric('Rotas observadas', formatNumber(summary.routesTracked || routes.length), analytics ? 'janela persistida' : 'instância atual'),
+      metric('Clientes ativos', formatNumber(localSummary.activeClients5m || 0), 'estado atual · últimos 5 minutos'),
+      metric('Cache hit', `${formatNumber(summary.cacheHitRatePercent || 0)}%`, `${formatNumber(summary.cacheHits || 0)} hits classificados`),
+      metric('Fonte confiável', `${formatNumber(summary.sourceReliabilityScore ?? 100)}/100`, `${formatNumber(summary.partialCritical || 0)} parciais críticas`, (summary.sourceReliabilityScore ?? 100) < 80 ? 'warning' : 'success'),
       metric('Entrada', formatBytes(summary.bytesIn || 0), `média ${formatBytes(summary.avgBytesIn || 0)}`),
-      metric('Saída', formatBytes(summary.bytesOut || 0), `${formatNumber(summary.responses || 0)} respostas`),
+      metric('Saída', formatBytes(summary.bytesOut || 0), `p95 ${formatBytes(summary.payloadP95BytesOut || 0)}`),
     ].join('');
     renderRouteTable(routes);
-    renderDistribution('sourceDistribution', data.distributions?.source || [], 'Nenhuma fonte identificada');
-    renderDistribution('cacheDistribution', data.distributions?.cache || [], 'Cache ainda não observado');
-    const apps = [...(data.distributions?.apps || []).map(item => ({ ...item, name: `App · ${item.name}` })), ...(data.distributions?.channels || []).map(item => ({ ...item, name: `Canal · ${item.name}` }))];
+    renderDistribution('sourceDistribution', distributions.source || [], 'Nenhuma fonte identificada');
+    renderDistribution('cacheDistribution', distributions.cache || [], 'Cache ainda não observado');
+    const apps = [...(distributions.apps || []).map(item => ({ ...item, name: `App · ${item.name}` })), ...(distributions.channels || []).map(item => ({ ...item, name: `Canal · ${item.name}` }))];
     renderDistribution('appDistribution', apps, 'Nenhum consumidor identificado');
   }
 
@@ -398,7 +438,7 @@
     const search = String($('routeSearch')?.value || '').trim().toLowerCase();
     const filtered = routes.filter(route => !search || [route.route, route.topSource, route.topCache, route.topApp, route.topChannel].join(' ').toLowerCase().includes(search));
     $('routeCount').textContent = `${formatNumber(filtered.length)} rotas`;
-    $('routeTable').innerHTML = filtered.length ? filtered.map(route => `<tr><td>${escapeHtml(route.route || '—')}<span class="cell-sub">${escapeHtml(route.topMethod || 'GET')} · último ${escapeHtml(formatTime(route.lastSeenAt))}</span></td><td><span class="cell-main">${escapeHtml(`${formatNumber(route.responses || 0)} respostas`)}</span><span class="cell-sub">${escapeHtml(`${formatNumber(route.requests || 0)} requisições`)}</span></td><td><span class="cell-main ${route.errorRatePercent ? 'tone-danger' : 'tone-success'}">${escapeHtml(`${formatNumber(route.successRatePercent ?? 100)}% sucesso`)}</span><span class="cell-sub">${escapeHtml(`${formatNumber(route.errors || 0)} erros`)}</span></td><td><span class="cell-main">p95 ${escapeHtml(formatMs(route.p95LatencyMs))}</span><span class="cell-sub">média ${escapeHtml(formatMs(route.avgLatencyMs))}</span></td><td><span class="cell-main">${escapeHtml(formatBytes(route.avgBytesOut || 0))}</span><span class="cell-sub">${escapeHtml(`${formatNumber(route.deliveredPayloads || 0)} payloads`)}</span></td><td><span class="cell-main">${escapeHtml(route.topSource || route.lastSourceStatus || '—')}</span><span class="cell-sub">${escapeHtml(route.topCache || route.lastCacheStatus || '—')}</span></td><td><span class="cell-main">${escapeHtml(route.topApp || route.topDevice || '—')}</span><span class="cell-sub">${escapeHtml(route.topChannel || 'canal —')}</span></td></tr>`).join('') : '<tr><td colspan="7">Nenhuma rota corresponde ao filtro.</td></tr>';
+    $('routeTable').innerHTML = filtered.length ? filtered.map(route => `<tr><td>${escapeHtml(route.route || '—')}<span class="cell-sub">${escapeHtml(route.topMethod || 'GET')} · último ${escapeHtml(formatTime(route.lastSeenAt))}</span></td><td><span class="cell-main">${escapeHtml(`${formatNumber(route.responses || 0)} respostas`)}</span><span class="cell-sub">${escapeHtml(`${formatNumber(route.partialCritical || 0)} críticas · ${formatNumber(route.partialDegraded || 0)} degradadas`)}</span></td><td><span class="cell-main ${route.errorRatePercent ? 'tone-danger' : 'tone-success'}">${escapeHtml(`${formatNumber(route.successRatePercent ?? 100)}% sucesso`)}</span><span class="cell-sub">${escapeHtml(`${formatNumber(route.errors || 0)} erros`)}</span></td><td><span class="cell-main">p95 ${escapeHtml(formatMs(route.p95LatencyMs))}</span><span class="cell-sub">${escapeHtml(`${formatNumber(route.latencySamples || route.responses || 0)} amostras · ${route.latencyConfidence || '—'}`)}</span></td><td><span class="cell-main">p95 ${escapeHtml(formatBytes(route.payloadP95BytesOut || route.avgBytesOut || 0))}</span><span class="cell-sub">${escapeHtml(`média ${formatBytes(route.avgBytesOut || 0)} · ${formatNumber(route.payloadSamples || route.responses || 0)} amostras`)}</span></td><td><span class="cell-main">${escapeHtml(route.topSource || route.lastSourceStatus || '—')}</span><span class="cell-sub">${escapeHtml(route.topCache || route.lastCacheStatus || '—')}</span></td><td><span class="cell-main">${escapeHtml(route.topApp || route.topDevice || '—')}</span><span class="cell-sub">${escapeHtml(route.topChannel || 'canal —')}</span></td></tr>`).join('') : '<tr><td colspan="7">Nenhuma rota corresponde ao filtro.</td></tr>';
   }
 
   function renderDistribution(id, items, emptyMessage) {
@@ -415,26 +455,31 @@
   function renderHealth() {
     const data = state.data;
     if (!data) return;
-    const summary = data.summary || {};
-    const heap = Number(summary.heapUsagePercent || 0);
+    const localSummary = data.summary || {};
+    const summary = observedSummary();
+    const heap = Number(localSummary.heapLimitUsagePercent || localSummary.heapUsagePercent || 0);
+    const latencyWarning = (summary.p95LatencyMs || 0) > (summary.sloP95TargetMs || 2500) && summary.latencyAlertEligible;
     $('healthMetrics').innerHTML = [
-      metric('Saúde', `${formatNumber(summary.healthScore ?? 100)}/100`, summary.operationalState || 'aguardando', (summary.healthScore ?? 100) < 75 ? 'danger' : (summary.healthScore ?? 100) < 88 ? 'warning' : 'success'),
-      metric('Disponibilidade', `${formatNumber(summary.availabilityPercent ?? 100)}%`, `SLO ${formatNumber(summary.sloAvailabilityTargetPercent || 99)}%`, (summary.availabilityPercent ?? 100) < (summary.sloAvailabilityTargetPercent || 99) ? 'danger' : 'success'),
-      metric('Latência p95', formatMs(summary.p95LatencyMs), `alvo ${formatMs(summary.sloP95TargetMs || 2500)}`, (summary.p95LatencyMs || 0) > (summary.sloP95TargetMs || 2500) ? 'warning' : ''),
-      metric('Erros 5xx', formatNumber(summary.serverErrors || 0), `${formatNumber(summary.clientErrors || 0)} erros 4xx`, summary.serverErrors ? 'danger' : 'success'),
-      metric('Heap', `${formatNumber(heap)}%`, `${formatNumber(summary.heapUsedMb || 0)} de ${formatNumber(summary.heapTotalMb || 0)} MB`, heap > 82 ? 'warning' : ''),
-      metric('SLO', String(summary.sloStatus || '—').replaceAll('_', ' '), `${formatNumber(summary.errorBudgetRemainingPercent ?? 100)}% orçamento restante`, (summary.errorBudgetRemainingPercent ?? 100) < 30 ? 'warning' : ''),
+      metric('Saúde da instância', `${formatNumber(localSummary.healthScore ?? 100)}/100`, localSummary.operationalState || 'aguardando', (localSummary.healthScore ?? 100) < 75 ? 'danger' : (localSummary.healthScore ?? 100) < 88 ? 'warning' : 'success'),
+      metric('Disponibilidade', `${formatNumber(summary.availabilityPercent ?? 100)}%`, `${formatNumber(summary.responses || 0)} respostas analisadas`, (summary.availabilityPercent ?? 100) < (summary.sloAvailabilityTargetPercent || 99) ? 'danger' : 'success'),
+      metric('Latência p95', formatMs(summary.p95LatencyMs), `${formatNumber(summary.measuredLatencySamples || 0)} amostras · confiança ${summary.latencyConfidence || '—'}`, latencyWarning ? 'warning' : ''),
+      metric('Qualidade dos dados', `${formatNumber(summary.dataQualityScore ?? 100)}/100`, `${formatNumber(summary.partialCritical || 0)} críticas · ${formatNumber(summary.partialRecovered || 0)} recuperadas`, (summary.dataQualityScore ?? 100) < 75 ? 'danger' : (summary.dataQualityScore ?? 100) < 88 ? 'warning' : 'success'),
+      metric('Heap / limite V8', `${formatNumber(heap)}%`, `${formatNumber(localSummary.heapUsedMb || 0)} de ${formatNumber(localSummary.heapSizeLimitMb || 0)} MB`, localSummary.memoryPressureAlert ? 'warning' : ''),
+      metric('SLO', String(localSummary.sloStatus || '—').replaceAll('_', ' '), `${formatNumber(localSummary.errorBudgetRemainingPercent ?? 100)}% orçamento restante`, (localSummary.errorBudgetRemainingPercent ?? 100) < 30 ? 'warning' : ''),
     ].join('');
     renderPlainList('alertList', data.insights || [], item => ({ level: item.level, title: item.title, text: item.description }));
     renderPlainList('runbookList', data.operations?.runbook || [], item => ({ level: item.level, title: item.action, text: item.detail }));
     $('captureFacts').innerHTML = facts([
-      ['Cobertura', `${formatNumber(summary.captureCompletenessPercent ?? 100)}%`, (summary.captureCompletenessPercent ?? 100) < 99 ? 'warning' : 'success'],
-      ['Lacunas', formatNumber(summary.captureGap || 0), summary.captureGap ? 'danger' : 'success'],
-      ['sendJson', formatNumber(summary.interceptedBySendJson || 0)],
-      ['Diretas / stream', formatNumber(summary.interceptedByResEnd || 0)],
-      ['HEAD / bodyless', `${formatNumber(summary.headResponses || 0)} / ${formatNumber(summary.bodylessResponses || 0)}`],
-      ['Polling interno', formatNumber(summary.internalTelemetryRequests || 0)],
-      ['Eventos retidos', formatNumber(summary.eventsStored || 0)],
+      ['Cobertura', `${formatNumber(localSummary.captureCompletenessPercent ?? 100)}%`, (localSummary.captureCompletenessPercent ?? 100) < 99 ? 'warning' : 'success'],
+      ['Lacunas', formatNumber(localSummary.captureGap || 0), localSummary.captureGap ? 'danger' : 'success'],
+      ['sendJson', formatNumber(localSummary.interceptedBySendJson || 0)],
+      ['Diretas / stream', formatNumber(localSummary.interceptedByResEnd || 0)],
+      ['HEAD / bodyless', `${formatNumber(localSummary.headResponses || 0)} / ${formatNumber(localSummary.bodylessResponses || 0)}`],
+      ['Polling interno', formatNumber(localSummary.internalTelemetryRequests || 0)],
+      ['Eventos na instância', formatNumber(localSummary.eventsStored || 0)],
+      ['Histórico disponível', formatNumber(localSummary.eventsAvailable || state.events.length)],
+      ['Persistidos no Supabase', formatNumber(localSummary.persistentEventsStored || 0), localSummary.historyPersistenceActive ? 'success' : 'warning'],
+      ['Janela analisada', formatNumber(monitorAnalytics()?.eventCount || localSummary.eventsStored || 0)],
     ]);
     const runtime = data.vercelRuntime || {};
     $('runtimeFacts').innerHTML = facts([
@@ -469,7 +514,8 @@
   function drawTrafficChart() {
     const canvas = $('trafficChart');
     if (!canvas || state.view !== 'health') return;
-    const data = Array.isArray(state.data?.timeSeries) ? state.data.timeSeries.slice(-60) : [];
+    const series = monitorAnalytics()?.timeSeries || state.data?.timeSeries;
+    const data = Array.isArray(series) ? series.slice(-60) : [];
     const width = Math.max(320, canvas.clientWidth || 800);
     const height = 190;
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -526,18 +572,214 @@
     state.rawRenderedAt = generatedAt;
   }
 
+  async function loadBenchmarkData({ force = false } = {}) {
+    if (state.benchmarkLoading || (state.benchmark && !force)) return;
+    state.benchmarkLoading = true;
+    state.benchmarkError = '';
+    renderBenchmark();
+    try {
+      const response = await fetch(`${BENCHMARK_DATA_URL}${force ? `?t=${Date.now()}` : ''}`, { cache: force ? 'no-store' : 'default' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const payload = await response.json();
+      if (!payload?.currentRun?.complex || !payload?.currentRun?.simple) throw new Error('Dataset incompleto');
+      state.benchmark = payload;
+    } catch (error) {
+      state.benchmarkError = error?.message || 'Falha ao carregar benchmark';
+    } finally {
+      state.benchmarkLoading = false;
+      renderBenchmark();
+    }
+  }
+
+  function percentReduction(fasterMs, baselineMs) {
+    const faster = Number(fasterMs || 0);
+    const baseline = Number(baselineMs || 0);
+    if (!(faster > 0 && baseline > 0)) return 0;
+    return Math.max(0, (1 - faster / baseline) * 100);
+  }
+
+  function multiplier(value, baseline) {
+    const current = Number(value || 0);
+    const base = Number(baseline || 0);
+    return current > 0 && base > 0 ? current / base : 0;
+  }
+
+  function engineLabel(name) {
+    const labels = {
+      'cheerio-parse5': 'Cheerio · Parse5',
+      'cheerio-htmlparser2': 'Cheerio · htmlparser2',
+      'valorae-hybrid-adaptive': 'VALORAE · híbrido adaptativo',
+      'valorae-hybrid-force-parse5': 'VALORAE · Parse5 forçado',
+      'valorae-css-lite-legacy': 'VALORAE · CSS Lite legado',
+      'valorae-single-pass-fast': 'VALORAE · passagem única',
+      'cheerio-parse5-simple': 'Cheerio · Parse5 simples',
+      'cheerio-htmlparser2-simple': 'Cheerio · htmlparser2 simples',
+    };
+    return labels[name] || String(name || 'Motor');
+  }
+
+  function renderBenchmarkBars(id, entries) {
+    const node = $(id);
+    if (!node) return;
+    const list = Array.isArray(entries) ? entries : [];
+    if (!list.length) {
+      node.innerHTML = '<div class="empty-copy">Medições indisponíveis.</div>';
+      return;
+    }
+    const maximum = Math.max(1, ...list.map(item => Number(item.averageMs || 0)));
+    node.innerHTML = list.map(item => {
+      const name = String(item.engine || '');
+      const valorae = name.startsWith('valorae-');
+      const comparable = item.parityWithParse5 !== null;
+      const width = Math.max(3, Number(item.averageMs || 0) / maximum * 100);
+      const subtitle = comparable ? (item.parityWithParse5 ? 'saída equivalente' : 'paridade divergente') : 'saída parcial · não comparável';
+      return `<div class="benchmark-bar${valorae ? ' valorae' : ''}${comparable ? '' : ' non-comparable'}"><span class="benchmark-bar-label"><strong title="${escapeHtml(name)}">${escapeHtml(engineLabel(name))}</strong><small>${escapeHtml(subtitle)}</small></span><span class="benchmark-track" aria-hidden="true"><i style="width:${width.toFixed(2)}%"></i></span><span class="benchmark-bar-value"><strong>${escapeHtml(formatMs(item.averageMs))}</strong><small>${escapeHtml(`${formatNumber(item.operationsPerSecond)} op/s`)}</small></span></div>`;
+    }).join('');
+  }
+
+  function renderBenchmark() {
+    const status = $('benchmarkStatus');
+    if (!status) return;
+    if (state.benchmarkLoading) status.textContent = 'carregando medições';
+    else if (state.benchmarkError) status.textContent = `falha: ${state.benchmarkError}`;
+    else if (state.benchmark) status.textContent = `execução real · ${state.benchmark.currentRun?.node || 'Node.js'}`;
+    else status.textContent = 'evidência ainda não carregada';
+
+    const metrics = $('benchmarkMetrics');
+    if (!state.benchmark) {
+      metrics.innerHTML = Array.from({ length: 6 }, (_, index) => metric(['Híbrido', 'Parse5', 'htmlparser2', 'Ganho vs Parse5', 'Paridade', 'Fixture'][index], '—', state.benchmarkError || 'aguardando')).join('');
+      $('complexBenchmarkBars').innerHTML = '<div class="empty-copy">Aguardando dados de benchmark.</div>';
+      $('simpleBenchmarkBars').innerHTML = '<div class="empty-copy">Aguardando dados de benchmark.</div>';
+      $('benchmarkTable').innerHTML = '<tr><td colspan="6">Dataset ainda não carregado.</td></tr>';
+      return;
+    }
+
+    const data = state.benchmark;
+    const run = data.currentRun || {};
+    const complex = Array.isArray(run.complex) ? run.complex : [];
+    const simple = Array.isArray(run.simple) ? run.simple : [];
+    const byName = Object.fromEntries([...complex, ...simple].map(item => [item.engine, item]));
+    const hybrid = byName['valorae-hybrid-adaptive'] || {};
+    const parse5 = byName['cheerio-parse5'] || {};
+    const htmlparser2 = byName['cheerio-htmlparser2'] || {};
+    const fast = byName['valorae-single-pass-fast'] || {};
+    const simpleParse5 = byName['cheerio-parse5-simple'] || {};
+    const reductionParse5 = percentReduction(hybrid.averageMs, parse5.averageMs);
+    const reductionHtml = percentReduction(hybrid.averageMs, htmlparser2.averageMs);
+    const fastReduction = percentReduction(fast.averageMs, simpleParse5.averageMs);
+    const comparable = complex.filter(item => item.parityWithParse5 === true).length;
+
+    metrics.innerHTML = [
+      metric('Híbrido adaptativo', formatMs(hybrid.averageMs), `${formatNumber(hybrid.operationsPerSecond)} operações/s`, 'success'),
+      metric('Cheerio Parse5', formatMs(parse5.averageMs), `${formatNumber(parse5.operationsPerSecond)} operações/s`),
+      metric('Cheerio htmlparser2', formatMs(htmlparser2.averageMs), `${formatNumber(htmlparser2.operationsPerSecond)} operações/s`),
+      metric('Ganho vs Parse5', `${formatNumber(reductionParse5)}%`, `${formatNumber(multiplier(hybrid.operationsPerSecond, parse5.operationsPerSecond))}× throughput`, 'success'),
+      metric('Paridade confirmada', `${formatNumber(comparable)}/${formatNumber(complex.filter(item => item.parityWithParse5 !== null).length)}`, 'fingerprint JSON equivalente', 'success'),
+      metric('Fixture', formatBytes(run.htmlBytes || 0), `${formatNumber(run.rows || 0)} linhas · ${formatNumber(run.iterations || 0)} iterações`),
+    ].join('');
+
+    $('benchmarkSummaryText').textContent = `Na execução empacotada, o motor híbrido reduziu a latência em ${formatNumber(reductionParse5)}% frente ao Cheerio/Parse5 e ${formatNumber(reductionHtml)}% frente ao Cheerio/htmlparser2, mantendo a mesma saída estrutural. No caminho simples, a passagem única reduziu ${formatNumber(fastReduction)}% frente ao Parse5.`;
+    renderBenchmarkBars('complexBenchmarkBars', complex);
+    renderBenchmarkBars('simpleBenchmarkBars', simple);
+    const rows = [
+      ...complex.map(item => ({ ...item, scenario: 'Complexo' })),
+      ...simple.map(item => ({ ...item, scenario: 'Simples' })),
+    ];
+    $('benchmarkTable').innerHTML = rows.map(item => {
+      const parity = item.parityWithParse5 === true
+        ? '<span class="parity-state ok"><i></i>equivalente</span>'
+        : item.parityWithParse5 === false
+          ? '<span class="parity-state partial"><i></i>divergente</span>'
+          : '<span class="parity-state partial"><i></i>não comparável</span>';
+      return `<tr><td>${escapeHtml(engineLabel(item.engine))}<span class="cell-sub">${escapeHtml(item.engine)}</span></td><td>${escapeHtml(item.scenario)}</td><td><span class="cell-main">${escapeHtml(formatMs(item.averageMs))}</span><span class="cell-sub">total ${escapeHtml(formatMs(item.totalMs))}</span></td><td>${escapeHtml(formatNumber(item.operationsPerSecond))}</td><td>${parity}</td><td>${escapeHtml(formatBytes(item.resultBytes || 0))}</td></tr>`;
+    }).join('');
+    $('benchmarkRunLabel').textContent = `${run.node || 'Node.js'} · ${formatNumber(run.iterations || 0)} iterações`;
+    $('benchmarkFacts').innerHTML = facts([
+      ['Comando', data.command || '—'],
+      ['Runtime da execução', run.node || '—'],
+      ['HTML processado', formatBytes(run.htmlBytes || 0)],
+      ['Linhas da fixture', formatNumber(run.rows || 0)],
+      ['Aquecimentos', formatNumber(data.methodology?.warmups || 0)],
+      ['Baseline', data.methodology?.baseline || '—'],
+      ['Rede incluída', data.methodology?.networkIncluded ? 'sim' : 'não'],
+      ['Referência de release', data.releaseReference?.release || '—'],
+    ]);
+  }
+
+  function renderArchitecture() {
+    if (!$('architectureMetrics')) return;
+    const data = state.data;
+    const summary = data?.summary || {};
+    const analytics = monitorAnalytics();
+    const persistence = data?.monitorPersistence || {};
+    const runtime = data?.vercelRuntime || {};
+    $('architectureMetrics').innerHTML = [
+      metric('Contrato mobile', '1 gateway', '/api/v1/mobile/portfolio-sync'),
+      metric('Rotas observadas', formatNumber((analytics?.summary || summary).routesTracked || 0), analytics ? 'janela persistida' : 'instância atual'),
+      metric('Fontes', formatNumber((analytics?.distributions?.source || data?.distributions?.source || []).length), 'adaptadores e fallbacks'),
+      metric('Cache hit', `${formatNumber((analytics?.summary || summary).cacheHitRatePercent || 0)}%`, 'classificado por resposta'),
+      metric('Persistência', persistence.operational ? 'Supabase' : 'Memória', persistence.operational ? 'eventos pós-resposta' : 'instância efêmera', persistence.operational ? 'success' : 'warning'),
+      metric('Runtime', data?.instance?.node || 'Node.js 24', runtime.env || data?.instance?.platform || 'Vercel'),
+    ].join('');
+    $('architectureRuntimeFacts').innerHTML = facts([
+      ['Release', data?.releasePatch || RELEASE_PATCH],
+      ['Ambiente', runtime.env || data?.instance?.platform || 'aguardando snapshot'],
+      ['Região', runtime.observed?.lastRegion || runtime.region || '—'],
+      ['Node.js', data?.instance?.node || '24.x declarado'],
+      ['Instância', data?.instance?.id || '—'],
+      ['Uptime', data ? formatAge(data.instance?.uptimeSeconds || 0) : '—'],
+      ['Em voo', formatNumber(summary.inFlight || 0)],
+    ]);
+    $('architecturePersistenceFacts').innerHTML = facts([
+      ['Modo', persistence.operational ? 'persistente' : 'efêmero', persistence.operational ? 'success' : 'warning'],
+      ['Eventos no Supabase', formatNumber(summary.persistentEventsStored || 0)],
+      ['Janela analítica', formatNumber(analytics?.eventCount || summary.eventsStored || 0)],
+      ['Eventos da instância', formatNumber(summary.eventsStored || 0)],
+      ['Escrita', 'pós-resposta'],
+      ['Segredo', 'service_role somente no Proxy'],
+      ['Estado instantâneo', 'heap, uptime e in-flight por instância'],
+    ]);
+  }
+
+  function openMenu() {
+    if (state.menuOpen) return;
+    state.menuOpen = true;
+    state.menuReturnFocus = document.activeElement;
+    document.body.classList.add('menu-open');
+    $('menuButton')?.setAttribute('aria-expanded', 'true');
+    $('appDrawer')?.setAttribute('aria-hidden', 'false');
+    $('menuBackdrop')?.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(() => $('menuCloseButton')?.focus());
+  }
+
+  function closeMenu({ restoreFocus = true } = {}) {
+    if (!state.menuOpen) return;
+    state.menuOpen = false;
+    document.body.classList.remove('menu-open');
+    $('menuButton')?.setAttribute('aria-expanded', 'false');
+    $('appDrawer')?.setAttribute('aria-hidden', 'true');
+    $('menuBackdrop')?.setAttribute('aria-hidden', 'true');
+    if (restoreFocus && state.menuReturnFocus?.focus) state.menuReturnFocus.focus();
+    state.menuReturnFocus = null;
+  }
+
   function renderSettings() {
     if ($('apiBaseInput') && document.activeElement !== $('apiBaseInput')) $('apiBaseInput').value = apiBase();
     if ($('pollInterval')) $('pollInterval').value = String(state.pollMs);
     if ($('feedLimit')) $('feedLimit').value = String(state.feedLimit);
     const summary = state.data?.summary;
-    if ($('settingsState')) $('settingsState').textContent = `${apiBase() || location.origin} · ${state.paused ? 'polling pausado' : `atualização a cada ${state.pollMs / 1000}s`} · ${formatNumber(summary?.eventsStored || state.events.length)} eventos no servidor.`;
+    if ($('settingsState')) {
+      const persistence = state.data?.monitorPersistence || {};
+      const analytics = monitorAnalytics();
+      const persistenceText = persistence.operational ? `${formatNumber(summary?.persistentEventsStored || 0)} persistidos no Supabase · ${formatNumber(analytics?.eventCount || 0)} na janela analítica` : 'persistência somente em memória';
+      $('settingsState').textContent = `${apiBase() || location.origin} · ${state.paused ? 'polling pausado' : `atualização a cada ${state.pollMs / 1000}s`} · ${persistenceText}.`;
+    }
     renderThemeChoices();
   }
 
   function setView(rawView, { updateHash = true } = {}) {
     const candidate = VIEW_ALIASES[rawView] || rawView || 'live';
-    const view = ['live', 'routes', 'health', 'settings'].includes(candidate) ? candidate : 'live';
+    const view = ['live', 'routes', 'health', 'benchmark', 'architecture', 'settings'].includes(candidate) ? candidate : 'live';
     state.view = view;
     $$('[data-view]').forEach(button => button.setAttribute('aria-current', button.dataset.view === view ? 'page' : 'false'));
     $$('[data-view-panel]').forEach(panel => {
@@ -547,7 +789,11 @@
     });
     safeStorage.set(STORAGE.view, view);
     if (updateHash) history.replaceState(null, '', `#${view}`);
+    if ($('currentPageLabel')) $('currentPageLabel').textContent = PAGE_TITLES[view] || PAGE_TITLES.live;
     if (view === 'health') requestAnimationFrame(drawTrafficChart);
+    if (view === 'benchmark') loadBenchmarkData();
+    if (view === 'architecture') renderArchitecture();
+    closeMenu({ restoreFocus: false });
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
@@ -609,6 +855,9 @@
 
   function bindEvents() {
     $$('[data-view]').forEach(button => button.addEventListener('click', () => setView(button.dataset.view)));
+    $('menuButton').addEventListener('click', openMenu);
+    $('menuCloseButton').addEventListener('click', () => closeMenu());
+    $('menuBackdrop').addEventListener('click', () => closeMenu());
     $('refreshButton').addEventListener('click', () => refresh({ manual: true }));
     $('pauseButton').addEventListener('click', () => {
       state.paused = !state.paused;
@@ -641,6 +890,7 @@
     });
     $('exportJsonButton').addEventListener('click', () => exportEvents('json'));
     $('exportCsvButton').addEventListener('click', () => exportEvents('csv'));
+    $('copyBenchmarkCommand').addEventListener('click', () => copyText(state.benchmark?.command || 'node --expose-gc scripts/benchmark-scraping-engines.js --quick', 'Comando do benchmark copiado.'));
     $('rawDetails').addEventListener('toggle', () => { if ($('rawDetails').open) renderRawSnapshot(); });
     $('copySnapshotButton').addEventListener('click', () => state.data && copyText(JSON.stringify(state.data, null, 2), 'Snapshot copiado.'));
     $('pollInterval').addEventListener('change', () => {
@@ -686,6 +936,9 @@
       refresh({ manual: true });
     });
     window.addEventListener('hashchange', () => setView(location.hash.slice(1), { updateHash: false }));
+    window.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && state.menuOpen) closeMenu();
+    });
     window.addEventListener('resize', () => { if (state.view === 'health') requestAnimationFrame(drawTrafficChart); });
     window.addEventListener('online', () => refresh({ manual: true }));
     window.addEventListener('offline', () => setConnection('offline', 'Sem rede'));
@@ -701,6 +954,7 @@
     const initial = VIEW_ALIASES[location.hash.slice(1)] || location.hash.slice(1) || safeStorage.get(STORAGE.view, 'live');
     setView(initial, { updateHash: false });
     renderSettings();
+    loadBenchmarkData();
     refresh({ manual: true });
     if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('/service-worker.js').catch(() => {});
   }

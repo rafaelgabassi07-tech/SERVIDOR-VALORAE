@@ -1,29 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="VALORAE Proxy Server Monitor">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-labelledby="title desc">
+  <title id="title">VALORAE Proxy</title>
+  <desc id="desc">Marca VALORAE do aplicativo com um pequeno indicador de conexão que distingue o Proxy.</desc>
   <defs>
-    <linearGradient id="bg" x1="86" y1="52" x2="426" y2="460" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#07100B"/>
-      <stop offset="0.46" stop-color="#0D2E22"/>
-      <stop offset="1" stop-color="#10251B"/>
+    <linearGradient id="apkBackground" x1="0" y1="0" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#27272A"/>
+      <stop offset="1" stop-color="#18181B"/>
     </linearGradient>
-    <linearGradient id="mark" x1="112" y1="115" x2="392" y2="384" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#B7FF73"/>
-      <stop offset="0.45" stop-color="#23C983"/>
-      <stop offset="1" stop-color="#087A57"/>
-    </linearGradient>
-    <linearGradient id="line" x1="156" y1="318" x2="365" y2="194" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#EFFFF5"/>
-      <stop offset="1" stop-color="#A7F36F"/>
-    </linearGradient>
-    <filter id="shadow" x="-18%" y="-18%" width="136%" height="136%">
-      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity="0.36"/>
-    </filter>
   </defs>
-  <rect x="24" y="24" width="464" height="464" rx="116" fill="url(#bg)"/>
-  <rect x="42" y="42" width="428" height="428" rx="98" fill="none" stroke="#1D3A2C" stroke-width="3" opacity="0.95"/>
-  <path d="M110 132h94l56 151 56-151h88L300 386h-84L110 132Z" fill="url(#mark)" filter="url(#shadow)"/>
-  <path d="M158 314c38-1 61-17 83-45 18-22 36-54 75-59 22-3 44 4 65 18" fill="none" stroke="url(#line)" stroke-width="21" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="158" cy="314" r="18" fill="#EFFFF5"/>
-  <circle cx="261" cy="252" r="15" fill="#EFFFF5"/>
-  <circle cx="382" cy="228" r="18" fill="#A7F36F"/>
-  <path d="M137 126h58M317 126h58M215 392h86" stroke="#EFFFF5" stroke-width="13" stroke-linecap="round" opacity="0.72"/>
+  <rect width="108" height="108" rx="25" fill="url(#apkBackground)"/>
+  <rect x="1" y="1" width="106" height="106" rx="24" fill="none" stroke="#3F3F46" stroke-width="1"/>
+  <g transform="translate(21 21) scale(.66)">
+    <path fill="#F2F2F2" d="M45 58h35v14H45z"/>
+    <path fill="#8D8D8D" d="M54 18h16l24 64H78z"/>
+    <path fill="#FFC107" d="M30 82h16l24-64H54z"/>
+    <path fill="#F2F2F2" d="M6 18h16l24 64H30z"/>
+  </g>
+  <g aria-label="Identificador do Proxy">
+    <circle cx="87" cy="87" r="13" fill="#18181B" stroke="#FFC107" stroke-width="2"/>
+    <path d="M80 87h14M83 83l-3 4 3 4M91 83l3 4-3 4" fill="none" stroke="#F2F2F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="87" cy="87" r="2.2" fill="#FFC107"/>
+  </g>
 </svg>

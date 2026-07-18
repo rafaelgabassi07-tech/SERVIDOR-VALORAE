@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#080808">
-  <meta name="valorae-ui" content="valorae-flat-live-monitor-checkpoint119">
+  <meta name="valorae-ui" content="valorae-monitor-navigation-benchmark-architecture-v352">
   <meta name="valorae-latest-patch" content="21.12.382-quote-state-resilience-v350">
   <meta name="valorae-readiness-endpoint" content="/api/v1/release/readiness">
-  <title>VALORAE · Proxy ao vivo</title>
+  <title>VALORAE Proxy · Monitor operacional</title>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/assets/valorae-icon-192.png">
   <link rel="stylesheet" href="/monitor-valorae.css">
@@ -17,10 +17,14 @@
   <a class="skip-link" href="#monitorMain">Ir para o conteúdo</a>
 
   <header class="app-header">
+    <button class="icon-button menu-button" id="menuButton" type="button" aria-label="Abrir menu de páginas" aria-controls="appDrawer" aria-expanded="false" title="Abrir menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
     <a class="brand" href="#live" aria-label="Abrir tráfego ao vivo">
-      <img src="/assets/valorae-logo.svg" alt="" width="36" height="36">
-      <span><strong>VALORAE</strong><small>Proxy monitor</small></span>
+      <img src="/assets/valorae-logo.svg" alt="" width="40" height="40">
+      <span><strong>VALORAE</strong><small>Proxy · Monitor</small></span>
     </a>
+    <div class="header-page" id="currentPageLabel" aria-live="polite">Ao vivo</div>
     <div class="connection" id="connectionState" role="status" aria-live="polite">
       <i aria-hidden="true"></i><span>Conectando</span>
     </div>
@@ -35,12 +39,47 @@
     </div>
   </header>
 
-  <nav class="monitor-nav" aria-label="Seções do monitor">
-    <button type="button" data-view="live" aria-current="page">Ao vivo</button>
-    <button type="button" data-view="routes">Rotas e fontes</button>
-    <button type="button" data-view="health">Saúde</button>
-    <button type="button" data-view="settings">Ajustes</button>
-  </nav>
+  <div class="menu-backdrop" id="menuBackdrop" aria-hidden="true"></div>
+  <aside class="app-drawer" id="appDrawer" aria-label="Menu principal" aria-hidden="true">
+    <header class="drawer-header">
+      <div class="drawer-brand">
+        <img src="/assets/valorae-logo.svg" alt="" width="48" height="48">
+        <div><strong>VALORAE</strong><span>Proxy Monitor</span></div>
+      </div>
+      <button class="icon-button" id="menuCloseButton" type="button" aria-label="Fechar menu" title="Fechar menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <nav class="drawer-nav" aria-label="Páginas do monitor">
+      <span class="drawer-group-label">Operação</span>
+      <button type="button" data-view="live" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17V9m5 8V5m5 12v-6m5 6V7"/></svg>
+        <span><strong>Ao vivo</strong><small>Eventos e respostas do Proxy</small></span>
+      </button>
+      <button type="button" data-view="routes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h14"/><circle cx="8" cy="6" r="1"/><circle cx="16" cy="12" r="1"/><circle cx="11" cy="18" r="1"/></svg>
+        <span><strong>Rotas e fontes</strong><small>Contratos, origem e cache</small></span>
+      </button>
+      <button type="button" data-view="health">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>
+        <span><strong>Saúde</strong><small>SLO, qualidade e alertas</small></span>
+      </button>
+      <span class="drawer-group-label">Engenharia</span>
+      <button type="button" data-view="benchmark">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9m5 10V5m5 14v-7m5 7V3"/></svg>
+        <span><strong>Benchmark</strong><small>Comparações reais de scraping</small></span>
+      </button>
+      <button type="button" data-view="architecture">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="6" rx="1"/><rect x="14" y="4" width="7" height="6" rx="1"/><rect x="8.5" y="15" width="7" height="6" rx="1"/><path d="M6.5 10v2h11v-2M12 12v3"/></svg>
+        <span><strong>Arquitetura</strong><small>Fluxo, camadas e resiliência</small></span>
+      </button>
+      <button type="button" data-view="settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A7 7 0 0 0 15 6l-.3-2.6h-4L10.4 6a7 7 0 0 0-1.5.9l-2.4-1-2 3.4L6.6 11a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 1.5.9l.3 2.6h4l.3-2.6a7 7 0 0 0 1.5-.9l2.4 1 2-3.4-2.1-1.5c.1-.3.1-.7.1-1Z"/></svg>
+        <span><strong>Ajustes</strong><small>Tema, origem e atualização</small></span>
+      </button>
+    </nav>
+    <footer class="drawer-footer"><span>Contrato protegido para o APK</span><strong>v350 · checkpoint 382</strong></footer>
+  </aside>
 
   <main id="monitorMain" class="monitor-main">
     <section class="view active" id="view-live" data-view-panel="live">
@@ -145,6 +184,56 @@
       </div>
       <section><header class="section-heading"><div><span class="eyebrow">Falhas recentes</span><h2>Erros e cancelamentos</h2></div><span id="errorCount">0</span></header><div class="error-list" id="errorList"></div></section>
       <details class="raw-details" id="rawDetails"><summary>Snapshot técnico completo</summary><div class="raw-actions"><button class="text-button" id="copySnapshotButton" type="button">Copiar snapshot</button></div><pre id="rawSnapshot">Abra para carregar o JSON.</pre></details>
+    </section>
+
+
+    <section class="view" id="view-benchmark" data-view-panel="benchmark" hidden>
+      <header class="page-heading">
+        <div><span class="eyebrow">Evidência reproduzível</span><h1>Benchmark de motores de scraping</h1><p>Comparação executada sobre o mesmo HTML, os mesmos seletores e o mesmo processo. Resultados incompletos são identificados e não entram como equivalentes.</p></div>
+        <div class="instance-meta"><span id="benchmarkStatus">carregando medições</span></div>
+      </header>
+      <div class="metric-strip" id="benchmarkMetrics" aria-label="Resumo do benchmark"></div>
+      <section class="benchmark-lead" aria-labelledby="benchmarkLeadTitle">
+        <div><span class="eyebrow">Leitura principal</span><h2 id="benchmarkLeadTitle">Comparação com paridade de saída</h2><p id="benchmarkSummaryText">Carregando o conjunto de evidências empacotado com esta versão.</p></div>
+        <div class="benchmark-actions"><button class="text-button emphasized" id="copyBenchmarkCommand" type="button">Copiar comando reproduzível</button></div>
+      </section>
+      <div class="benchmark-grid">
+        <section class="benchmark-panel" aria-labelledby="complexBenchmarkTitle"><header class="section-heading"><div><span class="eyebrow">Seletores complexos</span><h2 id="complexBenchmarkTitle">DOM completo e extrações estruturadas</h2></div><span>menor é melhor</span></header><div class="benchmark-bars" id="complexBenchmarkBars"></div></section>
+        <section class="benchmark-panel" aria-labelledby="simpleBenchmarkTitle"><header class="section-heading"><div><span class="eyebrow">Seletores simples</span><h2 id="simpleBenchmarkTitle">Caminho rápido de passagem única</h2></div><span>menor é melhor</span></header><div class="benchmark-bars" id="simpleBenchmarkBars"></div></section>
+      </div>
+      <section aria-labelledby="benchmarkTableTitle"><header class="section-heading"><div><span class="eyebrow">Resultado integral</span><h2 id="benchmarkTableTitle">Medições por motor</h2></div><span id="benchmarkRunLabel">—</span></header><div class="table-scroll"><table class="benchmark-table"><thead><tr><th>Motor</th><th>Cenário</th><th>Latência média</th><th>Operações/s</th><th>Paridade</th><th>Saída</th></tr></thead><tbody id="benchmarkTable"></tbody></table></div></section>
+      <div class="benchmark-evidence-grid">
+        <section><header class="section-heading"><div><span class="eyebrow">Metodologia</span><h2>Condições da execução</h2></div></header><dl class="fact-list" id="benchmarkFacts"></dl></section>
+        <section><header class="section-heading"><div><span class="eyebrow">Interpretação correta</span><h2>O que os números provam</h2></div></header><div class="evidence-copy"><p><strong>Comparável:</strong> motores com paridade confirmada retornaram a mesma estrutura do baseline Parse5.</p><p><strong>Não comparável:</strong> o caminho CSS Lite é mostrado por transparência, mas retorna menos dados e não pode ser tratado como vencedor.</p><p><strong>Escopo:</strong> o teste mede CPU local de parsing; rede, bloqueios do provedor e tempo de renderização remota ficam fora desta medição.</p></div></section>
+      </div>
+    </section>
+
+    <section class="view" id="view-architecture" data-view-panel="architecture" hidden>
+      <header class="page-heading">
+        <div><span class="eyebrow">Sistema explicado</span><h1>Arquitetura do VALORAE Proxy</h1><p>Do contrato solicitado pelo APK até a resposta normalizada, com cache, fallback, scraping híbrido, observabilidade e persistência isolados por responsabilidade.</p></div>
+      </header>
+      <div class="metric-strip" id="architectureMetrics" aria-label="Resumo da arquitetura"></div>
+      <section class="architecture-section" aria-labelledby="architectureFlowTitle"><header class="section-heading"><div><span class="eyebrow">Caminho principal</span><h2 id="architectureFlowTitle">Fluxo de uma requisição</h2></div><span>entrada → entrega</span></header>
+        <ol class="architecture-flow">
+          <li><span>01</span><strong>APK VALORAE</strong><small>Solicita um contrato versionado e informa canal, versão e contexto.</small></li>
+          <li><span>02</span><strong>Router HTTP</strong><small>Normaliza a rota, aplica segurança e direciona ao handler correto.</small></li>
+          <li><span>03</span><strong>Gateway de contratos</strong><small>Valida parâmetros e preserva o formato consumido pelo mobile.</small></li>
+          <li><span>04</span><strong>Cache e coalescing</strong><small>Reaproveita respostas válidas e evita trabalho concorrente duplicado.</small></li>
+          <li><span>05</span><strong>Fontes e scraping</strong><small>Combina APIs, HTML, parser adaptativo, prazos e fallbacks independentes.</small></li>
+          <li><span>06</span><strong>Normalização</strong><small>Consolida fontes, valida schema e classifica integridade e parcialidade.</small></li>
+          <li><span>07</span><strong>Resposta ao APK</strong><small>Entrega primeiro; telemetria e persistência seguem fora do caminho crítico.</small></li>
+        </ol>
+      </section>
+      <div class="architecture-grid">
+        <section><header class="section-heading"><div><span class="eyebrow">Resiliência</span><h2>Como o Proxy evita falhas em cascata</h2></div></header><ul class="architecture-list"><li><strong>Orçamentos por bloco</strong><span>Cada fonte opcional expira de forma independente.</span></li><li><strong>Stale-while-revalidate</strong><span>O último resultado seguro pode sustentar a interface durante indisponibilidade externa.</span></li><li><strong>Coalescing</strong><span>Requisições idênticas em andamento compartilham o mesmo trabalho.</span></li><li><strong>Contrato render-safe</strong><span>Parciais recuperadas são diferenciadas de respostas críticas.</span></li></ul></section>
+        <section><header class="section-heading"><div><span class="eyebrow">Observabilidade</span><h2>O que é medido sem atrasar o APK</h2></div></header><ul class="architecture-list"><li><strong>Interceptação central</strong><span>Status, latência, payload, fonte, cache e consumidor.</span></li><li><strong>Janela persistida</strong><span>Eventos no Supabase reconstroem análises após cold start.</span></li><li><strong>Estado efêmero separado</strong><span>Uptime, heap e requisições em voo continuam por instância.</span></li><li><strong>Polling isolado</strong><span>O próprio monitor não contamina as métricas externas.</span></li></ul></section>
+        <section><header class="section-heading"><div><span class="eyebrow">Segurança</span><h2>Fronteiras e segredos</h2></div></header><ul class="architecture-list"><li><strong>Service role somente no servidor</strong><span>O APK e o navegador nunca recebem a chave do Supabase.</span></li><li><strong>Prévia sanitizada</strong><span>O monitor limita payloads e parâmetros exibidos.</span></li><li><strong>Headers de segurança</strong><span>Respostas estáticas e de API recebem políticas centralizadas.</span></li><li><strong>RLS no histórico</strong><span>A tabela de eventos não é exposta ao cliente público.</span></li></ul></section>
+      </div>
+      <div class="architecture-live-grid">
+        <section><header class="section-heading"><div><span class="eyebrow">Deploy atual</span><h2>Runtime observado</h2></div></header><dl class="fact-list" id="architectureRuntimeFacts"></dl></section>
+        <section><header class="section-heading"><div><span class="eyebrow">Persistência</span><h2>Escopo dos dados</h2></div></header><dl class="fact-list" id="architecturePersistenceFacts"></dl></section>
+      </div>
+      <section class="architecture-contract" aria-labelledby="architectureContractTitle"><span class="eyebrow">Contrato principal</span><h2 id="architectureContractTitle"><code>/api/v1/mobile/portfolio-sync</code></h2><p>Agrega análise, histórico, IPCA, proventos e rankings opcionais. Cada bloco remoto mantém timeout e fallback próprios para que uma fonte lenta não derrube a resposta inteira.</p></section>
     </section>
 
     <section class="view" id="view-settings" data-view-panel="settings" hidden>

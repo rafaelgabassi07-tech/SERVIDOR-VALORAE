@@ -11,7 +11,7 @@ const PORT = Number(process.env.PORT || 3000);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const MAX_LOCAL_BODY_BYTES = Number(process.env.MAX_LOCAL_BODY_BYTES || 512 * 1024);
 const INVALID_JSON = 'INVALID_JSON';
-const MIME = { '.html':'text/html; charset=utf-8', '.js':'application/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.webmanifest':'application/manifest+json; charset=utf-8', '.svg':'image/svg+xml' };
+const MIME = { '.html':'text/html; charset=utf-8', '.js':'application/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.webmanifest':'application/manifest+json; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png' };
 
 function applyStaticSecurityHeaders(res, cacheControl = 'public, max-age=60') {
   return setSecurityHeaders(res, cacheControl);

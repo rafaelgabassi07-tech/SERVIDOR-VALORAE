@@ -9,6 +9,29 @@ O caminho de cotações agora usa fallback entre os hosts `query1` e `query2` do
 - `refresh`, `nocache` e `forceRefresh` atravessam a rota de cotação individual;
 - aliases de preço, fechamento anterior e variação diária permanecem compatíveis;
 - o monitor plano do v349 permanece funcional e sem novos containers.
+- o histórico da linha do tempo pode ser persistido no Supabase pela tabela `valorae_monitor_events`;
+- cada evento é gravado após a resposta por tarefa `waitUntil`, fora da latência observada pelo APK;
+- `/api/server/metrics` combina a memória atual com os eventos persistidos e mantém o polling isolado.
+
+
+## Persistência do histórico do monitor no Supabase
+
+1. Execute `supabase/005_valorae_monitor_events_persistence.sql` no SQL Editor do mesmo projeto Supabase usado pelo Proxy.
+2. Mantenha `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` configuradas somente no Vercel.
+3. Configure `VALORAE_MONITOR_PERSISTENCE_ENABLED=1` e, em produção, `VALORAE_MONITOR_PERSISTENCE_SCOPE=production`.
+4. Faça um novo deploy. O campo `monitorPersistence.active` em `/api/server/metrics` deve ficar `true`.
+
+A gravação é append-only com upsert idempotente por `event_key`, em lotes curtos e após o envio da resposta. Falhas do Supabase ativam cooldown e contingência em memória, sem bloquear nem alterar as respostas financeiras do Proxy. O painel consulta o histórico somente na rota de métricas e usa cache local curto; por padrão, carrega os 500 eventos mais recentes, enquanto o banco preserva todos até uma limpeza manual opcional.
+
+### Diagnóstico persistente e alertas corrigidos
+
+A mesma tabela e a mesma migração `005` continuam válidas; não existe um segundo SQL. A partir dos eventos persistidos, `/api/server/metrics` reconstrói a janela analítica usada pelo frontend: latência e confiança amostral, qualidade dos dados, gravidade das respostas parciais, payload por rota, fontes, cache, distribuições e série temporal. Chamadas em voo e memória instantânea continuam corretamente separadas por instância.
+
+- p95 só gera alerta operacional com pelo menos `VALORAE_METRICS_MIN_P95_SAMPLES` amostras, padrão 20;
+- parciais são classificadas como `recovered`, `degraded` ou `critical` e mantêm o motivo no evento;
+- qualidade dos dados usa taxas proporcionais e não recebe penalidade por latência, erro HTTP ou ausência de cache;
+- payload p95 e quantidade de amostras são expostos por rota;
+- memória usa `heap_size_limit` do V8, RSS e três amostras consecutivas; `heapUsed/heapTotal` fica apenas como diagnóstico de alocação.
 
 ## Release anterior — 21.12.381 / v349 (2026-07-17)
 

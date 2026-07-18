@@ -1,1 +1,1 @@
-const CACHE = 'valorae-proxy-server-v21-12-382';
+const CACHE = 'valorae-proxy-monitor-v21-12-382-ui-v352';
