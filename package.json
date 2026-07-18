@@ -12,7 +12,8 @@
     "test": "node scripts/run-tests.js",
     "audit:version": "node scripts/audit-version-consistency.js && node scripts/audit-version.js",
     "verify": "npm run build && npm run check:syntax && npm test && npm run audit:version",
-    "test:cross-stack": "node scripts/run-cross-stack-tests.js"
+    "test:cross-stack": "node scripts/run-cross-stack-tests.js",
+    "benchmark:cold-start": "node scripts/benchmark-cold-start.js"
   },
   "engines": {
     "node": "24.x"

@@ -2,30 +2,16 @@ import { createHash } from 'node:crypto';
 import { RELEASE } from '../lib/core/release.js';
 import { sendJson, queryObject, readJsonBody } from '../lib/core/http.js';
 import { cacheStats, clearCache } from '../lib/core/cache.js';
-import { buildMobilePortfolioSync } from '../lib/contracts/mobile.js';
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
-import { buildPortfolioAnalysis, buildRealMarketHistory, buildPortfolioReturns, buildRankings } from '../lib/portfolio/analysis.js';
 import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../lib/portfolio/history.js';
 import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.js';
 import { buildAssetsPayload, buildIndicesPayload, buildMarketMovers, getQuote } from '../lib/sources/quotes.js';
 import { fetchInvestidor10Rankings, getIpcaSeries, getConfirmedDividendsByTicker, buildSourceAdapterManifest, VALORAE_SOURCE_ADAPTER_VERSION } from '../lib/sources/adapters/index.js';
 import { getNews } from '../lib/sources/news.js';
-import { buildHtmlParserShadowManifest } from '../lib/scrape/standard-html-parser.js';
-import { buildStructuredDataManifest } from '../lib/scrape/structured-data-discovery.js';
-import { buildDynamicRenderManifest } from '../lib/scrape/dynamic-render-fallback.js';
-import { buildProviderTransportManifest } from '../lib/http/provider-transport.js';
-import { buildSharedStateManifest } from '../lib/state/shared-runtime-state.js';
-import { buildRealCanaryManifest } from '../lib/canary/real-canary.js';
-import { buildFinalDecompositionManifest } from '../lib/architecture/final-decomposition.js';
-import { buildHybridDocumentManifest } from '../lib/scrape/document-context.js';
 import { fetchText } from '../lib/sources/fetch.js';
 import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tickers.js';
 import { getAgendaDividends } from '../lib/sources/agenda-dividends.js';
-import { buildAssetDetails, getAssetHistory } from '../lib/sources/asset-details.js';
 import { buildAnalysisPageResponse } from '../lib/analysis/analysis-page-response.js';
-import { buildFiiModalContract } from '../lib/analysis/fii-modal-contract.js';
-import { buildStockModalContract } from '../lib/analysis/stock-modal-contract.js';
-import { buildAssetModalContract } from '../lib/analysis/asset-modal-contract.js';
 import { OFFICIAL_ASSET_LOGO_VERSION, fetchOfficialAssetLogo } from '../lib/market/official-logo.js';
 import { buildContractBaselineManifest } from '../lib/contract/baseline.js';
 import { contractContinuityStats, stabilizeContractPayloadShared } from '../lib/contract/continuity-store.js';
@@ -35,16 +21,6 @@ import {
   validateFormalRequestPayload,
 } from '../lib/contract/formal-schema-validation.js';
 import { attachFieldObservability, buildFieldObservabilityManifest, fieldObservabilityStats, getFieldObservabilityTrace } from '../lib/observability/field-observability.js';
-import integrationManifestHandler from './integration/manifest.js';
-import integrationSdkHandler from './integration/sdk.js';
-import integrationPromptsHandler from './integration/prompts.js';
-import releaseReadinessHandler from './release/readiness.js';
-import assetsHandler from './assets.js';
-import assetHistoryHandler from './asset/history.js';
-import marketIndicesHandler from './market/indices.js';
-import compatScraperHandler from './compat/scraper4.js';
-import syncHandler from './sync.js';
-import serverMetricsHandler from './server/metrics.js';
 import { TtlLruCache } from '../lib/cache/memory.js';
 import {
   applyRateLimitHeaders,
@@ -68,6 +44,76 @@ import {
   exposeHeadersCsv,
   requestHeadersCsv,
 } from '../lib/core/mobile-protocol.js';
+
+const lazyFeatureModules = globalThis.__VALORAE_ROUTER_LAZY_FEATURE_MODULES__ || new Map();
+globalThis.__VALORAE_ROUTER_LAZY_FEATURE_MODULES__ = lazyFeatureModules;
+
+function loadFeatureModule(key, loader) {
+  let promise = lazyFeatureModules.get(key);
+  if (!promise) {
+    promise = Promise.resolve().then(loader).catch(error => {
+      lazyFeatureModules.delete(key);
+      throw error;
+    });
+    lazyFeatureModules.set(key, promise);
+  }
+  return promise;
+}
+
+async function buildLazyFeatureManifest(key, loader, exportName, options) {
+  const module = await loadFeatureModule(key, loader);
+  return module[exportName](options);
+}
+
+async function runLazyDefaultHandler(key, loader, req, res) {
+  const module = await loadFeatureModule(key, loader);
+  return module.default(req, res);
+}
+
+async function buildMobilePortfolioSync(...args) {
+  const module = await loadFeatureModule('contracts-mobile', () => import('../lib/contracts/mobile.js'));
+  return module.buildMobilePortfolioSync(...args);
+}
+
+async function buildPortfolioAnalysis(...args) {
+  const module = await loadFeatureModule('portfolio-analysis', () => import('../lib/portfolio/analysis.js'));
+  return module.buildPortfolioAnalysis(...args);
+}
+
+async function buildRealMarketHistory(...args) {
+  const module = await loadFeatureModule('portfolio-analysis', () => import('../lib/portfolio/analysis.js'));
+  return module.buildRealMarketHistory(...args);
+}
+
+async function buildPortfolioReturns(...args) {
+  const module = await loadFeatureModule('portfolio-analysis', () => import('../lib/portfolio/analysis.js'));
+  return module.buildPortfolioReturns(...args);
+}
+
+async function buildAssetDetails(...args) {
+  const module = await loadFeatureModule('asset-details', () => import('../lib/sources/asset-details.js'));
+  return module.buildAssetDetails(...args);
+}
+
+async function getAssetHistory(...args) {
+  const module = await loadFeatureModule('asset-details', () => import('../lib/sources/asset-details.js'));
+  return module.getAssetHistory(...args);
+}
+
+async function buildAssetModalContract(...args) {
+  const module = await loadFeatureModule('asset-modal-contract', () => import('../lib/analysis/asset-modal-contract.js'));
+  return module.buildAssetModalContract(...args);
+}
+
+async function buildFiiModalContract(...args) {
+  const module = await loadFeatureModule('fii-modal-contract', () => import('../lib/analysis/fii-modal-contract.js'));
+  return module.buildFiiModalContract(...args);
+}
+
+async function buildStockModalContract(...args) {
+  const module = await loadFeatureModule('stock-modal-contract', () => import('../lib/analysis/stock-modal-contract.js'));
+  return module.buildStockModalContract(...args);
+}
 
 const analysisRouteCache = globalThis.__VALORAE_ANALYSIS_ROUTE_CACHE__ || new TtlLruCache({
   name: 'analysis-route-response-cache',
@@ -914,15 +960,15 @@ export async function dispatchRoute(req, res) {
     if (path === '/integration/prompts') return sendJson(req, res, buildIntegrationPromptsPayload(), { cacheControl: 'private, max-age=120' });
     if (path === '/contract/baseline') return sendJson(req, res, { ...buildContractBaselineManifest(), release: RELEASE.patch, continuityStore: contractContinuityStats() }, { cacheControl: 'private, max-age=120' });
     if (path === '/contract/source-adapters') return sendJson(req, res, { ...buildSourceAdapterManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
-    if (path === '/contract/html-parser-shadow') return sendJson(req, res, { ...buildHtmlParserShadowManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
-    if (path === '/contract/structured-data') return sendJson(req, res, { ...buildStructuredDataManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
-    if (path === '/contract/dynamic-render') return sendJson(req, res, { ...buildDynamicRenderManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=15' });
+    if (path === '/contract/html-parser-shadow') return sendJson(req, res, { ...(await buildLazyFeatureManifest('html-parser-shadow', () => import('../lib/scrape/standard-html-parser.js'), 'buildHtmlParserShadowManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
+    if (path === '/contract/structured-data') return sendJson(req, res, { ...(await buildLazyFeatureManifest('structured-data', () => import('../lib/scrape/structured-data-discovery.js'), 'buildStructuredDataManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
+    if (path === '/contract/dynamic-render') return sendJson(req, res, { ...(await buildLazyFeatureManifest('dynamic-render', () => import('../lib/scrape/dynamic-render-fallback.js'), 'buildDynamicRenderManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=15' });
     if (path === '/contract/formal-schemas') return sendJson(req, res, { ...buildFormalSchemaManifest({ includeSchemas: String(payload.includeSchemas || payload.full || '').toLowerCase() === 'true' || payload.includeSchemas === '1' }), release: RELEASE.patch }, { cacheControl: 'private, max-age=120' });
-    if (path === '/contract/http-transport') return sendJson(req, res, { ...buildProviderTransportManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=15' });
-    if (path === '/contract/shared-state') return sendJson(req, res, { ...buildSharedStateManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=10' });
-    if (path === '/contract/real-canaries') return sendJson(req, res, { ...buildRealCanaryManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=10' });
-    if (path === '/contract/final-decomposition') return sendJson(req, res, { ...buildFinalDecompositionManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=60' });
-    if (path === '/contract/scraping-engine') return sendJson(req, res, { ...buildHybridDocumentManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
+    if (path === '/contract/http-transport') return sendJson(req, res, { ...(await buildLazyFeatureManifest('http-transport', () => import('../lib/http/provider-transport.js'), 'buildProviderTransportManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=15' });
+    if (path === '/contract/shared-state') return sendJson(req, res, { ...(await buildLazyFeatureManifest('shared-state', () => import('../lib/state/shared-runtime-state.js'), 'buildSharedStateManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=10' });
+    if (path === '/contract/real-canaries') return sendJson(req, res, { ...(await buildLazyFeatureManifest('real-canaries', () => import('../lib/canary/real-canary.js'), 'buildRealCanaryManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=10' });
+    if (path === '/contract/final-decomposition') return sendJson(req, res, { ...(await buildLazyFeatureManifest('final-decomposition', () => import('../lib/architecture/final-decomposition.js'), 'buildFinalDecompositionManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=60' });
+    if (path === '/contract/scraping-engine') return sendJson(req, res, { ...(await buildLazyFeatureManifest('scraping-engine', () => import('../lib/scrape/document-context.js'), 'buildHybridDocumentManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
     if (path === '/contract/observability') {
       const trace = getFieldObservabilityTrace(payload.traceId || payload.requestId || '');
       return sendJson(req, res, trace
@@ -930,7 +976,7 @@ export async function dispatchRoute(req, res) {
         : { ...buildFieldObservabilityManifest(), release: RELEASE.patch, traceStore: fieldObservabilityStats() },
       { cacheControl: trace ? 'no-store' : 'private, max-age=120' });
     }
-    if (path === '/release/readiness' || path === '/personal/readiness') return releaseReadinessHandler(req, res);
+    if (path === '/release/readiness' || path === '/personal/readiness') return runLazyDefaultHandler('route-release-readiness', () => import('./release/readiness.js'), req, res);
     if (path === '/manifest' || path === '/schema' || path === '/source/status' || path === '/deploy/status') return sendJson(req, res, manifest());
     if (path === '/cache/stats') return sendJson(req, res, { status: 'OK', cache: cacheStats() });
     if (path === '/monitor/summary' || path === '/server/summary') return sendJson(req, res, monitorSummary(), { cacheControl: 'private, max-age=5' });
@@ -938,9 +984,9 @@ export async function dispatchRoute(req, res) {
     if (path === '/fields') return sendJson(req, res, { status: 'OK', endpoint: 'fields', fields: ['positions','dividendPositions','transactions','tickers','includeAnalysis','includeHistory','includeIpca','includeDividends','includeRankings'] });
     if (path === '/errors') return sendJson(req, res, { status: 'OK', endpoint: 'errors', errors: ['INVALID_JSON','PAYLOAD_TOO_LARGE','ROUTE_ERROR','NOT_FOUND'] });
     if (path === '/openapi') return sendJson(req, res, { status: 'OK', openapi: '3.0.0', info: { title: 'VALORAE Proxy API', version: RELEASE.version }, paths: Object.fromEntries(routeManifest().routes.map(r => [`/api/v1${r}`, openApiOperationForRoute(r)])) });
-    if (path === '/sync') return syncHandler(req, res);
+    if (path === '/sync') return runLazyDefaultHandler('route-sync', () => import('./sync.js'), req, res);
     if (path === '/admin/status') return sendJson(req, res, { status: 'OK', admin: false, version: RELEASE.version, cache: cacheStats() });
-    if (path === '/compat/scraper4' || path === '/scraper4' || path === '/scraper') return compatScraperHandler(req, res);
+    if (path === '/compat/scraper4' || path === '/scraper4' || path === '/scraper') return runLazyDefaultHandler('route-compat-scraper4', () => import('./compat/scraper4.js'), req, res);
     if (path === '/cache/clear' || path === '/admin/cache') {
       requireAdmin(req);
       clearCache();
@@ -956,7 +1002,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/asset/dividends' || path === '/asset/next-dividend') return sendJson(req, res, await handleAssetDividends(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
 
     if (path === '/portfolio/equilibrium' || path === '/portfolio/balance') return sendJson(req, res, buildEquilibriumContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioEquilibrium}` });
-    if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, buildPortfolioAnalysis(payload), { cacheControl: 'private, max-age=20' });
+    if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, await buildPortfolioAnalysis(payload), { cacheControl: 'private, max-age=20' });
     if (path === '/portfolio/returns' || path === '/portfolio/return' || path === '/portfolio/performance') return sendJson(req, res, await withContractBaseline('portfolioReturns', await buildPortfolioReturns(payload), payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioReturns}` });
     // Compat marker: VALORAE_REALTIME_PORTFOLIO_HISTORY_ENGINE_V291 evoluído para VALORAE_PORTFOLIO_HISTORY_REBUILD_V292.
     if (path === '/portfolio/history') {
@@ -981,7 +1027,7 @@ export async function dispatchRoute(req, res) {
       }
       return sendJson(req, res, await withContractBaseline('portfolioHistory', await buildRealMarketHistory(payload), payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioHistory}, stale-while-revalidate=120` });
     }
-    if (path === '/asset/history') return assetHistoryHandler(req, res);
+    if (path === '/asset/history') return runLazyDefaultHandler('route-asset-history', () => import('./asset/history.js'), req, res);
     if (path === '/asset/logo' || path === '/asset/yahoo-logo') return assetLogoHandler(req, res, payload);
     if (path === '/asset/modal') return sendJson(req, res, await withContractBaseline('assetModal', await buildAssetModalContract(payload), payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
     if (path === '/asset/fii-modal' || path === '/fii/modal') return sendJson(req, res, await withContractBaseline('fiiModal', await buildFiiModalContract(payload), payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
@@ -1026,7 +1072,7 @@ export async function dispatchRoute(req, res) {
     }
     if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.historyMonths || payload.months || 12), { cacheControl: 'private, max-age=300' });
     if (path === '/market/rankings') return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, ...(await buildCanonicalMarketRankings(payload)) }, { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.marketRankings}, stale-while-revalidate=300` });
-    if (path === '/market/indices') return marketIndicesHandler(req, res);
+    if (path === '/market/indices') return runLazyDefaultHandler('route-market-indices', () => import('./market/indices.js'), req, res);
 
     if (path === '/asset/quote' || path === '/quote') {
       const bypassQuoteCache = boolParamLocal(payload.refresh || payload.nocache || payload.forceRefresh, false);
@@ -1065,7 +1111,7 @@ export async function dispatchRoute(req, res) {
       return sendJson(req, res, await withContractBaseline('asset', { ...assetPayload(payload), ...enriched }, payload), { cacheControl: degradedAsset ? 'no-store' : 'private, max-age=60' });
     }
     if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
-    if (path === '/assets') return assetsHandler(req, res);
+    if (path === '/assets') return runLazyDefaultHandler('route-assets', () => import('./assets.js'), req, res);
     if (path === '/compare') return sendJson(req, res, await buildComparisonPayload(payload), { cacheControl: 'private, max-age=60' });
     if (path === '/news') return sendJson(req, res, await getNews(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.news}, stale-while-revalidate=120` });
     if (path === '/watchlist/analyze') return sendJson(req, res, emptyCompatible('OK'));
@@ -1081,7 +1127,7 @@ export async function dispatchRoute(req, res) {
       return sendJson(req, res, { status: fetched.status ? 'OK' : 'ERROR', url, html: payload.returnHtml ? fetched.text : undefined, text: fetched.text?.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0, Number(payload.limit || 5000)), metrics: { cacheStatus: fetched.cacheStatus, status: fetched.status } });
     }
     if (path === '/batch-scrape') return sendJson(req, res, { status: 'OK', results: [], data: [] });
-    if (path === '/server/metrics' || path === '/observability' || path === '/engine/maturity' || path === '/engine/performance') return serverMetricsHandler(req, res);
+    if (path === '/server/metrics' || path === '/observability' || path === '/engine/maturity' || path === '/engine/performance') return runLazyDefaultHandler('route-server-metrics', () => import('./server/metrics.js'), req, res);
     if (path === '/server/tests') return sendJson(req, res, await monitorSelfTest(), { cacheControl: 'no-store' });
 
     return sendJson(req, res, { status: 'NOT_FOUND', error: 'Rota não encontrada no contrato enxuto VALORAE.', path, available: routeManifest().routes }, { status: 404, cacheControl: 'no-store' });

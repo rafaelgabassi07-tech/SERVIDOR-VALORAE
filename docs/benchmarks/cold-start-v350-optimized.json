@@ -1,0 +1,33 @@
+{
+  "benchmark": "valorae-v350-cold-start-optimization",
+  "date": "2026-07-17",
+  "node": "v24.14.0",
+  "environment": "same-host-isolated-processes-external-network-disabled-memory-shared-state",
+  "routerImport": {
+    "v342MedianMs": 475.96,
+    "v350OriginalMedianMs": 484.83,
+    "v350OptimizedMedianMs": 87.67,
+    "optimizedVsOriginalPercent": 81.92,
+    "optimizedVsV342Percent": 81.58,
+    "optimizedFinalRuns": 11,
+    "optimizedAverageMs": 88.56,
+    "optimizedMinMs": 77.85,
+    "optimizedMaxMs": 94.5,
+    "optimizedMedianRssMiB": 52.39,
+    "optimizedMedianHeapUsedMiB": 8.26
+  },
+  "coldRequestMedianMs": {
+    "ready": { "original": 498.74, "optimized": 98.2 },
+    "assetQuote": { "original": 559.36, "optimized": 97.47 },
+    "quotesBatch": { "original": 499.98, "optimized": 95.4 },
+    "mobilePortfolioSync": { "original": 518.08, "optimized": 414.1 },
+    "assetModal": { "original": 564.79, "optimized": 491.0 },
+    "httpTransportManifest": { "original": 499.72, "optimized": 103.33 }
+  },
+  "validation": {
+    "proxyTestFilesPassed": 239,
+    "proxyTestFilesFailed": 0,
+    "apkV529CrossStackTestsPassed": 37,
+    "apkV529CrossStackTestsFailed": 0
+  }
+}
