@@ -6,6 +6,15 @@
 - A rota individual encaminha refresh e bypass de cache ao adaptador.
 - Pareamento atualizado para o APK v529, sem quebra de endpoints ou payloads existentes.
 
+## Monitor UI v356 — Checkpoint 387: Benchmark e Arquitetura explicáveis
+
+- Benchmark dividido em HTML estruturado, extração simples e DOM em navegador.
+- Medições reproduzíveis de VALORAE, Parse5, htmlparser2, Cheerio e Playwright/Chromium.
+- JSDOM, LinkeDOM e node-html-parser listados como referências sem números não executados.
+- Ranking visual informa paridade, latência, throughput e diferença de capacidade.
+- Arquitetura convertida em mapa interativo por camadas, com riscos e proteções de cada etapa.
+- Nenhum endpoint, contrato financeiro, schema Supabase ou comportamento do APK foi alterado.
+
 ## 21.12.381 — Checkpoint 119: monitor plano de tráfego ao vivo
 
 - O monitor foi reduzido a quatro superfícies operacionais: tráfego ao vivo, rotas/fontes, saúde e ajustes.

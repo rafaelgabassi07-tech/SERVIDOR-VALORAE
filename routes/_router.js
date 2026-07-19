@@ -662,6 +662,30 @@ function legacyAssetTimeoutPayload(payload = {}, routeDeadlineMs = 8_500) {
 async function assetLogoHandler(req, res, payload = {}) {
   const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query || '');
   if (!ticker) return sendJson(req, res, { ok: false, status: 'ERROR', error: 'Informe ticker ou symbol.', endpoint: 'asset/logo' }, { status: 400, cacheControl: 'no-store' });
+  const assetClass = classifyTicker(ticker);
+  if (assetClass === 'FII') {
+    const notApplicable = {
+      ok: true,
+      status: 'NOT_APPLICABLE',
+      endpoint: 'asset/logo',
+      contractVersion: OFFICIAL_ASSET_LOGO_VERSION,
+      ticker,
+      symbol: ticker,
+      assetClass,
+      logoUrl: '',
+      reason: 'Fundos imobiliários não usam logotipo oficial no VALORAE.'
+    };
+    if (payload.format === 'json' || payload.json === '1') {
+      return sendJson(req, res, notApplicable, { cacheControl: 'public, max-age=86400, stale-while-revalidate=604800' });
+    }
+    res.statusCode = 204;
+    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    res.setHeader('X-Valorae-Logo-Contract', OFFICIAL_ASSET_LOGO_VERSION);
+    res.setHeader('X-Valorae-Logo-Ticker', ticker);
+    res.setHeader('X-Valorae-Logo-Asset-Class', assetClass);
+    res.setHeader('X-Valorae-Logo-Status', 'NOT_APPLICABLE');
+    return res.end('');
+  }
   const timeoutMs = clampInt(payload.timeoutMs || 6500, 6500, 1800, 9000);
   const useCache = payload.cache !== 'false';
   const logo = await fetchOfficialAssetLogo(ticker, { timeoutMs, cache: useCache });

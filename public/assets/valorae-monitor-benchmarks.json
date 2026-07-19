@@ -1,98 +1,290 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-07-18T00:00:00.000Z",
-  "title": "VALORAE scraping engine comparative benchmark",
-  "command": "node --expose-gc scripts/benchmark-scraping-engines.js --quick",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-19T00:20:17.830Z",
+  "title": "VALORAE scraping engine comparative benchmark v2",
+  "command": "npm run benchmark:scraping",
   "currentRun": {
-    "benchmark": "valorae-scraping-engines",
+    "benchmark": "valorae-scraping-engines-v2",
+    "generatedAt": "2026-07-19T00:20:17.830Z",
     "node": "v22.16.0",
+    "platform": "linux/x64",
     "htmlBytes": 255208,
     "rows": 900,
     "iterations": 12,
+    "warmups": 3,
     "complex": [
+      {
+        "engine": "parse5-direct-css-select",
+        "iterations": 12,
+        "totalMs": 378.22,
+        "averageMs": 31.518,
+        "operationsPerSecond": 31.73,
+        "heapDeltaKiB": 254.8,
+        "parityWithParse5": true,
+        "resultBytes": 7961
+      },
+      {
+        "engine": "htmlparser2-direct-css-select",
+        "iterations": 12,
+        "totalMs": 207.42,
+        "averageMs": 17.285,
+        "operationsPerSecond": 57.85,
+        "heapDeltaKiB": -3607.6,
+        "parityWithParse5": true,
+        "resultBytes": 7961
+      },
       {
         "engine": "cheerio-parse5",
         "iterations": 12,
-        "totalMs": 833.86,
-        "averageMs": 69.488,
-        "operationsPerSecond": 14.39,
-        "heapDeltaKiB": -30795.1,
+        "totalMs": 465.41,
+        "averageMs": 38.784,
+        "operationsPerSecond": 25.78,
+        "heapDeltaKiB": 103.4,
         "parityWithParse5": true,
         "resultBytes": 7961
       },
       {
         "engine": "cheerio-htmlparser2",
         "iterations": 12,
-        "totalMs": 481.95,
-        "averageMs": 40.162,
-        "operationsPerSecond": 24.9,
-        "heapDeltaKiB": 97,
+        "totalMs": 250.98,
+        "averageMs": 20.915,
+        "operationsPerSecond": 47.81,
+        "heapDeltaKiB": 67,
         "parityWithParse5": true,
         "resultBytes": 7961
       },
       {
         "engine": "valorae-hybrid-adaptive",
         "iterations": 12,
-        "totalMs": 354.72,
-        "averageMs": 29.56,
-        "operationsPerSecond": 33.83,
-        "heapDeltaKiB": 102.7,
+        "totalMs": 206.46,
+        "averageMs": 17.205,
+        "operationsPerSecond": 58.12,
+        "heapDeltaKiB": 111.6,
         "parityWithParse5": true,
         "resultBytes": 7961
       },
       {
         "engine": "valorae-hybrid-force-parse5",
         "iterations": 12,
-        "totalMs": 599.28,
-        "averageMs": 49.94,
-        "operationsPerSecond": 20.02,
-        "heapDeltaKiB": 68.4,
+        "totalMs": 392.31,
+        "averageMs": 32.692,
+        "operationsPerSecond": 30.59,
+        "heapDeltaKiB": 136.4,
         "parityWithParse5": true,
         "resultBytes": 7961
       },
       {
         "engine": "valorae-css-lite-legacy",
         "iterations": 12,
-        "totalMs": 101.9,
-        "averageMs": 8.491,
-        "operationsPerSecond": 117.77,
-        "heapDeltaKiB": 84.4,
+        "totalMs": 64.84,
+        "averageMs": 5.404,
+        "operationsPerSecond": 185.06,
+        "heapDeltaKiB": 80,
         "parityWithParse5": null,
         "resultBytes": 4486
       }
     ],
     "simple": [
       {
-        "engine": "valorae-single-pass-fast",
+        "engine": "parse5-direct-simple",
         "iterations": 12,
-        "totalMs": 102.95,
-        "averageMs": 8.579,
-        "operationsPerSecond": 116.56,
-        "heapDeltaKiB": 61,
+        "totalMs": 254.04,
+        "averageMs": 21.17,
+        "operationsPerSecond": 47.24,
+        "heapDeltaKiB": 58.4,
         "parityWithParse5": true,
-        "resultBytes": 38887
+        "resultBytes": 1615
+      },
+      {
+        "engine": "htmlparser2-direct-simple",
+        "iterations": 12,
+        "totalMs": 122.85,
+        "averageMs": 10.237,
+        "operationsPerSecond": 97.68,
+        "heapDeltaKiB": 45.4,
+        "parityWithParse5": true,
+        "resultBytes": 1615
       },
       {
         "engine": "cheerio-parse5-simple",
         "iterations": 12,
-        "totalMs": 588.74,
-        "averageMs": 49.062,
-        "operationsPerSecond": 20.38,
-        "heapDeltaKiB": 88.4,
-        "parityWithParse5": null,
-        "resultBytes": 35271
+        "totalMs": 324.43,
+        "averageMs": 27.036,
+        "operationsPerSecond": 36.99,
+        "heapDeltaKiB": 27.3,
+        "parityWithParse5": true,
+        "resultBytes": 1615
       },
       {
         "engine": "cheerio-htmlparser2-simple",
         "iterations": 12,
-        "totalMs": 307.93,
-        "averageMs": 25.661,
-        "operationsPerSecond": 38.97,
-        "heapDeltaKiB": -3635,
-        "parityWithParse5": null,
-        "resultBytes": 35271
+        "totalMs": 160.61,
+        "averageMs": 13.384,
+        "operationsPerSecond": 74.72,
+        "heapDeltaKiB": 1.9,
+        "parityWithParse5": true,
+        "resultBytes": 1615
+      },
+      {
+        "engine": "valorae-single-pass-fast",
+        "iterations": 12,
+        "totalMs": 25.38,
+        "averageMs": 2.115,
+        "operationsPerSecond": 472.79,
+        "heapDeltaKiB": 47.4,
+        "parityWithParse5": true,
+        "resultBytes": 1615
       }
-    ]
+    ],
+    "browser": {
+      "available": true,
+      "executablePath": "/usr/bin/chromium",
+      "startupMs": 541.61,
+      "note": "Inclui page.setContent e querySelectorAll; não inclui rede.",
+      "results": [
+        {
+          "engine": "playwright-chromium-dom",
+          "iterations": 12,
+          "totalMs": 1553.17,
+          "averageMs": 129.431,
+          "operationsPerSecond": 7.73,
+          "heapDeltaKiB": 277.8,
+          "parityWithParse5": true,
+          "resultBytes": 7961
+        }
+      ]
+    }
+  },
+  "scenarios": {
+    "complex": {
+      "title": "HTML estruturado",
+      "description": "Parse completo de 255 KB, seletores CSS compostos, tabelas, atributos e normalização financeira.",
+      "capability": "HTML estático com saída estrutural equivalente",
+      "bestMetric": "Menor latência entre resultados com paridade confirmada."
+    },
+    "simple": {
+      "title": "Extração simples",
+      "description": "Título, cabeçalhos e links em passagem única, com deduplicação e o mesmo fingerprint final.",
+      "capability": "Páginas previsíveis e seletores simples",
+      "bestMetric": "Menor latência com a mesma saída normalizada."
+    },
+    "browser": {
+      "title": "DOM em navegador",
+      "description": "Chromium controlado pelo Playwright, com page.setContent e querySelectorAll; sem rede e sem tempo de download.",
+      "capability": "Páginas que dependem de DOM de navegador ou JavaScript",
+      "bestMetric": "Custo local do browser já inicializado; startup é mostrado separadamente."
+    }
+  },
+  "engineCatalog": [
+    {
+      "id": "valorae-hybrid-adaptive",
+      "label": "VALORAE híbrido adaptativo",
+      "family": "VALORAE",
+      "category": "Parser adaptativo",
+      "status": "measured",
+      "bestFor": "HTML estático complexo",
+      "strength": "Escolhe o caminho de parsing conforme o seletor e preserva a saída esperada.",
+      "tradeoff": "Não executa JavaScript da página."
+    },
+    {
+      "id": "valorae-single-pass-fast",
+      "label": "VALORAE passagem única",
+      "family": "VALORAE",
+      "category": "Extração especializada",
+      "status": "measured",
+      "bestFor": "Seletores simples e previsíveis",
+      "strength": "Evita construir um DOM completo quando a página permite.",
+      "tradeoff": "Recorre a outro parser quando o seletor excede o subconjunto seguro."
+    },
+    {
+      "id": "parse5-direct-css-select",
+      "label": "Parse5 direto + CSS Select",
+      "family": "Parse5",
+      "category": "Parser WHATWG",
+      "status": "measured",
+      "bestFor": "Compatibilidade HTML5",
+      "strength": "Parsing alinhado ao comportamento de HTML dos navegadores.",
+      "tradeoff": "Custo maior que parsers tolerantes em documentos grandes."
+    },
+    {
+      "id": "htmlparser2-direct-css-select",
+      "label": "htmlparser2 direto + CSS Select",
+      "family": "htmlparser2",
+      "category": "Parser tolerante",
+      "status": "measured",
+      "bestFor": "HTML estático em alto volume",
+      "strength": "DOM leve e alto throughput.",
+      "tradeoff": "Pode divergir de casos extremos da especificação HTML."
+    },
+    {
+      "id": "cheerio-parse5",
+      "label": "Cheerio com Parse5",
+      "family": "Cheerio",
+      "category": "API jQuery + Parse5",
+      "status": "measured",
+      "bestFor": "Produtividade com compatibilidade",
+      "strength": "API de seleção familiar sobre parser compatível.",
+      "tradeoff": "A camada de conveniência adiciona custo."
+    },
+    {
+      "id": "cheerio-htmlparser2",
+      "label": "Cheerio com htmlparser2",
+      "family": "Cheerio",
+      "category": "API jQuery + htmlparser2",
+      "status": "measured",
+      "bestFor": "Produtividade com menor custo",
+      "strength": "API Cheerio usando um backend mais leve.",
+      "tradeoff": "Ainda mantém a abstração do Cheerio."
+    },
+    {
+      "id": "playwright-chromium-dom",
+      "label": "Playwright + Chromium",
+      "family": "Browser",
+      "category": "Navegador real",
+      "status": "measured",
+      "bestFor": "Páginas renderizadas por JavaScript",
+      "strength": "Executa DOM e recursos do navegador.",
+      "tradeoff": "Startup, memória e latência muito maiores que parsing estático."
+    },
+    {
+      "id": "jsdom-reference",
+      "label": "JSDOM",
+      "family": "DOM virtual",
+      "category": "Implementação WHATWG em Node",
+      "status": "reference",
+      "bestFor": "Testes e código dependente de DOM",
+      "strength": "Ambiente de DOM abrangente sem abrir um navegador.",
+      "tradeoff": "Não foi instalado nem medido nesta release."
+    },
+    {
+      "id": "linkedom-reference",
+      "label": "LinkeDOM",
+      "family": "DOM virtual",
+      "category": "DOM leve",
+      "status": "reference",
+      "bestFor": "DOM server-side com foco em escala",
+      "strength": "Estrutura orientada a baixo overhead.",
+      "tradeoff": "Não foi instalado nem medido nesta release."
+    },
+    {
+      "id": "node-html-parser-reference",
+      "label": "node-html-parser",
+      "family": "Parser leve",
+      "category": "DOM simplificado",
+      "status": "reference",
+      "bestFor": "Extrações rápidas com API compacta",
+      "strength": "Projeto direcionado a parsing rápido.",
+      "tradeoff": "Não foi instalado nem medido nesta release."
+    }
+  ],
+  "methodology": {
+    "fixture": "HTML sintético determinístico de ativos financeiros",
+    "networkIncluded": false,
+    "warmups": 3,
+    "baseline": "Parse5 direto + CSS Select",
+    "parityRule": "Fingerprint JSON idêntico ao baseline Parse5 para o mesmo cenário",
+    "browserRule": "Chromium é comparado em uma faixa separada porque oferece capacidade diferente dos parsers estáticos.",
+    "caveat": "Microbenchmark de CPU local. Não mede rede, bloqueio, renderização remota, disponibilidade de fontes ou custo total do deploy."
   },
   "releaseReference": {
     "benchmark": "valorae-scraping-engines",
@@ -116,7 +308,7 @@
         "engine": "cheerio-htmlparser2",
         "averageMs": 41.824,
         "operationsPerSecond": 23.91,
-        "heapDeltaKiB": 29.0,
+        "heapDeltaKiB": 29,
         "parityWithParse5": true
       },
       {
@@ -207,7 +399,7 @@
       },
       "assetModal": {
         "original": 564.79,
-        "optimized": 491.0
+        "optimized": 491
       },
       "httpTransportManifest": {
         "original": 499.72,
@@ -220,13 +412,5 @@
       "apkV529CrossStackTestsPassed": 37,
       "apkV529CrossStackTestsFailed": 0
     }
-  },
-  "methodology": {
-    "fixture": "HTML sintético determinístico de ativos financeiros",
-    "networkIncluded": false,
-    "warmups": 3,
-    "baseline": "Cheerio com Parse5",
-    "parityRule": "Fingerprint JSON idêntico ao baseline Parse5 para o cenário complexo",
-    "caveat": "Microbenchmark de CPU local. Não mede rede, bloqueio, renderização remota ou disponibilidade de fontes."
   }
 }

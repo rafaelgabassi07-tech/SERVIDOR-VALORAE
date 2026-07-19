@@ -7,10 +7,10 @@ const html = `
   <section>
     <h2>CHECKLIST DO INVESTIDOR BUY AND HOLD SOBRE GGRC11</h2>
     <div><span class="material-icons">check</span> FII com mais de 5 anos listado em Bolsa <button>?</button></div>
-    <div><span class="material-icons">check</span> Dividend Yield médio dos últimos 5 anos acima de 8% <button>?</button></div>
-    <div><span class="material-icons">check</span> Liquidez média diária acima de R$ 700 mil <button>?</button></div>
+    <div><span class="material-icons">check</span> Dividend Yield médio dos últimos 24 meses acima de 9% <button>?</button></div>
+    <div><span class="material-icons">check</span> Liquidez média diária acima de R$ 1 milhão <button>?</button></div>
     <div><span class="material-icons">check</span> Número de cotistas acima de 20 mil <button>?</button></div>
-    <div><span class="material-icons">check</span> Patrimônio líquido acima de R$ 1 bilhão <button>?</button></div>
+    <div><span class="material-icons">check</span> Patrimônio líquido acima de R$ 500 milhões <button>?</button></div>
     <div><span class="material-icons">check</span> 5 ou mais imóveis no portfólio <button>?</button></div>
     <div><span class="material-icons">check</span> Vacância física média dos últimos 12 meses abaixo de 10% <button>?</button></div>
     <div><span class="material-icons">check</span> Vacância financeira média dos últimos 12 meses abaixo de 10% <button>?</button></div>

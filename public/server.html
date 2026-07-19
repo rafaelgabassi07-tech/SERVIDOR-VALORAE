@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#080808">
-  <meta name="valorae-ui" content="valorae-monitor-proxy-brand-v354">
+  <meta name="valorae-ui" content="valorae-monitor-proxy-experience-v356">
   <meta name="valorae-latest-patch" content="21.12.382-quote-state-resilience-v350">
   <meta name="valorae-readiness-endpoint" content="/api/v1/release/readiness">
   <title>VALORAE Proxy · Monitor operacional</title>
@@ -84,7 +84,7 @@
         <span><strong>Ajustes</strong><small>Tema, origem e atualização</small></span>
       </button>
     </nav>
-    <footer class="drawer-footer"><span>Contrato protegido para o APK</span><strong id="drawerReleaseLabel">Core v350 · UI v354</strong></footer>
+    <footer class="drawer-footer"><span>Contrato protegido para o APK</span><strong id="drawerReleaseLabel">Core v350 · UI v356</strong></footer>
   </aside>
 
   <main id="monitorMain" class="monitor-main" aria-busy="false">
@@ -194,52 +194,137 @@
 
 
     <section class="view" id="view-benchmark" data-view-panel="benchmark" tabindex="-1" hidden>
-      <header class="page-heading">
-        <div><span class="eyebrow">Evidência reproduzível</span><h1>Benchmark de motores de scraping</h1><p>Comparação executada sobre o mesmo HTML, os mesmos seletores e o mesmo processo. Resultados incompletos são identificados e não entram como equivalentes.</p></div>
+      <header class="page-heading benchmark-page-heading">
+        <div><span class="eyebrow">Comparação transparente</span><h1>Benchmark de scraping sem números soltos</h1><p>Escolha o cenário, compare motores com a mesma saída e entenda quando um parser rápido não substitui um navegador real.</p></div>
         <div class="instance-meta"><span id="benchmarkStatus" role="status" aria-live="polite">carregando medições</span></div>
       </header>
-      <div class="metric-strip" id="benchmarkMetrics" aria-label="Resumo do benchmark"></div>
-      <section class="benchmark-lead" aria-labelledby="benchmarkLeadTitle">
-        <div><span class="eyebrow">Leitura principal</span><h2 id="benchmarkLeadTitle">Comparação com paridade de saída</h2><p id="benchmarkSummaryText">Carregando o conjunto de evidências empacotado com esta versão.</p></div>
-        <div class="benchmark-actions"><button class="text-button emphasized" id="copyBenchmarkCommand" type="button">Copiar comando reproduzível</button></div>
+
+      <section class="benchmark-overview" aria-labelledby="benchmarkDecisionTitle">
+        <div class="benchmark-decision-copy">
+          <span class="eyebrow">Decisão rápida</span>
+          <h2 id="benchmarkDecisionTitle">Qual tecnologia faz sentido para cada página?</h2>
+          <p id="benchmarkSummaryText">Carregando a leitura consolidada das medições.</p>
+        </div>
+        <div class="benchmark-decision-grid" id="benchmarkDecisionGrid" aria-label="Recomendações por tipo de página"></div>
       </section>
-      <div class="benchmark-grid">
-        <section class="benchmark-panel" aria-labelledby="complexBenchmarkTitle"><header class="section-heading"><div><span class="eyebrow">Seletores complexos</span><h2 id="complexBenchmarkTitle">DOM completo e extrações estruturadas</h2></div><span>menor é melhor</span></header><div class="benchmark-bars" id="complexBenchmarkBars"></div></section>
-        <section class="benchmark-panel" aria-labelledby="simpleBenchmarkTitle"><header class="section-heading"><div><span class="eyebrow">Seletores simples</span><h2 id="simpleBenchmarkTitle">Caminho rápido de passagem única</h2></div><span>menor é melhor</span></header><div class="benchmark-bars" id="simpleBenchmarkBars"></div></section>
+
+      <div class="metric-strip benchmark-metric-strip" id="benchmarkMetrics" aria-label="Resumo do benchmark"></div>
+
+      <section class="benchmark-workbench" aria-labelledby="benchmarkWorkbenchTitle">
+        <header class="section-heading benchmark-workbench-heading">
+          <div><span class="eyebrow">Comparador interativo</span><h2 id="benchmarkWorkbenchTitle">Ranking com contexto</h2></div>
+          <div class="benchmark-scenario-tabs" id="benchmarkScenarioTabs" role="tablist" aria-label="Cenário do benchmark">
+            <button type="button" role="tab" aria-selected="true" data-benchmark-scenario="complex">HTML estruturado</button>
+            <button type="button" role="tab" aria-selected="false" data-benchmark-scenario="simple">Extração simples</button>
+            <button type="button" role="tab" aria-selected="false" data-benchmark-scenario="browser">DOM em navegador</button>
+          </div>
+        </header>
+        <div class="benchmark-scenario-intro" id="benchmarkScenarioIntro"></div>
+        <div class="benchmark-leaderboard" id="benchmarkLeaderboard" aria-live="polite"></div>
+      </section>
+
+      <div class="benchmark-insight-grid">
+        <section aria-labelledby="benchmarkInterpretationTitle">
+          <header class="section-heading"><div><span class="eyebrow">Como ler</span><h2 id="benchmarkInterpretationTitle">Velocidade não é o único critério</h2></div></header>
+          <div class="benchmark-reading-guide">
+            <div><span class="reading-icon">01</span><strong>Paridade primeiro</strong><p>Só compare como equivalente o motor que devolve o mesmo fingerprint de dados.</p></div>
+            <div><span class="reading-icon">02</span><strong>Depois, latência</strong><p>Entre saídas equivalentes, menor tempo e maior throughput são melhores.</p></div>
+            <div><span class="reading-icon">03</span><strong>Escolha por página</strong><p>HTML estático, DOM tolerante e conteúdo dependente de JavaScript exigem estratégias diferentes.</p></div>
+          </div>
+        </section>
+        <section aria-labelledby="benchmarkEvidenceTitle">
+          <header class="section-heading"><div><span class="eyebrow">Evidência</span><h2 id="benchmarkEvidenceTitle">Execução reproduzível</h2></div><button class="text-button emphasized" id="copyBenchmarkCommand" type="button">Copiar comando</button></header>
+          <dl class="fact-list" id="benchmarkFacts"></dl>
+        </section>
       </div>
-      <section aria-labelledby="benchmarkTableTitle"><header class="section-heading"><div><span class="eyebrow">Resultado integral</span><h2 id="benchmarkTableTitle">Medições por motor</h2></div><span id="benchmarkRunLabel">—</span></header><div class="table-scroll" tabindex="0" aria-label="Tabela comparativa dos motores de scraping"><table class="benchmark-table"><thead><tr><th>Motor</th><th>Cenário</th><th>Latência média</th><th>Operações/s</th><th>Paridade</th><th>Saída</th></tr></thead><tbody id="benchmarkTable"></tbody></table></div></section>
-      <div class="benchmark-evidence-grid">
-        <section><header class="section-heading"><div><span class="eyebrow">Metodologia</span><h2>Condições da execução</h2></div></header><dl class="fact-list" id="benchmarkFacts"></dl></section>
-        <section><header class="section-heading"><div><span class="eyebrow">Interpretação correta</span><h2>O que os números provam</h2></div></header><div class="evidence-copy"><p><strong>Comparável:</strong> motores com paridade confirmada retornaram a mesma estrutura do baseline Parse5.</p><p><strong>Não comparável:</strong> o caminho CSS Lite é mostrado por transparência, mas retorna menos dados e não pode ser tratado como vencedor.</p><p><strong>Escopo:</strong> o teste mede CPU local de parsing; rede, bloqueios do provedor e tempo de renderização remota ficam fora desta medição.</p></div></section>
-      </div>
+
+      <section class="engine-landscape" aria-labelledby="engineLandscapeTitle">
+        <header class="section-heading"><div><span class="eyebrow">Ecossistema</span><h2 id="engineLandscapeTitle">Motores considerados</h2><p>Resultados medidos aparecem com números. Alternativas não instaladas são mostradas como referência técnica, sem inventar desempenho.</p></div><span id="benchmarkRunLabel">—</span></header>
+        <div class="engine-tile-grid" id="engineCatalog"></div>
+      </section>
+
+      <details class="benchmark-technical-details">
+        <summary>Ver tabela técnica completa</summary>
+        <div class="table-scroll" tabindex="0" aria-label="Tabela comparativa completa dos motores de scraping">
+          <table class="benchmark-table"><thead><tr><th>Motor</th><th>Família</th><th>Cenário</th><th>Latência</th><th>Operações/s</th><th>Paridade</th><th>Saída</th></tr></thead><tbody id="benchmarkTable"></tbody></table>
+        </div>
+      </details>
     </section>
 
     <section class="view" id="view-architecture" data-view-panel="architecture" tabindex="-1" hidden>
-      <header class="page-heading">
-        <div><span class="eyebrow">Sistema explicado</span><h1>Arquitetura do VALORAE Proxy</h1><p>Do contrato solicitado pelo APK até a resposta normalizada, com cache, fallback, scraping híbrido, observabilidade e persistência isolados por responsabilidade.</p></div>
+      <header class="page-heading architecture-page-heading">
+        <div><span class="eyebrow">Mapa do sistema</span><h1>Arquitetura do VALORAE Proxy</h1><p>Uma visão por camadas do caminho entre o APK, as fontes externas e a resposta final, com pontos de cache, fallback, validação e telemetria claramente separados.</p></div>
       </header>
+
       <div class="metric-strip" id="architectureMetrics" aria-label="Resumo da arquitetura"></div>
-      <section class="architecture-section" aria-labelledby="architectureFlowTitle"><header class="section-heading"><div><span class="eyebrow">Caminho principal</span><h2 id="architectureFlowTitle">Fluxo de uma requisição</h2></div><span>entrada → entrega</span></header>
-        <ol class="architecture-flow">
-          <li><span>01</span><strong>APK VALORAE</strong><small>Solicita um contrato versionado e informa canal, versão e contexto.</small></li>
-          <li><span>02</span><strong>Router HTTP</strong><small>Normaliza a rota, aplica segurança e direciona ao handler correto.</small></li>
-          <li><span>03</span><strong>Gateway de contratos</strong><small>Valida parâmetros e preserva o formato consumido pelo mobile.</small></li>
-          <li><span>04</span><strong>Cache e coalescing</strong><small>Reaproveita respostas válidas e evita trabalho concorrente duplicado.</small></li>
-          <li><span>05</span><strong>Fontes e scraping</strong><small>Combina APIs, HTML, parser adaptativo, prazos e fallbacks independentes.</small></li>
-          <li><span>06</span><strong>Normalização</strong><small>Consolida fontes, valida schema e classifica integridade e parcialidade.</small></li>
-          <li><span>07</span><strong>Resposta ao APK</strong><small>Entrega primeiro; telemetria e persistência seguem fora do caminho crítico.</small></li>
-        </ol>
+
+      <section class="architecture-map" aria-labelledby="architectureMapTitle">
+        <header class="section-heading"><div><span class="eyebrow">Fluxo principal</span><h2 id="architectureMapTitle">Toque em uma etapa para entender sua responsabilidade</h2></div><span>entrada → aquisição → entrega</span></header>
+        <div class="architecture-map-layout">
+          <ol class="architecture-lanes" id="architectureLanes">
+            <li class="architecture-lane lane-client">
+              <span class="lane-label">Cliente</span>
+              <button type="button" class="architecture-node active" data-architecture-node="apk" aria-pressed="true"><span>01</span><strong>APK VALORAE</strong><small>Contratos versionados e contexto mobile</small></button>
+            </li>
+            <li class="architecture-lane lane-edge">
+              <span class="lane-label">Entrada</span>
+              <button type="button" class="architecture-node" data-architecture-node="router" aria-pressed="false"><span>02</span><strong>Edge + Router</strong><small>Segurança, roteamento e limites</small></button>
+              <button type="button" class="architecture-node" data-architecture-node="contract" aria-pressed="false"><span>03</span><strong>Gateway de contratos</strong><small>Compatibilidade e validação</small></button>
+            </li>
+            <li class="architecture-lane lane-orchestration">
+              <span class="lane-label">Orquestração</span>
+              <button type="button" class="architecture-node" data-architecture-node="cache" aria-pressed="false"><span>04</span><strong>Cache + coalescing</strong><small>Reuso, deduplicação e stale seguro</small></button>
+              <button type="button" class="architecture-node" data-architecture-node="orchestrator" aria-pressed="false"><span>05</span><strong>Orquestrador</strong><small>Orçamentos e tarefas paralelas</small></button>
+            </li>
+            <li class="architecture-lane lane-acquisition">
+              <span class="lane-label">Aquisição</span>
+              <button type="button" class="architecture-node" data-architecture-node="sources" aria-pressed="false"><span>06</span><strong>APIs e fontes HTML</strong><small>Adaptadores independentes e fallback</small></button>
+              <button type="button" class="architecture-node" data-architecture-node="scraping" aria-pressed="false"><span>07</span><strong>Scraping adaptativo</strong><small>Parser rápido, DOM completo ou browser</small></button>
+            </li>
+            <li class="architecture-lane lane-delivery">
+              <span class="lane-label">Entrega</span>
+              <button type="button" class="architecture-node" data-architecture-node="normalize" aria-pressed="false"><span>08</span><strong>Normalização + schema</strong><small>Qualidade, parcialidade e consistência</small></button>
+              <button type="button" class="architecture-node" data-architecture-node="response" aria-pressed="false"><span>09</span><strong>Resposta ao APK</strong><small>Payload mobile e entrega prioritária</small></button>
+            </li>
+          </ol>
+          <aside class="architecture-detail" id="architectureDetail" aria-live="polite"></aside>
+        </div>
       </section>
-      <div class="architecture-grid">
-        <section><header class="section-heading"><div><span class="eyebrow">Resiliência</span><h2>Como o Proxy evita falhas em cascata</h2></div></header><ul class="architecture-list"><li><strong>Orçamentos por bloco</strong><span>Cada fonte opcional expira de forma independente.</span></li><li><strong>Stale-while-revalidate</strong><span>O último resultado seguro pode sustentar a interface durante indisponibilidade externa.</span></li><li><strong>Coalescing</strong><span>Requisições idênticas em andamento compartilham o mesmo trabalho.</span></li><li><strong>Contrato render-safe</strong><span>Parciais recuperadas são diferenciadas de respostas críticas.</span></li></ul></section>
-        <section><header class="section-heading"><div><span class="eyebrow">Observabilidade</span><h2>O que é medido sem atrasar o APK</h2></div></header><ul class="architecture-list"><li><strong>Interceptação central</strong><span>Status, latência, payload, fonte, cache e consumidor.</span></li><li><strong>Janela persistida</strong><span>Eventos no Supabase reconstroem análises após cold start.</span></li><li><strong>Estado efêmero separado</strong><span>Uptime, heap e requisições em voo continuam por instância.</span></li><li><strong>Polling isolado</strong><span>O próprio monitor não contamina as métricas externas.</span></li></ul></section>
-        <section><header class="section-heading"><div><span class="eyebrow">Segurança</span><h2>Fronteiras e segredos</h2></div></header><ul class="architecture-list"><li><strong>Service role somente no servidor</strong><span>O APK e o navegador nunca recebem a chave do Supabase.</span></li><li><strong>Prévia sanitizada</strong><span>O monitor limita payloads e parâmetros exibidos.</span></li><li><strong>Headers de segurança</strong><span>Respostas estáticas e de API recebem políticas centralizadas.</span></li><li><strong>RLS no histórico</strong><span>A tabela de eventos não é exposta ao cliente público.</span></li></ul></section>
+
+      <div class="architecture-principles-grid">
+        <section>
+          <header class="section-heading"><div><span class="eyebrow">Resiliência</span><h2>Falhas ficam contidas</h2></div></header>
+          <div class="architecture-principle-list">
+            <article><strong>Timeout por fonte</strong><span>Uma integração lenta expira sem consumir todo o prazo do contrato.</span></article>
+            <article><strong>Fallback classificado</strong><span>Cache recuperado, parcial degradada e falha crítica não são tratados como iguais.</span></article>
+            <article><strong>Coalescing</strong><span>Chamadas idênticas compartilham o mesmo trabalho enquanto estão em voo.</span></article>
+            <article><strong>Entrega primeiro</strong><span>Persistência e telemetria são executadas depois da resposta ao APK.</span></article>
+          </div>
+        </section>
+        <section>
+          <header class="section-heading"><div><span class="eyebrow">Dados</span><h2>O que persiste e o que não persiste</h2></div></header>
+          <div class="data-scope-map">
+            <div class="scope-persistent"><span>Persistente</span><strong>Eventos operacionais</strong><small>Latência, rota, fonte, payload, cache e classificação no Supabase.</small></div>
+            <div class="scope-ephemeral"><span>Por instância</span><strong>Estado instantâneo</strong><small>Heap, uptime, requisições em voo e contexto do processo serverless.</small></div>
+          </div>
+        </section>
+        <section>
+          <header class="section-heading"><div><span class="eyebrow">Segurança</span><h2>Fronteiras explícitas</h2></div></header>
+          <div class="architecture-principle-list">
+            <article><strong>Segredos no servidor</strong><span>Service role e credenciais externas nunca chegam ao APK ou ao monitor.</span></article>
+            <article><strong>Payload sanitizado</strong><span>O monitor limita prévias e remove conteúdo sensível antes de exibir.</span></article>
+            <article><strong>RLS no histórico</strong><span>A persistência operacional não é consultada diretamente pelo navegador.</span></article>
+            <article><strong>Contrato estável</strong><span>Mudanças internas preservam o formato esperado pela versão mobile.</span></article>
+          </div>
+        </section>
       </div>
+
       <div class="architecture-live-grid">
         <section><header class="section-heading"><div><span class="eyebrow">Deploy atual</span><h2>Runtime observado</h2></div></header><dl class="fact-list" id="architectureRuntimeFacts"></dl></section>
-        <section><header class="section-heading"><div><span class="eyebrow">Persistência</span><h2>Escopo dos dados</h2></div></header><dl class="fact-list" id="architecturePersistenceFacts"></dl></section>
+        <section><header class="section-heading"><div><span class="eyebrow">Persistência</span><h2>Escopo operacional</h2></div></header><dl class="fact-list" id="architecturePersistenceFacts"></dl></section>
       </div>
-      <section class="architecture-contract" aria-labelledby="architectureContractTitle"><span class="eyebrow">Contrato principal</span><h2 id="architectureContractTitle"><code>/api/v1/mobile/portfolio-sync</code></h2><p>Agrega análise, histórico, IPCA, proventos e rankings opcionais. Cada bloco remoto mantém timeout e fallback próprios para que uma fonte lenta não derrube a resposta inteira.</p></section>
+
+      <section class="architecture-contract" aria-labelledby="architectureContractTitle"><span class="eyebrow">Exemplo de contrato agregado</span><h2 id="architectureContractTitle"><code>/api/v1/mobile/portfolio-sync</code></h2><p>O gateway reúne blocos independentes — análise, histórico, inflação, proventos e rankings — sem permitir que a lentidão de uma fonte opcional derrube toda a resposta.</p><div class="contract-path"><span>APK</span><i aria-hidden="true">→</i><span>Gateway</span><i aria-hidden="true">→</i><span>Fontes paralelas</span><i aria-hidden="true">→</i><span>Schema</span><i aria-hidden="true">→</i><span>Resposta mobile</span></div></section>
     </section>
 
     <section class="view" id="view-settings" data-view-panel="settings" tabindex="-1" hidden>

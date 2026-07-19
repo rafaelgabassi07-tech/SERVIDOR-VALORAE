@@ -50,6 +50,8 @@
     benchmark: null,
     benchmarkError: '',
     benchmarkLoading: false,
+    benchmarkScenario: 'complex',
+    architectureNode: 'apk',
     menuOpen: false,
     menuReturnFocus: null,
   };
@@ -280,7 +282,7 @@
       $('releaseLabel').textContent = compactRelease(fullRelease);
       $('releaseLabel').title = fullRelease;
     }
-    if ($('drawerReleaseLabel')) $('drawerReleaseLabel').textContent = `${compactRelease(fullRelease)} · UI v354`;
+    if ($('drawerReleaseLabel')) $('drawerReleaseLabel').textContent = `${compactRelease(fullRelease)} · UI v356`;
     if ($('instanceLabel')) $('instanceLabel').textContent = data?.instance?.id ? `instância ${compactId(data.instance.id, 8)}` : 'instância —';
     if ($('updatedLabel')) $('updatedLabel').textContent = state.error
       ? `falha: ${state.error}`
@@ -679,37 +681,137 @@
     return current > 0 && base > 0 ? current / base : 0;
   }
 
+  function engineCatalogEntry(name) {
+    const id = String(name || '');
+    const aliases = {
+      'parse5-direct-simple': 'parse5-direct-css-select',
+      'htmlparser2-direct-simple': 'htmlparser2-direct-css-select',
+      'cheerio-parse5-simple': 'cheerio-parse5',
+      'cheerio-htmlparser2-simple': 'cheerio-htmlparser2',
+    };
+    const target = aliases[id] || id;
+    return (state.benchmark?.engineCatalog || []).find(item => item.id === target) || null;
+  }
+
   function engineLabel(name) {
+    const catalog = engineCatalogEntry(name);
+    if (catalog?.label) return catalog.label;
     const labels = {
-      'cheerio-parse5': 'Cheerio · Parse5',
-      'cheerio-htmlparser2': 'Cheerio · htmlparser2',
-      'valorae-hybrid-adaptive': 'VALORAE · híbrido adaptativo',
       'valorae-hybrid-force-parse5': 'VALORAE · Parse5 forçado',
       'valorae-css-lite-legacy': 'VALORAE · CSS Lite legado',
-      'valorae-single-pass-fast': 'VALORAE · passagem única',
-      'cheerio-parse5-simple': 'Cheerio · Parse5 simples',
-      'cheerio-htmlparser2-simple': 'Cheerio · htmlparser2 simples',
+      'playwright-chromium-dom': 'Playwright · Chromium',
     };
     return labels[name] || String(name || 'Motor');
   }
 
-  function renderBenchmarkBars(id, entries) {
-    const node = $(id);
-    if (!node) return;
-    const list = Array.isArray(entries) ? entries : [];
-    if (!list.length) {
-      node.innerHTML = '<div class="empty-copy">Medições indisponíveis.</div>';
+  function benchmarkScenarioEntries(scenario) {
+    const run = state.benchmark?.currentRun || {};
+    if (scenario === 'simple') return Array.isArray(run.simple) ? run.simple : [];
+    if (scenario === 'browser') {
+      const browser = Array.isArray(run.browser?.results) ? run.browser.results.map(item => ({ ...item, capabilityComparable: true })) : [];
+      const hybrid = (run.complex || []).find(item => item.engine === 'valorae-hybrid-adaptive');
+      return hybrid ? [...browser, { ...hybrid, engine: 'valorae-hybrid-adaptive', referenceOnly: true, capabilityComparable: false, note: 'Referência de parser estático: não executa JavaScript.' }] : browser;
+    }
+    return Array.isArray(run.complex) ? run.complex : [];
+  }
+
+  function benchmarkScenarioText(scenario) {
+    const data = state.benchmark?.scenarios?.[scenario] || {};
+    return {
+      title: data.title || 'Cenário',
+      description: data.description || 'Medição local reproduzível.',
+      capability: data.capability || 'Capacidade não informada',
+      bestMetric: data.bestMetric || 'Menor latência entre saídas equivalentes.',
+    };
+  }
+
+  function benchmarkParity(item) {
+    if (item.referenceOnly || item.capabilityComparable === false) return { label: 'capacidade diferente', tone: 'reference' };
+    if (item.parityWithParse5 === true) return { label: 'saída equivalente', tone: 'ok' };
+    if (item.parityWithParse5 === false) return { label: 'saída divergente', tone: 'partial' };
+    return { label: 'não comparável', tone: 'partial' };
+  }
+
+  function renderBenchmarkLeaderboard() {
+    const node = $('benchmarkLeaderboard');
+    const intro = $('benchmarkScenarioIntro');
+    if (!node || !intro) return;
+    const scenario = state.benchmarkScenario;
+    const info = benchmarkScenarioText(scenario);
+    const entries = benchmarkScenarioEntries(scenario);
+    intro.innerHTML = `<div><span class="eyebrow">${escapeHtml(info.title)}</span><strong>${escapeHtml(info.capability)}</strong><p>${escapeHtml(info.description)}</p></div><small>${escapeHtml(info.bestMetric)}</small>`;
+    if (!entries.length) {
+      node.innerHTML = '<div class="empty-copy">Não há medição disponível para este cenário.</div>';
       return;
     }
-    const maximum = Math.max(1, ...list.map(item => Number(item.averageMs || 0)));
-    node.innerHTML = list.map(item => {
-      const name = String(item.engine || '');
-      const valorae = name.startsWith('valorae-');
-      const comparable = item.parityWithParse5 !== null;
-      const width = Math.max(3, Number(item.averageMs || 0) / maximum * 100);
-      const subtitle = comparable ? (item.parityWithParse5 ? 'saída equivalente' : 'paridade divergente') : 'saída parcial · não comparável';
-      return `<div class="benchmark-bar${valorae ? ' valorae' : ''}${comparable ? '' : ' non-comparable'}"><span class="benchmark-bar-label"><strong title="${escapeHtml(name)}">${escapeHtml(engineLabel(name))}</strong><small>${escapeHtml(subtitle)}</small></span><span class="benchmark-track" aria-hidden="true"><i style="width:${width.toFixed(2)}%"></i></span><span class="benchmark-bar-value"><strong>${escapeHtml(formatMs(item.averageMs))}</strong><small>${escapeHtml(`${formatNumber(item.operationsPerSecond)} op/s`)}</small></span></div>`;
+    const ranked = [...entries].sort((a, b) => {
+      if (Boolean(a.referenceOnly) !== Boolean(b.referenceOnly)) return a.referenceOnly ? 1 : -1;
+      if ((a.parityWithParse5 === true) !== (b.parityWithParse5 === true)) return a.parityWithParse5 === true ? -1 : 1;
+      return Number(a.averageMs || Infinity) - Number(b.averageMs || Infinity);
+    });
+    const comparable = ranked.filter(item => !item.referenceOnly && item.parityWithParse5 === true);
+    const maximum = Math.max(1, ...ranked.map(item => Number(item.averageMs || 0)));
+    const winner = comparable[0]?.engine;
+    let rank = 0;
+    node.innerHTML = ranked.map(item => {
+      const parity = benchmarkParity(item);
+      const isComparable = !item.referenceOnly && item.parityWithParse5 === true;
+      if (isComparable) rank += 1;
+      const meta = engineCatalogEntry(item.engine) || {};
+      const valorae = String(item.engine || '').startsWith('valorae-');
+      const isWinner = item.engine === winner;
+      const width = Math.max(2.5, Number(item.averageMs || 0) / maximum * 100);
+      const badge = isWinner ? '<span class="benchmark-winner">melhor equivalente</span>' : item.referenceOnly ? '<span class="benchmark-reference">referência</span>' : '';
+      return `<article class="benchmark-rank-row${valorae ? ' valorae' : ''}${item.referenceOnly ? ' reference-only' : ''}">
+        <span class="benchmark-rank">${isComparable ? String(rank).padStart(2, '0') : '—'}</span>
+        <div class="benchmark-engine-name"><span>${escapeHtml(meta.family || 'Motor')}</span><strong>${escapeHtml(engineLabel(item.engine))}</strong><small>${escapeHtml(meta.category || item.note || '')}</small></div>
+        <div class="benchmark-rank-track"><i style="width:${width.toFixed(2)}%" aria-hidden="true"></i></div>
+        <div class="benchmark-rank-metric"><strong>${escapeHtml(formatMs(item.averageMs))}</strong><small>${escapeHtml(`${formatNumber(item.operationsPerSecond)} op/s`)}</small></div>
+        <div class="benchmark-rank-state"><span class="parity-state ${escapeHtml(parity.tone)}"><i></i>${escapeHtml(parity.label)}</span>${badge}</div>
+      </article>`;
     }).join('');
+  }
+
+  function renderBenchmarkDecisionGrid() {
+    const node = $('benchmarkDecisionGrid');
+    if (!node || !state.benchmark) return;
+    const run = state.benchmark.currentRun || {};
+    const winner = entries => [...(entries || [])].filter(item => item.parityWithParse5 === true).sort((a, b) => Number(a.averageMs || Infinity) - Number(b.averageMs || Infinity))[0];
+    const complexWinner = winner(run.complex);
+    const simpleWinner = winner(run.simple);
+    const browserWinner = winner(run.browser?.results);
+    const cards = [
+      ['HTML estático complexo', complexWinner, 'Equilíbrio entre compatibilidade e throughput.'],
+      ['Extração simples', simpleWinner, 'Evita DOM completo quando o contrato permite.'],
+      ['Página com JavaScript', browserWinner, 'Use browser somente quando a renderização for indispensável.'],
+    ];
+    node.innerHTML = cards.map(([title, item, note], index) => `<article><span>0${index + 1}</span><div><small>${escapeHtml(title)}</small><strong>${escapeHtml(item ? engineLabel(item.engine) : 'Não medido')}</strong><p>${escapeHtml(note)}</p></div><b>${escapeHtml(item ? formatMs(item.averageMs) : '—')}</b></article>`).join('');
+  }
+
+  function renderEngineCatalog() {
+    const node = $('engineCatalog');
+    if (!node || !state.benchmark) return;
+    const catalog = Array.isArray(state.benchmark.engineCatalog) ? state.benchmark.engineCatalog : [];
+    const measuredIds = new Set([
+      ...(state.benchmark.currentRun?.complex || []),
+      ...(state.benchmark.currentRun?.simple || []),
+      ...(state.benchmark.currentRun?.browser?.results || []),
+    ].map(item => engineCatalogEntry(item.engine)?.id || item.engine));
+    node.innerHTML = catalog.map(item => {
+      const measured = item.status === 'measured' && measuredIds.has(item.id);
+      return `<article class="engine-tile ${measured ? 'measured' : 'reference'}"><header><span>${escapeHtml(item.family || 'Motor')}</span><b>${measured ? 'medido' : 'referência'}</b></header><h3>${escapeHtml(item.label)}</h3><p>${escapeHtml(item.category || '')}</p><dl><div><dt>Melhor uso</dt><dd>${escapeHtml(item.bestFor || '—')}</dd></div><div><dt>Vantagem</dt><dd>${escapeHtml(item.strength || '—')}</dd></div><div><dt>Limite</dt><dd>${escapeHtml(item.tradeoff || '—')}</dd></div></dl></article>`;
+    }).join('');
+  }
+
+  function setBenchmarkScenario(scenario) {
+    if (!['complex', 'simple', 'browser'].includes(scenario)) return;
+    state.benchmarkScenario = scenario;
+    $$('#benchmarkScenarioTabs [data-benchmark-scenario]').forEach(button => {
+      const active = button.dataset.benchmarkScenario === scenario;
+      button.setAttribute('aria-selected', String(active));
+      button.classList.toggle('active', active);
+    });
+    renderBenchmarkLeaderboard();
   }
 
   function renderBenchmark() {
@@ -722,10 +824,9 @@
 
     const metrics = $('benchmarkMetrics');
     if (!state.benchmark) {
-      metrics.innerHTML = Array.from({ length: 6 }, (_, index) => metric(['Híbrido', 'Parse5', 'htmlparser2', 'Ganho vs Parse5', 'Paridade', 'Fixture'][index], '—', state.benchmarkError || 'aguardando')).join('');
-      $('complexBenchmarkBars').innerHTML = '<div class="empty-copy">Aguardando dados de benchmark.</div>';
-      $('simpleBenchmarkBars').innerHTML = '<div class="empty-copy">Aguardando dados de benchmark.</div>';
-      $('benchmarkTable').innerHTML = '<tr><td colspan="6">Dataset ainda não carregado.</td></tr>';
+      metrics.innerHTML = Array.from({ length: 6 }, (_, index) => metric(['Motores medidos', 'Cenários', 'Melhor complexo', 'Melhor simples', 'Browser', 'Paridade'][index], '—', state.benchmarkError || 'aguardando')).join('');
+      $('benchmarkLeaderboard').innerHTML = '<div class="empty-copy">Aguardando dados de benchmark.</div>';
+      $('benchmarkTable').innerHTML = '<tr><td colspan="7">Dataset ainda não carregado.</td></tr>';
       return;
     }
 
@@ -733,52 +834,79 @@
     const run = data.currentRun || {};
     const complex = Array.isArray(run.complex) ? run.complex : [];
     const simple = Array.isArray(run.simple) ? run.simple : [];
-    const byName = Object.fromEntries([...complex, ...simple].map(item => [item.engine, item]));
-    const hybrid = byName['valorae-hybrid-adaptive'] || {};
-    const parse5 = byName['cheerio-parse5'] || {};
-    const htmlparser2 = byName['cheerio-htmlparser2'] || {};
-    const fast = byName['valorae-single-pass-fast'] || {};
-    const simpleParse5 = byName['cheerio-parse5-simple'] || {};
+    const browser = Array.isArray(run.browser?.results) ? run.browser.results : [];
+    const measured = [...complex, ...simple, ...browser];
+    const uniqueMeasured = new Set(measured.map(item => engineCatalogEntry(item.engine)?.id || item.engine));
+    const equivalent = measured.filter(item => item.parityWithParse5 === true).length;
+    const winner = entries => [...entries].filter(item => item.parityWithParse5 === true).sort((a, b) => Number(a.averageMs || Infinity) - Number(b.averageMs || Infinity))[0] || {};
+    const complexWinner = winner(complex);
+    const simpleWinner = winner(simple);
+    const browserWinner = winner(browser);
+    const parse5 = complex.find(item => item.engine === 'parse5-direct-css-select') || {};
+    const hybrid = complex.find(item => item.engine === 'valorae-hybrid-adaptive') || {};
     const reductionParse5 = percentReduction(hybrid.averageMs, parse5.averageMs);
-    const reductionHtml = percentReduction(hybrid.averageMs, htmlparser2.averageMs);
-    const fastReduction = percentReduction(fast.averageMs, simpleParse5.averageMs);
-    const comparable = complex.filter(item => item.parityWithParse5 === true).length;
 
     metrics.innerHTML = [
-      metric('Híbrido adaptativo', formatMs(hybrid.averageMs), `${formatNumber(hybrid.operationsPerSecond)} operações/s`, 'success'),
-      metric('Cheerio Parse5', formatMs(parse5.averageMs), `${formatNumber(parse5.operationsPerSecond)} operações/s`),
-      metric('Cheerio htmlparser2', formatMs(htmlparser2.averageMs), `${formatNumber(htmlparser2.operationsPerSecond)} operações/s`),
-      metric('Ganho vs Parse5', `${formatNumber(reductionParse5)}%`, `${formatNumber(multiplier(hybrid.operationsPerSecond, parse5.operationsPerSecond))}× throughput`, 'success'),
-      metric('Paridade confirmada', `${formatNumber(comparable)}/${formatNumber(complex.filter(item => item.parityWithParse5 !== null).length)}`, 'fingerprint JSON equivalente', 'success'),
-      metric('Fixture', formatBytes(run.htmlBytes || 0), `${formatNumber(run.rows || 0)} linhas · ${formatNumber(run.iterations || 0)} iterações`),
+      metric('Motores medidos', formatNumber(uniqueMeasured.size), `${formatNumber((data.engineCatalog || []).length - uniqueMeasured.size)} referências sem número`),
+      metric('Cenários', '3', 'estruturado · simples · browser'),
+      metric('Melhor complexo', formatMs(complexWinner.averageMs), engineLabel(complexWinner.engine), 'success'),
+      metric('Melhor simples', formatMs(simpleWinner.averageMs), engineLabel(simpleWinner.engine), 'success'),
+      metric('Chromium DOM', formatMs(browserWinner.averageMs), run.browser?.available ? `startup ${formatMs(run.browser.startupMs)}` : 'não executado', run.browser?.available ? 'warning' : 'danger'),
+      metric('Paridade', `${formatNumber(equivalent)}/${formatNumber(measured.length)}`, 'fingerprint por cenário', equivalent === measured.length ? 'success' : 'warning'),
     ].join('');
 
-    $('benchmarkSummaryText').textContent = `Na execução empacotada, o motor híbrido reduziu a latência em ${formatNumber(reductionParse5)}% frente ao Cheerio/Parse5 e ${formatNumber(reductionHtml)}% frente ao Cheerio/htmlparser2, mantendo a mesma saída estrutural. No caminho simples, a passagem única reduziu ${formatNumber(fastReduction)}% frente ao Parse5.`;
-    renderBenchmarkBars('complexBenchmarkBars', complex);
-    renderBenchmarkBars('simpleBenchmarkBars', simple);
+    $('benchmarkSummaryText').textContent = `No HTML estruturado, ${engineLabel(complexWinner.engine)} liderou entre as saídas equivalentes. O híbrido VALORAE ficou ${formatNumber(reductionParse5)}% abaixo da latência do Parse5 direto. Para páginas dependentes de JavaScript, o Chromium oferece outra capacidade e deve ser avaliado em uma faixa separada, não como substituto direto de um parser estático.`;
+    renderBenchmarkDecisionGrid();
+    renderBenchmarkLeaderboard();
+    renderEngineCatalog();
+
     const rows = [
-      ...complex.map(item => ({ ...item, scenario: 'Complexo' })),
-      ...simple.map(item => ({ ...item, scenario: 'Simples' })),
+      ...complex.map(item => ({ ...item, scenario: 'HTML estruturado' })),
+      ...simple.map(item => ({ ...item, scenario: 'Extração simples' })),
+      ...browser.map(item => ({ ...item, scenario: 'DOM em navegador' })),
     ];
     $('benchmarkTable').innerHTML = rows.map(item => {
-      const parity = item.parityWithParse5 === true
-        ? '<span class="parity-state ok"><i></i>equivalente</span>'
-        : item.parityWithParse5 === false
-          ? '<span class="parity-state partial"><i></i>divergente</span>'
-          : '<span class="parity-state partial"><i></i>não comparável</span>';
-      return `<tr><td>${escapeHtml(engineLabel(item.engine))}<span class="cell-sub">${escapeHtml(item.engine)}</span></td><td>${escapeHtml(item.scenario)}</td><td><span class="cell-main">${escapeHtml(formatMs(item.averageMs))}</span><span class="cell-sub">total ${escapeHtml(formatMs(item.totalMs))}</span></td><td>${escapeHtml(formatNumber(item.operationsPerSecond))}</td><td>${parity}</td><td>${escapeHtml(formatBytes(item.resultBytes || 0))}</td></tr>`;
+      const parity = benchmarkParity(item);
+      const meta = engineCatalogEntry(item.engine) || {};
+      return `<tr><td>${escapeHtml(engineLabel(item.engine))}<span class="cell-sub">${escapeHtml(item.engine)}</span></td><td>${escapeHtml(meta.family || '—')}</td><td>${escapeHtml(item.scenario)}</td><td><span class="cell-main">${escapeHtml(formatMs(item.averageMs))}</span><span class="cell-sub">total ${escapeHtml(formatMs(item.totalMs))}</span></td><td>${escapeHtml(formatNumber(item.operationsPerSecond))}</td><td><span class="parity-state ${escapeHtml(parity.tone)}"><i></i>${escapeHtml(parity.label)}</span></td><td>${escapeHtml(formatBytes(item.resultBytes || 0))}</td></tr>`;
     }).join('');
-    $('benchmarkRunLabel').textContent = `${run.node || 'Node.js'} · ${formatNumber(run.iterations || 0)} iterações`;
+    $('benchmarkRunLabel').textContent = `${run.node || 'Node.js'} · ${formatNumber(run.iterations || 0)} iterações · ${formatNumber(uniqueMeasured.size)} motores`;
     $('benchmarkFacts').innerHTML = facts([
       ['Comando', data.command || '—'],
-      ['Runtime da execução', run.node || '—'],
-      ['HTML processado', formatBytes(run.htmlBytes || 0)],
+      ['Runtime', `${run.node || '—'} · ${run.platform || 'plataforma não informada'}`],
+      ['HTML por operação', formatBytes(run.htmlBytes || 0)],
       ['Linhas da fixture', formatNumber(run.rows || 0)],
-      ['Aquecimentos', formatNumber(data.methodology?.warmups || 0)],
+      ['Aquecimentos', formatNumber(run.warmups ?? data.methodology?.warmups ?? 0)],
       ['Baseline', data.methodology?.baseline || '—'],
       ['Rede incluída', data.methodology?.networkIncluded ? 'sim' : 'não'],
-      ['Referência de release', data.releaseReference?.release || '—'],
+      ['Chromium', run.browser?.available ? `sim · startup ${formatMs(run.browser.startupMs)}` : `não · ${run.browser?.reason || 'indisponível'}`],
     ]);
+    setBenchmarkScenario(state.benchmarkScenario);
+  }
+
+  const ARCHITECTURE_NODE_DETAILS = {
+    apk: { eyebrow: 'Cliente mobile', title: 'APK VALORAE', summary: 'Consome contratos versionados e não conhece detalhes de scraping, provedores ou credenciais.', responsibilities: ['Envia versão e contexto do aplicativo', 'Define o contrato esperado', 'Recebe payload preparado para mobile'], risk: 'Uma mudança de formato sem compatibilidade quebra a interface.', protection: 'Gateway de contratos e testes cross-stack.' },
+    router: { eyebrow: 'Camada de entrada', title: 'Edge + Router HTTP', summary: 'É a fronteira pública: recebe a requisição, aplica políticas e encaminha ao handler correto.', responsibilities: ['Normalização de rota e método', 'Headers de segurança e CORS', 'Limites, request ID e observabilidade inicial'], risk: 'Entrada inválida ou rota excessivamente cara.', protection: 'Validação antecipada e budgets por endpoint.' },
+    contract: { eyebrow: 'Compatibilidade', title: 'Gateway de contratos', summary: 'Traduz a intenção do APK para operações internas sem expor a arquitetura de fornecedores.', responsibilities: ['Valida parâmetros e versão', 'Escolhe visão fast/full', 'Mantém shape render-safe'], risk: 'Regressão de campos entre versões.', protection: 'Schemas formais, aliases controlados e testes de integração.' },
+    cache: { eyebrow: 'Eficiência', title: 'Cache + coalescing', summary: 'Evita repetir trabalho e mantém respostas úteis durante oscilações externas.', responsibilities: ['Cache fresco e stale seguro', 'Deduplicação de requisições em voo', 'Classificação de hit/miss/revalidated'], risk: 'Dados antigos ou avalanche de chamadas iguais.', protection: 'TTL por domínio, integridade do cache e coalescing.' },
+    orchestrator: { eyebrow: 'Coordenação', title: 'Orquestrador paralelo', summary: 'Distribui tarefas independentes, controla prazos e decide o que pode degradar sem bloquear a entrega.', responsibilities: ['Budgets por bloco', 'Cancelamento e timeout', 'Composição progressiva fast/full'], risk: 'Uma fonte lenta consumir todo o prazo.', protection: 'Timeout isolado e fallback por producer.' },
+    sources: { eyebrow: 'Integrações', title: 'APIs e fontes HTML', summary: 'Cada fornecedor fica atrás de um adaptador próprio para reduzir acoplamento e facilitar fallback.', responsibilities: ['Transporte HTTP resiliente', 'Headers e sessões por origem', 'Fallback multi-host e cache por fonte'], risk: 'Bloqueio, drift de HTML ou indisponibilidade.', protection: 'Canários, adaptadores isolados e fontes alternativas.' },
+    scraping: { eyebrow: 'Extração', title: 'Scraping adaptativo', summary: 'Seleciona passagem única, DOM completo ou navegador conforme a complexidade e a necessidade de JavaScript.', responsibilities: ['Seletores simples em caminho rápido', 'Parse5/htmlparser2 para DOM estático', 'Browser somente quando indispensável'], risk: 'Usar browser caro em toda chamada ou parser leve em HTML incompatível.', protection: 'Classificação de seletor, benchmark e fallback explícito.' },
+    normalize: { eyebrow: 'Integridade', title: 'Normalização + schema', summary: 'Converte resultados heterogêneos em um contrato estável, incluindo qualidade, cobertura e parcialidade.', responsibilities: ['Conversão de números e datas', 'Reconciliação de fontes', 'Validação de schema e cobertura'], risk: 'Apresentar dado parcial como completo.', protection: 'Metadados de cobertura, sourceStatus e rejeição de fallback inadequado.' },
+    response: { eyebrow: 'Saída', title: 'Resposta ao APK', summary: 'Entrega o payload primeiro; persistência e telemetria seguem fora do caminho crítico.', responsibilities: ['Compressão e payload budget', 'ETag e cache HTTP', 'Captura pós-resposta para o monitor'], risk: 'A observabilidade aumentar a latência do usuário.', protection: 'after/waitUntil e isolamento do polling do monitor.' },
+  };
+
+  function renderArchitectureDetail(nodeId = state.architectureNode) {
+    const node = $('architectureDetail');
+    const detail = ARCHITECTURE_NODE_DETAILS[nodeId] || ARCHITECTURE_NODE_DETAILS.apk;
+    if (!node) return;
+    state.architectureNode = nodeId;
+    $$('.architecture-node').forEach(button => {
+      const active = button.dataset.architectureNode === nodeId;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    node.innerHTML = `<span class="eyebrow">${escapeHtml(detail.eyebrow)}</span><h3>${escapeHtml(detail.title)}</h3><p>${escapeHtml(detail.summary)}</p><div class="architecture-detail-block"><strong>Responsabilidades</strong><ul>${detail.responsibilities.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div><div class="architecture-risk-grid"><div><span>Risco principal</span><p>${escapeHtml(detail.risk)}</p></div><div><span>Proteção</span><p>${escapeHtml(detail.protection)}</p></div></div>`;
   }
 
   function renderArchitecture() {
@@ -814,6 +942,7 @@
       ['Segredo', 'service_role somente no Proxy'],
       ['Estado instantâneo', 'heap, uptime e in-flight por instância'],
     ]);
+    renderArchitectureDetail(state.architectureNode);
   }
 
   function drawerFocusableElements() {
@@ -1043,7 +1172,9 @@
     });
     $('exportJsonButton').addEventListener('click', () => exportEvents('json'));
     $('exportCsvButton').addEventListener('click', () => exportEvents('csv'));
-    $('copyBenchmarkCommand').addEventListener('click', () => copyText(state.benchmark?.command || 'node --expose-gc scripts/benchmark-scraping-engines.js --quick', 'Comando do benchmark copiado.'));
+    $('copyBenchmarkCommand').addEventListener('click', () => copyText(state.benchmark?.command || 'npm run benchmark:scraping', 'Comando do benchmark copiado.'));
+    $$('#benchmarkScenarioTabs [data-benchmark-scenario]').forEach(button => button.addEventListener('click', () => setBenchmarkScenario(button.dataset.benchmarkScenario)));
+    $$('.architecture-node').forEach(button => button.addEventListener('click', () => renderArchitectureDetail(button.dataset.architectureNode)));
     $('rawDetails').addEventListener('toggle', () => { if ($('rawDetails').open) renderRawSnapshot(); });
     $('copySnapshotButton').addEventListener('click', () => state.data && copyText(JSON.stringify(state.data, null, 2), 'Snapshot copiado.'));
     $('pollInterval').addEventListener('change', () => {

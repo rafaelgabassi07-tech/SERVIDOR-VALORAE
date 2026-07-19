@@ -17,6 +17,22 @@ importers:
       undici:
         specifier: ^7.28.0
         version: 7.28.0
+    devDependencies:
+      css-select:
+        specifier: ^5.2.2
+        version: 5.2.2
+      domutils:
+        specifier: ^3.2.2
+        version: 3.2.2
+      htmlparser2:
+        specifier: ^10.1.0
+        version: 10.1.0
+      parse5:
+        specifier: ^7.3.0
+        version: 7.3.0
+      parse5-htmlparser2-tree-adapter:
+        specifier: ^7.1.0
+        version: 7.1.0
     optionalDependencies:
       playwright-core:
         specifier: ^1.61.1

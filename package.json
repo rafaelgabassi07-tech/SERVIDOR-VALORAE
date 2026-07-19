@@ -13,7 +13,8 @@
     "audit:version": "node scripts/audit-version-consistency.js && node scripts/audit-version.js",
     "verify": "npm run build && npm run check:syntax && npm test && npm run audit:version",
     "test:cross-stack": "node scripts/run-cross-stack-tests.js",
-    "benchmark:cold-start": "node scripts/benchmark-cold-start.js"
+    "benchmark:cold-start": "node scripts/benchmark-cold-start.js",
+    "benchmark:scraping": "node --expose-gc scripts/benchmark-scraping-engines.js --quick"
   },
   "engines": {
     "node": "24.x"
@@ -47,5 +48,12 @@
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"
+  },
+  "devDependencies": {
+    "css-select": "^5.2.2",
+    "domutils": "^3.2.2",
+    "htmlparser2": "^10.1.0",
+    "parse5": "^7.3.0",
+    "parse5-htmlparser2-tree-adapter": "^7.1.0"
   }
 }

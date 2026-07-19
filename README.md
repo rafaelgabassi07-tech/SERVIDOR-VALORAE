@@ -1,3 +1,14 @@
+# Manutenção v355 — patrimônio, checklist FII e logotipos
+
+Checkpoint 386 pareado ao APK v529 / Checkpoint 121. O histórico de carteira diferencia valoração completa e parcial, o ponto atual não usa custo médio como cotação, o checklist FII foi normalizado para oito critérios e FIIs deixaram de consultar ou expor logotipos.
+
+- `/api/v1/asset/logo` encerra em `NOT_APPLICABLE`/204 para FIIs sem acesso externo;
+- ações e units continuam elegíveis a logos oficiais;
+- histórico informa cobertura e tickers sem cotação;
+- checklist direto e calculado é reconciliado por ID/rótulo canônico;
+- nenhuma migração SQL é necessária;
+- relatório: `docs/CHECKPOINT386_PORTFOLIO_MODAL_INTEGRITY_V355_2026_07_18.md`.
+
 # VALORAE Proxy 21.12.382 — Checkpoint 382 / v350
 
 ## Release atual — 21.12.382 / v350 (2026-07-17)

@@ -90,6 +90,10 @@ try {
   assert.ok(remoteRows.length >= 2, 'histórico remoto parcial deve continuar utilizável');
   assert.deepEqual(remoteRows.slice(0, 3).map(row => row.totalValue), [200, 220, 250]);
   assert.ok(remoteRows.every(row => row.partialValuation === true));
+  assert.ok(remoteRows.every(row => row.completeValuation === false));
+  assert.ok(remoteRows.every(row => row.valuationCoveragePercent === 50));
+  assert.ok(remoteRows.every(row => row.expectedValuationPositions === 2));
+  assert.ok(remoteRows.every(row => row.realValuationPositions === 1));
   assert.ok(remoteRows.every(row => row.unavailableValuationTickers.includes('MISS3')));
   assert.equal(history.fallbackUsed, false, 'carry contábil de uma componente não é curva sintética da carteira');
   assert.equal(history.partialValuationUsed, true);

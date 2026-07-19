@@ -15,13 +15,13 @@ assert.doesNotThrow(() => new vm.Script(worker, { filename: 'service-worker.js' 
 
 const ids = [...index.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(new Set(ids).size, ids.length, 'o monitor não pode conter IDs HTML duplicados');
-assert.match(index, /content="valorae-monitor-proxy-brand-v354"/);
+assert.match(index, /content="valorae-monitor-proxy-experience-v356"/);
 assert.match(index, /id="appDrawer"[^>]*role="dialog"[^>]*aria-modal="true"[^>]*inert/);
 assert.match(index, /id="monitorMain"[^>]*aria-busy="false"/);
 assert.match(index, /id="pauseButton"[^>]*aria-pressed="false"/);
 assert.match(index, /class="pause-glyph"/);
 assert.match(index, /class="play-glyph"/);
-assert.match(index, /id="drawerReleaseLabel">Core v350 · UI v354</);
+assert.match(index, /id="drawerReleaseLabel">Core v350 · UI v356</);
 assert.match(index, /id="feedCount"[^>]*role="status"[^>]*aria-live="polite"/);
 assert.match(index, /id="trafficChart"[^>]*role="img"/);
 assert.match(index, /id="apiBaseInput"[^>]*autocomplete="url"[^>]*spellcheck="false"/);
@@ -49,7 +49,7 @@ assert.match(runtime, /document\.execCommand\('copy'\)/);
 assert.match(css, /\.metric-item\{[^}]*border:1px solid var\(--line\)/);
 assert.match(css, /\.feed-pane,\.event-detail\{[^}]*background:var\(--raised\)/);
 assert.match(css, /\.benchmark-table tbody\{display:grid;gap:9px\}/, 'benchmark mobile deve preservar todas as métricas em cartões');
-assert.match(css, /\.architecture-flow\{grid-template-columns:1fr\}/);
+assert.match(css, /\.architecture-lane,\.architecture-lane:first-child\{grid-template-columns:1fr/);
 assert.match(css, /@media\(max-width:760px\)/);
 assert.match(css, /@media\(max-width:430px\)/);
 assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);

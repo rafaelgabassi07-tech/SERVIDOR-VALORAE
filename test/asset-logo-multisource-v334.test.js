@@ -96,7 +96,7 @@ try {
   clearCache();
   clearOfficialAssetLogoCache();
 
-  for (const ticker of ['VALE3', 'ITUB4', 'BBAS3', 'WEGE3', 'HGLG11', 'KNRI11']) {
+  for (const ticker of ['VALE3', 'ITUB4', 'BBAS3', 'WEGE3']) {
     const logo = await fetchOfficialAssetLogo(ticker, { cache: false, timeoutMs: 3200 });
     assert.equal(logo?.ticker, ticker);
     assert.equal(logo?.contentType, 'image/png');
@@ -116,13 +116,21 @@ try {
   assert.equal(routeLogo.getHeader('Content-Type'), 'image/png');
   assert.equal(Buffer.isBuffer(routeLogo.body), true);
 
+  const callsBeforeFii = calls.length;
+  const directFiiLogo = await fetchOfficialAssetLogo('HGLG11', { cache: false, timeoutMs: 3200 });
+  assert.equal(directFiiLogo, null);
   const headLogo = await invoke('/api/v1/asset/logo?ticker=HGLG11&cache=false&v=5', 'HEAD');
-  assert.equal(headLogo.statusCode, 200);
+  assert.equal(headLogo.statusCode, 204);
   assert.equal(headLogo.body, '');
   assert.equal(headLogo.getHeader('X-Valorae-Logo-Ticker'), 'HGLG11');
+  assert.equal(headLogo.getHeader('X-Valorae-Logo-Status'), 'NOT_APPLICABLE');
+  const fiiJson = await invoke('/api/v1/asset/logo?ticker=HGLG11&format=json&cache=false&v=5');
+  assert.equal(fiiJson.statusCode, 200);
+  assert.equal(JSON.parse(fiiJson.body).status, 'NOT_APPLICABLE');
+  assert.equal(calls.length, callsBeforeFii, 'FII não deve iniciar qualquer busca externa de logotipo');
 
   assert.equal(calls.some(url => url.includes('investidor10.com.br/acoes/vale3/')), true);
-  assert.equal(calls.some(url => url.includes('investidor10.com.br/fiis/hglg11/')), true);
+  assert.equal(calls.some(url => url.includes('investidor10.com.br/fiis/hglg11/')), false);
   console.log('asset-logo-multisource-v335 fallback ok');
 } finally {
   globalThis.fetch = originalFetch;

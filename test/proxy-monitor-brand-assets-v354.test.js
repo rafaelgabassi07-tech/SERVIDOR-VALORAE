@@ -38,7 +38,7 @@ for (const asset of expectedAssets) {
 
 assert.deepEqual(manifest.icons.map((icon) => icon.sizes), ['192x192', '512x512', '1024x1024']);
 assert.ok(manifest.icons.every((icon) => icon.src.startsWith('/assets/valorae-icon-')));
-assert.match(index, /valorae-monitor-proxy-brand-v354/);
-assert.match(index, /Core v350 · UI v354/);
+assert.match(index, /valorae-monitor-proxy-experience-v356/);
+assert.match(index, /Core v350 · UI v356/);
 
-console.log('proxy-monitor-brand-assets-v354 ok');
+console.log('proxy-monitor-brand-assets-v356 ok');

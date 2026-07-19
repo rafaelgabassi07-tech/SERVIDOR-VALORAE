@@ -29,8 +29,14 @@ const checklist = _test.ensureFiiBuyHoldChecklist({
     ]
   },
   dividendCharts: {
-    averageDy5y: 8.45,
-    events: [{ dataCom: '2021-01-01' }]
+    events: [{ dataCom: '2021-01-01' }],
+    yieldSeriesByFrequency: {
+      monthly: Array.from({ length: 24 }, (_, index) => ({
+        period: `${2024 + Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, '0')}`,
+        value: 9.2,
+        yieldPercent: 9.2
+      }))
+    }
   }
 });
 
@@ -42,6 +48,8 @@ assert.equal(checklist.unknown, 1);
 assert.equal(checklist.items.find(item => item.id === 'financial_vacancy_below_10').status, 'UNKNOWN');
 assert.equal(checklist.diagnostics.portfolioIndependent, true);
 assert.equal(checklist.diagnostics.derivation, 'calculated_by_valorae_from_investidor10_metrics');
-assert.ok(checklist.subtitle.includes('sem depender da carteira'));
+assert.ok(checklist.subtitle.includes('métricas reais'));
+assert.equal(checklist.diagnostics.hasAverageDy24m, true);
+assert.equal(checklist.diagnostics.averageDy24mSampleCount, 24);
 
 console.log('fii-modal-checklist-independent-v214 ok');
