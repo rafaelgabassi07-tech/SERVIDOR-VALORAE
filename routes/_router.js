@@ -662,7 +662,9 @@ function legacyAssetTimeoutPayload(payload = {}, routeDeadlineMs = 8_500) {
 async function assetLogoHandler(req, res, payload = {}) {
   const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query || '');
   if (!ticker) return sendJson(req, res, { ok: false, status: 'ERROR', error: 'Informe ticker ou symbol.', endpoint: 'asset/logo' }, { status: 400, cacheControl: 'no-store' });
-  const assetClass = classifyTicker(ticker);
+  const explicitAssetType = String(payload.assetType || payload.type || payload.assetClass || '').toUpperCase();
+  const inferredAssetClass = classifyTicker(ticker);
+  const assetClass = /(?:^|\b)(?:FII|FIAGRO|FI[ _-]?INFRA)(?:\b|$)/.test(explicitAssetType) ? 'FII' : inferredAssetClass;
   if (assetClass === 'FII') {
     const notApplicable = {
       ok: true,
@@ -1170,4 +1172,4 @@ export function routeManifest() {
   ].sort() };
 }
 
-export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetPayload, comparisonTickers, buildComparisonPayload, contractIdentity };
+export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetPayload, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity };

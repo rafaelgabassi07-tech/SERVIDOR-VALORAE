@@ -76,12 +76,9 @@ try {
     { ticker: 'VALE3', quantity: 2, averagePrice: 60, currentPrice: 0, firstPurchaseAt: Math.floor(Date.UTC(2025, 0, 1) / 1000) }
   ], { range: '1Y', interval: '1mo', timeoutMs: 400 });
   const partialCurrent = partialCurrentHistory.series.find(row => row.source === 'currentPricePartial');
-  assert.ok(partialCurrent, 'cotação atual ausente deve produzir ponto explicitamente parcial');
-  assert.equal(partialCurrent.totalValue, 400, 'custo médio do ativo sem cotação não pode entrar no patrimônio atual');
-  assert.equal(partialCurrent.completeValuation, false);
-  assert.equal(partialCurrent.partialValuation, true);
-  assert.equal(partialCurrent.valuationCoveragePercent, 50);
-  assert.deepEqual(partialCurrent.unavailableValuationTickers, ['VALE3']);
+  assert.equal(partialCurrent, undefined, 'valoração atual incompleta deve ser omitida, não exibida como patrimônio parcial');
+  assert.ok(partialCurrentHistory.series.every(row => row.completeValuation === true), 'somente pontos completos podem chegar ao APK');
+  assert.ok(partialCurrentHistory.series.every(row => !row.unavailableValuationTickers?.includes('VALE3')), 'nenhum custo da posição sem cotação pode contaminar a série');
 } finally {
   clearCache();
   globalThis.fetch = originalFetch;

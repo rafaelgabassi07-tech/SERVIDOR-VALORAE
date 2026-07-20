@@ -87,17 +87,11 @@ try {
     { ticker: 'MISS3', quantity: 2, averagePrice: 50, currentPrice: 55, firstPurchaseAt: Math.floor(Date.UTC(2025, 10, 1) / 1000) }
   ], { range: '1Y', interval: '1mo', timeoutMs: 300, maxConcurrency: 2 });
   const remoteRows = history.series.filter(row => row.source !== 'currentPrice');
-  assert.ok(remoteRows.length >= 2, 'histórico remoto parcial deve continuar utilizável');
-  assert.deepEqual(remoteRows.slice(0, 3).map(row => row.totalValue), [200, 220, 250]);
-  assert.ok(remoteRows.every(row => row.partialValuation === true));
-  assert.ok(remoteRows.every(row => row.completeValuation === false));
-  assert.ok(remoteRows.every(row => row.valuationCoveragePercent === 50));
-  assert.ok(remoteRows.every(row => row.expectedValuationPositions === 2));
-  assert.ok(remoteRows.every(row => row.realValuationPositions === 1));
-  assert.ok(remoteRows.every(row => row.unavailableValuationTickers.includes('MISS3')));
-  assert.equal(history.fallbackUsed, false, 'carry contábil de uma componente não é curva sintética da carteira');
-  assert.equal(history.partialValuationUsed, true);
-  assert.deepEqual(history.partialValuationTickers, ['MISS3']);
+  assert.equal(remoteRows.length, 0, 'histórico remoto com cobertura parcial não pode ser exibido como patrimônio real');
+  assert.ok(history.series.every(row => row.completeValuation === true));
+  assert.equal(history.fallbackUsed, false, 'custo contábil não pode criar curva sintética da carteira');
+  assert.equal(history.partialValuationUsed, false, 'pontos parciais são descartados antes da resposta ao APK');
+  assert.deepEqual(history.partialValuationTickers, []);
 
   clearCache();
   // O gráfico Retorno deve buscar índices na janela exibida, não em MAX/10y por causa
