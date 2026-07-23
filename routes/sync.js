@@ -4,13 +4,24 @@ import { formatBrDate } from '../lib/core/dates.js';
 import { beginRoute, getInput } from '../lib/http/route.js';
 import { ValoraeEngine } from '../lib/Valorae-engine.js';
 import { normalizeTicker } from '../lib/core/tickers.js';
+import {
+  TRANSACTION_PAGE_LIMIT_MAX,
+  applyOperationToPosition,
+  assertCursorMatchesState,
+  classifyCorporateOperation,
+  decodeRevisionCursor,
+  encodeRevisionCursor,
+  normalizeClientTxId,
+  stableDividendEventKey,
+} from '../lib/sync/financial-integrity.js';
 
 const SNAPSHOT_TABLE = process.env.VALORAE_SUPABASE_SNAPSHOT_TABLE || 'valorae_user_snapshots';
 const CLIENTS_TABLE = process.env.VALORAE_SUPABASE_CLIENTS_TABLE || 'valorae_sync_clients';
 const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'valorae_transactions';
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
 const BACKUPS_TABLE = process.env.VALORAE_SUPABASE_BACKUPS_TABLE || process.env.VALORAE_SUPABASE_BACKUP_TABLE || 'valorae_sync_backups';
-const CORE_VERSION = '21.12.201-general-full-regression-audit-v171';
+const SYNC_STATE_TABLE = process.env.VALORAE_SUPABASE_SYNC_STATE_TABLE || 'valorae_sync_user_state';
+const CORE_VERSION = '21.12.391-analysis-change-monitor-v359';
 // Compat lineage: 21.12.151-cloud-primary-supabase-v88.
 
 const SNAPSHOT_FULL_SELECT = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
@@ -24,6 +35,7 @@ const SYNC_CAPABILITIES = Object.freeze([
   'auth_check',
   'register_client',
   'upsert_snapshot',
+  'get_sync_state',
   'get_snapshot',
   'upsert_snapshots',
   'get_snapshots',
@@ -32,7 +44,6 @@ const SYNC_CAPABILITIES = Object.freeze([
   'get_transactions',
   'upsert_dividend_events',
   'get_dividend_events',
-  'upsert_sync_backup',
   'get_sync_backups',
   'delete_user_data',
 ]);
@@ -97,16 +108,36 @@ function hasValidAdminToken(req) {
 }
 
 async function parseJsonBody(req) {
-  if (req.body && typeof req.body === 'object') return req.body;
-  if (typeof req.body === 'string' && req.body.trim()) {
-    try { return JSON.parse(req.body); } catch { return {}; }
+  const maxBytes = Math.min(Math.max(Number(process.env.VALORAE_SYNC_MAX_BODY_BYTES || 1_048_576), 16_384), 5_242_880);
+  const invalid = (message, code = 'INVALID_JSON_BODY', status = 400) => {
+    const err = new Error(message);
+    err.code = code;
+    err.status = status;
+    return err;
+  };
+  if (req.body && typeof req.body === 'object') {
+    const bytes = Buffer.byteLength(JSON.stringify(req.body), 'utf8');
+    if (bytes > maxBytes) throw invalid('Payload de sincronização excede o limite permitido.', 'SYNC_PAYLOAD_TOO_LARGE', 413);
+    return req.body;
+  }
+  if (typeof req.body === 'string') {
+    const text = req.body.trim();
+    if (!text) return {};
+    if (Buffer.byteLength(text, 'utf8') > maxBytes) throw invalid('Payload de sincronização excede o limite permitido.', 'SYNC_PAYLOAD_TOO_LARGE', 413);
+    try { return JSON.parse(text); } catch { throw invalid('Corpo JSON inválido.'); }
   }
   if (!req || typeof req.on !== 'function') return {};
   const chunks = [];
-  for await (const chunk of req) chunks.push(Buffer.from(chunk));
+  let total = 0;
+  for await (const chunk of req) {
+    const bytes = Buffer.from(chunk);
+    total += bytes.length;
+    if (total > maxBytes) throw invalid('Payload de sincronização excede o limite permitido.', 'SYNC_PAYLOAD_TOO_LARGE', 413);
+    chunks.push(bytes);
+  }
   const text = Buffer.concat(chunks).toString('utf8').trim();
   if (!text) return {};
-  try { return JSON.parse(text); } catch { return {}; }
+  try { return JSON.parse(text); } catch { throw invalid('Corpo JSON inválido.'); }
 }
 
 function safeText(value, max = 160) {
@@ -159,18 +190,7 @@ function clientSecretHash(userId, clientSecret) {
 }
 
 function eventKey(userId, ev = {}) {
-  const raw = [
-    userId,
-    normalizeSingleTransactionSymbol(ev.ticker || ev.symbol || ''),
-    ev.paymentDate || ev.payment_date || '',
-    ev.dateCom || ev.date_com || '',
-    ev.inferredComDate || ev.inferred_com_date || ev.estimatedComDate || '',
-    ev.exDate || ev.ex_date || ev.dateEx || '',
-    ev.eligibilityDateSource || ev.eligibility_date_source || ev.dateComSource || '',
-    ev.valuePerShare || ev.value_per_share || ev.value || '',
-    ev.status || '',
-  ].join('|');
-  return crypto.createHash('sha256').update(raw).digest('hex');
+  return stableDividendEventKey(userId, ev);
 }
 
 function isLocalDividendProjection(ev = {}) {
@@ -196,24 +216,19 @@ function hasUsableDividendEvent(ev = {}) {
   return Boolean(ticker) && Boolean(dateCom || inferredComDate || exDate || paymentDate) && (Number.isFinite(value) && value > 0 || Number.isFinite(amount) && amount > 0);
 }
 
-async function purgeLocalDividendPredictions(userId) {
-  const encodedUser = encodeURIComponent(userId);
-  await Promise.all([
-    supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodedUser}&source=ilike.*local*`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }).catch(() => null),
-    supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodedUser}&status=ilike.*local*`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }).catch(() => null),
-    supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodedUser}&source=ilike.*estimativa*`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }).catch(() => null),
-    supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodedUser}&status=ilike.*previs*`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }).catch(() => null),
-  ]);
+function isValidSyncIdentity(value) {
+  const userId = safeText(value, 160);
+  return /^valorae-[a-z0-9-]{20,}$/i.test(userId) || /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId);
 }
 
-function safeClientCredentials(input = {}, req, { requireSecret = true } = {}) {
-  const userId = safeText(input.user_id || input.userId || header(req, 'x-valorae-user-id'), 160);
+function safeClientCredentials(input = {}, req, { requireSecret = true, forcedUserId = '' } = {}) {
+  const userId = safeText(forcedUserId || input.user_id || input.userId || header(req, 'x-valorae-user-id'), 160);
   const deviceId = safeText(input.device_id || input.deviceId || header(req, 'x-valorae-device-id'), 160);
   const clientSecret = safeText(input.client_secret || input.clientSecret || header(req, 'x-valorae-client-secret'), 240);
   const appVersion = safeText(input.app_version || input.appVersion || header(req, 'x-valorae-app-version'), 40);
   const source = safeText(input.source || input.client_kind || header(req, 'x-valorae-client-kind') || 'apk-android', 80);
 
-  if (!userId || !/^valorae-[a-z0-9-]{20,}$/i.test(userId)) {
+  if (!userId || !isValidSyncIdentity(userId)) {
     const err = new Error('Identidade VALORAE inválida ou ausente. Entre na Conta VALORAE ou atualize o APK.');
     err.status = 400;
     err.code = 'INVALID_SYNC_IDENTITY';
@@ -317,49 +332,93 @@ async function supabaseFetch(path, init = {}) {
 }
 
 
+function syncCursorSecret() {
+  const cfg = getSupabaseConfig();
+  return String(
+    process.env.VALORAE_SYNC_CURSOR_SECRET ||
+    process.env.VALORAE_SUPABASE_SYNC_TOKEN ||
+    cfg.key ||
+    ''
+  ).trim();
+}
+
+function normalizeSyncState(value = {}) {
+  const raw = Array.isArray(value) ? (value[0] || {}) : value;
+  const state = raw?.state || raw?.result || raw || {};
+  return {
+    revision: Math.max(0, Number(state.revision) || 0),
+    deletionGeneration: Math.max(0, Number(state.deletion_generation ?? state.deletionGeneration) || 0),
+    tombstone: Boolean(state.tombstone),
+    deletedAt: state.deleted_at || state.deletedAt || null,
+    updatedAt: state.updated_at || state.updatedAt || null,
+  };
+}
+
+async function callSyncRpc(name, args = {}) {
+  try {
+    return await supabaseFetch(`/rest/v1/rpc/${name}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(args),
+    });
+  } catch (err) {
+    const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`;
+    if (/SYNC_(?:REVISION_CONFLICT|STATE_REQUIRED|TOMBSTONE_ACTIVE|STALE_AFTER_DELETE)/.test(text)) {
+      err.status = 409;
+      err.code = text.match(/SYNC_(?:REVISION_CONFLICT|STATE_REQUIRED|TOMBSTONE_ACTIVE|STALE_AFTER_DELETE)/)?.[0] || 'SYNC_CONFLICT';
+    } else if (err?.code === 'PGRST202' || /Could not find the function|schema cache/i.test(text)) {
+      err.status = 503;
+      err.code = 'SYNC_RPC_MIGRATION_REQUIRED';
+      err.message = 'Migração Supabase 006_valorae_financial_sync_integrity_v358.sql não aplicada.';
+    }
+    throw err;
+  }
+}
+
+async function getSyncState(userId) {
+  const result = await callSyncRpc('valorae_sync_get_state', { p_user_id: userId });
+  return normalizeSyncState(result);
+}
+
+function expectedSyncState(input = {}) {
+  const source = input.sync_state || input.syncState || input.state || input;
+  const hasRevision = source.expected_revision != null || source.expectedRevision != null || source.revision != null;
+  const hasGeneration = source.expected_deletion_generation != null || source.expectedDeletionGeneration != null || source.deletion_generation != null || source.deletionGeneration != null;
+  const hasTombstone = source.expected_tombstone != null || source.expectedTombstone != null || source.tombstone != null;
+  if (!hasRevision || !hasGeneration || !hasTombstone) {
+    const err = new Error('A operação exige revisão, geração de exclusão e tombstone observados antes da escrita.');
+    err.status = 409;
+    err.code = 'SYNC_STATE_REQUIRED';
+    throw err;
+  }
+  return {
+    revision: Math.max(0, Number(source.expected_revision ?? source.expectedRevision ?? source.revision) || 0),
+    deletionGeneration: Math.max(0, Number(source.expected_deletion_generation ?? source.expectedDeletionGeneration ?? source.deletion_generation ?? source.deletionGeneration) || 0),
+    tombstone: Boolean(source.expected_tombstone ?? source.expectedTombstone ?? source.tombstone),
+    clearTombstone: Boolean(source.clear_tombstone ?? source.clearTombstone),
+    actionCreatedAt: normalizePostgrestTimestamp(source.action_created_at ?? source.actionCreatedAt ?? input.action_created_at ?? input.actionCreatedAt ?? input.createdAt ?? null),
+  };
+}
+
+function mutationRpcArgs(userId, input, rows, extra = {}) {
+  const expected = expectedSyncState(input);
+  return {
+    p_user_id: userId,
+    p_rows: rows,
+    p_expected_revision: expected.revision,
+    p_expected_deletion_generation: expected.deletionGeneration,
+    p_expected_tombstone: expected.tombstone,
+    p_action_created_at: expected.actionCreatedAt,
+    p_clear_tombstone: expected.clearTombstone,
+    ...extra,
+  };
+}
+
+
 function isSnapshotCacheColumnMissingError(err) {
   const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`.toLowerCase();
   return err?.code === 'PGRST204' && SNAPSHOT_CACHE_COLUMNS.some((column) => text.includes(column.toLowerCase())) ||
     SNAPSHOT_CACHE_COLUMNS.some((column) => text.includes(`'${column.toLowerCase()}' column`) || text.includes(`\"${column.toLowerCase()}\" column`));
-}
-
-function legacySnapshotRow(row = {}) {
-  return {
-    user_id: row.user_id,
-    domain: row.domain,
-    snapshot_key: row.snapshot_key,
-    payload: row.payload ?? {},
-    updated_at: row.updated_at || nowIso(),
-  };
-}
-
-function legacySnapshotRows(rows = []) {
-  return rows.map((row) => legacySnapshotRow(row));
-}
-
-async function postSnapshotRows(rows) {
-  const payload = Array.isArray(rows) ? rows : [rows];
-  try {
-    await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?on_conflict=user_id,domain,snapshot_key`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify(rows),
-    });
-    return { schemaMode: 'full', degraded: false };
-  } catch (err) {
-    if (!isSnapshotCacheColumnMissingError(err)) throw err;
-    await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?on_conflict=user_id,domain,snapshot_key`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify(Array.isArray(rows) ? legacySnapshotRows(payload) : legacySnapshotRow(rows)),
-    });
-    return {
-      schemaMode: 'legacy_snapshot_columns',
-      degraded: true,
-      warning: SNAPSHOT_LEGACY_COMPAT_MESSAGE,
-      missingColumns: SNAPSHOT_CACHE_COLUMNS,
-    };
-  }
 }
 
 async function fetchSnapshotRowsWithCompat(queryBuilder) {
@@ -456,6 +515,7 @@ async function supabaseDiagnostics() {
     probeSupabaseTable(TRANSACTIONS_TABLE, 'transactions'),
     probeSupabaseTable(DIVIDENDS_TABLE, 'dividends'),
     probeSupabaseTable(BACKUPS_TABLE, 'backups'),
+    probeSupabaseTable(SYNC_STATE_TABLE, 'sync_state'),
   ]);
   const failed = probes.filter((p) => !p.ok);
   const snapshotSchemaMissing = snapshotSchema.missingColumns || [];
@@ -544,14 +604,30 @@ async function checkSupabaseAuth(req) {
 
 
 async function registerClient(input, req) {
-  const client = safeClientCredentials(input, req, { requireSecret: true });
+  const admin = hasValidAdminToken(req);
+  const supabaseUser = admin ? null : await verifySupabaseBearer(req).catch(() => null);
+  const requestedUserId = safeText(input.user_id || input.userId || '', 160);
+  const authenticatedUserId = supabaseUser?.id || (admin ? requestedUserId : '');
+  if (!authenticatedUserId) {
+    const err = new Error('O registro do dispositivo exige uma sessão Supabase válida ou token administrativo.');
+    err.status = 401;
+    err.code = 'REGISTER_AUTH_REQUIRED';
+    throw err;
+  }
+  if (supabaseUser?.id && requestedUserId && requestedUserId !== supabaseUser.id) {
+    const err = new Error('A identidade solicitada não corresponde à sessão autenticada.');
+    err.status = 403;
+    err.code = 'SYNC_USER_MISMATCH';
+    throw err;
+  }
+  const client = safeClientCredentials(input, req, { requireSecret: true, forcedUserId: authenticatedUserId });
   const row = {
     user_id: client.userId,
     device_id: client.deviceId,
     client_secret_hash: clientSecretHash(client.userId, client.clientSecret),
     app_version: client.appVersion,
     source: client.source,
-    schema_version: 2,
+    schema_version: 3,
     revoked: false,
     last_seen_at: nowIso(),
   };
@@ -565,7 +641,7 @@ async function registerClient(input, req) {
   });
   return {
     ok: true,
-    authMode: 'device_client',
+    authMode: supabaseUser?.id ? 'supabase_auth' : 'admin_token',
     client: { user_id: client.userId, device_id: client.deviceId, registered: true },
   };
 }
@@ -614,49 +690,35 @@ async function verifyClient(req, input = {}) {
 }
 
 async function upsertSnapshot(record, auth) {
-  const forcedUserId = auth.mode === 'device_client' || auth.mode === 'supabase_auth' ? auth.userId : '';
-  const row = safeRecord(record, forcedUserId);
-  if (auth.userId && row.user_id !== auth.userId) {
-    const err = new Error('user_id do registro não combina com a identidade autenticada.');
-    err.status = 403;
-    err.code = 'SYNC_USER_MISMATCH';
-    throw err;
-  }
-  const compatibility = await postSnapshotRows(row);
-  const backup = await mirrorSyncBackup(row.user_id, 'snapshot', row.payload, { domain: row.domain, snapshot_key: row.snapshot_key, source: row.source || 'apk-snapshot' });
+  const userId = auth.userId;
+  const row = safeRecord(record, userId);
+  const result = await callSyncRpc('valorae_sync_upsert_snapshots', mutationRpcArgs(userId, record, [row], {
+    p_backup: { snapshots: [{ domain: row.domain, snapshot_key: row.snapshot_key, payload: row.payload }] },
+  }));
+  const state = normalizeSyncState(result);
   return {
     ok: true,
-    backupMirrored: backup.ok,
+    count: Number(result?.count || 1),
+    backupMirrored: true,
     record: { user_id: row.user_id, domain: row.domain, snapshot_key: row.snapshot_key, updated_at: row.updated_at },
-    schemaMode: compatibility.schemaMode,
-    degraded: compatibility.degraded,
-    warning: compatibility.warning,
-    missingColumns: compatibility.missingColumns,
+    syncState: state,
   };
 }
 
 async function upsertSnapshots(input, auth) {
-  const forcedUserId = auth.mode === 'device_client' || auth.mode === 'supabase_auth' ? auth.userId : '';
+  const userId = auth.userId;
   const arr = Array.isArray(input.snapshots) ? input.snapshots : Array.isArray(input.records) ? input.records : [];
-  const rows = arr.map((record) => safeRecord(record, forcedUserId));
-  if (!rows.length) return { ok: true, count: 0, message: 'Nenhum snapshot para salvar.' };
-  if (auth.userId && rows.some((row) => row.user_id !== auth.userId)) {
-    const err = new Error('Um ou mais snapshots não combinam com a identidade autenticada.');
-    err.status = 403;
-    err.code = 'SYNC_USER_MISMATCH';
-    throw err;
-  }
-  const compatibility = await postSnapshotRows(rows);
-  const backup = await mirrorSyncBackup(forcedUserId || rows[0]?.user_id, 'snapshots_batch', { snapshots: rows.map((row) => ({ domain: row.domain, snapshot_key: row.snapshot_key, payload: row.payload })) }, { source: 'apk-snapshots-batch', count: rows.length });
+  const rows = arr.map((record) => safeRecord(record, userId));
+  if (!rows.length) return { ok: true, count: 0, message: 'Nenhum snapshot para salvar.', syncState: await getSyncState(userId) };
+  const result = await callSyncRpc('valorae_sync_upsert_snapshots', mutationRpcArgs(userId, input, rows, {
+    p_backup: { snapshots: rows.map((row) => ({ domain: row.domain, snapshot_key: row.snapshot_key, payload: row.payload })) },
+  }));
   return {
     ok: true,
-    count: rows.length,
-    backupMirrored: backup.ok,
+    count: Number(result?.count || rows.length),
+    backupMirrored: true,
     snapshots: rows.map(snapshotToClient),
-    schemaMode: compatibility.schemaMode,
-    degraded: compatibility.degraded,
-    warning: compatibility.warning,
-    missingColumns: compatibility.missingColumns,
+    syncState: normalizeSyncState(result),
   };
 }
 
@@ -670,6 +732,13 @@ async function getSnapshot(input, auth) {
     const err = new Error('Informe userId, domain e snapshotKey.');
     err.status = 400;
     err.code = 'INVALID_SYNC_QUERY';
+    throw err;
+  }
+  const state = await getSyncState(userId);
+  if (state.tombstone) {
+    const err = new Error('Snapshot indisponível porque a carteira foi excluída.');
+    err.status = 404;
+    err.code = 'SNAPSHOT_NOT_FOUND';
     throw err;
   }
   const queryBuilder = (select) => `user_id=eq.${encodeURIComponent(userId)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=eq.${encodeURIComponent(snapshotKey)}&select=${select}&order=updated_at.desc&limit=1`;
@@ -693,6 +762,7 @@ async function getSnapshot(input, auth) {
     degraded: compatibility.degraded,
     warning: compatibility.warning,
     missingColumns: compatibility.missingColumns,
+    syncState: state,
   };
 }
 
@@ -700,6 +770,8 @@ async function getSnapshots(input, auth) {
   const userId = auth.mode === 'device_client' || auth.mode === 'supabase_auth'
     ? auth.userId
     : safeText(input.userId || input.user_id || auth.userId || '', 160);
+  const state = await getSyncState(userId);
+  if (state.tombstone) return { ok: true, count: 0, requested: 0, snapshots: [], syncState: state };
   const domain = normalizeDomain(input.domain);
   const keysInput = Array.isArray(input.keys) ? input.keys : String(input.keys || input.snapshot_keys || input.snapshotKeys || '').split(',');
   const keys = keysInput.map((key) => normalizeSnapshotKey(key)).filter(Boolean).slice(0, 60);
@@ -723,6 +795,7 @@ async function getSnapshots(input, auth) {
     degraded: compatibility.degraded,
     warning: compatibility.warning,
     missingColumns: compatibility.missingColumns,
+    syncState: state,
   };
 }
 
@@ -745,13 +818,17 @@ function transactionTimestamp(value) {
 function transactionRow(userId, tx = {}, options = {}) {
   const ticker = normalizeTransactionSymbols([tx.ticker || tx.symbol || ''])[0] || '';
   const date = normalizeTransactionDate(tx.date || tx.transaction_date || tx.transactionDate || tx.imported_at || tx.importedAt || '');
-  const operation = safeText(tx.operation || tx.side || (tx.isSell || tx.is_sell ? 'VENDA' : 'COMPRA'), 40).toUpperCase();
-  const quantity = Number(tx.quantity || 0);
+  const quantity = Math.abs(Number(tx.quantity || 0));
   const price = Number(tx.price ?? tx.purchasePrice ?? tx.purchase_price ?? 0);
   const grossValue = Number(tx.grossValue ?? tx.gross_value ?? (Number.isFinite(quantity) && Number.isFinite(price) ? quantity * price : 0));
-  const rawId = safeText(tx.client_tx_id || tx.clientTxId || tx.id || `${ticker}-${date}-${operation}-${quantity}-${price}-${grossValue}`, 160);
-  const clientTxId = rawId || crypto.randomUUID();
-  const assetType = safeText(tx.assetType || tx.asset_type || tx.type || '', 40);
+  const operation = classifyCorporateOperation(
+    tx.operation || tx.side || tx.type || tx.tipo || (tx.isSell || tx.is_sell ? 'VENDA' : 'COMPRA'),
+    { isSell: Boolean(tx.isSell || tx.is_sell), quantity: Number(tx.quantity || 0) },
+  );
+  const operationLabel = safeText(tx.operation || tx.side || operation.code, 80).toUpperCase();
+  const fallbackSeed = [userId, ticker, date, operation.code, quantity, price, grossValue, tx.source || ''].join('|');
+  const clientTxId = normalizeClientTxId(tx.client_tx_id || tx.clientTxId || tx.id || '', fallbackSeed);
+  const assetType = safeText(tx.assetType || tx.asset_type || '', 40);
   const transactionTime = transactionTimestamp(date);
   const transactionDateValue = options.dateMode === 'iso'
     ? new Date(transactionTime).toISOString()
@@ -765,23 +842,33 @@ function transactionRow(userId, tx = {}, options = {}) {
     purchase_price: Number.isFinite(price) ? price : 0,
     transaction_date: transactionDateValue,
     asset_type: assetType,
-    is_sell: operation.includes('VENDA') || operation === 'V',
+    is_sell: operation.reducesPosition,
     broker: safeText(tx.broker || '', 120),
     sector: safeText(tx.sector || '', 120),
     notes: safeText(tx.notes || '', 1000),
     payload: {
       ...tx,
       date,
-      operation,
+      operation: operationLabel,
+      operationCode: operation.code,
+      operation_code: operation.code,
+      quantityEffect: operation.quantityEffect,
+      quantity_effect: operation.quantityEffect,
+      costEffect: operation.costEffect,
+      cost_effect: operation.costEffect,
       symbol: ticker,
+      ticker,
       assetType,
       asset_type: assetType,
+      quantity: Number.isFinite(quantity) ? quantity : 0,
       price: Number.isFinite(price) ? price : 0,
       grossValue: Number.isFinite(grossValue) ? grossValue : 0,
       gross_value: Number.isFinite(grossValue) ? grossValue : 0,
       source: tx.source || 'B3',
       importedAt: Number(tx.importedAt ?? tx.imported_at ?? Date.now()),
       imported_at: Number(tx.importedAt ?? tx.imported_at ?? Date.now()),
+      clientTxId,
+      client_tx_id: clientTxId,
     },
     updated_at: nowIso(),
   };
@@ -804,7 +891,7 @@ function dedupeTransactionRowsByClientId(rows = []) {
   const seen = new Set();
   const output = [];
   for (const row of rows) {
-    const key = safeText(row?.client_tx_id || '', 160);
+    const key = normalizeClientTxId(row?.client_tx_id || '');
     if (key) {
       if (seen.has(key)) continue;
       seen.add(key);
@@ -814,174 +901,90 @@ function dedupeTransactionRowsByClientId(rows = []) {
   return output;
 }
 
-function postgrestIn(values = []) {
-  return values.map((value) => encodeURIComponent(value)).join(',');
-}
-
-function postgrestTextIn(values = []) {
-  return values
-    .map((value) => String(value || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"'))
-    .map((value) => encodeURIComponent(`"${value}"`))
-    .join(',');
-}
-
-function isTransactionDateColumnError(err) {
-  const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`.toLowerCase();
-  return text.includes('date/time field value out of range') ||
-    text.includes('invalid input syntax for type timestamp') ||
-    text.includes('invalid input syntax for type timestamp with time zone') ||
-    text.includes('invalid input syntax for type bigint') && text.includes('transaction_date');
-}
-
-function isTransactionConflictTargetError(err) {
-  const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`.toLowerCase();
-  return err?.code === '42P10' ||
-    text.includes('no unique or exclusion constraint') ||
-    text.includes('on conflict') && text.includes('constraint') ||
-    text.includes('there is no unique') && text.includes('client_tx_id');
-}
-
-async function deleteTransactionRowsByClientIds(userId, clientTxIds = []) {
-  const ids = [...new Set(clientTxIds.map((id) => safeText(id, 160)).filter(Boolean))].slice(0, 250);
-  if (!userId || !ids.length) return 0;
-  await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?user_id=eq.${encodeURIComponent(userId)}&client_tx_id=in.(${postgrestTextIn(ids)})`, {
-    method: 'DELETE',
-    headers: { prefer: 'return=minimal' },
-  });
-  return ids.length;
-}
-
-async function postTransactionRowsRaw(rows, { conflict = 'user_id,client_tx_id' } = {}) {
-  const conflictQuery = conflict ? `?on_conflict=${conflict}` : '';
-  const headers = conflict
-    ? { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' }
-    : { 'content-type': 'application/json', prefer: 'return=minimal' };
-  await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}${conflictQuery}`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(rows),
-  });
-}
-
-async function postTransactionRows(rows, { conflict = 'user_id,client_tx_id', allowPlainInsertFallback = false, scopeAlreadyCleared = false } = {}) {
-  if (!rows.length) return { mode: 'bigint' };
-  let rowsToWrite = rows;
-  let mode = 'bigint';
-  let dateWarning = '';
-
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    try {
-      await postTransactionRowsRaw(rowsToWrite, { conflict });
-      return { mode, conflictMode: 'upsert', warning: dateWarning || undefined };
-    } catch (err) {
-      if (isTransactionDateColumnError(err) && mode !== 'iso') {
-        rowsToWrite = rows.map((row) => ({
-          ...row,
-          transaction_date: normalizePostgrestTimestamp(row.transaction_date, { allowNull: false }),
-          payload: { ...(row.payload || {}), transactionDateMode: 'iso' },
-        }));
-        mode = 'iso';
-        dateWarning = 'transaction_date salvo em ISO por compatibilidade com schema Supabase legado.';
-        continue;
-      }
-      if (allowPlainInsertFallback && isTransactionConflictTargetError(err)) {
-        if (!scopeAlreadyCleared) {
-          await deleteTransactionRowsByClientIds(rowsToWrite[0]?.user_id || '', rowsToWrite.map((row) => row.client_tx_id));
-        }
-        try {
-          await postTransactionRowsRaw(rowsToWrite, { conflict: '' });
-        } catch (plainErr) {
-          if (!isTransactionDateColumnError(plainErr) || mode === 'iso') throw plainErr;
-          rowsToWrite = rows.map((row) => ({
-            ...row,
-            transaction_date: normalizePostgrestTimestamp(row.transaction_date, { allowNull: false }),
-            payload: { ...(row.payload || {}), transactionDateMode: 'iso' },
-          }));
-          mode = 'iso';
-          dateWarning = 'transaction_date salvo em ISO por compatibilidade com schema Supabase legado.';
-          await postTransactionRowsRaw(rowsToWrite, { conflict: '' });
-        }
-        return {
-          mode,
-          conflictMode: 'plain_insert_after_delete',
-          warning: [dateWarning, 'Histórico salvo em modo compatível porque a tabela não aceitou on_conflict por client_tx_id.']
-            .filter(Boolean)
-            .join(' '),
-        };
-      }
-      throw err;
-    }
-  }
-
-  return { mode, conflictMode: 'upsert', warning: dateWarning || undefined };
-}
-
 async function upsertTransactions(input, auth) {
   const userId = auth.userId;
   const arr = Array.isArray(input.transactions) ? input.transactions : [];
-  const rows = dedupeTransactionRowsByClientId(arr.map((tx) => transactionRow(userId, tx)).filter((r) => r.ticker));
-  if (!rows.length) return { ok: true, count: 0, message: 'Nenhuma transação para salvar.' };
-  const write = await postTransactionRows(rows, { allowPlainInsertFallback: true });
-  const backup = await mirrorSyncBackup(userId, 'transactions', { transactions: rows.map((row) => row.payload || row) }, { source: 'apk-history', count: rows.length });
-  return { ok: true, count: rows.length, transactionDateMode: write.mode, conflictMode: write.conflictMode, warning: write.warning, backupMirrored: backup.ok, backupWarning: backup.warning };
+  const rows = dedupeTransactionRowsByClientId(arr.map((tx) => transactionRow(userId, tx, { dateMode: 'iso' })).filter((r) => r.ticker));
+  if (!rows.length) return { ok: true, count: 0, message: 'Nenhuma transação para salvar.', syncState: await getSyncState(userId) };
+  const result = await callSyncRpc('valorae_sync_upsert_transactions', mutationRpcArgs(userId, input, rows, {
+    p_backup: { transactions: rows.map((row) => row.payload || row) },
+  }));
+  return { ok: true, count: Number(result?.count || rows.length), backupMirrored: true, syncState: normalizeSyncState(result) };
 }
 
 async function replaceTransactionsForSymbols(input, auth) {
   const userId = auth.userId;
   const symbols = normalizeTransactionSymbols(input.symbols || input.tickers || input.symbol || input.ticker || []);
-  if (!userId || !symbols.length) return { ok: true, count: 0, deleted: 0, message: 'Nenhum ticker para substituir.' };
-
+  if (!userId || !symbols.length) return { ok: true, count: 0, deleted: 0, message: 'Nenhum ticker para substituir.', syncState: await getSyncState(userId) };
   const arr = Array.isArray(input.transactions) ? input.transactions : [];
   const rows = dedupeTransactionRowsByClientId(arr
-    .map((tx) => transactionRow(userId, tx))
+    .map((tx) => transactionRow(userId, tx, { dateMode: 'iso' }))
     .filter((r) => r.ticker && symbols.includes(r.ticker)));
-
-  await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?user_id=eq.${encodeURIComponent(userId)}&ticker=in.(${postgrestIn(symbols)})`, {
-    method: 'DELETE',
-    headers: { prefer: 'return=minimal' },
-  });
-
-  const write = rows.length ? await postTransactionRows(rows, { allowPlainInsertFallback: true, scopeAlreadyCleared: true }) : { mode: 'none' };
-  const backup = await mirrorSyncBackup(userId, 'transactions_replace', { symbols, transactions: rows.map((row) => row.payload || row) }, { source: 'apk-history-replace', count: rows.length, symbols: symbols.join(',') });
-
+  const result = await callSyncRpc('valorae_sync_replace_transactions', mutationRpcArgs(userId, input, rows, {
+    p_symbols: symbols,
+    p_reason: safeText(input.reason || 'replace_transactions_for_symbols', 120),
+    p_backup: { symbols, transactions: rows.map((row) => row.payload || row) },
+  }));
   return {
-    backupMirrored: backup.ok,
-    backupWarning: backup.warning,
     ok: true,
-    count: rows.length,
-    transactionDateMode: write.mode,
-    conflictMode: write.conflictMode,
-    warning: write.warning,
+    count: Number(result?.count || 0),
+    deleted: Number(result?.deleted || 0),
     deletedScopeSymbols: symbols.length,
     symbols,
-    message: rows.length
-      ? `Histórico remoto substituído para ${symbols.length} ticker(s).`
-      : `Histórico remoto limpo para ${symbols.length} ticker(s).`,
+    backupMirrored: true,
+    syncState: normalizeSyncState(result),
+    message: rows.length ? `Histórico remoto substituído para ${symbols.length} ticker(s).` : `Histórico remoto limpo para ${symbols.length} ticker(s).`,
   };
 }
 
 async function getTransactions(input, auth) {
   const userId = auth.userId || safeText(input.userId || input.user_id || '', 160);
-  const q = `user_id=eq.${encodeURIComponent(userId)}&select=client_tx_id,ticker,name,quantity,purchase_price,transaction_date,asset_type,is_sell,broker,sector,notes,payload,updated_at&order=transaction_date.desc`;
+  const state = await getSyncState(userId);
+  const limit = Math.min(Math.max(Number(input.limit || 250), 1), TRANSACTION_PAGE_LIMIT_MAX);
+  const token = safeText(input.cursor || input.page_token || input.pageToken || '', 4096);
+  let offset = 0;
+  if (token) {
+    const cursor = decodeRevisionCursor(token, syncCursorSecret());
+    assertCursorMatchesState(cursor, state);
+    offset = cursor.offset;
+  } else if (Number(input.page || 1) > 1) {
+    const err = new Error('Paginação por número de página não é segura. Use o cursor retornado pela página anterior.');
+    err.status = 400;
+    err.code = 'SYNC_CURSOR_REQUIRED';
+    throw err;
+  }
+  if (state.tombstone) {
+    return { ok: true, count: 0, transactions: [], has_more: false, next_cursor: null, syncState: state };
+  }
+  const q = `user_id=eq.${encodeURIComponent(userId)}&select=client_tx_id,ticker,name,quantity,purchase_price,transaction_date,asset_type,is_sell,broker,sector,notes,payload,updated_at&order=transaction_date.desc,client_tx_id.asc&limit=${limit + 1}&offset=${offset}`;
   const rows = await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?${q}`, { method: 'GET' });
-  const uniqueRows = dedupeTransactionRowsByClientId(Array.isArray(rows) ? rows : []);
+  const pageRows = (Array.isArray(rows) ? rows : []).slice(0, limit);
+  const hasMore = Array.isArray(rows) && rows.length > limit;
+  const uniqueRows = dedupeTransactionRowsByClientId(pageRows);
   const transactions = uniqueRows.map((r) => {
     const payload = r.payload || {};
-    const operation = safeText(payload.operation || (r.is_sell ? 'VENDA' : 'COMPRA'), 40).toUpperCase();
+    const classified = classifyCorporateOperation(payload.operationCode || payload.operation_code || payload.operation || (r.is_sell ? 'VENDA' : 'COMPRA'), { isSell: Boolean(r.is_sell), quantity: Number(r.quantity || 0) });
+    const operation = safeText(payload.operation || classified.code, 80).toUpperCase();
     const price = Number(payload.price ?? payload.purchasePrice ?? r.purchase_price ?? 0);
     const grossValue = Number(payload.grossValue ?? payload.gross_value ?? (Number(r.quantity || 0) * price));
     const transactionMillis = transactionTimestamp(r.transaction_date || payload.date || payload.transaction_date || payload.transactionDate || Date.now());
     const ticker = normalizeSingleTransactionSymbol(payload.symbol || r.ticker);
     return {
       ...payload,
-      id: Number(payload.id || r.client_tx_id || 0) || 0,
-      client_tx_id: r.client_tx_id,
-      clientTxId: r.client_tx_id,
+      id: Number(payload.id || 0) || 0,
+      client_tx_id: normalizeClientTxId(r.client_tx_id || payload.client_tx_id || payload.clientTxId || ''),
+      clientTxId: normalizeClientTxId(r.client_tx_id || payload.client_tx_id || payload.clientTxId || ''),
       symbol: ticker,
       ticker,
       name: r.name || ticker,
       operation,
-      quantity: Number(r.quantity || 0),
+      operationCode: classified.code,
+      operation_code: classified.code,
+      quantityEffect: classified.quantityEffect,
+      quantity_effect: classified.quantityEffect,
+      costEffect: classified.costEffect,
+      cost_effect: classified.costEffect,
+      quantity: Math.abs(Number(r.quantity || 0)),
       price,
       purchasePrice: price,
       grossValue,
@@ -990,8 +993,8 @@ async function getTransactions(input, auth) {
       dateDisplay: formatBrDate(payload.date || normalizeTransactionDate(r.transaction_date), ''),
       assetType: payload.assetType || payload.asset_type || r.asset_type || '',
       asset_type: payload.asset_type || payload.assetType || r.asset_type || '',
-      isSell: Boolean(r.is_sell),
-      is_sell: Boolean(r.is_sell),
+      isSell: classified.reducesPosition,
+      is_sell: classified.reducesPosition,
       broker: r.broker || payload.broker || '',
       sector: r.sector || payload.sector || '',
       notes: r.notes || payload.notes || '',
@@ -1000,7 +1003,18 @@ async function getTransactions(input, auth) {
       imported_at: Number(payload.imported_at ?? payload.importedAt ?? transactionMillis),
     };
   });
-  return { ok: true, count: transactions.length, transactions };
+  const nextCursor = hasMore ? encodeRevisionCursor({ offset: offset + pageRows.length, ...state }, syncCursorSecret()) : null;
+  return {
+    ok: true,
+    count: transactions.length,
+    transactions,
+    has_more: hasMore,
+    hasMore,
+    next_cursor: nextCursor,
+    nextCursor,
+    next_page_token: nextCursor,
+    syncState: state,
+  };
 }
 
 function dividendRow(userId, ev = {}) {
@@ -1037,23 +1051,27 @@ function dividendRow(userId, ev = {}) {
 async function upsertDividendEvents(input, auth) {
   const userId = auth.userId;
   const arr = Array.isArray(input.events) ? input.events : [];
-  await purgeLocalDividendPredictions(userId);
   const rows = arr
     .filter((ev) => !isLocalDividendProjection(ev) && hasUsableDividendEvent(ev))
     .map((ev) => dividendRow(userId, ev))
     .filter((r) => r.ticker);
-  if (!rows.length) return { ok: true, count: 0, message: 'Nenhum provento real para salvar. Previsões locais foram ignoradas.' };
-  await supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?on_conflict=user_id,event_key`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', prefer: 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify(rows),
-  });
-  const backup = await mirrorSyncBackup(userId, 'dividend_events', { events: rows.map((row) => row.payload || row) }, { source: 'apk-dividend-agenda', count: rows.length });
-  return { ok: true, count: rows.length, ignoredLocalProjections: Math.max(0, arr.length - rows.length), backupMirrored: backup.ok, backupWarning: backup.warning };
+  if (!rows.length) return { ok: true, count: 0, message: 'Nenhum provento real para salvar. Previsões locais foram ignoradas.', syncState: await getSyncState(userId) };
+  const result = await callSyncRpc('valorae_sync_upsert_dividends', mutationRpcArgs(userId, input, rows, {
+    p_backup: { events: rows.map((row) => row.payload || row) },
+  }));
+  return {
+    ok: true,
+    count: Number(result?.count || rows.length),
+    ignoredLocalProjections: Math.max(0, arr.length - rows.length),
+    backupMirrored: true,
+    syncState: normalizeSyncState(result),
+  };
 }
 
 async function getDividendEvents(input, auth) {
   const userId = auth.userId || safeText(input.userId || input.user_id || '', 160);
+  const state = await getSyncState(userId);
+  if (state.tombstone) return { ok: true, count: 0, events: [], syncState: state };
   const category = safeText(input.category || '', 24);
   const catFilter = category ? `&category=eq.${encodeURIComponent(category)}` : '';
   const q = `user_id=eq.${encodeURIComponent(userId)}${catFilter}&select=*&order=payment_date.asc`;
@@ -1075,72 +1093,20 @@ async function getDividendEvents(input, auth) {
     status: r.status,
     source: r.source,
   }));
-  return { ok: true, count: events.length, events };
-}
-
-function syncBackupRow(userId, kind, payload = {}, metadata = {}) {
-  const serializedPayload = payload == null ? {} : payload;
-  const size = Buffer.byteLength(JSON.stringify(serializedPayload), 'utf8');
-  return {
-    user_id: userId,
-    backup_kind: safeText(kind || 'sync_event', 80),
-    source: safeText(metadata.source || 'valorae-proxy', 120),
-    payload: serializedPayload,
-    payload_size_bytes: size,
-    metadata: metadata || {},
-    created_at: nowIso(),
-    updated_at: nowIso(),
-  };
-}
-
-function isBackupSchemaError(err) {
-  const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`.toLowerCase();
-  return err?.code === 'PGRST204' || text.includes('valorae_sync_backups') && (text.includes('column') || text.includes('schema cache'));
-}
-
-async function mirrorSyncBackup(userId, kind, payload = {}, metadata = {}) {
-  if (!userId) return { ok: false, skipped: true, reason: 'missing_user_id' };
-  const row = syncBackupRow(userId, kind, payload, metadata);
-  try {
-    await supabaseFetch(`/rest/v1/${BACKUPS_TABLE}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', prefer: 'return=minimal' },
-      body: JSON.stringify(row),
-    });
-    return { ok: true, table: BACKUPS_TABLE, mode: 'full' };
-  } catch (err) {
-    if (!isBackupSchemaError(err)) return { ok: false, table: BACKUPS_TABLE, warning: err.message || 'Falha ao espelhar backup.' };
-    // Compatibilidade com projetos que criaram uma tabela simples só com user_id/payload/created_at.
-    try {
-      await supabaseFetch(`/rest/v1/${BACKUPS_TABLE}`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', prefer: 'return=minimal' },
-        body: JSON.stringify({ user_id: userId, payload: row.payload, created_at: row.created_at }),
-      });
-      return { ok: true, table: BACKUPS_TABLE, mode: 'legacy' };
-    } catch (legacyErr) {
-      return { ok: false, table: BACKUPS_TABLE, warning: legacyErr.message || 'Falha ao espelhar backup legado.' };
-    }
-  }
-}
-
-async function upsertSyncBackup(input, auth) {
-  const userId = auth.userId;
-  const payload = input.payload || input.data || input.record || {};
-  const kind = input.backup_kind || input.kind || input.reason || 'manual_backup';
-  const backup = await mirrorSyncBackup(userId, kind, payload, { source: input.source || 'apk-manual-backup', reason: input.reason || kind });
-  return { ok: backup.ok, backup };
+  return { ok: true, count: events.length, events, syncState: state };
 }
 
 async function getSyncBackups(input, auth) {
   const userId = auth.userId || safeText(input.userId || input.user_id || '', 160);
+  const state = await getSyncState(userId);
+  if (state.tombstone) return { ok: true, count: 0, backups: [], syncState: state };
   const limit = Math.min(Math.max(Number(input.limit || 20), 1), 100);
   const q = `user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc&limit=${limit}`;
   const rows = await supabaseFetch(`/rest/v1/${BACKUPS_TABLE}?${q}`, { method: 'GET' });
-  return { ok: true, count: Array.isArray(rows) ? rows.length : 0, backups: Array.isArray(rows) ? rows : [] };
+  return { ok: true, count: Array.isArray(rows) ? rows.length : 0, backups: Array.isArray(rows) ? rows : [], syncState: state };
 }
 
-async function deleteUserData(auth) {
+async function deleteUserData(input, auth) {
   const userId = safeText(auth.userId || '', 160);
   if (!userId) {
     const err = new Error('user_id ausente para apagar dados.');
@@ -1148,19 +1114,35 @@ async function deleteUserData(auth) {
     err.code = 'INVALID_SYNC_IDENTITY';
     throw err;
   }
-  await Promise.all([
-    supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?user_id=eq.${encodeURIComponent(userId)}`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }),
-    supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?user_id=eq.${encodeURIComponent(userId)}`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }).catch(() => null),
-    supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodeURIComponent(userId)}`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }).catch(() => null),
+  const expected = expectedSyncState(input);
+  const result = await callSyncRpc('valorae_sync_delete_user_data', {
+    p_user_id: userId,
+    p_expected_revision: expected.revision,
+    p_expected_deletion_generation: expected.deletionGeneration,
+    p_expected_tombstone: expected.tombstone,
+    p_reason: safeText(input.reason || 'portfolio_cleared', 120),
+  });
+  const encodedUser = encodeURIComponent(userId);
+  const verification = await Promise.all([
+    supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?user_id=eq.${encodedUser}&select=user_id&limit=1`, { method: 'GET' }),
+    supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?user_id=eq.${encodedUser}&select=user_id&limit=1`, { method: 'GET' }),
+    supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodedUser}&select=user_id&limit=1`, { method: 'GET' }),
+    supabaseFetch(`/rest/v1/${BACKUPS_TABLE}?user_id=eq.${encodedUser}&select=user_id&limit=1`, { method: 'GET' }),
   ]);
+  if (verification.some((rows) => Array.isArray(rows) && rows.length > 0)) {
+    const err = new Error('A exclusão não foi confirmada em todas as tabelas da nuvem.');
+    err.status = 500;
+    err.code = 'SYNC_DELETE_VERIFICATION_FAILED';
+    throw err;
+  }
   if (auth.mode === 'device_client') {
-    await supabaseFetch(`/rest/v1/${CLIENTS_TABLE}?user_id=eq.${encodeURIComponent(userId)}`, {
+    await supabaseFetch(`/rest/v1/${CLIENTS_TABLE}?user_id=eq.${encodedUser}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json', prefer: 'return=minimal' },
       body: JSON.stringify({ revoked: true, last_seen_at: nowIso() }),
     });
   }
-  return { ok: true, deleted: true, user_id: userId };
+  return { ok: true, deleted: true, user_id: userId, syncState: normalizeSyncState(result), deletedCounts: result?.deleted_counts || {} };
 }
 
 export default async function handler(req, res) {
@@ -1177,11 +1159,11 @@ export default async function handler(req, res) {
 
   const cfg = getSupabaseConfig();
   const queryInput = getInput(req) || {};
-  const bodyInput = req.method === 'POST' || req.method === 'DELETE' ? await parseJsonBody(req) : {};
-  const input = { ...queryInput, ...bodyInput };
-  const action = String(input.action || req.query?.action || (req.method === 'GET' ? 'health' : 'upsert_snapshot')).trim().toLowerCase();
 
   try {
+    const bodyInput = req.method === 'POST' || req.method === 'DELETE' ? await parseJsonBody(req) : {};
+    const input = { ...queryInput, ...bodyInput };
+    const action = String(input.action || req.query?.action || (req.method === 'GET' ? 'health' : 'upsert_snapshot')).trim().toLowerCase();
     if (action === 'health') {
       return sendJson(req, res, {
         ok: true,
@@ -1200,6 +1182,7 @@ export default async function handler(req, res) {
           transactionsTable: TRANSACTIONS_TABLE,
           dividendsTable: DIVIDENDS_TABLE,
           backupsTable: BACKUPS_TABLE,
+          syncStateTable: SYNC_STATE_TABLE,
           cloudMode: 'cloud_primary_local_cache',
           authMode: 'supabase_email_password',
           legacyAdminTokenEnabled: Boolean(process.env.VALORAE_SUPABASE_SYNC_TOKEN),
@@ -1253,7 +1236,8 @@ export default async function handler(req, res) {
 
     const auth = await verifyClient(req, input);
     let result;
-    if (action === 'upsert_snapshot') result = await upsertSnapshot(input.record || input, auth);
+    if (action === 'get_sync_state') result = { ok: true, syncState: await getSyncState(auth.userId) };
+    else if (action === 'upsert_snapshot') result = await upsertSnapshot(input.record ? { ...input.record, sync_state: input.sync_state || input.syncState, action_created_at: input.action_created_at || input.actionCreatedAt || input.createdAt } : input, auth);
     else if (action === 'upsert_snapshots') result = await upsertSnapshots(input, auth);
     else if (action === 'get_snapshot') result = await getSnapshot(input, auth);
     else if (action === 'get_snapshots') result = await getSnapshots(input, auth);
@@ -1262,9 +1246,8 @@ export default async function handler(req, res) {
     else if (action === 'get_transactions') result = await getTransactions(input, auth);
     else if (action === 'upsert_dividend_events') result = await upsertDividendEvents(input, auth);
     else if (action === 'get_dividend_events') result = await getDividendEvents(input, auth);
-    else if (action === 'upsert_sync_backup') result = await upsertSyncBackup(input, auth);
     else if (action === 'get_sync_backups') result = await getSyncBackups(input, auth);
-    else if (action === 'delete_user_data') result = await deleteUserData(auth);
+    else if (action === 'delete_user_data') result = await deleteUserData(input, auth);
     else {
       return sendJson(req, res, {
         ok: false,

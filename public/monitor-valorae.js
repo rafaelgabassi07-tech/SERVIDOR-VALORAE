@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const RELEASE_PATCH = '21.12.382-quote-state-resilience-v350';
+  const RELEASE_PATCH = '21.12.391-analysis-change-monitor-v359';
   const STORAGE = {
     theme: 'valorae:monitor:theme',
     apiBase: 'valorae:monitor:apiBase',
@@ -282,7 +282,7 @@
       $('releaseLabel').textContent = compactRelease(fullRelease);
       $('releaseLabel').title = fullRelease;
     }
-    if ($('drawerReleaseLabel')) $('drawerReleaseLabel').textContent = `${compactRelease(fullRelease)} · UI v356`;
+    if ($('drawerReleaseLabel')) $('drawerReleaseLabel').textContent = `${compactRelease(fullRelease)} · UI v359`;
     if ($('instanceLabel')) $('instanceLabel').textContent = data?.instance?.id ? `instância ${compactId(data.instance.id, 8)}` : 'instância —';
     if ($('updatedLabel')) $('updatedLabel').textContent = state.error
       ? `falha: ${state.error}`

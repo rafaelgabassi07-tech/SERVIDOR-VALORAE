@@ -23,7 +23,7 @@ const contract = JSON.parse(fs.readFileSync(new URL('../contracts/checkpoint120/
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 assert.equal(contract.version, '2026.07.17-checkpoint120-v1');
 assert.equal(contract.invariants.existingResponseFieldsPreserved, true);
-assert.equal(pkg.valorae.releasePatch, '21.12.382-quote-state-resilience-v350');
+assert.equal(pkg.valorae.releasePatch, '21.12.391-analysis-change-monitor-v359');
 
 const fastEmpty = await buildAssetsPayload({ tickers: [], includeFundamentals: false });
 assert.equal(fastEmpty.fundamentalsSnapshot.status, 'SKIPPED');

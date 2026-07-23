@@ -12,7 +12,6 @@ import {
   resetStructuredDataMetricsForTests,
   runStructuredDataShadow,
 } from '../lib/scrape/structured-data-discovery.js';
-import { extractSelectors } from '../lib/scrape/selector-engine.js';
 import { _test as assetDetailsTest } from '../lib/sources/asset-details.js';
 import { sendJson } from '../lib/core/http.js';
 import { dispatchRoute, routeManifest } from '../routes/_router.js';
@@ -61,13 +60,11 @@ assert.equal(shadow.diagnostics.outputSource, 'legacy-preserved');
 assert.equal(shadow.diagnostics.comparison.gainedKeyCount, 2);
 assert.deepEqual(shadow.results, { price: [], ticker: [] });
 
-const selectorShadow = extractSelectors(html, selectors, { url: 'https://investidor10.com.br/acoes/petr4/' }, { url: 'https://investidor10.com.br/acoes/petr4/' });
-assert.equal(selectorShadow.structuredDataDiscovery.promoted, false);
-assert.deepEqual(selectorShadow.results.price, []);
 
 process.env.VALORAE_STRUCTURED_DATA_MODE = 'prefer-structured';
-const promoted = extractSelectors(html, selectors, { url: 'https://investidor10.com.br/acoes/petr4/' }, { url: 'https://investidor10.com.br/acoes/petr4/' });
-assert.equal(promoted.strategy, 'structured-data-promoted');
+const promoted = runStructuredDataShadow(html, selectors, { price: [], ticker: [] }, { url: 'https://investidor10.com.br/acoes/petr4/' });
+assert.equal(promoted.diagnostics.promoted, true);
+assert.equal(promoted.diagnostics.outputSource, 'structured-gap-fill');
 assert.deepEqual(promoted.results.price, [38.99]);
 assert.deepEqual(promoted.results.ticker, ['PETR4']);
 delete process.env.VALORAE_STRUCTURED_DATA_MODE;

@@ -25,6 +25,6 @@ if ([protocol, http, guard, assetService, universalModalService, portfolioServic
   assert.match(universalModalService, /requireSafeContractReplacement\("\/api\/v1\/asset\/modal", hasPreviousSnapshot\)/);
   assert.match(portfolioService, /requireSafeContractReplacement\("\/api\/v1\/portfolio\/history", hasPreviousSnapshot\)/);
   assert.match(runtime, /assetDetailCache/);
-  assert.match(build, /versionCode = (?:2607140[45]|2607150[1-8]|26071702)/);
+  assert.match(build, /versionCode = (?:2607140[45]|2607150[1-8]|26072302)/);
 }
 console.log('cross-stack-contract-baseline-v336 ok');

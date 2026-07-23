@@ -15,13 +15,13 @@ assert.doesNotThrow(() => new vm.Script(worker, { filename: 'service-worker.js' 
 
 const ids = [...index.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(new Set(ids).size, ids.length, 'o monitor não pode conter IDs HTML duplicados');
-assert.match(index, /content="valorae-monitor-proxy-experience-v356"/);
+assert.match(index, /content="valorae-monitor-gateway-experience-v359"/);
 assert.match(index, /id="appDrawer"[^>]*role="dialog"[^>]*aria-modal="true"[^>]*inert/);
 assert.match(index, /id="monitorMain"[^>]*aria-busy="false"/);
 assert.match(index, /id="pauseButton"[^>]*aria-pressed="false"/);
 assert.match(index, /class="pause-glyph"/);
 assert.match(index, /class="play-glyph"/);
-assert.match(index, /id="drawerReleaseLabel">Core v350 · UI v356</);
+assert.match(index, /id="drawerReleaseLabel">Core v359 · UI v359</);
 assert.match(index, /id="feedCount"[^>]*role="status"[^>]*aria-live="polite"/);
 assert.match(index, /id="trafficChart"[^>]*role="img"/);
 assert.match(index, /id="apiBaseInput"[^>]*autocomplete="url"[^>]*spellcheck="false"/);
@@ -61,7 +61,7 @@ for (const eventName of ['install', 'activate', 'fetch']) {
 }
 assert.match(worker, /url\.pathname\.startsWith\('\/api\/'\)/, 'service worker nunca deve armazenar respostas da API');
 assert.match(worker, /caches\.match\('\/server\.html'\)/);
-assert.equal(manifest.background_color, '#080808');
-assert.equal(manifest.theme_color, '#0C0C0D');
+assert.equal(manifest.background_color, '#070B0F');
+assert.equal(manifest.theme_color, '#091016');
 
 console.log('proxy-monitor-visual-audit-v353 ok');

@@ -15,7 +15,7 @@ if ([protocol, http, contract, catalog, build].every(Boolean)) {
   assert.ok(contract.includes(VALORAE_DYNAMIC_RENDER_VERSION));
   assert.ok(contract.includes(VALORAE_DYNAMIC_RENDER_POLICY));
   assert.ok(catalog.includes('/api/v1/contract/dynamic-render'));
-  assert.match(build, /versionCode = (?:2607150[4-8]|26071702)/);
+  assert.match(build, /versionCode = (?:2607150[4-8]|26072302)/);
 }
 const manifest = buildDynamicRenderManifest();
 assert.equal(manifest.safety.browserIsNeverMandatoryForFinancialContract, true);

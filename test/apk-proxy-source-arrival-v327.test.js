@@ -6,9 +6,9 @@ import { VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION } from '../lib/core/mobile-
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');
-assert.equal(pkg.valorae.publicVersion, '21.12.382');
-assert.equal(pkg.valorae.releasePatch, '21.12.382-quote-state-resilience-v350');
-assert.equal(metadata.apkVersion, '2026.07.17.02');
+assert.equal(pkg.valorae.publicVersion, '21.12.391');
+assert.equal(pkg.valorae.releasePatch, '21.12.391-analysis-change-monitor-v359');
+assert.equal(metadata.apkVersion, '2026.07.23.02');
 assert.match(metadata.contractVersion, /asset modal delivery v4/i);
 
 const delivery = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalDelivery.kt');
@@ -33,8 +33,8 @@ if ([delivery, parser, loader, quality, protocol, build].every(Boolean)) {
   assert.match(quality, /hasRealComparisonSeries/);
   assert.match(quality, /points\.size >= 2/);
   assert.match(protocol, /AssetModalDeliverySchemaVersion = "4"/);
-  assert.match(build, /versionCode = (?:2607140[45]|2607150[1-8]|26071702)/);
-  assert.match(build, /versionName = "2026\.07\.(?:14\.0[45]|15\.0[1-8]|16\.01|17\.0[12])"/);
+  assert.match(build, /versionCode = (?:2607140[45]|2607150[1-8]|26072302)/);
+  assert.match(build, /versionName = "2026\.07\.(?:14\.0[45]|15\.0[1-8]|16\.01|17\.0[12]|23\.0[12])"/);
 }
 
 const runtime = fs.readFileSync(new URL('../lib/analysis/asset-modal-runtime.js', import.meta.url), 'utf8');

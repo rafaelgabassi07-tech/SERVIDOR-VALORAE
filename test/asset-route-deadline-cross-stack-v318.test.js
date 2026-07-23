@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import assetHandler, { buildAssetRouteTimeoutPayload } from '../routes/asset.js';
+import { dispatchRoute } from '../routes/_router.js';
 import assetsHandler from '../routes/assets.js';
 import { withRouteDeadline } from '../lib/http/route.js';
 
@@ -43,28 +43,12 @@ const deadlineResult = await withRouteDeadline(
 assert.deepEqual(deadlineResult, { timeout: true });
 assert.ok(Date.now() - started < 250, 'deadline defensivo precisa responder sem aguardar trabalho pendurado');
 
-const timeoutPayload = buildAssetRouteTimeoutPayload({
-  ticker: 'PETR4',
-  type: 'Ação',
-  view: 'app',
-  routeDeadlineMs: 8500,
-  requestId: 'test',
-  profile: 'asset',
-});
-assert.equal(timeoutPayload.status, 'PARTIAL');
-assert.equal(timeoutPayload.retryable, true);
-assert.equal(timeoutPayload.appDataContract.canReplacePreviousSnapshot, false);
-assert.equal(timeoutPayload.appDataContract.preservePreviousSnapshot, true);
-
-const directSource = fs.readFileSync(new URL('../routes/asset.js', import.meta.url), 'utf8');
 const routerSource = fs.readFileSync(new URL('../routes/_router.js', import.meta.url), 'utf8');
 const assetsSource = fs.readFileSync(new URL('../routes/assets.js', import.meta.url), 'utf8');
 const crossStackHelperSource = fs.readFileSync(new URL('./helpers/cross-stack-apk.js', import.meta.url), 'utf8');
-assert.ok(directSource.includes('withRouteDeadline('), 'rota física asset precisa de deadline global');
 assert.ok(routerSource.includes('legacyAssetTimeoutPayload'), 'router consolidado precisa de fallback de timeout');
 assert.ok(routerSource.includes('() => buildAssetDetails(payload)'), 'buildAssetDetails legado precisa estar protegido pelo deadline');
-assert.ok(directSource.includes('input.routeDeadlineMs || input.deadlineMs || input.timeoutMs'), 'timeoutMs explícito também deve limitar a duração total da rota física');
-assert.ok(routerSource.includes('payload.routeDeadlineMs || payload.deadlineMs || payload.timeoutMs'), 'timeoutMs explícito também deve limitar a rota consolidada legada');
+assert.ok(routerSource.includes('payload.routeDeadlineMs || payload.deadlineMs || payload.timeoutMs'), 'timeoutMs explícito deve limitar a rota consolidada');
 assert.ok(crossStackHelperSource.includes('if (!explicitApkRoot() && !strictCrossStackMode()) return null'), 'suíte autônoma não pode ler checkout APK global/desatualizado por acidente');
 assert.ok(assetsSource.includes('batch.stats?.partial') && assetsSource.includes('(batch.errors || []).length'), 'batch parcial ou com erros não pode receber cache privado como resposta completa');
 
@@ -87,14 +71,14 @@ try {
   assert.ok(elapsed < 300, `modo operacional sem fontes deve falhar rápido; elapsed=${elapsed}ms`);
 
   const degradedAssetResponse = new MockRes();
-  await assetHandler(request({ ticker: 'PETR4', timeoutMs: '600' }, '/api/asset?ticker=PETR4'), degradedAssetResponse);
+  await dispatchRoute(request({ ticker: 'PETR4', timeoutMs: '600' }, '/api/v1/asset?ticker=PETR4&timeoutMs=600'), degradedAssetResponse);
   const degradedAssetBody = bodyOf(degradedAssetResponse);
   assert.equal(degradedAssetResponse.statusCode, 200);
   assert.equal(degradedAssetBody.appResponseIntegrity?.cacheSafe, false);
   assert.match(String(degradedAssetResponse.getHeader('cache-control') || ''), /^no-store/);
 
   const invalidResponse = new MockRes();
-  await assetHandler(request({}, '/api/asset'), invalidResponse);
+  await dispatchRoute(request({}, '/api/v1/asset'), invalidResponse);
   assert.equal(invalidResponse.statusCode, 400, 'validação do ticker deve permanecer anterior ao trabalho externo');
 } finally {
   if (previousDisableExternal === undefined) delete process.env.VALORAE_DISABLE_EXTERNAL;

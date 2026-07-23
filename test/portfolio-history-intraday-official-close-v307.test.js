@@ -22,12 +22,10 @@ try {
 
   assert.equal(result.ok, true);
   assert.equal(result.summary.lastValue, 1985.85);
-  assert.ok(result.series.some(point => point.liveAligned === true), 'a base intradiária deve ser alinhada ao total oficial');
-  const previous = result.series.at(-2).totalValue;
-  const last = result.series.at(-1).totalValue;
-  const tailGap = Math.abs(last - previous) / Math.max(last, previous);
-  assert.ok(tailGap < 0.02, `o fechamento não pode criar queda vertical artificial: gap=${tailGap}, series=${JSON.stringify(result.series)}`);
-  assert.ok(Math.max(...result.series.map(row => row.totalValue)) <= 1985.86, 'a série inteira deve usar a mesma base do fechamento oficial');
+  assert.ok(result.series.every(point => point.liveAligned !== true), 'a série histórica não pode ser reescalada pelo valor atual');
+  assert.deepEqual(result.series.map(point => point.totalValue), [1998, 2021, 1985.85]);
+  assert.equal(result.series.at(-1).source, 'currentPrice');
+  assert.equal(result.series.at(-1).totalValue, 1985.85);
 } finally {
   globalThis.fetch = originalFetch;
 }

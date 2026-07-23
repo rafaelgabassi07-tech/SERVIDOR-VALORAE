@@ -28,7 +28,7 @@ assert.match(router, /getNews\(payload\)/);
 assert.match(sync, /upsert_transactions/);
 assert.match(sync, /replace_transactions_for_symbols/);
 assert.match(sync, /get_transactions/);
-assert.match(read('routes/portfolio/transactions.js'), /portfolio-transactions/);
+assert.match(sync, /client_tx_id/);
 
 // Nenhum endpoint B3 paralelo foi introduzido no Proxy.
 assert.doesNotMatch(router, /\/b3\/import|\/import\/b3/);

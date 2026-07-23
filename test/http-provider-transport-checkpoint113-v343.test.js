@@ -96,8 +96,14 @@ try {
       assert.equal(response.status, 200);
       assert.deepEqual(await response.json(), { ok: true });
     }
-    assert.equal(sockets.size, 1, 'Pool com uma conexão deve reutilizar o mesmo socket HTTP keep-alive');
-    assert.equal(providerTransportStats().pools, 1);
+    if (manifest.guarantees.poolsPerOriginAndProvider) {
+      assert.equal(sockets.size, 1, 'Pool com uma conexão deve reutilizar o mesmo socket HTTP keep-alive');
+      assert.equal(providerTransportStats().pools, 1);
+    } else {
+      assert.ok(sockets.size >= 1, 'fetch nativo deve concluir as requisições quando undici não estiver instalado');
+      assert.equal(providerTransportStats().pools, 0);
+      assert.ok(providerTransportStats().providers.generic.legacyFallbacks >= 3);
+    }
   } finally {
     await resetProviderTransportForTests();
     await new Promise(resolve => server.close(resolve));
@@ -165,8 +171,13 @@ try {
   };
   const fallbackResponse = await providerFetch(yahooUrl);
   assert.equal(fallbackResponse.status, 200);
-  assert.equal(fallbackCalls, 2);
-  assert.equal(providerTransportStats().providers.yahoo.legacyFallbacks, 1);
+  if (manifest.guarantees.poolsPerOriginAndProvider) {
+    assert.equal(fallbackCalls, 2, 'dispatcher incompatível deve repetir via fetch legado');
+    assert.equal(providerTransportStats().providers.yahoo.legacyFallbacks, 1);
+  } else {
+    assert.equal(fallbackCalls, 1, 'sem undici o fetch nativo já é o transporte compatível');
+    assert.equal(providerTransportStats().providers.yahoo.legacyFallbacks, 1);
+  }
 
   // Rollback operacional não cria dispatcher nem altera a assinatura do fetch antigo.
   await resetProviderTransportForTests();

@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v350 com cotações resilientes, fallback multi-host e lotes rápidos, compatível com o APK v529.",
+  "description": "Proxy v359 com rastreamento de mudanças fundamentalistas, runtime sem caminhos obsoletos e monitor Gateway responsivo, pareado ao APK v531.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,10 +11,11 @@
     "check:syntax": "node scripts/check-syntax.js",
     "test": "node scripts/run-tests.js",
     "audit:version": "node scripts/audit-version-consistency.js && node scripts/audit-version.js",
-    "verify": "npm run build && npm run check:syntax && npm test && npm run audit:version",
+    "verify": "npm run build && npm run check:syntax && npm run audit:dead-code && npm test && npm run audit:version",
     "test:cross-stack": "node scripts/run-cross-stack-tests.js",
     "benchmark:cold-start": "node scripts/benchmark-cold-start.js",
-    "benchmark:scraping": "node --expose-gc scripts/benchmark-scraping-engines.js --quick"
+    "benchmark:scraping": "node --expose-gc scripts/benchmark-scraping-engines.js --quick",
+    "audit:dead-code": "node scripts/audit-runtime-reachability.js"
   },
   "engines": {
     "node": "24.x"
@@ -26,25 +27,25 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.382-quote-state-resilience-v350",
+    "releasePatch": "21.12.391-analysis-change-monitor-v359",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.382",
-    "checkpoint": "quote-state-resilience-v350",
-    "releaseLabel": "quote-state-resilience-v350"
+    "publicVersion": "21.12.391",
+    "checkpoint": "analysis-change-monitor-v359",
+    "releaseLabel": "analysis-change-monitor-v359"
   },
-  "releasePatch": "21.12.382-quote-state-resilience-v350",
+  "releasePatch": "21.12.391-analysis-change-monitor-v359",
   "config": {
-    "releasePatch": "21.12.382-quote-state-resilience-v350",
-    "publicVersion": "21.12.382",
-    "checkpoint": "quote-state-resilience-v350",
-    "releaseLabel": "quote-state-resilience-v350"
+    "releasePatch": "21.12.391-analysis-change-monitor-v359",
+    "publicVersion": "21.12.391",
+    "checkpoint": "analysis-change-monitor-v359",
+    "releaseLabel": "analysis-change-monitor-v359"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.382-quote-state-resilience-v350",
-    "publicVersion": "21.12.382",
-    "checkpoint": "quote-state-resilience-v350",
-    "releaseLabel": "quote-state-resilience-v350"
+    "releasePatch": "21.12.391-analysis-change-monitor-v359",
+    "publicVersion": "21.12.391",
+    "checkpoint": "analysis-change-monitor-v359",
+    "releaseLabel": "analysis-change-monitor-v359"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

@@ -1,15 +1,15 @@
 {
-  "name": "VALORAE Proxy Monitor",
-  "short_name": "VALORAE Proxy",
+  "name": "VALORAE Proxy Gateway",
+  "short_name": "VALORAE Gateway",
   "start_url": "/server.html#live",
   "display": "standalone",
-  "background_color": "#080808",
-  "theme_color": "#0C0C0D",
+  "background_color": "#070B0F",
+  "theme_color": "#091016",
   "id": "/server.html",
-  "description": "Monitor operacional do VALORAE Proxy com identidade própria, tráfego persistido, benchmark reproduzível e arquitetura explicada.",
+  "description": "Monitor operacional do VALORAE Proxy Gateway com tráfego ao vivo, saúde, benchmark e arquitetura observável.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.382",
+  "version": "21.12.391",
   "icons": [
     {
       "src": "/assets/valorae-icon-192.png",

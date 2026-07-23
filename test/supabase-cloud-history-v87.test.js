@@ -4,11 +4,12 @@ import path from 'node:path';
 
 const syncRoute = fs.readFileSync(path.join(process.cwd(), 'routes/sync.js'), 'utf8');
 
-assert.match(syncRoute, /21\.12\.151-cloud-primary-supabase-v88/);
-assert.match(syncRoute, /function isTransactionDateColumnError/);
-assert.match(syncRoute, /async function postTransactionRows/);
-assert.match(syncRoute, /transactionDateMode/);
+assert.match(syncRoute, /21\.12\.391-analysis-change-monitor-v359/);
+assert.match(syncRoute, /valorae_sync_upsert_transactions/);
+assert.match(syncRoute, /valorae_sync_replace_transactions/);
 assert.match(syncRoute, /get_transactions/);
 assert.match(syncRoute, /replace_transactions_for_symbols/);
+assert.doesNotMatch(syncRoute, /async function postTransactionRows/);
+assert.doesNotMatch(syncRoute, /function isTransactionDateColumnError/);
 
 console.log('Supabase cloud history v87 test OK.');

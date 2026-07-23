@@ -1,3 +1,39 @@
+# Release v359 — mudanças fundamentalistas e Monitor Gateway
+
+## Release atual — 21.12.391 / v359 (2026-07-23)
+
+O Proxy `21.12.391-analysis-change-monitor-v359` é pareado ao APK v531 (`2026.07.23.02`) e preserva o protocolo móvel `2026.07.10.10`.
+
+- o APK compara indicadores com o snapshot local anterior e usa histórico real como primeira referência;
+- nenhum delta é inventado quando faltam dois valores comparáveis;
+- caminhos de ranking e componentes sem consumidor foram removidos do runtime da Análise;
+- o monitor recebeu identidade Proxy Gateway, novo logotipo vetorial e contraste adaptativo;
+- a migração transacional `supabase/006_valorae_financial_sync_integrity_v358.sql` continua obrigatória.
+
+# Release v358 — integridade financeira e sincronização transacional
+
+O Proxy `21.12.390-financial-sync-integrity-v358` é pareado ao APK v530 (`2026.07.23.01`) e mantém o protocolo móvel `2026.07.10.10`.
+
+- patrimônio atual e histórico usam somente preços de mercado válidos;
+- ações corporativas seguem o mesmo contrato canônico do APK;
+- mutações de transações, snapshots e proventos usam RPCs atômicas;
+- exclusão é confirmada somente após verificação integral da nuvem;
+- revisão, geração de exclusão e tombstone impedem ressurreição de dados;
+- paginação usa cursor assinado e rejeita mistura de revisões;
+- a migração `supabase/006_valorae_financial_sync_integrity_v358.sql` é obrigatória.
+
+# Manutenção v358 — integridade financeira e sincronização transacional
+
+## Release atual — 21.12.390 / v358 (2026-07-23)
+
+- patrimônio de mercado usa somente cotações atuais ou históricas válidas;
+- amortização reduz custo fiscal sem remover cotas; grupamentos preservam o custo total;
+- substituição de transações, snapshots, dividendos e backups ocorre por RPC PostgreSQL revisionada;
+- exclusões usam tombstone e geração por usuário para impedir ressurreição entre dispositivos;
+- transações são paginadas em até 500 itens por cursor HMAC vinculado à revisão;
+- `client_tx_id` possui normalização canônica de 96 caracteres e proventos não usam status na identidade;
+- migração obrigatória: `supabase/006_valorae_financial_sync_integrity_v358.sql`.
+
 # Manutenção v355 — patrimônio, checklist FII e logotipos
 
 Checkpoint 386 pareado ao APK v529 / Checkpoint 121. O histórico de carteira diferencia valoração completa e parcial, o ponto atual não usa custo médio como cotação, o checklist FII foi normalizado para oito critérios e FIIs deixaram de consultar ou expor logotipos.

@@ -1,29 +1,31 @@
-/* VALORAE Monitor v356 — identidade visual exclusiva do Proxy aplicada em todas as superfícies. */
+/* VALORAE Monitor v359 — gateway operacional, contraste adaptativo e superfícies responsivas. */
 :root{
   color-scheme:dark;
-  --bg:#080808;
-  --header:#0c0c0d;
-  --surface:#101011;
-  --raised:#151516;
-  --surface-soft:#0d0d0e;
-  --hover:#1b1b1d;
-  --line:#2b2b2f;
-  --line-soft:#202024;
-  --text:#f5f3ee;
-  --muted:#aaa79f;
-  --faint:#77746d;
-  --accent:#e8b84f;
-  --accent-strong:#f2c662;
-  --accent-soft:#2a220f;
-  --success:#49c88b;
-  --success-soft:#10251d;
-  --warning:#e8b84f;
-  --warning-soft:#2a220f;
-  --danger:#ff7278;
-  --danger-soft:#2a1517;
-  --info:#8daaf8;
-  --info-soft:#151d35;
-  --header-height:68px;
+  --bg:#070b0f;
+  --header:rgba(9,14,19,.92);
+  --surface:#0c1319;
+  --raised:#101922;
+  --surface-soft:#091016;
+  --hover:#17232d;
+  --line:#26343e;
+  --line-soft:#1b2730;
+  --text:#f4f7f8;
+  --muted:#a9b6bd;
+  --faint:#71818b;
+  --accent:#54ddd5;
+  --accent-strong:#79ebe4;
+  --accent-soft:#0d2c2c;
+  --brand-gold:#ddb354;
+  --brand-gold-soft:#2e2513;
+  --success:#4fd49b;
+  --success-soft:#0e2820;
+  --warning:#e8b85a;
+  --warning-soft:#2e2412;
+  --danger:#ff7c88;
+  --danger-soft:#30171b;
+  --info:#7faaff;
+  --info-soft:#14213d;
+  --header-height:72px;
   --content-width:1460px;
   --drawer-width:336px;
   --radius-sm:8px;
@@ -35,28 +37,30 @@
 
 body[data-theme="light"]{
   color-scheme:light;
-  --bg:#f3f2ef;
-  --header:#fbfaf7;
-  --surface:#faf9f6;
+  --bg:#f3f7f8;
+  --header:rgba(251,253,253,.94);
+  --surface:#f7fafb;
   --raised:#ffffff;
-  --surface-soft:#f6f5f1;
-  --hover:#efeee9;
-  --line:#d9d7d0;
-  --line-soft:#e8e6df;
-  --text:#1d1c1a;
-  --muted:#63615b;
-  --faint:#88857d;
-  --accent:#855f08;
-  --accent-strong:#714f04;
-  --accent-soft:#fff0c2;
+  --surface-soft:#f1f6f7;
+  --hover:#eaf1f3;
+  --line:#cedbdf;
+  --line-soft:#e2eaed;
+  --text:#172127;
+  --muted:#53646d;
+  --faint:#788991;
+  --accent:#087d79;
+  --accent-strong:#056965;
+  --accent-soft:#dff5f3;
+  --brand-gold:#8b6614;
+  --brand-gold-soft:#fff2cd;
   --success:#08784a;
-  --success-soft:#e7f6ef;
-  --warning:#855f08;
-  --warning-soft:#fff0c2;
-  --danger:#b52932;
+  --success-soft:#e5f6ee;
+  --warning:#8a6410;
+  --warning-soft:#fff1c8;
+  --danger:#b52d39;
   --danger-soft:#fcebed;
-  --info:#3158b0;
-  --info-soft:#edf1fc;
+  --info:#315db4;
+  --info-soft:#edf2fc;
 }
 
 *{box-sizing:border-box}
@@ -598,3 +602,51 @@ input:focus,select:focus,.icon-button:focus-visible,.text-button:focus-visible,.
   .architecture-detail h3{font-size:20px}
 }
 .benchmark-scenario-tabs button:focus-visible,.architecture-node:focus-visible{border-color:var(--accent);outline:2px solid color-mix(in srgb,var(--accent) 38%,transparent);outline-offset:2px}
+
+/* v359 — linguagem visual do gateway: menos ornamento, melhor hierarquia e resposta tátil. */
+body{background:var(--bg)}
+body::before{
+  content:"";position:fixed;inset:var(--header-height) 0 auto;height:1px;z-index:39;pointer-events:none;
+  background:var(--accent);opacity:.28
+}
+.app-header{
+  background:var(--header)
+}
+.brand{min-width:210px;gap:12px}
+.brand img{width:44px;height:44px}
+.brand strong{font-size:13px;letter-spacing:.18em}
+.brand small{color:var(--accent);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.header-page{font-weight:760;color:var(--text)}
+.connection{background:color-mix(in srgb,var(--surface) 86%,transparent)}
+.connection.online i{animation:gatewayPulse 1.8s ease-in-out infinite}
+.monitor-main{padding-top:38px}
+.page-heading{align-items:center;padding-bottom:24px}
+.page-heading h1{font-size:clamp(28px,3vw,42px);font-weight:760;letter-spacing:-.04em}
+.eyebrow{color:var(--accent);letter-spacing:.18em}
+.instance-meta span{background:color-mix(in srgb,var(--surface) 88%,transparent);border-color:color-mix(in srgb,var(--line) 82%,transparent)}
+.metric-item{
+  position:relative;overflow:hidden;min-height:118px;padding:17px;
+  background:var(--raised);
+  transition:transform .18s ease,border-color .18s ease
+}
+.metric-item::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:var(--accent);opacity:.72}
+.metric-item:nth-child(3n)::before{background:var(--brand-gold)}
+.metric-item:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 38%,var(--line))}
+.metric-label{font-size:9px;letter-spacing:.13em}
+.metric-value{font-weight:730}
+.feed-pane,.event-detail{border-radius:20px}
+.event-row{transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.event-row:hover{transform:translateX(2px)}
+.icon-button:focus-visible,.text-button:focus-visible,.pause-button:focus-visible,.drawer-nav button:focus-visible,input:focus-visible,select:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px
+}
+.drawer-brand span{color:var(--accent);letter-spacing:.04em}
+.drawer-footer strong{color:var(--brand-gold)}
+::selection{background:color-mix(in srgb,var(--accent) 34%,transparent);color:var(--text)}
+@keyframes gatewayPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.78);opacity:.65}}
+@media (prefers-reduced-motion:reduce){.connection.online i{animation:none}.metric-item,.event-row{transition:none}.metric-item:hover,.event-row:hover{transform:none}}
+@media (max-width:760px){
+  .brand{min-width:0}.brand span{display:none}.header-page{display:none}.connection{margin-left:auto}
+  .monitor-main{padding-top:24px}.page-heading{align-items:flex-start}.page-heading h1{font-size:30px}
+  .metric-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.metric-item{min-height:104px}
+}

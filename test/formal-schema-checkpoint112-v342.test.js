@@ -18,52 +18,60 @@ const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.ur
 assert.equal(pkg.dependencies.ajv, '^8.20.0');
 assert.equal(formalSchemaMode(), 'guard-last-good');
 assert.equal(formalRequestSchemaMode(), 'shadow');
-assert.equal(VALORAE_FORMAL_SCHEMA_IMPLEMENTATION, 'ajv-8.20.0-strict-draft-2020-12');
+assert.equal(VALORAE_FORMAL_SCHEMA_IMPLEMENTATION, 'ajv-8.20.0-strict-draft-2020-12-optional-runtime');
+const validatorAvailable = buildFormalSchemaManifest().metrics.validatorAvailable;
 
-const validAnalysis = {
-  endpoint: 'analysis',
-  contract: 'AnalysisPageResponse',
-  ticker: 'PETR4',
-  sections: [{ id: 'summary', items: [] }],
-  sourceCoverage: [],
-  dataQuality: {},
-  summary: { readySections: 1 },
-  missingSignals: [],
-};
-const valid = validateFormalContractPayload('analysis', validAnalysis);
-assert.equal(valid.ok, true);
-assert.match(valid.schemaId, /analysis\.schema\.json$/);
+if (validatorAvailable) {
+  const validAnalysis = {
+    endpoint: 'analysis',
+    contract: 'AnalysisPageResponse',
+    ticker: 'PETR4',
+    sections: [{ id: 'summary', items: [] }],
+    sourceCoverage: [],
+    dataQuality: {},
+    summary: { readySections: 1 },
+    missingSignals: [],
+  };
+  const valid = validateFormalContractPayload('analysis', validAnalysis);
+  assert.equal(valid.ok, true);
+  assert.match(valid.schemaId, /analysis\.schema\.json$/);
 
-const invalidAnalysis = { ...validAnalysis, ticker: 1234 };
-const invalid = validateFormalContractPayload('analysis', invalidAnalysis);
-assert.equal(invalid.ok, false);
-assert.ok(invalid.errors.some(error => error.instancePath === '/ticker' && error.keyword === 'type'));
+  const invalidAnalysis = { ...validAnalysis, ticker: 1234 };
+  const invalid = validateFormalContractPayload('analysis', invalidAnalysis);
+  assert.equal(invalid.ok, false);
+  assert.ok(invalid.errors.some(error => error.instancePath === '/ticker' && error.keyword === 'type'));
 
-const invalidRequest = validateFormalRequestPayload('/analysis', { ticker: { bad: true } });
-assert.equal(invalidRequest.ok, false);
-assert.equal(invalidRequest.direction, 'request');
+  const invalidRequest = validateFormalRequestPayload('/analysis', { ticker: { bad: true } });
+  assert.equal(invalidRequest.ok, false);
+  assert.equal(invalidRequest.direction, 'request');
 
-clearContractContinuityStore();
-const stored = stabilizeContractPayload('analysis', 'PETR4::page', validAnalysis);
-assert.equal(stored.contractSchemaValidation.ok, true);
-assert.equal(stored.contractSchemaValidation.canReplacePrevious, true);
-const blocked = stabilizeContractPayload('analysis', 'PETR4::page', invalidAnalysis);
-assert.equal(blocked.ticker, 'PETR4', 'ticker inválido não pode substituir o último payload válido');
-assert.equal(blocked.contractSchemaValidation.ok, false);
-assert.equal(blocked.contractSchemaValidation.previousPreserved, true);
-assert.equal(blocked.contractSchemaValidation.canReplacePrevious, false);
-assert.equal(blocked.contractBaseline.status, 'FORMAL_SCHEMA_BLOCKED_USING_LAST_GOOD');
+  clearContractContinuityStore();
+  const stored = stabilizeContractPayload('analysis', 'PETR4::page', validAnalysis);
+  assert.equal(stored.contractSchemaValidation.ok, true);
+  assert.equal(stored.contractSchemaValidation.canReplacePrevious, true);
+  const blocked = stabilizeContractPayload('analysis', 'PETR4::page', invalidAnalysis);
+  assert.equal(blocked.ticker, 'PETR4', 'ticker inválido não pode substituir o último payload válido');
+  assert.equal(blocked.contractSchemaValidation.ok, false);
+  assert.equal(blocked.contractSchemaValidation.previousPreserved, true);
+  assert.equal(blocked.contractSchemaValidation.canReplacePrevious, false);
+  assert.equal(blocked.contractBaseline.status, 'FORMAL_SCHEMA_BLOCKED_USING_LAST_GOOD');
 
-clearContractContinuityStore();
-const firstInvalid = stabilizeContractPayload('asset', 'broken::first', {
-  ticker: 1234,
-  status: 'OK',
-  results: {},
-});
-assert.equal(firstInvalid.contractSchemaValidation.ok, false);
-assert.equal(firstInvalid.contractSchemaValidation.previousPreserved, false);
-assert.equal(firstInvalid.contractSchemaValidation.canReplacePrevious, false);
-assert.equal(firstInvalid.contractBaseline.status, 'FORMAL_SCHEMA_INVALID_NO_BASELINE');
+  clearContractContinuityStore();
+  const firstInvalid = stabilizeContractPayload('asset', 'broken::first', {
+    ticker: 1234,
+    status: 'OK',
+    results: {},
+  });
+  assert.equal(firstInvalid.contractSchemaValidation.ok, false);
+  assert.equal(firstInvalid.contractSchemaValidation.previousPreserved, false);
+  assert.equal(firstInvalid.contractSchemaValidation.canReplacePrevious, false);
+  assert.equal(firstInvalid.contractBaseline.status, 'FORMAL_SCHEMA_INVALID_NO_BASELINE');
+} else {
+  const unavailable = validateFormalContractPayload('analysis', { ticker: 1234 });
+  assert.equal(unavailable.ok, true);
+  assert.equal(unavailable.skipped, true);
+  assert.equal(unavailable.reason, 'validator-runtime-unavailable');
+}
 
 const manifest = buildFormalSchemaManifest();
 assert.equal(manifest.version, VALORAE_FORMAL_SCHEMA_VERSION);

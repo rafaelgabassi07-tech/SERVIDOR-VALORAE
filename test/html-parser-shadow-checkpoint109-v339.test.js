@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { sendJson } from '../lib/core/http.js';
 import { extractCustomSelectors } from '../lib/scrape/custom-selectors.js';
-import { extractSelectors } from '../lib/scrape/selector-engine.js';
 import {
   VALORAE_HTML_PARSER_IMPLEMENTATION,
   VALORAE_HTML_PARSER_SHADOW_POLICY,
@@ -10,7 +9,6 @@ import {
   buildHtmlParserShadowManifest,
   compareHtmlParserResults,
   extractStandardHtmlSelectors,
-  resetHtmlParserShadowMetricsForTests,
 } from '../lib/scrape/standard-html-parser.js';
 import { dispatchRoute, routeManifest } from '../routes/_router.js';
 import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
@@ -40,29 +38,20 @@ assert.equal(comparison.gainedKeyCount, 1);
 assert.equal(comparison.promotionSafe, true);
 assert.ok(comparison.standardCoverage.percent > comparison.legacyCoverage.percent);
 
-resetHtmlParserShadowMetricsForTests();
-delete process.env.VALORAE_STANDARD_HTML_PARSER_MODE;
-delete process.env.VALORAE_STANDARD_HTML_PARSER_ENABLED;
-const shadow = extractSelectors(malformedHtml, selectors, { maxSelectors: 10, maxPerSelector: 10 }, { url: 'https://investidor10.com.br/acoes/petr4/' });
+const directShadow = await import('../lib/scrape/standard-html-parser.js');
+process.env.VALORAE_STANDARD_HTML_PARSER_MODE = 'shadow';
+const shadow = directShadow.runHtmlParserShadow(malformedHtml, selectors, legacy.results, { url: 'https://investidor10.com.br/acoes/petr4/' });
 assert.deepEqual(shadow.results, legacy.results, 'modo sombra não pode alterar a saída financeira');
-assert.equal(shadow.strategy, 'css-lite');
-assert.equal(shadow.htmlParserShadow.ran, true);
-assert.equal(shadow.htmlParserShadow.promoted, false);
-assert.equal(shadow.htmlParserShadow.outputSource, 'legacy-preserved');
-assert.equal(shadow.htmlParserShadow.comparison.gainedKeyCount, 1);
+assert.equal(shadow.diagnostics.ran, true);
+assert.equal(shadow.diagnostics.promoted, false);
+assert.equal(shadow.diagnostics.outputSource, 'legacy-preserved');
+assert.equal(shadow.diagnostics.comparison.gainedKeyCount, 1);
 
 process.env.VALORAE_STANDARD_HTML_PARSER_MODE = 'prefer-standard';
-const promoted = extractSelectors(malformedHtml, selectors, { maxSelectors: 10, maxPerSelector: 10 }, { url: 'https://investidor10.com.br/acoes/petr4/' });
-assert.equal(promoted.strategy, 'standards-dom-promoted');
+const promoted = directShadow.runHtmlParserShadow(malformedHtml, selectors, legacy.results, { url: 'https://investidor10.com.br/acoes/petr4/' });
 assert.deepEqual(promoted.results.row, [['P/L', '8,42']]);
-assert.equal(promoted.htmlParserShadow.promoted, true);
+assert.equal(promoted.diagnostics.promoted, true);
 delete process.env.VALORAE_STANDARD_HTML_PARSER_MODE;
-
-const fast = extractSelectors('<h1>VALORAE</h1>', { title: 'h1' }, {}, {});
-assert.deepEqual(fast.results.title, ['VALORAE']);
-assert.equal(fast.strategy, 'single-pass');
-assert.equal(fast.htmlParserShadow.ran, false);
-assert.equal(fast.htmlParserShadow.reason, 'fast-path-preserved');
 
 const manifest = buildHtmlParserShadowManifest();
 assert.equal(manifest.version, VALORAE_HTML_PARSER_SHADOW_VERSION);

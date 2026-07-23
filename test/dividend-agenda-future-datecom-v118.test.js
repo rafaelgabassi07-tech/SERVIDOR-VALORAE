@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { parseInvestidor10DividendAgendaHtml } from '../lib/market/investidor10-dividend-agenda.js';
+import { parseAgendaHtml } from '../lib/sources/agenda-dividends.js';
 
 const html = `
   <html><body>
@@ -11,11 +11,11 @@ const html = `
   </body></html>
 `;
 
-const events = parseInvestidor10DividendAgendaHtml(html, { assetClass: 'FII' });
+const events = parseAgendaHtml(html, ['MXRF11']);
 const event = events.find(e => e.ticker === 'MXRF11');
 
 assert.ok(event, 'parser deve capturar evento anunciado com Data COM futura mesmo sem data de pagamento');
-assert.equal(event.dateCom, '15/07/2026');
+assert.equal(event.dateCom, '2026-07-15');
 assert.equal(event.paymentDate, '');
 assert.equal(event.announced, true);
 assert.equal(event.assetClass, 'FII');

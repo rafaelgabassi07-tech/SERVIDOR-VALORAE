@@ -1,51 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-labelledby="title desc">
-  <title id="title">VALORAE Proxy</title>
-  <desc id="desc">Símbolo exclusivo do VALORAE Proxy: um V integrado a um gateway de dados com rotas de rede.</desc>
-  <defs>
-    <linearGradient id="bg" x1="11" y1="8" x2="97" y2="100" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#18181B"/>
-      <stop offset="0.56" stop-color="#0C0C0E"/>
-      <stop offset="1" stop-color="#050506"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="16" y1="17" x2="92" y2="93" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFE59A"/>
-      <stop offset="0.3" stop-color="#F4C44E"/>
-      <stop offset="0.68" stop-color="#C58A1C"/>
-      <stop offset="1" stop-color="#FFDF82"/>
-    </linearGradient>
-    <linearGradient id="silver" x1="31" y1="61" x2="77" y2="82" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#B9BDC6"/>
-    </linearGradient>
-  </defs>
+  <title id="title">VALORAE Proxy Gateway</title>
+  <desc id="desc">Símbolo exclusivo do VALORAE Proxy Gateway / ponte de dados: Rotas do Proxy convergem, são validadas e seguem para a aplicação.</desc>
+  <rect x="3" y="3" width="102" height="102" rx="27" fill="#0A1117" stroke="#263640" stroke-width="2"/>
 
-  <rect x="2" y="2" width="104" height="104" rx="25" fill="url(#bg)"/>
-  <rect x="3.25" y="3.25" width="101.5" height="101.5" rx="23.75" fill="none" stroke="url(#gold)" stroke-width="2.5"/>
+  <!-- V da família VALORAE, reduzido a duas rotas estruturais. -->
+  <path d="M28 27 53 80c.4.9 1.7.9 2.1 0L80 27" fill="none" stroke="#DDB354" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- V estrutural: preserva a família VALORAE sem repetir o ícone do APK. -->
-  <path d="M27 27 53 84c.35.8 1.6.8 2 0l26-57" fill="none" stroke="url(#gold)" stroke-width="7.2" stroke-linecap="square" stroke-linejoin="round" opacity=".82"/>
+  <!-- Gateway: entrada, validação central e saída. -->
+  <path d="M18 54h24" fill="none" stroke="#54DDD5" stroke-width="4" stroke-linecap="round"/>
+  <path d="M66 54h24" fill="none" stroke="#54DDD5" stroke-width="4" stroke-linecap="round"/>
+  <path d="m42 38 16 16-16 16" fill="none" stroke="#F3F7F8" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m66 38-16 16 16 16" fill="none" stroke="#54DDD5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- Gateway / ponte de dados. -->
-  <path d="M18 52.5h72" fill="none" stroke="url(#gold)" stroke-width="3.1" stroke-linecap="round"/>
-  <path d="M54 28.5v25" fill="none" stroke="url(#gold)" stroke-width="3.6" stroke-linecap="round"/>
-  <path d="M19 51.7C34 51.7 45 41.2 54 29.5c9 11.7 20 22.2 35 22.2" fill="none" stroke="url(#gold)" stroke-width="2.4" stroke-linecap="round"/>
-  <path d="M32 48.5v4M40 44.8v7.7M47 38.5v14M61 38.5v14M68 44.8v7.7M76 48.5v4" fill="none" stroke="#D8A43A" stroke-width="1.1" stroke-linecap="round" opacity=".9"/>
-
-  <!-- Rotas do Proxy: um gateway central distribui a resposta para múltiplos destinos. -->
-  <path d="M54 57.5C48 65 40.5 72.5 32.5 80" fill="none" stroke="url(#silver)" stroke-width="2.7" stroke-linecap="round"/>
-  <path d="M54 57.5C60 65 67.5 72.5 75.5 80" fill="none" stroke="url(#silver)" stroke-width="2.7" stroke-linecap="round"/>
-  <path d="M54 59v24" fill="none" stroke="url(#gold)" stroke-width="2" stroke-linecap="round" stroke-dasharray="2.4 4"/>
-  <path d="M50 59c-6 4-11 8.5-15 14M58 59c6 4 11 8.5 15 14" fill="none" stroke="url(#gold)" stroke-width="1.35" stroke-linecap="round" stroke-dasharray="2 4" opacity=".9"/>
-
-  <!-- Nós de entrada, gateway e saída. -->
-  <g fill="#09090B" stroke="url(#gold)">
-    <circle cx="18" cy="52.5" r="4.7" stroke-width="2.6"/>
-    <circle cx="90" cy="52.5" r="4.7" stroke-width="2.6"/>
-    <circle cx="54" cy="28" r="4.35" stroke-width="2.5"/>
-    <circle cx="54" cy="55" r="5.6" stroke-width="2.8"/>
-    <circle cx="32.5" cy="80" r="4.4" stroke-width="2.5"/>
-    <circle cx="54" cy="84" r="4.1" stroke-width="2.4"/>
-    <circle cx="75.5" cy="80" r="4.4" stroke-width="2.5"/>
-  </g>
-  <circle cx="54" cy="55" r="1.8" fill="#FFFFFF"/>
+  <circle cx="18" cy="54" r="5" fill="#0A1117" stroke="#54DDD5" stroke-width="3"/>
+  <circle cx="54" cy="54" r="6" fill="#0A1117" stroke="#DDB354" stroke-width="3"/>
+  <circle cx="90" cy="54" r="5" fill="#0A1117" stroke="#54DDD5" stroke-width="3"/>
+  <circle cx="54" cy="54" r="2" fill="#F3F7F8"/>
 </svg>

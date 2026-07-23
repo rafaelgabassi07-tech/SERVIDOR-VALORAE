@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#080808">
-  <meta name="valorae-ui" content="valorae-monitor-proxy-experience-v356">
-  <meta name="valorae-latest-patch" content="21.12.382-quote-state-resilience-v350">
+  <meta name="theme-color" content="#070B0F">
+  <meta name="valorae-ui" content="valorae-monitor-gateway-experience-v359">
+  <meta name="valorae-latest-patch" content="21.12.391-analysis-change-monitor-v359">
   <meta name="valorae-readiness-endpoint" content="/api/v1/release/readiness">
-  <title>VALORAE Proxy · Monitor operacional</title>
+  <title>VALORAE Gateway · Monitor operacional</title>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="/assets/valorae-logo.svg">
   <link rel="icon" type="image/png" sizes="48x48" href="/assets/valorae-favicon-48.png">
@@ -24,7 +24,7 @@
     </button>
     <a class="brand" href="#live" aria-label="Abrir tráfego ao vivo">
       <img src="/assets/valorae-logo.svg" alt="" width="40" height="40">
-      <span><strong>VALORAE</strong><small>Proxy · Monitor</small></span>
+      <span><strong>VALORAE</strong><small>Data Gateway</small></span>
     </a>
     <div class="header-page" id="currentPageLabel" aria-live="polite">Ao vivo</div>
     <div class="connection" id="connectionState" role="status" aria-live="polite">
@@ -50,7 +50,7 @@
     <header class="drawer-header">
       <div class="drawer-brand">
         <img src="/assets/valorae-logo.svg" alt="" width="48" height="48">
-        <div><strong>VALORAE</strong><span>Proxy Monitor</span></div>
+        <div><strong>VALORAE</strong><span>Proxy Gateway</span></div>
       </div>
       <button class="icon-button" id="menuCloseButton" type="button" aria-label="Fechar menu" title="Fechar menu">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
@@ -84,19 +84,19 @@
         <span><strong>Ajustes</strong><small>Tema, origem e atualização</small></span>
       </button>
     </nav>
-    <footer class="drawer-footer"><span>Contrato protegido para o APK</span><strong id="drawerReleaseLabel">Core v350 · UI v356</strong></footer>
+    <footer class="drawer-footer"><span>Contrato protegido para o APK</span><strong id="drawerReleaseLabel">Core v359 · UI v359</strong></footer>
   </aside>
 
   <main id="monitorMain" class="monitor-main" aria-busy="false">
     <section class="view active" id="view-live" data-view-panel="live" tabindex="-1">
       <header class="page-heading">
         <div>
-          <span class="eyebrow">Fluxo externo da instância</span>
-          <h1>Tudo que atravessa o Proxy</h1>
+          <span class="eyebrow">Observabilidade em tempo real</span>
+          <h1>Fluxo operacional do Proxy</h1>
           <p id="liveDescription">Requisições, respostas, consumidores, fontes, cache, latência e payloads em uma linha do tempo única.</p>
         </div>
         <div class="instance-meta">
-          <span id="releaseLabel">v350</span>
+          <span id="releaseLabel">v359</span>
           <span id="instanceLabel">instância —</span>
           <span id="updatedLabel">aguardando dados</span>
         </div>

@@ -11,7 +11,7 @@ assert.equal(index, server, 'index.html e server.html precisam permanecer idênt
 const inlineScripts = [...index.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(match => match[1]);
 assert.equal(inlineScripts.length, 0, 'runtime do monitor deve permanecer separado do HTML');
 assert.doesNotThrow(() => new vm.Script(runtime, { filename: 'monitor-valorae.js' }));
-assert.ok(index.includes('21.12.382-quote-state-resilience-v350'));
+assert.ok(index.includes('21.12.391-analysis-change-monitor-v359'));
 assert.ok(index.includes('/monitor-valorae.css'));
 assert.ok(index.includes('/monitor-valorae.js'));
 for (const id of [
@@ -29,8 +29,8 @@ assert.ok(runtime.includes('function renderHealth()'));
 assert.ok(runtime.includes('event.safeQuery'));
 assert.ok(runtime.includes("exportEvents('json')"));
 assert.ok(runtime.includes("exportEvents('csv')"));
-assert.ok(css.includes('--accent:#e8b84f'));
-assert.ok(css.includes('--bg:#080808'));
+assert.ok(css.includes('--accent:#54ddd5'));
+assert.ok(css.includes('--bg:#070b0f'));
 assert.ok(css.includes('@media(max-width:760px)'));
 assert.ok(css.includes('@media(max-width:430px)'));
 assert.ok(css.includes('@media(prefers-reduced-motion:reduce)'));

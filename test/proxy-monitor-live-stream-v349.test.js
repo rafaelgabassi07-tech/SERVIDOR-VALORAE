@@ -18,11 +18,11 @@ const server = read('public/server.html');
 const css = read('public/monitor-valorae.css');
 const runtime = read('public/monitor-valorae.js');
 
-assert.equal(pkg.valorae.publicVersion, '21.12.382');
-assert.equal(pkg.valorae.releasePatch, '21.12.382-quote-state-resilience-v350');
-assert.equal(pkg.valorae.checkpoint, 'quote-state-resilience-v350');
-assert.equal(metadata.monitorObservabilityVersion, '2026.07.17-checkpoint119-v1');
-assert.equal(manifest.version, '21.12.382');
+assert.equal(pkg.valorae.publicVersion, '21.12.391');
+assert.equal(pkg.valorae.releasePatch, '21.12.391-analysis-change-monitor-v359');
+assert.equal(pkg.valorae.checkpoint, 'analysis-change-monitor-v359');
+assert.equal(metadata.monitorObservabilityVersion, '2026.07.23-v359');
+assert.equal(manifest.version, '21.12.391');
 assert.equal(manifest.start_url, '/server.html#live');
 assert.equal(contract.contractVersionUnchanged, true);
 assert.equal(contract.invariants.apkV528Compatible, true);
@@ -89,8 +89,8 @@ const apkMetadataText = readSiblingApkFile('metadata.json');
 const apkProtocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 if (apkMetadataText || apkProtocol) {
   const apkMetadata = JSON.parse(apkMetadataText || '{}');
-  assert.equal(apkMetadata.versionCode, 26071702);
-  assert.equal(apkMetadata.proxyPatch, '21.12.382-quote-state-resilience-v350');
+  assert.equal(apkMetadata.versionCode, 26072302);
+  assert.equal(apkMetadata.proxyPatch, '21.12.391-analysis-change-monitor-v359');
   assert.match(apkProtocol || '', /Version = "2026\.07\.10\.10"/);
 }
 

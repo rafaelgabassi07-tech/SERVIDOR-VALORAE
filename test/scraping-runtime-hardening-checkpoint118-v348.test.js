@@ -131,7 +131,7 @@ if (apkContract !== null || apkProtocol !== null || apkMetadataText !== null) {
   assert.ok(apkContract?.includes('serverVersion.isNullOrBlank() || serverVersion == Version'));
   assert.ok(apkProtocol?.includes('ScrapingEngineHardeningVersion'));
   const apkMetadata = JSON.parse(apkMetadataText || '{}');
-  assert.equal(apkMetadata.versionCode, 26071702);
+  assert.equal(apkMetadata.versionCode, 26072302);
   assert.equal(apkMetadata.proxyPatch, '21.12.382-quote-state-resilience-v350');
 }
 

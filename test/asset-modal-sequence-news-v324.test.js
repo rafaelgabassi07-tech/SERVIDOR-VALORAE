@@ -51,9 +51,10 @@ assertOrder(fii, [
   assert.ok(feedService.includes('assetOnly=$assetOnly'), 'cache do APK deve segregar modo estrito');
 }
 
-const routeSource = fs.readFileSync(new URL('../routes/news.js', import.meta.url), 'utf8');
+const routeSource = fs.readFileSync(new URL('../routes/_router.js', import.meta.url), 'utf8');
 const engineSource = fs.readFileSync(new URL('../lib/Valorae-engine.js', import.meta.url), 'utf8');
-assert.ok(routeSource.includes('assetOnly') && routeSource.includes('strictAsset'));
+assert.ok(routeSource.includes("if (path === '/news')") && routeSource.includes('getNews(payload)'));
+assert.ok(engineSource.includes('assetOnly') && engineSource.includes('strictAsset'));
 assert.ok(engineSource.includes('matchesStrictAssetNews'));
 assert.ok(engineSource.includes('assetOnly=${assetOnly}'));
 

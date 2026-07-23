@@ -16,6 +16,13 @@ const expect = (actual, expected, label) => {
   if (String(actual ?? '') !== String(expected ?? '')) failures.push(`${label}: ${actual ?? '<ausente>'} != ${expected}`);
 };
 if (!read('lib/Valorae-engine.js').includes(`${version}-`)) failures.push(`Valorae-engine.js não contém prefixo ${version}-`);
+const currentReleaseSource = read('lib/release/current.js');
+const coreReleaseSource = read('lib/core/release.js');
+const syncRouteSource = read('routes/sync.js');
+if (!currentReleaseSource.includes(`VALORAE_PUBLIC_VERSION = '${publicVersion}'`)) failures.push('lib/release/current.js não expõe a versão pública atual.');
+if (!currentReleaseSource.includes(releasePatch)) failures.push('lib/release/current.js não expõe o patch atual.');
+if (!coreReleaseSource.includes(releasePatch)) failures.push('lib/core/release.js não expõe o patch atual.');
+if (!syncRouteSource.includes(releasePatch)) failures.push('routes/sync.js não expõe o patch de sincronização atual.');
 if (!releasePatch || !/^21\.12\.\d+-/.test(releasePatch)) failures.push('releasePatch precisa estar explícito como patch interno.');
 expect(pkg.releasePatch, releasePatch, 'package.releasePatch');
 for (const [name, block] of [['config', pkg.config], ['releaseMetadata', pkg.releaseMetadata]]) {

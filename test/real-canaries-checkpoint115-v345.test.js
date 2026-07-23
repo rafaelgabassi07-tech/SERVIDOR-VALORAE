@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { sendJson } from '../lib/core/http.js';
-import { extractSelectorsWithDynamicFallback } from '../lib/scrape/selector-engine.js';
 import {
   VALORAE_REAL_CANARY_IMPLEMENTATION,
   VALORAE_REAL_CANARY_POLICY,
@@ -101,17 +100,6 @@ assert.equal(leaseRejected.diagnostics.reason, 'lease-not-acquired');
 assert.deepEqual(leaseRejected.results.sector, []);
 await releaseSharedLease('real-canary', leaseKey, { owner: 'held-by-test' });
 
-const malformedHtml = '<table id="indicators"><tr class="indicator"><td>P/L<td>8,42</tr></table>';
-const integrated = await extractSelectorsWithDynamicFallback(
-  malformedHtml,
-  { row: { selector: '#indicators > tbody > tr.indicator', extract: 'cells' } },
-  { maxSelectors: 10, maxPerSelector: 10, forceRealCanary: true, realCanaryEndpoint: 'scrape' },
-  { url: 'https://investidor10.com.br/acoes/petr4/', provider: 'direct', blocked: false },
-);
-assert.equal(integrated.realCanary.selected, true);
-assert.equal(integrated.realCanary.promoted, true);
-assert.equal(integrated.strategy, 'real-canary-gap-fill');
-assert.deepEqual(integrated.results.row, [['P/L', '8,42']]);
 
 process.env.VALORAE_REAL_CANARY_MODE = 'safe-promote';
 process.env.VALORAE_REAL_CANARY_MAX_VALUE_BYTES = '8000';

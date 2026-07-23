@@ -1,11 +1,7 @@
 import assert from 'node:assert/strict';
-import health from '../routes/health.js';
-import asset from '../routes/asset.js';
 import assets from '../routes/assets.js';
-import compare from '../routes/compare.js';
-import scrape from '../routes/scrape.js';
-import transactions from '../routes/portfolio/transactions.js';
 import sync from '../routes/sync.js';
+import { dispatchRoute } from '../routes/_router.js';
 import { resolveSelfScrapeUrl } from '../lib/http/route.js';
 
 class MockRes {
@@ -40,17 +36,25 @@ async function call(handler, request) {
   return response;
 }
 
-const r1 = await call(health, req('GET'));
+async function callRoute(path, method = 'GET', query = {}, body = undefined) {
+  const queryString = new URLSearchParams(query).toString();
+  return call(dispatchRoute, {
+    ...req(method, query, body),
+    url: `/api/v1${path}${queryString ? `?${queryString}` : ''}`,
+  });
+}
+
+const r1 = await callRoute('/health');
 assert.equal(r1.statusCode, 200);
 assert.equal(parseBody(r1).ok, true);
 assert.equal(r1.getHeader('x-content-type-options'), 'nosniff');
 
-const r2 = await call(asset, req('GET', {}));
+const r2 = await callRoute('/asset');
 assert.equal(r2.statusCode, 400);
 assert.match(parseBody(r2).error, /Ticker vazio/);
 assert.ok(parseBody(r2).requestId);
 
-const r3 = await call(compare, req('GET', { tickers: 'PETR4' }));
+const r3 = await callRoute('/compare', 'GET', { tickers: 'PETR4' });
 assert.equal(r3.statusCode, 400);
 assert.match(parseBody(r3).error, /ao menos dois/i);
 
@@ -60,11 +64,11 @@ assert.equal(parseBody(rAssetsSuggestions).status, 'SUGGESTIONS');
 assert.ok(parseBody(rAssetsSuggestions).assets.some(item => item.symbol === 'BBAS3'));
 assert.equal(parseBody(rAssetsSuggestions).assets.find(item => item.symbol === 'BBAS3').price, null);
 
-const r4 = await call(scrape, req('GET', {}));
+const r4 = await callRoute('/scrape');
 assert.equal(r4.statusCode, 400);
 assert.match(parseBody(r4).error, /URL HTTPS permitida/i);
 
-const r5 = await call(transactions, req('GET'));
+const r5 = await callRoute('/portfolio/transactions');
 assert.equal(r5.statusCode, 405);
 assert.match(parseBody(r5).error, /Método não permitido/);
 

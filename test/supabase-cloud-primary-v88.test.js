@@ -7,9 +7,9 @@ const sql = fs.readFileSync(path.join(process.cwd(), 'supabase/003_valorae_cloud
 
 assert.match(syncRoute, /21\.12\.151-cloud-primary-supabase-v88/);
 assert.match(syncRoute, /BACKUPS_TABLE/);
-assert.match(syncRoute, /upsert_sync_backup/);
+assert.doesNotMatch(syncRoute, /['\"]upsert_sync_backup['\"]/, 'backup manual foi removido para não contornar revisão/tombstone');
 assert.match(syncRoute, /get_sync_backups/);
-assert.match(syncRoute, /mirrorSyncBackup/);
+assert.doesNotMatch(syncRoute, /function\s+mirrorSyncBackup\b/, 'backup agora é gravado somente dentro das RPCs transacionais');
 assert.match(syncRoute, /upsert_dividend_events/);
 assert.match(sql, /create table if not exists public\.valorae_sync_backups/i);
 assert.match(sql, /create table if not exists public\.valorae_transactions/i);

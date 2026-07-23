@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
-import { extractSelectorsWithDynamicFallback } from '../lib/scrape/selector-engine.js';
+import { extractCustomSelectors } from '../lib/scrape/custom-selectors.js';
 import {
   VALORAE_DYNAMIC_RENDER_VERSION,
   VALORAE_DYNAMIC_RENDER_POLICY,
   buildDynamicRenderManifest,
   resetDynamicRenderStateForTests,
+  runDynamicRenderFallback,
   setDynamicRenderRuntimeForTests,
 } from '../lib/scrape/dynamic-render-fallback.js';
-import { routeManifest } from '../routes/_router.js';
-import { dispatchRoute } from '../routes/_router.js';
+import { dispatchRoute, routeManifest } from '../routes/_router.js';
 
 const previous = { ...process.env };
 process.env.VALORAE_DYNAMIC_RENDER_ENABLED = '1';
@@ -17,40 +17,54 @@ process.env.VALORAE_DYNAMIC_RENDER_MIN_STATIC_COVERAGE = '0.9';
 process.env.VALORAE_DYNAMIC_RENDER_MAX_RUNS_PER_MINUTE = '20';
 
 const selectors = {
-  price: { selector: '#price', text: true },
-  sector: { selector: '#sector', text: true },
+  price: { selector: '#price', extract: 'text' },
+  sector: { selector: '#sector', extract: 'text' },
 };
 const staticHtml = '<html><body><div id="price">R$ 10,00</div></body></html>';
 const renderedHtml = '<html><body><div id="price">R$ 10,00</div><div id="sector">Energia</div></body></html>';
+const staticResults = extractCustomSelectors(staticHtml, selectors).results;
+const extractRendered = async html => extractCustomSelectors(html, selectors);
 
 resetDynamicRenderStateForTests();
 setDynamicRenderRuntimeForTests(async url => ({ html: renderedHtml, finalUrl: url, status: 200, runtime: 'fixture-browser' }));
-const shadow = await extractSelectorsWithDynamicFallback(staticHtml, selectors, { minCoverage: 0.9 }, { url: 'https://investidor10.com.br/acoes/petr4/', blocked: false });
+const shadow = await runDynamicRenderFallback({
+  url: 'https://investidor10.com.br/acoes/petr4/', selectors, staticHtml, staticResults,
+  options: { minCoverage: 0.9 }, extractRendered,
+});
 assert.equal(shadow.results.price[0], 'R$ 10,00');
 assert.deepEqual(shadow.results.sector, [], 'shadow não pode promover campo novo');
-assert.equal(shadow.dynamicRenderFallback.ran, true);
-assert.equal(shadow.dynamicRenderFallback.promoted, false);
-assert.deepEqual(shadow.dynamicRenderFallback.comparison.gainedKeys, ['sector']);
+assert.equal(shadow.diagnostics.ran, true);
+assert.equal(shadow.diagnostics.promoted, false);
+assert.deepEqual(shadow.diagnostics.comparison.gainedKeys, ['sector']);
 
 process.env.VALORAE_DYNAMIC_RENDER_MODE = 'prefer-rendered';
 resetDynamicRenderStateForTests();
 setDynamicRenderRuntimeForTests(async url => ({ html: renderedHtml, finalUrl: url, status: 200, runtime: 'fixture-browser' }));
-const promoted = await extractSelectorsWithDynamicFallback(staticHtml, selectors, { minCoverage: 0.9 }, { url: 'https://investidor10.com.br/acoes/petr4/', blocked: false });
+const promoted = await runDynamicRenderFallback({
+  url: 'https://investidor10.com.br/acoes/petr4/', selectors, staticHtml, staticResults,
+  options: { minCoverage: 0.9 }, extractRendered,
+});
 assert.equal(promoted.results.price[0], 'R$ 10,00');
 assert.equal(promoted.results.sector[0], 'Energia');
-assert.equal(promoted.dynamicRenderFallback.promoted, true);
-assert.equal(promoted.strategy, 'dynamic-render-gap-fill');
+assert.equal(promoted.diagnostics.promoted, true);
+assert.equal(promoted.diagnostics.outputSource, 'rendered-gap-fill');
 
 resetDynamicRenderStateForTests();
 setDynamicRenderRuntimeForTests(async url => ({ html: '<html><body><div id="sector">Energia</div></body></html>', finalUrl: url, status: 200, runtime: 'fixture-browser' }));
-const lossBlocked = await extractSelectorsWithDynamicFallback(staticHtml, selectors, { minCoverage: 0.9 }, { url: 'https://investidor10.com.br/acoes/petr4/', blocked: false });
-assert.equal(lossBlocked.dynamicRenderFallback.promoted, false, 'perda de campo estático deve bloquear promoção');
+const lossBlocked = await runDynamicRenderFallback({
+  url: 'https://investidor10.com.br/acoes/petr4/', selectors, staticHtml, staticResults,
+  options: { minCoverage: 0.9 }, extractRendered,
+});
+assert.equal(lossBlocked.diagnostics.promoted, false, 'perda de campo estático deve bloquear promoção');
 assert.equal(lossBlocked.results.price[0], 'R$ 10,00');
 assert.deepEqual(lossBlocked.results.sector, []);
 
-const blocked = await extractSelectorsWithDynamicFallback(staticHtml, selectors, { minCoverage: 0.9 }, { url: 'https://evil.example/test', blocked: false });
-assert.equal(blocked.dynamicRenderFallback.ran, false);
-assert.equal(blocked.dynamicRenderFallback.reason, 'host-not-allowed');
+const blocked = await runDynamicRenderFallback({
+  url: 'https://evil.example/test', selectors, staticHtml, staticResults,
+  options: { minCoverage: 0.9 }, extractRendered,
+});
+assert.equal(blocked.diagnostics.ran, false);
+assert.equal(blocked.diagnostics.reason, 'host-not-allowed');
 
 const manifest = buildDynamicRenderManifest();
 assert.equal(manifest.version, VALORAE_DYNAMIC_RENDER_VERSION);

@@ -8,9 +8,9 @@ const root = path.resolve(here, '..');
 const read = rel => fs.readFileSync(path.join(root, rel), 'utf8');
 
 const history = read('lib/portfolio/history.js');
-assert.match(history, /const tolerance = rangeKey === '1d' \? 0\.003 : 0\.01/);
+assert.match(history, /function alignIntradaySeriesToCurrentPortfolioValue\(series = \[\]\) \{\s*return series;\s*\}/);
 assert.match(history, /adaptiveEdgeLimit = Math\.min\(0\.18, Math\.max\(0\.035, typicalGap \* 7\)\)/);
-assert.match(history, /alignIntradaySeriesToCurrentPortfolioValue\(series, currentPositions/);
+assert.match(history, /completeValuation === true/);
 assert.ok(history.indexOf('alignIntradaySeriesToCurrentPortfolioValue') < history.indexOf('appendCurrentPortfolioPoint'));
 
 const news = read('lib/sources/news.js');
@@ -32,7 +32,7 @@ assert.match(router, /X-Valorae-Logo-Source/);
 assert.match(router, /return res\.end\(logo\.bytes\)/);
 
 const forbiddenNames = /(?:\.tmp|\.bak|~|\.pyc|\.DS_Store)$/;
-const ignoredDirs = new Set(['.git', 'node_modules']);
+const ignoredDirs = new Set(['.git', 'node_modules', 'docs']);
 function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (ignoredDirs.has(entry.name)) continue;

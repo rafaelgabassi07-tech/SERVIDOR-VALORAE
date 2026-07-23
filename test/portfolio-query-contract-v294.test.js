@@ -25,8 +25,9 @@ const history = await buildPortfolioHistory([], {
   timeoutMs: 1,
   maxConcurrency: 1,
 });
-assert.equal(history.ok, true);
+assert.equal(history.ok, false);
 assert.deepEqual(history.activeTickers, ['PETR4']);
-assert.ok(history.series.length >= 2, 'fallback series should be created from ticker query aliases');
+assert.equal(history.series.length, 0, 'average cost must not fabricate a market series when quotes are unavailable');
+assert.equal(history.source, 'Unavailable');
 
 console.log('portfolio-query-contract-v294 ok');

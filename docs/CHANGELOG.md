@@ -1,3 +1,18 @@
+## 21.12.391 — Mudanças fundamentalistas, limpeza estrutural e Monitor Gateway (v359)
+
+- adiciona comparação objetiva entre os dois estados comparáveis mais recentes nos modais de ações e FIIs;
+- remove caminhos de runtime sem consumidor e protege a limpeza com auditoria automática de alcançabilidade;
+- redesenha o monitor operacional com identidade VALORAE Proxy Gateway, logotipo vetorial próprio e layout responsivo;
+- corrige normalização de símbolos de notícias e a distinção entre data-com e data de pagamento na agenda de proventos;
+- mantém protocolo móvel, contratos financeiros e migração transacional v358.
+
+## 21.12.390 — Integridade financeira e sincronização transacional (v358)
+
+- remove patrimônio sintético baseado em custo médio ou última operação;
+- unifica ações corporativas entre Proxy e APK;
+- adiciona revisão, tombstone, exclusão transacional e paginação assinada;
+- torna estáveis as identidades de transações e proventos.
+
 ## 21.12.382 — Checkpoint 382: cotações resilientes e persistentes
 
 - Yahoo `query1` e `query2` passam a formar uma cadeia de fallback com cache stale seguro.

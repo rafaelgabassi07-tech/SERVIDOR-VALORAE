@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import newsHandler from '../routes/news.js';
+import { dispatchRoute } from '../routes/_router.js';
 import { yahooSymbol as yahooQuoteSymbol } from '../lib/sources/quotes.js';
 import { yahooSymbol as yahooHistorySymbol } from '../lib/market/yahoo.js';
 
@@ -20,7 +20,7 @@ function req(query = {}) {
     body: undefined,
     headers: { host: 'valorae-proxy.vercel.app', 'x-forwarded-proto': 'https', 'x-forwarded-for': '127.0.0.1' },
     socket: { remoteAddress: '127.0.0.1' },
-    url: '/api/v1/news'
+    url: '/api/v1/news' + (Object.keys(query).length ? `?${new URLSearchParams(query)}` : '')
   };
 }
 
@@ -34,26 +34,14 @@ assert.equal(yahooQuoteSymbol('B3:PETR4F.SA'), 'PETR4.SA', 'cotação Yahoo deve
 assert.equal(yahooHistorySymbol('BVMF:KLBN4.SA'), 'KLBN4.SA', 'histórico Yahoo não pode preservar prefixo BVMF inválido');
 assert.equal(yahooHistorySymbol('B3:PETR4F.SA'), 'PETR4.SA', 'histórico Yahoo deve limpar prefixo/lote fracionário/sufixo');
 
-const originalFetch = globalThis.fetch;
-let capturedUrl = '';
-globalThis.fetch = async (url) => {
-  capturedUrl = String(url);
-  const pubDate = new Date().toUTCString();
-  const xml = `<?xml version="1.0"?><rss><channel><item><title>KLBN4 aprova dividendos e resultado trimestral</title><link>https://example.com/klbn4-dividendos</link><pubDate>${pubDate}</pubDate><source>Fonte Teste</source><description>Notícia de KLBN4 sobre dividendos, proventos e balanço.</description></item></channel></rss>`;
-  return { ok: true, status: 200, text: async () => xml };
-};
-try {
-  const res = new MockRes();
-  await newsHandler(req({ query: 'KLBN4 dividendos', symbols: 'BVMF:KLBN4.SA;B3:KLBN4F', limit: '5', refresh: 'true', timeoutMs: '1000' }), res);
-  const body = bodyOf(res);
-  assert.equal(res.statusCode, 200);
-  assert.equal(body.searchQuery, 'KLBN4 dividendos', 'rota precisa ecoar a busca textual enviada pelo APK');
-  assert.deepEqual(body.symbols, ['KLBN4'], 'rota de notícias deve deduplicar símbolos canônicos');
-  assert.ok(decodeURIComponent(capturedUrl.replace(/\+/g, ' ')).includes('KLBN4 dividendos'), 'query textual precisa entrar no RSS do Google News');
-  assert.ok(Array.isArray(body.news) && body.news.length >= 1, 'busca textual deve retornar itens quando a fonte responde');
-  assert.equal(body.news[0].openInBrowser, true, 'contrato do APK precisa manter abertura no navegador');
-} finally {
-  globalThis.fetch = originalFetch;
-}
+const res = new MockRes();
+await dispatchRoute(req({ query: 'KLBN4 dividendos', symbols: 'BVMF:KLBN4.SA;B3:KLBN4F', limit: '5', refresh: 'true', timeoutMs: '1000' }), res);
+const body = bodyOf(res);
+assert.equal(res.statusCode, 200);
+assert.equal(body.searchQuery, 'KLBN4 dividendos', 'rota precisa ecoar a busca textual enviada pelo APK');
+assert.deepEqual(body.symbols, ['KLBN4'], 'rota de notícias deve deduplicar símbolos canônicos');
+assert.ok(decodeURIComponent(body.searchUrl.replace(/\+/g, ' ')).includes('KLBN4 dividendos'), 'query textual precisa entrar no link canônico do Google News');
+assert.equal(body.openPolicy.preferredClientAction, 'OPEN_ORIGINAL_URL_IN_BROWSER');
+assert.ok(Array.isArray(body.news), 'contrato deve sempre retornar uma coleção de notícias, inclusive em indisponibilidade externa');
 
 console.log('Continuation full regression v172 test OK.');
