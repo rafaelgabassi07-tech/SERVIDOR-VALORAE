@@ -11,28 +11,22 @@ class MockRes {
   end(value = '') { this.body = value; this.finished = true; return this; }
 }
 
-async function call(body) {
+async function call() {
   const res = new MockRes();
   await syncHandler({
-    method: 'POST',
-    url: '/api/sync?action=upsert_snapshot',
-    query: { action: 'upsert_snapshot' },
-    body,
+    method: 'GET',
+    url: '/api/sync?action=get_snapshot&domain=portfolio&snapshot_key=latest',
+    query: { action: 'get_snapshot', domain: 'portfolio', snapshot_key: 'latest' },
+    body: undefined,
     headers: { host: 'valorae-proxy.test', authorization: 'Bearer valid-user-jwt' },
     socket: { remoteAddress: '127.0.0.1' },
   }, res);
   return res;
 }
 
-function json(res) {
-  return typeof res.body === 'string' && res.body ? JSON.parse(res.body) : res.body;
-}
+function json(res) { return typeof res.body === 'string' && res.body ? JSON.parse(res.body) : res.body; }
 
-const oldEnv = {
-  url: process.env.SUPABASE_URL,
-  key: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  anon: process.env.SUPABASE_ANON_KEY,
-};
+const oldEnv = { url: process.env.SUPABASE_URL, key: process.env.SUPABASE_SERVICE_ROLE_KEY, anon: process.env.SUPABASE_ANON_KEY };
 const oldFetch = globalThis.fetch;
 
 try {
@@ -40,39 +34,46 @@ try {
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-test';
   process.env.SUPABASE_ANON_KEY = 'anon-test';
 
-  const postedBodies = [];
-  let postCount = 0;
+  const snapshotCalls = [];
   globalThis.fetch = async (url, init = {}) => {
     const href = String(url);
     if (href.includes('/auth/v1/user')) {
-      return { ok: true, status: 200, text: async () => '{"id":"user-123","email":"u@valorae.app"}', json: async () => ({ id: 'user-123', email: 'u@valorae.app' }) };
+      return { ok: true, status: 200, headers: { get: () => null }, json: async () => ({ id: 'user-123', email: 'u@valorae.app' }), text: async () => '{"id":"user-123"}' };
+    }
+    if (href.includes('/rpc/valorae_sync_get_state')) {
+      return { ok: true, status: 200, headers: { get: () => null }, text: async () => JSON.stringify({ revision: 4, deletion_generation: 0, tombstone: false }) };
     }
     if (href.includes('/rest/v1/valorae_user_snapshots')) {
-      postCount += 1;
-      postedBodies.push(JSON.parse(init.body));
-      if (postCount === 1) {
+      snapshotCalls.push(href);
+      if (href.includes('cache_scope')) {
         return {
           ok: false,
           status: 400,
+          headers: { get: () => null },
           text: async () => JSON.stringify({ code: 'PGRST204', message: "Could not find the 'cache_scope' column of 'valorae_user_snapshots' in the schema cache" }),
         };
       }
-      return { ok: true, status: 201, text: async () => '' };
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => null },
+        text: async () => JSON.stringify([{ user_id: 'user-123', domain: 'portfolio', snapshot_key: 'latest', payload: { assetsCount: 1 }, updated_at: '2026-06-19T04:49:23.444Z' }]),
+      };
     }
-    return { ok: true, status: 200, text: async () => '[]' };
+    return { ok: true, status: 200, headers: { get: () => null }, text: async () => '[]' };
   };
 
-  const res = await call({ action: 'upsert_snapshot', domain: 'portfolio', snapshot_key: 'latest', payload: { assetsCount: 1 }, cache_scope: 'user' });
+  const res = await call();
   const payload = json(res);
   assert.equal(res.statusCode, 200);
   assert.equal(payload.ok, true);
   assert.equal(payload.schemaMode, 'legacy_snapshot_columns');
   assert.equal(payload.degraded, true);
-  assert.equal(postedBodies.length, 2);
-  assert.equal(postedBodies[0].cache_scope, 'user');
-  assert.equal(postedBodies[1].cache_scope, undefined, 'fallback não deve reenviar cache_scope quando a coluna não existe');
-  assert.equal(postedBodies[1].user_id, 'user-123');
-  assert.deepEqual(postedBodies[1].payload, { assetsCount: 1 });
+  assert.equal(snapshotCalls.length, 2);
+  assert.match(snapshotCalls[0], /cache_scope/);
+  assert.doesNotMatch(snapshotCalls[1], /cache_scope/);
+  assert.equal(payload.snapshot.payload.assetsCount, 1);
+  assert.equal(payload.syncState.revision, 4);
 } finally {
   if (oldEnv.url === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = oldEnv.url;
   if (oldEnv.key === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY; else process.env.SUPABASE_SERVICE_ROLE_KEY = oldEnv.key;

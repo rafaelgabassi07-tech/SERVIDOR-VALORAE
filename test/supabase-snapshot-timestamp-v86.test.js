@@ -24,15 +24,9 @@ async function call(body) {
   return res;
 }
 
-function json(res) {
-  return typeof res.body === 'string' && res.body ? JSON.parse(res.body) : res.body;
-}
+function json(res) { return typeof res.body === 'string' && res.body ? JSON.parse(res.body) : res.body; }
 
-const oldEnv = {
-  url: process.env.SUPABASE_URL,
-  key: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  anon: process.env.SUPABASE_ANON_KEY,
-};
+const oldEnv = { url: process.env.SUPABASE_URL, key: process.env.SUPABASE_SERVICE_ROLE_KEY, anon: process.env.SUPABASE_ANON_KEY };
 const oldFetch = globalThis.fetch;
 
 try {
@@ -40,17 +34,17 @@ try {
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-test';
   process.env.SUPABASE_ANON_KEY = 'anon-test';
 
-  const postedBodies = [];
+  let rpcArgs = null;
   globalThis.fetch = async (url, init = {}) => {
     const href = String(url);
     if (href.includes('/auth/v1/user')) {
-      return { ok: true, status: 200, text: async () => '{"id":"user-123","email":"u@valorae.app"}', json: async () => ({ id: 'user-123', email: 'u@valorae.app' }) };
+      return { ok: true, status: 200, headers: { get: () => null }, json: async () => ({ id: 'user-123', email: 'u@valorae.app' }), text: async () => '{"id":"user-123"}' };
     }
-    if (href.includes('/rest/v1/valorae_user_snapshots')) {
-      postedBodies.push(JSON.parse(init.body));
-      return { ok: true, status: 201, text: async () => '' };
+    if (href.includes('/rpc/valorae_sync_upsert_snapshots')) {
+      rpcArgs = JSON.parse(init.body);
+      return { ok: true, status: 200, headers: { get: () => null }, text: async () => JSON.stringify({ count: 1, revision: 2, deletion_generation: 0, tombstone: false }) };
     }
-    return { ok: true, status: 200, text: async () => '[]' };
+    return { ok: true, status: 200, headers: { get: () => null }, text: async () => '[]' };
   };
 
   const res = await call({
@@ -61,14 +55,19 @@ try {
     source_updated_at: '1781844563444',
     updated_at: 1781844563444,
     expires_at: '1781848163444',
+    sync_state: { revision: 1, deletion_generation: 0, tombstone: false },
+    action_created_at: 1781844563444,
   });
   const payload = json(res);
   assert.equal(res.statusCode, 200);
   assert.equal(payload.ok, true);
-  assert.equal(postedBodies.length, 1);
-  assert.equal(postedBodies[0].source_updated_at, '2026-06-19T04:49:23.444Z');
-  assert.equal(postedBodies[0].updated_at, '2026-06-19T04:49:23.444Z');
-  assert.equal(postedBodies[0].expires_at, '2026-06-19T05:49:23.444Z');
+  assert.ok(rpcArgs);
+  assert.equal(rpcArgs.p_rows.length, 1);
+  assert.equal(rpcArgs.p_rows[0].source_updated_at, '2026-06-19T04:49:23.444Z');
+  assert.equal(rpcArgs.p_rows[0].updated_at, '2026-06-19T04:49:23.444Z');
+  assert.equal(rpcArgs.p_rows[0].expires_at, '2026-06-19T05:49:23.444Z');
+  assert.equal(rpcArgs.p_expected_revision, 1);
+  assert.equal(payload.syncState.revision, 2);
 } finally {
   if (oldEnv.url === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = oldEnv.url;
   if (oldEnv.key === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY; else process.env.SUPABASE_SERVICE_ROLE_KEY = oldEnv.key;

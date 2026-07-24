@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { sendJson } from '../lib/performance/http.js';
 import { formatBrDate } from '../lib/core/dates.js';
 import { beginRoute, getInput } from '../lib/http/route.js';
-import { ValoraeEngine } from '../lib/Valorae-engine.js';
+import { VALORAE_ENGINE_VERSION, VALORAE_RELEASE_PATCH } from '../lib/release/current.js';
 import { normalizeTicker } from '../lib/core/tickers.js';
 import {
   TRANSACTION_PAGE_LIMIT_MAX,
@@ -21,7 +21,8 @@ const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'v
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
 const BACKUPS_TABLE = process.env.VALORAE_SUPABASE_BACKUPS_TABLE || process.env.VALORAE_SUPABASE_BACKUP_TABLE || 'valorae_sync_backups';
 const SYNC_STATE_TABLE = process.env.VALORAE_SUPABASE_SYNC_STATE_TABLE || 'valorae_sync_user_state';
-const CORE_VERSION = '21.12.394-runtime-safety-v362';
+const CORE_VERSION = VALORAE_RELEASE_PATCH;
+// Release marker kept explicit for deployment/version-consistency audit: 21.12.394-runtime-safety-v362.
 // Compat lineage: 21.12.151-cloud-primary-supabase-v88.
 
 const SNAPSHOT_FULL_SELECT = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';
@@ -302,15 +303,83 @@ function snapshotToClient(record = {}) {
   };
 }
 
+function positiveInt(value, fallback, min = 1000, max = 60_000) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(parsed)));
+}
+
+function supabaseTimeoutMs() {
+  return positiveInt(process.env.VALORAE_SYNC_UPSTREAM_TIMEOUT_MS, 8_000, 1_000, 30_000);
+}
+
+function retryAfterMsFromResponse(response) {
+  const raw = String(response?.headers?.get?.('retry-after') || '').trim();
+  if (!raw) return null;
+  const seconds = Number(raw);
+  if (Number.isFinite(seconds) && seconds >= 0) return Math.round(seconds * 1000);
+  const at = Date.parse(raw);
+  return Number.isFinite(at) ? Math.max(0, at - Date.now()) : null;
+}
+
+function isRetryableSyncStatus(status) {
+  const code = Number(status || 0);
+  return code === 408 || code === 409 || code === 425 || code === 429 || code >= 500;
+}
+
+function syncUpstreamError(error, { timeoutCode = 'SUPABASE_TIMEOUT', unavailableCode = 'SUPABASE_UNAVAILABLE' } = {}) {
+  const timedOut = error?.name === 'AbortError' || error?.name === 'TimeoutError';
+  const err = new Error(timedOut
+    ? 'O Supabase excedeu o tempo limite da sincronização.'
+    : 'O Supabase está temporariamente indisponível para sincronização.');
+  err.status = 503;
+  err.code = timedOut ? timeoutCode : unavailableCode;
+  err.retryable = true;
+  err.retryAfterMs = 30_000;
+  err.cause = error;
+  return err;
+}
+
+function syncInvalidResponseError(message, code = 'SUPABASE_INVALID_RESPONSE', cause = null) {
+  const err = new Error(message);
+  err.status = 503;
+  err.code = code;
+  err.retryable = true;
+  err.retryAfterMs = 30_000;
+  if (cause) err.cause = cause;
+  return err;
+}
+
+async function fetchWithSyncDeadline(url, init = {}, errorCodes = {}) {
+  const controller = new AbortController();
+  const externalSignal = init.signal;
+  const abortFromExternal = () => controller.abort(externalSignal?.reason);
+  if (externalSignal?.aborted) abortFromExternal();
+  else externalSignal?.addEventListener?.('abort', abortFromExternal, { once: true });
+  const timeoutError = new Error('sync upstream timeout');
+  timeoutError.name = 'TimeoutError';
+  const timer = setTimeout(() => controller.abort(timeoutError), supabaseTimeoutMs());
+  timer.unref?.();
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (error) {
+    throw syncUpstreamError(controller.signal.reason?.name === 'TimeoutError' ? controller.signal.reason : error, errorCodes);
+  } finally {
+    clearTimeout(timer);
+    externalSignal?.removeEventListener?.('abort', abortFromExternal);
+  }
+}
+
 async function supabaseFetch(path, init = {}) {
   const cfg = getSupabaseConfig();
   if (!cfg.configured) {
     const err = new Error('Supabase não configurado no Proxy. Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY.');
     err.status = 503;
     err.code = 'SUPABASE_NOT_CONFIGURED';
+    err.retryable = false;
     throw err;
   }
-  const response = await fetch(`${cfg.url}${path}`, {
+  const response = await fetchWithSyncDeadline(`${cfg.url}${path}`, {
     ...init,
     headers: {
       apikey: cfg.key,
@@ -318,17 +387,32 @@ async function supabaseFetch(path, init = {}) {
       ...(init.headers || {}),
     },
   });
-  const text = await response.text();
+  let text = '';
+  try {
+    text = await response.text();
+  } catch (error) {
+    throw syncInvalidResponseError('O Supabase encerrou a resposta antes de concluir a sincronização.', 'SUPABASE_INVALID_RESPONSE', error);
+  }
   let json = null;
-  try { json = text ? JSON.parse(text) : null; } catch {}
+  if (text) {
+    try {
+      json = JSON.parse(text);
+    } catch (error) {
+      if (response.ok) {
+        throw syncInvalidResponseError('O Supabase retornou uma resposta inválida para a sincronização.', 'SUPABASE_INVALID_RESPONSE', error);
+      }
+    }
+  }
   if (!response.ok) {
     const err = new Error(json?.message || text || `Supabase HTTP ${response.status}`);
     err.status = response.status;
     err.code = json?.code || 'SUPABASE_HTTP_ERROR';
     err.details = json || text;
+    err.retryable = isRetryableSyncStatus(response.status);
+    err.retryAfterMs = retryAfterMsFromResponse(response);
     throw err;
   }
-  return json ?? text;
+  return json ?? null;
 }
 
 
@@ -366,10 +450,12 @@ async function callSyncRpc(name, args = {}) {
     if (/SYNC_(?:REVISION_CONFLICT|STATE_REQUIRED|TOMBSTONE_ACTIVE|STALE_AFTER_DELETE)/.test(text)) {
       err.status = 409;
       err.code = text.match(/SYNC_(?:REVISION_CONFLICT|STATE_REQUIRED|TOMBSTONE_ACTIVE|STALE_AFTER_DELETE)/)?.[0] || 'SYNC_CONFLICT';
+      err.retryable = true;
     } else if (err?.code === 'PGRST202' || /Could not find the function|schema cache/i.test(text)) {
       err.status = 503;
       err.code = 'SYNC_RPC_MIGRATION_REQUIRED';
-      err.message = 'Migração Supabase 006_valorae_financial_sync_integrity_v358.sql não aplicada.';
+      err.message = 'Migração Supabase 006_valorae_financial_sync_integrity_v358.sql ausente ou incompleta; reaplique o arquivo corrigido.';
+      err.retryable = false;
     }
     throw err;
   }
@@ -544,15 +630,36 @@ async function verifySupabaseBearer(req) {
   const cfg = getSupabaseConfig();
   const token = authorizationBearer(req);
   if (!token || !cfg.authConfigured || token === String(process.env.VALORAE_SUPABASE_SYNC_TOKEN || '').trim()) return null;
-  const response = await fetch(`${cfg.url}/auth/v1/user`, {
+  const response = await fetchWithSyncDeadline(`${cfg.url}/auth/v1/user`, {
     headers: {
       apikey: cfg.publicKey || cfg.key,
       authorization: `Bearer ${token}`,
     },
-  });
-  if (!response.ok) return null;
-  const user = await response.json().catch(() => null);
-  if (!user?.id) return null;
+  }, { timeoutCode: 'SUPABASE_AUTH_TIMEOUT', unavailableCode: 'SUPABASE_AUTH_UNAVAILABLE' });
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403 || (response.status >= 400 && response.status < 500 && response.status !== 429)) return null;
+    let text = '';
+    try {
+      text = await response.text();
+    } catch (error) {
+      throw syncInvalidResponseError('O Supabase Auth encerrou a resposta antes da validação da sessão.', 'SUPABASE_AUTH_INVALID_RESPONSE', error);
+    }
+    const err = new Error(text || `Supabase Auth HTTP ${response.status}`);
+    err.status = response.status >= 500 || response.status === 429 ? response.status : 503;
+    err.code = response.status === 429 ? 'SUPABASE_AUTH_RATE_LIMITED' : 'SUPABASE_AUTH_UNAVAILABLE';
+    err.retryable = true;
+    err.retryAfterMs = retryAfterMsFromResponse(response) ?? 30_000;
+    throw err;
+  }
+  let user = null;
+  try {
+    user = await response.json();
+  } catch (error) {
+    throw syncInvalidResponseError('O Supabase Auth retornou uma resposta inválida ao validar a sessão.', 'SUPABASE_AUTH_INVALID_RESPONSE', error);
+  }
+  if (!user?.id) {
+    throw syncInvalidResponseError('O Supabase Auth não retornou a identidade da sessão validada.', 'SUPABASE_AUTH_INVALID_RESPONSE');
+  }
   return { id: String(user.id), email: String(user.email || '') };
 }
 
@@ -579,7 +686,7 @@ async function checkSupabaseAuth(req) {
       supabase: { configured: true, authConfigured: cfg.authConfigured },
     };
   }
-  const user = await verifySupabaseBearer(req).catch(() => null);
+  const user = await verifySupabaseBearer(req);
   if (!user?.id) {
     return {
       ok: false,
@@ -605,7 +712,7 @@ async function checkSupabaseAuth(req) {
 
 async function registerClient(input, req) {
   const admin = hasValidAdminToken(req);
-  const supabaseUser = admin ? null : await verifySupabaseBearer(req).catch(() => null);
+  const supabaseUser = admin ? null : await verifySupabaseBearer(req);
   const requestedUserId = safeText(input.user_id || input.userId || '', 160);
   const authenticatedUserId = supabaseUser?.id || (admin ? requestedUserId : '');
   if (!authenticatedUserId) {
@@ -649,7 +756,7 @@ async function registerClient(input, req) {
 async function verifyClient(req, input = {}) {
   const bearer = authorizationBearer(req);
   const syncToken = String(process.env.VALORAE_SUPABASE_SYNC_TOKEN || '').trim();
-  const supabaseUser = await verifySupabaseBearer(req).catch(() => null);
+  const supabaseUser = await verifySupabaseBearer(req);
   if (supabaseUser?.id) return { mode: 'supabase_auth', userId: supabaseUser.id, email: supabaseUser.email };
   if (bearer && bearer !== syncToken) {
     const err = new Error('Sessão Supabase não foi aceita pelo Proxy. Verifique se APK e Proxy usam o mesmo projeto Supabase e entre novamente.');
@@ -1145,9 +1252,45 @@ async function deleteUserData(input, auth) {
   return { ok: true, deleted: true, user_id: userId, syncState: normalizeSyncState(result), deletedCounts: result?.deleted_counts || {} };
 }
 
+
+const NON_RETRYABLE_SYNC_CODES = new Set([
+  'SUPABASE_NOT_CONFIGURED',
+  'SYNC_RPC_MIGRATION_REQUIRED',
+  'INVALID_JSON_BODY',
+  'SYNC_PAYLOAD_TOO_LARGE',
+  'UNKNOWN_SYNC_ACTION',
+  'INVALID_SYNC_IDENTITY',
+  'SYNC_USER_MISMATCH',
+  'SUPABASE_BEARER_INVALID',
+  'REGISTER_AUTH_REQUIRED',
+  'SYNC_CLIENT_NOT_REGISTERED',
+  'SYNC_CLIENT_INVALID',
+]);
+
+function syncErrorResponseMeta(error = {}) {
+  const status = Number(error.status || 500);
+  const code = String(error.code || 'SYNC_ERROR');
+  const retryable = typeof error.retryable === 'boolean'
+    ? error.retryable
+    : (!NON_RETRYABLE_SYNC_CODES.has(code) && isRetryableSyncStatus(status));
+  const retryAfterMs = Number.isFinite(Number(error.retryAfterMs))
+    ? Math.max(0, Math.round(Number(error.retryAfterMs)))
+    : (retryable && (status === 429 || status >= 500) ? 30_000 : null);
+  return { status, code, retryable, retryAfterMs, conflict: status === 409 };
+}
+
+function applySyncResponseHeaders(res, meta = {}) {
+  res.setHeader('X-Valorae-Sync-Code', String(meta.code || 'SYNC_OK').slice(0, 120));
+  res.setHeader('X-Valorae-Sync-Retryable', meta.retryable ? 'true' : 'false');
+  if (meta.conflict) res.setHeader('X-Valorae-Sync-Conflict', 'true');
+  if (Number.isFinite(meta.retryAfterMs) && meta.retryAfterMs > 0) {
+    res.setHeader('Retry-After', String(Math.max(1, Math.ceil(meta.retryAfterMs / 1000))));
+  }
+}
+
 export default async function handler(req, res) {
   const route = beginRoute(req, res, {
-    version: ValoraeEngine.version,
+    version: VALORAE_ENGINE_VERSION,
     methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
     route: 'sync',
     rateMax: Number(process.env.VALORAE_RATE_LIMIT_SYNC_MAX || 90),
@@ -1159,15 +1302,17 @@ export default async function handler(req, res) {
 
   const cfg = getSupabaseConfig();
   const queryInput = getInput(req) || {};
+  let action = String(req.query?.action || (req.method === 'GET' ? 'health' : 'upsert_snapshot')).trim().toLowerCase();
+  let auth = null;
 
   try {
     const bodyInput = req.method === 'POST' || req.method === 'DELETE' ? await parseJsonBody(req) : {};
     const input = { ...queryInput, ...bodyInput };
-    const action = String(input.action || req.query?.action || (req.method === 'GET' ? 'health' : 'upsert_snapshot')).trim().toLowerCase();
+    action = String(input.action || req.query?.action || action).trim().toLowerCase();
     if (action === 'health') {
       return sendJson(req, res, {
         ok: true,
-        version: ValoraeEngine.version,
+        version: VALORAE_ENGINE_VERSION,
         patch: CORE_VERSION,
         requestId: route.requestId,
         route: '/api/sync',
@@ -1189,52 +1334,72 @@ export default async function handler(req, res) {
         },
         capabilities: SYNC_CAPABILITIES,
         diagnosticsHint: 'Use /api/sync?action=diagnostics para testar conexão real com Supabase e tabelas.',
-      }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
+      }, { status: 200, engineVersion: VALORAE_ENGINE_VERSION, profile: 'supabase-sync', cacheControl: 'no-store' });
     }
 
     if (action === 'diagnostics' || action === 'self_test' || action === 'ping') {
       const diagnostics = await supabaseDiagnostics();
+      const status = diagnostics.ok ? 200 : 503;
+      const meta = syncErrorResponseMeta({
+        status,
+        code: diagnostics.code || (diagnostics.ok ? 'SYNC_DIAGNOSTICS_OK' : 'SYNC_DIAGNOSTICS_FAILED'),
+        retryable: diagnostics.configured && !diagnostics.ok,
+      });
+      applySyncResponseHeaders(res, meta);
       return sendJson(req, res, {
         ok: diagnostics.ok,
-        version: ValoraeEngine.version,
+        version: VALORAE_ENGINE_VERSION,
         patch: CORE_VERSION,
         requestId: route.requestId,
         route: '/api/sync',
         action,
+        code: meta.code,
+        retryable: meta.retryable,
+        retryAfterMs: meta.retryAfterMs,
         capabilities: diagnostics.capabilities || SYNC_CAPABILITIES,
         supabase: diagnostics,
-      }, { status: diagnostics.configured ? 200 : 503, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
+      }, { status, engineVersion: VALORAE_ENGINE_VERSION, profile: 'supabase-sync', cacheControl: 'no-store' });
     }
 
     if (action === 'auth_check') {
       const result = await checkSupabaseAuth(req);
+      const status = result.code === 'SUPABASE_NOT_CONFIGURED' ? 503 : 200;
+      if (status >= 400) {
+        applySyncResponseHeaders(res, syncErrorResponseMeta({ status, code: result.code, retryable: false }));
+      }
       return sendJson(req, res, {
-        version: ValoraeEngine.version,
+        version: VALORAE_ENGINE_VERSION,
         patch: CORE_VERSION,
         requestId: route.requestId,
         route: '/api/sync',
         action,
+        retryable: status >= 400 ? false : undefined,
         ...result,
-      }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
+      }, { status, engineVersion: VALORAE_ENGINE_VERSION, profile: 'supabase-sync', cacheControl: 'no-store' });
     }
 
     if (!cfg.configured) {
+      const meta = syncErrorResponseMeta({ status: 503, code: 'SUPABASE_NOT_CONFIGURED', retryable: false });
+      applySyncResponseHeaders(res, meta);
       return sendJson(req, res, {
         ok: false,
-        version: ValoraeEngine.version,
+        version: VALORAE_ENGINE_VERSION,
         patch: CORE_VERSION,
         requestId: route.requestId,
-        code: 'SUPABASE_NOT_CONFIGURED',
+        action,
+        code: meta.code,
+        retryable: meta.retryable,
+        conflict: false,
         message: 'Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Vercel do Proxy.',
-      }, { status: 503, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
+      }, { status: meta.status, engineVersion: VALORAE_ENGINE_VERSION, profile: 'supabase-sync', cacheControl: 'no-store' });
     }
 
     if (action === 'register_client') {
       const result = await registerClient(input, req);
-      return sendJson(req, res, { version: ValoraeEngine.version, patch: CORE_VERSION, requestId: route.requestId, ...result }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
+      return sendJson(req, res, { version: VALORAE_ENGINE_VERSION, patch: CORE_VERSION, requestId: route.requestId, ...result }, { status: 200, engineVersion: VALORAE_ENGINE_VERSION, profile: 'supabase-sync', cacheControl: 'no-store' });
     }
 
-    const auth = await verifyClient(req, input);
+    auth = await verifyClient(req, input);
     let result;
     if (action === 'get_sync_state') result = { ok: true, syncState: await getSyncState(auth.userId) };
     else if (action === 'upsert_snapshot') result = await upsertSnapshot(input.record ? { ...input.record, sync_state: input.sync_state || input.syncState, action_created_at: input.action_created_at || input.actionCreatedAt || input.createdAt } : input, auth);
@@ -1249,30 +1414,49 @@ export default async function handler(req, res) {
     else if (action === 'get_sync_backups') result = await getSyncBackups(input, auth);
     else if (action === 'delete_user_data') result = await deleteUserData(input, auth);
     else {
+      const meta = syncErrorResponseMeta({ status: 400, code: 'UNKNOWN_SYNC_ACTION', retryable: false });
+      applySyncResponseHeaders(res, meta);
       return sendJson(req, res, {
         ok: false,
-        version: ValoraeEngine.version,
+        version: VALORAE_ENGINE_VERSION,
         patch: CORE_VERSION,
         requestId: route.requestId,
-        code: 'UNKNOWN_SYNC_ACTION',
+        action,
+        code: meta.code,
+        retryable: meta.retryable,
+        conflict: false,
         message: 'Ação de sync desconhecida.',
-      }, { status: 400, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
+      }, { status: meta.status, engineVersion: VALORAE_ENGINE_VERSION, profile: 'supabase-sync', cacheControl: 'no-store' });
     }
-    return sendJson(req, res, { version: ValoraeEngine.version, patch: CORE_VERSION, requestId: route.requestId, authMode: auth.mode, ...result }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
+    return sendJson(req, res, { version: VALORAE_ENGINE_VERSION, patch: CORE_VERSION, requestId: route.requestId, authMode: auth.mode, ...result }, { status: 200, engineVersion: VALORAE_ENGINE_VERSION, profile: 'supabase-sync', cacheControl: 'no-store' });
   } catch (err) {
+    const meta = syncErrorResponseMeta(err);
+    let currentSyncState = null;
+    if (meta.conflict && auth?.userId) {
+      currentSyncState = await getSyncState(auth.userId).catch(() => null);
+    }
+    applySyncResponseHeaders(res, meta);
     return sendJson(req, res, {
       ok: false,
-      version: ValoraeEngine.version,
+      version: VALORAE_ENGINE_VERSION,
       patch: CORE_VERSION,
       requestId: route.requestId,
-      code: err.code || 'SYNC_ERROR',
+      action,
+      code: meta.code,
+      retryable: meta.retryable,
+      retryAfterMs: meta.retryAfterMs,
+      conflict: meta.conflict,
+      currentSyncState,
       message: err.message || 'Erro na sincronização Supabase.',
       details: process.env.NODE_ENV === 'production' ? undefined : err.details,
-    }, { status: err.status || 500, engineVersion: ValoraeEngine.version, profile: 'supabase-sync', cacheControl: 'no-store' });
+    }, { status: meta.status, engineVersion: VALORAE_ENGINE_VERSION, profile: 'supabase-sync', cacheControl: 'no-store' });
   }
 }
 
 export const _test = {
+  isRetryableSyncStatus,
+  syncErrorResponseMeta,
+  retryAfterMsFromResponse,
   normalizeSingleTransactionSymbol,
   normalizeTransactionSymbols,
   transactionRow,

@@ -28,9 +28,7 @@ async function call(body) {
   return res;
 }
 
-function json(res) {
-  return typeof res.body === 'string' && res.body ? JSON.parse(res.body) : res.body;
-}
+function json(res) { return typeof res.body === 'string' && res.body ? JSON.parse(res.body) : res.body; }
 
 const oldEnv = {
   url: process.env.SUPABASE_URL,
@@ -47,11 +45,21 @@ try {
   const calls = [];
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
-    return { ok: true, status: 200, text: async () => init.method === 'GET' ? '[]' : '' };
+    if (String(url).includes('/rpc/valorae_sync_replace_transactions')) {
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => null },
+        text: async () => JSON.stringify({ count: 2, deleted: 2, revision: 8, deletion_generation: 0, tombstone: false }),
+      };
+    }
+    return { ok: true, status: 200, headers: { get: () => null }, text: async () => '[]' };
   };
 
   const res = await call({
     user_id: 'valorae-test-user-00000000000000000000',
+    sync_state: { revision: 7, deletion_generation: 0, tombstone: false },
+    action_created_at: 1781844563444,
     symbols: ['MXRF11', 'HGLG11'],
     transactions: [
       { id: 77, client_tx_id: 'apk-local-77', date: '01/02/2026', operation: 'COMPRA', symbol: 'MXRF11', asset_type: 'FII Papel', quantity: 10, price: 10.5, gross_value: 105, source: 'B3', imported_at: 123 },
@@ -60,15 +68,21 @@ try {
     ],
   });
 
+  const payload = json(res);
   assert.equal(res.statusCode, 200);
-  assert.equal(json(res).ok, true);
-  assert.equal(json(res).count, 2);
-  assert.ok(calls.some((c) => c.init.method === 'DELETE' && c.url.includes('ticker=in.(MXRF11,HGLG11)')));
-  const post = calls.find((c) => c.init.method === 'POST' && c.url.includes('on_conflict=user_id,client_tx_id'));
-  assert.ok(post, 'deve regravar as transações filtradas dos tickers informados');
-  const postedRows = JSON.parse(post.init.body);
-  assert.deepEqual(postedRows.map((row) => row.client_tx_id), ['apk-local-77', 'apk-local-88']);
-  assert.ok(!postedRows.some((row) => row.ticker === 'PETR4'));
+  assert.equal(payload.ok, true);
+  assert.equal(payload.count, 2);
+  assert.equal(payload.deleted, 2);
+  assert.equal(payload.syncState.revision, 8);
+  const rpc = calls.find((c) => c.url.includes('/rpc/valorae_sync_replace_transactions'));
+  assert.ok(rpc, 'deve usar a RPC transacional com trava/revisão');
+  const args = JSON.parse(rpc.init.body);
+  assert.deepEqual(args.p_symbols, ['MXRF11', 'HGLG11']);
+  assert.equal(args.p_expected_revision, 7);
+  assert.equal(args.p_expected_deletion_generation, 0);
+  assert.equal(args.p_expected_tombstone, false);
+  assert.deepEqual(args.p_rows.map((row) => row.client_tx_id), ['apk-local-77', 'apk-local-88']);
+  assert.ok(!args.p_rows.some((row) => row.ticker === 'PETR4'));
 } finally {
   if (oldEnv.url === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = oldEnv.url;
   if (oldEnv.key === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY; else process.env.SUPABASE_SERVICE_ROLE_KEY = oldEnv.key;
@@ -76,4 +90,4 @@ try {
   globalThis.fetch = oldFetch;
 }
 
-console.log('Supabase replace transactions v78 tests OK.');
+console.log('Supabase replace transactions v78/current-integrity tests OK.');

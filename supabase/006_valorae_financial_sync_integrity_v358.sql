@@ -311,7 +311,7 @@ begin
          r->>'broker', r->>'sector', r->>'notes',
          coalesce(r->'payload', '{}'::jsonb), now()
     from jsonb_array_elements(coalesce(p_rows, '[]'::jsonb)) r
-     and r->>'ticker' = any(coalesce(p_symbols, array[]::text[]))
+   where r->>'ticker' = any(coalesce(p_symbols, array[]::text[]))
   on conflict (user_id, client_tx_id) do update set
     ticker = excluded.ticker,
     name = excluded.name,

@@ -163,8 +163,9 @@
     toastTimer = setTimeout(() => node.classList.remove('show'), 2600);
   }
 
-  function statusTone(status) {
+  function statusTone(status, event = {}) {
     const code = Number(status || 0);
+    if (code === 409 && event?.payloadSignals?.syncRetryable === true) return 'redirect';
     if (code >= 400 || code === 0) return 'error';
     if (code >= 300) return 'redirect';
     return 'success';
@@ -381,7 +382,7 @@
       const eventApp = String(event.appName || event.device || 'Consumidor API');
       if (app !== 'all' && eventApp !== app) return false;
       if (!search) return true;
-      const haystack = [event.route, event.ticker, event.view, eventApp, event.appChannel, event.sourceStatus, event.cacheStatus, event.requestId, ...(event.queryKeys || [])].join(' ').toLowerCase();
+      const haystack = [event.route, event.ticker, event.view, eventApp, event.appChannel, event.sourceStatus, event.cacheStatus, event.requestId, event.payloadSignals?.syncCode, ...(event.queryKeys || [])].join(' ').toLowerCase();
       return haystack.includes(search);
     }).slice(0, state.feedLimit);
   }
@@ -398,13 +399,16 @@
     $('eventFeed').innerHTML = state.filteredEvents.map(event => {
       const id = eventIdentity(event);
       const selected = id === state.selectedId;
-      const tone = statusTone(event.status);
+      const tone = statusTone(event.status, event);
       const source = event.sourceStatus && event.sourceStatus !== 'unknown' ? event.sourceStatus : 'fonte —';
       const cache = event.cacheStatus && event.cacheStatus !== 'unknown' ? event.cacheStatus : 'cache —';
       const flags = [
         event.ticker ? `<span class="flag">${escapeHtml(event.ticker)}</span>` : '',
         `<span class="flag">${escapeHtml(source)}</span>`,
         `<span class="flag">${escapeHtml(cache)}</span>`,
+        event.payloadSignals?.syncConflict ? '<span class="flag">conflito recuperável</span>' : '',
+        event.payloadSignals?.syncRetryable === true && !event.payloadSignals?.syncConflict ? '<span class="flag">retentativa automática</span>' : '',
+        event.payloadSignals?.syncCode ? `<span class="flag">${escapeHtml(event.payloadSignals.syncCode)}</span>` : '',
         event.partial?.detected ? `<span class="flag${event.partial.classification === 'critical' ? ' danger' : ''}">parcial ${escapeHtml(event.partial.classification || '')}</span>` : '',
         event.aborted || event.clientClosed ? '<span class="flag danger">cancelada</span>' : event.slow ? '<span class="flag danger">lenta</span>' : '',
       ].filter(Boolean).join('');
@@ -442,6 +446,13 @@
     const queryText = queryEntries.length ? queryEntries.map(([key, value]) => `${key}=${value}`).join(' · ') : (event.queryKeys || []).join(', ') || 'sem parâmetros visíveis';
     const roots = Array.isArray(event.payloadRoots) ? event.payloadRoots : [];
     const signals = event.payloadSignals && typeof event.payloadSignals === 'object' ? event.payloadSignals : {};
+    const responseTone = signals.syncConflict && signals.syncRetryable === true
+      ? 'info'
+      : Number(event.status || 0) >= 500
+        ? 'danger'
+        : Number(event.status || 0) >= 400
+          ? 'warning'
+          : 'success';
     $('eventDetailBody').innerHTML = `
       <div class="detail-block"><p class="detail-route">${escapeHtml(event.route || '/')}</p><div class="detail-subline"><span>${escapeHtml(formatDateTime(event.at))}</span><span>request ${escapeHtml(event.requestId || 'não informado')}</span><span>${escapeHtml(event.interceptor || 'interceptor —')}</span></div></div>
       <dl class="fact-list">${facts([
@@ -450,7 +461,11 @@
         ['Entrada', `${formatBytes(event.bytesIn || 0)} · ${event.requestContentType || 'sem body'}`],
         ['Parâmetros', queryText],
         ['Ticker / view', [event.ticker, event.view].filter(Boolean).join(' · ') || '—'],
-        ['Resposta', `${event.status || '—'} · ${event.contentType || 'tipo não informado'}`, Number(event.status || 0) >= 400 ? 'danger' : 'success'],
+        ['Resposta', `${event.status || '—'} · ${event.contentType || 'tipo não informado'}`, responseTone],
+        ['Código sync', signals.syncCode || '—', signals.syncConflict ? 'info' : ''],
+        ['Retentativa', signals.syncRetryable === true ? 'permitida' : signals.syncRetryable === false ? 'não permitida' : 'não informada', signals.syncRetryable === true ? 'warning' : ''],
+        ['Conflito', signals.syncConflict === true ? 'recuperável mediante atualização de estado' : 'não', signals.syncConflict === true ? 'info' : ''],
+        ['Retentar após', Number.isFinite(Number(signals.syncRetryAfterMs)) ? formatMs(Number(signals.syncRetryAfterMs)) : '—'],
         ['Latência', formatMs(event.latencyMs), event.slow ? 'warning' : ''],
         ['Saída', formatBytes(event.bytesOut || 0)],
         ['Fonte', event.sourceStatus || 'unknown'],
@@ -583,9 +598,18 @@
   }
 
   function renderErrors() {
-    const errors = state.events.filter(event => Number(event.status || 0) >= 400 || event.aborted || event.clientClosed).slice(0, 40);
-    $('errorCount').textContent = formatNumber(errors.length);
-    $('errorList').innerHTML = errors.length ? errors.map(event => `<div class="error-row"><time>${escapeHtml(formatTime(event.at))}</time><strong class="tone-${Number(event.status || 0) >= 500 ? 'danger' : 'warning'}">${escapeHtml(event.status || '—')}</strong><code title="${escapeHtml(event.route || '')}">${escapeHtml(event.route || '/')}</code><span>${escapeHtml(event.sourceStatus || event.deliveryDecision || '—')}</span><span>${escapeHtml(formatMs(event.latencyMs))}</span></div>`).join('') : '<div class="empty-copy">Nenhum erro ou cancelamento no feed recente.</div>';
+    const occurrences = state.events.filter(event => Number(event.status || 0) >= 400 || event.aborted || event.clientClosed).slice(0, 40);
+    $('errorCount').textContent = formatNumber(occurrences.length);
+    $('errorList').innerHTML = occurrences.length ? occurrences.map(event => {
+      const status = Number(event.status || 0);
+      const signals = event.payloadSignals && typeof event.payloadSignals === 'object' ? event.payloadSignals : {};
+      const recoverableConflict = status === 409 && signals.syncRetryable === true;
+      const tone = recoverableConflict ? 'info' : status >= 500 ? 'danger' : 'warning';
+      const classification = recoverableConflict
+        ? `conflito recuperável${signals.syncCode ? ` · ${signals.syncCode}` : ''}`
+        : signals.syncCode || event.sourceStatus || event.deliveryDecision || (event.aborted || event.clientClosed ? 'cancelada pelo cliente' : '—');
+      return `<div class="error-row"><time>${escapeHtml(formatTime(event.at))}</time><strong class="tone-${tone}">${escapeHtml(event.status || '—')}</strong><code title="${escapeHtml(event.route || '')}">${escapeHtml(event.route || '/')}</code><span title="${escapeHtml(classification)}">${escapeHtml(classification)}</span><span>${escapeHtml(formatMs(event.latencyMs))}</span></div>`;
+    }).join('') : '<div class="empty-copy">Nenhum erro, conflito ou cancelamento no feed recente.</div>';
   }
 
   function drawTrafficChart() {
