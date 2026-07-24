@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const RELEASE_PATCH = '21.12.391-analysis-change-monitor-v359';
+  const RELEASE_PATCH = '21.12.394-runtime-safety-v362';
   const STORAGE = {
     theme: 'valorae:monitor:theme',
     apiBase: 'valorae:monitor:apiBase',

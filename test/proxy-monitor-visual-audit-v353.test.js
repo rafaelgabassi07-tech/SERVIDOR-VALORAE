@@ -21,7 +21,7 @@ assert.match(index, /id="monitorMain"[^>]*aria-busy="false"/);
 assert.match(index, /id="pauseButton"[^>]*aria-pressed="false"/);
 assert.match(index, /class="pause-glyph"/);
 assert.match(index, /class="play-glyph"/);
-assert.match(index, /id="drawerReleaseLabel">Core v359 · UI v359</);
+assert.match(index, /id="drawerReleaseLabel">Core v362 · UI v359</);
 assert.match(index, /id="feedCount"[^>]*role="status"[^>]*aria-live="polite"/);
 assert.match(index, /id="trafficChart"[^>]*role="img"/);
 assert.match(index, /id="apiBaseInput"[^>]*autocomplete="url"[^>]*spellcheck="false"/);

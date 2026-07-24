@@ -9,7 +9,7 @@
   "description": "Monitor operacional do VALORAE Proxy Gateway com tráfego ao vivo, saúde, benchmark e arquitetura observável.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.391",
+  "version": "21.12.394",
   "icons": [
     {
       "src": "/assets/valorae-icon-192.png",

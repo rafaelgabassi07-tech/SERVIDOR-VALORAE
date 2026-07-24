@@ -4,7 +4,7 @@ Data: 2026-07-23
 
 ## Escopo
 
-- pareamento com o APK v531 (`2026.07.23.02`);
+- pareamento com o APK v531 (`2026.07.23.03`);
 - suporte visual ao bloco "O que mudou" dos modais de ações e FIIs;
 - remoção de módulos sem consumidor comprovado;
 - nova identidade visual e logotipo do Monitor Proxy Gateway;
@@ -34,7 +34,7 @@ O gate `npm run audit:dead-code` agora:
 - build Vercel-safe aprovado;
 - 392 arquivos JavaScript com sintaxe aprovada;
 - grafo de runtime: 144/144 módulos alcançáveis;
-- auditoria de versão aprovada para `21.12.391-analysis-change-monitor-v359`;
+- auditoria de versão aprovada para `21.12.392-extraction-intelligence-v360`;
 - suíte integral: 136 aprovados, 113 bloqueados por dependências ausentes no ambiente, 0 falhas;
 - suíte cross-stack: 22 aprovados, 16 bloqueados por dependências ausentes, 0 falhas;
 - servidor local serviu monitor, SVG, CSS, JavaScript e health check com HTTP 200.

@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v359 com rastreamento de mudanças fundamentalistas, runtime sem caminhos obsoletos e monitor Gateway responsivo, pareado ao APK v531.",
+  "description": "Proxy v362 com JSON sanitizado, navegador isolado e transporte HTTP limitado, pareado ao APK v534.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -27,25 +27,25 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.391-analysis-change-monitor-v359",
+    "releasePatch": "21.12.394-runtime-safety-v362",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.391",
-    "checkpoint": "analysis-change-monitor-v359",
-    "releaseLabel": "analysis-change-monitor-v359"
+    "publicVersion": "21.12.394",
+    "checkpoint": "runtime-safety-v362",
+    "releaseLabel": "runtime-safety-v362"
   },
-  "releasePatch": "21.12.391-analysis-change-monitor-v359",
+  "releasePatch": "21.12.394-runtime-safety-v362",
   "config": {
-    "releasePatch": "21.12.391-analysis-change-monitor-v359",
-    "publicVersion": "21.12.391",
-    "checkpoint": "analysis-change-monitor-v359",
-    "releaseLabel": "analysis-change-monitor-v359"
+    "releasePatch": "21.12.394-runtime-safety-v362",
+    "publicVersion": "21.12.394",
+    "checkpoint": "runtime-safety-v362",
+    "releaseLabel": "runtime-safety-v362"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.391-analysis-change-monitor-v359",
-    "publicVersion": "21.12.391",
-    "checkpoint": "analysis-change-monitor-v359",
-    "releaseLabel": "analysis-change-monitor-v359"
+    "releasePatch": "21.12.394-runtime-safety-v362",
+    "publicVersion": "21.12.394",
+    "checkpoint": "runtime-safety-v362",
+    "releaseLabel": "runtime-safety-v362"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

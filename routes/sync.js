@@ -21,7 +21,7 @@ const TRANSACTIONS_TABLE = process.env.VALORAE_SUPABASE_TRANSACTIONS_TABLE || 'v
 const DIVIDENDS_TABLE = process.env.VALORAE_SUPABASE_DIVIDENDS_TABLE || 'valorae_dividend_events';
 const BACKUPS_TABLE = process.env.VALORAE_SUPABASE_BACKUPS_TABLE || process.env.VALORAE_SUPABASE_BACKUP_TABLE || 'valorae_sync_backups';
 const SYNC_STATE_TABLE = process.env.VALORAE_SUPABASE_SYNC_STATE_TABLE || 'valorae_sync_user_state';
-const CORE_VERSION = '21.12.391-analysis-change-monitor-v359';
+const CORE_VERSION = '21.12.394-runtime-safety-v362';
 // Compat lineage: 21.12.151-cloud-primary-supabase-v88.
 
 const SNAPSHOT_FULL_SELECT = 'payload,payload_ciphertext,encrypted,updated_at,domain,snapshot_key,user_id,cache_scope,cache_ttl_seconds,expires_at,source,source_updated_at,etag,payload_size_bytes';

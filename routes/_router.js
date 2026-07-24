@@ -8,7 +8,7 @@ import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.
 import { buildAssetsPayload, buildIndicesPayload, buildMarketMovers, getQuote } from '../lib/sources/quotes.js';
 import { fetchInvestidor10Rankings, getIpcaSeries, getConfirmedDividendsByTicker, buildSourceAdapterManifest, VALORAE_SOURCE_ADAPTER_VERSION } from '../lib/sources/adapters/index.js';
 import { getNews } from '../lib/sources/news.js';
-import { fetchText } from '../lib/sources/fetch.js';
+import { fetchAllowedScrapeText } from '../lib/scrape/safe-target-fetch.js';
 import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tickers.js';
 import { getAgendaDividends } from '../lib/sources/agenda-dividends.js';
 import { buildAnalysisPageResponse } from '../lib/analysis/analysis-page-response.js';
@@ -507,11 +507,14 @@ function scrapeError(code, message, status = 400, extras = {}) {
   return { status: 'ERROR', code, error: message, ...extras, retryable: false };
 }
 
-function allowedScrapeHost(hostname = '') {
-  const host = String(hostname || '').toLowerCase();
-  const env = String(process.env.VALORAE_SCRAPE_ALLOWED_HOSTS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-  const allowed = env.length ? env : ['investidor10.com.br', 'www.investidor10.com.br', 'statusinvest.com.br', 'www.statusinvest.com.br', 'fundamentus.com.br', 'www.fundamentus.com.br', 'dados.cvm.gov.br'];
-  return allowed.some(base => host === base || host.endsWith(`.${base}`));
+function allowedScrapeHosts() {
+  const env = String(process.env.VALORAE_SCRAPE_ALLOWED_HOSTS || '')
+    .split(',')
+    .map(value => value.trim().replace(/^\.+|\.+$/g, '').toLowerCase())
+    .filter(Boolean);
+  return env.length
+    ? [...new Set(env)]
+    : ['investidor10.com.br', 'statusinvest.com.br', 'fundamentus.com.br', 'dados.cvm.gov.br'];
 }
 
 async function bodyOrQuery(req, parsed) {
@@ -534,7 +537,7 @@ function rootPayload() {
     version: RELEASE.version,
     status: 'online',
     contract: RELEASE.contract,
-    routes: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/dividends/batch', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/analysis', '/api/v1/monitor/summary', '/api/v1/monitor/self-test', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health', '/api/v1/contract/baseline', '/api/v1/contract/observability', '/api/v1/contract/source-adapters', '/api/v1/contract/html-parser-shadow', '/api/v1/contract/structured-data', '/api/v1/contract/dynamic-render', '/api/v1/contract/formal-schemas', '/api/v1/contract/http-transport', '/api/v1/contract/shared-state', '/api/v1/contract/real-canaries', '/api/v1/contract/final-decomposition', '/api/v1/contract/scraping-engine'],
+    routes: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/dividends/batch', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/analysis', '/api/v1/monitor/summary', '/api/v1/monitor/self-test', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health', '/api/v1/contract/baseline', '/api/v1/contract/observability', '/api/v1/contract/source-adapters', '/api/v1/contract/html-parser-shadow', '/api/v1/contract/structured-data', '/api/v1/contract/dynamic-render', '/api/v1/contract/extraction-intelligence', '/api/v1/contract/formal-schemas', '/api/v1/contract/http-transport', '/api/v1/contract/shared-state', '/api/v1/contract/real-canaries', '/api/v1/contract/final-decomposition', '/api/v1/contract/scraping-engine'],
     router: routeManifest(),
     monitor: '/server.html'
   };
@@ -989,6 +992,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/contract/html-parser-shadow') return sendJson(req, res, { ...(await buildLazyFeatureManifest('html-parser-shadow', () => import('../lib/scrape/standard-html-parser.js'), 'buildHtmlParserShadowManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
     if (path === '/contract/structured-data') return sendJson(req, res, { ...(await buildLazyFeatureManifest('structured-data', () => import('../lib/scrape/structured-data-discovery.js'), 'buildStructuredDataManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
     if (path === '/contract/dynamic-render') return sendJson(req, res, { ...(await buildLazyFeatureManifest('dynamic-render', () => import('../lib/scrape/dynamic-render-fallback.js'), 'buildDynamicRenderManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=15' });
+    if (path === '/contract/extraction-intelligence') return sendJson(req, res, { ...(await buildLazyFeatureManifest('extraction-intelligence', () => import('../lib/scrape/extraction-intelligence.js'), 'buildExtractionIntelligenceManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
     if (path === '/contract/formal-schemas') return sendJson(req, res, { ...buildFormalSchemaManifest({ includeSchemas: String(payload.includeSchemas || payload.full || '').toLowerCase() === 'true' || payload.includeSchemas === '1' }), release: RELEASE.patch }, { cacheControl: 'private, max-age=120' });
     if (path === '/contract/http-transport') return sendJson(req, res, { ...(await buildLazyFeatureManifest('http-transport', () => import('../lib/http/provider-transport.js'), 'buildProviderTransportManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=15' });
     if (path === '/contract/shared-state') return sendJson(req, res, { ...(await buildLazyFeatureManifest('shared-state', () => import('../lib/state/shared-runtime-state.js'), 'buildSharedStateManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=10' });
@@ -1144,13 +1148,33 @@ export async function dispatchRoute(req, res) {
     if (path === '/scrape') {
       const url = String(payload.url || '').trim();
       if (!url) return sendJson(req, res, scrapeError('MISSING_TARGET_URL', 'Informe url=https://... para fazer scraping controlado.'), { status: 400, cacheControl: 'no-store' });
-      let parsedTarget;
-      try { parsedTarget = new URL(url); } catch { return sendJson(req, res, scrapeError('INVALID_TARGET_URL', 'URL inválida.'), { status: 400, cacheControl: 'no-store' }); }
-      if (parsedTarget.username || parsedTarget.password) return sendJson(req, res, scrapeError('INVALID_TARGET_URL_CREDENTIALS', 'URL com credenciais embutidas não é aceita.'), { status: 400, cacheControl: 'no-store' });
-      if (parsedTarget.protocol !== 'https:') return sendJson(req, res, scrapeError('INVALID_TARGET_URL_PROTOCOL', 'Somente HTTPS é aceito para scraping via proxy.'), { status: 400, cacheControl: 'no-store' });
-      if (!allowedScrapeHost(parsedTarget.hostname)) return sendJson(req, res, scrapeError('SCRAPE_HOST_NOT_ALLOWED', 'Host fora da allowlist do Valorae Proxy.', 403, { hostname: parsedTarget.hostname }), { status: 403, cacheControl: 'no-store' });
-      const fetched = await fetchText(url, { timeoutMs: Number(payload.timeoutMs || 5500), ttlMs: 60000 });
-      return sendJson(req, res, { status: fetched.status ? 'OK' : 'ERROR', url, html: payload.returnHtml ? fetched.text : undefined, text: fetched.text?.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0, Number(payload.limit || 5000)), metrics: { cacheStatus: fetched.cacheStatus, status: fetched.status } });
+      let fetched;
+      try {
+        fetched = await fetchAllowedScrapeText(url, {
+          allowedHosts: allowedScrapeHosts(),
+          timeoutMs: payload.timeoutMs,
+          maxRedirects: payload.maxRedirects,
+        });
+      } catch (error) {
+        const status = clampInt(error?.status, 400, 400, 504);
+        return sendJson(req, res, scrapeError(error?.code || 'SCRAPE_TARGET_REJECTED', error?.message || 'Destino de scraping rejeitado.', status), { status, cacheControl: 'no-store' });
+      }
+      const textLimit = clampInt(payload.limit, 5_000, 100, 50_000);
+      const htmlLimit = clampInt(payload.htmlLimit, 200_000, 1_000, 500_000);
+      const rawText = String(fetched.text || '');
+      return sendJson(req, res, {
+        status: fetched.status ? 'OK' : 'ERROR',
+        url: fetched.diagnosticUrl,
+        html: payload.returnHtml ? rawText.slice(0, htmlLimit) : undefined,
+        text: rawText.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, textLimit),
+        metrics: {
+          cacheStatus: fetched.cacheStatus,
+          status: fetched.status,
+          redirects: fetched.redirectCount || 0,
+          htmlTruncated: Boolean(payload.returnHtml && rawText.length > htmlLimit),
+          networkSafetyPolicy: fetched.networkSafetyPolicy,
+        },
+      });
     }
     if (path === '/batch-scrape') return sendJson(req, res, { status: 'OK', results: [], data: [] });
     if (path === '/server/metrics' || path === '/observability' || path === '/engine/maturity' || path === '/engine/performance') return runLazyDefaultHandler('route-server-metrics', () => import('./server/metrics.js'), req, res);
@@ -1168,7 +1192,7 @@ export function routeManifest() {
     physicalFunctions: ['api/router.js'],
     legacyAliases: { '/ativo': '/asset', '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
     routes: [
-    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/contract/scraping-engine','/source/status','/release/readiness','/personal/readiness','/cache/stats','/cache/clear','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/asset/logo','/asset/yahoo-logo','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/modal','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
+    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/extraction-intelligence','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/contract/scraping-engine','/source/status','/release/readiness','/personal/readiness','/cache/stats','/cache/clear','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/asset/logo','/asset/yahoo-logo','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/modal','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
   ].sort() };
 }
 

@@ -1,4 +1,33 @@
-## 21.12.391 — Mudanças fundamentalistas, limpeza estrutural e Monitor Gateway (v359)
+## 21.12.394 — Segurança de runtime e transporte limitado (v362)
+
+- sanitiza JSON capturado, removendo campos sensíveis, chaves de prototype e estruturas acima dos limites;
+- aplica backpressure, limite de tarefas pendentes e prazo de settle ao coletor de rede;
+- habilita sandbox local por padrão e bloqueia downloads, popups, WebSockets e Service Workers;
+- executa preflight DNS em cada host permitido e exige endereço real do servidor por padrão;
+- valida DNS e allowlist em todos os redirecionamentos nativos, bloqueando troca de host, rede privada, loops e destinos sensíveis;
+- normaliza limites ambientais inválidos, aplica LRU ao cache DNS e remove valores pessoais/credenciais presentes em JSON capturado;
+- usa hash nas chaves de cache dinâmico e limita pools HTTP globais por LRU;
+- adiciona contrato móvel `2026.07.23-checkpoint126-v1`, pareado ao APK v534, preservando checkpoints 123 e 125.
+
+## 21.12.393 — Hardening de extração e endereço real (v361)
+
+- reconhece registros JSON estritos incorporados em frames React Flight/Next.js App Router sem executar JavaScript;
+- rejeita endpoints privados e especiais já na descoberta estática;
+- resolve o host antes da navegação dinâmica e valida o endereço real retornado pelo navegador quando disponível;
+- endurece IPv4 encapsulado em IPv6 e outras representações que poderiam contornar filtros de SSRF;
+- mantém promoção somente por preenchimento de lacunas e retrocompatibilidade com o contrato v360;
+- adiciona contrato móvel `2026.07.23-checkpoint125-v1`, pareado ao APK v533.
+
+## 21.12.392 — Inteligência de extração híbrida (v360)
+
+- adiciona descoberta estática e segura de estados de frameworks e atributos de hidratação;
+- adiciona captura limitada de respostas JSON/XHR/fetch no fallback Playwright;
+- usa `serviceWorkers: block`, contexto isolado, limites de bytes e deduplicação SHA-256;
+- promove somente dados aditivos para preencher lacunas, preservando valores financeiros já válidos;
+- adiciona contrato móvel `2026.07.23-checkpoint123-v1`, aceito de forma retrocompatível pelo APK v532;
+- mantém o caminho HTTP/HTML como padrão e o navegador como dependência opcional.
+
+## 21.12.392 — Mudanças fundamentalistas, limpeza estrutural e Monitor Gateway (v359)
 
 - adiciona comparação objetiva entre os dois estados comparáveis mais recentes nos modais de ações e FIIs;
 - remove caminhos de runtime sem consumidor e protege a limpeza com auditoria automática de alcançabilidade;

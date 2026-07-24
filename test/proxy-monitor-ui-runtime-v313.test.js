@@ -11,7 +11,7 @@ assert.equal(index, server, 'index.html e server.html precisam permanecer idênt
 const inlineScripts = [...index.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(match => match[1]);
 assert.equal(inlineScripts.length, 0, 'runtime do monitor deve permanecer separado do HTML');
 assert.doesNotThrow(() => new vm.Script(runtime, { filename: 'monitor-valorae.js' }));
-assert.ok(index.includes('21.12.391-analysis-change-monitor-v359'));
+assert.ok(index.includes('21.12.394-runtime-safety-v362'));
 assert.ok(index.includes('/monitor-valorae.css'));
 assert.ok(index.includes('/monitor-valorae.js'));
 for (const id of [

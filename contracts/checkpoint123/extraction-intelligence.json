@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2026.07.23-checkpoint123-v1",
+  "policyVersion": "safe-static-state-and-known-json-network-gap-fill-v1",
+  "implementation": "adaptive-dom-hydration-state-playwright-json-response-pipeline-v1",
+  "compatibility": "additive-backward-compatible",
+  "invariants": {
+    "mobileProtocolUnchanged": true,
+    "assetModalDeliverySchemaUnchanged": true,
+    "existingFinancialFieldsPreserved": true,
+    "staticValuesNeverOverwrittenByBrowserCandidates": true,
+    "browserFallbackOptional": true,
+    "olderProxyWithoutManifestAcceptedByApk": true
+  },
+  "features": [
+    "framework-hydration-state-discovery-without-eval",
+    "bounded-hydration-attribute-json",
+    "playwright-xhr-fetch-json-response-capture",
+    "known-host-and-known-endpoint-gap-fill",
+    "sensitive-url-and-payload-budgets",
+    "isolated-contexts-with-browser-process-reuse"
+  ]
+}

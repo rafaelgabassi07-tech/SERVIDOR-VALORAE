@@ -1,14 +1,23 @@
-# Release v359 — mudanças fundamentalistas e Monitor Gateway
+# Release v362 — segurança de runtime e transporte limitado
 
-## Release atual — 21.12.391 / v359 (2026-07-23)
+## Release atual — 21.12.394 / v362 (2026-07-23)
 
-O Proxy `21.12.391-analysis-change-monitor-v359` é pareado ao APK v531 (`2026.07.23.02`) e preserva o protocolo móvel `2026.07.10.10`.
+O Proxy `21.12.394-runtime-safety-v362` é pareado ao APK v534 (`2026.07.23.05`) e preserva o protocolo móvel `2026.07.10.10` e o schema de entrega `4`.
 
-- o APK compara indicadores com o snapshot local anterior e usa histórico real como primeira referência;
-- nenhum delta é inventado quando faltam dois valores comparáveis;
-- caminhos de ranking e componentes sem consumidor foram removidos do runtime da Análise;
-- o monitor recebeu identidade Proxy Gateway, novo logotipo vetorial e contraste adaptativo;
-- a migração transacional `supabase/006_valorae_financial_sync_integrity_v358.sql` continua obrigatória.
+- sanitiza JSON capturado antes de qualquer promoção, removendo campos sensíveis, chaves de prototype e estruturas acima dos limites;
+- limita tarefas pendentes, documentos, bytes e tempo de settle do coletor de rede;
+- habilita sandbox no Chromium local por padrão e bloqueia downloads, popups, WebSockets e Service Workers;
+- executa preflight DNS em cada host permitido e exige endereço real do servidor por padrão;
+- valida DNS e allowlist em cada redirecionamento da rota `/scrape` e do fetch direto, sem seguir saltos automaticamente;
+- remove valores pessoais/credenciais encontrados no conteúdo JSON, normaliza limites inválidos e mantém caches DNS/pools globalmente limitados;
+- armazena chaves de cache dinâmico por hash, sem expor URLs ou query strings;
+- limita globalmente pools HTTP por origem com descarte LRU;
+- resultados dinâmicos continuam apenas preenchendo lacunas e nunca substituem dados financeiros válidos;
+- aceita os contratos `2026.07.23-checkpoint123-v1` e `2026.07.23-checkpoint125-v1` e negocia o novo `2026.07.23-checkpoint126-v1`.
+
+# Release v361 — hardening de extração e endereço real
+
+O Proxy `21.12.393-extraction-hardening-v361` permanece compatível com o APK v533 e introduziu React Flight estrito, verificação de endereço real e bloqueio ampliado de redes privadas.
 
 # Release v358 — integridade financeira e sincronização transacional
 

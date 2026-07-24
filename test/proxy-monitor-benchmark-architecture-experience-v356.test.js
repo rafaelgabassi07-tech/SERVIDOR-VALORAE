@@ -14,7 +14,7 @@ const benchmark = JSON.parse(read('public/assets/valorae-monitor-benchmarks.json
 assert.equal(index, server);
 assert.doesNotThrow(() => new vm.Script(runtime));
 assert.match(index, /valorae-monitor-gateway-experience-v359/);
-assert.match(index, /Core v359 · UI v359/);
+assert.match(index, /Core v362 · UI v359/);
 assert.equal((index.match(/data-benchmark-scenario=/g) || []).length, 3);
 assert.equal((index.match(/data-architecture-node=/g) || []).length, 9);
 for (const id of ['benchmarkDecisionGrid', 'benchmarkScenarioIntro', 'benchmarkLeaderboard', 'engineCatalog', 'architectureLanes', 'architectureDetail']) {

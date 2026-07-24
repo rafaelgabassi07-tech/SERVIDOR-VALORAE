@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2026.07.23-checkpoint126-v1",
+  "policyVersion": "safe-sanitized-json-sandboxed-browser-bounded-transport-v4",
+  "implementation": "adaptive-dom-rsc-sanitized-json-sandboxed-playwright-bounded-transport-v4",
+  "compatibility": "additive-backward-compatible",
+  "invariants": {
+    "mobileProtocolUnchanged": true,
+    "assetModalDeliverySchemaUnchanged": true,
+    "existingFinancialFieldsPreserved": true,
+    "staticValuesNeverOverwrittenByBrowserCandidates": true,
+    "browserFallbackOptional": true,
+    "olderProxyWithoutManifestAcceptedByApk": true,
+    "checkpoint123AcceptedByApk": true,
+    "checkpoint125AcceptedByApk": true
+  },
+  "features": [
+    "captured-json-sensitive-field-removal",
+    "captured-json-prototype-key-removal",
+    "captured-json-depth-node-and-string-budgets",
+    "collector-pending-backpressure-and-settle-timeout",
+    "per-request-browser-dns-preflight",
+    "actual-browser-server-address-required-by-default",
+    "local-chromium-sandbox-enabled-by-default",
+    "downloads-popups-websockets-and-service-workers-blocked",
+    "hashed-dynamic-cache-keys",
+    "bounded-lru-undici-provider-pools",
+    "allowlisted-native-scrape-manual-redirect-dns-validation",
+    "direct-provider-manual-redirect-dns-validation"
+  ]
+}

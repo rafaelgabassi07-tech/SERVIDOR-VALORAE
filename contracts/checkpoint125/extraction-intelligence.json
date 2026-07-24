@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2026.07.23-checkpoint125-v1",
+  "policyVersion": "safe-rsc-state-and-address-verified-json-gap-fill-v2",
+  "implementation": "adaptive-dom-rsc-hydration-playwright-address-verified-json-pipeline-v2",
+  "compatibility": "additive-backward-compatible",
+  "invariants": {
+    "mobileProtocolUnchanged": true,
+    "assetModalDeliverySchemaUnchanged": true,
+    "existingFinancialFieldsPreserved": true,
+    "staticValuesNeverOverwrittenByBrowserCandidates": true,
+    "browserFallbackOptional": true,
+    "olderProxyWithoutManifestAcceptedByApk": true,
+    "checkpoint123AcceptedByApk": true
+  },
+  "features": [
+    "framework-hydration-state-discovery-without-eval",
+    "nextjs-app-router-react-flight-strict-json-records",
+    "bounded-hydration-attribute-json",
+    "playwright-xhr-fetch-json-response-capture",
+    "dns-resolution-preflight",
+    "actual-browser-server-address-verification",
+    "private-and-special-discovered-endpoint-rejection",
+    "known-host-and-known-endpoint-gap-fill",
+    "sensitive-url-and-payload-budgets",
+    "isolated-contexts-with-browser-process-reuse"
+  ]
+}

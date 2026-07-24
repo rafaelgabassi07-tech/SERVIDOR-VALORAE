@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const syncRoute = fs.readFileSync(path.join(process.cwd(), 'routes/sync.js'), 'utf8');
 
-assert.match(syncRoute, /21\.12\.391-analysis-change-monitor-v359/);
+assert.match(syncRoute, /21\.12\.394-runtime-safety-v362/);
 assert.match(syncRoute, /valorae_sync_upsert_transactions/);
 assert.match(syncRoute, /valorae_sync_replace_transactions/);
 assert.match(syncRoute, /get_transactions/);
