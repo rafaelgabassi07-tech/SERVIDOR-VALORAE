@@ -35,6 +35,7 @@ const envKeys = [
   'VALORAE_SHARED_STATE_MODE',
   'VALORAE_SHARED_STATE_SCOPE',
   'VALORAE_SHARED_STATE_REMOTE_TIMEOUT_MS',
+  'VALORAE_SHARED_STATE_REMOTE_ENABLED',
   'SUPABASE_URL',
   'SUPABASE_SERVICE_ROLE_KEY',
 ];
@@ -138,6 +139,7 @@ try {
   // Driver Supabase realista: REST, hidratação e RPC de lease, sem expor a service role.
   await resetSharedStateForTests();
   process.env.VALORAE_SHARED_STATE_MODE = 'supabase';
+  process.env.VALORAE_SHARED_STATE_REMOTE_ENABLED = '1';
   process.env.SUPABASE_URL = 'https://example.supabase.co';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-fixture';
   process.env.VALORAE_SHARED_STATE_REMOTE_TIMEOUT_MS = '2000';
@@ -197,6 +199,7 @@ try {
   };
 
   const remoteSet = await setSharedState('remote-test', 'beta', { source: 'remote' }, { ttlMs: 5000 });
+  if (remoteSet.remoteStored !== true) console.log('DEBUG remoteSet:', remoteSet);
   assert.equal(remoteSet.remoteStored, true);
   const staleSet = await setSharedState('remote-test', 'beta', { source: 'stale' }, { ttlMs: 5000, version: remoteSet.record.version - 1 });
   assert.equal(staleSet.remoteStored, false);

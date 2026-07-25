@@ -1153,7 +1153,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/watchlist/analyze') return sendJson(req, res, emptyCompatible('OK'));
     if (path === '/scrape') {
       const url = String(payload.url || '').trim();
-      if (!url) return sendJson(req, res, scrapeError('MISSING_TARGET_URL', 'Informe url=https://... para fazer scraping controlado.'), { status: 400, cacheControl: 'no-store' });
+      if (!url) return sendJson(req, res, scrapeError('MISSING_TARGET_URL', 'URL HTTPS permitida obrigatória.'), { status: 400, cacheControl: 'no-store' });
       let fetched;
       try {
         fetched = await fetchAllowedScrapeText(url, {
