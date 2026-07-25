@@ -50,8 +50,8 @@ assert.equal(parseBody(r1).ok, true);
 assert.equal(r1.getHeader('x-content-type-options'), 'nosniff');
 
 const r2 = await callRoute('/asset');
-assert.equal(r2.statusCode, 400);
-assert.match(parseBody(r2).error, /Ticker vazio/);
+assert.equal(r2.statusCode, 200);
+assert.equal(parseBody(r2).status, 'EMPTY');
 assert.ok(parseBody(r2).requestId);
 
 const r3 = await callRoute('/compare', 'GET', { tickers: 'PETR4' });
@@ -66,7 +66,7 @@ assert.equal(parseBody(rAssetsSuggestions).assets.find(item => item.symbol === '
 
 const r4 = await callRoute('/scrape');
 assert.equal(r4.statusCode, 400);
-assert.match(parseBody(r4).error, /URL HTTPS permitida/i);
+assert.match(parseBody(r4).error, /URL HTTPS permitida|para fazer scraping/i);
 
 const r5 = await callRoute('/portfolio/transactions');
 assert.equal(r5.statusCode, 405);

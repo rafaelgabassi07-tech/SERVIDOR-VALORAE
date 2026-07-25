@@ -263,7 +263,7 @@ export function shouldReplaceLocalCache(data) {
 function routeMethods(path = '') {
   const normalized = String(path || '').replace(/^\/api(?:\/v[12])?/, '') || '/';
   if (normalized === '/sync') return ['GET', 'POST', 'DELETE'];
-  if (normalized === '/portfolio/history') return ['GET', 'POST'];
+  if (normalized === '/portfolio/history' || normalized === '/compare') return ['GET', 'POST'];
   if (normalized === '/admin/cache' || normalized === '/cache/clear') return ['POST', 'DELETE'];
   const postRoutes = new Set([
     '/mobile/bootstrap', '/app/bootstrap',
@@ -274,7 +274,7 @@ function routeMethods(path = '') {
     '/portfolio/returns', '/portfolio/analyze', '/portfolio/allocation', '/portfolio/equilibrium',
     '/portfolio/balance', '/portfolio/history', '/portfolio/income', '/portfolio/rebalance',
     '/portfolio/risk', '/portfolio/summary', '/portfolio/transactions',
-    '/compare', '/watchlist/analyze', '/batch-scrape'
+    '/watchlist/analyze', '/batch-scrape'
   ]);
   return postRoutes.has(normalized) ? ['POST'] : ['GET'];
 }
@@ -1142,7 +1142,13 @@ export async function dispatchRoute(req, res) {
     }
     if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
     if (path === '/assets') return runLazyDefaultHandler('route-assets', () => import('./assets.js'), req, res);
-    if (path === '/compare') return sendJson(req, res, await buildComparisonPayload(payload), { cacheControl: 'private, max-age=60' });
+    if (path === '/compare') {
+      const tickers = comparisonTickers(payload);
+      if (tickers.length < 2) {
+        return sendJson(req, res, { status: 'ERROR', error: 'Informe ao menos dois tickers para comparação.' }, { status: 400, cacheControl: 'no-store' });
+      }
+      return sendJson(req, res, await buildComparisonPayload(payload), { cacheControl: 'private, max-age=60' });
+    }
     if (path === '/news') return sendJson(req, res, await getNews(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.news}, stale-while-revalidate=120` });
     if (path === '/watchlist/analyze') return sendJson(req, res, emptyCompatible('OK'));
     if (path === '/scrape') {

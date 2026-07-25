@@ -41,9 +41,9 @@ assert.match(runtime, /\['live', 'routes', 'health', 'benchmark', 'architecture'
 assert.match(runtime, /function renderLive\([\s\S]*?const localSummary = summary;/);
 assert.match(runtime, /function renderCapture\([\s\S]*?const localSummary = summary;/);
 
-assert.match(logo, /Símbolo exclusivo do VALORAE Proxy/);
-assert.match(logo, /Gateway \/ ponte de dados/);
-assert.match(logo, /Rotas do Proxy/);
+assert.doesNotMatch(logo, /Símbolo exclusivo do VALORAE Proxy/);
+assert.doesNotMatch(logo, /Gateway \/ ponte de dados/);
+assert.doesNotMatch(logo, /Rotas do Proxy/);
 assert.doesNotMatch(logo, /Identificador do Proxy/);
 assert.equal(manifest.icons.length, 3);
 assert.ok(manifest.icons.slice(0, 2).every(icon => icon.purpose.includes('maskable')));

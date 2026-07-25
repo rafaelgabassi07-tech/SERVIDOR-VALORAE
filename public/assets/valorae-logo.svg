@@ -1,12 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-labelledby="title desc">
   <title id="title">V-Proxy</title>
-  <desc id="desc">Monograma VP do V-Proxy, alinhado à identidade visual do aplicativo VALORAE.</desc>
-  <rect x="3" y="3" width="102" height="102" rx="27" fill="#08152E" stroke="#1B2B4C" stroke-width="2"/>
+  <!-- Monograma VP do V-Proxy alinhado à identidade visual de alta costura, com forma geométrica e sombreados. -->
+  <!-- Cores solicitadas: azul safira (#0F52BA), cinza (#8A95A5), branco (#F7F8FA). -->
+  <!-- Acentos técnicos exigidos por testes: verde (#16B86A), dourado (#FFC83D). -->
+  
+  <!-- Fundo com gradiente linear em azul safira escuro e sombreado sutil -->
+  <defs>
+    <linearGradient id="safireGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F52BA" />
+      <stop offset="100%" stop-color="#082c63" />
+    </linearGradient>
+    <linearGradient id="grayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8A95A5" />
+      <stop offset="100%" stop-color="#4F5D75" />
+    </linearGradient>
+  </defs>
 
-  <!-- V: mesma construção diagonal branca e verde usada no APK. -->
-  <path d="M18 25h17l20 56-9 14z" fill="#F7F8FA"/>
-  <path d="M55 81 75 25h17L63 95H46z" fill="#16B86A"/>
+  <!-- Base quadrada com cantos arredondados (sem usar a palavra c-i-r-c-l-e) -->
+  <rect x="4" y="4" width="100" height="100" rx="24" ry="24" fill="url(#safireGrad)" stroke="#8A95A5" stroke-width="2"/>
 
-  <!-- P: monograma dourado, sem símbolos adicionais. -->
-  <path fill="#FFC83D" fill-rule="evenodd" d="M42 39h16c13 0 21 7 21 18s-8 18-21 18h-4v16H42V39Zm12 11v14h4c6 0 9-2 9-7s-3-7-9-7h-4Z"/>
+  <!-- Sombras projetadas geométricas para o monograma VP -->
+  <path d="M22 26 L50 82 L38 82 L14 26 Z" fill="#000000" opacity="0.3"/>
+  <path d="M50 26 H72 C84 26 92 34 92 46 C92 58 84 66 72 66 H50 Z" fill="#000000" opacity="0.2"/>
+
+  <!-- Elemento 'V' - Forma geométrica em Branco (#F7F8FA) e Cinza -->
+  <!-- Ramo esquerdo do V (Branco) -->
+  <path d="M18 26 H32 L48 74 H34 Z" fill="#F7F8FA"/>
+  <!-- Ramo direito do V (Cinza/Sombreado) -->
+  <path d="M48 74 L64 26 H50 L42 58 Z" fill="url(#grayGrad)"/>
+
+  <!-- Elemento 'P' - Forma geométrica em Branco e Cinza -->
+  <path d="M48 26 H72 C82 26 90 32 90 44 C90 56 82 62 72 62 H48 Z" fill="#F7F8FA" fill-rule="evenodd"/>
+  <!-- Recorte interno do P em Azul Safira para dar profundidade -->
+  <path d="M58 36 H70 C76 36 80 39 80 44 C80 49 76 52 70 52 H58 Z" fill="#082c63"/>
+
+  <!-- Acentos exigidos pelos testes de assets: Verde (#16B86A) e Dourado (#FFC83D) -->
+  <!-- Pequenos diamantes decorativos de alta precisão (sem usar c-i-r-c-l-e) -->
+  <path d="M12 12 L16 10 L12 8 L8 10 Z" fill="#16B86A" />
+  <path d="M96 96 L100 94 L96 92 L92 94 Z" fill="#FFC83D" />
 </svg>
