@@ -1,3 +1,7 @@
+# Hotfix — restauração de dados da nuvem (2026-07-24)
+
+O Proxy v362 mantém o contrato público e corrige a leitura de transações/proventos legados, payload JSON vazio ou parcial e identidades antigas armazenadas pelo e-mail verificado. Relatório: `docs/CLOUD_RESTORE_HOTFIX_2026_07_24.md`.
+
 # Release v362 — segurança de runtime e transporte limitado
 
 ## Release atual — 21.12.394 / v362 (2026-07-23)
@@ -70,14 +74,14 @@ O caminho de cotações agora usa fallback entre os hosts `query1` e `query2` do
 - `/api/server/metrics` combina a memória atual com os eventos persistidos e mantém o polling isolado.
 
 
-## Persistência do histórico do monitor no Supabase
+## Persistência opcional do histórico do monitor no Supabase
 
-1. Execute `supabase/005_valorae_monitor_events_persistence.sql` no SQL Editor do mesmo projeto Supabase usado pelo Proxy.
-2. Mantenha `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` configuradas somente no Vercel.
-3. Configure `VALORAE_MONITOR_PERSISTENCE_ENABLED=1` e, em produção, `VALORAE_MONITOR_PERSISTENCE_SCOPE=production`.
-4. Faça um novo deploy. O campo `monitorPersistence.active` em `/api/server/metrics` deve ficar `true`.
+1. Na operação normal, mantenha `VALORAE_MONITOR_PERSISTENCE_ENABLED=0`: o monitor funciona em memória, sem gravar ou consultar a linha do tempo no Supabase.
+2. Mantenha `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` configuradas somente no Vercel para as funções de produto que realmente precisam do banco.
+3. Somente para um diagnóstico temporário, execute `supabase/005_valorae_monitor_events_persistence.sql` e defina `VALORAE_MONITOR_PERSISTENCE_ENABLED=1`.
+4. O campo `monitorPersistence.active` em `/api/server/metrics` só fica `true` quando o opt-in e as credenciais estão presentes.
 
-A gravação é append-only com upsert idempotente por `event_key`, em lotes curtos e após o envio da resposta. Falhas do Supabase ativam cooldown e contingência em memória, sem bloquear nem alterar as respostas financeiras do Proxy. O painel consulta o histórico somente na rota de métricas e usa cache local curto; por padrão, carrega os 500 eventos mais recentes, enquanto o banco preserva todos até uma limpeza manual opcional.
+Credenciais do Supabase, sozinhas, não ativam mais a persistência. Isso evita inserts contínuos em `valorae_monitor_events`, leituras frequentes do histórico e crescimento desnecessário do banco. Quando habilitada explicitamente, a gravação continua pós-resposta, em lotes e com cooldown de falha; para operação normal, a telemetria permanece efêmera em memória.
 
 ### Diagnóstico persistente e alertas corrigidos
 

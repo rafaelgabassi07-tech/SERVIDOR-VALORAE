@@ -12,10 +12,12 @@ const worker = read('service-worker.js');
 const logo = read('assets/valorae-logo.svg');
 
 assert.equal(index, server, 'index.html e server.html devem manter a mesma marca e estrutura');
-assert.match(logo, /Símbolo exclusivo do VALORAE Proxy/);
-assert.match(logo, /Gateway \/ ponte de dados/);
-assert.match(logo, /Rotas do Proxy/);
-assert.doesNotMatch(logo, /Marca VALORAE do aplicativo com um pequeno indicador/);
+assert.match(logo, /<title id="title">V-Proxy<\/title>/);
+assert.match(logo, /Monograma VP do V-Proxy/);
+assert.match(logo, /#F7F8FA/);
+assert.match(logo, /#16B86A/);
+assert.match(logo, /#FFC83D/);
+assert.doesNotMatch(logo, /Gateway \/ ponte de dados|Rotas do Proxy/);
 
 for (const ref of [
   '/assets/valorae-logo.svg',
@@ -38,7 +40,7 @@ for (const asset of expectedAssets) {
 
 assert.deepEqual(manifest.icons.map((icon) => icon.sizes), ['192x192', '512x512', '1024x1024']);
 assert.ok(manifest.icons.every((icon) => icon.src.startsWith('/assets/valorae-icon-')));
-assert.match(index, /valorae-monitor-gateway-experience-v359/);
-assert.match(index, /Core v362 · UI v359/);
+assert.match(index, /valorae-monitor-gateway-experience-v360/);
+assert.match(index, /Core v362 · UI v360/);
 
 console.log('proxy-monitor-brand-assets-v356 ok');

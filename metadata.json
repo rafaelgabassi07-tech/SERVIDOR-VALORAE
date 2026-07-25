@@ -5,7 +5,7 @@
   "publicVersion": "21.12.394",
   "checkpoint": "runtime-safety-v362",
   "label": "runtime-safety-v362",
-  "monitorObservabilityVersion": "2026.07.23-v359",
+  "monitorObservabilityVersion": "2026.07.24-v360",
   "description": "Proxy v362 com inteligência de extração híbrida, DOM adaptativo e transporte HTTP seguro.",
   "requestFramePermissions": [],
   "majorCapabilities": [

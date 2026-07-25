@@ -41,7 +41,7 @@
     loading: false,
     timer: null,
     requestController: null,
-    pollMs: boundedNumber(safeStorage.get(STORAGE.poll, '3000'), 3000, 2000, 10000),
+    pollMs: boundedNumber(safeStorage.get(STORAGE.poll, '15000'), 15000, 10000, 60000),
     feedLimit: boundedNumber(safeStorage.get(STORAGE.feedLimit, '60'), 60, 30, 80),
     view: 'live',
     lastSuccessAt: 0,
@@ -283,7 +283,7 @@
       $('releaseLabel').textContent = compactRelease(fullRelease);
       $('releaseLabel').title = fullRelease;
     }
-    if ($('drawerReleaseLabel')) $('drawerReleaseLabel').textContent = `${compactRelease(fullRelease)} · UI v359`;
+    if ($('drawerReleaseLabel')) $('drawerReleaseLabel').textContent = `${compactRelease(fullRelease)} · UI v360`;
     if ($('instanceLabel')) $('instanceLabel').textContent = data?.instance?.id ? `instância ${compactId(data.instance.id, 8)}` : 'instância —';
     if ($('updatedLabel')) $('updatedLabel').textContent = state.error
       ? `falha: ${state.error}`
@@ -1202,7 +1202,7 @@
     $('rawDetails').addEventListener('toggle', () => { if ($('rawDetails').open) renderRawSnapshot(); });
     $('copySnapshotButton').addEventListener('click', () => state.data && copyText(JSON.stringify(state.data, null, 2), 'Snapshot copiado.'));
     $('pollInterval').addEventListener('change', () => {
-      state.pollMs = boundedNumber($('pollInterval').value, 3000, 2000, 10000);
+      state.pollMs = boundedNumber($('pollInterval').value, 15000, 10000, 60000);
       safeStorage.set(STORAGE.poll, String(state.pollMs));
       schedule();
       renderSettings();
@@ -1235,7 +1235,7 @@
     });
     $('resetPreferences').addEventListener('click', () => {
       Object.values(STORAGE).forEach(key => safeStorage.remove(key));
-      state.pollMs = 3000;
+      state.pollMs = 15000;
       state.feedLimit = 60;
       state.paused = false;
       setPauseState();

@@ -21,7 +21,7 @@ const runtime = read('public/monitor-valorae.js');
 assert.equal(pkg.valorae.publicVersion, '21.12.394');
 assert.equal(pkg.valorae.releasePatch, '21.12.394-runtime-safety-v362');
 assert.equal(pkg.valorae.checkpoint, 'runtime-safety-v362');
-assert.equal(metadata.monitorObservabilityVersion, '2026.07.23-v359');
+assert.equal(metadata.monitorObservabilityVersion, '2026.07.24-v360');
 assert.equal(manifest.version, '21.12.394');
 assert.equal(manifest.start_url, '/server.html#live');
 assert.equal(contract.contractVersionUnchanged, true);

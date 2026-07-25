@@ -40,6 +40,32 @@ function restore() {
 try {
   process.env.SUPABASE_URL = 'https://example.supabase.co/rest/v1';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-test';
+  delete process.env.VALORAE_MONITOR_PERSISTENCE_ENABLED;
+
+  resetMonitorPersistenceForTests();
+  resetServerMetricsForTests();
+  assert.equal(monitorPersistenceStatus().configured, true, 'credenciais devem ser reconhecidas');
+  assert.equal(monitorPersistenceStatus().active, false, 'credenciais isoladas não podem ativar a persistência do monitor');
+
+  const disabledBackgroundTasks = [];
+  const disabledReq = {
+    method: 'GET',
+    url: '/api/v1/asset/quote?ticker=VALE3',
+    waitUntil(task) { disabledBackgroundTasks.push(task); },
+    headers: { 'x-request-id': 'monitor-disabled-by-default' },
+  };
+  const disabledRes = {
+    statusCode: 200,
+    writableEnded: false,
+    setHeader() {},
+    getHeader() { return 'application/json'; },
+    write() { return true; },
+    end() { this.writableEnded = true; return this; },
+  };
+  attachProxyMetricsInterceptor(disabledReq, disabledRes);
+  disabledRes.end(JSON.stringify({ status: 'OK', ticker: 'VALE3' }));
+  assert.equal(disabledBackgroundTasks.length, 0, 'monitor em memória não pode agendar escrita no Supabase');
+
   process.env.VALORAE_MONITOR_PERSISTENCE_ENABLED = '1';
   process.env.VALORAE_MONITOR_PERSISTENCE_SCOPE = 'production';
   process.env.VALORAE_MONITOR_PERSISTENCE_TABLE = 'valorae_monitor_events';

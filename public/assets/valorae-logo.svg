@@ -1,19 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-labelledby="title desc">
-  <title id="title">VALORAE Proxy Gateway</title>
-  <desc id="desc">Símbolo exclusivo do VALORAE Proxy Gateway / ponte de dados: Rotas do Proxy convergem, são validadas e seguem para a aplicação.</desc>
-  <rect x="3" y="3" width="102" height="102" rx="27" fill="#0A1117" stroke="#263640" stroke-width="2"/>
+  <title id="title">V-Proxy</title>
+  <desc id="desc">Monograma VP do V-Proxy, alinhado à identidade visual do aplicativo VALORAE.</desc>
+  <rect x="3" y="3" width="102" height="102" rx="27" fill="#08152E" stroke="#1B2B4C" stroke-width="2"/>
 
-  <!-- V da família VALORAE, reduzido a duas rotas estruturais. -->
-  <path d="M28 27 53 80c.4.9 1.7.9 2.1 0L80 27" fill="none" stroke="#DDB354" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- V: mesma construção diagonal branca e verde usada no APK. -->
+  <path d="M18 25h17l20 56-9 14z" fill="#F7F8FA"/>
+  <path d="M55 81 75 25h17L63 95H46z" fill="#16B86A"/>
 
-  <!-- Gateway: entrada, validação central e saída. -->
-  <path d="M18 54h24" fill="none" stroke="#54DDD5" stroke-width="4" stroke-linecap="round"/>
-  <path d="M66 54h24" fill="none" stroke="#54DDD5" stroke-width="4" stroke-linecap="round"/>
-  <path d="m42 38 16 16-16 16" fill="none" stroke="#F3F7F8" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="m66 38-16 16 16 16" fill="none" stroke="#54DDD5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <circle cx="18" cy="54" r="5" fill="#0A1117" stroke="#54DDD5" stroke-width="3"/>
-  <circle cx="54" cy="54" r="6" fill="#0A1117" stroke="#DDB354" stroke-width="3"/>
-  <circle cx="90" cy="54" r="5" fill="#0A1117" stroke="#54DDD5" stroke-width="3"/>
-  <circle cx="54" cy="54" r="2" fill="#F3F7F8"/>
+  <!-- P: monograma dourado, sem símbolos adicionais. -->
+  <path fill="#FFC83D" fill-rule="evenodd" d="M42 39h16c13 0 21 7 21 18s-8 18-21 18h-4v16H42V39Zm12 11v14h4c6 0 9-2 9-7s-3-7-9-7h-4Z"/>
 </svg>

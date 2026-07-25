@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#070B0F">
-  <meta name="valorae-ui" content="valorae-monitor-gateway-experience-v359">
+  <meta name="valorae-ui" content="valorae-monitor-gateway-experience-v360">
   <meta name="valorae-latest-patch" content="21.12.394-runtime-safety-v362">
   <meta name="valorae-readiness-endpoint" content="/api/v1/release/readiness">
-  <title>VALORAE Gateway · Monitor operacional</title>
+  <title>V-Proxy · Monitor operacional</title>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="/assets/valorae-logo.svg">
   <link rel="icon" type="image/png" sizes="48x48" href="/assets/valorae-favicon-48.png">
@@ -24,7 +24,7 @@
     </button>
     <a class="brand" href="#live" aria-label="Abrir tráfego ao vivo">
       <img src="/assets/valorae-logo.svg" alt="" width="40" height="40">
-      <span><strong>VALORAE</strong><small>Data Gateway</small></span>
+      <span><strong>V-Proxy</strong><small>Gateway VALORAE</small></span>
     </a>
     <div class="header-page" id="currentPageLabel" aria-live="polite">Ao vivo</div>
     <div class="connection" id="connectionState" role="status" aria-live="polite">
@@ -50,7 +50,7 @@
     <header class="drawer-header">
       <div class="drawer-brand">
         <img src="/assets/valorae-logo.svg" alt="" width="48" height="48">
-        <div><strong>VALORAE</strong><span>Proxy Gateway</span></div>
+        <div><strong>V-Proxy</strong><span>Gateway de dados</span></div>
       </div>
       <button class="icon-button" id="menuCloseButton" type="button" aria-label="Fechar menu" title="Fechar menu">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
@@ -84,7 +84,7 @@
         <span><strong>Ajustes</strong><small>Tema, origem e atualização</small></span>
       </button>
     </nav>
-    <footer class="drawer-footer"><span>Contrato protegido para o APK</span><strong id="drawerReleaseLabel">Core v362 · UI v359</strong></footer>
+    <footer class="drawer-footer"><span>Contrato protegido para o APK</span><strong id="drawerReleaseLabel">Core v362 · UI v360</strong></footer>
   </aside>
 
   <main id="monitorMain" class="monitor-main" aria-busy="false">
@@ -96,7 +96,7 @@
           <p id="liveDescription">Requisições, respostas, consumidores, fontes, cache, latência e payloads em uma linha do tempo única.</p>
         </div>
         <div class="instance-meta">
-          <span id="releaseLabel">v359</span>
+          <span id="releaseLabel">v360</span>
           <span id="instanceLabel">instância —</span>
           <span id="updatedLabel">aguardando dados</span>
         </div>
@@ -253,7 +253,7 @@
 
     <section class="view" id="view-architecture" data-view-panel="architecture" tabindex="-1" hidden>
       <header class="page-heading architecture-page-heading">
-        <div><span class="eyebrow">Mapa do sistema</span><h1>Arquitetura do VALORAE Proxy</h1><p>Uma visão por camadas do caminho entre o APK, as fontes externas e a resposta final, com pontos de cache, fallback, validação e telemetria claramente separados.</p></div>
+        <div><span class="eyebrow">Mapa do sistema</span><h1>Arquitetura do V-Proxy</h1><p>Uma visão por camadas do caminho entre o APK, as fontes externas e a resposta final, com pontos de cache, fallback, validação e telemetria claramente separados.</p></div>
       </header>
 
       <div class="metric-strip" id="architectureMetrics" aria-label="Resumo da arquitetura"></div>
@@ -334,7 +334,7 @@
       <div class="settings-list">
         <section class="setting-row"><div><h2>Tema</h2><p>Claro, escuro ou de acordo com o sistema.</p></div><div class="segmented" id="themeChoices"><button type="button" data-theme="dark">Escuro</button><button type="button" data-theme="light">Claro</button><button type="button" data-theme="system">Sistema</button></div></section>
         <section class="setting-row"><div><h2>Origem da API</h2><p>Deixe vazio para monitorar o mesmo deploy que abriu esta página.</p></div><div class="setting-control api-control"><input id="apiBaseInput" type="url" inputmode="url" aria-label="Origem da API do Proxy" autocomplete="url" spellcheck="false" placeholder="https://seu-proxy.vercel.app"><button class="text-button" id="saveApiBase" type="button">Salvar</button><button class="text-button" id="clearApiBase" type="button">Usar atual</button></div></section>
-        <section class="setting-row"><div><h2>Atualização</h2><p>Polling HTTP isolado da telemetria externa.</p></div><div class="setting-control"><select id="pollInterval"><option value="2000">2 segundos</option><option value="3000">3 segundos</option><option value="5000">5 segundos</option><option value="10000">10 segundos</option></select></div></section>
+        <section class="setting-row"><div><h2>Atualização</h2><p>Polling HTTP isolado da telemetria externa.</p></div><div class="setting-control"><select id="pollInterval"><option value="10000">10 segundos</option><option value="15000" selected>15 segundos</option><option value="30000">30 segundos</option><option value="60000">60 segundos</option></select></div></section>
         <section class="setting-row"><div><h2>Eventos visíveis</h2><p>Limite apenas da interface; a retenção do servidor não é alterada.</p></div><div class="setting-control"><select id="feedLimit"><option value="30">30 eventos</option><option value="60">60 eventos</option><option value="80">80 eventos</option></select></div></section>
         <section class="setting-row"><div><h2>Estado local</h2><p id="settingsState">Aguardando conexão.</p></div><div class="setting-control"><button class="text-button" id="resetPreferences" type="button">Restaurar preferências</button></div></section>
       </div>

@@ -1,4 +1,4 @@
-/* VALORAE Monitor v359 — gateway operacional, contraste adaptativo e superfícies responsivas. */
+/* VALORAE Monitor v360 — gateway operacional, contraste adaptativo e superfícies responsivas. */
 :root{
   color-scheme:dark;
   --bg:#070b0f;
@@ -603,7 +603,7 @@ input:focus,select:focus,.icon-button:focus-visible,.text-button:focus-visible,.
 }
 .benchmark-scenario-tabs button:focus-visible,.architecture-node:focus-visible{border-color:var(--accent);outline:2px solid color-mix(in srgb,var(--accent) 38%,transparent);outline-offset:2px}
 
-/* v359 — linguagem visual do gateway: menos ornamento, melhor hierarquia e resposta tátil. */
+/* v360 — linguagem visual do gateway: menos ornamento, melhor hierarquia e resposta tátil. */
 body{background:var(--bg)}
 body::before{
   content:"";position:fixed;inset:var(--header-height) 0 auto;height:1px;z-index:39;pointer-events:none;

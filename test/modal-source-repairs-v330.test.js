@@ -7,8 +7,8 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(pkg.valorae.publicVersion, '21.12.382');
-assert.equal(pkg.valorae.releasePatch, '21.12.382-quote-state-resilience-v350');
+assert.equal(pkg.valorae.publicVersion, '21.12.394');
+assert.equal(pkg.valorae.releasePatch, '21.12.394-runtime-safety-v362');
 assert.equal(metadata.apkVersion, '2026.07.23.05');
 assert.equal(fii.FII_MODAL_VERSION, '26.asset-modal.fii.v25-modal-source-repair');
 assert.equal(stock.STOCK_MODAL_VERSION, '26.asset-modal.stock.v58-modal-source-repair');
@@ -16,12 +16,12 @@ assert.equal(stock.STOCK_MODAL_VERSION, '26.asset-modal.stock.v58-modal-source-r
 const fiiChecklistHtml = `
   <section id="checklist">
     <div class="checklist-item">
-      <input type="checkbox" id="styled-checkbox-years" checked disabled>
-      <label>FII com mais de 5 anos listado em Bolsa <i data-content="Tempo desde a primeira cotação."></i></label>
+      <div class="checklist-state"><input disabled id="styled-checkbox-years" checked type="checkbox"></div>
+      <div class="checklist-copy"><label>FII com mais de 5 anos listado em Bolsa <i data-content="Tempo desde a primeira cotação."></i></label></div>
     </div>
     <div class="checklist-item">
-      <input type="checkbox" id="styled-checkbox-dy" disabled>
-      <label>Dividend Yield médio dos últimos 24 meses acima de 9% <i data-content="Média dos últimos 24 meses."></i></label>
+      <div class="checklist-state"><input disabled id="styled-checkbox-dy" type="checkbox"></div>
+      <div class="checklist-copy"><label>Dividend Yield médio dos últimos 24 meses acima de 9% <i data-content="Média dos últimos 24 meses."></i></label></div>
     </div>
   </section>`;
 const fiiChecklist = fii.extractInvestidor10FiiBuyHoldChecklist(fiiChecklistHtml, 'TEST11');
@@ -32,6 +32,16 @@ assert.equal(fiiChecklist.unknown, 0);
 assert.equal(fiiChecklist.items[0].dataNature, 'DIRECT');
 assert.match(fiiChecklist.items[0].evidence, /atributo checked/i);
 assert.match(fiiChecklist.items[1].evidence, /sem o atributo checked/i);
+
+const vacancyChecklist = fii.ensureFiiBuyHoldChecklist({
+  ticker: 'TEST11',
+  html: '<section>Vacância física: 7,5% · Vacância financeira: 4,2%</section>',
+  checklist: null,
+  infoItems: []
+});
+assert.equal(vacancyChecklist.items.find(item => item.id === 'physical_vacancy_below_10')?.passed, true);
+assert.equal(vacancyChecklist.items.find(item => item.id === 'financial_vacancy_below_10')?.passed, true);
+assert.equal(vacancyChecklist.items.find(item => item.id === 'financial_vacancy_below_10')?.value, 4.2);
 
 const peerRows = fii.normalizeInvestidor10FiiPeerApi({
   data: [
@@ -47,12 +57,12 @@ assert.equal(peerRows[1].patrimonialValue, 2953072420);
 const stockChecklistHtml = `
   <div id="checklist">
     <div class="checklist-item">
-      <input type="checkbox" id="styled-checkbox-years" checked disabled>
-      <label>Empresa com mais de 5 anos de Bolsa <i data-content="Histórico mínimo de negociação."></i></label>
+      <div class="checklist-state"><input id="styled-checkbox-years" type="checkbox" checked disabled></div>
+      <div class="checklist-copy"><label>Empresa com mais de 5 anos de Bolsa <i data-content="Histórico mínimo de negociação."></i></label></div>
     </div>
     <div class="checklist-item">
-      <input type="checkbox" id="styled-checkbox-profitable" disabled>
-      <label>Empresa nunca deu prejuízo (ano fiscal) <i data-content="Consistência anual de lucro."></i></label>
+      <div class="checklist-state"><input id="styled-checkbox-profitable" type="checkbox" disabled></div>
+      <div class="checklist-copy"><label>Empresa nunca deu prejuízo (ano fiscal) <i data-content="Consistência anual de lucro."></i></label></div>
     </div>
   </div>`;
 const stockChecklist = stock.extractInvestidor10StockBuyHoldChecklist(stockChecklistHtml, 'PETR4');

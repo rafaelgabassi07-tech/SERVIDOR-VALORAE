@@ -796,6 +796,42 @@ async function verifyClient(req, input = {}) {
   return { mode: 'device_client', userId: client.userId, deviceId: client.deviceId };
 }
 
+function legacyEmailIdentity(auth = {}) {
+  if (auth.mode !== 'supabase_auth') return '';
+  const email = safeText(auth.email || '', 160).toLowerCase();
+  return email && email !== safeText(auth.userId || '', 160).toLowerCase() ? email : '';
+}
+
+async function fetchRowsWithLegacyIdentityFallback(pathForUserId, auth) {
+  const primaryUserId = safeText(auth.userId || '', 160);
+  const primaryRows = await supabaseFetch(pathForUserId(primaryUserId), { method: 'GET' });
+  if (Array.isArray(primaryRows) && primaryRows.length > 0) {
+    return { rows: primaryRows, identity: 'supabase_user_id' };
+  }
+  const legacyEmail = legacyEmailIdentity(auth);
+  if (!legacyEmail) return { rows: Array.isArray(primaryRows) ? primaryRows : [], identity: 'supabase_user_id' };
+  const legacyRows = await supabaseFetch(pathForUserId(legacyEmail), { method: 'GET' });
+  return {
+    rows: Array.isArray(legacyRows) ? legacyRows : [],
+    identity: Array.isArray(legacyRows) && legacyRows.length > 0 ? 'legacy_verified_email' : 'supabase_user_id',
+  };
+}
+
+async function fetchSnapshotRowsWithIdentityFallback(queryBuilderForUserId, auth) {
+  const primaryUserId = safeText(auth.userId || '', 160);
+  const primary = await fetchSnapshotRowsWithCompat((select) => queryBuilderForUserId(primaryUserId, select));
+  if (Array.isArray(primary.rows) && primary.rows.length > 0) {
+    return { ...primary, identity: 'supabase_user_id' };
+  }
+  const legacyEmail = legacyEmailIdentity(auth);
+  if (!legacyEmail) return { ...primary, identity: 'supabase_user_id' };
+  const legacy = await fetchSnapshotRowsWithCompat((select) => queryBuilderForUserId(legacyEmail, select));
+  return {
+    ...legacy,
+    identity: Array.isArray(legacy.rows) && legacy.rows.length > 0 ? 'legacy_verified_email' : 'supabase_user_id',
+  };
+}
+
 async function upsertSnapshot(record, auth) {
   const userId = auth.userId;
   const row = safeRecord(record, userId);
@@ -848,8 +884,8 @@ async function getSnapshot(input, auth) {
     err.code = 'SNAPSHOT_NOT_FOUND';
     throw err;
   }
-  const queryBuilder = (select) => `user_id=eq.${encodeURIComponent(userId)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=eq.${encodeURIComponent(snapshotKey)}&select=${select}&order=updated_at.desc&limit=1`;
-  const compatibility = await fetchSnapshotRowsWithCompat(queryBuilder);
+  const queryBuilder = (identity, select) => `user_id=eq.${encodeURIComponent(identity)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=eq.${encodeURIComponent(snapshotKey)}&select=${select}&order=updated_at.desc&limit=1`;
+  const compatibility = await fetchSnapshotRowsWithIdentityFallback(queryBuilder, auth);
   const rows = compatibility.rows;
   const record = Array.isArray(rows) ? rows[0] : null;
   if (!record) {
@@ -865,6 +901,7 @@ async function getSnapshot(input, auth) {
     snapshot,
     snapshots: [snapshot],
     count: 1,
+    identitySource: compatibility.identity,
     schemaMode: compatibility.schemaMode,
     degraded: compatibility.degraded,
     warning: compatibility.warning,
@@ -889,8 +926,8 @@ async function getSnapshots(input, auth) {
     throw err;
   }
   const inValues = keys.map((key) => encodeURIComponent(key)).join(',');
-  const queryBuilder = (select) => `user_id=eq.${encodeURIComponent(userId)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=in.(${inValues})&select=${select}&order=updated_at.desc`;
-  const compatibility = await fetchSnapshotRowsWithCompat(queryBuilder);
+  const queryBuilder = (identity, select) => `user_id=eq.${encodeURIComponent(identity)}&domain=eq.${encodeURIComponent(domain)}&snapshot_key=in.(${inValues})&select=${select}&order=updated_at.desc`;
+  const compatibility = await fetchSnapshotRowsWithIdentityFallback(queryBuilder, auth);
   const rows = compatibility.rows;
   const snapshots = (Array.isArray(rows) ? rows : []).map(snapshotToClient);
   return {
@@ -898,6 +935,7 @@ async function getSnapshots(input, auth) {
     count: snapshots.length,
     requested: keys.length,
     snapshots,
+    identitySource: compatibility.identity,
     schemaMode: compatibility.schemaMode,
     degraded: compatibility.degraded,
     warning: compatibility.warning,
@@ -1044,6 +1082,140 @@ async function replaceTransactionsForSymbols(input, auth) {
   };
 }
 
+function recordPayload(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+
+function firstPresent(...values) {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return undefined;
+}
+
+function storedTransactionToClient(row = {}) {
+  const r = recordPayload(row);
+  const payload = recordPayload(r.payload);
+  const rawQuantity = Number(firstPresent(payload.quantity, r.quantity, 0));
+  const quantity = Number.isFinite(rawQuantity) ? Math.abs(rawQuantity) : 0;
+  const rawPrice = Number(firstPresent(payload.price, payload.purchasePrice, payload.purchase_price, r.purchase_price, r.price, 0));
+  const price = Number.isFinite(rawPrice) ? rawPrice : 0;
+  const rawGross = Number(firstPresent(payload.grossValue, payload.gross_value, r.gross_value, r.grossValue, quantity * price));
+  const grossValue = Number.isFinite(rawGross) ? rawGross : quantity * price;
+  const operationHint = firstPresent(
+    payload.operationCode,
+    payload.operation_code,
+    payload.operation,
+    payload.side,
+    payload.type,
+    payload.tipo,
+    r.operation_code,
+    r.operation,
+    r.side,
+    r.type,
+    r.tipo,
+    (r.is_sell || payload.is_sell || payload.isSell || rawQuantity < 0) ? 'VENDA' : 'COMPRA',
+  );
+  const classified = classifyCorporateOperation(operationHint, {
+    isSell: Boolean(r.is_sell || payload.is_sell || payload.isSell),
+    quantity: rawQuantity,
+  });
+  const operation = safeText(firstPresent(payload.operation, payload.side, r.operation, r.side, classified.code), 80).toUpperCase();
+  const dateValue = firstPresent(
+    payload.date,
+    payload.transactionDate,
+    payload.transaction_date,
+    r.date,
+    r.transaction_date,
+    r.transactionDate,
+    r.imported_at,
+    r.importedAt,
+    r.updated_at,
+  );
+  const normalizedDate = normalizeTransactionDate(dateValue);
+  const transactionMillis = transactionTimestamp(dateValue || normalizedDate || Date.now());
+  const ticker = normalizeSingleTransactionSymbol(firstPresent(payload.symbol, payload.ticker, r.ticker, r.symbol, ''));
+  const clientTxId = normalizeClientTxId(
+    firstPresent(r.client_tx_id, r.clientTxId, payload.client_tx_id, payload.clientTxId, payload.id, r.id, ''),
+    [ticker, normalizedDate, classified.code, quantity, price, grossValue, firstPresent(payload.source, r.source, '')].join('|'),
+  );
+  const assetType = safeText(firstPresent(payload.assetType, payload.asset_type, r.asset_type, r.assetType, r.type, ''), 40);
+  return {
+    ...payload,
+    id: Number(firstPresent(payload.id, r.id, 0)) || 0,
+    client_tx_id: clientTxId,
+    clientTxId,
+    symbol: ticker,
+    ticker,
+    name: safeText(firstPresent(payload.name, r.name, ticker), 160),
+    operation,
+    operationCode: classified.code,
+    operation_code: classified.code,
+    quantityEffect: classified.quantityEffect,
+    quantity_effect: classified.quantityEffect,
+    costEffect: classified.costEffect,
+    cost_effect: classified.costEffect,
+    quantity,
+    price,
+    purchasePrice: price,
+    grossValue,
+    gross_value: grossValue,
+    date: normalizedDate,
+    dateDisplay: formatBrDate(normalizedDate, ''),
+    assetType,
+    asset_type: assetType,
+    isSell: classified.reducesPosition,
+    is_sell: classified.reducesPosition,
+    broker: safeText(firstPresent(r.broker, payload.broker, ''), 160),
+    sector: safeText(firstPresent(r.sector, payload.sector, ''), 160),
+    notes: safeText(firstPresent(r.notes, payload.notes, ''), 1000),
+    source: safeText(firstPresent(payload.source, r.source, 'Supabase'), 160),
+    importedAt: Number(firstPresent(payload.importedAt, payload.imported_at, r.imported_at, r.importedAt, transactionMillis)) || transactionMillis,
+    imported_at: Number(firstPresent(payload.imported_at, payload.importedAt, r.imported_at, r.importedAt, transactionMillis)) || transactionMillis,
+  };
+}
+
+function storedDividendToClient(row = {}) {
+  const r = recordPayload(row);
+  const payload = recordPayload(r.payload);
+  const ticker = normalizeSingleTransactionSymbol(firstPresent(payload.ticker, payload.symbol, r.ticker, r.symbol, ''));
+  const dateCom = safeText(firstPresent(payload.dateCom, payload.date_com, payload.dataCom, r.date_com, r.dateCom, ''), 40);
+  const exDate = safeText(firstPresent(payload.exDate, payload.ex_date, payload.dateEx, r.ex_date, r.exDate, ''), 40);
+  const inferredComDate = safeText(firstPresent(payload.inferredComDate, payload.inferred_com_date, payload.estimatedComDate, r.inferred_com_date, r.inferredComDate, ''), 40);
+  const eligibilityDateSource = safeText(firstPresent(payload.eligibilityDateSource, payload.eligibility_date_source, payload.dateComSource, r.eligibility_date_source, r.eligibilityDateSource, ''), 80);
+  const paymentDate = safeText(firstPresent(payload.paymentDate, payload.payment_date, r.payment_date, r.paymentDate, ''), 40);
+  const valuePerShare = Number(firstPresent(payload.valuePerShare, payload.value_per_share, payload.value, r.value_per_share, r.value, 0)) || 0;
+  const quantity = Number(firstPresent(payload.quantity, r.quantity, 0)) || 0;
+  const estimatedAmount = Number(firstPresent(payload.estimatedAmount, payload.estimated_amount, r.estimated_amount, r.estimatedAmount, 0)) || 0;
+  return {
+    ...payload,
+    ticker,
+    symbol: ticker,
+    dateCom,
+    date_com: dateCom,
+    dateComDisplay: formatBrDate(dateCom, ''),
+    exDate,
+    ex_date: exDate,
+    exDateDisplay: formatBrDate(exDate, ''),
+    inferredComDate,
+    inferred_com_date: inferredComDate,
+    inferredComDateDisplay: formatBrDate(inferredComDate, ''),
+    eligibilityDateSource,
+    eligibility_date_source: eligibilityDateSource,
+    paymentDate,
+    payment_date: paymentDate,
+    paymentDateDisplay: formatBrDate(paymentDate, ''),
+    valuePerShare,
+    value_per_share: valuePerShare,
+    quantity,
+    estimatedAmount,
+    estimated_amount: estimatedAmount,
+    status: safeText(firstPresent(payload.status, r.status, 'oficial'), 80),
+    category: safeText(firstPresent(payload.category, r.category, ''), 80),
+    source: safeText(firstPresent(payload.source, r.source, 'Supabase'), 160),
+  };
+}
+
 async function getTransactions(input, auth) {
   const userId = auth.userId || safeText(input.userId || input.user_id || '', 160);
   const state = await getSyncState(userId);
@@ -1063,53 +1235,20 @@ async function getTransactions(input, auth) {
   if (state.tombstone) {
     return { ok: true, count: 0, transactions: [], has_more: false, next_cursor: null, syncState: state };
   }
-  const q = `user_id=eq.${encodeURIComponent(userId)}&select=client_tx_id,ticker,name,quantity,purchase_price,transaction_date,asset_type,is_sell,broker,sector,notes,payload,updated_at&order=transaction_date.desc,client_tx_id.asc&limit=${limit + 1}&offset=${offset}`;
-  const rows = await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?${q}`, { method: 'GET' });
-  const pageRows = (Array.isArray(rows) ? rows : []).slice(0, limit);
-  const hasMore = Array.isArray(rows) && rows.length > limit;
+  // select=* preserves compatibility with rows created by older Proxy versions. The
+  // response is still allow-listed through storedTransactionToClient before leaving the route.
+  const transactionQuery = (identity) => `user_id=eq.${encodeURIComponent(identity)}&select=*&order=transaction_date.desc,client_tx_id.asc&limit=${limit + 1}&offset=${offset}`;
+  const fetched = await fetchRowsWithLegacyIdentityFallback(
+    (identity) => `/rest/v1/${TRANSACTIONS_TABLE}?${transactionQuery(identity)}`,
+    auth,
+  );
+  const rows = fetched.rows;
+  const pageRows = rows.slice(0, limit);
+  const hasMore = rows.length > limit;
   const uniqueRows = dedupeTransactionRowsByClientId(pageRows);
-  const transactions = uniqueRows.map((r) => {
-    const payload = r.payload || {};
-    const classified = classifyCorporateOperation(payload.operationCode || payload.operation_code || payload.operation || (r.is_sell ? 'VENDA' : 'COMPRA'), { isSell: Boolean(r.is_sell), quantity: Number(r.quantity || 0) });
-    const operation = safeText(payload.operation || classified.code, 80).toUpperCase();
-    const price = Number(payload.price ?? payload.purchasePrice ?? r.purchase_price ?? 0);
-    const grossValue = Number(payload.grossValue ?? payload.gross_value ?? (Number(r.quantity || 0) * price));
-    const transactionMillis = transactionTimestamp(r.transaction_date || payload.date || payload.transaction_date || payload.transactionDate || Date.now());
-    const ticker = normalizeSingleTransactionSymbol(payload.symbol || r.ticker);
-    return {
-      ...payload,
-      id: Number(payload.id || 0) || 0,
-      client_tx_id: normalizeClientTxId(r.client_tx_id || payload.client_tx_id || payload.clientTxId || ''),
-      clientTxId: normalizeClientTxId(r.client_tx_id || payload.client_tx_id || payload.clientTxId || ''),
-      symbol: ticker,
-      ticker,
-      name: r.name || ticker,
-      operation,
-      operationCode: classified.code,
-      operation_code: classified.code,
-      quantityEffect: classified.quantityEffect,
-      quantity_effect: classified.quantityEffect,
-      costEffect: classified.costEffect,
-      cost_effect: classified.costEffect,
-      quantity: Math.abs(Number(r.quantity || 0)),
-      price,
-      purchasePrice: price,
-      grossValue,
-      gross_value: grossValue,
-      date: payload.date || normalizeTransactionDate(r.transaction_date),
-      dateDisplay: formatBrDate(payload.date || normalizeTransactionDate(r.transaction_date), ''),
-      assetType: payload.assetType || payload.asset_type || r.asset_type || '',
-      asset_type: payload.asset_type || payload.assetType || r.asset_type || '',
-      isSell: classified.reducesPosition,
-      is_sell: classified.reducesPosition,
-      broker: r.broker || payload.broker || '',
-      sector: r.sector || payload.sector || '',
-      notes: r.notes || payload.notes || '',
-      source: payload.source || 'Supabase',
-      importedAt: Number(payload.importedAt ?? payload.imported_at ?? transactionMillis),
-      imported_at: Number(payload.imported_at ?? payload.importedAt ?? transactionMillis),
-    };
-  });
+  const transactions = uniqueRows
+    .map(storedTransactionToClient)
+    .filter((transaction) => transaction.symbol && transaction.date);
   const nextCursor = hasMore ? encodeRevisionCursor({ offset: offset + pageRows.length, ...state }, syncCursorSecret()) : null;
   return {
     ok: true,
@@ -1120,6 +1259,7 @@ async function getTransactions(input, auth) {
     next_cursor: nextCursor,
     nextCursor,
     next_page_token: nextCursor,
+    identitySource: fetched.identity,
     syncState: state,
   };
 }
@@ -1181,26 +1321,15 @@ async function getDividendEvents(input, auth) {
   if (state.tombstone) return { ok: true, count: 0, events: [], syncState: state };
   const category = safeText(input.category || '', 24);
   const catFilter = category ? `&category=eq.${encodeURIComponent(category)}` : '';
-  const q = `user_id=eq.${encodeURIComponent(userId)}${catFilter}&select=*&order=payment_date.asc`;
-  const rows = await supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?${q}`, { method: 'GET' });
-  const events = (Array.isArray(rows) ? rows : []).map((r) => r.payload || ({
-    ticker: r.ticker,
-    dateCom: r.date_com,
-    dateComDisplay: formatBrDate(r.date_com, ''),
-    exDate: r.ex_date || '',
-    exDateDisplay: formatBrDate(r.ex_date, ''),
-    inferredComDate: r.inferred_com_date || '',
-    inferredComDateDisplay: formatBrDate(r.inferred_com_date, ''),
-    eligibilityDateSource: r.eligibility_date_source || '',
-    paymentDate: r.payment_date,
-    paymentDateDisplay: formatBrDate(r.payment_date, ''),
-    valuePerShare: Number(r.value_per_share || 0),
-    quantity: Number(r.quantity || 0),
-    estimatedAmount: Number(r.estimated_amount || 0),
-    status: r.status,
-    source: r.source,
-  }));
-  return { ok: true, count: events.length, events, syncState: state };
+  const dividendQuery = (identity) => `user_id=eq.${encodeURIComponent(identity)}${catFilter}&select=*&order=payment_date.asc`;
+  const fetched = await fetchRowsWithLegacyIdentityFallback(
+    (identity) => `/rest/v1/${DIVIDENDS_TABLE}?${dividendQuery(identity)}`,
+    auth,
+  );
+  const events = fetched.rows
+    .map(storedDividendToClient)
+    .filter((event) => event.ticker && (event.dateCom || event.exDate || event.inferredComDate || event.paymentDate));
+  return { ok: true, count: events.length, events, identitySource: fetched.identity, syncState: state };
 }
 
 async function getSyncBackups(input, auth) {
@@ -1459,8 +1588,12 @@ export const _test = {
   retryAfterMsFromResponse,
   normalizeSingleTransactionSymbol,
   normalizeTransactionSymbols,
+  legacyEmailIdentity,
+  fetchRowsWithLegacyIdentityFallback,
   transactionRow,
+  storedTransactionToClient,
   dividendRow,
+  storedDividendToClient,
   eventKey,
   hasUsableDividendEvent,
 };
