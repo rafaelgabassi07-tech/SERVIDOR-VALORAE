@@ -31,8 +31,13 @@ assert.ok(revenue.charts.length >= 2, 'negócios e regiões devem gerar gráfico
 assert.ok(revenue.charts.every(chart => chart.chartType === 'donut_composition'));
 assert.ok(revenue.charts.every(chart => chart.series.every(serie => serie.points.every(point => point.value > 0 && point.value <= 100))));
 
-const apk = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
-assertOptionalMatch(apk, /AnalysisCategoryBlock/);
+const apk = [
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisSectionRules.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisFinancialBlocksUi.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisChartsUi.kt')
+].filter(Boolean).join('\n');
+assertOptionalMatch(apk, /AnalysisCategoryTabs/);
 assertOptionalMatch(apk, /RichAnalysisChart/);
 assertOptionalMatch(apk, /Detalhamento da receita/);
 assertOptionalMatch(apk, /Detalhamento da fonte/);

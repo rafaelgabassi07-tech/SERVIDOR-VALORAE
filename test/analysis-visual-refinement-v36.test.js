@@ -1,9 +1,16 @@
 import assert from 'node:assert/strict';
 import { readOptionalApkFile, assertOptionalMatch, assertOptionalDoesNotMatch } from './_optional-apk.js';
 
-const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
-assertOptionalMatch(screen, /AnalysisCategoryHeader/, 'Análise deve manter hierarquia visual por categoria');
-assertOptionalMatch(screen, /AnalysisSectionHeader/, 'Checkpoint 36 deve ter cabeçalho de seção com hierarquia');
+const screen = [
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisHomeStartUi.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisDiscoveryUi.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisSectionContentUi.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisSectionRules.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisChartsUi.kt')
+].filter(Boolean).join('\n');
+assertOptionalMatch(screen, /AnalysisDiscoveryHomeSectionHeader|AnalysisCategoryTabs/, 'Análise deve manter hierarquia visual por categoria');
+assertOptionalMatch(screen, /AnalysisPageCompactHeader|AnalysisDiscoveryGroupListHeader/, 'A Análise deve ter cabeçalhos de seção com hierarquia');
 assertOptionalMatch(screen, /CompactDataPreview/, 'Dados longos podem ser compactados sem esconder gráficos');
 assertOptionalMatch(screen, /RichAnalysisChart/, 'Gráficos precisam permanecer renderizados como bloco visual próprio');
 assertOptionalMatch(screen, /AnalysisMissingSignalsSection/, 'Sinalizações precisam continuar separadas do conteúdo principal');

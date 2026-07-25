@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v362 com JSON sanitizado, navegador isolado e transporte HTTP limitado, pareado ao APK v534.",
+  "description": "Proxy v362 com monitor profissional v364, telemetria em memória e notícias visuais pareadas ao APK v540.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -32,7 +32,9 @@
     "freeOnly": true,
     "publicVersion": "21.12.394",
     "checkpoint": "runtime-safety-v362",
-    "releaseLabel": "runtime-safety-v362"
+    "releaseLabel": "runtime-safety-v362",
+    "apkVersion": "2026.07.25.03",
+    "monitorVersion": "v364"
   },
   "releasePatch": "21.12.394-runtime-safety-v362",
   "config": {
@@ -45,7 +47,9 @@
     "releasePatch": "21.12.394-runtime-safety-v362",
     "publicVersion": "21.12.394",
     "checkpoint": "runtime-safety-v362",
-    "releaseLabel": "runtime-safety-v362"
+    "releaseLabel": "runtime-safety-v362",
+    "apkVersion": "2026.07.25.03",
+    "monitorVersion": "v364"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

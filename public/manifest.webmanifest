@@ -1,12 +1,12 @@
 {
   "name": "V-Proxy",
   "short_name": "V-Proxy",
-  "start_url": "/server.html#live",
+  "start_url": "/monitor",
   "display": "standalone",
   "background_color": "#070B0F",
   "theme_color": "#091016",
-  "id": "/server.html",
-  "description": "Monitor operacional do V-Proxy com tráfego ao vivo, saúde, benchmark e arquitetura observável.",
+  "id": "/monitor",
+  "description": "Central operacional profissional do V-Proxy com visão geral, tráfego, rotas, fontes, saúde, diagnósticos, benchmark e arquitetura.",
   "scope": "/",
   "orientation": "any",
   "version": "21.12.394",
@@ -29,5 +29,6 @@
       "type": "image/png",
       "purpose": "any"
     }
-  ]
+  ],
+  "monitor_version": "v364"
 }

@@ -15,8 +15,10 @@ const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
 assert.equal(packageJson.valorae.publicVersion, '21.12.394');
 assert.equal(packageJson.valorae.releasePatch, '21.12.394-runtime-safety-v362');
-assert.equal(metadata.apkVersion, '2026.07.23.05');
-assert.ok(metadata.contractVersion.includes('APK v534 / Proxy 21.12.394'));
+assert.equal(metadata.apkVersion, '2026.07.25.03');
+assert.ok(metadata.contractVersion.includes('APK v540 / Proxy 21.12.394'));
+assert.equal(packageJson.valorae.apkVersion, '2026.07.25.03');
+assert.equal(packageJson.valorae.monitorVersion, 'v364');
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');
@@ -39,17 +41,17 @@ for (const header of ['X-Valorae-Mobile-Protocol', 'X-Valorae-Contract-Version',
 
 assert.deepEqual(VALORAE_MOBILE_CACHE_POLICY_SECONDS, {
   ready: 10,
-  quote: 30,
-  quotes: 30,
+  quote: 120,
+  quotes: 120,
   assetHistory: 60,
-  marketIndices: 30,
-  marketRankings: 60,
-  news: 30,
+  marketIndices: 120,
+  marketRankings: 900,
+  news: 900,
   analysis: 60,
-  portfolioHistory: 30,
+  portfolioHistory: 300,
   portfolioEquilibrium: 20,
-  portfolioReturns: 60,
-  portfolioDividends: 60,
+  portfolioReturns: 300,
+  portfolioDividends: 900,
   assetModalFast: 35,
   assetModalFull: 180,
   assetModalFastStaleGrace: 120,

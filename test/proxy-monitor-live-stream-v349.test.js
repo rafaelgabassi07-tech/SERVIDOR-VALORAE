@@ -21,24 +21,25 @@ const runtime = read('public/monitor-valorae.js');
 assert.equal(pkg.valorae.publicVersion, '21.12.394');
 assert.equal(pkg.valorae.releasePatch, '21.12.394-runtime-safety-v362');
 assert.equal(pkg.valorae.checkpoint, 'runtime-safety-v362');
-assert.equal(metadata.monitorObservabilityVersion, '2026.07.24-v360');
+assert.equal(metadata.monitorObservabilityVersion, '2026.07.25-v364');
 assert.equal(manifest.version, '21.12.394');
-assert.equal(manifest.start_url, '/server.html#live');
+assert.equal(manifest.monitor_version, 'v364');
+assert.equal(manifest.start_url, '/monitor');
 assert.equal(contract.contractVersionUnchanged, true);
 assert.equal(contract.invariants.apkV528Compatible, true);
 
 assert.equal(index, server, 'as duas URLs do monitor precisam entregar a mesma interface');
 assert.doesNotThrow(() => new vm.Script(runtime, { filename: 'monitor-valorae.js' }));
 assert.equal((index.match(/<script(?![^>]*\bsrc=)/gi) || []).length, 0);
-for (const view of ['live', 'routes', 'health', 'settings']) assert.ok(index.includes(`data-view-panel="${view}"`));
-for (const feature of ['eventFeed', 'eventDetail', 'inflightList', 'routeTable', 'trafficChart', 'rawSnapshot']) {
+for (const view of ['overview', 'traffic', 'request', 'routes', 'sources', 'health', 'diagnostics', 'benchmark', 'architecture', 'settings']) assert.ok(index.includes(`data-view-panel="${view}"`));
+for (const feature of ['eventFeed', 'requestPayload', 'routeTable', 'sourceDistribution', 'trafficChart', 'rawSnapshot']) {
   assert.ok(index.includes(`id="${feature}"`), `${feature} ausente`);
 }
-assert.doesNotMatch(index, /class="[^"]*\bcard\b/i);
+assert.match(index, /valorae-monitor-professional-v364/);
 assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 assert.doesNotMatch(css, /backdrop-filter\s*:/i);
 assert.doesNotMatch(css, /box-shadow\s*:/i);
-assert.ok(css.includes('@media(max-width:760px)'));
+assert.ok(css.includes('@media(max-width:900px)'));
 assert.ok(css.includes('@media(prefers-reduced-motion:reduce)'));
 
 function response() {
@@ -89,7 +90,7 @@ const apkMetadataText = readSiblingApkFile('metadata.json');
 const apkProtocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 if (apkMetadataText || apkProtocol) {
   const apkMetadata = JSON.parse(apkMetadataText || '{}');
-  assert.equal(apkMetadata.versionCode, 26072305);
+  assert.equal(apkMetadata.versionCode, 26072503);
   assert.equal(apkMetadata.proxyPatch, '21.12.394-runtime-safety-v362');
   assert.match(apkProtocol || '', /Version = "2026\.07\.10\.10"/);
 }

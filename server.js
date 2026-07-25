@@ -7,7 +7,7 @@ import { sendText, setSecurityHeaders } from './lib/core/http.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const PORT = 3000;
+const PORT = Math.max(1, Math.min(65535, Number(process.env.PORT || 3000) || 3000));
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const MAX_LOCAL_BODY_BYTES = Number(process.env.MAX_LOCAL_BODY_BYTES || 512 * 1024);
 const INVALID_JSON = 'INVALID_JSON';
@@ -35,7 +35,8 @@ const server = http.createServer(async (req, res) => {
     rewriteRouter(req, parsed);
     return dispatchRoute(req, res);
   }
-  const clean = ['/', '/server', '/monitor', '/tests', '/inspector'].includes(parsed.pathname) ? '/server.html' : parsed.pathname;
+  const isMonitorRoute = parsed.pathname === '/monitor' || parsed.pathname.startsWith('/monitor/');
+  const clean = ['/', '/server', '/tests', '/inspector'].includes(parsed.pathname) || isMonitorRoute ? '/server.html' : parsed.pathname;
   const target = path.normalize(path.join(PUBLIC_DIR, clean));
   const relative = path.relative(PUBLIC_DIR, target);
   if (relative.startsWith('..') || path.isAbsolute(relative)) return sendText(res, 403, 'Acesso negado');
@@ -43,7 +44,7 @@ const server = http.createServer(async (req, res) => {
     if (err) return sendText(res, 404, 'Não encontrado');
     res.statusCode = 200;
     res.setHeader('Content-Type', MIME[path.extname(target)] || 'application/octet-stream');
-    applyStaticSecurityHeaders(res, path.extname(target) === '.html' ? 'public, max-age=60' : 'public, max-age=300');
+    applyStaticSecurityHeaders(res, path.extname(target) === '.html' ? 'no-cache, no-store, must-revalidate' : 'public, max-age=300');
     res.end(data);
   });
 });

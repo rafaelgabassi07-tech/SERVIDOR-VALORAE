@@ -7,6 +7,11 @@ const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 
 const productionRoots = ['api', 'routes', 'lib', 'scripts', 'public'];
 const sourceExtensions = new Set(['.js', '.mjs', '.cjs']);
 const ignoredDirectories = new Set(['node_modules', '.git', '.forgedesk']);
+const allowlistPath = path.join(root, 'config/runtime-reachability-allowlist.json');
+const allowlistDocument = fs.existsSync(allowlistPath)
+  ? JSON.parse(fs.readFileSync(allowlistPath, 'utf8'))
+  : { entries: {} };
+const intentionalStandaloneModules = new Map(Object.entries(allowlistDocument.entries || {}));
 
 function walk(relative) {
   const absolute = path.join(root, relative);
@@ -99,11 +104,18 @@ while (stack.length) {
   for (const dependency of graph.get(file) || []) stack.push(dependency);
 }
 
-const ignoredPublicModules = new Set();
+const staleAllowlistEntries = [...intentionalStandaloneModules.keys()]
+  .filter(file => !jsFiles.has(file))
+  .sort();
+if (staleAllowlistEntries.length) {
+  console.error('Runtime reachability audit failed. Allowlist contém arquivos inexistentes:');
+  staleAllowlistEntries.forEach(file => console.error(`- ${file}`));
+  process.exit(1);
+}
 const unreachable = [...jsFiles]
   .filter(file => !reachable.has(file))
   .filter(file => !file.startsWith('test/'))
-  .filter(file => !ignoredPublicModules.has(file))
+  .filter(file => !intentionalStandaloneModules.has(file))
   .sort();
 
 if (unreachable.length) {
@@ -111,4 +123,4 @@ if (unreachable.length) {
   unreachable.forEach(file => console.error(`- ${file}`));
   process.exit(1);
 }
-console.log(`Runtime reachability OK: ${reachable.size}/${jsFiles.size} módulos JavaScript alcançáveis por runtime, monitor ou tooling declarado.`);
+console.log(`Runtime reachability OK: ${reachable.size}/${jsFiles.size} módulos alcançáveis; ${intentionalStandaloneModules.size} módulos standalone documentados.`);

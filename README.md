@@ -1,12 +1,25 @@
+# Release atual — V-Proxy 21.12.394 / monitor v364 (2026-07-25)
+
+O V-Proxy permanece no patch `21.12.394-runtime-safety-v362`, pareado ao APK v540 (`2026.07.25.03`). O monitor v364 foi reorganizado como uma central operacional profissional com páginas dedicadas para visão geral, tráfego, detalhe de requisição, rotas, fontes/cache, saúde, diagnósticos, arquitetura, benchmark e ajustes.
+
+Metadados visuais de notícias agora incluem domínio, ícone da publicação em 128 px e imagem de matéria quando a própria fonte a fornece; esses campos são opcionais e mantêm fallback compatível com APKs anteriores.
+
+- telemetria exclusivamente em memória, sem leitura ou escrita de eventos no Supabase;
+- navegação por URL em `/monitor/*`, adequada para desktop e mobile;
+- detalhes de requisição abertos em página própria, sem conteúdo técnico escondido no rodapé;
+- TTLs mobile alinhados ao APK;
+- manifesto, service worker, metadados e auditorias de versão alinhados;
+- testes de contrato, Supabase, monitor, rotas e sincronização preservados.
+
 # Hotfix — restauração de dados da nuvem (2026-07-24)
 
 O Proxy v362 mantém o contrato público e corrige a leitura de transações/proventos legados, payload JSON vazio ou parcial e identidades antigas armazenadas pelo e-mail verificado. Relatório: `docs/CLOUD_RESTORE_HOTFIX_2026_07_24.md`.
 
 # Release v362 — segurança de runtime e transporte limitado
 
-## Release atual — 21.12.394 / v362 (2026-07-23)
+## Release atual — 21.12.394 / v362 (2026-07-25)
 
-O Proxy `21.12.394-runtime-safety-v362` é pareado ao APK v534 (`2026.07.23.05`) e preserva o protocolo móvel `2026.07.10.10` e o schema de entrega `4`.
+O Proxy `21.12.394-runtime-safety-v362` é pareado ao APK v540 (`2026.07.25.03`) e preserva o protocolo móvel `2026.07.10.10` e o schema de entrega `4`.
 
 - sanitiza JSON capturado antes de qualquer promoção, removendo campos sensíveis, chaves de prototype e estruturas acima dos limites;
 - limita tarefas pendentes, documentos, bytes e tempo de settle do coletor de rede;
@@ -488,3 +501,8 @@ Core version: 21.12.0
 21.12.333-asset-modal-progressive-fast-full-v301: reativa o carregamento progressivo dos modais de Ação/FII com stages `fast` e `full`, alinhando APK e Proxy para reduzir espera inicial e evitar timeout percebido nos modais de ação. O stage rápido entrega cotação/gráfico/resumo/indicadores básicos; o stage completo mantém os blocos pesados.
 
 Core version: 21.12.0
+
+
+## Monitor profissional v364
+
+O painel em `/monitor` usa navegação por páginas para visão geral, tráfego, detalhes de requisição, rotas, fontes/cache, saúde, diagnósticos, arquitetura, benchmark e ajustes. A telemetria operacional permanece somente na memória da instância e não é gravada no Supabase.

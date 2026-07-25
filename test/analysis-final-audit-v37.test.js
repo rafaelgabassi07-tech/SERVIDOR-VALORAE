@@ -104,10 +104,16 @@ const fakeComparison = buildAnalysisPageResponse({
 assert.ok(!(section(fakeComparison, 'comparisons')?.charts || []).some(chart => chart.id === 'asset_vs_ibov'), 'comparador com flag sintética aninhada deve ser descartado');
 
 // 6) APK: Análise segue contrato único, busca confirmada e Canvas nativo.
-const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
+const screen = [
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreenContent.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisSectionRules.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisFinancialBlocksUi.kt'),
+  readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisChartsUi.kt')
+].filter(Boolean).join('\n');
 const client = readOptionalApkFile('../apk/app/src/main/java/com/example/data/proxy/ValoraeProxyClient.kt');
 assertOptionalMatch(screen, /submittedTicker/, 'Busca precisa separar texto digitado de ticker consultado');
-assertOptionalMatch(screen, /AnalysisCategoryHeader/, 'Hierarquia visual da Análise precisa permanecer');
+assertOptionalMatch(screen, /AnalysisCategoryTabs|AnalysisDiscoveryHomeSectionHeader/, 'Hierarquia visual da Análise precisa permanecer');
 assertOptionalMatch(screen, /AnalysisMissingSignalsSection/, 'Sinalização discreta precisa permanecer');
 assertOptionalMatch(screen, /FiiDetailsBlock/, 'FIIs completos precisam permanecer no APK');
 assertOptionalMatch(screen, /ComparisonAnalysisBlock/, 'Comparadores precisam permanecer no APK');
