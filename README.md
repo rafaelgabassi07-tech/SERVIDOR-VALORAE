@@ -69,23 +69,20 @@ O caminho de cotações agora usa fallback entre os hosts `query1` e `query2` do
 - `refresh`, `nocache` e `forceRefresh` atravessam a rota de cotação individual;
 - aliases de preço, fechamento anterior e variação diária permanecem compatíveis;
 - o monitor plano do v349 permanece funcional e sem novos containers.
-- o histórico da linha do tempo pode ser persistido no Supabase pela tabela `valorae_monitor_events`;
-- cada evento é gravado após a resposta por tarefa `waitUntil`, fora da latência observada pelo APK;
-- `/api/server/metrics` combina a memória atual com os eventos persistidos e mantém o polling isolado.
+- a linha do tempo do monitor permanece exclusivamente em memória;
+- nenhuma credencial ou variável legada ativa gravação em `valorae_monitor_events`;
+- `/api/server/metrics` não consulta histórico remoto do monitor.
 
 
-## Persistência opcional do histórico do monitor no Supabase
+## Monitor sem persistência no Supabase
 
-1. Na operação normal, mantenha `VALORAE_MONITOR_PERSISTENCE_ENABLED=0`: o monitor funciona em memória, sem gravar ou consultar a linha do tempo no Supabase.
-2. Mantenha `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` configuradas somente no Vercel para as funções de produto que realmente precisam do banco.
-3. Somente para um diagnóstico temporário, execute `supabase/005_valorae_monitor_events_persistence.sql` e defina `VALORAE_MONITOR_PERSISTENCE_ENABLED=1`.
-4. O campo `monitorPersistence.active` em `/api/server/metrics` só fica `true` quando o opt-in e as credenciais estão presentes.
+A persistência remota do monitor foi removida do caminho operacional. `VALORAE_MONITOR_PERSISTENCE_ENABLED`, mesmo com valor `1`, não ativa leitura ou escrita. As métricas ficam em memória e desaparecem quando a instância serverless é reciclada.
 
-Credenciais do Supabase, sozinhas, não ativam mais a persistência. Isso evita inserts contínuos em `valorae_monitor_events`, leituras frequentes do histórico e crescimento desnecessário do banco. Quando habilitada explicitamente, a gravação continua pós-resposta, em lotes e com cooldown de falha; para operação normal, a telemetria permanece efêmera em memória.
+As credenciais `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` continuam sendo usadas somente para autenticação e sincronização financeira legítima.
 
-### Diagnóstico persistente e alertas corrigidos
+### Diagnóstico do monitor e alertas corrigidos
 
-A mesma tabela e a mesma migração `005` continuam válidas; não existe um segundo SQL. A partir dos eventos persistidos, `/api/server/metrics` reconstrói a janela analítica usada pelo frontend: latência e confiança amostral, qualidade dos dados, gravidade das respostas parciais, payload por rota, fontes, cache, distribuições e série temporal. Chamadas em voo e memória instantânea continuam corretamente separadas por instância.
+`/api/server/metrics` reconstrói a janela analítica apenas com os eventos mantidos na memória da instância: latência, confiança amostral, qualidade dos dados, respostas parciais, payload por rota, fontes, cache, distribuições e série temporal. Chamadas em voo e memória instantânea continuam separadas por instância.
 
 - p95 só gera alerta operacional com pelo menos `VALORAE_METRICS_MIN_P95_SAMPLES` amostras, padrão 20;
 - parciais são classificadas como `recovered`, `degraded` ou `critical` e mantêm o motivo no evento;
@@ -159,8 +156,8 @@ Estado operacional compartilhado entre instâncias serverless, pareado ao APK v5
 - Saúde, cooldown e score das fontes compartilhados com TTL.
 - Backoff negativo compartilhado para falhas repetidas de scraping.
 - Leases atômicos preparados para os canários reais do Checkpoint 115.
-- Supabase opcional com escrita versionada, RLS e acesso exclusivo de `service_role`.
-- Espelho em memória limitado e fallback não bloqueante quando o remoto está ausente.
+- O padrão atual é memória local; Supabase remoto exige `VALORAE_SHARED_STATE_MODE=supabase` e `VALORAE_SHARED_STATE_REMOTE_ENABLED=1`.
+- Sem os dois opt-ins, credenciais do Supabase não geram leitura ou escrita de estado operacional.
 - Diagnóstico oculto: `/api/v1/contract/shared-state`.
 - Rollback: `VALORAE_SHARED_STATE_MODE=memory` ou `VALORAE_SHARED_STATE_ENABLED=0`.
 - Nenhum campo financeiro, layout, tabela pessoal ou contrato existente foi alterado.

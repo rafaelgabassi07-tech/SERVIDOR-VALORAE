@@ -49,6 +49,95 @@ const SYNC_CAPABILITIES = Object.freeze([
   'delete_user_data',
 ]);
 
+const syncRuntime = globalThis.__VALORAE_SYNC_RESOURCE_GUARD__ || {
+  authTokens: new Map(),
+  diagnostics: { value: null, fetchedAt: 0, promise: null },
+  metrics: {
+    authCacheHits: 0,
+    authCacheMisses: 0,
+    authUpstreamCalls: 0,
+    diagnosticsCacheHits: 0,
+    diagnosticsUpstreamRuns: 0,
+    backupPayloadsSuppressed: 0,
+  },
+};
+globalThis.__VALORAE_SYNC_RESOURCE_GUARD__ = syncRuntime;
+
+function envEnabled(value, fallback = false) {
+  if (value === undefined || value === null || value === '') return fallback;
+  return ['1', 'true', 'yes', 'sim', 'on'].includes(String(value).trim().toLowerCase());
+}
+
+function financialSyncBackupsEnabled() {
+  // Os dados já existem nas tabelas canônicas. Duplicar todo payload a cada mutação
+  // aumenta CPU, WAL, autovacuum e armazenamento sem benefício operacional padrão.
+  return envEnabled(process.env.VALORAE_FINANCIAL_SYNC_BACKUPS_ENABLED, false);
+}
+
+function optionalBackup(payload) {
+  if (financialSyncBackupsEnabled()) return payload;
+  syncRuntime.metrics.backupPayloadsSuppressed += 1;
+  return null;
+}
+
+function authCacheTtlMs() {
+  return Math.min(Math.max(Number(process.env.VALORAE_SYNC_AUTH_CACHE_MS || 300_000), 15_000), 900_000);
+}
+
+function authNegativeCacheTtlMs() {
+  return Math.min(Math.max(Number(process.env.VALORAE_SYNC_AUTH_NEGATIVE_CACHE_MS || 15_000), 1_000), 60_000);
+}
+
+function diagnosticsCacheTtlMs() {
+  return Math.min(Math.max(Number(process.env.VALORAE_SYNC_DIAGNOSTICS_CACHE_MS || 300_000), 30_000), 900_000);
+}
+
+function trimAuthCache() {
+  const now = Date.now();
+  for (const [key, entry] of syncRuntime.authTokens.entries()) {
+    if (!entry || Number(entry.expiresAt || 0) <= now) syncRuntime.authTokens.delete(key);
+  }
+  while (syncRuntime.authTokens.size > 500) {
+    syncRuntime.authTokens.delete(syncRuntime.authTokens.keys().next().value);
+  }
+}
+
+function tokenCacheKey(token) {
+  return crypto.createHash('sha256').update(String(token || '')).digest('hex');
+}
+
+function jwtExpiryMs(token) {
+  try {
+    const payload = String(token || '').split('.')[1];
+    if (!payload) return null;
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const json = JSON.parse(Buffer.from(normalized, 'base64').toString('utf8'));
+    const exp = Number(json?.exp);
+    return Number.isFinite(exp) && exp > 0 ? exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+function readCachedAuth(token) {
+  trimAuthCache();
+  const entry = syncRuntime.authTokens.get(tokenCacheKey(token));
+  if (!entry || entry.expiresAt <= Date.now()) return undefined;
+  syncRuntime.metrics.authCacheHits += 1;
+  return entry.user;
+}
+
+function cacheAuth(token, user, ttlMs) {
+  const now = Date.now();
+  const jwtExpiry = jwtExpiryMs(token);
+  const hardExpiry = jwtExpiry ? Math.max(now + 1_000, jwtExpiry - 30_000) : now + ttlMs;
+  syncRuntime.authTokens.set(tokenCacheKey(token), {
+    user,
+    expiresAt: Math.min(now + ttlMs, hardExpiry),
+  });
+  trimAuthCache();
+}
+
 function cleanUrl(raw = '') {
   let value = String(raw || '').trim().replace(/\/+$/, '');
   // Aceita SUPABASE_URL colada com /rest/v1, /auth/v1 etc. no Vercel e normaliza
@@ -528,19 +617,22 @@ async function fetchSnapshotRowsWithCompat(queryBuilder) {
 
 async function probeSnapshotCacheColumns() {
   const started = Date.now();
-  const checks = [];
-  for (const column of SNAPSHOT_CACHE_COLUMNS) {
-    try {
-      await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?select=${column}&limit=1`, { method: 'GET' });
-      checks.push({ column, ok: true });
-    } catch (err) {
-      checks.push({
+  const select = SNAPSHOT_CACHE_COLUMNS.join(',');
+  let checks = SNAPSHOT_CACHE_COLUMNS.map((column) => ({ column, ok: true }));
+  try {
+    await supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?select=${select}&limit=1`, { method: 'GET' });
+  } catch (err) {
+    const text = `${err?.message || ''} ${JSON.stringify(err?.details || '')}`;
+    const explicitlyMissing = SNAPSHOT_CACHE_COLUMNS.filter((column) => text.includes(column));
+    const affected = explicitlyMissing.length ? explicitlyMissing : SNAPSHOT_CACHE_COLUMNS;
+    checks = SNAPSHOT_CACHE_COLUMNS.map((column) => affected.includes(column)
+      ? {
         column,
         ok: false,
         code: err.code || 'SUPABASE_SCHEMA_COLUMN_ERROR',
         message: String(err.message || '').slice(0, 180),
-      });
-    }
+      }
+      : { column, ok: true });
   }
   const missing = checks.filter((item) => !item.ok).map((item) => item.column);
   return {
@@ -555,10 +647,10 @@ async function probeSnapshotCacheColumns() {
   };
 }
 
-async function probeSupabaseTable(table, label = table) {
+async function probeSupabaseTable(table, label = table, select = 'user_id') {
   const started = Date.now();
   try {
-    const rows = await supabaseFetch(`/rest/v1/${table}?select=*&limit=1`, { method: 'GET' });
+    const rows = await supabaseFetch(`/rest/v1/${table}?select=${encodeURIComponent(select)}&limit=1`, { method: 'GET' });
     return {
       table,
       label,
@@ -594,42 +686,64 @@ async function supabaseDiagnostics() {
       capabilities: SYNC_CAPABILITIES,
     };
   }
-  const [snapshotSchema, ...probes] = await Promise.all([
-    probeSnapshotCacheColumns(),
-    probeSupabaseTable(SNAPSHOT_TABLE, 'snapshots'),
-    probeSupabaseTable(CLIENTS_TABLE, 'clients'),
-    probeSupabaseTable(TRANSACTIONS_TABLE, 'transactions'),
-    probeSupabaseTable(DIVIDENDS_TABLE, 'dividends'),
-    probeSupabaseTable(BACKUPS_TABLE, 'backups'),
-    probeSupabaseTable(SYNC_STATE_TABLE, 'sync_state'),
-  ]);
-  const failed = probes.filter((p) => !p.ok);
-  const snapshotSchemaMissing = snapshotSchema.missingColumns || [];
-  return {
-    ok: failed.length === 0 && snapshotSchema.ok,
-    schemaCompatible: snapshotSchema.ok,
-    snapshotSchema,
-    configured: true,
-    urlConfigured: Boolean(cfg.url),
-    keyConfigured: Boolean(cfg.key),
-    authConfigured: cfg.authConfigured,
-    checkedAt: nowIso(),
-    elapsedMs: Date.now() - started,
-    tables: probes,
-    failedTables: failed.map((p) => p.table),
-    capabilities: SYNC_CAPABILITIES,
-    recommendation: failed.length
-      ? 'Revise nomes das tabelas, políticas/permissões, service role key e URL do projeto no Vercel.'
-      : snapshotSchemaMissing.length
-        ? 'Supabase acessível, mas a tabela de snapshots está em schema antigo. Execute supabase/002_valorae_snapshot_cache_columns_v85.sql para remover pendência de cache_scope.'
-        : 'Supabase acessível pelo Proxy. Escrita/leitura deve funcionar se o APK enviar identidade e payload válidos.',
-  };
+  const cached = syncRuntime.diagnostics.value;
+  if (cached && Date.now() - syncRuntime.diagnostics.fetchedAt < diagnosticsCacheTtlMs()) {
+    syncRuntime.metrics.diagnosticsCacheHits += 1;
+    return { ...cached, cached: true, cacheAgeMs: Date.now() - syncRuntime.diagnostics.fetchedAt };
+  }
+  if (syncRuntime.diagnostics.promise) return syncRuntime.diagnostics.promise;
+  syncRuntime.diagnostics.promise = (async () => {
+    syncRuntime.metrics.diagnosticsUpstreamRuns += 1;
+    const jobs = [
+      probeSnapshotCacheColumns(),
+      probeSupabaseTable(SNAPSHOT_TABLE, 'snapshots', 'user_id'),
+      probeSupabaseTable(CLIENTS_TABLE, 'clients', 'user_id'),
+      probeSupabaseTable(TRANSACTIONS_TABLE, 'transactions', 'user_id'),
+      probeSupabaseTable(DIVIDENDS_TABLE, 'dividends', 'user_id'),
+      probeSupabaseTable(SYNC_STATE_TABLE, 'sync_state', 'user_id'),
+    ];
+    if (financialSyncBackupsEnabled()) jobs.push(probeSupabaseTable(BACKUPS_TABLE, 'backups', 'user_id'));
+    const [snapshotSchema, ...probes] = await Promise.all(jobs);
+    const failed = probes.filter((p) => !p.ok);
+    const snapshotSchemaMissing = snapshotSchema.missingColumns || [];
+    const result = {
+      ok: failed.length === 0 && snapshotSchema.ok,
+      schemaCompatible: snapshotSchema.ok,
+      snapshotSchema,
+      configured: true,
+      urlConfigured: Boolean(cfg.url),
+      keyConfigured: Boolean(cfg.key),
+      authConfigured: cfg.authConfigured,
+      checkedAt: nowIso(),
+      elapsedMs: Date.now() - started,
+      tables: probes,
+      failedTables: failed.map((p) => p.table),
+      capabilities: SYNC_CAPABILITIES,
+      financialBackupsEnabled: financialSyncBackupsEnabled(),
+      resourceGuard: { ...syncRuntime.metrics },
+      recommendation: failed.length
+        ? 'Revise nomes das tabelas, políticas/permissões, service role key e URL do projeto no Vercel.'
+        : snapshotSchemaMissing.length
+          ? 'Supabase acessível, mas a tabela de snapshots está em schema antigo. Execute supabase/002_valorae_snapshot_cache_columns_v85.sql para remover pendência de cache_scope.'
+          : 'Supabase acessível pelo Proxy. Escrita/leitura deve funcionar se o APK enviar identidade e payload válidos.',
+    };
+    syncRuntime.diagnostics.value = result;
+    syncRuntime.diagnostics.fetchedAt = Date.now();
+    return result;
+  })().finally(() => {
+    syncRuntime.diagnostics.promise = null;
+  });
+  return syncRuntime.diagnostics.promise;
 }
 
 async function verifySupabaseBearer(req) {
   const cfg = getSupabaseConfig();
   const token = authorizationBearer(req);
   if (!token || !cfg.authConfigured || token === String(process.env.VALORAE_SUPABASE_SYNC_TOKEN || '').trim()) return null;
+  const cached = readCachedAuth(token);
+  if (cached !== undefined) return cached;
+  syncRuntime.metrics.authCacheMisses += 1;
+  syncRuntime.metrics.authUpstreamCalls += 1;
   const response = await fetchWithSyncDeadline(`${cfg.url}/auth/v1/user`, {
     headers: {
       apikey: cfg.publicKey || cfg.key,
@@ -637,7 +751,10 @@ async function verifySupabaseBearer(req) {
     },
   }, { timeoutCode: 'SUPABASE_AUTH_TIMEOUT', unavailableCode: 'SUPABASE_AUTH_UNAVAILABLE' });
   if (!response.ok) {
-    if (response.status === 401 || response.status === 403 || (response.status >= 400 && response.status < 500 && response.status !== 429)) return null;
+    if (response.status === 401 || response.status === 403 || (response.status >= 400 && response.status < 500 && response.status !== 429)) {
+      cacheAuth(token, null, authNegativeCacheTtlMs());
+      return null;
+    }
     let text = '';
     try {
       text = await response.text();
@@ -660,7 +777,9 @@ async function verifySupabaseBearer(req) {
   if (!user?.id) {
     throw syncInvalidResponseError('O Supabase Auth não retornou a identidade da sessão validada.', 'SUPABASE_AUTH_INVALID_RESPONSE');
   }
-  return { id: String(user.id), email: String(user.email || '') };
+  const normalized = { id: String(user.id), email: String(user.email || '') };
+  cacheAuth(token, normalized, authCacheTtlMs());
+  return normalized;
 }
 
 async function checkSupabaseAuth(req) {
@@ -836,13 +955,13 @@ async function upsertSnapshot(record, auth) {
   const userId = auth.userId;
   const row = safeRecord(record, userId);
   const result = await callSyncRpc('valorae_sync_upsert_snapshots', mutationRpcArgs(userId, record, [row], {
-    p_backup: { snapshots: [{ domain: row.domain, snapshot_key: row.snapshot_key, payload: row.payload }] },
+    p_backup: optionalBackup({ snapshots: [{ domain: row.domain, snapshot_key: row.snapshot_key, payload: row.payload }] }),
   }));
   const state = normalizeSyncState(result);
   return {
     ok: true,
     count: Number(result?.count || 1),
-    backupMirrored: true,
+    backupMirrored: financialSyncBackupsEnabled(),
     record: { user_id: row.user_id, domain: row.domain, snapshot_key: row.snapshot_key, updated_at: row.updated_at },
     syncState: state,
   };
@@ -854,12 +973,12 @@ async function upsertSnapshots(input, auth) {
   const rows = arr.map((record) => safeRecord(record, userId));
   if (!rows.length) return { ok: true, count: 0, message: 'Nenhum snapshot para salvar.', syncState: await getSyncState(userId) };
   const result = await callSyncRpc('valorae_sync_upsert_snapshots', mutationRpcArgs(userId, input, rows, {
-    p_backup: { snapshots: rows.map((row) => ({ domain: row.domain, snapshot_key: row.snapshot_key, payload: row.payload })) },
+    p_backup: optionalBackup({ snapshots: rows.map((row) => ({ domain: row.domain, snapshot_key: row.snapshot_key, payload: row.payload })) }),
   }));
   return {
     ok: true,
     count: Number(result?.count || rows.length),
-    backupMirrored: true,
+    backupMirrored: financialSyncBackupsEnabled(),
     snapshots: rows.map(snapshotToClient),
     syncState: normalizeSyncState(result),
   };
@@ -1052,9 +1171,9 @@ async function upsertTransactions(input, auth) {
   const rows = dedupeTransactionRowsByClientId(arr.map((tx) => transactionRow(userId, tx, { dateMode: 'iso' })).filter((r) => r.ticker));
   if (!rows.length) return { ok: true, count: 0, message: 'Nenhuma transação para salvar.', syncState: await getSyncState(userId) };
   const result = await callSyncRpc('valorae_sync_upsert_transactions', mutationRpcArgs(userId, input, rows, {
-    p_backup: { transactions: rows.map((row) => row.payload || row) },
+    p_backup: optionalBackup({ transactions: rows.map((row) => row.payload || row) }),
   }));
-  return { ok: true, count: Number(result?.count || rows.length), backupMirrored: true, syncState: normalizeSyncState(result) };
+  return { ok: true, count: Number(result?.count || rows.length), backupMirrored: financialSyncBackupsEnabled(), syncState: normalizeSyncState(result) };
 }
 
 async function replaceTransactionsForSymbols(input, auth) {
@@ -1068,7 +1187,7 @@ async function replaceTransactionsForSymbols(input, auth) {
   const result = await callSyncRpc('valorae_sync_replace_transactions', mutationRpcArgs(userId, input, rows, {
     p_symbols: symbols,
     p_reason: safeText(input.reason || 'replace_transactions_for_symbols', 120),
-    p_backup: { symbols, transactions: rows.map((row) => row.payload || row) },
+    p_backup: optionalBackup({ symbols, transactions: rows.map((row) => row.payload || row) }),
   }));
   return {
     ok: true,
@@ -1076,7 +1195,7 @@ async function replaceTransactionsForSymbols(input, auth) {
     deleted: Number(result?.deleted || 0),
     deletedScopeSymbols: symbols.length,
     symbols,
-    backupMirrored: true,
+    backupMirrored: financialSyncBackupsEnabled(),
     syncState: normalizeSyncState(result),
     message: rows.length ? `Histórico remoto substituído para ${symbols.length} ticker(s).` : `Histórico remoto limpo para ${symbols.length} ticker(s).`,
   };
@@ -1304,13 +1423,13 @@ async function upsertDividendEvents(input, auth) {
     .filter((r) => r.ticker);
   if (!rows.length) return { ok: true, count: 0, message: 'Nenhum provento real para salvar. Previsões locais foram ignoradas.', syncState: await getSyncState(userId) };
   const result = await callSyncRpc('valorae_sync_upsert_dividends', mutationRpcArgs(userId, input, rows, {
-    p_backup: { events: rows.map((row) => row.payload || row) },
+    p_backup: optionalBackup({ events: rows.map((row) => row.payload || row) }),
   }));
   return {
     ok: true,
     count: Number(result?.count || rows.length),
     ignoredLocalProjections: Math.max(0, arr.length - rows.length),
-    backupMirrored: true,
+    backupMirrored: financialSyncBackupsEnabled(),
     syncState: normalizeSyncState(result),
   };
 }
@@ -1336,6 +1455,16 @@ async function getSyncBackups(input, auth) {
   const userId = auth.userId || safeText(input.userId || input.user_id || '', 160);
   const state = await getSyncState(userId);
   if (state.tombstone) return { ok: true, count: 0, backups: [], syncState: state };
+  if (!financialSyncBackupsEnabled()) {
+    return {
+      ok: true,
+      count: 0,
+      backups: [],
+      disabled: true,
+      message: 'Backups integrais desativados para reduzir CPU, WAL e armazenamento.',
+      syncState: state,
+    };
+  }
   const limit = Math.min(Math.max(Number(input.limit || 20), 1), 100);
   const q = `user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc&limit=${limit}`;
   const rows = await supabaseFetch(`/rest/v1/${BACKUPS_TABLE}?${q}`, { method: 'GET' });
@@ -1359,12 +1488,15 @@ async function deleteUserData(input, auth) {
     p_reason: safeText(input.reason || 'portfolio_cleared', 120),
   });
   const encodedUser = encodeURIComponent(userId);
-  const verification = await Promise.all([
+  const verificationJobs = [
     supabaseFetch(`/rest/v1/${SNAPSHOT_TABLE}?user_id=eq.${encodedUser}&select=user_id&limit=1`, { method: 'GET' }),
     supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?user_id=eq.${encodedUser}&select=user_id&limit=1`, { method: 'GET' }),
     supabaseFetch(`/rest/v1/${DIVIDENDS_TABLE}?user_id=eq.${encodedUser}&select=user_id&limit=1`, { method: 'GET' }),
-    supabaseFetch(`/rest/v1/${BACKUPS_TABLE}?user_id=eq.${encodedUser}&select=user_id&limit=1`, { method: 'GET' }),
-  ]);
+  ];
+  if (financialSyncBackupsEnabled()) {
+    verificationJobs.push(supabaseFetch(`/rest/v1/${BACKUPS_TABLE}?user_id=eq.${encodedUser}&select=user_id&limit=1`, { method: 'GET' }));
+  }
+  const verification = await Promise.all(verificationJobs);
   if (verification.some((rows) => Array.isArray(rows) && rows.length > 0)) {
     const err = new Error('A exclusão não foi confirmada em todas as tabelas da nuvem.');
     err.status = 500;
@@ -1457,11 +1589,15 @@ export default async function handler(req, res) {
           dividendsTable: DIVIDENDS_TABLE,
           backupsTable: BACKUPS_TABLE,
           syncStateTable: SYNC_STATE_TABLE,
+          financialBackupsEnabled: financialSyncBackupsEnabled(),
+          authCacheTtlMs: authCacheTtlMs(),
+          diagnosticsCacheTtlMs: diagnosticsCacheTtlMs(),
           cloudMode: 'cloud_primary_local_cache',
           authMode: 'supabase_email_password',
           legacyAdminTokenEnabled: Boolean(process.env.VALORAE_SUPABASE_SYNC_TOKEN),
         },
         capabilities: SYNC_CAPABILITIES,
+        resourceGuard: { ...syncRuntime.metrics },
         diagnosticsHint: 'Use /api/sync?action=diagnostics para testar conexão real com Supabase e tabelas.',
       }, { status: 200, engineVersion: VALORAE_ENGINE_VERSION, profile: 'supabase-sync', cacheControl: 'no-store' });
     }

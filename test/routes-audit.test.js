@@ -66,7 +66,7 @@ assert.equal(parseBody(rAssetsSuggestions).assets.find(item => item.symbol === '
 
 const r4 = await callRoute('/scrape');
 assert.equal(r4.statusCode, 400);
-assert.match(parseBody(r4).error, /URL HTTPS permitida|para fazer scraping/i);
+assert.match(parseBody(r4).error, /URL HTTPS permitida/i);
 
 const r5 = await callRoute('/portfolio/transactions');
 assert.equal(r5.statusCode, 405);
