@@ -1,17 +1,17 @@
 {
   "name": "VALORAE Proxy",
-  "version": "21.12.0",
-  "releasePatch": "21.12.394-runtime-safety-v362",
-  "publicVersion": "21.12.394",
-  "apkVersion": "2026.07.25.09",
-  "checkpoint": "runtime-safety-v362",
-  "label": "runtime-safety-v362",
-  "monitorObservabilityVersion": "2026.07.25-v366",
   "description": "Proxy v362 pareado ao APK v546, com monitor Material 3 v366 e histórico patrimonial desde o início com cobertura mensal máxima disponível.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
-  "apkCheckpoint": "v546-b3-import-accuracy",
-  "contractVersion": "APK v546 / Proxy 21.12.394 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / monitor v366"
+  "version": "21.12.0",
+  "releasePatch": "21.12.394-runtime-safety-v362",
+  "publicVersion": "21.12.394",
+  "checkpoint": "runtime-safety-v362",
+  "label": "runtime-safety-v362",
+  "apkVersion": "2026.07.25.09",
+  "apkCheckpoint": "v546",
+  "contractVersion": "APK v546 / Proxy 21.12.394",
+  "monitorObservabilityVersion": "2026.07.25-v366"
 }
