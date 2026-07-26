@@ -989,11 +989,22 @@ async function fetchSnapshotRowsWithIdentityFallback(queryBuilderForUserId, auth
   }
   const legacyEmail = legacyEmailIdentity(auth);
   if (!legacyEmail) return { ...primary, identity: 'supabase_user_id' };
-  const legacy = await fetchSnapshotRowsWithCompat((select) => queryBuilderForUserId(legacyEmail, select));
-  return {
-    ...legacy,
-    identity: Array.isArray(legacy.rows) && legacy.rows.length > 0 ? 'legacy_verified_email' : 'supabase_user_id',
-  };
+  try {
+    const legacy = await fetchSnapshotRowsWithCompat((select) => queryBuilderForUserId(legacyEmail, select));
+    return {
+      ...legacy,
+      identity: Array.isArray(legacy.rows) && legacy.rows.length > 0 ? 'legacy_verified_email' : 'supabase_user_id',
+    };
+  } catch (error) {
+    // UUID-backed schemas reject the historical e-mail value with 22P02. The absence of a
+    // compatible legacy namespace is not a failure of the current authenticated identity.
+    return {
+      ...primary,
+      identity: 'supabase_user_id',
+      legacyIdentitySkipped: true,
+      legacyIdentityError: safeText(error?.code || 'LEGACY_IDENTITY_QUERY_FAILED', 120),
+    };
+  }
 }
 
 async function upsertSnapshot(record, auth) {
@@ -1410,6 +1421,10 @@ async function getTransactions(input, auth) {
     (identity) => `/rest/v1/${TRANSACTIONS_TABLE}?${transactionQuery(identity)}`,
     auth,
     {
+      // Some Supabase installations use UUID for user_id. In those projects the verified
+      // e-mail namespace cannot physically exist in the same column and PostgREST rejects
+      // `user_id=eq.email@example.com` with 22P02. A valid UUID read must still be returned.
+      ignoreLegacyErrors: true,
       keyOf: (row) => normalizeClientTxId(row?.client_tx_id || row?.payload?.clientTxId || row?.payload?.client_tx_id || ''),
       compare: (left, right) => {
         const leftDate = Date.parse(normalizeTransactionDate(firstPresent(left?.transaction_date, left?.date, left?.payload?.date, ''))) || 0;
@@ -1438,6 +1453,8 @@ async function getTransactions(input, auth) {
     nextCursor,
     next_page_token: nextCursor,
     identitySource: fetched.identity,
+    legacyIdentitySkipped: fetched.legacyIdentitySkipped || undefined,
+    legacyIdentityError: fetched.legacyIdentityError,
     syncState: state,
   };
 }
