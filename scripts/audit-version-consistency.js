@@ -36,6 +36,27 @@ expect(metadata.releasePatch, releasePatch, 'metadata.releasePatch');
 expect(metadata.publicVersion, publicVersion, 'metadata.publicVersion');
 expect(metadata.checkpoint, checkpoint, 'metadata.checkpoint');
 expect(metadata.label, releaseLabel, 'metadata.label');
+expect(pkg.valorae?.apkVersion, metadata.apkVersion, 'package.valorae.apkVersion');
+expect(pkg.releaseMetadata?.apkVersion, metadata.apkVersion, 'package.releaseMetadata.apkVersion');
+const apkCheckpointMatch = String(metadata.apkCheckpoint || '').match(/^v(\d+)/);
+if (!apkCheckpointMatch) failures.push('metadata.apkCheckpoint precisa iniciar com v<numero>.');
+else if (!String(metadata.contractVersion || '').includes(`APK v${apkCheckpointMatch[1]} / Proxy ${publicVersion}`)) failures.push('metadata.contractVersion não corresponde ao apkCheckpoint/publicVersion.');
+const explicitApkRoot = String(process.env.VALORAE_APK_ROOT || '').trim();
+const strictApkPairing = ['1', 'true', 'yes', 'on'].includes(String(process.env.VALORAE_REQUIRE_APK || '').trim().toLowerCase());
+if (explicitApkRoot || strictApkPairing) {
+  const apkRoot = path.resolve(explicitApkRoot || path.join(root, '..', 'apk'));
+  const apkMetadataPath = path.join(apkRoot, 'metadata.json');
+  const apkBuildPath = path.join(apkRoot, 'app/build.gradle.kts');
+  if (!fs.existsSync(apkMetadataPath) || !fs.existsSync(apkBuildPath)) failures.push(`APK pareado não encontrado em ${apkRoot}.`);
+  else {
+    const apkMetadata = JSON.parse(fs.readFileSync(apkMetadataPath, 'utf8'));
+    const apkBuild = fs.readFileSync(apkBuildPath, 'utf8');
+    expect(metadata.apkVersion, apkMetadata.versionName, 'proxy.metadata.apkVersion x apk.metadata.versionName');
+    if (!apkBuild.includes(`versionCode = ${apkMetadata.versionCode}`)) failures.push('APK build.gradle.kts não corresponde ao versionCode do metadata.json.');
+    if (!apkBuild.includes(`versionName = "${apkMetadata.versionName}"`)) failures.push('APK build.gradle.kts não corresponde ao versionName do metadata.json.');
+    if (!String(metadata.contractVersion || '').startsWith(`APK v${String(apkMetadata.checkpoint || '').match(/^v(\d+)/)?.[1] || '?'} / Proxy ${publicVersion}`)) failures.push('Contrato do Proxy não corresponde ao checkpoint do APK real.');
+  }
+}
 expect(manifest.version, publicVersion, 'manifest.version');
 const readmeHead = read('README.md').match(/^## Release atual — ([^\n]+)/m)?.[1] || '';
 const changelogHead = read('docs/CHANGELOG.md').match(/^## ([^\n]+)/m)?.[1] || '';

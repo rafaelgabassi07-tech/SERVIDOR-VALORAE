@@ -9,7 +9,7 @@ const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.ur
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
 assert.equal(pkg.valorae.publicVersion, '21.12.394');
 assert.equal(pkg.valorae.releasePatch, '21.12.394-runtime-safety-v362');
-assert.equal(metadata.apkVersion, '2026.07.25.04');
+assert.equal(metadata.apkVersion, pkg.valorae.apkVersion);
 assert.equal(fii.FII_MODAL_VERSION, '26.asset-modal.fii.v25-modal-source-repair');
 assert.equal(stock.STOCK_MODAL_VERSION, '26.asset-modal.stock.v58-modal-source-repair');
 

@@ -24,8 +24,9 @@ if (protocol && http && contract && catalog && build && migration) {
   assert.ok(http.includes('sharedStateVersion = header(ValoraeMobileProtocol.HeaderSharedState)'));
   assert.ok(http.includes('fun sharedState()'));
   assert.ok(catalog.includes('/api/v1/contract/shared-state'));
-  assert.ok(build.includes('versionCode = 26072503'));
-  assert.ok(build.includes('versionName = "2026.07.25.01"'));
+  const apkMetadata = JSON.parse(readSiblingApkFile('metadata.json'));
+  assert.ok(build.includes(`versionCode = ${apkMetadata.versionCode}`));
+  assert.ok(build.includes(`versionName = \"${apkMetadata.versionName}\"`));
   assert.ok(migration.includes('valorae_runtime_shared_state'));
   assert.ok(migration.includes('valorae_shared_state_put'));
   assert.ok(migration.includes('valorae_shared_state_acquire_lease'));

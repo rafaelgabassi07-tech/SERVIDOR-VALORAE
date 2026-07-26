@@ -1,6 +1,6 @@
 # Release atual — V-Proxy 21.12.394 / monitor v366 (2026-07-25)
 
-O V-Proxy permanece no patch `21.12.394-runtime-safety-v362`, pareado ao APK v541 (`2026.07.25.04`). O monitor v366 usa Material 3 e foi reorganizado como uma central operacional profissional com páginas dedicadas para visão geral, tráfego, detalhe de requisição, rotas, fontes/cache, saúde, diagnósticos, arquitetura, benchmark e ajustes.
+O V-Proxy permanece no patch `21.12.394-runtime-safety-v362`, pareado ao APK v546 (`2026.07.25.09`). O monitor v366 usa Material 3 e foi reorganizado como uma central operacional profissional com páginas dedicadas para visão geral, tráfego, detalhe de requisição, rotas, fontes/cache, saúde, diagnósticos, arquitetura, benchmark e ajustes.
 
 Metadados visuais de notícias agora incluem domínio, ícone da publicação em 128 px e imagem de matéria quando a própria fonte a fornece; esses campos são opcionais e mantêm fallback compatível com APKs anteriores.
 
@@ -19,7 +19,7 @@ O Proxy v362 mantém o contrato público e corrige a leitura de transações/pro
 
 ## Release atual — 21.12.394 / v362 (2026-07-25)
 
-O Proxy `21.12.394-runtime-safety-v362` é pareado ao APK v541 (`2026.07.25.04`) e preserva o protocolo móvel `2026.07.10.10` e o schema de entrega `4`.
+O Proxy `21.12.394-runtime-safety-v362` é pareado ao APK v546 (`2026.07.25.09`) e preserva o protocolo móvel `2026.07.10.10` e o schema de entrega `4`.
 
 - sanitiza JSON capturado antes de qualquer promoção, removendo campos sensíveis, chaves de prototype e estruturas acima dos limites;
 - limita tarefas pendentes, documentos, bytes e tempo de settle do coletor de rede;

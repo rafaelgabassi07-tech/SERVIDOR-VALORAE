@@ -11,7 +11,8 @@ const universalModalService = readSiblingApkFile('app/src/main/java/com/example/
 const portfolioService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyPortfolioContractsService.kt');
 const runtime = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyRuntime.kt');
 const build = readSiblingApkFile('app/build.gradle.kts');
-if ([protocol, http, guard, assetService, universalModalService, portfolioService, runtime, build].every(Boolean)) {
+const apkMetadataText = readSiblingApkFile('metadata.json');
+if ([protocol, http, guard, assetService, universalModalService, portfolioService, runtime, build, apkMetadataText].every(Boolean)) {
   assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Baseline-Contract'));
   assert.match(protocol, /BaselineContractVersion = ValoraeContractContinuityGuard\.BaselineVersion/);
   assert.match(guard, new RegExp(VALORAE_BASELINE_CONTRACT_VERSION.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
@@ -25,6 +26,8 @@ if ([protocol, http, guard, assetService, universalModalService, portfolioServic
   assert.match(universalModalService, /requireSafeContractReplacement\("\/api\/v1\/asset\/modal", hasPreviousSnapshot\)/);
   assert.match(portfolioService, /requireSafeContractReplacement\("\/api\/v1\/portfolio\/history", hasPreviousSnapshot\)/);
   assert.match(runtime, /assetDetailCache/);
-  assert.match(build, /versionCode = (?:2607140[45]|2607150[1-8]|2607230[3-5])/);
+  const apkMetadata = JSON.parse(apkMetadataText);
+  assert.ok(build.includes(`versionCode = ${apkMetadata.versionCode}`));
+  assert.ok(build.includes(`versionName = "${apkMetadata.versionName}"`));
 }
 console.log('cross-stack-contract-baseline-v336 ok');

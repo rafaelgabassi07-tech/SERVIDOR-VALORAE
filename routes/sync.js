@@ -301,9 +301,9 @@ function hasUsableDividendEvent(ev = {}) {
   const inferredComDate = safeText(ev.inferredComDate || ev.inferred_com_date || ev.estimatedComDate || '', 40);
   const exDate = safeText(ev.exDate || ev.ex_date || ev.dateEx || '', 40);
   const paymentDate = safeText(ev.paymentDate || ev.payment_date || '', 40);
-  const value = Number(ev.valuePerShare ?? ev.value_per_share ?? ev.value ?? 0);
-  const amount = Number(ev.estimatedAmount ?? ev.estimated_amount ?? 0);
-  return Boolean(ticker) && Boolean(dateCom || inferredComDate || exDate || paymentDate) && (Number.isFinite(value) && value > 0 || Number.isFinite(amount) && amount > 0);
+  // Eventos oficiais com data conhecida continuam úteis mesmo quando a fonte ainda não publicou
+  // valor por cota ou montante estimado. Previsões locais seguem bloqueadas separadamente.
+  return Boolean(ticker) && Boolean(dateCom || inferredComDate || exDate || paymentDate);
 }
 
 function isValidSyncIdentity(value) {
@@ -1397,15 +1397,18 @@ function dividendRow(userId, ev = {}) {
     eligibilityDateSource: safeText(ev.eligibilityDateSource || ev.eligibility_date_source || ev.dateComSource || '', 80),
     paymentDate: safeText(ev.paymentDate || ev.payment_date || '', 40),
   };
+  const numericValuePerShare = Number(ev.valuePerShare ?? ev.value_per_share ?? ev.value ?? 0);
+  const numericQuantity = Number(ev.quantity ?? 0);
+  const numericEstimatedAmount = Number(ev.estimatedAmount ?? ev.estimated_amount ?? 0);
   return {
     user_id: userId,
     event_key: eventKey(userId, normalizedPayload),
     ticker: normalizeSingleTransactionSymbol(ev.ticker || ev.symbol || ''),
     date_com: normalizedPayload.dateCom,
     payment_date: normalizedPayload.paymentDate,
-    value_per_share: Number(ev.valuePerShare ?? ev.value_per_share ?? ev.value ?? 0),
-    quantity: Number(ev.quantity || 0),
-    estimated_amount: Number(ev.estimatedAmount ?? ev.estimated_amount ?? 0),
+    value_per_share: Number.isFinite(numericValuePerShare) && numericValuePerShare > 0 ? numericValuePerShare : 0,
+    quantity: Number.isFinite(numericQuantity) && numericQuantity > 0 ? numericQuantity : 0,
+    estimated_amount: Number.isFinite(numericEstimatedAmount) && numericEstimatedAmount > 0 ? numericEstimatedAmount : 0,
     status,
     category: low.includes('pago') || low.includes('receb') || low.includes('paid') ? 'received' : 'future',
     source: safeText(ev.source || 'VALORAE', 160),
@@ -1417,18 +1420,30 @@ function dividendRow(userId, ev = {}) {
 async function upsertDividendEvents(input, auth) {
   const userId = auth.userId;
   const arr = Array.isArray(input.events) ? input.events : [];
-  const rows = arr
-    .filter((ev) => !isLocalDividendProjection(ev) && hasUsableDividendEvent(ev))
+  const localProjectionCount = arr.filter((ev) => isLocalDividendProjection(ev)).length;
+  const usableEvents = arr.filter((ev) => !isLocalDividendProjection(ev) && hasUsableDividendEvent(ev));
+  const rows = usableEvents
     .map((ev) => dividendRow(userId, ev))
     .filter((r) => r.ticker);
-  if (!rows.length) return { ok: true, count: 0, message: 'Nenhum provento real para salvar. Previsões locais foram ignoradas.', syncState: await getSyncState(userId) };
+  const invalidCount = Math.max(0, arr.length - localProjectionCount - rows.length);
+  if (!rows.length) return {
+    ok: true,
+    count: 0,
+    acceptedCount: 0,
+    ignoredLocalProjections: localProjectionCount,
+    ignoredInvalid: invalidCount,
+    message: 'Nenhum provento oficial datado para salvar.',
+    syncState: await getSyncState(userId),
+  };
   const result = await callSyncRpc('valorae_sync_upsert_dividends', mutationRpcArgs(userId, input, rows, {
     p_backup: optionalBackup({ events: rows.map((row) => row.payload || row) }),
   }));
   return {
     ok: true,
-    count: Number(result?.count || rows.length),
-    ignoredLocalProjections: Math.max(0, arr.length - rows.length),
+    count: Number(result?.count ?? rows.length),
+    acceptedCount: rows.length,
+    ignoredLocalProjections: localProjectionCount,
+    ignoredInvalid: invalidCount,
     backupMirrored: financialSyncBackupsEnabled(),
     syncState: normalizeSyncState(result),
   };

@@ -7,7 +7,7 @@ import { sendText, setSecurityHeaders } from './lib/core/http.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const PORT = Math.max(1, Math.min(65535, Number(process.env.PORT || 3000) || 3000));
+const PORT = 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const MAX_LOCAL_BODY_BYTES = Number(process.env.MAX_LOCAL_BODY_BYTES || 512 * 1024);
 const INVALID_JSON = 'INVALID_JSON';

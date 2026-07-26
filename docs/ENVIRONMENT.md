@@ -16,6 +16,8 @@ Principais variáveis:
 | `VALORAE_MAX_QUERY_PARAMS` | Limite de query params | `80` |
 | `VALORAE_FETCH_TIMEOUT_MS` | Timeout de fontes externas | `12000` |
 | `VALORAE_MAX_HTML_CHARS` | Máximo de HTML processado | `3200000` |
+| `VALORAE_CLIENT_KEYS` | Pares `appId:clientKey` autorizados, separados por vírgula | vazio/modo aberto |
+| `VALORAE_REQUIRE_CLIENT_AUTH` | Exige `x-valorae-app-id` e `x-valorae-client-key` (ou HMAC) | `0` |
 | `VALORAE_ADMIN_TOKEN` | Ativa rotas admin | vazio/desativado |
 | `VALORAE_ADMIN_ALLOW_QUERY_TOKEN` | Permite token admin via query apenas fora de produção | `0` |
 | `VALORAE_ADMIN_ALLOW_QUERY_TOKEN_IN_PRODUCTION` | Override explícito e não recomendado para query token em produção | `0` |

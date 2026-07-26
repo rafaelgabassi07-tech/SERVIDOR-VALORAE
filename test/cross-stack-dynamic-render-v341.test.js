@@ -7,7 +7,8 @@ const http = readSiblingApkFile('app/src/main/java/com/example/data/proxy/Valora
 const contract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeDynamicRender.kt');
 const catalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
 const build = readSiblingApkFile('app/build.gradle.kts');
-if ([protocol, http, contract, catalog, build].every(Boolean)) {
+const apkMetadataText = readSiblingApkFile('metadata.json');
+if ([protocol, http, contract, catalog, build, apkMetadataText].every(Boolean)) {
   assert.ok(protocol.includes('HeaderDynamicRender'));
   assert.ok(protocol.includes('HeaderDynamicRenderAccept'));
   assert.ok(http.includes(VALORAE_DYNAMIC_RENDER_POLICY));
@@ -15,7 +16,9 @@ if ([protocol, http, contract, catalog, build].every(Boolean)) {
   assert.ok(contract.includes(VALORAE_DYNAMIC_RENDER_VERSION));
   assert.ok(contract.includes(VALORAE_DYNAMIC_RENDER_POLICY));
   assert.ok(catalog.includes('/api/v1/contract/dynamic-render'));
-  assert.match(build, /versionCode = (?:2607150[4-8]|2607230[3-5])/);
+  const apkMetadata = JSON.parse(apkMetadataText);
+  assert.ok(build.includes(`versionCode = ${apkMetadata.versionCode}`));
+  assert.ok(build.includes(`versionName = "${apkMetadata.versionName}"`));
 }
 const manifest = buildDynamicRenderManifest();
 assert.equal(manifest.safety.browserIsNeverMandatoryForFinancialContract, true);

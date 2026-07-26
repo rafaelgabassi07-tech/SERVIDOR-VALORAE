@@ -15,9 +15,9 @@ const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
 assert.equal(packageJson.valorae.publicVersion, '21.12.394');
 assert.equal(packageJson.valorae.releasePatch, '21.12.394-runtime-safety-v362');
-assert.equal(metadata.apkVersion, '2026.07.25.04');
-assert.ok(metadata.contractVersion.includes('APK v541 / Proxy 21.12.394'));
-assert.equal(packageJson.valorae.apkVersion, '2026.07.25.04');
+assert.equal(metadata.apkVersion, packageJson.valorae.apkVersion);
+assert.ok(metadata.contractVersion.includes(`APK ${metadata.apkCheckpoint.match(/^v\d+/)?.[0]} / Proxy ${packageJson.valorae.publicVersion}`));
+assert.equal(packageJson.releaseMetadata.apkVersion, metadata.apkVersion);
 assert.equal(packageJson.valorae.monitorVersion, 'v366');
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
@@ -110,7 +110,12 @@ if (apkCache && apkProtocol && apkHttp && apkSync && apkCatalog && apkParser) {
     DividendAgendaTtlMs: VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends * 1000,
   };
   for (const [name, value] of Object.entries(ttlMarkers)) {
-    assert.ok(apkCache.includes(`const val ${name} = ${value}`) || apkCache.includes(`const val ${name} = ${value.toLocaleString('en-US').replaceAll(',', '_')}`), `TTL APK divergente: ${name}`);
+    const match = apkCache.match(new RegExp(`const\\s+val\\s+${name}\\s*=\\s*([^\\n]+)`));
+    assert.ok(match, `TTL APK ausente: ${name}`);
+    const factors = match[1].replaceAll('_', '').replaceAll('L', '').trim().split('*').map(part => Number(part.trim()));
+    assert.ok(factors.length > 0 && factors.every(Number.isFinite), `expressão TTL APK inválida: ${name}`);
+    const actualValue = factors.reduce((total, factor) => total * factor, 1);
+    assert.equal(actualValue, value, `TTL APK divergente: ${name}`);
   }
   assert.ok(apkCache.includes('effectiveHttpMaxAgeSeconds'));
   assert.ok(apkCache.includes('min(localMaxAge'));

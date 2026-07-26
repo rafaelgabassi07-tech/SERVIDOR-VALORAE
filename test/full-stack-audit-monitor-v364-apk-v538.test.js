@@ -20,10 +20,9 @@ const sharedState = read('lib/state/shared-state-foundation.js');
 const sync = read('routes/sync.js');
 
 assert.equal(proxyMetadata.apkVersion, apkMetadata.versionName);
-assert.equal(apkMetadata.versionCode, 26072503);
-assert.match(apkBuild, /versionCode = 26072503/);
-assert.match(apkBuild, /versionName = "2026\.07\.25\.03"/);
-assert.match(proxyMetadata.contractVersion, /APK v541/);
+assert.match(apkBuild, new RegExp(`versionCode = ${apkMetadata.versionCode}`));
+assert.match(apkBuild, new RegExp(`versionName = \"${apkMetadata.versionName.replaceAll('.', '\\.') }\"`));
+assert.ok(proxyMetadata.contractVersion.includes(`APK ${apkMetadata.checkpoint.match(/^v\d+/)?.[0]}`));
 assert.match(proxyMetadata.contractVersion, /monitor v366/);
 assert.match(apkMetadata.contractVersion, /Proxy 21\.12\.394/);
 assert.match(apkMetadata.contractVersion, /monitor v(?:364|366)/);
@@ -73,4 +72,4 @@ assert.match(sharedState, /VALORAE_SHARED_STATE_MODE \|\| 'memory'/);
 assert.match(sharedState, /VALORAE_SHARED_STATE_REMOTE_ENABLED, false/);
 assert.match(sync, /VALORAE_FINANCIAL_SYNC_BACKUPS_ENABLED, false/);
 
-console.log('full-stack-audit-monitor-v366-apk-v541 ok');
+console.log(`full-stack-audit-monitor-v366-${apkMetadata.checkpoint} ok`);
