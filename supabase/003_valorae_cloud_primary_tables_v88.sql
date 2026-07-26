@@ -69,7 +69,7 @@ create table if not exists public.valorae_transactions (
   name text,
   quantity numeric,
   purchase_price numeric,
-  transaction_date bigint,
+  transaction_date timestamptz,
   asset_type text,
   is_sell boolean default false,
   broker text,
@@ -94,8 +94,8 @@ alter table public.valorae_transactions
   add column if not exists payload jsonb,
   add column if not exists updated_at timestamptz default now();
 
--- Se transaction_date existir como timestamptz em um projeto antigo, o Proxy v88 converte automaticamente.
--- O tipo recomendado para novas instalações é bigint em milissegundos Unix.
+-- transaction_date usa timestamptz, o mesmo contrato das RPCs financeiras atuais.
+-- A migração 006 converte automaticamente instalações antigas que ainda usam epoch bigint.
 
 create table if not exists public.valorae_dividend_events (
   user_id text not null,

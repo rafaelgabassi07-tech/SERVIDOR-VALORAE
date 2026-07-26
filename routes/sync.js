@@ -8,9 +8,12 @@ import {
   TRANSACTION_PAGE_LIMIT_MAX,
   applyOperationToPosition,
   assertCursorMatchesState,
+  assertTransactionCursorMatchesState,
   classifyCorporateOperation,
   decodeRevisionCursor,
+  decodeTransactionReadCursor,
   encodeRevisionCursor,
+  encodeTransactionReadCursor,
   normalizeClientTxId,
   stableDividendEventKey,
 } from '../lib/sync/financial-integrity.js';
@@ -981,6 +984,63 @@ async function fetchRowsWithLegacyIdentityFallback(pathForUserId, auth, options 
   };
 }
 
+async function fetchTransactionIdentityRows(identity, targetCount) {
+  const safeTarget = Math.min(Math.max(Number(targetCount) || 0, 1), TRANSACTION_PAGE_LIMIT_MAX * 201);
+  const output = [];
+  let offset = 0;
+  while (output.length < safeTarget) {
+    const limit = Math.min(TRANSACTION_PAGE_LIMIT_MAX, safeTarget - output.length);
+    const query = `user_id=eq.${encodeURIComponent(identity)}&select=*&order=transaction_date.desc,client_tx_id.asc&limit=${limit}&offset=${offset}`;
+    const raw = await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?${query}`, { method: 'GET' });
+    const batch = Array.isArray(raw) ? raw : [];
+    if (!batch.length) break;
+    output.push(...batch.slice(0, limit));
+    if (batch.length < limit) break;
+    offset += limit;
+  }
+  return output;
+}
+
+async function fetchTransactionRowsWithIdentityFallback(auth, targetCount) {
+  const primaryUserId = safeText(auth.userId || '', 160);
+  const legacyEmail = legacyEmailIdentity(auth);
+  if (!legacyEmail) {
+    const primaryRows = await fetchTransactionIdentityRows(primaryUserId, targetCount);
+    return {
+      rows: mergeIdentityRows(primaryRows, [], transactionMergeOptions()),
+      identity: 'supabase_user_id',
+    };
+  }
+  const [primaryResult, legacyResult] = await Promise.allSettled([
+    fetchTransactionIdentityRows(primaryUserId, targetCount),
+    fetchTransactionIdentityRows(legacyEmail, targetCount),
+  ]);
+  if (primaryResult.status === 'rejected') throw primaryResult.reason;
+  const primaryRows = Array.isArray(primaryResult.value) ? primaryResult.value : [];
+  const legacyRows = legacyResult.status === 'fulfilled' && Array.isArray(legacyResult.value) ? legacyResult.value : [];
+  const legacyIdentityError = legacyResult.status === 'rejected'
+    ? safeText(legacyResult.reason?.code || 'LEGACY_IDENTITY_QUERY_FAILED', 120)
+    : '';
+  return {
+    rows: mergeIdentityRows(primaryRows, legacyRows, transactionMergeOptions()),
+    identity: mergedIdentitySource(primaryRows, legacyRows),
+    legacyIdentitySkipped: Boolean(legacyIdentityError),
+    legacyIdentityError: legacyIdentityError || undefined,
+  };
+}
+
+function transactionMergeOptions() {
+  return {
+    keyOf: (row) => storedTransactionToClient(row).clientTxId,
+    compare: (left, right) => {
+      const leftDate = Date.parse(normalizeTransactionDate(firstPresent(left?.transaction_date, left?.date, left?.payload?.date, ''))) || 0;
+      const rightDate = Date.parse(normalizeTransactionDate(firstPresent(right?.transaction_date, right?.date, right?.payload?.date, ''))) || 0;
+      if (leftDate !== rightDate) return rightDate - leftDate;
+      return storedTransactionToClient(left).clientTxId.localeCompare(storedTransactionToClient(right).clientTxId);
+    },
+  };
+}
+
 async function fetchSnapshotRowsWithIdentityFallback(queryBuilderForUserId, auth) {
   const primaryUserId = safeText(auth.userId || '', 160);
   const primary = await fetchSnapshotRowsWithCompat((select) => queryBuilderForUserId(primaryUserId, select));
@@ -1211,7 +1271,7 @@ function dedupeTransactionRowsByClientId(rows = []) {
   const seen = new Set();
   const output = [];
   for (const row of rows) {
-    const key = normalizeClientTxId(row?.client_tx_id || '');
+    const key = storedTransactionToClient(row).clientTxId;
     if (key) {
       if (seen.has(key)) continue;
       seen.add(key);
@@ -1397,9 +1457,10 @@ async function getTransactions(input, auth) {
   const limit = Math.min(Math.max(Number(input.limit || 250), 1), TRANSACTION_PAGE_LIMIT_MAX);
   const token = safeText(input.cursor || input.page_token || input.pageToken || '', 4096);
   let offset = 0;
+  let cursor = null;
   if (token) {
-    const cursor = decodeRevisionCursor(token, syncCursorSecret());
-    assertCursorMatchesState(cursor, state);
+    cursor = decodeTransactionReadCursor(token, syncCursorSecret());
+    assertTransactionCursorMatchesState(cursor, state);
     offset = cursor.offset;
   } else if (Number(input.page || 1) > 1) {
     const err = new Error('Paginação por número de página não é segura. Use o cursor retornado pela página anterior.');
@@ -1416,24 +1477,10 @@ async function getTransactions(input, auth) {
   // accounts partially migrated from verified e-mail to Supabase UUID without introducing a
   // second cursor format. The UUID copy wins duplicate client_tx_id records.
   const mergedReadLimit = Math.min(offset + limit + 1, TRANSACTION_PAGE_LIMIT_MAX * 201);
-  const transactionQuery = (identity) => `user_id=eq.${encodeURIComponent(identity)}&select=*&order=transaction_date.desc,client_tx_id.asc&limit=${mergedReadLimit}&offset=0`;
-  const fetched = await fetchRowsWithLegacyIdentityFallback(
-    (identity) => `/rest/v1/${TRANSACTIONS_TABLE}?${transactionQuery(identity)}`,
-    auth,
-    {
-      // Some Supabase installations use UUID for user_id. In those projects the verified
-      // e-mail namespace cannot physically exist in the same column and PostgREST rejects
-      // `user_id=eq.email@example.com` with 22P02. A valid UUID read must still be returned.
-      ignoreLegacyErrors: true,
-      keyOf: (row) => normalizeClientTxId(row?.client_tx_id || row?.payload?.clientTxId || row?.payload?.client_tx_id || ''),
-      compare: (left, right) => {
-        const leftDate = Date.parse(normalizeTransactionDate(firstPresent(left?.transaction_date, left?.date, left?.payload?.date, ''))) || 0;
-        const rightDate = Date.parse(normalizeTransactionDate(firstPresent(right?.transaction_date, right?.date, right?.payload?.date, ''))) || 0;
-        if (leftDate !== rightDate) return rightDate - leftDate;
-        return normalizeClientTxId(left?.client_tx_id || '').localeCompare(normalizeClientTxId(right?.client_tx_id || ''));
-      },
-    },
-  );
+  // Fetch in bounded 500-row chunks. Supabase/PostgREST commonly caps one response at 1,000
+  // rows; requesting the whole prefix in a single call silently truncated histories above that
+  // threshold. Chunking preserves the merged UUID/e-mail ordering for large portfolios.
+  const fetched = await fetchTransactionRowsWithIdentityFallback(auth, mergedReadLimit);
   const mergedRows = fetched.rows;
   const rows = mergedRows.slice(offset, offset + limit + 1);
   const pageRows = rows.slice(0, limit);
@@ -1442,7 +1489,7 @@ async function getTransactions(input, auth) {
   const transactions = uniqueRows
     .map(storedTransactionToClient)
     .filter((transaction) => transaction.symbol && transaction.date);
-  const nextCursor = hasMore ? encodeRevisionCursor({ offset: offset + pageRows.length, ...state }, syncCursorSecret()) : null;
+  const nextCursor = hasMore ? encodeTransactionReadCursor({ offset: offset + pageRows.length, revision: cursor?.revision ?? state.revision, deletionGeneration: state.deletionGeneration, tombstone: state.tombstone, issuedAt: cursor?.issuedAt }) : null;
   return {
     ok: true,
     count: transactions.length,
@@ -1452,6 +1499,10 @@ async function getTransactions(input, auth) {
     next_cursor: nextCursor,
     nextCursor,
     next_page_token: nextCursor,
+    cursorVersion: nextCursor ? 2 : (cursor?.v || 2),
+    readRevision: cursor?.revision ?? state.revision,
+    currentRevision: state.revision,
+    unrelatedRevisionChangeObserved: Boolean(cursor && cursor.revision !== state.revision),
     identitySource: fetched.identity,
     legacyIdentitySkipped: fetched.legacyIdentitySkipped || undefined,
     legacyIdentityError: fetched.legacyIdentityError,

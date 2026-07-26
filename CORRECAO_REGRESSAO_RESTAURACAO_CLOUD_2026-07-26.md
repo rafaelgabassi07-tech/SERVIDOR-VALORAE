@@ -25,3 +25,7 @@ O erro da identidade legada derrubava também a consulta válida pelo UUID. O AP
 - build Vercel: aprovado;
 - sintaxe: 510 arquivos JavaScript;
 - suíte: 168 aprovados, 0 falhas, 107 bloqueados por dependências ausentes (`cheerio`/`undici`).
+
+## Complemento — paginação
+
+A mensagem posterior “O Histórico mudou durante a leitura” revelou uma segunda regressão independente: cursor vinculado à instância/revisão global. A análise e a correção completas estão em `AUDITORIA_CONEXAO_APK_PROXY_SUPABASE_2026-07-26.md`.

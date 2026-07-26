@@ -50,7 +50,7 @@ create table if not exists public.valorae_transactions (
   name text,
   quantity numeric,
   purchase_price numeric,
-  transaction_date bigint,
+  transaction_date timestamptz,
   asset_type text,
   is_sell boolean default false,
   broker text,
