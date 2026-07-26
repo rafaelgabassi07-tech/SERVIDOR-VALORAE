@@ -1,4 +1,4 @@
-const CACHE = 'valorae-proxy-monitor-v21-12-394-ui-v364';
+const CACHE = 'valorae-proxy-monitor-v21-12-394-ui-v366';
 const SHELL = [
   '/server.html',
   '/monitor',

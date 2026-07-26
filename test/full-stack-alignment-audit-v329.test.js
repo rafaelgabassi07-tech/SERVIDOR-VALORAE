@@ -13,7 +13,7 @@ assert.equal(pkg.valorae.publicVersion,'21.12.394');
 assert.equal(pkg.valorae.releasePatch,'21.12.394-runtime-safety-v362');
 assert.equal(pkg.releasePatch,pkg.valorae.releasePatch);
 for(const block of [pkg.config,pkg.releaseMetadata]) assert.deepEqual({releasePatch:block.releasePatch,publicVersion:block.publicVersion,checkpoint:block.checkpoint,releaseLabel:block.releaseLabel},{releasePatch:pkg.valorae.releasePatch,publicVersion:pkg.valorae.publicVersion,checkpoint:pkg.valorae.checkpoint,releaseLabel:pkg.valorae.releaseLabel});
-assert.equal(metadata.apkVersion,'2026.07.25.03');
+assert.equal(metadata.apkVersion,'2026.07.25.04');
 for(const header of ['X-Valorae-Delivery-Schema','X-Valorae-Signature','X-Valorae-Timestamp'])assert.ok(VALORAE_REQUEST_HEADERS.includes(header));
 for(const [input,expected] of [['1m','1m'],['3 meses','3m'],['6m','6m'],['1 ano','12m']])assert.equal(fiiTest.distributionPeriodKey(input),expected);
 const revenue=stockTest.buildStockRevenueBreakdownPayload({ticker:'AUDT3',canonical:{revenueByRegion:{totalAmountDisplay:'127 mi',rows:[{label:'Brasil',percent:100}]}}},'region');

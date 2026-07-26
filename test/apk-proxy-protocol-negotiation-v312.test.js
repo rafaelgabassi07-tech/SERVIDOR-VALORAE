@@ -16,9 +16,9 @@ const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
 assert.equal(packageJson.valorae.publicVersion, '21.12.394');
 assert.equal(packageJson.valorae.releasePatch, '21.12.394-runtime-safety-v362');
-assert.equal(metadata.apkVersion, '2026.07.25.03');
-assert.ok(metadata.contractVersion.includes('APK v540 / Proxy 21.12.394'));
-assert.equal(packageJson.valorae.monitorVersion, 'v364');
+assert.equal(metadata.apkVersion, '2026.07.25.04');
+assert.ok(metadata.contractVersion.includes('APK v541 / Proxy 21.12.394'));
+assert.equal(packageJson.valorae.monitorVersion, 'v366');
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');

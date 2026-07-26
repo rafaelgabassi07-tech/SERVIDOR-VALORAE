@@ -8,7 +8,7 @@ const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.m
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');
 assert.equal(pkg.valorae.publicVersion, '21.12.394');
 assert.equal(pkg.valorae.releasePatch, '21.12.394-runtime-safety-v362');
-assert.equal(metadata.apkVersion, '2026.07.25.03');
+assert.equal(metadata.apkVersion, '2026.07.25.04');
 assert.match(metadata.contractVersion, /asset modal delivery v4/i);
 
 const delivery = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalDelivery.kt');

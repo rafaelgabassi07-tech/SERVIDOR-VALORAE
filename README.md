@@ -1,6 +1,6 @@
-# Release atual — V-Proxy 21.12.394 / monitor v364 (2026-07-25)
+# Release atual — V-Proxy 21.12.394 / monitor v366 (2026-07-25)
 
-O V-Proxy permanece no patch `21.12.394-runtime-safety-v362`, pareado ao APK v540 (`2026.07.25.03`). O monitor v364 foi reorganizado como uma central operacional profissional com páginas dedicadas para visão geral, tráfego, detalhe de requisição, rotas, fontes/cache, saúde, diagnósticos, arquitetura, benchmark e ajustes.
+O V-Proxy permanece no patch `21.12.394-runtime-safety-v362`, pareado ao APK v541 (`2026.07.25.04`). O monitor v366 usa Material 3 e foi reorganizado como uma central operacional profissional com páginas dedicadas para visão geral, tráfego, detalhe de requisição, rotas, fontes/cache, saúde, diagnósticos, arquitetura, benchmark e ajustes.
 
 Metadados visuais de notícias agora incluem domínio, ícone da publicação em 128 px e imagem de matéria quando a própria fonte a fornece; esses campos são opcionais e mantêm fallback compatível com APKs anteriores.
 
@@ -19,7 +19,7 @@ O Proxy v362 mantém o contrato público e corrige a leitura de transações/pro
 
 ## Release atual — 21.12.394 / v362 (2026-07-25)
 
-O Proxy `21.12.394-runtime-safety-v362` é pareado ao APK v540 (`2026.07.25.03`) e preserva o protocolo móvel `2026.07.10.10` e o schema de entrega `4`.
+O Proxy `21.12.394-runtime-safety-v362` é pareado ao APK v541 (`2026.07.25.04`) e preserva o protocolo móvel `2026.07.10.10` e o schema de entrega `4`.
 
 - sanitiza JSON capturado antes de qualquer promoção, removendo campos sensíveis, chaves de prototype e estruturas acima dos limites;
 - limita tarefas pendentes, documentos, bytes e tempo de settle do coletor de rede;
@@ -503,6 +503,22 @@ Core version: 21.12.0
 Core version: 21.12.0
 
 
-## Monitor profissional v364
+## Monitor Material 3 v366
 
 O painel em `/monitor` usa navegação por páginas para visão geral, tráfego, detalhes de requisição, rotas, fontes/cache, saúde, diagnósticos, arquitetura, benchmark e ajustes. A telemetria operacional permanece somente na memória da instância e não é gravada no Supabase.
+
+A aparência segue o mesmo catálogo do APK Valorae:
+
+- modos `Sistema`, `Claro` e `Escuro`;
+- paletas Ouro Classic, Coral Solar, Turquesa Oceano, Grafite Mineral, Azul Safira, Esmeralda Verde, Lírio Ametista, Vermelho Rubi e Cacau Bronze;
+- densidade Confortável ou Compacta;
+- movimento Padrão ou Reduzido.
+
+As escolhas ficam persistidas localmente no navegador. O modo Sistema acompanha alterações de tema do sistema em tempo real. A interface usa tokens, superfícies, formas, estados e componentes inspirados no Material 3, mantendo contraste e responsividade em desktop e dispositivos móveis.
+
+## Patrimônio Total v541
+
+- `SINCE_START` deixa de ser truncado silenciosamente em 120 meses.
+- A janela é derivada da primeira transação válida, limitada somente pela cobertura real das fontes e pelo teto de segurança de 600 meses.
+- CDI e benchmarks usam o mesmo número de meses solicitado pelo painel.
+- O Yahoo usa `range=max` em séries mensais para o período máximo disponível.

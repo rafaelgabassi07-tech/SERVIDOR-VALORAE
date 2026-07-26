@@ -23,10 +23,10 @@ assert.equal(proxyMetadata.apkVersion, apkMetadata.versionName);
 assert.equal(apkMetadata.versionCode, 26072503);
 assert.match(apkBuild, /versionCode = 26072503/);
 assert.match(apkBuild, /versionName = "2026\.07\.25\.03"/);
-assert.match(proxyMetadata.contractVersion, /APK v540/);
-assert.match(proxyMetadata.contractVersion, /monitor v364/);
+assert.match(proxyMetadata.contractVersion, /APK v541/);
+assert.match(proxyMetadata.contractVersion, /monitor v366/);
 assert.match(apkMetadata.contractVersion, /Proxy 21\.12\.394/);
-assert.match(apkMetadata.contractVersion, /monitor v364/);
+assert.match(apkMetadata.contractVersion, /monitor v(?:364|366)/);
 
 for (const [apkPattern, proxyPattern] of [
   [/QuoteTtlMs\s*=\s*2L \* 60L \* 1000L/, /quote:\s*120/],
@@ -64,7 +64,7 @@ for (const call of uniqueCalls) {
   assert.ok(routerTest.routeMethods(call.route).includes(call.method), `método incompatível: ${call.method} ${call.route}`);
 }
 
-assert.match(monitorHtml, /valorae-monitor-professional-v364/);
+assert.match(monitorHtml, /valorae-monitor-material3-themes-v366/);
 for (const view of ['overview','traffic','request','routes','sources','health','diagnostics','architecture','benchmark','settings']) assert.match(monitorHtml, new RegExp(`data-view-panel="${view}"`));
 assert.match(metrics, /mode: 'memory-observability'/);
 assert.match(metrics, /persistent: false/);
@@ -73,4 +73,4 @@ assert.match(sharedState, /VALORAE_SHARED_STATE_MODE \|\| 'memory'/);
 assert.match(sharedState, /VALORAE_SHARED_STATE_REMOTE_ENABLED, false/);
 assert.match(sync, /VALORAE_FINANCIAL_SYNC_BACKUPS_ENABLED, false/);
 
-console.log('full-stack-audit-monitor-v364-apk-v538 ok');
+console.log('full-stack-audit-monitor-v366-apk-v541 ok');

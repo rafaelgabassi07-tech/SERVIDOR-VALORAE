@@ -3,10 +3,10 @@
   "short_name": "V-Proxy",
   "start_url": "/monitor",
   "display": "standalone",
-  "background_color": "#070B0F",
-  "theme_color": "#091016",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "id": "/monitor",
-  "description": "Central operacional profissional do V-Proxy com visão geral, tráfego, rotas, fontes, saúde, diagnósticos, benchmark e arquitetura.",
+  "description": "Central operacional Material 3 do V-Proxy com os mesmos modos e paletas do APK Valorae.",
   "scope": "/",
   "orientation": "any",
   "version": "21.12.394",
@@ -30,5 +30,5 @@
       "purpose": "any"
     }
   ],
-  "monitor_version": "v364"
+  "monitor_version": "v366"
 }

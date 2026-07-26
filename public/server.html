@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b1117">
-  <meta name="valorae-ui" content="valorae-monitor-professional-v364">
+  <meta id="themeColorMeta" name="theme-color" content="#000000">
+  <meta name="valorae-ui" content="valorae-monitor-material3-themes-v366">
   <meta name="valorae-latest-patch" content="21.12.394-runtime-safety-v362">
   <meta name="valorae-readiness-endpoint" content="/api/v1/release/readiness">
   <title>V-Proxy · Central operacional</title>
@@ -48,7 +48,7 @@
       <div class="sidebar-status">
         <div><span class="status-dot online" aria-hidden="true"></span><strong>Monitor em memória</strong></div>
         <small>Sem gravação de telemetria no Supabase</small>
-        <span id="sidebarRelease">Core v362 · Monitor v364</span>
+        <span id="sidebarRelease">Core v362 · Monitor v366</span>
       </div>
     </aside>
 
@@ -65,7 +65,7 @@
         </div>
         <div class="topbar-spacer"></div>
         <div class="connection" id="connectionState" role="status" aria-live="polite"><i aria-hidden="true"></i><span>Conectando</span></div>
-        <button class="icon-button" id="themeToggle" type="button" aria-label="Alternar tema" aria-pressed="false" title="Alternar tema">
+        <button class="icon-button" id="themeToggle" type="button" aria-label="Alternar modo claro e escuro" aria-pressed="false" title="Alternar modo claro e escuro">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9c0-1-.2-2-.5-2.8A7 7 0 0 1 12 3Z"/></svg>
         </button>
         <button class="icon-button" id="refreshButton" type="button" aria-label="Atualizar agora" aria-busy="false" title="Atualizar agora">
@@ -162,12 +162,29 @@
 
         <section class="view" id="view-settings" data-view-panel="settings" tabindex="-1" hidden>
           <header class="page-heading"><div><span class="eyebrow">Preferências locais</span><h1>Ajustes do monitor</h1><p>As preferências ficam apenas neste navegador e não são enviadas ao Supabase.</p></div></header>
+          <section class="material-theme-preview" id="themePreview" aria-labelledby="themePreviewTitle">
+            <div class="theme-preview-copy"><span class="eyebrow">Material 3</span><h2 id="themePreviewTitle">Ouro Classic · Sistema</h2><p id="themePreviewDescription">Cores e superfícies alinhadas ao APK Valorae.</p></div>
+            <div class="theme-preview-components" aria-hidden="true"><span class="preview-filled">Ação</span><span class="preview-tonal">Tonal</span><span class="preview-chip">Estado</span></div>
+          </section>
           <div class="settings-list">
-            <section class="setting-row"><div><h2>Tema</h2><p>Use o sistema, modo claro ou escuro.</p></div><div class="segmented" id="themeChoices"><button type="button" data-theme="system">Sistema</button><button type="button" data-theme="light">Claro</button><button type="button" data-theme="dark">Escuro</button></div></section>
+            <section class="setting-row"><div><h2>Modo de aparência</h2><p>Acompanha o sistema ou fixa o monitor em claro ou escuro.</p></div><div class="segmented" id="themeChoices" role="group" aria-label="Modo de aparência"><button type="button" data-theme-mode="system">Sistema</button><button type="button" data-theme-mode="light">Claro</button><button type="button" data-theme-mode="dark">Escuro</button></div></section>
+            <section class="setting-row palette-setting"><div><h2>Paleta Valorae</h2><p>As mesmas nove identidades cromáticas disponíveis no APK.</p></div><div class="theme-palette-grid" id="colorThemeChoices" role="group" aria-label="Paleta de cores">
+              <button class="theme-palette-button swatch-gold" type="button" data-color-theme="gold"><span class="theme-swatch"></span><span><strong>Ouro Classic</strong><small>Dourado institucional</small></span><i aria-hidden="true">✓</i></button>
+              <button class="theme-palette-button swatch-champagne" type="button" data-color-theme="champagne"><span class="theme-swatch"></span><span><strong>Coral Solar</strong><small>Coral acolhedor</small></span><i aria-hidden="true">✓</i></button>
+              <button class="theme-palette-button swatch-amber" type="button" data-color-theme="amber"><span class="theme-swatch"></span><span><strong>Turquesa Oceano</strong><small>Turquesa técnico</small></span><i aria-hidden="true">✓</i></button>
+              <button class="theme-palette-button swatch-graphite" type="button" data-color-theme="graphite"><span class="theme-swatch"></span><span><strong>Grafite Mineral</strong><small>Neutro e sóbrio</small></span><i aria-hidden="true">✓</i></button>
+              <button class="theme-palette-button swatch-sapphire" type="button" data-color-theme="sapphire"><span class="theme-swatch"></span><span><strong>Azul Safira</strong><small>Azul analítico</small></span><i aria-hidden="true">✓</i></button>
+              <button class="theme-palette-button swatch-emerald" type="button" data-color-theme="emerald"><span class="theme-swatch"></span><span><strong>Esmeralda Verde</strong><small>Verde financeiro</small></span><i aria-hidden="true">✓</i></button>
+              <button class="theme-palette-button swatch-amethyst" type="button" data-color-theme="amethyst"><span class="theme-swatch"></span><span><strong>Lírio Ametista</strong><small>Violeta sofisticado</small></span><i aria-hidden="true">✓</i></button>
+              <button class="theme-palette-button swatch-ruby" type="button" data-color-theme="ruby"><span class="theme-swatch"></span><span><strong>Vermelho Rubi</strong><small>Rubi expressivo</small></span><i aria-hidden="true">✓</i></button>
+              <button class="theme-palette-button swatch-platinum" type="button" data-color-theme="platinum"><span class="theme-swatch"></span><span><strong>Cacau Bronze</strong><small>Bronze terroso</small></span><i aria-hidden="true">✓</i></button>
+            </div></section>
+            <section class="setting-row"><div><h2>Densidade dos cartões</h2><p>Confortável para leitura ou compacta para mais informação na tela.</p></div><div class="segmented" id="densityChoices" role="group" aria-label="Densidade"><button type="button" data-density="comfortable">Confortável</button><button type="button" data-density="compact">Compacta</button></div></section>
+            <section class="setting-row"><div><h2>Movimento</h2><p>Reduza transições e animações sem alterar a atualização das métricas.</p></div><div class="segmented" id="motionChoices" role="group" aria-label="Movimento"><button type="button" data-motion="standard">Padrão</button><button type="button" data-motion="reduced">Reduzido</button></div></section>
             <section class="setting-row"><div><h2>Atualização automática</h2><p>Intervalos maiores reduzem tráfego administrativo sem afetar as métricas externas.</p></div><label><span class="sr-only">Intervalo</span><select id="pollInterval"><option value="15000">15 segundos</option><option value="30000">30 segundos</option><option value="60000">1 minuto</option><option value="120000">2 minutos</option></select></label></section>
             <section class="setting-row"><div><h2>Eventos por página</h2><p>Limita somente a apresentação local do feed.</p></div><label><span class="sr-only">Quantidade</span><select id="feedLimit"><option value="30">30 eventos</option><option value="60">60 eventos</option><option value="100">100 eventos</option></select></label></section>
             <section class="setting-row"><div><h2>Origem da API</h2><p>Opcional para monitorar outro deploy. Não inclua credenciais na URL.</p></div><div class="api-control"><input id="apiBaseInput" type="url" inputmode="url" placeholder="https://seu-proxy.vercel.app"><button class="secondary-button" id="saveApiBase" type="button">Salvar</button><button class="text-button" id="clearApiBase" type="button">Usar atual</button></div></section>
-            <section class="setting-row"><div><h2>Restaurar preferências</h2><p>Remove tema, origem e intervalos gravados neste navegador.</p></div><button class="secondary-button" id="resetPreferences" type="button">Restaurar</button></section>
+            <section class="setting-row"><div><h2>Restaurar preferências</h2><p>Remove aparência, origem e intervalos gravados neste navegador.</p></div><button class="secondary-button" id="resetPreferences" type="button">Restaurar</button></section>
           </div>
           <div class="status-banner neutral" id="settingsState"><span class="status-dot"></span><div><strong>Configuração local</strong><small>—</small></div></div>
         </section>

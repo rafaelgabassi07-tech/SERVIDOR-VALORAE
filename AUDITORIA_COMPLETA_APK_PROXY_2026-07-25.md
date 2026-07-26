@@ -8,15 +8,15 @@ O APK e o Proxy foram auditados em conjunto e corrigidos para operar com o mesmo
 
 ## Incompatibilidades corrigidas
 
-- O Proxy ainda declarava pareamento com o APK v534 (`2026.07.23.05`), enquanto o APK enviado estava na linha v537. O par atual foi consolidado como APK v538 (`2026.07.25.01`) + Proxy público `21.12.394` + monitor v364.
+- O Proxy ainda declarava pareamento com o APK v534 (`2026.07.23.05`), enquanto o APK enviado estava na linha v537. O par atual foi consolidado como APK v538 (`2026.07.25.01`) + Proxy público `21.12.394` + monitor v366.
 - Metadados, manifesto, service worker, `package.json`, Gradle, arquivos de atualização e changelog foram alinhados.
-- O manifesto PWA voltou a usar a versão pública canônica `21.12.394`, mantendo `monitor_version: v364` em campo próprio.
+- O manifesto PWA voltou a usar a versão pública canônica `21.12.394`, mantendo `monitor_version: v366` em campo próprio.
 - TTLs foram equalizados: cotações 120 s; notícias, rankings e agenda 900 s; histórico e retornos da carteira 300 s.
 - Dezesseis chamadas diretas GET/POST encontradas no APK foram comparadas ao manifesto real do roteador do Proxy. Nenhuma rota ou método ficou ausente.
 - Testes antigos que ainda presumiam tela monolítica ou versões v534/v537 foram atualizados para a arquitetura modular e para o contrato atual.
 - A busca de ativos em subpáginas da Análise abre o modal compartilhado sem sobrescrever a barra de pesquisa principal (`updateMainSearch = false`).
 
-## Monitor profissional v364
+## Monitor profissional v366
 
 O monitor deixou de concentrar informações técnicas no rodapé e passou a oferecer páginas próprias:
 

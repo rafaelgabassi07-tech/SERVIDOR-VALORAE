@@ -21,9 +21,9 @@ const runtime = read('public/monitor-valorae.js');
 assert.equal(pkg.valorae.publicVersion, '21.12.394');
 assert.equal(pkg.valorae.releasePatch, '21.12.394-runtime-safety-v362');
 assert.equal(pkg.valorae.checkpoint, 'runtime-safety-v362');
-assert.equal(metadata.monitorObservabilityVersion, '2026.07.25-v364');
+assert.equal(metadata.monitorObservabilityVersion, '2026.07.25-v366');
 assert.equal(manifest.version, '21.12.394');
-assert.equal(manifest.monitor_version, 'v364');
+assert.equal(manifest.monitor_version, 'v366');
 assert.equal(manifest.start_url, '/monitor');
 assert.equal(contract.contractVersionUnchanged, true);
 assert.equal(contract.invariants.apkV528Compatible, true);
@@ -35,7 +35,7 @@ for (const view of ['overview', 'traffic', 'request', 'routes', 'sources', 'heal
 for (const feature of ['eventFeed', 'requestPayload', 'routeTable', 'sourceDistribution', 'trafficChart', 'rawSnapshot']) {
   assert.ok(index.includes(`id="${feature}"`), `${feature} ausente`);
 }
-assert.match(index, /valorae-monitor-professional-v364/);
+assert.match(index, /valorae-monitor-material3-themes-v366/);
 assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 assert.doesNotMatch(css, /backdrop-filter\s*:/i);
 assert.doesNotMatch(css, /box-shadow\s*:/i);
