@@ -1454,32 +1454,61 @@ function storedDividendToClient(row = {}) {
 async function getTransactions(input, auth) {
   const userId = auth.userId || safeText(input.userId || input.user_id || '', 160);
   const state = await getSyncState(userId);
-  const limit = Math.min(Math.max(Number(input.limit || 250), 1), TRANSACTION_PAGE_LIMIT_MAX);
+  const requestedPagination = safeText(input.pagination || input.pagination_mode || input.paginationMode || '', 40).toLowerCase();
+  const requestedOffsetRaw = input.offset ?? input.page_offset ?? input.pageOffset;
+  const requestedOffset = Number(requestedOffsetRaw);
+  const useOffsetPagination = requestedPagination === 'offset-v1' || requestedPagination === 'restore-v1' ||
+    (requestedOffsetRaw !== undefined && requestedOffsetRaw !== null && requestedOffsetRaw !== '' && Number.isInteger(requestedOffset) && requestedOffset >= 0);
+  const restoreMode = requestedPagination === 'restore-v1';
+  const pageLimitMax = restoreMode ? 5_000 : (useOffsetPagination ? 1_000 : TRANSACTION_PAGE_LIMIT_MAX);
+  const limit = Math.min(Math.max(Number(input.limit || (restoreMode ? 5_000 : 250)), 1), pageLimitMax);
   const token = safeText(input.cursor || input.page_token || input.pageToken || '', 4096);
   let offset = 0;
   let cursor = null;
-  if (token) {
+  let recoveredLegacyCursor = false;
+
+  if (useOffsetPagination) {
+    if (!Number.isInteger(requestedOffset) || requestedOffset < 0) {
+      const err = new Error('Offset de paginação inválido.');
+      err.status = 400;
+      err.code = 'SYNC_OFFSET_INVALID';
+      err.retryable = false;
+      throw err;
+    }
+    offset = requestedOffset;
+  } else if (token) {
     cursor = decodeTransactionReadCursor(token, syncCursorSecret());
+    recoveredLegacyCursor = Boolean(cursor?.legacySignatureRecovered);
     assertTransactionCursorMatchesState(cursor, state);
     offset = cursor.offset;
   } else if (Number(input.page || 1) > 1) {
-    const err = new Error('Paginação por número de página não é segura. Use o cursor retornado pela página anterior.');
+    const err = new Error('Paginação por número de página não é segura. Use cursor ou offset retornado pela página anterior.');
     err.status = 400;
     err.code = 'SYNC_CURSOR_REQUIRED';
+    err.retryable = false;
     throw err;
   }
+
   if (state.tombstone) {
-    return { ok: true, count: 0, transactions: [], has_more: false, next_cursor: null, syncState: state };
+    return {
+      ok: true,
+      count: 0,
+      transactions: [],
+      has_more: false,
+      hasMore: false,
+      next_cursor: null,
+      nextCursor: null,
+      next_offset: null,
+      nextOffset: null,
+      paginationMode: useOffsetPagination ? requestedPagination || 'offset-v1' : 'cursor-v2',
+      syncState: state,
+    };
   }
-  // select=* preserves compatibility with rows created by older Proxy versions. The
-  // response is still allow-listed through storedTransactionToClient before leaving the route.
-  // Read enough rows from each identity to build one deterministic merged page. This fixes
-  // accounts partially migrated from verified e-mail to Supabase UUID without introducing a
-  // second cursor format. The UUID copy wins duplicate client_tx_id records.
+
+  // select=* preserves compatibility with rows created by older Proxy versions. The response is
+  // allow-listed through storedTransactionToClient before leaving the route. Rows are fetched in
+  // bounded 500-row chunks because PostgREST commonly caps one response at 1,000 rows.
   const mergedReadLimit = Math.min(offset + limit + 1, TRANSACTION_PAGE_LIMIT_MAX * 201);
-  // Fetch in bounded 500-row chunks. Supabase/PostgREST commonly caps one response at 1,000
-  // rows; requesting the whole prefix in a single call silently truncated histories above that
-  // threshold. Chunking preserves the merged UUID/e-mail ordering for large portfolios.
   const fetched = await fetchTransactionRowsWithIdentityFallback(auth, mergedReadLimit);
   const mergedRows = fetched.rows;
   const rows = mergedRows.slice(offset, offset + limit + 1);
@@ -1489,7 +1518,17 @@ async function getTransactions(input, auth) {
   const transactions = uniqueRows
     .map(storedTransactionToClient)
     .filter((transaction) => transaction.symbol && transaction.date);
-  const nextCursor = hasMore ? encodeTransactionReadCursor({ offset: offset + pageRows.length, revision: cursor?.revision ?? state.revision, deletionGeneration: state.deletionGeneration, tombstone: state.tombstone, issuedAt: cursor?.issuedAt }) : null;
+  const nextOffset = hasMore ? offset + pageRows.length : null;
+  // Cursor remains present for older APKs, while offset-v1/restore-v1 avoids rejecting a valid
+  // history when page 2 reaches a different serverless instance or a mixed deployment.
+  const nextCursor = hasMore ? encodeTransactionReadCursor({
+    offset: nextOffset,
+    revision: cursor?.revision ?? state.revision,
+    deletionGeneration: state.deletionGeneration,
+    tombstone: state.tombstone,
+    issuedAt: cursor?.issuedAt,
+  }) : null;
+
   return {
     ok: true,
     count: transactions.length,
@@ -1499,7 +1538,12 @@ async function getTransactions(input, auth) {
     next_cursor: nextCursor,
     nextCursor,
     next_page_token: nextCursor,
+    next_offset: nextOffset,
+    nextOffset,
+    paginationMode: useOffsetPagination ? requestedPagination || 'offset-v1' : 'cursor-v2',
+    paginationProtocol: 'transactions-restore-v1',
     cursorVersion: nextCursor ? 2 : (cursor?.v || 2),
+    legacyCursorRecovered: recoveredLegacyCursor || undefined,
     readRevision: cursor?.revision ?? state.revision,
     currentRevision: state.revision,
     unrelatedRevisionChangeObserved: Boolean(cursor && cursor.revision !== state.revision),
@@ -1715,6 +1759,7 @@ export default async function handler(req, res) {
     methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
     route: 'sync',
     rateMax: Number(process.env.VALORAE_RATE_LIMIT_SYNC_MAX || 90),
+    maxBodyBytes: Number(process.env.VALORAE_SYNC_MAX_BODY_BYTES || 2 * 1024 * 1024),
     profile: 'supabase-sync',
     cacheControl: 'no-store',
   });
