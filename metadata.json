@@ -12,6 +12,6 @@
   "label": "runtime-safety-v362",
   "apkVersion": "2026.07.25.09",
   "apkCheckpoint": "v546",
-  "contractVersion": "APK v546 / Proxy 21.12.394",
+  "contractVersion": "APK v546 / Proxy 21.12.394 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / monitor v366",
   "monitorObservabilityVersion": "2026.07.25-v366"
 }

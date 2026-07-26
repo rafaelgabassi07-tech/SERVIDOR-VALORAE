@@ -25,6 +25,7 @@ assert.match(runtime, /apiUrl\('\/api\/server\/metrics'\)/);
 assert.match(runtime, /event\.safeQuery/);
 assert.match(runtime, /exportEvents\('json'\)/);
 assert.match(runtime, /exportEvents\('csv'\)/);
+assert.match(runtime, /'syncAction','status','errorCode','retryable'/, 'CSV deve identificar ação e código do sync');
 assert.match(runtime, /storage\.get\(STORAGE\.poll, '30000'\)/);
 assert.match(runtime, /bounded\(storage\.get\(STORAGE\.poll, '30000'\), 30000, 15000, 120000\)/);
 assert.match(css, /@media\(max-width:900px\)/);

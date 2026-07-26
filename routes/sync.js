@@ -921,18 +921,63 @@ function legacyEmailIdentity(auth = {}) {
   return email && email !== safeText(auth.userId || '', 160).toLowerCase() ? email : '';
 }
 
-async function fetchRowsWithLegacyIdentityFallback(pathForUserId, auth) {
+function mergedIdentitySource(primaryRows = [], legacyRows = []) {
+  const hasPrimary = Array.isArray(primaryRows) && primaryRows.length > 0;
+  const hasLegacy = Array.isArray(legacyRows) && legacyRows.length > 0;
+  if (hasPrimary && hasLegacy) return 'supabase_user_id+legacy_verified_email';
+  if (hasLegacy) return 'legacy_verified_email';
+  return 'supabase_user_id';
+}
+
+function mergeIdentityRows(primaryRows = [], legacyRows = [], options = {}) {
+  const keyOf = typeof options.keyOf === 'function' ? options.keyOf : null;
+  const compare = typeof options.compare === 'function' ? options.compare : null;
+  const merged = [...(Array.isArray(primaryRows) ? primaryRows : []), ...(Array.isArray(legacyRows) ? legacyRows : [])];
+  const rows = keyOf
+    ? (() => {
+        const seen = new Set();
+        return merged.filter((row) => {
+          const key = String(keyOf(row) || '').trim();
+          if (!key) return true;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      })()
+    : merged;
+  if (compare) rows.sort(compare);
+  return rows;
+}
+
+/**
+ * Reads both the current Supabase UUID namespace and the verified-email namespace used by
+ * older APK releases. UUID rows are placed first, so an identical logical record stored in
+ * both namespaces resolves to the current identity while unique legacy rows are still restored.
+ */
+async function fetchRowsWithLegacyIdentityFallback(pathForUserId, auth, options = {}) {
   const primaryUserId = safeText(auth.userId || '', 160);
-  const primaryRows = await supabaseFetch(pathForUserId(primaryUserId), { method: 'GET' });
-  if (Array.isArray(primaryRows) && primaryRows.length > 0) {
-    return { rows: primaryRows, identity: 'supabase_user_id' };
-  }
   const legacyEmail = legacyEmailIdentity(auth);
-  if (!legacyEmail) return { rows: Array.isArray(primaryRows) ? primaryRows : [], identity: 'supabase_user_id' };
-  const legacyRows = await supabaseFetch(pathForUserId(legacyEmail), { method: 'GET' });
+  if (!legacyEmail) {
+    const primaryRowsRaw = await supabaseFetch(pathForUserId(primaryUserId), { method: 'GET' });
+    const primaryRows = Array.isArray(primaryRowsRaw) ? primaryRowsRaw : [];
+    return { rows: mergeIdentityRows(primaryRows, [], options), identity: 'supabase_user_id' };
+  }
+  const [primaryResult, legacyResult] = await Promise.allSettled([
+    supabaseFetch(pathForUserId(primaryUserId), { method: 'GET' }),
+    supabaseFetch(pathForUserId(legacyEmail), { method: 'GET' }),
+  ]);
+  if (primaryResult.status === 'rejected') throw primaryResult.reason;
+  if (legacyResult.status === 'rejected' && options.ignoreLegacyErrors !== true) throw legacyResult.reason;
+  const primaryRows = Array.isArray(primaryResult.value) ? primaryResult.value : [];
+  const legacyRows = legacyResult.status === 'fulfilled' && Array.isArray(legacyResult.value) ? legacyResult.value : [];
+  const legacyIdentityError = legacyResult.status === 'rejected'
+    ? safeText(legacyResult.reason?.code || 'LEGACY_IDENTITY_QUERY_FAILED', 120)
+    : '';
   return {
-    rows: Array.isArray(legacyRows) ? legacyRows : [],
-    identity: Array.isArray(legacyRows) && legacyRows.length > 0 ? 'legacy_verified_email' : 'supabase_user_id',
+    rows: mergeIdentityRows(primaryRows, legacyRows, options),
+    identity: mergedIdentitySource(primaryRows, legacyRows),
+    legacyIdentitySkipped: Boolean(legacyIdentityError),
+    legacyIdentityError: legacyIdentityError || undefined,
   };
 }
 
@@ -1356,12 +1401,26 @@ async function getTransactions(input, auth) {
   }
   // select=* preserves compatibility with rows created by older Proxy versions. The
   // response is still allow-listed through storedTransactionToClient before leaving the route.
-  const transactionQuery = (identity) => `user_id=eq.${encodeURIComponent(identity)}&select=*&order=transaction_date.desc,client_tx_id.asc&limit=${limit + 1}&offset=${offset}`;
+  // Read enough rows from each identity to build one deterministic merged page. This fixes
+  // accounts partially migrated from verified e-mail to Supabase UUID without introducing a
+  // second cursor format. The UUID copy wins duplicate client_tx_id records.
+  const mergedReadLimit = Math.min(offset + limit + 1, TRANSACTION_PAGE_LIMIT_MAX * 201);
+  const transactionQuery = (identity) => `user_id=eq.${encodeURIComponent(identity)}&select=*&order=transaction_date.desc,client_tx_id.asc&limit=${mergedReadLimit}&offset=0`;
   const fetched = await fetchRowsWithLegacyIdentityFallback(
     (identity) => `/rest/v1/${TRANSACTIONS_TABLE}?${transactionQuery(identity)}`,
     auth,
+    {
+      keyOf: (row) => normalizeClientTxId(row?.client_tx_id || row?.payload?.clientTxId || row?.payload?.client_tx_id || ''),
+      compare: (left, right) => {
+        const leftDate = Date.parse(normalizeTransactionDate(firstPresent(left?.transaction_date, left?.date, left?.payload?.date, ''))) || 0;
+        const rightDate = Date.parse(normalizeTransactionDate(firstPresent(right?.transaction_date, right?.date, right?.payload?.date, ''))) || 0;
+        if (leftDate !== rightDate) return rightDate - leftDate;
+        return normalizeClientTxId(left?.client_tx_id || '').localeCompare(normalizeClientTxId(right?.client_tx_id || ''));
+      },
+    },
   );
-  const rows = fetched.rows;
+  const mergedRows = fetched.rows;
+  const rows = mergedRows.slice(offset, offset + limit + 1);
   const pageRows = rows.slice(0, limit);
   const hasMore = rows.length > limit;
   const uniqueRows = dedupeTransactionRowsByClientId(pageRows);
@@ -1453,17 +1512,35 @@ async function getDividendEvents(input, auth) {
   const userId = auth.userId || safeText(input.userId || input.user_id || '', 160);
   const state = await getSyncState(userId);
   if (state.tombstone) return { ok: true, count: 0, events: [], syncState: state };
-  const category = safeText(input.category || '', 24);
-  const catFilter = category ? `&category=eq.${encodeURIComponent(category)}` : '';
-  const dividendQuery = (identity) => `user_id=eq.${encodeURIComponent(identity)}${catFilter}&select=*&order=payment_date.asc`;
+  const category = safeText(input.category || '', 24).toLowerCase();
+  // Keep the PostgREST query compatible with legacy dividend tables. Older installations may
+  // store payment/category only inside payload, and some projects use UUID for user_id. Ordering
+  // and category filtering are therefore applied after normalization, while a rejected legacy
+  // email lookup must not invalidate a successful lookup by the current Supabase UUID.
+  const dividendQuery = (identity) => `user_id=eq.${encodeURIComponent(identity)}&select=*`;
   const fetched = await fetchRowsWithLegacyIdentityFallback(
     (identity) => `/rest/v1/${DIVIDENDS_TABLE}?${dividendQuery(identity)}`,
     auth,
+    {
+      ignoreLegacyErrors: true,
+      keyOf: (row) => safeText(row?.event_key || row?.payload?.eventKey || row?.payload?.event_key || '', 240),
+    },
   );
   const events = fetched.rows
     .map(storedDividendToClient)
-    .filter((event) => event.ticker && (event.dateCom || event.exDate || event.inferredComDate || event.paymentDate));
-  return { ok: true, count: events.length, events, identitySource: fetched.identity, syncState: state };
+    .filter((event) => event.ticker && (event.dateCom || event.exDate || event.inferredComDate || event.paymentDate))
+    .filter((event) => !category || safeText(event.category || '', 24).toLowerCase() === category)
+    .sort((left, right) => String(left.paymentDate || left.exDate || left.dateCom || left.inferredComDate || '')
+      .localeCompare(String(right.paymentDate || right.exDate || right.dateCom || right.inferredComDate || '')));
+  return {
+    ok: true,
+    count: events.length,
+    events,
+    identitySource: fetched.identity,
+    legacyIdentitySkipped: fetched.legacyIdentitySkipped || undefined,
+    legacyIdentityError: fetched.legacyIdentityError,
+    syncState: state,
+  };
 }
 
 async function getSyncBackups(input, auth) {
@@ -1740,6 +1817,8 @@ export const _test = {
   normalizeSingleTransactionSymbol,
   normalizeTransactionSymbols,
   legacyEmailIdentity,
+  mergedIdentitySource,
+  mergeIdentityRows,
   fetchRowsWithLegacyIdentityFallback,
   transactionRow,
   storedTransactionToClient,
