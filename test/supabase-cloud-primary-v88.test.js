@@ -1,19 +1,11 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import path from 'node:path';
-
-const syncRoute = fs.readFileSync(path.join(process.cwd(), 'routes/sync.js'), 'utf8');
-const sql = fs.readFileSync(path.join(process.cwd(), 'supabase/003_valorae_cloud_primary_tables_v88.sql'), 'utf8');
-
-assert.match(syncRoute, /21\.12\.151-cloud-primary-supabase-v88/);
-assert.match(syncRoute, /BACKUPS_TABLE/);
-assert.doesNotMatch(syncRoute, /['\"]upsert_sync_backup['\"]/, 'backup manual foi removido para não contornar revisão/tombstone');
-assert.match(syncRoute, /get_sync_backups/);
-assert.doesNotMatch(syncRoute, /function\s+mirrorSyncBackup\b/, 'backup agora é gravado somente dentro das RPCs transacionais');
-assert.match(syncRoute, /upsert_dividend_events/);
-assert.match(sql, /create table if not exists public\.valorae_sync_backups/i);
-assert.match(sql, /create table if not exists public\.valorae_transactions/i);
-assert.match(sql, /create table if not exists public\.valorae_dividend_events/i);
-assert.match(sql, /notify pgrst, 'reload schema'/i);
-
-console.log('Supabase cloud primary v88 tests OK.');
+const route=fs.readFileSync(new URL('../routes/sync.js',import.meta.url),'utf8');
+const sql=fs.readFileSync(new URL('../supabase/013_valorae_minimal_financial_sync_v2.sql',import.meta.url),'utf8');
+assert.match(route,/auth\/v1\/user/);
+assert.match(route,/valorae_financial_download_v2/);
+assert.match(route,/valorae_financial_upload_transactions_v2/);
+assert.match(route,/valorae_financial_upload_dividends_v2/);
+assert.doesNotMatch(route,/VALORAE_SUPABASE_TRANSACTIONS_TABLE|VALORAE_SUPABASE_SNAPSHOTS_TABLE/);
+assert.deepEqual([...sql.matchAll(/create table if not exists public\.([a-z0-9_]+)/gi)].map(m=>m[1]),['valorae_financial_transactions','valorae_financial_dividends']);
+console.log('Supabase minimal cloud primary v2 OK');

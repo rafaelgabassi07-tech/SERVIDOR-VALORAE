@@ -23,9 +23,9 @@ assert.equal(proxyMetadata.apkVersion, apkMetadata.versionName);
 assert.match(apkBuild, new RegExp(`versionCode = ${apkMetadata.versionCode}`));
 assert.match(apkBuild, new RegExp(`versionName = \"${apkMetadata.versionName.replaceAll('.', '\\.') }\"`));
 assert.ok(proxyMetadata.contractVersion.includes(`APK ${apkMetadata.checkpoint.match(/^v\d+/)?.[0]}`));
-assert.match(proxyMetadata.contractVersion, /monitor v366/);
-assert.match(apkMetadata.contractVersion, /Proxy 21\.12\.394/);
-assert.match(apkMetadata.contractVersion, /monitor v(?:364|366)/);
+assert.match(proxyMetadata.contractVersion, /monitor memory-only/);
+assert.match(apkMetadata.contractVersion, /Proxy 21\.12\.395/);
+assert.match(apkMetadata.contractVersion, /monitor (?:v364|v366|memory-only)/);
 
 for (const [apkPattern, proxyPattern] of [
   [/QuoteTtlMs\s*=\s*2L \* 60L \* 1000L/, /quote:\s*120/],
@@ -68,8 +68,10 @@ for (const view of ['overview','traffic','request','routes','sources','health','
 assert.match(metrics, /mode: 'memory-observability'/);
 assert.match(metrics, /persistent: false/);
 assert.match(persistence, /const enabled = false/);
-assert.match(sharedState, /VALORAE_SHARED_STATE_MODE \|\| 'memory'/);
-assert.match(sharedState, /VALORAE_SHARED_STATE_REMOTE_ENABLED, false/);
-assert.match(sync, /VALORAE_FINANCIAL_SYNC_BACKUPS_ENABLED, false/);
+assert.match(sharedState, /return boolValue\(process\.env\.VALORAE_SHARED_STATE_ENABLED, true\) \? 'memory' : 'off'/);
+assert.match(persistence, /active: false/);
+assert.match(sync, /snapshotsEnabled: false/);
+assert.match(sync, /backupsEnabled: false/);
+assert.match(sync, /sharedRuntimeStateEnabled: false/);
 
 console.log(`full-stack-audit-monitor-v366-${apkMetadata.checkpoint} ok`);

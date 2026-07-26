@@ -42,7 +42,7 @@ assert.match(worker, /url\.pathname\.startsWith\('\/api\/'\)/);
 assert.match(worker, /caches\.match\('\/server\.html'\)/);
 assert.equal(manifest.start_url, '/monitor');
 assert.equal(manifest.id, '/monitor');
-assert.equal(manifest.version, '21.12.394');
+assert.equal(manifest.version, '21.12.395');
 assert.equal(manifest.monitor_version, 'v366');
 
 console.log('proxy-monitor-visual-audit-v366 ok');

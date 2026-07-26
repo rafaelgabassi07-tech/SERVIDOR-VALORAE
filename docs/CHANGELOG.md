@@ -1,3 +1,11 @@
+## 21.12.395 — Sincronização financeira mínima / APK v548
+
+- mantém no Supabase somente Auth, transações e dividendos;
+- substitui cursores, snapshots, backups e revisão global por uma única RPC de download e RPCs diferenciais de upload;
+- desativa persistência remota do monitor e do estado operacional, que passam a funcionar somente em memória;
+- migração obrigatória: `supabase/013_valorae_minimal_financial_sync_v2.sql`;
+- limpeza opcional após validação: `supabase/014_valorae_remove_nonessential_cloud_data.sql`.
+
 ## 21.12.394 hotfix — Restauração atômica do Histórico / APK v547
 
 - adiciona `restore_transactions` por POST e contrato `history-restore-atomic-v1`;

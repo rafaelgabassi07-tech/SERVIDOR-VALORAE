@@ -1,17 +1,18 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy v362 hotfix pareado ao APK v547, com restauração atômica do Histórico na tabela canônica do Supabase.",
+  "description": "Proxy v363 pareado ao APK v548, com sincronização financeira mínima no Supabase.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
   "version": "21.12.0",
-  "releasePatch": "21.12.394-runtime-safety-v362",
-  "publicVersion": "21.12.394",
-  "checkpoint": "runtime-safety-v362",
-  "label": "runtime-safety-v362",
-  "apkVersion": "2026.07.26.01",
-  "apkCheckpoint": "v547",
-  "contractVersion": "APK v547 / Proxy 21.12.394 / mobile protocol 2026.07.10.10 / history restore atomic v1 / asset modal delivery v4 / monitor v366",
-  "monitorObservabilityVersion": "2026.07.25-v366"
+  "releasePatch": "21.12.395-minimal-financial-sync-v363",
+  "publicVersion": "21.12.395",
+  "checkpoint": "minimal-financial-sync-v363",
+  "label": "minimal-financial-sync-v363",
+  "apkVersion": "2026.07.26.02",
+  "apkCheckpoint": "v548",
+  "contractVersion": "APK v548 / Proxy 21.12.395 / mobile protocol 2026.07.10.10 / financial sync valorae-financial-sync-v2 / asset modal delivery v4 / monitor memory-only",
+  "monitorObservabilityVersion": "2026.07.25-v366",
+  "monitorPersistenceMode": "memory-only"
 }

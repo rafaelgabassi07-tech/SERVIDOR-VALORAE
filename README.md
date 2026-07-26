@@ -1,8 +1,17 @@
-# Hotfix atual — restauração atômica do Histórico / APK v547 (2026-07-26)
+## Release atual — 21.12.395 / sincronização financeira mínima / APK v548 (2026-07-26)
+
+O Proxy `21.12.395-minimal-financial-sync-v363` usa o contrato `valorae-financial-sync-v2`. O Supabase recebe somente transações e dividendos. Auth continua no Supabase Auth; carteira derivada, notícias, cotações, snapshots, backups, monitor e estado operacional permanecem em memória/local.
+
+1. Execute `supabase/013_valorae_minimal_financial_sync_v2.sql`.
+2. Publique este Proxy.
+3. Instale o APK v548.
+4. Depois de confirmar a restauração, execute opcionalmente `supabase/014_valorae_remove_nonessential_cloud_data.sql`.
+
+# Histórico de release — restauração atômica do Histórico / APK v547 (2026-07-26)
 
 O Proxy mantém o patch público `21.12.394-runtime-safety-v362`, mas adiciona o contrato `history-restore-atomic-v1`, pareado ao APK v547 (`2026.07.26.01`). A leitura passa a usar a tabela canônica `public.valorae_transactions`, a mesma utilizada pelas RPCs de escrita, e deixa de depender do cursor mantido entre requisições do APK.
 
-A migração recomendada é `supabase/012_valorae_atomic_history_restore_v363.sql`; enquanto ela ainda não estiver no schema cache, o Proxy usa fallback interno na tabela canônica.
+A migration 012 pertence ao release anterior e não é usada pelo contrato financeiro mínimo v2. Para o APK v548, execute somente `supabase/013_valorae_minimal_financial_sync_v2.sql` e, após validar a restauração, a limpeza opcional `supabase/014_valorae_remove_nonessential_cloud_data.sql`.
 
 # Release atual — V-Proxy 21.12.394 / monitor v366 (2026-07-25)
 

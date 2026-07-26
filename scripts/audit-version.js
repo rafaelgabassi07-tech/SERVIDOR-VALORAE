@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const expectedCore = '21.12.0';
-const expectedPublic = '21.12.394';
-const expectedPatch = '21.12.394-runtime-safety-v362';
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const expectedCore = String(pkg.version || '');
+const expectedPublic = String(pkg.valorae?.publicVersion || '');
+const expectedPatch = String(pkg.valorae?.releasePatch || '');
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
 const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
 const sw = fs.readFileSync('public/service-worker.js', 'utf8');
@@ -20,16 +20,16 @@ assert.equal(pkg.releasePatch, expectedPatch);
 for (const block of [pkg.config, pkg.releaseMetadata]) {
   assert.equal(block.releasePatch, expectedPatch);
   assert.equal(block.publicVersion, expectedPublic);
-  assert.equal(block.checkpoint, 'runtime-safety-v362');
-  assert.equal(block.releaseLabel, 'runtime-safety-v362');
+  assert.equal(block.checkpoint, pkg.valorae.checkpoint);
+  assert.equal(block.releaseLabel, pkg.valorae.releaseLabel);
 }
 assert.equal(metadata.version, expectedCore);
 assert.equal(metadata.releasePatch, expectedPatch);
 assert.equal(manifest.version, expectedPublic);
-assert.ok(sw.includes('v21-12-394'));
+assert.ok(sw.includes(`v${expectedPublic.replaceAll('.', '-')}`));
 assert.ok(coreRelease.includes(expectedPatch));
-assert.ok(coreRelease.includes('valorae-proxy-server-v21-12-394'));
-assert.ok(currentRelease.includes("VALORAE_PUBLIC_VERSION = '21.12.394'"));
+assert.ok(coreRelease.includes(`valorae-proxy-server-v${expectedPublic.replaceAll('.', '-')}`));
+assert.ok(currentRelease.includes(`VALORAE_PUBLIC_VERSION = '${expectedPublic}'`));
 assert.ok(currentRelease.includes(expectedPatch));
 const expectedNodeMajor = String(pkg.engines?.node || '').match(/\d+/)?.[0];
 assert.ok(expectedNodeMajor, 'package.json precisa declarar engines.node');
