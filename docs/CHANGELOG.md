@@ -1,3 +1,11 @@
+## 21.12.394 hotfix — Restauração atômica do Histórico / APK v547
+
+- adiciona `restore_transactions` por POST e contrato `history-restore-atomic-v1`;
+- lê `public.valorae_transactions`, a mesma tabela canônica usada pelas RPCs de escrita;
+- concilia UUID e e-mail legado sem erro de cast;
+- agrega até 10.000 operações em uma resposta e informa total, origem, identidade e vazio verificado;
+- mantém fallback canônico caso a RPC da migração 012 ainda não esteja disponível.
+
 ## 21.12.394 — Segurança de runtime e transporte limitado (v362)
 
 - sanitiza JSON capturado, removendo campos sensíveis, chaves de prototype e estruturas acima dos limites;

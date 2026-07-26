@@ -1,3 +1,9 @@
+# Hotfix atual — restauração atômica do Histórico / APK v547 (2026-07-26)
+
+O Proxy mantém o patch público `21.12.394-runtime-safety-v362`, mas adiciona o contrato `history-restore-atomic-v1`, pareado ao APK v547 (`2026.07.26.01`). A leitura passa a usar a tabela canônica `public.valorae_transactions`, a mesma utilizada pelas RPCs de escrita, e deixa de depender do cursor mantido entre requisições do APK.
+
+A migração recomendada é `supabase/012_valorae_atomic_history_restore_v363.sql`; enquanto ela ainda não estiver no schema cache, o Proxy usa fallback interno na tabela canônica.
+
 # Release atual — V-Proxy 21.12.394 / monitor v366 (2026-07-25)
 
 O V-Proxy permanece no patch `21.12.394-runtime-safety-v362`, pareado ao APK v546 (`2026.07.25.09`). O monitor v366 usa Material 3 e foi reorganizado como uma central operacional profissional com páginas dedicadas para visão geral, tráfego, detalhe de requisição, rotas, fontes/cache, saúde, diagnósticos, arquitetura, benchmark e ajustes.

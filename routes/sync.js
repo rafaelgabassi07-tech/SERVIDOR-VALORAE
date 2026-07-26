@@ -46,6 +46,7 @@ const SYNC_CAPABILITIES = Object.freeze([
   'upsert_transactions',
   'replace_transactions_for_symbols',
   'get_transactions',
+  'restore_transactions',
   'upsert_dividend_events',
   'get_dividend_events',
   'get_sync_backups',
@@ -984,14 +985,14 @@ async function fetchRowsWithLegacyIdentityFallback(pathForUserId, auth, options 
   };
 }
 
-async function fetchTransactionIdentityRows(identity, targetCount) {
+async function fetchTransactionIdentityRows(identity, targetCount, tableName = TRANSACTIONS_TABLE) {
   const safeTarget = Math.min(Math.max(Number(targetCount) || 0, 1), TRANSACTION_PAGE_LIMIT_MAX * 201);
   const output = [];
   let offset = 0;
   while (output.length < safeTarget) {
     const limit = Math.min(TRANSACTION_PAGE_LIMIT_MAX, safeTarget - output.length);
     const query = `user_id=eq.${encodeURIComponent(identity)}&select=*&order=transaction_date.desc,client_tx_id.asc&limit=${limit}&offset=${offset}`;
-    const raw = await supabaseFetch(`/rest/v1/${TRANSACTIONS_TABLE}?${query}`, { method: 'GET' });
+    const raw = await supabaseFetch(`/rest/v1/${tableName}?${query}`, { method: 'GET' });
     const batch = Array.isArray(raw) ? raw : [];
     if (!batch.length) break;
     output.push(...batch.slice(0, limit));
@@ -1001,19 +1002,19 @@ async function fetchTransactionIdentityRows(identity, targetCount) {
   return output;
 }
 
-async function fetchTransactionRowsWithIdentityFallback(auth, targetCount) {
+async function fetchTransactionRowsWithIdentityFallback(auth, targetCount, tableName = TRANSACTIONS_TABLE) {
   const primaryUserId = safeText(auth.userId || '', 160);
   const legacyEmail = legacyEmailIdentity(auth);
   if (!legacyEmail) {
-    const primaryRows = await fetchTransactionIdentityRows(primaryUserId, targetCount);
+    const primaryRows = await fetchTransactionIdentityRows(primaryUserId, targetCount, tableName);
     return {
       rows: mergeIdentityRows(primaryRows, [], transactionMergeOptions()),
       identity: 'supabase_user_id',
     };
   }
   const [primaryResult, legacyResult] = await Promise.allSettled([
-    fetchTransactionIdentityRows(primaryUserId, targetCount),
-    fetchTransactionIdentityRows(legacyEmail, targetCount),
+    fetchTransactionIdentityRows(primaryUserId, targetCount, tableName),
+    fetchTransactionIdentityRows(legacyEmail, targetCount, tableName),
   ]);
   if (primaryResult.status === 'rejected') throw primaryResult.reason;
   const primaryRows = Array.isArray(primaryResult.value) ? primaryResult.value : [];
@@ -1554,6 +1555,144 @@ async function getTransactions(input, auth) {
   };
 }
 
+
+function atomicRestoreRpcMissing(error) {
+  const text = `${error?.code || ''} ${error?.message || ''} ${JSON.stringify(error?.details || '')}`;
+  return error?.code === 'PGRST202' || error?.code === '42883' || /valorae_sync_restore_transactions|Could not find the function|schema cache/i.test(text);
+}
+
+async function callAtomicHistoryRestoreRpc(input, auth) {
+  const limit = Math.min(Math.max(Number(input.limit || 10_000), 1), 10_000);
+  const offset = Math.max(Number(input.offset || 0) || 0, 0);
+  const readFence = safeText(input.read_fence || input.readFence || '', 80) || null;
+  const raw = await supabaseFetch('/rest/v1/rpc/valorae_sync_restore_transactions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      p_user_id: auth.userId,
+      p_legacy_user_id: legacyEmailIdentity(auth) || null,
+      p_limit: limit,
+      p_offset: offset,
+      p_read_fence: readFence,
+    }),
+  });
+  return recordPayload(Array.isArray(raw) ? raw[0] : raw);
+}
+
+async function restoreTransactions(input, auth) {
+  const limit = Math.min(Math.max(Number(input.limit || 10_000), 1), 10_000);
+  const offset = Math.max(Number(input.offset || 0) || 0, 0);
+  let rpcPayload = null;
+  let rpcUnavailable = false;
+  let rpcUnavailableCode = '';
+
+  try {
+    rpcPayload = await callAtomicHistoryRestoreRpc(input, auth);
+  } catch (error) {
+    if (!atomicRestoreRpcMissing(error)) throw error;
+    // Compatibilidade de implantação: o Proxy novo continua lendo a tabela canônica mesmo antes
+    // de a migração 012 entrar no schema cache. A resposta informa o fallback para diagnóstico.
+    rpcUnavailable = true;
+    rpcUnavailableCode = safeText(error?.code || 'ATOMIC_RESTORE_RPC_MISSING', 120);
+  }
+
+  if (rpcPayload && (Array.isArray(rpcPayload.transactions) || Array.isArray(rpcPayload.rows))) {
+    const rawRows = Array.isArray(rpcPayload.transactions) ? rpcPayload.transactions : rpcPayload.rows;
+    const transactions = dedupeTransactionRowsByClientId(rawRows)
+      .map(storedTransactionToClient)
+      .filter((transaction) => transaction.symbol && transaction.date);
+    const totalCount = Math.max(Number(rpcPayload.total_count ?? rpcPayload.totalCount ?? transactions.length) || 0, transactions.length);
+    const hasMore = Boolean(rpcPayload.has_more ?? rpcPayload.hasMore ?? (offset + transactions.length < totalCount));
+    const nextOffsetValue = rpcPayload.next_offset ?? rpcPayload.nextOffset;
+    const nextOffset = hasMore ? Math.max(Number(nextOffsetValue ?? (offset + transactions.length)) || 0, offset + transactions.length) : null;
+    const state = normalizeSyncState(rpcPayload.sync_state || rpcPayload.syncState || rpcPayload.state || {});
+    return {
+      ok: true,
+      count: transactions.length,
+      totalCount,
+      total_count: totalCount,
+      transactions,
+      has_more: hasMore,
+      hasMore,
+      next_offset: nextOffset,
+      nextOffset,
+      read_fence: rpcPayload.read_fence || rpcPayload.readFence || null,
+      readFence: rpcPayload.read_fence || rpcPayload.readFence || null,
+      paginationMode: 'atomic-rpc-v1',
+      paginationProtocol: 'history-restore-atomic-v1',
+      restoreContract: 'history-restore-atomic-v1',
+      restoreSource: 'supabase_rpc_canonical',
+      verifiedEmpty: totalCount === 0,
+      identitySource: rpcPayload.identity_source || rpcPayload.identitySource || 'supabase_user_id',
+      primaryIdentityCount: Number(rpcPayload.primary_count ?? rpcPayload.primaryCount ?? 0) || 0,
+      legacyIdentityCount: Number(rpcPayload.legacy_count ?? rpcPayload.legacyCount ?? 0) || 0,
+      syncState: state,
+    };
+  }
+
+  const state = await getSyncState(auth.userId);
+  if (state.tombstone) {
+    return {
+      ok: true,
+      count: 0,
+      totalCount: 0,
+      total_count: 0,
+      transactions: [],
+      has_more: false,
+      hasMore: false,
+      next_offset: null,
+      nextOffset: null,
+      paginationMode: 'atomic-rest-fallback-v1',
+      paginationProtocol: 'history-restore-atomic-v1',
+      restoreContract: 'history-restore-atomic-v1',
+      restoreSource: 'canonical_rest_fallback',
+      atomicRpcAvailable: false,
+      atomicRpcError: rpcUnavailableCode || undefined,
+      verifiedEmpty: true,
+      identitySource: 'supabase_user_id',
+      syncState: state,
+    };
+  }
+
+  // O fallback ignora VALORAE_SUPABASE_TRANSACTIONS_TABLE de propósito. As RPCs de escrita
+  // persistem em public.valorae_transactions; ler uma tabela configurável diferente era capaz de
+  // produzir exatamente o sintoma "envia, mas não restaura".
+  const targetCount = Math.min(offset + limit + 1, 100_001);
+  const fetched = await fetchTransactionRowsWithIdentityFallback(auth, targetCount, 'valorae_transactions');
+  const rows = fetched.rows.slice(offset, offset + limit + 1);
+  const pageRows = rows.slice(0, limit);
+  const hasMore = rows.length > limit;
+  const transactions = dedupeTransactionRowsByClientId(pageRows)
+    .map(storedTransactionToClient)
+    .filter((transaction) => transaction.symbol && transaction.date);
+  const nextOffset = hasMore ? offset + pageRows.length : null;
+  const totalCount = hasMore ? nextOffset + 1 : offset + transactions.length;
+  return {
+    ok: true,
+    count: transactions.length,
+    totalCount,
+    total_count: totalCount,
+    transactions,
+    has_more: hasMore,
+    hasMore,
+    next_offset: nextOffset,
+    nextOffset,
+    read_fence: null,
+    readFence: null,
+    paginationMode: 'atomic-rest-fallback-v1',
+    paginationProtocol: 'history-restore-atomic-v1',
+    restoreContract: 'history-restore-atomic-v1',
+    restoreSource: 'canonical_rest_fallback',
+    atomicRpcAvailable: !rpcUnavailable,
+    atomicRpcError: rpcUnavailableCode || undefined,
+    verifiedEmpty: !hasMore && transactions.length === 0,
+    identitySource: fetched.identity,
+    legacyIdentitySkipped: fetched.legacyIdentitySkipped || undefined,
+    legacyIdentityError: fetched.legacyIdentityError,
+    syncState: state,
+  };
+}
+
 function dividendRow(userId, ev = {}) {
   const status = safeText(ev.status || '', 80);
   const low = status.toLowerCase();
@@ -1879,6 +2018,7 @@ export default async function handler(req, res) {
     else if (action === 'upsert_transactions') result = await upsertTransactions(input, auth);
     else if (action === 'replace_transactions_for_symbols') result = await replaceTransactionsForSymbols(input, auth);
     else if (action === 'get_transactions') result = await getTransactions(input, auth);
+    else if (action === 'restore_transactions') result = await restoreTransactions(input, auth);
     else if (action === 'upsert_dividend_events') result = await upsertDividendEvents(input, auth);
     else if (action === 'get_dividend_events') result = await getDividendEvents(input, auth);
     else if (action === 'get_sync_backups') result = await getSyncBackups(input, auth);
