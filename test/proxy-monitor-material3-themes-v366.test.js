@@ -11,7 +11,7 @@ const worker = fs.readFileSync(new URL('../public/service-worker.js', import.met
 
 assert.equal(html, server, 'index e fallback precisam permanecer idênticos');
 assert.doesNotThrow(() => new vm.Script(runtime));
-assert.match(html, /valorae-monitor-material3-themes-v366/);
+assert.match(html, /valorae-monitor-material3-polish-v367/);
 assert.match(html, /<span class="eyebrow">Material 3<\/span>/);
 
 for (const mode of ['system', 'light', 'dark']) {
@@ -41,9 +41,9 @@ assert.match(runtime, /function applyAppearance/);
 assert.match(runtime, /storage\.set\(STORAGE\.colorTheme,palette\)/);
 assert.match(runtime, /document\.body\.dataset\.colorTheme=palette/);
 assert.match(runtime, /matchMedia\('\(prefers-color-scheme: dark\)'\)/);
-assert.match(runtime, /MONITOR_VERSION = 'v366'/);
-assert.equal(manifest.monitor_version, 'v366');
-assert.match(worker, /ui-v366/);
+assert.match(runtime, /MONITOR_VERSION = 'v367'/);
+assert.equal(manifest.monitor_version, 'v367');
+assert.match(worker, /ui-v367/);
 assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 assert.doesNotMatch(css, /backdrop-filter\s*:/i);
 console.log('proxy-monitor-material3-themes-v366 ok');

@@ -10,7 +10,7 @@ const runtime = fs.readFileSync(new URL('../public/monitor-valorae.js', import.m
 assert.equal(index, server, 'index.html e server.html precisam permanecer idênticos');
 assert.equal([...index.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].length, 0, 'runtime deve ficar separado do HTML');
 assert.doesNotThrow(() => new vm.Script(runtime, { filename: 'monitor-valorae.js' }));
-assert.match(index, /valorae-monitor-material3-themes-v366/);
+assert.match(index, /valorae-monitor-material3-polish-v367/);
 assert.match(index, /<title>V-Proxy · Central operacional<\/title>/);
 for (const id of [
   'appSidebar', 'monitorMain', 'view-overview', 'view-traffic', 'view-request', 'view-routes',

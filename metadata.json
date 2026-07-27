@@ -1,6 +1,6 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy v363 pareado ao APK v548, com sincronização financeira mínima no Supabase.",
+  "description": "Proxy v363 pareado ao APK v549, com monitor v367 e sincronização financeira mínima auditada.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
@@ -10,9 +10,9 @@
   "publicVersion": "21.12.395",
   "checkpoint": "minimal-financial-sync-v363",
   "label": "minimal-financial-sync-v363",
-  "apkVersion": "2026.07.26.02",
-  "apkCheckpoint": "v548",
-  "contractVersion": "APK v548 / Proxy 21.12.395 / mobile protocol 2026.07.10.10 / financial sync valorae-financial-sync-v2 / asset modal delivery v4 / monitor memory-only",
-  "monitorObservabilityVersion": "2026.07.25-v366",
+  "apkVersion": "2026.07.26.03",
+  "apkCheckpoint": "v549",
+  "contractVersion": "APK v549 / Proxy 21.12.395 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / monitor v367 memory-only",
+  "monitorObservabilityVersion": "2026.07.26-v367",
   "monitorPersistenceMode": "memory-only"
 }

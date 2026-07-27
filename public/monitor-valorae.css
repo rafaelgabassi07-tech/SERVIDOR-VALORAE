@@ -147,4 +147,50 @@ body[data-reduced-motion="reduced"] *,body[data-reduced-motion="reduced"] *::bef
 /* Prevent long operational metadata from widening narrow viewports. */
 html,body{overflow-x:clip}.page-heading>div{min-width:0}.instance-meta span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:620px){.instance-meta{max-width:100%}.instance-meta span{max-width:min(100%,calc(100vw - 12px))}.sidebar-backdrop{width:100vw}.toast{max-width:calc(100vw - 12px)}}
-x)}}
+
+/* Monitor refinement v367 — readable controls, consistent touch targets and calmer hierarchy. */
+:root{
+  --topbar:58px;
+  --sidebar:272px;
+  --control-height:44px;
+  --control-height-compact:40px;
+}
+body{font-size:14px;line-height:1.45}
+.brand-block{padding:6px 10px}.brand{gap:10px}.brand img{width:40px;height:40px}.brand strong{font-size:14px;letter-spacing:.055em}.brand small{font-size:10px}
+.sidebar-nav{padding:6px 8px 14px}.nav-group{padding:10px 10px 4px;font-size:10px}.sidebar-nav a{min-height:44px;padding:7px 10px;border-radius:14px}.sidebar-nav a svg{flex-basis:19px;width:19px;height:19px}.sidebar-nav a strong{font-size:12px}.sidebar-nav a small{font-size:10px}
+.sidebar-status{padding:10px 12px}.sidebar-status strong{font-size:11px}.sidebar-status small,.sidebar-status>span:last-child{font-size:10px}
+.topbar{gap:8px;padding:0 12px}.page-context span{font-size:9px}.page-context strong{font-size:13px}
+.icon-button{width:var(--control-height);height:var(--control-height);min-width:var(--control-height);border-radius:14px}.icon-button svg{width:20px;height:20px}
+.connection{min-height:38px;padding:0 12px;font-size:11px}
+.pause-button,.secondary-button{min-height:var(--control-height);padding:0 16px;border-radius:14px;font-size:12px}
+.secondary-link,.text-button{min-height:40px;padding:0 12px;border-radius:12px;font-size:11px}
+.monitor-main{padding:12px 14px 24px}.page-heading{gap:14px;margin-bottom:12px}.page-heading h1{font-size:clamp(24px,2.7vw,36px)}.page-heading p{font-size:13px;line-height:1.5}.eyebrow{font-size:10px}.instance-meta span{padding:5px 9px;font-size:10px}
+.back-link{display:inline-flex;align-items:center;gap:9px;min-height:44px;margin:0 0 10px;padding:0 14px;border-radius:14px;background:var(--md-surface-container-high);color:var(--md-on-surface);font-size:12px;font-weight:750;transition:background-color .16s ease,color .16s ease,transform .16s ease}
+.back-link svg{width:20px;height:20px}.back-link:hover{background:var(--md-primary-container);color:var(--md-on-primary-container)}.back-link:active{transform:scale(.985)}
+.status-banner{padding:10px 12px}.status-banner strong{font-size:12px}.status-banner small{font-size:11px}
+.metric-grid{gap:8px;margin-bottom:8px}.metric-card{padding:10px 12px}.metric-card span{font-size:10px}.metric-card strong{font-size:22px}.metric-card small{font-size:11px}
+.panel{margin-bottom:8px;padding:10px 12px}.panel-heading{margin-bottom:10px}.panel-heading h2{font-size:15px}.panel-heading>span{font-size:10px}.two-column,.three-column{gap:8px}
+.shortcut-grid{gap:8px}.shortcut-grid a{min-height:72px;padding:10px 12px}.shortcut-grid strong{font-size:12px}.shortcut-grid span{font-size:10px}
+.filter-bar{gap:8px;padding:8px 10px}input,select{height:42px;padding-inline:12px;font-size:12px}.search-field input{padding-left:36px}.search-field svg{left:11px;width:18px;height:18px}
+.segmented{padding:3px}.segmented button{min-height:38px;padding:0 12px;font-size:11px}
+.setting-row{padding:12px 14px}.setting-row h2{font-size:14px}.setting-row p{font-size:11px}.theme-palette-button{min-height:56px;padding:8px 10px}.theme-palette-button strong{font-size:12px}.theme-palette-button small{font-size:10px}
+.event-row{padding:8px 10px}.compact-event{padding:7px 0}.chip{padding:4px 8px;font-size:10px}.toast{padding:10px 14px;font-size:11px}
+button:disabled,.secondary-button:disabled,.text-button:disabled{cursor:not-allowed;opacity:.46;filter:saturate(.55)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid color-mix(in srgb,var(--md-primary) 72%,transparent);outline-offset:2px}
+@media(max-width:900px){
+  :root{--topbar:56px}
+  .monitor-main{padding:10px 10px 20px}
+  .icon-button.sidebar-close,.icon-button.menu-button{display:grid}
+}
+@media(max-width:620px){
+  :root{--control-height:44px}
+  .topbar{gap:5px;padding:0 6px}.page-context strong{font-size:12px}.pause-button{min-height:40px;padding:0 10px;font-size:11px}
+  .monitor-main{padding:8px 7px 16px}.page-heading h1{font-size:24px}.page-heading p{font-size:12px}
+  .back-link{width:max-content;min-height:44px;padding:0 12px}
+  .metric-card{padding:9px}.metric-card strong{font-size:19px}
+  .panel{padding:9px}.filter-bar{padding:7px}.secondary-button{width:100%}
+}
+body[data-density="compact"]{--topbar:52px;--sidebar:252px;--control-height:40px}
+body[data-density="compact"] .sidebar-nav a{min-height:40px}
+body[data-density="compact"] .metric-card,body[data-density="compact"] .panel{padding:8px 10px}
+

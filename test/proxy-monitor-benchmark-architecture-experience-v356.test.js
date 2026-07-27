@@ -13,15 +13,15 @@ const benchmark = JSON.parse(read('public/assets/valorae-monitor-benchmarks.json
 
 assert.equal(index, server);
 assert.doesNotThrow(() => new vm.Script(runtime));
-assert.match(index, /valorae-monitor-material3-themes-v366/);
-assert.match(index, /Core v362 · Monitor v366/);
+assert.match(index, /valorae-monitor-material3-polish-v367/);
+assert.match(index, /Core v363 · Monitor v367/);
 assert.equal((index.match(/data-benchmark-scenario=/g) || []).length, 3);
 for (const id of ['benchmarkScenarioTitle','benchmarkScenarioDescription','benchmarkMetrics','benchmarkLeaderboard','benchmarkFacts','architectureFlow','architectureControls','architectureContracts']) assert.match(index, new RegExp(`id="${id}"`));
 assert.match(runtime, /benchmarkScenario: 'complex'/);
 assert.match(runtime, /button\.dataset\.benchmarkScenario/);
 assert.match(css, /\.benchmark-list/);
 assert.match(css, /\.architecture-flow/);
-assert.match(worker, /ui-v366/);
+assert.match(worker, /ui-v367/);
 
 assert.equal(benchmark.schemaVersion, 2);
 assert.equal(Object.keys(benchmark.scenarios).length, 3);

@@ -21,10 +21,10 @@ const runtime = read('public/monitor-valorae.js');
 assert.equal(pkg.valorae.publicVersion, '21.12.395');
 assert.equal(pkg.valorae.releasePatch, '21.12.395-minimal-financial-sync-v363');
 assert.equal(pkg.valorae.checkpoint, 'minimal-financial-sync-v363');
-assert.equal(metadata.monitorObservabilityVersion, '2026.07.25-v366');
+assert.equal(metadata.monitorObservabilityVersion, '2026.07.26-v367');
 assert.equal(metadata.monitorPersistenceMode, 'memory-only');
 assert.equal(manifest.version, '21.12.395');
-assert.equal(manifest.monitor_version, 'v366');
+assert.equal(manifest.monitor_version, 'v367');
 assert.equal(manifest.start_url, '/monitor');
 assert.equal(contract.contractVersionUnchanged, true);
 assert.equal(contract.invariants.apkV528Compatible, true);
@@ -36,7 +36,7 @@ for (const view of ['overview', 'traffic', 'request', 'routes', 'sources', 'heal
 for (const feature of ['eventFeed', 'requestPayload', 'routeTable', 'sourceDistribution', 'trafficChart', 'rawSnapshot']) {
   assert.ok(index.includes(`id="${feature}"`), `${feature} ausente`);
 }
-assert.match(index, /valorae-monitor-material3-themes-v366/);
+assert.match(index, /valorae-monitor-material3-polish-v367/);
 assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 assert.doesNotMatch(css, /backdrop-filter\s*:/i);
 assert.doesNotMatch(css, /box-shadow\s*:/i);

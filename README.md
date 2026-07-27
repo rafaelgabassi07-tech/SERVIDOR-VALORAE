@@ -1,10 +1,16 @@
-## Release atual — 21.12.395 / sincronização financeira mínima / APK v548 (2026-07-26)
+## Release atual — 21.12.395 / Monitor v367 / APK v549 (2026-07-26)
 
 O Proxy `21.12.395-minimal-financial-sync-v363` usa o contrato `valorae-financial-sync-v2`. O Supabase recebe somente transações e dividendos. Auth continua no Supabase Auth; carteira derivada, notícias, cotações, snapshots, backups, monitor e estado operacional permanecem em memória/local.
 
+- Monitor com botão **Voltar ao tráfego** de 44 px, controles maiores, foco visível, tipografia legível e hierarquia visual refinada.
+- Logotipo VP canônico aplicado ao monitor, favicon, PWA, ícones 192/512/1024 e ativo interno do Proxy.
+- Contrato financeiro obrigatório em todas as ações; cargas parciais e respostas RPC incompatíveis são recusadas antes de atingir o Room.
+- Lotes de transações e dividendos são deduplicados antes da RPC; uma agenda vazia autoritativa pode limpar dividendos obsoletos.
+- O APK v549 remove o cliente PostgREST direto: somente o Auth acessa o Supabase diretamente; dados financeiros passam exclusivamente pelo Proxy.
+
 1. Execute `supabase/013_valorae_minimal_financial_sync_v2.sql`.
 2. Publique este Proxy.
-3. Instale o APK v548.
+3. Instale o APK v549.
 4. Depois de confirmar a restauração, execute opcionalmente `supabase/014_valorae_remove_nonessential_cloud_data.sql`.
 
 # Histórico de release — restauração atômica do Histórico / APK v547 (2026-07-26)
@@ -13,7 +19,7 @@ O Proxy mantém o patch público `21.12.394-runtime-safety-v362`, mas adiciona o
 
 A migration 012 pertence ao release anterior e não é usada pelo contrato financeiro mínimo v2. Para o APK v548, execute somente `supabase/013_valorae_minimal_financial_sync_v2.sql` e, após validar a restauração, a limpeza opcional `supabase/014_valorae_remove_nonessential_cloud_data.sql`.
 
-# Release atual — V-Proxy 21.12.394 / monitor v366 (2026-07-25)
+# Histórico — V-Proxy 21.12.394 / monitor v366 (2026-07-25)
 
 O V-Proxy permanece no patch `21.12.394-runtime-safety-v362`, pareado ao APK v546 (`2026.07.25.09`). O monitor v366 usa Material 3 e foi reorganizado como uma central operacional profissional com páginas dedicadas para visão geral, tráfego, detalhe de requisição, rotas, fontes/cache, saúde, diagnósticos, arquitetura, benchmark e ajustes.
 
@@ -32,7 +38,7 @@ O Proxy v362 mantém o contrato público e corrige a leitura de transações/pro
 
 # Release v362 — segurança de runtime e transporte limitado
 
-## Release atual — 21.12.394 / v362 (2026-07-25)
+## Histórico — 21.12.394 / v362 (2026-07-25)
 
 O Proxy `21.12.394-runtime-safety-v362` é pareado ao APK v546 (`2026.07.25.09`) e preserva o protocolo móvel `2026.07.10.10` e o schema de entrega `4`.
 

@@ -15,8 +15,9 @@ const fiiParser = readSiblingApkFile('app/src/main/java/com/example/data/proxy/V
 const checklistUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalChecklistUi.kt');
 const vacancyUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalFiiPatrimonialVacancyUi.kt');
 const build = readSiblingApkFile('app/build.gradle.kts');
+const apkMetadataSource = readSiblingApkFile('metadata.json');
 
-if ([models, parser, fiiParser, checklistUi, vacancyUi, build].every(Boolean)) {
+if ([models, parser, fiiParser, checklistUi, vacancyUi, build, apkMetadataSource].every(Boolean)) {
   assert.match(models, /val evidence: String\? = null/);
   assert.match(models, /val dataNature: String = "UNKNOWN"/);
   assert.match(models, /val calculated: Boolean = false/);
@@ -28,8 +29,9 @@ if ([models, parser, fiiParser, checklistUi, vacancyUi, build].every(Boolean)) {
   assert.doesNotMatch(checklistUi, /AssetChecklistSummaryChip\("Não atende"/);
   assert.match(fiiParser, /directOccupancy == null/);
   assert.match(vacancyUi, /Ocupação calculada/);
-  assert.match(build, /versionCode = 2607(?:130[2-9]|140[1-5]|150[1-8]|1601|170[12]|230[1-5]|240[1-9]|250[1-9]|260[12])/);
-  assert.match(build, /versionName = "2026\.07\.(?:13\.0[2-9]|14\.0[1-5]|15\.0[1-8]|16\.01|17\.0[12]|23\.0[1-5]|24\.0[1-9]|25\.0[1-9]|26\.0[12])"/);
+  const apkMetadata = JSON.parse(apkMetadataSource);
+  assert.match(build, new RegExp(`versionCode = ${apkMetadata.versionCode}`));
+  assert.match(build, new RegExp(`versionName = \"${apkMetadata.versionName.replaceAll('.', '\\.') }\"`));
 }
 
 const stock = fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8');

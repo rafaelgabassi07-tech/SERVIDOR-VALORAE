@@ -20,7 +20,7 @@ for (const asset of ['assets/valorae-logo.svg','assets/valorae-favicon-48.png','
   assert.ok(worker.includes(`/${asset}`), `asset fora do cache: ${asset}`);
 }
 assert.deepEqual(manifest.icons.map(icon => icon.sizes), ['192x192','512x512','1024x1024']);
-assert.match(index, /valorae-monitor-material3-themes-v366/);
-assert.match(index, /Core v362 · Monitor v366/);
+assert.match(index, /valorae-monitor-material3-polish-v367/);
+assert.match(index, /Core v363 · Monitor v367/);
 
 console.log('proxy-monitor-brand-assets-v366 ok');

@@ -2,7 +2,7 @@
   'use strict';
 
   const RELEASE_PATCH = '21.12.394-runtime-safety-v362';
-  const MONITOR_VERSION = 'v366';
+  const MONITOR_VERSION = 'v367';
   const BENCHMARK_URL = '/assets/valorae-monitor-benchmarks.json';
   const STORAGE = {
     theme: 'valorae:monitor:theme', themeMode: 'valorae:monitor:themeMode', colorTheme: 'valorae:monitor:colorTheme', density: 'valorae:monitor:density', reducedMotion: 'valorae:monitor:reducedMotion', apiBase: 'valorae:monitor:apiBase', poll: 'valorae:monitor:pollMs',

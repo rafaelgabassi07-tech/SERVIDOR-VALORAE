@@ -305,6 +305,47 @@ function cleanText(value, max = 160) {
   return String(value ?? '').trim().slice(0, max);
 }
 
+function requestSyncContract(req) {
+  return cleanText(header(req, 'x-valorae-sync-contract'), 120);
+}
+
+function assertRequestContract(req, action) {
+  if (action === 'health' || action === 'diagnostics' || action === 'self_test' || action === 'ping') return;
+  const supplied = requestSyncContract(req);
+  if (!supplied) {
+    const error = new Error('O contrato de sincronização financeira não foi informado pelo cliente.');
+    error.status = 428;
+    error.code = 'SYNC_CONTRACT_REQUIRED';
+    error.retryable = false;
+    throw error;
+  }
+  if (supplied !== SYNC_CONTRACT) {
+    const error = new Error(`APK e Proxy usam contratos de sincronização diferentes (${supplied} != ${SYNC_CONTRACT}).`);
+    error.status = 409;
+    error.code = 'SYNC_CONTRACT_MISMATCH';
+    error.retryable = false;
+    throw error;
+  }
+}
+
+function assertRpcContract(result, rpcName) {
+  if (result?.contract === SYNC_CONTRACT) return result;
+  const error = new Error(`A RPC ${rpcName} não confirmou o contrato financeiro v2.`);
+  error.status = 502;
+  error.code = 'MINIMAL_SYNC_CONTRACT_MISMATCH';
+  error.retryable = false;
+  throw error;
+}
+
+function dedupeRows(rows, keyName) {
+  const byId = new Map();
+  for (const row of rows) {
+    const key = cleanText(row?.[keyName], 96);
+    if (key) byId.set(key, row);
+  }
+  return [...byId.values()];
+}
+
 function finiteNumber(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -393,18 +434,27 @@ function syncStateFrom(result = {}) {
 
 async function downloadFinancialData(userId) {
   runtime.metrics.downloads += 1;
-  const result = normalizeRpcObject(await callRpc(DOWNLOAD_RPC, { p_user_id: userId }));
-  if (result.contract !== SYNC_CONTRACT) {
-    const error = new Error('A RPC do Supabase não retornou o contrato financeiro v2.');
-    error.status = 502;
-    error.code = 'MINIMAL_SYNC_CONTRACT_MISMATCH';
-    error.retryable = false;
-    throw error;
-  }
+  const result = assertRpcContract(
+    normalizeRpcObject(await callRpc(DOWNLOAD_RPC, { p_user_id: userId })),
+    DOWNLOAD_RPC,
+  );
   const transactions = Array.isArray(result.transactions) ? result.transactions : [];
   const dividends = Array.isArray(result.dividends) ? result.dividends : [];
   const transactionsCount = Number(result.transactions_count ?? transactions.length) || 0;
   const dividendsCount = Number(result.dividends_count ?? dividends.length) || 0;
+  if (transactionsCount !== transactions.length || dividendsCount !== dividends.length) {
+    const error = new Error('O Supabase retornou uma carga financeira incompleta. Nenhum dado parcial será aplicado.');
+    error.status = 502;
+    error.code = 'MINIMAL_SYNC_COUNT_MISMATCH';
+    error.retryable = true;
+    error.details = {
+      transactionsCount,
+      transactionsLength: transactions.length,
+      dividendsCount,
+      dividendsLength: dividends.length,
+    };
+    throw error;
+  }
   return {
     ok: true,
     contract: SYNC_CONTRACT,
@@ -435,17 +485,23 @@ async function downloadFinancialData(userId) {
 
 async function uploadTransactions(userId, input, action) {
   const sourceRows = Array.isArray(input.transactions) ? input.transactions : Array.isArray(input.rows) ? input.rows : [];
-  const rows = sourceRows.map(normalizeTransaction).filter(row => row.symbol && row.date && (row.quantity > 0 || row.grossValue > 0));
+  const rows = dedupeRows(
+    sourceRows.map(normalizeTransaction).filter(row => row.symbol && row.date && (row.quantity > 0 || row.grossValue > 0)),
+    'clientTxId',
+  );
   const replacement = action === 'replace_transactions_for_symbols' || input.mode === 'replace_symbols';
   const symbols = replacement
     ? [...new Set((Array.isArray(input.symbols) ? input.symbols : []).map(normalizeTicker).filter(Boolean))]
     : [];
   runtime.metrics.transactionUploads += 1;
-  const result = normalizeRpcObject(await callRpc(UPLOAD_TRANSACTIONS_RPC, {
-    p_user_id: userId,
-    p_rows: rows,
-    p_replace_symbols: symbols.length ? symbols : null,
-  }));
+  const result = assertRpcContract(
+    normalizeRpcObject(await callRpc(UPLOAD_TRANSACTIONS_RPC, {
+      p_user_id: userId,
+      p_rows: rows,
+      p_replace_symbols: symbols.length ? symbols : null,
+    })),
+    UPLOAD_TRANSACTIONS_RPC,
+  );
   return {
     ok: result.ok !== false,
     contract: SYNC_CONTRACT,
@@ -458,13 +514,19 @@ async function uploadTransactions(userId, input, action) {
 
 async function uploadDividends(userId, input) {
   const sourceRows = Array.isArray(input.events) ? input.events : Array.isArray(input.dividends) ? input.dividends : [];
-  const rows = sourceRows.map(normalizeDividend).filter(row => row.ticker && (row.dateCom || row.exDate || row.inferredComDate || row.paymentDate));
+  const rows = dedupeRows(
+    sourceRows.map(normalizeDividend).filter(row => row.ticker && (row.dateCom || row.exDate || row.inferredComDate || row.paymentDate)),
+    'eventId',
+  );
   runtime.metrics.dividendUploads += 1;
-  const result = normalizeRpcObject(await callRpc(UPLOAD_DIVIDENDS_RPC, {
-    p_user_id: userId,
-    p_rows: rows,
-    p_replace_all: input.replaceAll !== false && input.replace_all !== false,
-  }));
+  const result = assertRpcContract(
+    normalizeRpcObject(await callRpc(UPLOAD_DIVIDENDS_RPC, {
+      p_user_id: userId,
+      p_rows: rows,
+      p_replace_all: input.replaceAll !== false && input.replace_all !== false,
+    })),
+    UPLOAD_DIVIDENDS_RPC,
+  );
   return {
     ok: result.ok !== false,
     contract: SYNC_CONTRACT,
@@ -476,7 +538,10 @@ async function uploadDividends(userId, input) {
 }
 
 async function financialStatus(userId) {
-  const result = normalizeRpcObject(await callRpc(STATUS_RPC, { p_user_id: userId }));
+  const result = assertRpcContract(
+    normalizeRpcObject(await callRpc(STATUS_RPC, { p_user_id: userId })),
+    STATUS_RPC,
+  );
   return {
     ok: true,
     contract: SYNC_CONTRACT,
@@ -488,7 +553,10 @@ async function financialStatus(userId) {
 
 async function deleteFinancialData(userId) {
   runtime.metrics.deletions += 1;
-  const result = normalizeRpcObject(await callRpc(DELETE_RPC, { p_user_id: userId }));
+  const result = assertRpcContract(
+    normalizeRpcObject(await callRpc(DELETE_RPC, { p_user_id: userId })),
+    DELETE_RPC,
+  );
   return {
     ok: result.ok !== false,
     contract: SYNC_CONTRACT,
@@ -548,6 +616,7 @@ export default async function handler(req, res) {
     const body = req.method === 'POST' || req.method === 'DELETE' ? await parseJsonBody(req) : {};
     const input = { ...query, ...body };
     action = String(input.action || action).trim().toLowerCase();
+    assertRequestContract(req, action);
 
     if (action === 'health') {
       return send(req, res, {
@@ -728,4 +797,8 @@ export const _test = {
   normalizeSingleTransactionSymbol: normalizeTicker,
   normalizeTransactionSymbols,
   storedTransactionToClient: normalizeTransaction,
+  requestSyncContract,
+  assertRequestContract,
+  assertRpcContract,
+  dedupeRows,
 };

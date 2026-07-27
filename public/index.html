@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta id="themeColorMeta" name="theme-color" content="#000000">
-  <meta name="valorae-ui" content="valorae-monitor-material3-themes-v366">
+  <meta name="valorae-ui" content="valorae-monitor-material3-polish-v367">
   <meta name="valorae-latest-patch" content="21.12.394-runtime-safety-v362">
   <meta name="valorae-readiness-endpoint" content="/api/v1/release/readiness">
   <title>V-Proxy · Central operacional</title>
@@ -22,7 +22,7 @@
     <aside class="sidebar" id="appSidebar" aria-label="Navegação principal">
       <div class="brand-block">
         <a class="brand" href="/monitor" data-nav="overview" aria-label="Abrir visão geral">
-          <img src="/assets/valorae-logo.svg" alt="" width="44" height="44">
+          <img src="/assets/valorae-logo.svg" alt="" width="48" height="48">
           <span><strong>V-Proxy</strong><small>Central operacional</small></span>
         </a>
         <button class="icon-button sidebar-close" id="menuCloseButton" type="button" aria-label="Fechar navegação">
@@ -48,7 +48,7 @@
       <div class="sidebar-status">
         <div><span class="status-dot online" aria-hidden="true"></span><strong>Monitor em memória</strong></div>
         <small>Sem gravação de telemetria no Supabase</small>
-        <span id="sidebarRelease">Core v362 · Monitor v366</span>
+        <span id="sidebarRelease">Core v363 · Monitor v367</span>
       </div>
     </aside>
 
@@ -108,7 +108,10 @@
         </section>
 
         <section class="view" id="view-request" data-view-panel="request" tabindex="-1" hidden>
-          <header class="page-heading detail-page-heading"><div><a class="back-link" href="/monitor/traffic" data-nav="traffic">← Voltar ao tráfego</a><span class="eyebrow">Inspeção de evento</span><h1 id="requestTitle">Detalhe da requisição</h1><p id="requestSubtitle">Selecione um evento no tráfego para abrir a análise completa.</p></div><button class="secondary-button" id="copyEventButton" type="button" disabled>Copiar JSON</button></header>
+          <header class="page-heading detail-page-heading"><div><a class="back-link" href="/monitor/traffic" data-nav="traffic" aria-label="Voltar para a página de tráfego">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+                <span>Voltar ao tráfego</span>
+              </a><span class="eyebrow">Inspeção de evento</span><h1 id="requestTitle">Detalhe da requisição</h1><p id="requestSubtitle">Selecione um evento no tráfego para abrir a análise completa.</p></div><button class="secondary-button" id="copyEventButton" type="button" disabled>Copiar JSON</button></header>
           <div id="requestEmpty" class="empty-state"><strong>Nenhum evento selecionado</strong><span>Abra a página Tráfego e escolha uma resposta.</span></div>
           <div id="requestContent" hidden>
             <div class="metric-grid compact" id="requestMetrics"></div>
