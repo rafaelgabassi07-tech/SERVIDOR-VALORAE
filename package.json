@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v363 com restauração integral do Histórico, monitor v367 e sincronização financeira mínima, pareado ao APK Valorae v551.",
+  "description": "Proxy v363 com restauração integral do Histórico, monitor v367 e sincronização financeira mínima, preparado para deploy Vercel com npm lockfile único.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -23,7 +23,7 @@
   "dependencies": {
     "ajv": "^8.20.0",
     "cheerio": "^1.2.0",
-    "undici": "^7.29.0"
+    "undici": "^7.28.0"
   },
   "valorae": {
     "coreVersion": "21.12.0",
@@ -60,5 +60,6 @@
     "htmlparser2": "^10.1.0",
     "parse5": "^7.3.0",
     "parse5-htmlparser2-tree-adapter": "^7.1.0"
-  }
+  },
+  "packageManager": "npm@10.9.2"
 }
