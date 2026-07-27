@@ -1,4 +1,4 @@
-## Release atual — 21.12.395 / Monitor v367 / APK v549 (2026-07-26)
+## Release atual — 21.12.395 / Monitor v367 / APK v551 (2026-07-26)
 
 O Proxy `21.12.395-minimal-financial-sync-v363` usa o contrato `valorae-financial-sync-v2`. O Supabase recebe somente transações e dividendos. Auth continua no Supabase Auth; carteira derivada, notícias, cotações, snapshots, backups, monitor e estado operacional permanecem em memória/local.
 
@@ -6,11 +6,11 @@ O Proxy `21.12.395-minimal-financial-sync-v363` usa o contrato `valorae-financia
 - Logotipo VP canônico aplicado ao monitor, favicon, PWA, ícones 192/512/1024 e ativo interno do Proxy.
 - Contrato financeiro obrigatório em todas as ações; cargas parciais e respostas RPC incompatíveis são recusadas antes de atingir o Room.
 - Lotes de transações e dividendos são deduplicados antes da RPC; uma agenda vazia autoritativa pode limpar dividendos obsoletos.
-- O APK v549 remove o cliente PostgREST direto: somente o Auth acessa o Supabase diretamente; dados financeiros passam exclusivamente pelo Proxy.
+- O APK v551 remove o cliente PostgREST direto: somente o Auth acessa o Supabase diretamente; dados financeiros passam exclusivamente pelo Proxy.
 
 1. Execute `supabase/013_valorae_minimal_financial_sync_v2.sql`.
 2. Publique este Proxy.
-3. Instale o APK v549.
+3. Instale o APK v551.
 4. Depois de confirmar a restauração, execute opcionalmente `supabase/014_valorae_remove_nonessential_cloud_data.sql`.
 
 # Histórico de release — restauração atômica do Histórico / APK v547 (2026-07-26)
@@ -543,3 +543,7 @@ As escolhas ficam persistidas localmente no navegador. O modo Sistema acompanha 
 - A janela é derivada da primeira transação válida, limitada somente pela cobertura real das fontes e pelo teto de segurança de 600 meses.
 - CDI e benchmarks usam o mesmo número de meses solicitado pelo painel.
 - O Yahoo usa `range=max` em séries mensais para o período máximo disponível.
+
+### Reparo de Histórico completo
+
+Para bases migradas pela primeira versão do contrato financeiro v2, execute `supabase/015_valorae_restore_all_transactions_repair.sql` antes de publicar este pacote. O reparo preserva vendas, operações repetidas e quantidades assinadas sem apagar as tabelas financeiras.

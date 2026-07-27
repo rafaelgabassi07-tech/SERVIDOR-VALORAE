@@ -65,10 +65,11 @@ try {
     if (href.includes('/auth/v1/user')) return response({ id: USER_ID, email: 'owner@valorae.test' });
     if (href.includes('/rpc/valorae_financial_upload_transactions_v2')) {
       assert.equal(body.p_user_id, USER_ID);
-      assert.equal(body.p_rows.length, 1, 'duplicidades devem ser removidas antes da RPC');
-      assert.equal(body.p_rows[0].quantity, 3, 'última versão da duplicidade deve prevalecer');
+      assert.equal(body.p_rows.length, 2, 'colisões de ID com operações diferentes devem preservar as duas linhas');
+      assert.notEqual(body.p_rows[0].clientTxId, body.p_rows[1].clientTxId);
+      assert.deepEqual(body.p_rows.map(row => row.quantity).sort((a,b)=>a-b), [1, 3]);
       assert.deepEqual(body.p_replace_symbols, ['PETR4']);
-      return response({ ok: true, contract: CONTRACT, count: 1, deleted: 0 });
+      return response({ ok: true, contract: CONTRACT, count: 2, deleted: 0 });
     }
     if (href.includes('/rpc/valorae_financial_upload_dividends_v2')) {
       assert.equal(body.p_user_id, USER_ID);

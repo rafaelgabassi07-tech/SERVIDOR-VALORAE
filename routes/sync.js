@@ -346,6 +346,52 @@ function dedupeRows(rows, keyName) {
   return [...byId.values()];
 }
 
+function transactionFingerprint(row = {}) {
+  return JSON.stringify([
+    cleanText(row.date, 40),
+    cleanText(row.operation, 48).toUpperCase(),
+    cleanText(row.symbol, 24).toUpperCase(),
+    cleanText(row.assetType, 80),
+    finiteNumber(row.quantity),
+    finiteNumber(row.price),
+    finiteNumber(row.grossValue),
+    cleanText(row.source, 120).toUpperCase(),
+    row.importedAt ?? null,
+  ]);
+}
+
+function collisionSafeTransactionRows(rows = []) {
+  const byIdAndFingerprint = new Map();
+  const usedIds = new Set();
+  const output = [];
+  for (const row of rows) {
+    const baseId = cleanText(row?.clientTxId, 96);
+    if (!baseId) continue;
+    const fingerprint = transactionFingerprint(row);
+    const known = byIdAndFingerprint.get(baseId);
+    if (!known) {
+      byIdAndFingerprint.set(baseId, new Set([fingerprint]));
+      usedIds.add(baseId);
+      output.push(row);
+      continue;
+    }
+    if (known.has(fingerprint)) continue;
+    known.add(fingerprint);
+    const suffix = crypto.createHash('sha256').update(fingerprint).digest('hex').slice(0, 16);
+    const prefix = baseId.slice(0, Math.max(1, 96 - suffix.length - 1));
+    let candidate = `${prefix}-${suffix}`;
+    let attempt = 1;
+    while (usedIds.has(candidate)) {
+      const extra = crypto.createHash('sha256').update(`${fingerprint}:${attempt}`).digest('hex').slice(0, 16);
+      candidate = `${baseId.slice(0, Math.max(1, 96 - extra.length - 1))}-${extra}`;
+      attempt += 1;
+    }
+    usedIds.add(candidate);
+    output.push({ ...row, clientTxId: candidate });
+  }
+  return output;
+}
+
 function finiteNumber(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -364,18 +410,23 @@ function normalizeTransactionSymbols(values = []) {
 
 function normalizeTransaction(row = {}) {
   const symbol = normalizeTicker(row.symbol || row.ticker || '').slice(0, 24);
-  const quantity = Math.max(0, finiteNumber(row.quantity));
-  const price = Math.max(0, finiteNumber(row.price ?? row.purchase_price));
-  const grossValue = Math.max(0, finiteNumber(row.grossValue ?? row.gross_value, quantity * price));
+  const signedQuantity = finiteNumber(row.quantity);
+  const signedPrice = finiteNumber(row.price ?? row.purchase_price);
+  const signedGross = finiteNumber(row.grossValue ?? row.gross_value, signedQuantity * signedPrice);
+  const quantity = Math.abs(signedQuantity);
+  const price = Math.abs(signedPrice);
+  const grossMagnitude = Math.abs(signedGross);
+  const rawOperation = cleanText(row.operation || row.side || '', 48).toUpperCase();
+  const operation = rawOperation || ((signedQuantity < 0 || signedGross < 0 || row.isSell === true || row.is_sell === true) ? 'VENDA' : 'MOVIMENTAÇÃO');
   return {
     clientTxId: normalizedClientId(row),
     date: cleanText(row.date || row.transaction_date, 40),
-    operation: cleanText(row.operation || row.side || 'MOVIMENTAÇÃO', 48).toUpperCase(),
+    operation,
     symbol,
     assetType: cleanText(row.assetType || row.asset_type || 'Outro', 80),
     quantity,
     price,
-    grossValue: grossValue > 0 ? grossValue : quantity * price,
+    grossValue: grossMagnitude > 0 ? grossMagnitude : quantity * price,
     source: cleanText(row.source || 'VALORAE', 120),
     importedAt: row.importedAt ?? row.imported_at ?? null,
   };
@@ -440,6 +491,14 @@ async function downloadFinancialData(userId) {
   );
   const transactions = Array.isArray(result.transactions) ? result.transactions : [];
   const dividends = Array.isArray(result.dividends) ? result.dividends : [];
+  const transactionIds = transactions.map(row => cleanText(row?.clientTxId || row?.client_tx_id, 96));
+  if (transactionIds.some(id => !id) || new Set(transactionIds).size !== transactionIds.length) {
+    const error = new Error('O Supabase retornou identificadores de transação ausentes ou duplicados. Nenhum dado parcial será aplicado.');
+    error.status = 502;
+    error.code = 'MINIMAL_SYNC_TRANSACTION_IDENTITY_INVALID';
+    error.retryable = false;
+    throw error;
+  }
   const transactionsCount = Number(result.transactions_count ?? transactions.length) || 0;
   const dividendsCount = Number(result.dividends_count ?? dividends.length) || 0;
   if (transactionsCount !== transactions.length || dividendsCount !== dividends.length) {
@@ -485,10 +544,18 @@ async function downloadFinancialData(userId) {
 
 async function uploadTransactions(userId, input, action) {
   const sourceRows = Array.isArray(input.transactions) ? input.transactions : Array.isArray(input.rows) ? input.rows : [];
-  const rows = dedupeRows(
-    sourceRows.map(normalizeTransaction).filter(row => row.symbol && row.date && (row.quantity > 0 || row.grossValue > 0)),
-    'clientTxId',
-  );
+  const normalizedRows = sourceRows.map(normalizeTransaction);
+  const invalidRows = normalizedRows.filter(row => !row.clientTxId || !row.symbol || !row.date || !row.operation ||
+    !Number.isFinite(row.quantity) || !Number.isFinite(row.price) || !Number.isFinite(row.grossValue));
+  if (invalidRows.length > 0) {
+    const error = new Error(`${invalidRows.length} transação(ões) não puderam ser normalizadas; o lote inteiro foi recusado para evitar Histórico parcial.`);
+    error.status = 422;
+    error.code = 'SYNC_TRANSACTION_ROWS_REJECTED';
+    error.retryable = false;
+    error.details = { received: sourceRows.length, rejected: invalidRows.length };
+    throw error;
+  }
+  const rows = collisionSafeTransactionRows(normalizedRows);
   const replacement = action === 'replace_transactions_for_symbols' || input.mode === 'replace_symbols';
   const symbols = replacement
     ? [...new Set((Array.isArray(input.symbols) ? input.symbols : []).map(normalizeTicker).filter(Boolean))]
@@ -507,6 +574,8 @@ async function uploadTransactions(userId, input, action) {
     contract: SYNC_CONTRACT,
     count: Number(result.count || 0),
     deleted: Number(result.deleted || 0),
+    receivedCount: sourceRows.length,
+    normalizedCount: rows.length,
     message: `Histórico sincronizado: ${Number(result.count || 0)} alteração(ões), ${Number(result.deleted || 0)} remoção(ões).`,
     syncState: syncStateFrom(result),
   };

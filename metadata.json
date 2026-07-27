@@ -1,6 +1,6 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy v363 pareado ao APK v549, com monitor v367 e sincronização financeira mínima auditada.",
+  "description": "Proxy v363 pareado ao APK v551, com monitor v367 e restauração integral do Histórico financeiro.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
@@ -10,9 +10,9 @@
   "publicVersion": "21.12.395",
   "checkpoint": "minimal-financial-sync-v363",
   "label": "minimal-financial-sync-v363",
-  "apkVersion": "2026.07.26.03",
-  "apkCheckpoint": "v549",
-  "contractVersion": "APK v549 / Proxy 21.12.395 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / monitor v367 memory-only",
+  "apkVersion": "2026.07.26.05",
+  "apkCheckpoint": "v551",
+  "contractVersion": "APK v551 / Proxy 21.12.395 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / monitor v367 memory-only",
   "monitorObservabilityVersion": "2026.07.26-v367",
   "monitorPersistenceMode": "memory-only"
 }

@@ -54,8 +54,9 @@ try {
   ]},headers:{host:'x','content-type':'application/json',authorization:'Bearer ok','x-valorae-sync-contract':'valorae-financial-sync-v2'},socket:{remoteAddress:'127.0.0.1'}};
   const res=new MockRes(); await syncHandler(req,res);
   assert.equal(res.statusCode,200,res.body);
-  assert.equal(rpcBody.p_rows.length,1);
-  assert.equal(rpcBody.p_rows[0].quantity,2);
+  assert.equal(rpcBody.p_rows.length,2);
+  assert.notEqual(rpcBody.p_rows[0].clientTxId,rpcBody.p_rows[1].clientTxId);
+  assert.deepEqual(rpcBody.p_rows.map(row=>row.quantity).sort((a,b)=>a-b),[1,2]);
 
   const badReq={...req,headers:{...req.headers,'x-valorae-sync-contract':'legacy-v1'}};
   const badRes=new MockRes(); await syncHandler(badReq,badRes);
