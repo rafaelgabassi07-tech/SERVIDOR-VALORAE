@@ -95,7 +95,10 @@
         </section>
 
         <section class="view" id="view-traffic" data-view-panel="traffic" tabindex="-1" hidden>
-          <header class="page-heading"><div><span class="eyebrow">Observabilidade em tempo real</span><h1>Tráfego do Proxy</h1><p>Eventos externos capturados pela instância. As consultas do próprio monitor ficam isoladas das métricas.</p></div><div class="instance-meta"><span id="trafficRetention">Memória da instância</span><span id="trafficCount">0 eventos</span></div></header>
+          <header class="page-heading subpage-heading"><div><a class="back-link" href="/monitor" data-nav="overview" aria-label="Voltar para a visão geral">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+                <span>Voltar à visão geral</span>
+              </a><span class="eyebrow">Observabilidade em tempo real</span><h1>Tráfego do Proxy</h1><p>Eventos externos capturados pela instância. As consultas do próprio monitor ficam isoladas das métricas.</p></div><div class="instance-meta"><span id="trafficRetention">Memória da instância</span><span id="trafficCount">0 eventos</span></div></header>
           <div class="metric-grid compact" id="trafficMetrics"></div>
           <div class="filter-bar" aria-label="Filtros de tráfego">
             <label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="sr-only">Buscar no tráfego</span><input id="feedSearch" type="search" autocomplete="off" placeholder="Buscar rota, ticker, consumidor ou request ID"></label>
@@ -108,7 +111,7 @@
         </section>
 
         <section class="view" id="view-request" data-view-panel="request" tabindex="-1" hidden>
-          <header class="page-heading detail-page-heading"><div><a class="back-link" href="/monitor/traffic" data-nav="traffic" aria-label="Voltar para a página de tráfego">
+          <header class="page-heading detail-page-heading subpage-heading"><div><a class="back-link" href="/monitor/traffic" data-nav="traffic" aria-label="Voltar para a página de tráfego">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
                 <span>Voltar ao tráfego</span>
               </a><span class="eyebrow">Inspeção de evento</span><h1 id="requestTitle">Detalhe da requisição</h1><p id="requestSubtitle">Selecione um evento no tráfego para abrir a análise completa.</p></div><button class="secondary-button" id="copyEventButton" type="button" disabled>Copiar JSON</button></header>
@@ -121,21 +124,30 @@
         </section>
 
         <section class="view" id="view-routes" data-view-panel="routes" tabindex="-1" hidden>
-          <header class="page-heading"><div><span class="eyebrow">Catálogo observado</span><h1>Rotas e contratos</h1><p>Desempenho por endpoint, método e consumidor, com volume, falhas, latência e tamanho de resposta.</p></div><div class="instance-meta"><span id="routeCount">0 rotas</span></div></header>
+          <header class="page-heading subpage-heading"><div><a class="back-link" href="/monitor" data-nav="overview" aria-label="Voltar para a visão geral">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+                <span>Voltar à visão geral</span>
+              </a><span class="eyebrow">Catálogo observado</span><h1>Rotas e contratos</h1><p>Desempenho por endpoint, método e consumidor, com volume, falhas, latência e tamanho de resposta.</p></div><div class="instance-meta"><span id="routeCount">0 rotas</span></div></header>
           <div class="metric-grid compact" id="routeMetrics"></div>
           <div class="filter-bar compact-filter"><label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="sr-only">Buscar rota</span><input id="routeSearch" type="search" placeholder="Buscar rota, método ou saída"></label></div>
           <section class="panel"><div class="table-scroll" tabindex="0"><table><thead><tr><th>Rota</th><th>Método</th><th>Respostas</th><th>Erros</th><th>p95</th><th>Saída média</th><th>Cache</th><th>Último evento</th></tr></thead><tbody id="routeTable"></tbody></table></div></section>
         </section>
 
         <section class="view" id="view-sources" data-view-panel="sources" tabindex="-1" hidden>
-          <header class="page-heading"><div><span class="eyebrow">Aquisição e reutilização</span><h1>Fontes e cache</h1><p>Separe a origem dos dados da execução das rotas para identificar instabilidade, bloqueio, drift e desperdício de coleta.</p></div></header>
+          <header class="page-heading subpage-heading"><div><a class="back-link" href="/monitor" data-nav="overview" aria-label="Voltar para a visão geral">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+                <span>Voltar à visão geral</span>
+              </a><span class="eyebrow">Aquisição e reutilização</span><h1>Fontes e cache</h1><p>Separe a origem dos dados da execução das rotas para identificar instabilidade, bloqueio, drift e desperdício de coleta.</p></div></header>
           <div class="metric-grid compact" id="sourceMetrics"></div>
           <div class="three-column"><section class="panel"><header class="panel-heading"><div><span class="eyebrow">Origem</span><h2>Fontes utilizadas</h2></div></header><div class="distribution-list" id="sourceDistribution"></div></section><section class="panel"><header class="panel-heading"><div><span class="eyebrow">Eficiência</span><h2>Estados de cache</h2></div></header><div class="distribution-list" id="cacheDistribution"></div></section><section class="panel"><header class="panel-heading"><div><span class="eyebrow">Consumo</span><h2>Aplicativos e canais</h2></div></header><div class="distribution-list" id="appDistribution"></div></section></div>
           <section class="panel"><header class="panel-heading"><div><span class="eyebrow">Confiabilidade</span><h2>Sinais de fonte</h2></div></header><div class="action-list" id="sourceActions"></div></section>
         </section>
 
         <section class="view" id="view-health" data-view-panel="health" tabindex="-1" hidden>
-          <header class="page-heading"><div><span class="eyebrow">SLO e capacidade</span><h1>Saúde operacional</h1><p>Disponibilidade, latência, qualidade do contrato, pressão de memória e falhas recentes em uma página dedicada.</p></div></header>
+          <header class="page-heading subpage-heading"><div><a class="back-link" href="/monitor" data-nav="overview" aria-label="Voltar para a visão geral">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+                <span>Voltar à visão geral</span>
+              </a><span class="eyebrow">SLO e capacidade</span><h1>Saúde operacional</h1><p>Disponibilidade, latência, qualidade do contrato, pressão de memória e falhas recentes em uma página dedicada.</p></div></header>
           <div class="metric-grid" id="healthMetrics"></div>
           <section class="panel"><header class="panel-heading"><div><span class="eyebrow">Tendência</span><h2>Tráfego e erros</h2></div><span id="chartLegend">requisições · respostas · erros</span></header><canvas id="trafficChart" height="220" role="img" aria-label="Tráfego e erros ao longo do tempo"></canvas></section>
           <div class="two-column"><section class="panel"><header class="panel-heading"><div><span class="eyebrow">Prioridade</span><h2>Alertas e ações</h2></div></header><div class="action-list" id="healthActions"></div></section><section class="panel"><header class="panel-heading"><div><span class="eyebrow">Runtime</span><h2>Instância atual</h2></div></header><dl class="fact-list" id="runtimeFacts"></dl></section></div>
@@ -143,20 +155,29 @@
         </section>
 
         <section class="view" id="view-diagnostics" data-view-panel="diagnostics" tabindex="-1" hidden>
-          <header class="page-heading"><div><span class="eyebrow">Evidência técnica</span><h1>Diagnósticos</h1><p>Informações antes escondidas no rodapé agora estão organizadas em uma página própria para investigação e suporte.</p></div><button class="secondary-button" id="copySnapshotButton" type="button">Copiar snapshot</button></header>
+          <header class="page-heading subpage-heading"><div><a class="back-link" href="/monitor" data-nav="overview" aria-label="Voltar para a visão geral">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+                <span>Voltar à visão geral</span>
+              </a><span class="eyebrow">Evidência técnica</span><h1>Diagnósticos</h1><p>Informações antes escondidas no rodapé agora estão organizadas em uma página própria para investigação e suporte.</p></div><button class="secondary-button" id="copySnapshotButton" type="button">Copiar snapshot</button></header>
           <div class="two-column"><section class="panel"><header class="panel-heading"><div><span class="eyebrow">Captura</span><h2>Integridade do monitor</h2></div></header><dl class="fact-list" id="captureFacts"></dl></section><section class="panel"><header class="panel-heading"><div><span class="eyebrow">Persistência</span><h2>Retenção e privacidade</h2></div></header><dl class="fact-list" id="persistenceFacts"></dl></section></div>
           <section class="panel"><header class="panel-heading"><div><span class="eyebrow">Payload completo</span><h2>Snapshot JSON</h2></div><span id="snapshotSize">—</span></header><pre id="rawSnapshot">Aguardando dados.</pre></section>
         </section>
 
         <section class="view" id="view-architecture" data-view-panel="architecture" tabindex="-1" hidden>
-          <header class="page-heading"><div><span class="eyebrow">Mapa do sistema</span><h1>Arquitetura do V-Proxy</h1><p>Fluxo entre APK, gateway, cache, fontes e Supabase financeiro. A telemetria do monitor permanece somente em memória.</p></div></header>
+          <header class="page-heading subpage-heading"><div><a class="back-link" href="/monitor" data-nav="overview" aria-label="Voltar para a visão geral">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+                <span>Voltar à visão geral</span>
+              </a><span class="eyebrow">Mapa do sistema</span><h1>Arquitetura do V-Proxy</h1><p>Fluxo entre APK, gateway, cache, fontes e Supabase financeiro. A telemetria do monitor permanece somente em memória.</p></div></header>
           <div class="metric-grid compact" id="architectureMetrics"></div>
           <section class="panel"><header class="panel-heading"><div><span class="eyebrow">Caminho principal</span><h2>Entrada, processamento e saída</h2></div></header><div class="architecture-flow" id="architectureFlow"></div></section>
           <div class="two-column"><section class="panel"><header class="panel-heading"><div><span class="eyebrow">Proteções</span><h2>Segurança e resiliência</h2></div></header><div class="action-list" id="architectureControls"></div></section><section class="panel"><header class="panel-heading"><div><span class="eyebrow">Integrações</span><h2>Contratos principais</h2></div></header><div class="contract-list" id="architectureContracts"></div></section></div>
         </section>
 
         <section class="view" id="view-benchmark" data-view-panel="benchmark" tabindex="-1" hidden>
-          <header class="page-heading"><div><span class="eyebrow">Comparação reproduzível</span><h1>Benchmark de extração</h1><p>Resultados medidos por cenário, separando paridade de saída, latência e capacidade técnica.</p></div><div class="instance-meta"><span id="benchmarkStatus">carregando</span></div></header>
+          <header class="page-heading subpage-heading"><div><a class="back-link" href="/monitor" data-nav="overview" aria-label="Voltar para a visão geral">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+                <span>Voltar à visão geral</span>
+              </a><span class="eyebrow">Comparação reproduzível</span><h1>Benchmark de extração</h1><p>Resultados medidos por cenário, separando paridade de saída, latência e capacidade técnica.</p></div><div class="instance-meta"><span id="benchmarkStatus">carregando</span></div></header>
           <div class="segmented" id="benchmarkScenarioTabs" role="tablist" aria-label="Cenário"><button type="button" data-benchmark-scenario="complex" aria-selected="true">HTML estruturado</button><button type="button" data-benchmark-scenario="simple" aria-selected="false">Extração simples</button><button type="button" data-benchmark-scenario="browser" aria-selected="false">Navegador</button></div>
           <section class="panel benchmark-summary"><header class="panel-heading"><div><span class="eyebrow">Leitura</span><h2 id="benchmarkScenarioTitle">Cenário</h2></div><button class="text-button" id="copyBenchmarkCommand" type="button">Copiar comando</button></header><p id="benchmarkScenarioDescription">Carregando medições.</p><div class="metric-grid compact" id="benchmarkMetrics"></div></section>
           <section class="panel"><header class="panel-heading"><div><span class="eyebrow">Ranking</span><h2>Motores medidos</h2></div></header><div class="benchmark-list" id="benchmarkLeaderboard"></div></section>
@@ -164,7 +185,10 @@
         </section>
 
         <section class="view" id="view-settings" data-view-panel="settings" tabindex="-1" hidden>
-          <header class="page-heading"><div><span class="eyebrow">Preferências locais</span><h1>Ajustes do monitor</h1><p>As preferências ficam apenas neste navegador e não são enviadas ao Supabase.</p></div></header>
+          <header class="page-heading subpage-heading"><div><a class="back-link" href="/monitor" data-nav="overview" aria-label="Voltar para a visão geral">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+                <span>Voltar à visão geral</span>
+              </a><span class="eyebrow">Preferências locais</span><h1>Ajustes do monitor</h1><p>As preferências ficam apenas neste navegador e não são enviadas ao Supabase.</p></div></header>
           <section class="material-theme-preview" id="themePreview" aria-labelledby="themePreviewTitle">
             <div class="theme-preview-copy"><span class="eyebrow">Material 3</span><h2 id="themePreviewTitle">Ouro Classic · Sistema</h2><p id="themePreviewDescription">Cores e superfícies alinhadas ao APK Valorae.</p></div>
             <div class="theme-preview-components" aria-hidden="true"><span class="preview-filled">Ação</span><span class="preview-tonal">Tonal</span><span class="preview-chip">Estado</span></div>

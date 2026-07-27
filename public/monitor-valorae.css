@@ -193,4 +193,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 body[data-density="compact"]{--topbar:52px;--sidebar:252px;--control-height:40px}
 body[data-density="compact"] .sidebar-nav a{min-height:40px}
 body[data-density="compact"] .metric-card,body[data-density="compact"] .panel{padding:8px 10px}
-
+/* Back navigation audit — every monitor subpage exposes a consistent 44 px return action. */
+.subpage-heading .back-link{flex:0 0 auto}
+@media(max-width:620px){.subpage-heading .back-link{max-width:100%}}
