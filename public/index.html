@@ -5,26 +5,192 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
-  <title>VALORAE Proxy</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <title>VALORAE Proxy — Integração privada com o APK</title>
   <link rel="icon" href="/assets/valorae-favicon-48.png" sizes="48x48">
   <link rel="stylesheet" href="/monitor.css">
 </head>
 <body>
-  <main class="page">
-    <section class="panel" aria-labelledby="title">
-      <img class="logo" src="/assets/valorae-logo.svg" alt="VALORAE">
-      <p class="eyebrow"><span aria-hidden="true"></span> Serviço sob demanda</p>
-      <h1 id="title">Proxy do aplicativo VALORAE</h1>
-      <p class="summary">Esta página é apenas informativa. Nenhum dado financeiro, métrica da Vercel ou diagnóstico é consultado aqui.</p>
-      <ol class="flow" aria-label="Fluxo do serviço">
-        <li><b>1</b><span><strong>O APK solicita</strong><small>Uma função específica é chamada pelo aplicativo.</small></span></li>
-        <li><b>2</b><span><strong>O Proxy processa</strong><small>Somente os blocos pedidos são executados.</small></span></li>
-        <li><b>3</b><span><strong>O APK recebe</strong><small>A resposta retorna e o Proxy volta a ficar inativo.</small></span></li>
+  <header>
+    <img src="/assets/valorae-logo.svg" alt="VALORAE">
+    <p class="eyebrow">Infraestrutura privada do aplicativo Android</p>
+    <h1>Proxy de dados do APK VALORAE</h1>
+    <p class="lead">Serviço intermediário, reativo e executado somente quando o aplicativo solicita uma operação. Esta página é documentação estática: não lê métricas da Vercel, não consulta fontes financeiras, não acessa o Supabase e não inicia funções serverless.</p>
+  </header>
+
+  <main>
+    <section aria-labelledby="purpose">
+      <h2 id="purpose">Responsabilidade do serviço</h2>
+      <p>O Proxy separa o aplicativo Android das particularidades de cada fonte externa. O APK envia uma solicitação com os parâmetros necessários; o Proxy valida a rota e o contrato, carrega apenas os módulos relacionados à operação, obtém ou reutiliza os dados permitidos, normaliza formatos diferentes e devolve uma resposta estável para a interface.</p>
+      <p>Ele não é um robô de coleta contínua, não mantém um processo residente e não trabalha depois de concluir a resposta. O custo de função ocorre somente durante uma requisição recebida.</p>
+    </section>
+
+    <section aria-labelledby="lifecycle">
+      <h2 id="lifecycle">Ciclo completo de uma solicitação</h2>
+      <ol>
+        <li><strong>Origem no APK.</strong> Uma tela, atualização manual, sincronização ou worker autorizado identifica a necessidade de dados.</li>
+        <li><strong>Preparação no Android.</strong> O aplicativo reduz o payload, agrupa ativos equivalentes, reutiliza cache local e cancela trabalhos substituídos ou telas fechadas.</li>
+        <li><strong>Entrada no Proxy.</strong> Método, URL, tamanho, parâmetros, identidade do aplicativo, protocolo móvel e schema da operação são verificados.</li>
+        <li><strong>Execução seletiva.</strong> Somente a rota solicitada é executada. Bundles com opções booleanas ignoram integralmente os blocos desativados.</li>
+        <li><strong>Normalização e qualidade.</strong> O Proxy classifica o resultado como completo, parcial, vazio ou indisponível, preserva origem e integridade e evita substituir uma resposta válida por conteúdo inferior.</li>
+        <li><strong>Entrega.</strong> A resposta retorna com protocolo, versão de contrato, política de cache e identificador da requisição.</li>
+        <li><strong>Encerramento.</strong> Não há nova consulta automática, repetição invisível ou rotina iniciada por esta página.</li>
       </ol>
-      <p class="note">Sem polling · sem cron · sem JavaScript · sem consulta automática</p>
-      <footer>VALORAE Proxy 21.12.396</footer>
+    </section>
+
+    <section aria-labelledby="foreground">
+      <h2 id="foreground">Uso em primeiro plano</h2>
+      <dl>
+        <dt>Carteira</dt>
+        <dd>Cotações individuais e em lote, histórico de preço, evolução, retorno, equilíbrio e índices. O APK agrupa tickers e evita fallback individual em massa.</dd>
+        <dt>Home</dt>
+        <dd>Notícias, rankings e agenda podem ser reunidos em um bundle. Cada bloco é solicitado somente quando seu cache venceu ou quando o usuário atualiza.</dd>
+        <dt>Análise</dt>
+        <dd>A busca local é priorizada. Consultas remotas usam debounce, cancelamento, cache e lotes; não existe varredura automática por ticker.</dd>
+        <dt>Modal de Ação ou FII</dt>
+        <dd>Uma única rota universal classifica o ativo no servidor e entrega o contrato correspondente. O conteúdo anterior permanece visível durante atualização manual.</dd>
+        <dt>Notícias do modal</dt>
+        <dd>Ficam disponíveis no final do conteúdo e só geram rede quando o usuário toca em Carregar ou Atualizar.</dd>
+      </dl>
+    </section>
+
+    <section aria-labelledby="modal">
+      <h2 id="modal">Modal universal de Ações e FIIs</h2>
+      <p>O endpoint canônico <code>/api/v1/asset/modal</code> substitui rotas antigas separadas. O APK informa ticker e tipo conhecido; o Proxy resolve conflitos de classificação e devolve exclusivamente o contrato de Ação ou de FII.</p>
+      <p>Conforme a família e a disponibilidade das fontes, o contrato pode conter cotação, gráfico, métricas rápidas, rentabilidade, histórico de indicadores, comparação com índices e pares, checklist, dividendos, radar, dados patrimoniais, informações empresariais ou do fundo, composição, vacância, imóveis, receitas, posição acionária, resultados, balanço, comunicados e metadados de qualidade.</p>
+      <ul>
+        <li>Uma solicitação completa por abertura quando não há cache fresco.</li>
+        <li>Single-flight para unir solicitações simultâneas do mesmo ativo.</li>
+        <li>Cache em memória no APK e cache privado permitido apenas para respostas estáveis.</li>
+        <li>Resposta parcial ou degradada marcada como não reutilizável pelo cache HTTP.</li>
+        <li>Atualização sem cache somente por ação manual explícita.</li>
+        <li>Cancelamento da chamada quando o modal é descartado.</li>
+        <li>Gráfico reutiliza os pontos entregues e consulta outro período apenas quando selecionado.</li>
+        <li>Nenhuma rota legada de modal, ativo genérico ou dividendo individual é publicada em produção.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="background">
+      <h2 id="background">Notificações e segundo plano</h2>
+      <p>O endpoint <code>/api/v1/mobile/alerts</code> recebe opções independentes para cotações, dividendos, notícias e rankings. Um bloco desativado não é importado, consultado nem serializado.</p>
+      <ul>
+        <li>Notificações periódicas são desativadas por padrão e dependem de autorização do usuário.</li>
+        <li>O worker periódico respeita restrições de rede e a frequência mínima definida pelo Android.</li>
+        <li>O fechamento diário solicita somente as informações necessárias àquele aviso.</li>
+        <li>Retries são limitados; falha persistente não cria repetição infinita contra a Vercel.</li>
+        <li>Bundles equivalentes reutilizam cache e processamento em andamento.</li>
+        <li>O último resultado válido pode ser usado por uma janela curta quando a rede falha, sempre marcado como parcial.</li>
+        <li>Deduplicação ordenada evita republicar notificações antigas.</li>
+        <li>Doze, economia de bateria e políticas do fabricante podem atrasar o Android, mas não fazem o Proxy consultar sozinho.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="cloud">
+      <h2 id="cloud">Autenticação e dados financeiros em nuvem</h2>
+      <p>Login, cadastro, confirmação e renovação de sessão permanecem no Supabase. Operações financeiras enviadas ao Proxy usam o token da sessão do usuário; o servidor confirma essa identidade antes de utilizar credenciais privilegiadas.</p>
+      <dl>
+        <dt>Transações</dt>
+        <dd>Envio, restauração, reconciliação, paginação, fila offline e exclusões sincronizadas.</dd>
+        <dt>Dividendos</dt>
+        <dd>Envio, restauração, agenda, histórico e associação ao usuário autenticado.</dd>
+        <dt>SQL mantido</dt>
+        <dd>Somente transações, dividendos e bloqueio/verificação de legado.</dd>
+        <dt>SQL inexistente</dt>
+        <dd>Não há tabela de monitor, polling, cache operacional, telemetria ou coleta periódica.</dd>
+      </dl>
+      <p>A chave <em>service role</em> permanece exclusivamente no ambiente do Proxy. O APK contém apenas as configurações públicas necessárias ao cliente Supabase.</p>
+    </section>
+
+    <section aria-labelledby="routes">
+      <h2 id="routes">Superfície de produção alinhada ao APK</h2>
+      <p>O runtime de produção publica somente as rotas consumidas pelo aplicativo atual:</p>
+      <ul class="routes">
+        <li><code>/api/v1/ready</code> — disponibilidade mínima.</li>
+        <li><code>/api/sync</code> — sincronização autenticada de transações e dividendos.</li>
+        <li><code>/api/v1/assets</code>, <code>/asset/quote</code> e <code>/quotes</code> — descoberta e cotações.</li>
+        <li><code>/api/v1/asset/history</code> e <code>/asset/logo</code> — gráficos e identidade visual.</li>
+        <li><code>/api/v1/asset/modal</code> — contrato universal de Ação e FII.</li>
+        <li><code>/api/v1/dividends/batch</code> — processamento consolidado de dividendos.</li>
+        <li><code>/api/v1/mobile/alerts</code> — bundle de notificações e Home.</li>
+        <li><code>/api/v1/news</code>, <code>/market/rankings</code> e <code>/market/indices</code> — conteúdo e referências de mercado.</li>
+        <li><code>/api/v1/portfolio/equilibrium</code>, <code>/portfolio/history</code> e <code>/portfolio/returns</code> — cálculos da carteira.</li>
+      </ul>
+      <p>Rotas administrativas, testes, diagnósticos, scraping genérico, aliases históricos e contratos supersedidos não ficam acessíveis no ambiente normal de produção.</p>
+    </section>
+
+    <section aria-labelledby="performance">
+      <h2 id="performance">Desempenho, cache e consumo da Vercel</h2>
+      <ul>
+        <li>Carregamento tardio: módulos pesados só são importados pela rota que precisa deles.</li>
+        <li>Single-flight: chamadas idênticas simultâneas compartilham o mesmo processamento.</li>
+        <li>Lotes: vários ativos são enviados em uma chamada limitada, em vez de uma função por ticker.</li>
+        <li>Cache local e privado: resultados estáveis são reutilizados por janelas adequadas ao tipo de dado.</li>
+        <li>Stale-if-error controlado: conteúdo anterior pode preservar a interface durante falhas transitórias, sem duração indefinida.</li>
+        <li>Limites de concorrência e deadlines: fornecedores lentos não mantêm a resposta aberta sem controle.</li>
+        <li>Payload reduzido: o APK envia somente os campos necessários e compacta históricos extensos preservando saldo por ativo.</li>
+        <li>Respostas parciais não aquecem cache como se fossem completas.</li>
+        <li>Importar o roteador não dispara rede, intervalo periódico ou temporizador.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="contracts">
+      <h2 id="contracts">Contrato e compatibilidade</h2>
+      <p>APK e Proxy compartilham versão de protocolo móvel, schema de entrega e baseline de continuidade. Respostas 2xx das rotas de dados precisam declarar os cabeçalhos esperados; conteúdo incompatível não substitui dados válidos já exibidos.</p>
+      <p>O identificador de requisição é enviado em cabeçalho, não na URL cacheável. Isso permite rastreabilidade sem fragmentar entradas de cache equivalentes. O projeto de uso privado não exige segredo HMAC compartilhado entre APK e Vercel.</p>
+    </section>
+
+    <section aria-labelledby="failures">
+      <h2 id="failures">Falhas, parcialidade e preservação da interface</h2>
+      <dl>
+        <dt>Fonte lenta</dt>
+        <dd>O Proxy aplica deadline e devolve resultado parcial ou indisponível, sem manter o APK aguardando indefinidamente.</dd>
+        <dt>Rede interrompida</dt>
+        <dd>A coroutine e a chamada HTTP são canceladas quando possível; a tela preserva o conteúdo anterior.</dd>
+        <dt>Contrato incompleto</dt>
+        <dd>Seções ausentes são identificadas e podem ser recuperadas somente por atualização manual.</dd>
+        <dt>Resposta inválida</dt>
+        <dd>Schema, protocolo e baseline impedem substituição silenciosa de dados íntegros.</dd>
+        <dt>Fonte sem conteúdo</dt>
+        <dd>Estado vazio é diferenciado de erro e de timeout, evitando informações fabricadas.</dd>
+      </dl>
+    </section>
+
+    <section aria-labelledby="security">
+      <h2 id="security">Segurança e privacidade</h2>
+      <ul>
+        <li>Superfície de produção limitada às rotas do APK.</li>
+        <li>Identificação canônica de aplicativo, canal, versão e protocolo.</li>
+        <li>Sessão Supabase obrigatória para dados financeiros privados.</li>
+        <li>Credenciais privilegiadas mantidas somente no servidor.</li>
+        <li>Limites de URL, query, corpo, concorrência e frequência.</li>
+        <li>CORS e cabeçalhos de segurança aplicados pelo runtime.</li>
+        <li>Erros sanitizados, sem stack trace ou segredo na resposta.</li>
+        <li>Nenhuma informação do usuário é exibida nesta página.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="inactive">
+      <h2 id="inactive">O que não acontece automaticamente</h2>
+      <ul>
+        <li>Não há cron de cotações, notícias, dividendos ou análise.</li>
+        <li>Não há polling desta página ou de um painel administrativo.</li>
+        <li>Não há service worker, manifesto PWA ou execução residente.</li>
+        <li>Não há consulta a métricas, logs ou consumo da Vercel.</li>
+        <li>Não há consulta SQL sem uma operação válida recebida.</li>
+        <li>Não há geração autônoma de dados financeiros temporários.</li>
+        <li>Não há refresh oculto ao abrir, voltar para a aba ou recuperar conexão nesta página.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="page">
+      <h2 id="page">Natureza desta página</h2>
+      <p>O documento é entregue como HTML e CSS estáticos. Ele não possui JavaScript, formulário, botão operacional, integração com API, contador ou indicador ao vivo. A aparência informa o propósito do serviço sem produzir carga de função. Para diagnosticar o aplicativo, devem ser usados os recursos internos e explícitos do próprio APK.</p>
     </section>
   </main>
+
+  <footer>
+    <p><strong>VALORAE Proxy 21.12.396</strong></p>
+    <p>Integração privada do aplicativo Android VALORAE · processamento somente por solicitação</p>
+  </footer>
 </body>
 </html>

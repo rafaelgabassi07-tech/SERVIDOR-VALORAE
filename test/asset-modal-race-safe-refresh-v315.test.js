@@ -141,20 +141,15 @@ assert.equal(promoted, false);
 assert.equal(getCache(key, { allowStale: true }).value.quoteSummary.price, 50.0);
 
 const apkUniversal = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
-const apkLegacy = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalService.kt');
 const apkQuality = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
 const apkMerge = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalMergePolicy.kt');
-if (apkUniversal && apkLegacy && apkQuality && apkMerge) {
+if (apkUniversal && apkQuality && apkMerge) {
   assert.ok(apkUniversal.includes('APK_MEMORY_RECOVERY_STALE_UPGRADE'));
   assert.ok(apkUniversal.includes('val latestFallback = findUniversalModalCache'));
   assert.ok(apkUniversal.includes('asRecoveryStaleUniversalUpgrade'));
   assert.ok(apkUniversal.includes('shouldPromoteUniversalModalCacheOver'));
   assert.ok(apkUniversal.includes('shouldPromoteStockModalCacheOver'));
   assert.ok(apkUniversal.includes('shouldPromoteFiiModalCacheOver'));
-  assert.ok(apkLegacy.includes('findStockModalCache'));
-  assert.ok(apkLegacy.includes('findFiiModalCache'));
-  assert.ok(apkLegacy.includes('refreshed.shouldPromoteStockModalCacheOver(contract)'));
-  assert.ok(apkLegacy.includes('refreshed.shouldPromoteFiiModalCacheOver(contract)'));
   assert.ok(apkQuality.includes('ValoraeAssetModalCachePromotionScore'));
   assert.ok(apkQuality.includes('actualStockCacheSections'));
   assert.ok(apkQuality.includes('actualFiiCacheSections'));

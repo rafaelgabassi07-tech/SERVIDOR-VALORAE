@@ -44,6 +44,10 @@ assertOrder(fii, [
   '"fii_type_segment_average"', 'AssetModalNewsSection(ticker = cleanTicker, assetName = newsAssetName)'
 ], 'FII');
 
+  assert.ok(newsUi.includes('var loadRequested'), 'notícias do modal devem ser opt-in');
+  assert.ok(newsUi.includes('if (loadRequested)'), 'o efeito de rede só pode existir depois da solicitação do usuário');
+  assert.ok(newsUi.includes('if (loadRequested) refreshNonce += 1 else loadRequested = true'));
+  assert.ok(newsUi.includes('Text(if (loadRequested) "Atualizar" else "Carregar"'));
   assert.ok(newsUi.includes('query = assetName.takeIf'), 'APK deve enviar o nome do ativo como contexto de busca');
   assert.ok(newsUi.includes('assetOnly = true'), 'APK deve solicitar notícias estritas');
   assert.ok(feedService.includes('put("assetOnly", "true")'));

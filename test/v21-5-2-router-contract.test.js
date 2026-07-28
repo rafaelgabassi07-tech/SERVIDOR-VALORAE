@@ -25,11 +25,12 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
   const manifest = routeManifest();
   assert.ok(manifest.physicalFunctions.includes('api/router.js'), 'manifest sem api/router.js');
   assert.equal(manifest.physicalFunctions.length, 1);
-  assert.ok(manifest.routes.includes('/asset'));
+  assert.ok(manifest.routes.includes('/asset/modal'));
+  assert.equal(manifest.routes.includes('/asset'), false);
   assert.ok(!manifest.routes.includes('/server/tests'));
   assert.ok(manifest.routes.includes('/cache/stats'));
   assert.ok(manifest.routes.includes('/source/status'));
-  assert.equal(manifest.legacyAliases['/ativo'], '/asset');
+  assert.equal(manifest.legacyAliases['/ativo'], undefined);
   assert.equal(manifest.legacyAliases['/scraper'], '/compat/scraper4');
 }
 

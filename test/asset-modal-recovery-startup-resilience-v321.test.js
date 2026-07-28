@@ -99,7 +99,9 @@ if (classifier && service && modalRuntime && returnsUi && settings && fallback) 
   assert.match(classifier, /fun canonicalAssetModalType/);
   assert.match(service, /inferAssetModalFamily\(cleanSymbol, assetType\)/);
   assert.match(service, /canonicalAssetModalType\(cleanSymbol, assetType\)/);
-  assert.match(modalRuntime, /when \(inferAssetModalFamily\(normalizedTicker, assetType\)\)/);
+  assert.match(modalRuntime, /when \(payload\)/);
+  assert.match(modalRuntime, /ValoraeUniversalAssetModalContract\.Stock/);
+  assert.match(modalRuntime, /ValoraeUniversalAssetModalContract\.Fii/);
   assert.match(returnsUi, /Rentabilidade da ação ainda não está disponível para esta empresa/);
   assert.match(returnsUi, /Rentabilidade do FII ainda não está disponível para este fundo/);
   assert.doesNotMatch(settings, /runBlocking/);

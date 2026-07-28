@@ -37,7 +37,7 @@ if (validatorAvailable) {
   assert.equal(invalid.ok, false);
   assert.ok(invalid.errors.some(error => error.instancePath === '/ticker' && error.keyword === 'type'));
 
-  const invalidRequest = validateFormalRequestPayload('/asset', { ticker: { bad: true } });
+  const invalidRequest = validateFormalRequestPayload('/asset/modal', { ticker: { bad: true } });
   assert.equal(invalidRequest.ok, false);
   assert.equal(invalidRequest.direction, 'request');
 

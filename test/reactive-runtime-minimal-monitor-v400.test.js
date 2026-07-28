@@ -12,12 +12,19 @@ const http = read('lib/core/http.js');
 const ignore = read('.vercelignore');
 
 assert.ok(index.includes('VALORAE Proxy'));
-assert.ok(index.includes('Serviço sob demanda'));
+assert.ok(index.includes('somente quando o aplicativo solicita'));
+assert.ok(index.includes('Superfície de produção alinhada ao APK'));
+assert.ok(index.includes('/api/v1/asset/modal'));
+assert.ok(index.includes('Notificações e segundo plano'));
+assert.ok(index.includes('Autenticação e dados financeiros em nuvem'));
 assert.ok(index.includes('monitor.css'));
-for (const forbidden of ['<script', 'fetch(', 'XMLHttpRequest', 'EventSource', 'WebSocket', 'setInterval', 'setTimeout', '/api/']) {
+for (const forbidden of ['<script', 'fetch(', 'XMLHttpRequest', 'EventSource', 'WebSocket', 'setInterval', 'setTimeout', '<form', '<button', 'onclick=', 'onload=']) {
   assert.ok(!index.includes(forbidden), `monitor estático contém ${forbidden}`);
 }
 assert.ok(css.length < 12_000, 'CSS do monitor deve permanecer pequeno');
+for (const cardPattern of ['box-shadow:', '.card{', '.panel{', 'section{background:', 'section{border-radius:']) {
+  assert.ok(!css.includes(cardPattern), `página informativa não deve voltar a usar containers: ${cardPattern}`);
+}
 for (const removed of ['server.html', 'service-worker.js', 'manifest.webmanifest', 'tests.html', 'inspector.html']) {
   assert.equal(fs.existsSync(path.join(root, 'public', removed)), false, `${removed} não pode voltar ao monitor mínimo`);
 }

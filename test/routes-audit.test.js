@@ -49,10 +49,10 @@ assert.equal(r1.statusCode, 200);
 assert.equal(parseBody(r1).ok, true);
 assert.equal(r1.getHeader('x-content-type-options'), 'nosniff');
 
-const r2 = await callRoute('/asset');
+const r2 = await callRoute('/asset/modal');
 assert.equal(r2.statusCode, 200);
-assert.equal(parseBody(r2).status, 'EMPTY');
-assert.ok(parseBody(r2).requestId);
+assert.equal(parseBody(r2).status, 'ERROR');
+assert.match(parseBody(r2).error, /ticker|symbol/i);
 
 const r3 = await callRoute('/compare', 'GET', { tickers: 'PETR4' });
 assert.equal(r3.statusCode, 400);

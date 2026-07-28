@@ -22,10 +22,9 @@ if ([protocol, http, guard, assetService, universalModalService, portfolioServic
   assert.match(guard, /contractBaseline/);
   assert.match(guard, /contractBaseline\.version=/);
   assert.match(http, /!hasCompatibleBaselineContract/);
-  assert.match(assetService, /requireSafeContractReplacement\("\/api\/v1\/asset", hasPreviousSnapshot\)/);
   assert.match(universalModalService, /requireSafeContractReplacement\("\/api\/v1\/asset\/modal", hasPreviousSnapshot\)/);
   assert.match(portfolioService, /requireSafeContractReplacement\("\/api\/v1\/portfolio\/history", hasPreviousSnapshot\)/);
-  assert.match(runtime, /assetDetailCache/);
+  assert.match(runtime, /assetModalCache/);
   const apkMetadata = JSON.parse(apkMetadataText);
   assert.ok(build.includes(`versionCode = ${apkMetadata.versionCode}`));
   assert.ok(build.includes(`versionName = "${apkMetadata.versionName}"`));

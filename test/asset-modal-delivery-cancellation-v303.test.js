@@ -7,7 +7,7 @@ import { _test as fiiModalTest } from '../lib/analysis/fii-modal-contract.js';
 import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const apkHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-const apkService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalService.kt');
+const apkService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
 const apkLoader = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
 const apkParser = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalParsers.kt');
 const apkFallback = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalFallbackPolicy.kt');
@@ -16,16 +16,13 @@ const fiiContract = fs.readFileSync(new URL('../lib/analysis/fii-modal-contract.
 if (apkHttp && apkService && apkLoader && apkParser && apkFallback) {
   assert.ok(apkHttp.includes('suspend fun executeJsonGetCancellable'), 'APK deve possuir GET cancelável para modais');
   assert.ok(apkHttp.includes('continuation.invokeOnCancellation { call.cancel() }'), 'cancelamento da coroutine deve cancelar OkHttp');
-  assert.ok(apkService.includes('executeJsonGetCancellable("/api/v1/asset/fii-modal"'), 'FII deve usar transporte cancelável');
-  assert.ok(apkService.includes('executeJsonGetCancellable("/api/v1/asset/stock-modal"'), 'Ação deve usar transporte cancelável');
-  assert.ok(apkLoader.includes('val fastDeferred = async'), 'fast deve iniciar em tarefa própria');
-  assert.ok(apkLoader.includes('val fullDeferred = async'), 'full deve iniciar em tarefa própria');
-  assert.ok(apkLoader.includes('select<Pair<SingleAssetModalLoadStage'), 'primeira resposta útil deve vencer');
-  assert.ok(apkLoader.includes('delay(280L)'), 'full deve ter apenas escalonamento curto, sem aguardar o fast terminar');
-  assert.ok(apkParser.includes('toAssetModalDelivery'), 'APK deve interpretar metadados do contrato progressivo v2');
-  assert.ok(apkFallback.includes('deliveryQualityScore'), 'troca fast/full deve comparar completude antes de substituir conteúdo útil');
-  assert.ok(apkFallback.includes('fullState.deliveryQualityScore() >= fastState.deliveryQualityScore()'), 'full parcial não deve substituir fast mais completo');
-  assert.ok(apkLoader.includes('needsControlledFullRecovery()') && apkLoader.includes('recoverFullContractWhileOpen'), 'full incompleto deve manter o fast e continuar a recuperação enquanto o modal está aberto');
+  assert.ok(apkService.includes('"/api/v1/asset/modal"'), 'Ação e FII devem usar a rota universal cancelável');
+  assert.ok(apkService.includes('requestId = requestId'), 'request ID deve seguir em cabeçalho sem fragmentar a URL de cache');
+  assert.ok(apkLoader.includes('loadSingleAssetModalContract('), 'modal deve executar uma solicitação canônica');
+  assert.equal(apkLoader.includes('async'), false, 'modal não deve criar fan-out fast/full');
+  assert.equal(apkLoader.includes('delay('), false, 'modal não deve agendar segunda passagem automática');
+  assert.ok(apkParser.includes('toAssetModalDelivery'), 'APK deve interpretar metadados do contrato');
+  assert.ok(apkFallback.includes('deliveryQualityScore'), 'atualização manual deve preservar o snapshot mais completo');
 }
 assert.ok(fiiContract.includes('stage,\n    mode: stage,\n    fullOnly: !fastMode'), 'FII deve expor stage/mode explicitamente como Ação');
 assert.equal(runtimeTest.assetModalDeadlineMs({ stage: 'full', timeoutMs: 12000 }), 12000, 'full deve ter deadline defensivo alinhado ao orçamento');

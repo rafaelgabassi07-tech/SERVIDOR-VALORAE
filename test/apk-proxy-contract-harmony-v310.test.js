@@ -9,29 +9,28 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 const routes = new Set(routeManifest().routes);
 const requiredRoutes = new Map([
   ['/ready', 'GET'],
-  ['/source/status', 'GET'],
-  ['/mobile/bootstrap', 'POST'],
-  ['/mobile/portfolio-sync', 'POST'],
+  ['/sync', 'POST'],
   ['/mobile/alerts', 'POST'],
+  ['/dividends/batch', 'POST'],
   ['/assets', 'GET'],
   ['/asset/quote', 'GET'],
   ['/quotes', 'GET'],
-  ['/asset', 'GET'],
   ['/asset/history', 'GET'],
   ['/asset/modal', 'GET'],
-  ['/asset/dividends', 'GET'],
-  ['/dividends/batch', 'POST'],
+  ['/asset/logo', 'GET'],
   ['/market/indices', 'GET'],
-  ['/market/ipca', 'GET'],
   ['/market/rankings', 'GET'],
   ['/news', 'GET'],
   ['/portfolio/history', 'POST'],
   ['/portfolio/equilibrium', 'POST'],
-  ['/portfolio/returns', 'POST'],
-  ['/portfolio/next-dividends', 'POST'],
-  ['/release/readiness', 'GET'],
-  ['/sync', 'POST']
+  ['/portfolio/returns', 'POST']
 ]);
+assert.deepEqual(
+  [...routerTest.PRODUCTION_ROUTE_ALLOWLIST].sort(),
+  [...requiredRoutes.keys()].sort(),
+  'allowlist de produção deve corresponder exatamente às rotas consumidas pelo APK'
+);
+
 for (const [route, method] of requiredRoutes) {
   assert.ok(routes.has(route), `rota obrigatória ausente: ${route}`);
   assert.equal(routerTest.routeMethod(route), method, `método divergente em ${route}`);

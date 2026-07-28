@@ -31,7 +31,6 @@ import {
   shouldRequireValoraeApkRequest,
 } from '../lib/security/client-auth.js';
 import { coalesce } from '../lib/resilience/inflight.js';
-import { withRouteDeadline } from '../lib/http/route.js';
 import {
   VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION,
   VALORAE_MOBILE_CACHE_POLICY_SECONDS,
@@ -44,8 +43,8 @@ globalThis.__VALORAE_ROUTER_LAZY_FEATURE_MODULES__ = lazyFeatureModules;
 
 const PRODUCTION_ROUTE_ALLOWLIST = new Set([
   '/ready', '/sync', '/mobile/alerts', '/dividends/batch',
-  '/asset', '/assets', '/asset/quote', '/quotes', '/asset/history', '/asset/dividends',
-  '/asset/modal', '/asset/fii-modal', '/asset/stock-modal', '/asset/logo',
+  '/assets', '/asset/quote', '/quotes', '/asset/history',
+  '/asset/modal', '/asset/logo',
   '/market/indices', '/market/rankings', '/news',
   '/portfolio/equilibrium', '/portfolio/history', '/portfolio/returns',
 ]);
@@ -73,8 +72,6 @@ function loadFeatureModule(key, loader) {
   }
   return promise;
 }
-
-
 
 async function buildLazyFeatureManifest(key, loader, exportName, options) {
   const module = await loadFeatureModule(key, loader);
@@ -116,11 +113,6 @@ async function getIpcaSeries(...args) {
   return module.getIpcaSeries(...args);
 }
 
-async function getConfirmedDividendsByTicker(...args) {
-  const module = await loadFeatureModule('source-adapters', () => import('../lib/sources/adapters/index.js'));
-  return module.getConfirmedDividendsByTicker(...args);
-}
-
 async function buildSourceAdapterManifest(...args) {
   const module = await loadFeatureModule('source-adapters', () => import('../lib/sources/adapters/index.js'));
   return module.buildSourceAdapterManifest(...args);
@@ -136,19 +128,9 @@ async function fetchAllowedScrapeText(...args) {
   return module.fetchAllowedScrapeText(...args);
 }
 
-async function getAgendaDividends(...args) {
-  const module = await loadFeatureModule('agenda-dividends', () => import('../lib/sources/agenda-dividends.js'));
-  return module.getAgendaDividends(...args);
-}
-
 async function buildPortfolioReturns(...args) {
   const module = await loadFeatureModule('portfolio-analysis', () => import('../lib/portfolio/analysis.js'));
   return module.buildPortfolioReturns(...args);
-}
-
-async function buildAssetDetails(...args) {
-  const module = await loadFeatureModule('asset-details', () => import('../lib/sources/asset-details.js'));
-  return module.buildAssetDetails(...args);
 }
 
 async function getAssetHistory(...args) {
@@ -159,16 +141,6 @@ async function getAssetHistory(...args) {
 async function buildAssetModalContract(...args) {
   const module = await loadFeatureModule('asset-modal-contract', () => import('../lib/analysis/asset-modal-contract.js'));
   return module.buildAssetModalContract(...args);
-}
-
-async function buildFiiModalContract(...args) {
-  const module = await loadFeatureModule('fii-modal-contract', () => import('../lib/analysis/fii-modal-contract.js'));
-  return module.buildFiiModalContract(...args);
-}
-
-async function buildStockModalContract(...args) {
-  const module = await loadFeatureModule('stock-modal-contract', () => import('../lib/analysis/stock-modal-contract.js'));
-  return module.buildStockModalContract(...args);
 }
 
 function contractIdentity(endpoint, payload = {}) {
@@ -326,7 +298,6 @@ function clampInt(value, fallback, min = 1, max = Number.MAX_SAFE_INTEGER) {
   return Math.max(min, Math.min(max, Math.floor(n)));
 }
 
-
 function rankingArraysFrom(payload = {}) {
   const rankings = payload?.rankings && typeof payload.rankings === 'object' ? payload.rankings : {};
   const highs = payload?.altas || payload?.highs || payload?.gainers || payload?.maioresAltas || rankings.altas || rankings.highs || rankings.gainers || rankings.maioresAltas || [];
@@ -361,7 +332,6 @@ function withRankingAliases(highs = [], lows = []) {
     topLosers: lows,
   };
 }
-
 
 function operationalRankingFallback(kind = 'ACAO', limit = 6) {
   const defaults = String(kind || 'ACAO').toUpperCase() === 'FII'
@@ -526,7 +496,7 @@ function rootPayload() {
     version: RELEASE.version,
     status: 'online',
     contract: RELEASE.contract,
-    routes: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/mobile/alerts', '/api/v1/dividends/batch', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health', '/api/v1/contract/baseline', '/api/v1/contract/observability', '/api/v1/contract/source-adapters', '/api/v1/contract/html-parser-shadow', '/api/v1/contract/structured-data', '/api/v1/contract/dynamic-render', '/api/v1/contract/extraction-intelligence', '/api/v1/contract/formal-schemas', '/api/v1/contract/http-transport', '/api/v1/contract/shared-state', '/api/v1/contract/real-canaries', '/api/v1/contract/final-decomposition', '/api/v1/contract/scraping-engine'],
+    routes: [...PRODUCTION_ROUTE_ALLOWLIST].sort().map(route => `/api/v1${route}`),
     router: routeManifest()
   };
 }
@@ -538,58 +508,6 @@ function health() {
 function manifest() {
   return { status: 'OK', name: RELEASE.name, version: RELEASE.version, release: RELEASE.patch, contract: RELEASE.contract, endpoints: routeManifest().routes };
 }
-function assetPayload(payload = {}) {
-  const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q);
-  const assetClass = classifyTicker(ticker);
-  return {
-    status: ticker ? 'OK' : 'EMPTY',
-    ticker,
-    symbol: ticker,
-    assetClass,
-    source: 'VALORAE Fonte Oficial',
-    profile: { ticker, assetClass, name: ticker, segment: assetClass === 'FII' ? 'Fundo imobiliário' : 'Renda variável' },
-    fundamentals: {},
-    indicators: {},
-    valuation: {},
-    profitability: {},
-    debt: {},
-    statements: {},
-    peers: [],
-    quality: { score: ticker ? 70 : 0, status: ticker ? 'available' : 'missing' },
-    coverage: { ticker: Boolean(ticker), assetClass: Boolean(assetClass), source: 'normalized' },
-    actionPlan: [{ priority: 'normal', text: 'Usar análise de carteira e eventos oficiais normalizados.' }]
-  };
-}
-
-function legacyAssetTimeoutPayload(payload = {}, routeDeadlineMs = 8_500) {
-  const base = assetPayload(payload);
-  return {
-    ...base,
-    ok: false,
-    status: 'PARTIAL',
-    partial: true,
-    timeout: true,
-    retryable: true,
-    source: 'VALORAE_ROUTE_DEADLINE',
-    error: `Deadline da rota asset atingido em ${routeDeadlineMs}ms.`,
-    message: 'Preserve o último snapshot válido e revalide a rota em segundo plano.',
-    appResponseIntegrity: {
-      renderSafe: true,
-      cacheSafe: false,
-      canReplacePreviousSnapshot: false,
-    },
-    appDataContract: {
-      canReplacePreviousSnapshot: false,
-      preservePreviousSnapshot: true,
-    },
-    performance: {
-      routeDeadlineMs,
-      timedOut: true,
-    },
-  };
-}
-
-
 
 async function assetLogoHandler(req, res, payload = {}) {
   const ticker = normalizeTicker(payload.ticker || payload.symbol || payload.q || payload.query || '');
@@ -697,7 +615,6 @@ async function mobileBootstrap(payload = {}) {
     diagnostics: { assetCount: assets.assets?.length || 0, newsCount: news.items?.length || 0 }
   };
 }
-
 
 function uniqueDividendItemCount(payload = {}) {
   const keys = ['portfolioUpcoming', 'upcoming', 'upcomingEvents', 'officialUpcomingEvents', 'allOfficialFuturePayments', 'portfolioReceived', 'received', 'historyEvents', 'events', 'dividends'];
@@ -1005,40 +922,6 @@ async function buildComparisonPayload(payload = {}) {
   };
 }
 
-async function handleAssetDividends(payload = {}) {
-  const ticker = normalizeTicker(payload.ticker || payload.symbol || uniqueTickers(payload.tickers || payload.dividendTickers || [])[0]);
-  const diagnostics = [];
-  const result = await getConfirmedDividendsByTicker(ticker, { timeoutMs: Number(payload.timeoutMs || 9000), htmlTimeoutMs: Number(payload.htmlTimeoutMs || 3500) });
-  diagnostics.push(...(Array.isArray(result.diagnostics) ? result.diagnostics : [result.diagnostics].filter(Boolean)));
-  let events = result.events || [];
-
-  const includeUpcoming = payload.includeUpcoming === undefined || !['0', 'false', 'no', 'off'].includes(String(payload.includeUpcoming).toLowerCase());
-  if (ticker && includeUpcoming) {
-    const agenda = await getAgendaDividends([ticker], { timeoutMs: Number(payload.agendaTimeoutMs || payload.timeoutMs || 9000), futureMonths: Number(payload.futureMonths || payload.monthsForward || 18), deadlineAt: Date.now() + Number(payload.agendaTimeoutMs || payload.timeoutMs || 9000), maxPages: Number(payload.agendaMaxPages || 64) });
-    diagnostics.push(...(agenda.diagnostics || []));
-    const map = new Map();
-    for (const event of [...events, ...(agenda.events || [])]) {
-      const key = event.eventKey || [event.ticker, event.eligibilityDate || event.dateCom || event.exDate || '', event.paymentDate || '', event.dividendType || '', Number(event.valuePerShare || 0).toFixed(8)].join('|');
-      const existing = map.get(key);
-      if (!existing || (event.paymentDate && !existing.paymentDate) || (event.valuePerShare && !existing.valuePerShare)) map.set(key, event);
-    }
-    events = [...map.values()];
-  }
-
-  const partial = diagnostics.some(d => d?.status === 0 || d?.status === 'PARTIAL' || String(d?.reason || d?.error || '').toLowerCase().includes('deadline') || String(d?.reason || d?.error || '').toLowerCase().includes('timeout'));
-  return {
-    status: partial && events.length === 0 ? 'PARTIAL' : 'OK',
-    sourceStatus: events.length ? (partial ? 'PARTIAL_LIVE_OR_CACHE' : 'LIVE_OR_CACHE') : (partial ? 'SOURCE_TIMEOUT' : 'EMPTY'),
-    ticker,
-    sourcePolicy: 'STATUSINVEST_PER_TICKER_PLUS_INVESTIDOR10_CALENDAR_COMPLEMENT_STALE_IF_ERROR',
-    partial,
-    retryAfterMs: partial && events.length === 0 ? 30000 : undefined,
-    events,
-    dividends: events,
-    dividendEvents: events,
-    diagnostics
-  };
-}
 
 function emptyCompatible(status = 'OK') {
   return { status, items: [], events: [], data: [], partial: false, source: 'VALORAE Proxy' };
@@ -1203,7 +1086,6 @@ export async function dispatchRoute(req, res) {
 
     if (path === '/dividends/batch') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
     if (path === '/portfolio/dividends' || path === '/portfolio/next-dividends' || path === '/portfolio/events') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
-    if (path === '/asset/dividends' || path === '/asset/next-dividend') return sendJson(req, res, await handleAssetDividends(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
 
     if (path === '/portfolio/equilibrium' || path === '/portfolio/balance') return sendJson(req, res, buildEquilibriumContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioEquilibrium}` });
     if (path === '/portfolio/analyze' || path === '/portfolio/allocation' || path === '/portfolio/rebalance' || path === '/portfolio/risk' || path === '/portfolio/income' || path === '/portfolio/summary' || path === '/portfolio/transactions') return sendJson(req, res, await buildPortfolioAnalysis(payload), { cacheControl: 'private, max-age=20' });
@@ -1233,9 +1115,20 @@ export async function dispatchRoute(req, res) {
     }
     if (path === '/asset/history') return runLazyDefaultHandler('route-asset-history', () => import('./asset/history.js'), req, res);
     if (path === '/asset/logo' || path === '/asset/yahoo-logo') return assetLogoHandler(req, res, payload);
-    if (path === '/asset/modal') return sendJson(req, res, await withContractBaseline('assetModal', await buildAssetModalContract(payload), payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
-    if (path === '/asset/fii-modal' || path === '/fii/modal') return sendJson(req, res, await withContractBaseline('fiiModal', await buildFiiModalContract(payload), payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
-    if (path === '/asset/stock-modal' || path === '/asset/action-modal' || path === '/acao/modal') return sendJson(req, res, await withContractBaseline('stockModal', await buildStockModalContract(payload), payload), { cacheControl: 'no-store, no-cache, max-age=0, must-revalidate' });
+    if (path === '/asset/modal') {
+      const modal = await withContractBaseline('assetModal', await buildAssetModalContract(payload), payload);
+      const degraded = Boolean(
+        modal?.partial || modal?.timeout ||
+        String(modal?.status || '').toUpperCase() === 'PARTIAL' ||
+        modal?.delivery?.isFinal === false ||
+        modal?.delivery?.stableForCache === false
+      );
+      const stage = String(payload.stage || modal?.delivery?.deliveredStage || 'full').toLowerCase();
+      const maxAge = stage === 'fast' ? 35 : 180;
+      return sendJson(req, res, modal, {
+        cacheControl: degraded ? 'no-store' : `private, max-age=${maxAge}, stale-while-revalidate=${stage === 'fast' ? 120 : 900}`
+      });
+    }
     if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.historyMonths || payload.months || 12), { cacheControl: 'private, max-age=300' });
     if (path === '/market/rankings') return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, ...(await buildCanonicalMarketRankings(payload)) }, { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.marketRankings}, stale-while-revalidate=300` });
     if (path === '/market/indices') return runLazyDefaultHandler('route-market-indices', () => import('./market/indices.js'), req, res);
@@ -1257,26 +1150,6 @@ export async function dispatchRoute(req, res) {
         fundamentalTimeoutMs: payload.fundamentalTimeoutMs || payload.fundamentusTimeoutMs || 6500
       }), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.quotes}, stale-while-revalidate=300` });
     }
-    if (path === '/asset' || path === '/asset/coverage' || path === '/asset/fundamentals' || path === '/asset/profile' || path === '/asset/valuation' || path === '/asset/profitability' || path === '/asset/debt' || path === '/asset/statements' || path === '/asset/peers' || path === '/asset/source-map' || path === '/asset/indicators' || path === '/asset/quality' || path === '/asset/action-plan') {
-      const deepRequested = ['complete', 'full', 'deep', 'precise', 'max'].includes(String(payload.mode || payload.profile || '').toLowerCase())
-        || boolParamLocal(payload.complete || payload.full || payload.precise, false);
-      const routeDeadlineMs = clampInt(
-        payload.routeDeadlineMs || payload.deadlineMs || payload.timeoutMs,
-        deepRequested ? 22_000 : 8_500,
-        500,
-        deepRequested ? 28_000 : 15_000
-      );
-      const enriched = await withRouteDeadline(
-        () => buildAssetDetails(payload),
-        routeDeadlineMs,
-        () => legacyAssetTimeoutPayload(payload, routeDeadlineMs)
-      );
-      const degradedAsset = Boolean(
-        enriched?.timeout || enriched?.partial || String(enriched?.status || '').toUpperCase() === 'PARTIAL' || enriched?.appResponseIntegrity?.cacheSafe === false
-      );
-      return sendJson(req, res, await withContractBaseline('asset', { ...assetPayload(payload), ...enriched }, payload), { cacheControl: degradedAsset ? 'no-store' : 'private, max-age=60' });
-    }
-    if (path.startsWith('/fii/')) return sendJson(req, res, { ...assetPayload(payload), fii: true });
     if (path === '/assets') return runLazyDefaultHandler('route-assets', () => import('./assets.js'), req, res);
     if (path === '/compare') {
       const tickers = comparisonTickers(payload);
@@ -1330,10 +1203,10 @@ export async function dispatchRoute(req, res) {
 export function routeManifest() {
   return {
     physicalFunctions: ['api/router.js'],
-    legacyAliases: { '/ativo': '/asset', '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
+    legacyAliases: { '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
     routes: [
-    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/extraction-intelligence','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/contract/scraping-engine','/source/status','/release/readiness','/personal/readiness','/cache/stats','/cache/clear','/deploy/status','/fields','/errors','/openapi','/sync','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/mobile/alerts','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/asset/logo','/asset/yahoo-logo','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/modal','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
+    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/extraction-intelligence','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/contract/scraping-engine','/source/status','/release/readiness','/personal/readiness','/cache/stats','/cache/clear','/deploy/status','/fields','/errors','/openapi','/sync','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/mobile/alerts','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/asset/quote','/quote','/quotes','/asset/history','/asset/logo','/asset/yahoo-logo','/asset/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
   ].sort() };
 }
 
-export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetPayload, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, uniqueDividendItemCount, routeAllowedInCurrentRuntime, PRODUCTION_ROUTE_ALLOWLIST };
+export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, uniqueDividendItemCount, routeAllowedInCurrentRuntime, PRODUCTION_ROUTE_ALLOWLIST };
