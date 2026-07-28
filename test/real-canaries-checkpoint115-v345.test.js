@@ -148,24 +148,22 @@ function responseHarness() {
 
 const direct = responseHarness();
 sendJson({ method: 'GET', url: '/api/v1/ready', headers: {} }, direct.response, { status: 'OK' });
-assert.equal(direct.headers.get('x-valorae-real-canary'), VALORAE_REAL_CANARY_VERSION);
+assert.equal(direct.headers.get('x-valorae-real-canary'), undefined);
 
 const routed = responseHarness();
 await dispatchRoute({ method: 'GET', url: '/api/v1/contract/real-canaries', headers: { 'x-request-id': 'cp115-manifest' } }, routed.response);
 assert.equal(routed.response.statusCode, 200);
 assert.equal(routed.json().version, VALORAE_REAL_CANARY_VERSION);
-assert.equal(routed.headers.get('x-valorae-real-canary'), VALORAE_REAL_CANARY_VERSION);
+assert.equal(routed.headers.get('x-valorae-real-canary'), undefined);
 
 assert.ok(fs.existsSync(new URL('../contracts/checkpoint115/real-canaries.json', import.meta.url)));
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
-const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeRealCanary.kt');
+const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeRealCanary.kt', { optional: true });
 const clientHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-if (protocol !== null || clientContract !== null || clientHttp !== null) {
-  assert.ok(protocol?.includes('HeaderRealCanary'));
-  assert.ok(protocol?.includes('HeaderRealCanaryAccept'));
-  assert.ok(clientContract?.includes(VALORAE_REAL_CANARY_VERSION));
-  assert.ok(clientContract?.includes('legacyValuesNeverOverwritten'));
-  assert.ok(clientHttp?.includes('ValoraeRealCanaryContract.PolicyVersion'));
+if (protocol !== null || clientHttp !== null) {
+  assert.ok(!protocol?.includes('HeaderRealCanary'));
+  assert.ok(!clientHttp?.includes('realCanaryVersion'));
+  assert.equal(clientContract, null);
 }
 
 process.env = previous;

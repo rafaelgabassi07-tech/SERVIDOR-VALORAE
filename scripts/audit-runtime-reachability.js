@@ -93,7 +93,7 @@ for (const html of walk('public').filter(file => file.endsWith('.html'))) {
     if (jsFiles.has(candidate)) entries.add(candidate);
   }
 }
-for (const worker of ['public/service-worker.js']) if (jsFiles.has(worker)) entries.add(worker);
+// The cleanup service worker is a static migration artifact, not a runtime module entry.
 
 const reachable = new Set();
 const stack = [...entries];

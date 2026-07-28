@@ -14,7 +14,7 @@ assert.equal(pkg.valorae.releasePatch,'21.12.394-runtime-safety-v362');
 assert.equal(pkg.releasePatch,pkg.valorae.releasePatch);
 for(const block of [pkg.config,pkg.releaseMetadata]) assert.deepEqual({releasePatch:block.releasePatch,publicVersion:block.publicVersion,checkpoint:block.checkpoint,releaseLabel:block.releaseLabel},{releasePatch:pkg.valorae.releasePatch,publicVersion:pkg.valorae.publicVersion,checkpoint:pkg.valorae.checkpoint,releaseLabel:pkg.valorae.releaseLabel});
 assert.equal(metadata.apkVersion,pkg.valorae.apkVersion);
-for(const header of ['X-Valorae-Delivery-Schema','X-Valorae-Signature','X-Valorae-Timestamp'])assert.ok(VALORAE_REQUEST_HEADERS.includes(header));
+for(const header of ['X-Valorae-Delivery-Schema','X-Valorae-App-Id','X-Valorae-Mobile-Protocol'])assert.ok(VALORAE_REQUEST_HEADERS.includes(header));
 for(const [input,expected] of [['1m','1m'],['3 meses','3m'],['6m','6m'],['1 ano','12m']])assert.equal(fiiTest.distributionPeriodKey(input),expected);
 const revenue=stockTest.buildStockRevenueBreakdownPayload({ticker:'AUDT3',canonical:{revenueByRegion:{totalAmountDisplay:'127 mi',rows:[{label:'Brasil',percent:100}]}}},'region');
 assert.equal(revenue.totalAmount,127_000_000);assert.match(revenue.totalAmountDisplay,/127\s*mi/i);
@@ -26,17 +26,15 @@ let seq=1;
 function response(){const h=new Map();return{statusCode:200,writableEnded:false,body:'',setHeader(n,v){h.set(String(n).toLowerCase(),String(v));},getHeader(n){return h.get(String(n).toLowerCase());},removeHeader(n){h.delete(String(n).toLowerCase());},end(v=''){this.body=Buffer.isBuffer(v)?v:String(v);this.writableEnded=true;return this;},status(c){this.statusCode=c;return this;},send(v){return this.end(v);}}}
 async function invoke(url,{method='GET',headers={},body}={}){const res=response();await dispatchRoute({method,url,headers,body,socket:{remoteAddress:`127.0.1.${seq++}`}},res);return res;}
 const json=res=>JSON.parse(Buffer.isBuffer(res.body)?res.body.toString('utf8'):res.body);
-const keys=['VALORAE_RATE_LIMIT_DISABLED','VALORAE_CORS_STRICT','VALORAE_CORS_ALLOW_ORIGINS','VALORAE_CLIENT_KEYS','VALORAE_REQUIRE_CLIENT_AUTH','VALORAE_ADMIN_TOKEN','ADMIN_TOKEN','VALORAE_MAX_BODY_BYTES','MAX_LOCAL_BODY_BYTES','VALORAE_DISABLE_EXTERNAL'];
+const keys=['VALORAE_RATE_LIMIT_DISABLED','VALORAE_CORS_STRICT','VALORAE_CORS_ALLOW_ORIGINS','VALORAE_ADMIN_TOKEN','ADMIN_TOKEN','VALORAE_MAX_BODY_BYTES','MAX_LOCAL_BODY_BYTES','VALORAE_DISABLE_EXTERNAL'];
 const saved=Object.fromEntries(keys.map(k=>[k,process.env[k]]));const originalFetch=globalThis.fetch;
 try{
   process.env.VALORAE_RATE_LIMIT_DISABLED='1';
   process.env.VALORAE_CORS_STRICT='1';process.env.VALORAE_CORS_ALLOW_ORIGINS='https://app.valorae.test';
   const cors=await invoke('/api/v1/ready',{headers:{origin:'https://evil.example'}});assert.equal(cors.getHeader('Access-Control-Allow-Origin'),'https://app.valorae.test');assert.ok(cors.getHeader('X-Valorae-Security'));
   delete process.env.VALORAE_CORS_STRICT;delete process.env.VALORAE_CORS_ALLOW_ORIGINS;
-  process.env.VALORAE_CLIENT_KEYS='audit-app:audit-key';process.env.VALORAE_REQUIRE_CLIENT_AUTH='1';
   const unauthorized=await invoke('/api/v1/ready');assert.equal(unauthorized.statusCode,401);assert.equal(json(unauthorized).code,'VALORAE_CLIENT_AUTH_REQUIRED');
   assert.equal((await invoke('/api/v1/ready',{headers:{'x-valorae-app-id':'audit-app','x-valorae-client-key':'audit-key'}})).statusCode,200);
-  delete process.env.VALORAE_CLIENT_KEYS;delete process.env.VALORAE_REQUIRE_CLIENT_AUTH;
   delete process.env.VALORAE_ADMIN_TOKEN;delete process.env.ADMIN_TOKEN;
   let admin=await invoke('/api/v1/admin/cache',{method:'POST',body:{}});assert.equal(admin.statusCode,503);assert.equal(json(admin).code,'ADMIN_TOKEN_NOT_CONFIGURED');
   process.env.VALORAE_ADMIN_TOKEN='audit-admin-token';assert.equal((await invoke('/api/v1/admin/cache')).statusCode,405);assert.equal((await invoke('/api/v1/admin/cache',{method:'POST',body:{}})).statusCode,401);

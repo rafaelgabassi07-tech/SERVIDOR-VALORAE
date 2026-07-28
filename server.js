@@ -7,11 +7,11 @@ import { sendText, setSecurityHeaders } from './lib/core/http.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const MAX_LOCAL_BODY_BYTES = Number(process.env.MAX_LOCAL_BODY_BYTES || 512 * 1024);
 const INVALID_JSON = 'INVALID_JSON';
-const MIME = { '.html':'text/html; charset=utf-8', '.js':'application/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.webmanifest':'application/manifest+json; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png' };
+const MIME = { '.html':'text/html; charset=utf-8', '.js':'application/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png' };
 
 function applyStaticSecurityHeaders(res, cacheControl = 'public, max-age=60') {
   return setSecurityHeaders(res, cacheControl);
@@ -36,7 +36,7 @@ const server = http.createServer(async (req, res) => {
     return dispatchRoute(req, res);
   }
   const isMonitorRoute = parsed.pathname === '/monitor' || parsed.pathname.startsWith('/monitor/');
-  const clean = ['/', '/server', '/tests', '/inspector'].includes(parsed.pathname) || isMonitorRoute ? '/server.html' : parsed.pathname;
+  const clean = ['/', '/server'].includes(parsed.pathname) || isMonitorRoute ? '/index.html' : parsed.pathname;
   const target = path.normalize(path.join(PUBLIC_DIR, clean));
   const relative = path.relative(PUBLIC_DIR, target);
   if (relative.startsWith('..') || path.isAbsolute(relative)) return sendText(res, 403, 'Acesso negado');

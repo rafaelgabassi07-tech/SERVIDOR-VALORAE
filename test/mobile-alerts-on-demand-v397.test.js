@@ -13,7 +13,7 @@ const empty = await _test.buildMobileAlerts({
 });
 assert.equal(empty.status, 'EMPTY');
 assert.equal(empty.endpoint, 'mobile-alerts');
-assert.deepEqual(empty.blockStatus, { quotes: 'SKIPPED', dividends: 'SKIPPED', news: 'SKIPPED' });
+assert.deepEqual(empty.blockStatus, { quotes: 'SKIPPED', dividends: 'SKIPPED', news: 'SKIPPED', rankings: 'SKIPPED' });
 assert.deepEqual(empty.quotes, []);
 assert.equal(empty.dividends, null);
 assert.deepEqual(empty.news, []);
@@ -23,7 +23,7 @@ assert.match(source, /includeFundamentals:\s*false/);
 assert.match(source, /refresh:\s*false/);
 assert.match(source, /nocache:\s*false/);
 assert.match(source, /Promise\.allSettled/);
-assert.match(source, /positions: Array\.isArray\(payload\.positions\)/);
+assert.match(source, /const positions = Array\.isArray\(payload\.positions\)/);
 assert.match(source, /assetOnly:\s*true/);
 assert.match(source, /historyMonths:\s*Math\.min\(180, Math\.max\(0,/);
 assert.match(source, /source:\s*requestSource/);

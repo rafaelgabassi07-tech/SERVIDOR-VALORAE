@@ -25,3 +25,6 @@ build.gradle.kts
 settings.gradle.kts
 src/
 contracts/golden/
+
+# Contratos e fixtures usados apenas por auditorias locais.
+contracts/

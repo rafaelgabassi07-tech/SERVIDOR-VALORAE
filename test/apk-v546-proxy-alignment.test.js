@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { resolveClientAuth } from '../lib/security/client-auth.js';
 import { VALORAE_REQUEST_HEADERS } from '../lib/core/mobile-protocol.js';
 import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
@@ -9,46 +8,30 @@ const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.m
 assert.equal(pkg.valorae.apkVersion, metadata.apkVersion);
 assert.equal(pkg.releaseMetadata.apkVersion, metadata.apkVersion);
 assert.ok(metadata.contractVersion.includes(`APK ${metadata.apkCheckpoint.match(/^v\d+/)?.[0]} / Proxy ${pkg.valorae.publicVersion}`));
-assert.ok(VALORAE_REQUEST_HEADERS.includes('X-Valorae-Client-Key'));
-
-const savedKeys = process.env.VALORAE_CLIENT_KEYS;
-try {
-  process.env.VALORAE_CLIENT_KEYS = 'com.aistudio.carteira.kxmpzq:test-client-key';
-  const authorized = resolveClientAuth({
-    method: 'GET',
-    url: '/api/v1/ready',
-    headers: {
-      'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
-      'x-valorae-client-key': 'test-client-key',
-    },
-  });
-  assert.equal(authorized.ok, true);
-  assert.equal(authorized.strategy, 'client_key');
-  const rejected = resolveClientAuth({
-    method: 'GET',
-    url: '/api/v1/ready',
-    headers: { 'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq' },
-  });
-  assert.equal(rejected.ok, false);
-  assert.equal(rejected.reason, 'missing_client_key_or_signature');
-} finally {
-  if (savedKeys === undefined) delete process.env.VALORAE_CLIENT_KEYS;
-  else process.env.VALORAE_CLIENT_KEYS = savedKeys;
+for (const header of ['X-Valorae-App', 'X-Valorae-Channel', 'X-Valorae-App-Id', 'X-Valorae-Mobile-Protocol']) {
+  assert.ok(VALORAE_REQUEST_HEADERS.includes(header));
 }
+assert.equal(VALORAE_REQUEST_HEADERS.includes('X-Valorae-Client-Key'), false);
 
 const apkMetadataText = readSiblingApkFile('metadata.json');
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
+const jsonPayload = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeJsonPayload.kt');
 const http = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const sync = readSiblingApkFile('app/src/main/java/com/example/data/sync/ValoraeSyncClient.kt');
 const modalService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalService.kt');
-if ([apkMetadataText, protocol, http, sync, modalService].every(Boolean)) {
+if ([apkMetadataText, protocol, jsonPayload, http, sync, modalService].every(Boolean)) {
   const apkMetadata = JSON.parse(apkMetadataText);
   assert.equal(apkMetadata.versionName, metadata.apkVersion);
-  assert.ok(protocol.includes('HeaderClientKey = "X-Valorae-Client-Key"'));
-  assert.ok(http.includes('BuildConfig.VALORAE_PROXY_CLIENT_KEY'));
-  assert.ok(http.includes('builder.header(ValoraeMobileProtocol.HeaderClientKey, it)'));
-  assert.ok(sync.includes('BuildConfig.VALORAE_PROXY_CLIENT_KEY'));
-  assert.ok(sync.includes('header(ValoraeMobileProtocol.HeaderClientKey, it)'));
+  assert.ok(!protocol.includes('HeaderSignature'));
+  assert.ok(!protocol.includes('HeaderNonce'));
+  assert.ok(!protocol.includes('VALORAE_PROXY_CLIENT_KEY'));
+  assert.equal(protocol.includes('HeaderClientKey'), false);
+  assert.ok(jsonPayload.includes('canonicalBody'));
+  assert.ok(!jsonPayload.includes('HmacSHA256'));
+  assert.ok(!http.includes('VALORAE_PROXY_CLIENT_KEY'));
+  assert.ok(!sync.includes('VALORAE_PROXY_CLIENT_KEY'));
+  assert.equal(http.includes('HeaderClientKey'), false);
+  assert.equal(sync.includes('HeaderClientKey'), false);
   assert.ok(modalService.includes('executeJsonGetCancellable("/api/v1/asset/stock-modal"'));
   assert.ok(modalService.includes('executeJsonGetCancellable("/api/v1/asset/fii-modal"'));
 }

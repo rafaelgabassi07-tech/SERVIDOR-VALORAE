@@ -30,7 +30,7 @@ export function resolveSiblingApkRoot() {
  *   projeto ou o arquivo esperado estiver ausente;
  * - VALORAE_APK_ROOT permite apontar para qualquer checkout/extração do APK.
  */
-export function readSiblingApkFile(relativePath) {
+export function readSiblingApkFile(relativePath, { optional = false } = {}) {
   // A suíte autônoma do Proxy não deve acoplar-se por acidente a um checkout
   // global ou desatualizado. A leitura cruzada só é habilitada quando a raiz é
   // informada explicitamente ou quando o modo estrito foi solicitado.
@@ -43,7 +43,7 @@ export function readSiblingApkFile(relativePath) {
     throw new Error(`Caminho APK inválido fora da raiz configurada: ${relativePath}`);
   }
   if (!fs.existsSync(target)) {
-    if (strictCrossStackMode()) {
+    if (strictCrossStackMode() && !optional) {
       throw new Error(`APK pareado obrigatório não encontrado: ${target}. Configure VALORAE_APK_ROOT corretamente.`);
     }
     return null;

@@ -31,15 +31,26 @@ function response() {
 }
 
 let requestSequence = 70;
+function authenticatedHeaders(url, method = 'GET', extras = {}) {
+  return {
+    'x-valorae-app': 'VALORAE Android',
+    'x-valorae-channel': 'android',
+    'x-valorae-app-version': '2026.07.27.02',
+    'x-valorae-build': 'release',
+    'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
+    'x-valorae-mobile-protocol': '2026.07.10.10',
+    'x-request-id': `logo-test-${requestSequence}`,
+    ...extras,
+  };
+}
 async function invoke(url, { method = 'GET', headers = {} } = {}) {
   const res = response();
-  await dispatchRoute({ method, url, headers, socket: { remoteAddress: `127.0.5.${requestSequence++}` } }, res);
+  const signedHeaders = authenticatedHeaders(url, method, headers);
+  await dispatchRoute({ method, url, headers: signedHeaders, socket: { remoteAddress: `127.0.5.${requestSequence++}` } }, res);
   return res;
 }
 
 const originalFetch = globalThis.fetch;
-const originalKeys = process.env.VALORAE_CLIENT_KEYS;
-const originalAuth = process.env.VALORAE_REQUIRE_CLIENT_AUTH;
 const originalRate = process.env.VALORAE_RATE_LIMIT_DISABLED;
 const calls = [];
 let valePageCalls = 0;
@@ -94,8 +105,6 @@ globalThis.fetch = async (url) => {
 
 try {
   process.env.VALORAE_RATE_LIMIT_DISABLED = '1';
-  process.env.VALORAE_CLIENT_KEYS = 'protected-app:protected-key';
-  process.env.VALORAE_REQUIRE_CLIENT_AUTH = '1';
   clearCache();
   clearOfficialAssetLogoCache();
 
@@ -145,7 +154,5 @@ try {
   globalThis.fetch = originalFetch;
   clearCache();
   clearOfficialAssetLogoCache();
-  if (originalKeys === undefined) delete process.env.VALORAE_CLIENT_KEYS; else process.env.VALORAE_CLIENT_KEYS = originalKeys;
-  if (originalAuth === undefined) delete process.env.VALORAE_REQUIRE_CLIENT_AUTH; else process.env.VALORAE_REQUIRE_CLIENT_AUTH = originalAuth;
   if (originalRate === undefined) delete process.env.VALORAE_RATE_LIMIT_DISABLED; else process.env.VALORAE_RATE_LIMIT_DISABLED = originalRate;
 }

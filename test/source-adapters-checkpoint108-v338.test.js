@@ -79,7 +79,7 @@ function mockResponse() {
 
 const direct = mockResponse();
 sendJson({ method: 'GET', url: '/api/v1/ready', headers: {} }, direct.response, { status: 'OK' });
-assert.equal(direct.headers.get('x-valorae-source-adapters'), VALORAE_SOURCE_ADAPTER_VERSION);
+assert.equal(direct.headers.get('x-valorae-source-adapters'), undefined);
 
 const routed = mockResponse();
 await dispatchRoute({ method: 'GET', url: '/api/v1/contract/source-adapters', headers: { 'x-request-id': 'cp108-manifest' } }, routed.response);
@@ -87,17 +87,15 @@ const body = JSON.parse(routed.response.body || '{}');
 assert.equal(routed.response.statusCode, 200);
 assert.equal(body.version, VALORAE_SOURCE_ADAPTER_VERSION);
 assert.equal(body.policyVersion, VALORAE_SOURCE_ADAPTER_POLICY_VERSION);
-assert.equal(routed.headers.get('x-valorae-source-adapters'), VALORAE_SOURCE_ADAPTER_VERSION);
+assert.equal(routed.headers.get('x-valorae-source-adapters'), undefined);
 
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
-const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeSourceAdapters.kt');
+const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeSourceAdapters.kt', { optional: true });
 const clientHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-if (protocol !== null || clientContract !== null || clientHttp !== null) {
-  assert.ok(protocol?.includes('HeaderSourceAdapters'));
-  assert.ok(protocol?.includes('HeaderSourceAdaptersAccept'));
-  assert.ok(clientContract?.includes(VALORAE_SOURCE_ADAPTER_VERSION));
-  assert.ok(clientContract?.includes('hiddenFromUi'));
-  assert.ok(clientHttp?.includes('isolated-provider-adapters-v1'));
+if (protocol !== null || clientHttp !== null) {
+  assert.ok(!protocol?.includes('HeaderSourceAdapters'));
+  assert.ok(!clientHttp?.includes('sourceAdaptersVersion'));
+  assert.equal(clientContract, null);
 }
 
 assert.equal(fs.existsSync(new URL('../contracts/checkpoint108/source-adapters.json', import.meta.url)), true);

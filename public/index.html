@@ -5,23 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
   <title>VALORAE Proxy</title>
   <link rel="icon" href="/assets/valorae-favicon-48.png" sizes="48x48">
-  <link rel="stylesheet" href="/monitor-valorae.css">
+  <link rel="stylesheet" href="/monitor.css">
 </head>
 <body>
-  <main class="shell" aria-labelledby="page-title">
-    <section class="card">
+  <main class="page">
+    <section class="panel" aria-labelledby="title">
       <img class="logo" src="/assets/valorae-logo.svg" alt="VALORAE">
-      <span class="badge">Serviço sob demanda</span>
-      <h1 id="page-title">VALORAE Proxy</h1>
-      <p class="lead">O Proxy permanece inativo até receber uma solicitação do APK VALORAE.</p>
-      <div class="facts" role="list" aria-label="Comportamento do serviço">
-        <div role="listitem"><strong>Sem monitoramento remoto</strong><span>Esta página não consulta Vercel, API, métricas, banco ou fontes financeiras.</span></div>
-        <div role="listitem"><strong>Sem atualização automática</strong><span>Não há polling, cron, timer, fila ou atualização em segundo plano iniciada por esta página.</span></div>
-        <div role="listitem"><strong>Dados somente para o APK</strong><span>As informações financeiras são processadas apenas quando o aplicativo envia uma requisição.</span></div>
-      </div>
-      <footer>VALORAE Proxy 21.12.396 · página estática</footer>
+      <p class="eyebrow"><span aria-hidden="true"></span> Serviço sob demanda</p>
+      <h1 id="title">Proxy do aplicativo VALORAE</h1>
+      <p class="summary">Esta página é apenas informativa. Nenhum dado financeiro, métrica da Vercel ou diagnóstico é consultado aqui.</p>
+      <ol class="flow" aria-label="Fluxo do serviço">
+        <li><b>1</b><span><strong>O APK solicita</strong><small>Uma função específica é chamada pelo aplicativo.</small></span></li>
+        <li><b>2</b><span><strong>O Proxy processa</strong><small>Somente os blocos pedidos são executados.</small></span></li>
+        <li><b>3</b><span><strong>O APK recebe</strong><small>A resposta retorna e o Proxy volta a ficar inativo.</small></span></li>
+      </ol>
+      <p class="note">Sem polling · sem cron · sem JavaScript · sem consulta automática</p>
+      <footer>VALORAE Proxy 21.12.396</footer>
     </section>
   </main>
 </body>

@@ -24,7 +24,7 @@ As rotas não executam pré-busca. Cada produtor de informação só é carregad
 
 ## Monitor
 
-`public/index.html` e `public/server.html` são páginas estáticas. O monitor não chama a API, não consulta métricas do Vercel, não possui polling, JavaScript de rede, WebSocket, EventSource ou service worker ativo. Ele apenas informa o estado arquitetural do Proxy.
+`public/index.html` é a única página estática do monitor. O monitor não chama a API, não consulta métricas do Vercel, não possui polling, JavaScript de rede, WebSocket, EventSource. Ele apenas informa o estado arquitetural do Proxy.
 
 A telemetria detalhada do runtime foi removida do fluxo operacional. Para confirmar que a importação da função não inicia trabalho autônomo, execute `npm run audit:on-demand`.
 
@@ -35,7 +35,7 @@ Na Vercel ou com `NODE_ENV=production`, o modo APK-only é habilitado por padrã
 - `VALORAE_ANDROID_APP_ID`
 - `VALORAE_MOBILE_PROTOCOL`
 
-A identificação por cabeçalhos valida o contrato do cliente, mas não substitui autenticação criptográfica. Para rotas JSON sensíveis, mantenha também as chaves de cliente configuradas quando disponíveis.
+Para o uso privado solicitado, não existe segredo compartilhado entre APK e Proxy e nenhuma variável de autenticação precisa ser configurada manualmente. A rota `/api/sync` continua validando a sessão do usuário pelo token Bearer do Supabase.
 
 ## Validação
 

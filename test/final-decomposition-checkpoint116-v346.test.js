@@ -153,24 +153,22 @@ function responseHarness() {
 
 const direct = responseHarness();
 sendJson({ method: 'GET', url: '/api/v1/ready', headers: {} }, direct.response, { status: 'OK' });
-assert.equal(direct.headers.get('x-valorae-final-decomposition'), VALORAE_FINAL_DECOMPOSITION_VERSION);
+assert.equal(direct.headers.get('x-valorae-final-decomposition'), undefined);
 assert.ok(routeManifest().routes.includes('/contract/final-decomposition'));
 const routed = responseHarness();
 await dispatchRoute({ method: 'GET', url: '/api/v1/contract/final-decomposition', headers: { 'x-request-id': 'cp116-manifest' } }, routed.response);
 assert.equal(routed.response.statusCode, 200);
 assert.equal(routed.json().version, VALORAE_FINAL_DECOMPOSITION_VERSION);
-assert.equal(routed.headers.get('x-valorae-final-decomposition'), VALORAE_FINAL_DECOMPOSITION_VERSION);
+assert.equal(routed.headers.get('x-valorae-final-decomposition'), undefined);
 assert.ok(fs.existsSync(path.join(root, 'contracts/checkpoint116/final-decomposition.json')));
 
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
-const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeFinalDecomposition.kt');
+const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeFinalDecomposition.kt', { optional: true });
 const clientHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-if (protocol !== null || clientContract !== null || clientHttp !== null) {
-  assert.ok(protocol?.includes('HeaderFinalDecomposition'));
-  assert.ok(protocol?.includes('HeaderFinalDecompositionAccept'));
-  assert.ok(clientContract?.includes(VALORAE_FINAL_DECOMPOSITION_VERSION));
-  assert.ok(clientContract?.includes('facadeImportPathsPreserved'));
-  assert.ok(clientHttp?.includes('ValoraeFinalDecompositionContract.PolicyVersion'));
+if (protocol !== null || clientHttp !== null) {
+  assert.ok(!protocol?.includes('HeaderFinalDecomposition'));
+  assert.ok(!clientHttp?.includes('finalDecompositionVersion'));
+  assert.equal(clientContract, null);
 }
 
 process.env = previous;

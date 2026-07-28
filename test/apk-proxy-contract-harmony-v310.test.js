@@ -171,7 +171,7 @@ if (diagnosticsKt && httpKt && deliveryKt && parserKt && qualityKt && loaderKt &
 }
 
 if (alertsServiceKt && notificationUiKt && notificationWorkerKt && dailyCloseWorkerKt) {
-  assert.ok(alertsServiceKt.includes('executeJsonPost("/api/v1/mobile/alerts", body)'), 'APK deve usar o bundle de alertas sob demanda');
+  assert.ok(alertsServiceKt.includes('executeJsonPostCancellable("/api/v1/mobile/alerts", body)'), 'APK deve usar o bundle de alertas sob demanda');
   assert.equal((notificationUiKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 1, 'Central de Notificações deve usar uma invocação consolidada');
   assert.ok(!notificationUiKt.includes('remoteRepository.getDividendAgenda('), 'Central de Notificações não deve duplicar chamada de dividendos');
   assert.ok(!notificationUiKt.includes('remoteRepository.getNews('), 'Central de Notificações não deve duplicar chamada de notícias');

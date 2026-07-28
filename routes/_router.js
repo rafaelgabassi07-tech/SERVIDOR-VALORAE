@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { RELEASE } from '../lib/core/release.js';
 import { sendJson, queryObject, readJsonBody } from '../lib/core/http.js';
-import { cacheStats, clearCache } from '../lib/core/cache.js';
+import { cacheStats, clearCache, getCache, setCache, stableKey } from '../lib/core/cache.js';
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
 import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../lib/portfolio/history.js';
 import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.js';
@@ -14,7 +14,6 @@ import {
   formalRequestSchemaMode,
   validateFormalRequestPayload,
 } from '../lib/contract/formal-schema-validation.js';
-import { attachFieldObservability, buildFieldObservabilityManifest, fieldObservabilityStats, getFieldObservabilityTrace } from '../lib/observability/field-observability.js';
 import {
   applyRateLimitHeaders,
   applySecurityHeaders,
@@ -42,6 +41,26 @@ import {
 
 const lazyFeatureModules = globalThis.__VALORAE_ROUTER_LAZY_FEATURE_MODULES__ || new Map();
 globalThis.__VALORAE_ROUTER_LAZY_FEATURE_MODULES__ = lazyFeatureModules;
+
+const PRODUCTION_ROUTE_ALLOWLIST = new Set([
+  '/ready', '/sync', '/mobile/alerts', '/dividends/batch',
+  '/asset', '/assets', '/asset/quote', '/quotes', '/asset/history', '/asset/dividends',
+  '/asset/modal', '/asset/fii-modal', '/asset/stock-modal', '/asset/logo',
+  '/market/indices', '/market/rankings', '/news',
+  '/portfolio/equilibrium', '/portfolio/history', '/portfolio/returns',
+]);
+
+function productionRuntime() {
+  return process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
+}
+
+function internalRoutesEnabled() {
+  return ['1', 'true', 'yes', 'sim', 'on'].includes(String(process.env.VALORAE_ENABLE_INTERNAL_ROUTES || '').trim().toLowerCase());
+}
+
+function routeAllowedInCurrentRuntime(path = '/') {
+  return !productionRuntime() || internalRoutesEnabled() || PRODUCTION_ROUTE_ALLOWLIST.has(path);
+}
 
 function loadFeatureModule(key, loader) {
   let promise = lazyFeatureModules.get(key);
@@ -207,7 +226,11 @@ async function withContractBaseline(endpoint, payload, requestPayload = {}) {
   const assetModalEndpoint = endpoint === 'assetModal' || endpoint === 'stockModal' || endpoint === 'fiiModal';
   const contractPayload = assetModalEndpoint ? stripRemovedAssetModalFields(payload) : payload;
   const stable = await stabilizeContractPayloadShared(endpoint, contractIdentity(endpoint, requestPayload), contractPayload);
-  const observed = attachFieldObservability(endpoint, stable, {
+  const observabilityEnabled = boolParamLocal(process.env.VALORAE_FIELD_OBSERVABILITY_ENABLED, false)
+    && boolParamLocal(requestPayload.includeObservability ?? requestPayload.observability, false);
+  if (!observabilityEnabled) return assetModalEndpoint ? stripRemovedAssetModalFields(stable) : stable;
+  const module = await loadFeatureModule('field-observability', () => import('../lib/observability/field-observability.js'));
+  const observed = module.attachFieldObservability(endpoint, stable, {
     traceId: requestPayload.requestId || stable?.requestId,
   });
   return assetModalEndpoint ? stripRemovedAssetModalFields(observed) : observed;
@@ -676,35 +699,63 @@ async function mobileBootstrap(payload = {}) {
 }
 
 
+function uniqueDividendItemCount(payload = {}) {
+  const keys = ['portfolioUpcoming', 'upcoming', 'upcomingEvents', 'officialUpcomingEvents', 'allOfficialFuturePayments', 'portfolioReceived', 'received', 'historyEvents', 'events', 'dividends'];
+  const unique = new Set();
+  for (const key of keys) {
+    const rows = Array.isArray(payload?.[key]) ? payload[key] : [];
+    for (const item of rows) {
+      const ticker = normalizeTicker(item?.ticker || item?.symbol || item?.codigo || '');
+      const date = String(item?.paymentDate || item?.datePayment || item?.comDate || item?.exDate || item?.date || '').slice(0, 24);
+      const kind = String(item?.kind || item?.type || item?.dividendType || '').trim().toUpperCase();
+      const value = Number(item?.valuePerShare ?? item?.amount ?? item?.value ?? 0);
+      const quantity = Number(item?.quantityAtDate ?? item?.eligibilityQuantity ?? item?.quantity ?? 0);
+      if (ticker || date || value || quantity) unique.add([ticker, date, kind, value.toFixed(8), quantity.toFixed(8)].join('|'));
+    }
+  }
+  return unique.size;
+}
+
 async function buildMobileAlerts(payload = {}) {
   const includeQuotes = boolParamLocal(payload.includeQuotes, false);
   const includeDividends = boolParamLocal(payload.includeDividends, false);
   const includeNews = boolParamLocal(payload.includeNews, false);
-  const requestedBlocks = { quotes: includeQuotes, dividends: includeDividends, news: includeNews };
+  const includeRankings = boolParamLocal(payload.includeRankings, false);
+  const requestedBlocks = { quotes: includeQuotes, dividends: includeDividends, news: includeNews, rankings: includeRankings };
   const requestSource = String(payload.source || 'apk-notifications').trim().slice(0, 48) || 'apk-notifications';
   const symbols = uniqueTickers([
     ...(Array.isArray(payload.symbols) ? payload.symbols : String(payload.symbols || '').split(/[,;\s]+/)),
     ...(Array.isArray(payload.tickers) ? payload.tickers : String(payload.tickers || '').split(/[,;\s]+/)),
     ...(Array.isArray(payload.positions) ? payload.positions : []),
   ]).slice(0, 180);
+  const positions = Array.isArray(payload.positions) ? payload.positions : [];
+  const transactions = Array.isArray(payload.transactions) ? payload.transactions : [];
+  const effectiveBlocks = {
+    quotes: includeQuotes && symbols.length > 0,
+    dividends: includeDividends && positions.length > 0,
+    news: includeNews && symbols.length > 0,
+    rankings: includeRankings,
+  };
 
-  if (!includeQuotes && !includeDividends && !includeNews) {
+  if (!includeQuotes && !includeDividends && !includeNews && !includeRankings) {
     return {
       status: 'EMPTY',
       endpoint: 'mobile-alerts',
       version: RELEASE.version,
       requestedBlocks,
-      blockStatus: { quotes: 'SKIPPED', dividends: 'SKIPPED', news: 'SKIPPED' },
+      effectiveBlocks: { quotes: false, dividends: false, news: false, rankings: false },
+      blockStatus: { quotes: 'SKIPPED', dividends: 'SKIPPED', news: 'SKIPPED', rankings: 'SKIPPED' },
       quotes: [],
       dividends: null,
       news: [],
+      rankings: null,
       partial: false,
       generatedAt: new Date().toISOString(),
     };
   }
 
   const jobs = {
-    quotes: includeQuotes
+    quotes: effectiveBlocks.quotes
       ? buildAssetsPayload({
           symbols,
           tickers: symbols,
@@ -719,23 +770,26 @@ async function buildMobileAlerts(payload = {}) {
           timeoutMs: Math.min(8000, Math.max(2500, Number(payload.quotesTimeoutMs || 6000))),
         })
       : Promise.resolve({ status: 'SKIPPED', assets: [] }),
-    dividends: includeDividends
+    dividends: effectiveBlocks.dividends
       ? buildDividendsContract({
-          positions: Array.isArray(payload.positions) ? payload.positions : [],
-          transactions: Array.isArray(payload.transactions) ? payload.transactions : [],
+          positions,
+          transactions,
           mode: 'mobile-notification-alerts',
           source: requestSource,
           tickers: symbols,
           symbols,
           includeCalendar: true,
           includeAgenda: true,
-          futureMonths: Math.min(24, Math.max(1, Number(payload.futureMonths ?? 18))),
-          historyMonths: Math.min(180, Math.max(0, Number(payload.historyMonths ?? 120))),
+          futureMonths: Math.min(24, Math.max(1, Number(payload.futureMonths ?? 6))),
+          historyMonths: Math.min(180, Math.max(0, Number(payload.historyMonths ?? 12))),
           timeoutMs: Math.min(14000, Math.max(4500, Number(payload.dividendsTimeoutMs || payload.timeoutMs || 11000))),
           agendaTimeoutMs: Math.min(10000, Math.max(3500, Number(payload.agendaTimeoutMs || 8000))),
+          transactionCompaction: payload.transactionCompaction && typeof payload.transactionCompaction === 'object'
+            ? payload.transactionCompaction
+            : undefined,
         })
       : Promise.resolve({ status: 'SKIPPED' }),
-    news: includeNews
+    news: effectiveBlocks.news
       ? getNews({
           symbols: symbols.slice(0, 16),
           tickers: symbols.slice(0, 16),
@@ -750,9 +804,19 @@ async function buildMobileAlerts(payload = {}) {
           timeoutMs: Math.min(7000, Math.max(2500, Number(payload.newsTimeoutMs || 5200))),
         })
       : Promise.resolve({ status: 'SKIPPED', items: [] }),
+    rankings: effectiveBlocks.rankings
+      ? buildCanonicalMarketRankings({
+          limit: Math.min(12, Math.max(2, Number(payload.rankingLimit || 6))),
+          source: 'home',
+          mode: 'auto',
+          timeoutMs: Math.min(8000, Math.max(2500, Number(payload.rankingsTimeoutMs || 6000))),
+          refresh: false,
+          nocache: false,
+        })
+      : Promise.resolve({ status: 'SKIPPED', highs: [], lows: [] }),
   };
 
-  const names = ['quotes', 'dividends', 'news'];
+  const names = ['quotes', 'dividends', 'news', 'rankings'];
   const settled = await Promise.allSettled(names.map(name => jobs[name]));
   const values = {};
   const blockStatus = {};
@@ -771,24 +835,97 @@ async function buildMobileAlerts(payload = {}) {
 
   const quotes = Array.isArray(values.quotes?.assets) ? values.quotes.assets : [];
   const news = Array.isArray(values.news?.items) ? values.news.items : (Array.isArray(values.news?.news) ? values.news.news : []);
-  const produced = quotes.length + news.length + (includeDividends && values.dividends && blockStatus.dividends !== 'ERROR' ? 1 : 0);
+  const dividendPayload = values.dividends && typeof values.dividends === 'object' ? values.dividends : null;
+  const dividendItemCount = dividendPayload ? uniqueDividendItemCount(dividendPayload) : 0;
+  const rankings = values.rankings && typeof values.rankings === 'object' ? values.rankings : null;
+  const rankingRows = rankings ? rankingArraysFrom(rankings) : { highs: [], lows: [] };
+  const rankingItemCount = rankingRows.highs.length + rankingRows.lows.length;
+  const produced = quotes.length + news.length + dividendItemCount + rankingItemCount;
   const requestedCount = Object.values(requestedBlocks).filter(Boolean).length;
-  const failedCount = Object.entries(blockStatus).filter(([name, status]) => requestedBlocks[name] && status === 'ERROR').length;
+  const effectiveCount = Object.values(effectiveBlocks).filter(Boolean).length;
+  const failedCount = Object.entries(blockStatus).filter(([name, status]) => effectiveBlocks[name] && status === 'ERROR').length;
+  const requestedHistoryMonths = Number(payload?.transactionCompaction?.requestedHistoryMonths ?? payload.historyMonths ?? 0);
+  const effectiveHistoryMonths = Number(payload?.transactionCompaction?.effectiveHistoryMonths ?? requestedHistoryMonths);
+  const transactionHistoryPartial = effectiveBlocks.dividends
+    && Number.isFinite(requestedHistoryMonths)
+    && Number.isFinite(effectiveHistoryMonths)
+    && effectiveHistoryMonths < requestedHistoryMonths;
+  if (transactionHistoryPartial && blockStatus.dividends !== 'ERROR') blockStatus.dividends = 'PARTIAL';
 
   return {
-    status: failedCount === requestedCount ? 'ERROR' : (produced > 0 ? (failedCount > 0 ? 'PARTIAL' : 'OK') : (failedCount > 0 ? 'PARTIAL' : 'EMPTY')),
+    status: effectiveCount > 0 && failedCount === effectiveCount ? 'ERROR' : (produced > 0 ? (failedCount > 0 || transactionHistoryPartial ? 'PARTIAL' : 'OK') : (failedCount > 0 || transactionHistoryPartial ? 'PARTIAL' : 'EMPTY')),
     endpoint: 'mobile-alerts',
     version: RELEASE.version,
     requestedBlocks,
+    effectiveBlocks,
     blockStatus,
     quotes,
-    dividends: includeDividends && blockStatus.dividends !== 'ERROR' ? values.dividends : null,
+    dividends: effectiveBlocks.dividends && blockStatus.dividends !== 'ERROR' ? dividendPayload : null,
     news,
-    partial: failedCount > 0 || Boolean(values.quotes?.partial) || Boolean(values.dividends?.partial),
+    rankings: effectiveBlocks.rankings && blockStatus.rankings !== 'ERROR' ? rankings : null,
+    partial: failedCount > 0 || transactionHistoryPartial || Boolean(values.quotes?.partial) || Boolean(values.dividends?.partial) || Boolean(values.news?.partial) || Boolean(values.rankings?.partial),
     errors,
-    diagnostics: { requestedSymbols: symbols.length, quoteCount: quotes.length, newsCount: news.length, requestedCount, failedCount },
+    diagnostics: { requestedSymbols: symbols.length, quoteCount: quotes.length, dividendItemCount, newsCount: news.length, rankingItemCount, requestedCount, effectiveCount, failedCount, transactionHistoryPartial, requestedHistoryMonths, effectiveHistoryMonths },
     generatedAt: new Date().toISOString(),
   };
+}
+
+async function buildMobileAlertsCached(payload = {}) {
+  const canonicalPositions = (Array.isArray(payload.positions) ? payload.positions : [])
+    .map(position => ({
+      ticker: String(position?.ticker || position?.symbol || '').trim().toUpperCase(),
+      quantity: Number(position?.quantity || 0),
+      avgPrice: Number(position?.avgPrice || 0),
+      currentPrice: Number(position?.currentPrice || 0),
+      firstPurchaseDate: String(position?.firstPurchaseDate || ''),
+      assetClass: String(position?.assetClass || position?.type || ''),
+    }))
+    .filter(position => position.ticker && Number.isFinite(position.quantity) && position.quantity > 0)
+    .sort((a, b) => a.ticker.localeCompare(b.ticker));
+  const canonicalTransactions = (Array.isArray(payload.transactions) ? payload.transactions : [])
+    .map(transaction => ({
+      ticker: String(transaction?.ticker || transaction?.symbol || '').trim().toUpperCase(),
+      date: String(transaction?.date || ''),
+      side: String(transaction?.side || 'BUY').trim().toUpperCase(),
+      quantity: Number(transaction?.quantity || 0),
+      price: Number(transaction?.price || 0),
+      operation: String(transaction?.operation || ''),
+    }))
+    .filter(transaction => transaction.ticker && transaction.date && Number.isFinite(transaction.quantity) && transaction.quantity !== 0)
+    .sort((a, b) => `${a.ticker}|${a.date}|${a.side}|${a.quantity}|${a.price}|${a.operation}`.localeCompare(`${b.ticker}|${b.date}|${b.side}|${b.quantity}|${b.price}|${b.operation}`));
+  const keyPayload = {
+    includeQuotes: boolParamLocal(payload.includeQuotes, false),
+    includeDividends: boolParamLocal(payload.includeDividends, false),
+    includeNews: boolParamLocal(payload.includeNews, false),
+    includeRankings: boolParamLocal(payload.includeRankings, false),
+    newsLimit: Number(payload.newsLimit || 24),
+    rankingLimit: Number(payload.rankingLimit || 6),
+    futureMonths: Number(payload.futureMonths ?? 6),
+    historyMonths: Number(payload.historyMonths ?? 12),
+    symbols: uniqueTickers([...(Array.isArray(payload.symbols) ? payload.symbols : []), ...(Array.isArray(payload.tickers) ? payload.tickers : []), ...canonicalPositions]).slice(0, 180),
+    positions: canonicalPositions,
+    transactions: canonicalTransactions,
+  };
+  const cacheKey = `mobile-alerts:${createHash('sha256').update(stableKey(keyPayload)).digest('hex')}`;
+  const cached = getCache(cacheKey, { allowStale: true });
+  if (cached?.status === 'HIT') return { ...cached.value, cache: 'HIT' };
+  const stale = cached?.status === 'STALE' ? cached : null;
+  try {
+    return await coalesce(cacheKey, async () => {
+      const joined = getCache(cacheKey, { allowStale: true });
+      if (joined?.status === 'HIT') return { ...joined.value, cache: 'HIT' };
+      const value = await buildMobileAlerts(payload);
+      if (value.status !== 'ERROR') {
+        const freshTtlMs = value.status === 'PARTIAL' ? 15_000 : 90_000;
+        const staleMaxAgeMs = value.status === 'PARTIAL' ? 3 * 60_000 : 12 * 60_000;
+        setCache(cacheKey, value, freshTtlMs, staleMaxAgeMs);
+      }
+      return { ...value, cache: 'MISS' };
+    });
+  } catch (error) {
+    if (stale) return { ...stale.value, cache: 'STALE', partial: true, staleReason: String(error?.message || error).slice(0, 180) };
+    throw error;
+  }
 }
 
 function comparisonPointsFromHistory(history = {}) {
@@ -907,11 +1044,6 @@ function emptyCompatible(status = 'OK') {
   return { status, items: [], events: [], data: [], partial: false, source: 'VALORAE Proxy' };
 }
 
-function isAssetLogoRoute(path = '', method = 'GET') {
-  const normalizedMethod = String(method || 'GET').toUpperCase();
-  return (path === '/asset/logo' || path === '/asset/yahoo-logo') && ['GET', 'HEAD'].includes(normalizedMethod);
-}
-
 export async function dispatchRoute(req, res) {
   let path = '/';
   let requestId = '';
@@ -926,11 +1058,6 @@ export async function dispatchRoute(req, res) {
     res.setHeader('X-Request-Id', requestId);
     req.query = { ...(req.query || {}), ...queryObject(parsed.searchParams) };
 
-    const clientAuth = resolveClientAuth(req);
-    req.valoraeClientAuth = clientAuth;
-    res.setHeader('X-Valorae-Auth-Mode', clientAuth.mode || 'open');
-    if (clientAuth.appId) res.setHeader('X-Valorae-App-Id', String(clientAuth.appId).slice(0, 80));
-    const assetLogoRoute = isAssetLogoRoute(path, req.method);
     const canonicalApkRequest = isCanonicalValoraeApkRequest(req);
     if (shouldRequireValoraeApkRequest() && !canonicalApkRequest) {
       return sendJson(req, res, {
@@ -941,15 +1068,14 @@ export async function dispatchRoute(req, res) {
         error: 'Este Proxy aceita dados somente de requisições canônicas do APK VALORAE.',
       }, { status: 403, cacheControl: 'no-store' });
     }
-    if (shouldRequireClientAuth() && !assetLogoRoute && !clientAuth.ok) {
+    if (!routeAllowedInCurrentRuntime(path)) {
       return sendJson(req, res, {
         version: RELEASE.version,
-        status: 'UNAUTHORIZED',
+        status: 'NOT_FOUND',
         requestId,
-        code: 'VALORAE_CLIENT_AUTH_REQUIRED',
-        error: 'Autenticação do app/cliente é necessária para este deploy.',
-        auth: { mode: clientAuth.mode, configured: clientAuth.configured, appId: clientAuth.appId, reason: clientAuth.reason, required: true }
-      }, { status: 401, cacheControl: 'no-store' });
+        code: 'ROUTE_NOT_AVAILABLE_IN_PRODUCTION',
+        error: 'Rota interna ou histórica não publicada no runtime de produção.',
+      }, { status: 404, cacheControl: 'no-store' });
     }
 
     const method = String(req.method || 'GET').toUpperCase();
@@ -992,8 +1118,28 @@ export async function dispatchRoute(req, res) {
     }
     const payloadRequestId = String(payload?.requestId || '').trim();
     requestId = safeRequestId(incomingRequestId || payloadRequestId || requestId) || requestId;
-    payload.requestId = requestId;
     res.setHeader('X-Request-Id', requestId);
+
+    const clientAuth = resolveClientAuth(req, {
+      path,
+      query: req.query,
+      payload: ['GET', 'HEAD'].includes(method) ? '' : payload,
+    });
+    req.valoraeClientAuth = clientAuth;
+    res.setHeader('X-Valorae-Auth-Mode', clientAuth.mode || 'open');
+    if (clientAuth.appId) res.setHeader('X-Valorae-App-Id', String(clientAuth.appId).slice(0, 80));
+    if (shouldRequireClientAuth() && !clientAuth.ok) {
+      return sendJson(req, res, {
+        version: RELEASE.version,
+        status: 'FORBIDDEN',
+        requestId,
+        code: 'VALORAE_APK_REQUEST_REQUIRED',
+        error: 'A requisição não possui a identidade canônica do APK VALORAE.',
+        auth: { mode: clientAuth.mode, appId: clientAuth.appId, reason: clientAuth.reason, required: true }
+      }, { status: 403, cacheControl: 'no-store' });
+    }
+
+    payload.requestId = requestId;
     const formalRequestValidation = validateFormalRequestPayload(path, payload);
     req.valoraeFormalRequestValidation = formalRequestValidation;
     if (formalRequestSchemaMode() === 'enforce' && formalRequestValidation.applicable && !formalRequestValidation.ok) {
@@ -1024,10 +1170,14 @@ export async function dispatchRoute(req, res) {
     if (path === '/contract/final-decomposition') return sendJson(req, res, { ...(await buildLazyFeatureManifest('final-decomposition', () => import('../lib/architecture/final-decomposition.js'), 'buildFinalDecompositionManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=60' });
     if (path === '/contract/scraping-engine') return sendJson(req, res, { ...(await buildLazyFeatureManifest('scraping-engine', () => import('../lib/scrape/document-context.js'), 'buildHybridDocumentManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
     if (path === '/contract/observability') {
-      const trace = getFieldObservabilityTrace(payload.traceId || payload.requestId || '');
+      if (!boolParamLocal(process.env.VALORAE_FIELD_OBSERVABILITY_ENABLED, false)) {
+        return sendJson(req, res, { status: 'DISABLED', endpoint: 'contract/observability', release: RELEASE.patch }, { cacheControl: 'private, max-age=300' });
+      }
+      const module = await loadFeatureModule('field-observability', () => import('../lib/observability/field-observability.js'));
+      const trace = module.getFieldObservabilityTrace(payload.traceId || payload.requestId || '');
       return sendJson(req, res, trace
         ? { status: 'OK', endpoint: 'contract/observability/trace', trace, release: RELEASE.patch }
-        : { ...buildFieldObservabilityManifest(), release: RELEASE.patch, traceStore: fieldObservabilityStats() },
+        : { ...module.buildFieldObservabilityManifest(), release: RELEASE.patch, traceStore: module.fieldObservabilityStats() },
       { cacheControl: trace ? 'no-store' : 'private, max-age=120' });
     }
     if (path === '/release/readiness' || path === '/personal/readiness') return runLazyDefaultHandler('route-release-readiness', () => import('./release/readiness.js'), req, res);
@@ -1049,7 +1199,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/mobile/practical-sync' || path === '/app/practical-sync') return sendJson(req, res, await withContractBaseline('mobileSync', await buildMobilePortfolioSync({ ...payload, practicalMode: true, includeDividendsInBundle: payload.includeDividendsInBundle ?? false, includeRankings: payload.includeRankings ?? false }), payload), { cacheControl: 'private, max-age=20' });
     if (path === '/mobile/portfolio-sync' || path === '/app/portfolio-sync' || path === '/portfolio/insights-bundle') return sendJson(req, res, await withContractBaseline('mobileSync', await buildMobilePortfolioSync(payload), payload), { cacheControl: 'private, max-age=20' });
 
-    if (path === '/mobile/alerts' || path === '/app/alerts') return sendJson(req, res, await buildMobileAlerts(payload), { cacheControl: 'no-store' });
+    if (path === '/mobile/alerts' || path === '/app/alerts') return sendJson(req, res, await buildMobileAlertsCached(payload), { cacheControl: 'no-store' });
 
     if (path === '/dividends/batch') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
     if (path === '/portfolio/dividends' || path === '/portfolio/next-dividends' || path === '/portfolio/events') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
@@ -1186,4 +1336,4 @@ export function routeManifest() {
   ].sort() };
 }
 
-export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetPayload, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts };
+export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetPayload, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, uniqueDividendItemCount, routeAllowedInCurrentRuntime, PRODUCTION_ROUTE_ALLOWLIST };

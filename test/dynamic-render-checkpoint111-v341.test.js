@@ -92,7 +92,7 @@ function responseHarness() {
 const routed = responseHarness();
 await dispatchRoute({ method: 'GET', url: '/api/v1/contract/dynamic-render', headers: { 'x-request-id': 'cp111-manifest' } }, routed.response);
 assert.equal(routed.response.statusCode, 200);
-assert.equal(routed.headers.get('x-valorae-dynamic-render'), VALORAE_DYNAMIC_RENDER_VERSION);
+assert.equal(routed.headers.get('x-valorae-dynamic-render'), undefined);
 assert.equal(routed.json().version, VALORAE_DYNAMIC_RENDER_VERSION);
 
 process.env = previous;

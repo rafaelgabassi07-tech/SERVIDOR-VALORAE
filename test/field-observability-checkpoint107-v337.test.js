@@ -79,15 +79,16 @@ function mockResponse() {
 
 const direct = mockResponse();
 sendJson({ method: 'GET', url: '/api/v1/asset', headers: { 'x-request-id': fixture.requestId } }, direct.response, attached);
-assert.equal(direct.headers.get('x-valorae-field-observability'), VALORAE_FIELD_OBSERVABILITY_VERSION);
+assert.equal(direct.headers.get('x-valorae-field-observability'), undefined);
 assert.equal(direct.headers.get('x-valorae-trace-id'), fixture.requestId);
 
+process.env.VALORAE_FIELD_OBSERVABILITY_ENABLED = '1';
 const routed = mockResponse();
 await dispatchRoute({ method: 'GET', url: '/api/v1/contract/observability', headers: { 'x-request-id': 'manifest-trace' } }, routed.response);
 const routedBody = JSON.parse(routed.response.body || '{}');
 assert.equal(routed.response.statusCode, 200);
 assert.equal(routedBody.version, VALORAE_FIELD_OBSERVABILITY_VERSION);
-assert.equal(routed.headers.get('x-valorae-field-observability'), VALORAE_FIELD_OBSERVABILITY_VERSION);
+assert.equal(routed.headers.get('x-valorae-field-observability'), undefined);
 
 const traceResponse = mockResponse();
 await dispatchRoute({ method: 'GET', url: `/api/v1/contract/observability?traceId=${fixture.requestId}`, headers: { 'x-request-id': 'trace-reader' } }, traceResponse.response);
@@ -98,12 +99,12 @@ assert.ok(traceBody.trace.fields.length >= attached.fieldObservability.fields.le
 assert.equal(JSON.stringify(traceBody.trace).includes('must-not-appear'), false);
 
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
-const clientModel = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeFieldObservability.kt');
-if (protocol !== null || clientModel !== null) {
-  assert.ok(protocol?.includes('HeaderFieldObservability'));
-  assert.ok(protocol?.includes('HeaderTraceId'));
-  assert.ok(clientModel?.includes(VALORAE_FIELD_OBSERVABILITY_VERSION));
-  assert.ok(clientModel?.includes('hiddenFromUi'));
+const clientModel = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeFieldObservability.kt', { optional: true });
+const clientHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
+if (protocol !== null || clientHttp !== null) {
+  assert.ok(!protocol?.includes('HeaderFieldObservability'));
+  assert.ok(!clientHttp?.includes('fieldObservabilityVersion'));
+  assert.equal(clientModel, null);
 }
 
 assert.equal(fs.existsSync(new URL('../contracts/checkpoint107/field-observability.json', import.meta.url)), true);

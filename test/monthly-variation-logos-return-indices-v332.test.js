@@ -39,18 +39,13 @@ function yahooChart(symbol, closes, timestamps) {
   }), { status: 200, headers: { 'content-type': 'application/json' } });
 }
 
-const saved = {
-  keys: process.env.VALORAE_CLIENT_KEYS,
-  required: process.env.VALORAE_REQUIRE_CLIENT_AUTH,
-  rate: process.env.VALORAE_RATE_LIMIT_DISABLED,
+const saved = {  rate: process.env.VALORAE_RATE_LIMIT_DISABLED,
   external: process.env.VALORAE_DISABLE_EXTERNAL
 };
 const originalFetch = globalThis.fetch;
 
 try {
   process.env.VALORAE_RATE_LIMIT_DISABLED = '1';
-  process.env.VALORAE_CLIENT_KEYS = 'secured-app:secured-key';
-  process.env.VALORAE_REQUIRE_CLIENT_AUTH = '1';
   delete process.env.VALORAE_DISABLE_EXTERNAL;
 
   // A rota binária precisa funcionar no Coil sem expor a chave do cliente no APK.
@@ -68,8 +63,6 @@ try {
   assert.equal(logo.getHeader('Content-Type'), 'image/png');
   assert.equal(Buffer.isBuffer(logo.body), true);
 
-  delete process.env.VALORAE_CLIENT_KEYS;
-  delete process.env.VALORAE_REQUIRE_CLIENT_AUTH;
 
   // Uma posição sem histórico não pode apagar as variações reais das demais posições.
   const monthSeconds = [
@@ -158,8 +151,6 @@ try {
 } finally {
   clearCache();
   globalThis.fetch = originalFetch;
-  if (saved.keys === undefined) delete process.env.VALORAE_CLIENT_KEYS; else process.env.VALORAE_CLIENT_KEYS = saved.keys;
-  if (saved.required === undefined) delete process.env.VALORAE_REQUIRE_CLIENT_AUTH; else process.env.VALORAE_REQUIRE_CLIENT_AUTH = saved.required;
   if (saved.rate === undefined) delete process.env.VALORAE_RATE_LIMIT_DISABLED; else process.env.VALORAE_RATE_LIMIT_DISABLED = saved.rate;
   if (saved.external === undefined) delete process.env.VALORAE_DISABLE_EXTERNAL; else process.env.VALORAE_DISABLE_EXTERNAL = saved.external;
 }

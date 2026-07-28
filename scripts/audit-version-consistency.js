@@ -5,7 +5,7 @@ import pkg from '../package.json' with { type: 'json' };
 const root = process.cwd();
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const metadata = JSON.parse(read('metadata.json'));
-const monitorHtml = read('public/server.html');
+const monitorHtml = read('public/index.html');
 const version = String(pkg.version || '');
 const releasePatch = String(pkg.valorae?.releasePatch || '');
 const publicVersion = String(pkg.valorae?.publicVersion || '');
@@ -57,8 +57,8 @@ if (explicitApkRoot || strictApkPairing) {
     if (!String(metadata.contractVersion || '').startsWith(`APK v${String(apkMetadata.checkpoint || '').match(/^v(\d+)/)?.[1] || '?'} / Proxy ${publicVersion}`)) failures.push('Contrato do Proxy não corresponde ao checkpoint do APK real.');
   }
 }
-if (!monitorHtml.includes(publicVersion)) failures.push('public/server.html não exibe a versão pública atual.');
-if (/fetch\s*\(|XMLHttpRequest|EventSource|WebSocket|setInterval\s*\(/.test(monitorHtml)) failures.push('public/server.html não pode iniciar consultas de rede.');
+if (!monitorHtml.includes(publicVersion)) failures.push('public/index.html não exibe a versão pública atual.');
+if (/fetch\s*\(|XMLHttpRequest|EventSource|WebSocket|setInterval\s*\(/.test(monitorHtml)) failures.push('public/index.html não pode iniciar consultas de rede.');
 const forbiddenControl = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/;
 for (const directory of ['api', 'routes', 'lib', 'scripts']) {
   const walk = current => {

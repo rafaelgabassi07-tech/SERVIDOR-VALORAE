@@ -19,6 +19,14 @@
         {
           "key": "Permissions-Policy",
           "value": "geolocation=(), microphone=(), camera=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'none'; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
         }
       ]
     }
@@ -33,20 +41,16 @@
       "destination": "/api/router?path=:path*"
     },
     {
-      "source": "/",
-      "destination": "/server.html"
-    },
-    {
       "source": "/server",
-      "destination": "/server.html"
+      "destination": "/index.html"
     },
     {
       "source": "/monitor",
-      "destination": "/server.html"
+      "destination": "/index.html"
     },
     {
       "source": "/monitor/:path*",
-      "destination": "/server.html"
+      "destination": "/index.html"
     }
   ]
 }

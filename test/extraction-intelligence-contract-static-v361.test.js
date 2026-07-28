@@ -44,20 +44,21 @@ const router = read('routes/_router.js');
 assert.ok(router.includes('/contract/extraction-intelligence'));
 assert.ok(router.includes('buildExtractionIntelligenceManifest'));
 const http = read('lib/core/http.js');
-assert.ok(http.includes("X-Valorae-Extraction-Intelligence"));
+assert.ok(!http.includes("X-Valorae-Extraction-Intelligence"));
 const mobile = read('lib/core/mobile-protocol.js');
-assert.ok(mobile.includes('X-Valorae-Extraction-Intelligence-Accept'));
+assert.ok(!mobile.includes('X-Valorae-Extraction-Intelligence-Accept'));
 
 const apkRoot = process.env.VALORAE_APK_ROOT;
 if (apkRoot) {
   const apkRead = relative => fs.readFileSync(`${apkRoot}/${relative}`, 'utf8');
   const apkProtocol = apkRead('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
   const apkHttp = apkRead('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-  const apkContract = apkRead('app/src/main/java/com/example/data/proxy/ValoraeExtractionIntelligence.kt');
-  assert.ok(apkProtocol.includes('HeaderExtractionIntelligenceAccept'));
-  assert.ok(apkHttp.includes('ValoraeExtractionIntelligenceContract.PolicyVersion'));
-  assert.ok(apkContract.includes(VALORAE_EXTRACTION_INTELLIGENCE_VERSION));
-  assert.ok(apkContract.includes('safeForCurrentApk'));
+  assert.ok(!apkProtocol.includes('HeaderExtractionIntelligence'));
+  assert.ok(!apkHttp.includes('extractionIntelligenceVersion'));
+  assert.equal(
+    fs.existsSync(`${apkRoot}/app/src/main/java/com/example/data/proxy/ValoraeExtractionIntelligence.kt`),
+    false,
+  );
 }
 
 const jsonSafety = read('lib/scrape/json-safety.js');

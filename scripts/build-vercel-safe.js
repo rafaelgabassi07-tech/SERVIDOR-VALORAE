@@ -4,9 +4,8 @@ const requiredFiles = [
   'api/router.js',
   'routes/_router.js',
   'server.js',
-  'public/server.html',
-  'public/monitor-valorae.css',
-  'public/service-worker.js'
+  'public/index.html',
+  'public/monitor.css',
 ];
 
 const ignoredDirectories = new Set(['node_modules', '.git', '.vercel']);

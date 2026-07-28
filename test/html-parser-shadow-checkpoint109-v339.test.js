@@ -82,7 +82,7 @@ function mockResponse() {
 
 const direct = mockResponse();
 sendJson({ method: 'GET', url: '/api/v1/ready', headers: {} }, direct.response, { status: 'OK' });
-assert.equal(direct.headers.get('x-valorae-html-parser-shadow'), VALORAE_HTML_PARSER_SHADOW_VERSION);
+assert.equal(direct.headers.get('x-valorae-html-parser-shadow'), undefined);
 
 const routed = mockResponse();
 await dispatchRoute({ method: 'GET', url: '/api/v1/contract/html-parser-shadow', headers: { 'x-request-id': 'cp109-manifest' } }, routed.response);
@@ -90,7 +90,7 @@ const body = JSON.parse(routed.response.body || '{}');
 assert.equal(routed.response.statusCode, 200);
 assert.equal(body.version, VALORAE_HTML_PARSER_SHADOW_VERSION);
 assert.equal(body.outputPolicy, 'legacy-output-always-preserved');
-assert.equal(routed.headers.get('x-valorae-html-parser-shadow'), VALORAE_HTML_PARSER_SHADOW_VERSION);
+assert.equal(routed.headers.get('x-valorae-html-parser-shadow'), undefined);
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 assert.equal(packageJson.dependencies?.cheerio, '^1.2.0');
@@ -98,14 +98,12 @@ assert.ok(fs.existsSync(new URL('../package-lock.json', import.meta.url)));
 assert.ok(fs.existsSync(new URL('../contracts/checkpoint109/html-parser-shadow.json', import.meta.url)));
 
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
-const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeHtmlParserShadow.kt');
+const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeHtmlParserShadow.kt', { optional: true });
 const clientHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-if (protocol !== null || clientContract !== null || clientHttp !== null) {
-  assert.ok(protocol?.includes('HeaderHtmlParserShadow'));
-  assert.ok(protocol?.includes('HeaderHtmlParserShadowAccept'));
-  assert.ok(clientContract?.includes(VALORAE_HTML_PARSER_SHADOW_VERSION));
-  assert.ok(clientContract?.includes('hiddenFromUi'));
-  assert.ok(clientHttp?.includes('standards-html-shadow-v1'));
+if (protocol !== null || clientHttp !== null) {
+  assert.ok(!protocol?.includes('HeaderHtmlParserShadow'));
+  assert.ok(!clientHttp?.includes('htmlParserShadowVersion'));
+  assert.equal(clientContract, null);
 }
 
 console.log('html-parser-shadow-checkpoint109-v339 ok');

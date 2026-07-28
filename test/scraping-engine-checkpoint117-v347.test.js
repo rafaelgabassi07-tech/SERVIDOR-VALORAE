@@ -91,22 +91,20 @@ function responseHarness() {
 
 const direct = responseHarness();
 sendJson({ method: 'GET', url: '/api/v1/ready', headers: {} }, direct.response, { status: 'OK' });
-assert.equal(direct.headers.get('x-valorae-scraping-engine'), VALORAE_HYBRID_DOCUMENT_VERSION);
+assert.equal(direct.headers.get('x-valorae-scraping-engine'), undefined);
 const routed = responseHarness();
 await dispatchRoute({ method: 'GET', url: '/api/v1/contract/scraping-engine', headers: { 'x-request-id': 'cp117-engine' } }, routed.response);
 assert.equal(routed.response.statusCode, 200);
 assert.equal(routed.json().version, VALORAE_HYBRID_DOCUMENT_VERSION);
-assert.equal(routed.headers.get('x-valorae-scraping-engine'), VALORAE_HYBRID_DOCUMENT_VERSION);
+assert.equal(routed.headers.get('x-valorae-scraping-engine'), undefined);
 
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
-const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeScrapingEngine.kt');
+const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeScrapingEngine.kt', { optional: true });
 const clientHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 if (protocol !== null || clientContract !== null || clientHttp !== null) {
-  assert.ok(protocol?.includes('HeaderScrapingEngineAccept'));
-  assert.ok(clientContract?.includes(VALORAE_HYBRID_DOCUMENT_VERSION));
-  assert.ok(clientContract?.includes('serverVersion.isNullOrBlank()'));
-  assert.ok(clientHttp?.includes('scrapingEngineVersion'));
-  assert.ok(clientHttp?.includes('ValoraeScrapingEngineContract.PolicyVersion'));
+  assert.ok(!protocol?.includes('HeaderScrapingEngine'));
+  assert.ok(!clientHttp?.includes('scrapingEngineVersion'));
+  assert.equal(clientContract, null);
 }
 
 console.log('scraping-engine-checkpoint117-v347 ok');

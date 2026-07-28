@@ -197,7 +197,7 @@ try {
   const routed = responseHarness();
   await dispatchRoute({ method: 'GET', url: '/api/v1/contract/http-transport', headers: { 'x-request-id': 'cp113-http' } }, routed.response);
   assert.equal(routed.response.statusCode, 200);
-  assert.equal(routed.headers.get('x-valorae-http-transport'), VALORAE_HTTP_TRANSPORT_VERSION);
+  assert.equal(routed.headers.get('x-valorae-http-transport'), undefined);
   assert.equal(routed.json().version, VALORAE_HTTP_TRANSPORT_VERSION);
   assert.ok(routeManifest().routes.includes('/contract/http-transport'));
 

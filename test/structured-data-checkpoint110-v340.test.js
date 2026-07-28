@@ -102,7 +102,7 @@ function mockResponse() {
 
 const direct = mockResponse();
 sendJson({ method: 'GET', url: '/api/v1/ready', headers: {} }, direct.response, { status: 'OK' });
-assert.equal(direct.headers.get('x-valorae-structured-data'), VALORAE_STRUCTURED_DATA_VERSION);
+assert.equal(direct.headers.get('x-valorae-structured-data'), undefined);
 
 const routed = mockResponse();
 await dispatchRoute({ method: 'GET', url: '/api/v1/contract/structured-data', headers: { 'x-request-id': 'cp110-manifest' } }, routed.response);
@@ -110,18 +110,16 @@ const body = JSON.parse(routed.response.body || '{}');
 assert.equal(routed.response.statusCode, 200);
 assert.equal(body.version, VALORAE_STRUCTURED_DATA_VERSION);
 assert.equal(body.outputPolicy, 'legacy-output-always-preserved');
-assert.equal(routed.headers.get('x-valorae-structured-data'), VALORAE_STRUCTURED_DATA_VERSION);
+assert.equal(routed.headers.get('x-valorae-structured-data'), undefined);
 
 assert.ok(fs.existsSync(new URL('../contracts/checkpoint110/structured-data.json', import.meta.url)));
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
-const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeStructuredData.kt');
+const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeStructuredData.kt', { optional: true });
 const clientHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-if (protocol !== null || clientContract !== null || clientHttp !== null) {
-  assert.ok(protocol?.includes('HeaderStructuredData'));
-  assert.ok(protocol?.includes('HeaderStructuredDataAccept'));
-  assert.ok(clientContract?.includes(VALORAE_STRUCTURED_DATA_VERSION));
-  assert.ok(clientContract?.includes('hiddenFromUi'));
-  assert.ok(clientHttp?.includes('structured-data-first-shadow-v1'));
+if (protocol !== null || clientHttp !== null) {
+  assert.ok(!protocol?.includes('HeaderStructuredData'));
+  assert.ok(!clientHttp?.includes('structuredDataVersion'));
+  assert.equal(clientContract, null);
 }
 
 console.log('structured-data-checkpoint110-v340 ok');

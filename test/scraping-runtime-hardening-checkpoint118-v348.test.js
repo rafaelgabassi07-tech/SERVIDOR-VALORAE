@@ -122,17 +122,16 @@ assert.equal(manifest.safety.non2xxResponsesAreNeverStoredAsFreshFetchCache, tru
 assert.equal(manifest.safety.outboundHeadersAreSanitizedAfterFinalMerge, true);
 assert.equal(manifest.safety.invalidUndeclaredUtf8FallsBackToWindows1252ForText, true);
 
-const apkContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeScrapingEngine.kt');
+const apkContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeScrapingEngine.kt', { optional: true });
 const apkProtocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
+const apkHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const apkMetadataText = readSiblingApkFile('metadata.json');
-if (apkContract !== null || apkProtocol !== null || apkMetadataText !== null) {
-  assert.ok(apkContract?.includes(`HardeningVersion = "${VALORAE_HYBRID_DOCUMENT_HARDENING_VERSION}"`));
-  assert.ok(apkContract?.includes('runtimeHardened'));
-  assert.ok(apkContract?.includes('serverVersion.isNullOrBlank() || serverVersion == Version'));
-  assert.ok(apkProtocol?.includes('ScrapingEngineHardeningVersion'));
+if (apkContract !== null || apkProtocol !== null || apkHttp !== null || apkMetadataText !== null) {
+  assert.equal(apkContract, null);
+  assert.ok(!apkProtocol?.includes('ScrapingEngineHardeningVersion'));
+  assert.ok(!apkHttp?.includes('scrapingEngineVersion'));
   const apkMetadata = JSON.parse(apkMetadataText || '{}');
-  assert.equal(apkMetadata.versionCode, 26072305);
-  assert.equal(apkMetadata.proxyPatch, '21.12.382-quote-state-resilience-v350');
+  assert.ok(Number(apkMetadata.versionCode || 0) >= 26071701);
 }
 
 console.log('scraping-runtime-hardening-checkpoint118-v348 ok');

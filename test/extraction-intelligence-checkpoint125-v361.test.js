@@ -153,20 +153,16 @@ function responseHarness() {
 const routed = responseHarness();
 await dispatchRoute({ method: 'GET', url: '/api/v1/contract/extraction-intelligence', headers: { 'x-request-id': 'cp126-manifest' } }, routed.response);
 assert.equal(routed.response.statusCode, 200);
-assert.equal(routed.headers.get('x-valorae-extraction-intelligence'), VALORAE_EXTRACTION_INTELLIGENCE_VERSION);
+assert.equal(routed.headers.get('x-valorae-extraction-intelligence'), undefined);
 assert.equal(routed.json().version, VALORAE_EXTRACTION_INTELLIGENCE_VERSION);
 
 const apkProtocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
-const apkContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeExtractionIntelligence.kt');
+const apkContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeExtractionIntelligence.kt', { optional: true });
 const apkHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-if (apkProtocol !== null || apkContract !== null || apkHttp !== null) {
-  assert.ok(apkProtocol?.includes('HeaderExtractionIntelligence'));
-  assert.ok(apkProtocol?.includes('HeaderExtractionIntelligenceAccept'));
-  assert.ok(apkContract?.includes(VALORAE_EXTRACTION_INTELLIGENCE_VERSION));
-  assert.ok(apkContract?.includes(VALORAE_EXTRACTION_INTELLIGENCE_POLICY));
-  assert.ok(apkContract?.includes('safeForCurrentApk'));
-  assert.ok(apkHttp?.includes('ValoraeExtractionIntelligenceContract.PolicyVersion'));
-  assert.ok(apkHttp?.includes('extractionIntelligenceVersion = header(ValoraeMobileProtocol.HeaderExtractionIntelligence)'));
+if (apkProtocol !== null || apkHttp !== null) {
+  assert.ok(!apkProtocol?.includes('HeaderExtractionIntelligence'));
+  assert.ok(!apkHttp?.includes('extractionIntelligenceVersion'));
+  assert.equal(apkContract, null);
 }
 
 process.env = previous;
