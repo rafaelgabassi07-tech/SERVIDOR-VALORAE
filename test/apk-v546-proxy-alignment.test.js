@@ -40,8 +40,8 @@ const apkMetadataText = readSiblingApkFile('metadata.json');
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 const http = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const sync = readSiblingApkFile('app/src/main/java/com/example/data/sync/ValoraeSyncClient.kt');
-const catalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
-if ([apkMetadataText, protocol, http, sync, catalog].every(Boolean)) {
+const modalService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalService.kt');
+if ([apkMetadataText, protocol, http, sync, modalService].every(Boolean)) {
   const apkMetadata = JSON.parse(apkMetadataText);
   assert.equal(apkMetadata.versionName, metadata.apkVersion);
   assert.ok(protocol.includes('HeaderClientKey = "X-Valorae-Client-Key"'));
@@ -49,9 +49,8 @@ if ([apkMetadataText, protocol, http, sync, catalog].every(Boolean)) {
   assert.ok(http.includes('builder.header(ValoraeMobileProtocol.HeaderClientKey, it)'));
   assert.ok(sync.includes('BuildConfig.VALORAE_PROXY_CLIENT_KEY'));
   assert.ok(sync.includes('header(ValoraeMobileProtocol.HeaderClientKey, it)'));
-  assert.match(catalog, /\/api\/v1\/asset\/stock-modal[^\n]+sampleQuery/);
-  assert.match(catalog, /\/api\/v1\/asset\/fii-modal[^\n]+sampleQuery/);
-  assert.doesNotMatch(catalog, /\/api\/v1\/asset\/(?:stock|fii)-modal[^\n]+expectedForApk = false/);
+  assert.ok(modalService.includes('executeJsonGetCancellable("/api/v1/asset/stock-modal"'));
+  assert.ok(modalService.includes('executeJsonGetCancellable("/api/v1/asset/fii-modal"'));
 }
 
 console.log('apk-v546-proxy-alignment ok');

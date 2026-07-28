@@ -19,7 +19,6 @@ const requiredRoutes = new Map([
   ['/asset', 'GET'],
   ['/asset/history', 'GET'],
   ['/asset/modal', 'GET'],
-  ['/analysis', 'GET'],
   ['/asset/dividends', 'GET'],
   ['/dividends/batch', 'POST'],
   ['/market/indices', 'GET'],
@@ -140,7 +139,7 @@ for (const header of ['X-Valorae-App', 'X-Valorae-Channel', 'X-Valorae-App-Versi
   assert.ok(protocolSource.includes(header), `protocolo móvel deve reconhecer ${header}`);
 }
 
-const endpointCatalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
+const diagnosticsKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyDiagnosticsService.kt');
 const httpKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const deliveryKt = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalDelivery.kt');
 const parserKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalParsers.kt');
@@ -152,9 +151,8 @@ const alertsServiceKt = readSiblingApkFile('app/src/main/java/com/example/data/p
 const notificationUiKt = readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioNotificationCenterScreenUi.kt');
 const notificationWorkerKt = readSiblingApkFile('app/src/main/java/com/example/data/notifications/ValoraeNotificationWorker.kt');
 const dailyCloseWorkerKt = readSiblingApkFile('app/src/main/java/com/example/data/notifications/ValoraeDailyCloseWorker.kt');
-if (endpointCatalog && httpKt && deliveryKt && parserKt && qualityKt && loaderKt && runtimeKt && mobileProtocolKt) {
-  const syncGetMarkers = endpointCatalog.match(/ProxyEndpointStatus\("\/api\/sync"[^\n]+method = "GET"\)/g) || [];
-  assert.equal(syncGetMarkers.length, 2, 'diagnóstico /api/sync deve usar GET em ambas as ações de leitura');
+if (diagnosticsKt && httpKt && deliveryKt && parserKt && qualityKt && loaderKt && runtimeKt && mobileProtocolKt) {
+  assert.equal((diagnosticsKt.match(/executeJsonGet\("\/api\/v1\/ready"\)/g) || []).length, 1, 'diagnóstico deve executar uma única chamada leve de readiness');
   for (const header of ['X-Valorae-App', 'X-Valorae-Channel', 'X-Valorae-App-Version', 'X-Valorae-Build', 'X-Valorae-App-Id']) {
     assert.ok(mobileProtocolKt.includes(`"${header}"`), `APK deve declarar ${header}`);
   }
@@ -165,8 +163,9 @@ if (endpointCatalog && httpKt && deliveryKt && parserKt && qualityKt && loaderKt
   }
   assert.ok(qualityKt.includes('delivery.completeForDelivery == false'));
   assert.ok(qualityKt.includes('delivery.stableForCache'));
-  assert.ok(loaderKt.includes('shouldRetryStockModalContract("full")'));
-  assert.ok(loaderKt.includes('shouldRetryFiiModalContract("full")'));
+  assert.ok(loaderKt.includes('internal suspend fun loadSingleAssetModalOnDemand'));
+  assert.ok(loaderKt.includes('stage = SingleAssetModalLoadStage.Full'));
+  assert.ok(!loaderKt.includes('async(') && !loaderKt.includes('delay(') && !loaderKt.includes('select<Pair<'), 'modal do APK não deve abrir fan-out ou retry temporizado');
   assert.ok(runtimeKt.includes('SingleAssetModalFastCacheTtlMs = ValoraeCachePolicy.AssetModalFastTtlMs'));
   assert.ok(runtimeKt.includes('SingleAssetModalFullCacheTtlMs = ValoraeCachePolicy.AssetModalFullTtlMs'));
 }

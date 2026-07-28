@@ -206,7 +206,8 @@ if (apkUniversal && apkLoader && apkUi) {
   assert.ok(apkUniversal.includes('put("knownCompletenessPercent"'));
   assert.ok(apkUniversal.includes('put("knownDeepSectionCount"'));
   assert.ok(apkUniversal.includes('put("knownAvailableSections"'));
-  assert.ok(apkUniversal.includes('recovery -> "22000"'));
+  assert.ok(apkUniversal.includes('recovery -> "15000"'));
+  assert.ok(apkUniversal.includes('fundamentalTimeoutMs') && apkUniversal.includes('recovery) "13000"'));
   assert.ok(apkUniversal.includes('put("requiredSections"'));
   assert.ok(apkUniversal.includes('put("knownMissingSections"'));
   assert.ok(apkUniversal.includes('put("sectionRecovery", "true")'));
@@ -215,7 +216,9 @@ if (apkUniversal && apkLoader && apkUi) {
   assert.ok(apkUniversal.includes('APK_MEMORY_RECOVERY_UPGRADE'));
   assert.ok(apkUniversal.includes('contract.hasUsefulStockModalData()'));
   assert.ok(apkUniversal.includes('contract.hasUsefulFiiModalData()'));
-  assert.ok(apkLoader.includes('recoveryContext = best.recoveryContextOrNull()'));
+  assert.ok(apkLoader.includes('previousReady?.recoveryContextOrNull()'));
+  assert.ok(apkLoader.includes('internal suspend fun loadSingleAssetModalOnDemand'));
+  assert.ok(!apkLoader.includes('delay(') && !apkLoader.includes('async('));
   assert.ok(apkUi.includes('AssetModalRetryDetailsPill'));
   assert.equal(apkUi.includes('StockShareholdingPositionSection(position = contract.shareholdingPosition)'), false);
 }

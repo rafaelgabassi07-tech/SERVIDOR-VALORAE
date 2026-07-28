@@ -32,9 +32,17 @@ function response() {
 }
 
 let requestSequence = 30;
-async function invoke(url, method = 'GET') {
+const canonicalApkHeaders = {
+  'x-valorae-app': 'VALORAE Android',
+  'x-valorae-channel': 'android',
+  'x-valorae-app-version': '2026.07.27.02',
+  'x-valorae-build': 'release',
+  'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
+  'x-valorae-mobile-protocol': '2026.07.10.10'
+};
+async function invoke(url, method = 'GET', headers = canonicalApkHeaders) {
   const res = response();
-  await dispatchRoute({ method, url, headers: {}, socket: { remoteAddress: `127.0.4.${requestSequence++}` } }, res);
+  await dispatchRoute({ method, url, headers, socket: { remoteAddress: `127.0.4.${requestSequence++}` } }, res);
   return res;
 }
 
@@ -58,6 +66,7 @@ const originalFetch = globalThis.fetch;
 const originalKeys = process.env.VALORAE_CLIENT_KEYS;
 const originalAuth = process.env.VALORAE_REQUIRE_CLIENT_AUTH;
 const originalRate = process.env.VALORAE_RATE_LIMIT_DISABLED;
+const originalApkOnly = process.env.VALORAE_APK_ONLY;
 const calls = [];
 
 globalThis.fetch = async (url) => {
@@ -91,6 +100,7 @@ globalThis.fetch = async (url) => {
 
 try {
   process.env.VALORAE_RATE_LIMIT_DISABLED = '1';
+  process.env.VALORAE_APK_ONLY = '1';
   process.env.VALORAE_CLIENT_KEYS = 'protected-app:protected-key';
   process.env.VALORAE_REQUIRE_CLIENT_AUTH = '1';
   clearCache();
@@ -105,9 +115,13 @@ try {
     assert.match(logo?.sourceUrl || '', new RegExp(ticker, 'i'));
   }
 
+  const rejectedLogo = await invoke('/api/v1/asset/logo?ticker=VALE3&cache=false&v=5', 'GET', {});
+  assert.equal(rejectedLogo.statusCode, 403);
+  assert.equal(JSON.parse(rejectedLogo.body).code, 'VALORAE_APK_REQUEST_REQUIRED');
+
   const routeLogo = await invoke('/api/v1/asset/logo?ticker=VALE3&cache=false&v=5');
   assert.equal(routeLogo.statusCode, 200);
-  assert.equal(routeLogo.getHeader('X-Valorae-Auth-Bypass'), 'public-asset-logo');
+  assert.equal(routeLogo.getHeader('X-Valorae-Auth-Bypass'), undefined);
   assert.equal(routeLogo.getHeader('X-Valorae-Logo-Contract'), OFFICIAL_ASSET_LOGO_VERSION);
   assert.equal(routeLogo.getHeader('X-Valorae-Logo-Ticker'), 'VALE3');
   assert.match(routeLogo.getHeader('X-Valorae-Logo-Source') || '', /Investidor10/);
@@ -139,4 +153,5 @@ try {
   if (originalKeys === undefined) delete process.env.VALORAE_CLIENT_KEYS; else process.env.VALORAE_CLIENT_KEYS = originalKeys;
   if (originalAuth === undefined) delete process.env.VALORAE_REQUIRE_CLIENT_AUTH; else process.env.VALORAE_REQUIRE_CLIENT_AUTH = originalAuth;
   if (originalRate === undefined) delete process.env.VALORAE_RATE_LIMIT_DISABLED; else process.env.VALORAE_RATE_LIMIT_DISABLED = originalRate;
+  if (originalApkOnly === undefined) delete process.env.VALORAE_APK_ONLY; else process.env.VALORAE_APK_ONLY = originalApkOnly;
 }

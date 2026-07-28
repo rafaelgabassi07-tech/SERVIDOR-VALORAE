@@ -108,8 +108,9 @@ const universalKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy
 const analysisKt = readSiblingApkFile('app/src/main/java/com/example/ui/AnalysisDiscoveryUi.kt');
 const dividendsKt = readSiblingApkFile('app/src/main/java/com/example/ui/DividendsEvolutionModalComponents.kt');
 if (loaderKt && qualityKt && universalKt && analysisKt && dividendsKt) {
-  assert.ok(loaderKt.includes('longArrayOf(450L, 1_100L, 2_300L, 4_200L)'));
-  assert.ok(loaderKt.includes('recovery = true'));
+  assert.ok(loaderKt.includes('internal suspend fun loadSingleAssetModalOnDemand'));
+  assert.ok(loaderKt.includes('previousReady?.recoveryContextOrNull()'));
+  assert.ok(!loaderKt.includes('longArrayOf(') && !loaderKt.includes('delay(') && !loaderKt.includes('async('));
   assert.ok(qualityKt.includes('completeness < StockModalStableCachePercent'));
   assert.ok(qualityKt.includes('StockModalStableCachePercent = 62'));
   assert.ok(!qualityKt.includes('(delivery.isFinal && !delivery.retryable)'), 'proxy antigo não pode promover full pobre por isFinal isolado');

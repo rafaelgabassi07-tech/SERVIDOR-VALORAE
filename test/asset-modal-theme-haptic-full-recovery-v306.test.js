@@ -111,7 +111,7 @@ if (colorKt && themeKt && settingsKt && agendaKt && dividendsKt && hapticKt && m
   assert.ok(dividendsKt.includes('valueColor = ValoraeYellow'), 'métrica A receber deve manter amarelo semântico');
   assert.ok(manifest.includes('android.permission.VIBRATE'), 'APK deve declarar permissão de vibração');
   assert.ok(hapticKt.includes('VibratorManager') && hapticKt.includes('VibrationEffect.createOneShot'), 'retorno tátil deve possuir execução física explícita');
-  assert.ok(loaderKt.includes('AssetModalFullRecoveryDelaysMs') && loaderKt.includes('450L, 1_100L, 2_300L, 4_200L') && loaderKt.includes('recovery = true'), 'APK deve recuperar o full incompleto enquanto o modal permanece aberto');
+  assert.ok(loaderKt.includes('internal suspend fun loadSingleAssetModalOnDemand') && loaderKt.includes('stage = SingleAssetModalLoadStage.Full') && !loaderKt.includes('delay(') && !loaderKt.includes('async('), 'APK deve consultar o modal uma vez e recuperar somente após ação manual');
   assert.ok(qualityKt.includes('StockModalStableCachePercent = 62') && qualityKt.includes('FiiModalStableCachePercent = 58'), 'full básico não pode entrar no cache estável do APK');
 }
 

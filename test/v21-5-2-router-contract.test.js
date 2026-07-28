@@ -26,7 +26,7 @@ async function call(handler, req) { const res=mockRes(); await handler(req,res);
   assert.ok(manifest.physicalFunctions.includes('api/router.js'), 'manifest sem api/router.js');
   assert.equal(manifest.physicalFunctions.length, 1);
   assert.ok(manifest.routes.includes('/asset'));
-  assert.ok(manifest.routes.includes('/server/tests'));
+  assert.ok(!manifest.routes.includes('/server/tests'));
   assert.ok(manifest.routes.includes('/cache/stats'));
   assert.ok(manifest.routes.includes('/source/status'));
   assert.equal(manifest.legacyAliases['/ativo'], '/asset');

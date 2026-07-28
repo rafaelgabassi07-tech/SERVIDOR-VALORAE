@@ -1,6 +1,6 @@
 # VALORAE Proxy
 
-Proxy Vercel sob demanda para o APK VALORAE. O runtime possui uma única função física (`api/router.js`), não contém cron e não executa consultas sem uma requisição HTTP do cliente.
+Proxy Vercel estritamente sob demanda para o APK VALORAE. O runtime possui uma única função física (`api/router.js`), não contém cron e não inicia consultas, timers ou coleta de dados ao ser importado. Em produção, as rotas da API aceitam somente requisições com a identidade canônica do APK.
 
 ## Banco mínimo
 
@@ -16,19 +16,34 @@ Não existem SQLs de snapshot, monitor, cache, dispositivo ou estado operacional
 
 - `POST /api/v1/mobile/alerts`: consolida cotações, dividendos e notícias da Central de Notificações e dos workers em uma única invocação, executando somente os blocos explicitamente solicitados pelo APK.
 - `GET /api/v1/quotes`: cotações de primeiro plano solicitadas pelo APK.
-- `GET /api/v1/news`: notícias foreground.
-- `POST /api/v1/dividends/batch`: agenda foreground.
+- `GET /api/v1/news`: notícias de primeiro plano solicitadas pelo APK.
+- `POST /api/v1/dividends/batch`: agenda de dividendos solicitada pelo APK.
 - `/api/sync`: transações, dividendos e verificação/bloqueio legado.
 
-## Observabilidade
+As rotas não executam pré-busca. Cada produtor de informação só é carregado quando a requisição recebida solicita o respectivo bloco.
 
-A coleta detalhada por resposta fica desativada por padrão para não aumentar o Fluid Active CPU. Ela só é carregada quando `VALORAE_METRICS_ENABLED=1`. A página de monitor não possui polling e consulta as métricas exclusivamente por ação manual.
+## Monitor
+
+`public/index.html` e `public/server.html` são páginas estáticas. O monitor não chama a API, não consulta métricas do Vercel, não possui polling, JavaScript de rede, WebSocket, EventSource ou service worker ativo. Ele apenas informa o estado arquitetural do Proxy.
+
+A telemetria detalhada do runtime foi removida do fluxo operacional. Para confirmar que a importação da função não inicia trabalho autônomo, execute `npm run audit:on-demand`.
+
+## Proteção do cliente
+
+Na Vercel ou com `NODE_ENV=production`, o modo APK-only é habilitado por padrão. Não configure `VALORAE_APK_ONLY=false` em produção. Os valores esperados podem ser ajustados por:
+
+- `VALORAE_ANDROID_APP_ID`
+- `VALORAE_MOBILE_PROTOCOL`
+
+A identificação por cabeçalhos valida o contrato do cliente, mas não substitui autenticação criptográfica. Para rotas JSON sensíveis, mantenha também as chaves de cliente configuradas quando disponíveis.
 
 ## Validação
 
 ```bash
 npm run build
 npm run check:syntax
+npm run audit:on-demand
 npm run audit:dead-code
+npm run audit:sql
 npm run test:cross-stack
 ```

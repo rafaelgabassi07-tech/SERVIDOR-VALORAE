@@ -9,17 +9,15 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 const http = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const contract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeHttpTransport.kt');
-const catalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
 const build = readSiblingApkFile('app/build.gradle.kts');
 const apkMetadataText = readSiblingApkFile('metadata.json');
-if (protocol && http && contract && catalog && build && apkMetadataText) {
+if (protocol && http && contract && build && apkMetadataText) {
   assert.ok(contract.includes(VALORAE_HTTP_TRANSPORT_VERSION));
   assert.ok(contract.includes(VALORAE_HTTP_TRANSPORT_POLICY));
   assert.ok(protocol.includes('HeaderHttpTransportAccept'));
   assert.ok(http.includes(VALORAE_HTTP_TRANSPORT_POLICY));
   assert.ok(http.includes('httpTransportVersion = header(ValoraeMobileProtocol.HeaderHttpTransport)'));
   assert.ok(http.includes('fun httpTransport()'));
-  assert.ok(catalog.includes('/api/v1/contract/http-transport'));
   const apkMetadata = JSON.parse(apkMetadataText);
   assert.ok(build.includes(`versionCode = ${apkMetadata.versionCode}`));
   assert.ok(build.includes(`versionName = "${apkMetadata.versionName}"`));

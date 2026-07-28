@@ -5,17 +5,15 @@ import { VALORAE_DYNAMIC_RENDER_VERSION, VALORAE_DYNAMIC_RENDER_POLICY, buildDyn
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 const http = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const contract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeDynamicRender.kt');
-const catalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
 const build = readSiblingApkFile('app/build.gradle.kts');
 const apkMetadataText = readSiblingApkFile('metadata.json');
-if ([protocol, http, contract, catalog, build, apkMetadataText].every(Boolean)) {
+if ([protocol, http, contract, build, apkMetadataText].every(Boolean)) {
   assert.ok(protocol.includes('HeaderDynamicRender'));
   assert.ok(protocol.includes('HeaderDynamicRenderAccept'));
   assert.ok(http.includes(VALORAE_DYNAMIC_RENDER_POLICY));
   assert.ok(http.includes('dynamicRenderVersion = header(ValoraeMobileProtocol.HeaderDynamicRender)'));
   assert.ok(contract.includes(VALORAE_DYNAMIC_RENDER_VERSION));
   assert.ok(contract.includes(VALORAE_DYNAMIC_RENDER_POLICY));
-  assert.ok(catalog.includes('/api/v1/contract/dynamic-render'));
   const apkMetadata = JSON.parse(apkMetadataText);
   assert.ok(build.includes(`versionCode = ${apkMetadata.versionCode}`));
   assert.ok(build.includes(`versionName = "${apkMetadata.versionName}"`));

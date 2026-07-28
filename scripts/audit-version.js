@@ -6,12 +6,12 @@ const expectedCore = String(pkg.version || '');
 const expectedPublic = String(pkg.valorae?.publicVersion || '');
 const expectedPatch = String(pkg.valorae?.releasePatch || '');
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
-const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
-const sw = fs.readFileSync('public/service-worker.js', 'utf8');
+const monitor = fs.readFileSync('public/server.html', 'utf8');
+const monitorCss = fs.readFileSync('public/monitor-valorae.css', 'utf8');
+const cleanupWorker = fs.readFileSync('public/service-worker.js', 'utf8');
 const coreRelease = fs.readFileSync('lib/core/release.js', 'utf8');
 const currentRelease = fs.readFileSync('lib/release/current.js', 'utf8');
 const nvmrc = fs.readFileSync('.nvmrc', 'utf8').trim();
-const serverMetrics = fs.readFileSync('lib/observability/server-metrics.js', 'utf8');
 
 assert.equal(pkg.version, expectedCore);
 assert.equal(pkg.valorae.coreVersion, expectedCore);
@@ -25,8 +25,12 @@ for (const block of [pkg.config, pkg.releaseMetadata]) {
 }
 assert.equal(metadata.version, expectedCore);
 assert.equal(metadata.releasePatch, expectedPatch);
-assert.equal(manifest.version, expectedPublic);
-assert.ok(sw.includes(`v${expectedPublic.replaceAll('.', '-')}`));
+assert.ok(monitor.includes(expectedPublic), 'monitor estático precisa exibir a versão pública');
+assert.ok(!/fetch\s*\(|XMLHttpRequest|EventSource|WebSocket|setInterval\s*\(/.test(monitor), 'monitor estático não pode consultar rede');
+assert.ok(!/\/api\//.test(monitor), 'monitor estático não pode referenciar endpoints da API');
+assert.ok(monitorCss.length > 200, 'CSS mínimo do monitor ausente');
+assert.ok(cleanupWorker.includes('registration.unregister'), 'service worker deve apenas remover o cache legado');
+assert.ok(!cleanupWorker.includes("addEventListener('fetch'"), 'service worker não pode interceptar requisições');
 assert.ok(coreRelease.includes(expectedPatch));
 assert.ok(coreRelease.includes(`valorae-proxy-server-v${expectedPublic.replaceAll('.', '-')}`));
 assert.ok(currentRelease.includes(`VALORAE_PUBLIC_VERSION = '${expectedPublic}'`));
@@ -34,7 +38,6 @@ assert.ok(currentRelease.includes(expectedPatch));
 const expectedNodeMajor = String(pkg.engines?.node || '').match(/\d+/)?.[0];
 assert.ok(expectedNodeMajor, 'package.json precisa declarar engines.node');
 assert.equal(nvmrc, expectedNodeMajor, '.nvmrc precisa acompanhar package.json engines.node');
-assert.ok(serverMetrics.includes(`Node.js ${expectedNodeMajor}`), 'monitor precisa exibir o runtime Node declarado');
-assert.ok(!serverMetrics.includes('Node.js 20'), 'monitor não pode anunciar runtime obsoleto');
+assert.equal(fs.existsSync('lib/observability/server-metrics.js'), false, 'telemetria por requisição deve estar removida do runtime');
 
 console.log('release audit OK:', expectedCore, expectedPatch);

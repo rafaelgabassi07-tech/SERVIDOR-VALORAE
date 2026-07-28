@@ -11,12 +11,13 @@
     "check:syntax": "node scripts/check-syntax.js",
     "test": "node scripts/run-tests.js",
     "audit:version": "node scripts/audit-version-consistency.js && node scripts/audit-version.js",
-    "verify": "npm run build && npm run check:syntax && npm run audit:dead-code && npm run audit:sql && npm test && npm run audit:version",
+    "verify": "npm run build && npm run check:syntax && npm run audit:on-demand && npm run audit:dead-code && npm run audit:sql && npm test && npm run audit:version",
     "test:cross-stack": "node scripts/run-cross-stack-tests.js",
     "benchmark:cold-start": "node scripts/benchmark-cold-start.js",
     "benchmark:scraping": "node --expose-gc scripts/benchmark-scraping-engines.js --quick",
     "audit:dead-code": "node scripts/audit-runtime-reachability.js",
-    "audit:sql": "node scripts/validate-minimal-sql.js"
+    "audit:sql": "node scripts/validate-minimal-sql.js",
+    "audit:on-demand": "node scripts/audit-on-demand-import.js"
   },
   "engines": {
     "node": "24.x"
@@ -35,7 +36,7 @@
     "checkpoint": "asset-modal-completeness-v364",
     "releaseLabel": "asset-modal-completeness-v364",
     "apkVersion": "2026.07.27.02",
-    "monitorVersion": "v367"
+    "monitorVersion": "static-no-api-v399"
   },
   "releasePatch": "21.12.396-asset-modal-completeness-v364",
   "config": {
@@ -50,7 +51,7 @@
     "checkpoint": "asset-modal-completeness-v364",
     "releaseLabel": "asset-modal-completeness-v364",
     "apkVersion": "2026.07.27.02",
-    "monitorVersion": "memory-only"
+    "monitorVersion": "static-no-api-v399"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

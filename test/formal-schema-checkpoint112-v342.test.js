@@ -22,34 +22,30 @@ assert.equal(VALORAE_FORMAL_SCHEMA_IMPLEMENTATION, 'ajv-8.20.0-strict-draft-2020
 const validatorAvailable = buildFormalSchemaManifest().metrics.validatorAvailable;
 
 if (validatorAvailable) {
-  const validAnalysis = {
-    endpoint: 'analysis',
-    contract: 'AnalysisPageResponse',
+  const validAsset = {
     ticker: 'PETR4',
-    sections: [{ id: 'summary', items: [] }],
-    sourceCoverage: [],
-    dataQuality: {},
-    summary: { readySections: 1 },
-    missingSignals: [],
+    status: 'OK',
+    results: {},
+    normalized: {},
   };
-  const valid = validateFormalContractPayload('analysis', validAnalysis);
+  const valid = validateFormalContractPayload('asset', validAsset);
   assert.equal(valid.ok, true);
-  assert.match(valid.schemaId, /analysis\.schema\.json$/);
+  assert.match(valid.schemaId, /asset\.schema\.json$/);
 
-  const invalidAnalysis = { ...validAnalysis, ticker: 1234 };
-  const invalid = validateFormalContractPayload('analysis', invalidAnalysis);
+  const invalidAsset = { ...validAsset, ticker: 1234 };
+  const invalid = validateFormalContractPayload('asset', invalidAsset);
   assert.equal(invalid.ok, false);
   assert.ok(invalid.errors.some(error => error.instancePath === '/ticker' && error.keyword === 'type'));
 
-  const invalidRequest = validateFormalRequestPayload('/analysis', { ticker: { bad: true } });
+  const invalidRequest = validateFormalRequestPayload('/asset', { ticker: { bad: true } });
   assert.equal(invalidRequest.ok, false);
   assert.equal(invalidRequest.direction, 'request');
 
   clearContractContinuityStore();
-  const stored = stabilizeContractPayload('analysis', 'PETR4::page', validAnalysis);
+  const stored = stabilizeContractPayload('asset', 'PETR4::asset', validAsset);
   assert.equal(stored.contractSchemaValidation.ok, true);
   assert.equal(stored.contractSchemaValidation.canReplacePrevious, true);
-  const blocked = stabilizeContractPayload('analysis', 'PETR4::page', invalidAnalysis);
+  const blocked = stabilizeContractPayload('asset', 'PETR4::asset', invalidAsset);
   assert.equal(blocked.ticker, 'PETR4', 'ticker inválido não pode substituir o último payload válido');
   assert.equal(blocked.contractSchemaValidation.ok, false);
   assert.equal(blocked.contractSchemaValidation.previousPreserved, true);
@@ -67,7 +63,7 @@ if (validatorAvailable) {
   assert.equal(firstInvalid.contractSchemaValidation.canReplacePrevious, false);
   assert.equal(firstInvalid.contractBaseline.status, 'FORMAL_SCHEMA_INVALID_NO_BASELINE');
 } else {
-  const unavailable = validateFormalContractPayload('analysis', { ticker: 1234 });
+  const unavailable = validateFormalContractPayload('asset', { ticker: 1234 });
   assert.equal(unavailable.ok, true);
   assert.equal(unavailable.skipped, true);
   assert.equal(unavailable.reason, 'validator-runtime-unavailable');
@@ -80,7 +76,9 @@ assert.equal(manifest.draft, '2020-12');
 assert.equal(manifest.strictMode, true);
 assert.equal(manifest.guarantees.invalidResponseUsesLastGoodWhenAvailable, true);
 assert.equal(manifest.guarantees.financialValuesNotCoerced, true);
-assert.ok(manifest.catalog.response.analysis.id.includes('/analysis.schema.json'));
+assert.ok(manifest.catalog.response.asset.id.includes('/asset.schema.json'));
+assert.equal(manifest.catalog.response.analysis, undefined);
+assert.equal(manifest.catalog.request.analysis, undefined);
 assert.ok(routeManifest().routes.includes('/contract/formal-schemas'));
 
 function responseHarness() {

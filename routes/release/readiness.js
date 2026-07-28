@@ -2,12 +2,10 @@ import { ValoraeEngine, getValoraeRuntimeStats } from '../../lib/Valorae-engine.
 import { sendJson } from '../../lib/performance/http.js';
 import { beginRoute } from '../../lib/http/route.js';
 import { buildSourceReliabilityMatrix } from '../../lib/quality/data-quality.js';
-import { getServerMetricsSnapshot } from '../../lib/observability/server-metrics.js';
 import { buildPersonalReleaseReadiness } from '../../lib/release/personal-maturity.js';
 import { VALORAE_RELEASE_PATCH } from '../../lib/release/current.js';
 
 export default async function handler(req, res) {
-  req.__valoraeInternalTelemetry = true;
   const route = beginRoute(req, res, {
     version: ValoraeEngine.version,
     methods: ['GET'],
@@ -19,8 +17,7 @@ export default async function handler(req, res) {
   if (route.done) return;
   const runtime = getValoraeRuntimeStats();
   const providers = buildSourceReliabilityMatrix(runtime);
-  const metrics = getServerMetricsSnapshot();
-  const readiness = buildPersonalReleaseReadiness({ runtime, providers, metrics, proxyOutputMonitor: metrics.proxyOutputMonitor, deliveryHarmony: metrics.deliveryHarmony });
+  const readiness = buildPersonalReleaseReadiness({ runtime, providers });
   return sendJson(req, res, {
     version: ValoraeEngine.version,
     requestId: route.requestId,

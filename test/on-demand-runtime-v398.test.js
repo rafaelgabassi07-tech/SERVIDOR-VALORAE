@@ -3,12 +3,11 @@ import fs from 'node:fs';
 
 const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 const vercel = JSON.parse(read('vercel.json'));
-const monitor = read('public/monitor-valorae.js');
+const monitor = read('public/index.html');
 const serviceWorker = read('public/service-worker.js');
-const persistence = read('lib/observability/monitor-persistence.js');
-const metrics = read('lib/observability/server-metrics.js');
 const sync = read('routes/sync.js');
 const router = read('routes/_router.js');
+const auth = read('lib/security/client-auth.js');
 const sharedState = read('lib/state/shared-runtime-state.js');
 const sharedStateRemote = read('lib/state/shared-state-supabase.js');
 const circuitBreaker = read('lib/resilience/circuit-breaker.js');
@@ -16,18 +15,12 @@ const failureCache = read('lib/resilience/failure-cache.js');
 const continuityStore = read('lib/contract/continuity-store.js');
 
 assert.equal(vercel.crons, undefined, 'Vercel não deve possuir cron');
-assert.doesNotMatch(monitor, /setInterval\s*\(/, 'monitor não pode fazer polling');
-assert.doesNotMatch(monitor, /visibilitychange[^\n]*refresh|addEventListener\(['"]online['"][^\n]*refresh/s, 'retorno à aba/rede não pode consultar métricas');
-assert.match(monitor, /on\('refreshButton','click',refresh\)/, 'métricas devem depender de clique explícito');
-assert.doesNotMatch(monitor, /renderSettings\(\);loadBenchmark\(\)/, 'benchmark não deve carregar na abertura');
-assert.match(monitor, /state\.view==='benchmark'[^\n]*loadBenchmark\(\)/, 'benchmark deve ser lazy');
-assert.match(serviceWorker, /caches\.match\('\/server\.html'\)/, 'navegação estática deve ser cache-first');
-
-assert.match(persistence, /const enabled = false/);
-assert.doesNotMatch(persistence, /globalThis\.fetch|fetch\s*\(|setTimeout\s*\(|setInterval\s*\(|\/rest\/v1\//, 'compatibilidade do monitor não pode iniciar rede/timer/SQL');
-assert.match(metrics, /pollingHintMs: null/);
-assert.match(metrics, /só é executado por chamada manual/);
-assert.match(metrics, /const DETAILED_METRICS = process\.env\.VALORAE_METRICS_DETAILED === '1'/);
+assert.doesNotMatch(monitor, /<script\b|setInterval\s*\(|setTimeout\s*\(|fetch\s*\(|\/api\//i);
+assert.match(monitor, /Serviço sob demanda/);
+assert.doesNotMatch(serviceWorker, /addEventListener\(['"]fetch|fetch\s*\(/);
+assert.match(serviceWorker, /registration\.unregister\(\)/);
+assert.equal(fs.existsSync(new URL('../lib/observability/monitor-persistence.js',import.meta.url)),false);
+assert.equal(fs.existsSync(new URL('../lib/observability/server-metrics.js', import.meta.url)), false);
 
 assert.match(sync, /const TRANSACTIONS_TABLE = 'valorae_financial_transactions'/);
 assert.match(sync, /const DIVIDENDS_TABLE = 'valorae_financial_dividends'/);
@@ -36,19 +29,19 @@ assert.match(sync, /snapshotsEnabled: false/);
 assert.match(sync, /backupsEnabled: false/);
 assert.match(sync, /legacyWriteBlocks/);
 
-assert.doesNotMatch(sharedState, /\/rest\/v1\/|sharedStateRemoteRequest|globalThis\.fetch|fetch\s*\(/, 'estado operacional deve permanecer exclusivamente em memória');
-assert.doesNotMatch(sharedStateRemote, /\/rest\/v1\/|globalThis\.fetch|fetch\s*\(|setTimeout\s*\(/, 'driver legado remoto precisa ser inerte');
-assert.match(sharedState, /remote: 'desativado'/);
-assert.doesNotMatch(circuitBreaker, /setTimeout\s*\(|setSharedState\s*\(/, 'circuit breaker não deve agendar persistência redundante');
-assert.doesNotMatch(failureCache, /setSharedState\s*\(|getSharedState\s*\(/, 'cache negativo deve usar um único mapa local');
-assert.doesNotMatch(continuityStore, /setSharedState\s*\(|getSharedState\s*\(/, 'continuidade deve usar um único mapa local');
+assert.doesNotMatch(sharedState, /\/rest\/v1\/|sharedStateRemoteRequest|globalThis\.fetch|fetch\s*\(/);
+assert.doesNotMatch(sharedStateRemote, /\/rest\/v1\/|globalThis\.fetch|fetch\s*\(|setTimeout\s*\(/);
+assert.doesNotMatch(circuitBreaker, /setTimeout\s*\(|setSharedState\s*\(/);
+assert.doesNotMatch(failureCache, /setSharedState\s*\(|getSharedState\s*\(/);
+assert.doesNotMatch(continuityStore, /setSharedState\s*\(|getSharedState\s*\(/);
 
 assert.match(router, /async function buildMobileAlerts/);
 assert.match(router, /Promise\.allSettled/);
 assert.match(router, /includeNews/);
 assert.match(router, /loadFeatureModule/);
-assert.match(router, /VALORAE_METRICS_ENABLED/);
-assert.doesNotMatch(router, /import \{ attachProxyMetricsInterceptor \} from/);
-assert.match(router, /loadFeatureModule\('source-quotes', \(\) => import\('\.\.\/lib\/sources\/quotes\.js'\)\)/);
+assert.doesNotMatch(router, /attachProxyMetricsInterceptor|\/server\/metrics|\/monitor\/summary|\/monitor\/self-test/);
+assert.match(router, /VALORAE_APK_REQUEST_REQUIRED/);
+assert.match(auth, /shouldRequireValoraeApkRequest/);
+assert.match(auth, /return process\.env\.VERCEL === '1' \|\| process\.env\.NODE_ENV === 'production'/);
 
-console.log('on-demand runtime v398 OK');
+console.log('on-demand runtime v399 OK');

@@ -18,7 +18,7 @@ assert.equal(packageJson.valorae.releasePatch, '21.12.396-asset-modal-completene
 assert.equal(metadata.apkVersion, packageJson.valorae.apkVersion);
 assert.ok(metadata.contractVersion.includes(`APK ${metadata.apkCheckpoint.match(/^v\d+/)?.[0]} / Proxy ${packageJson.valorae.publicVersion}`));
 assert.equal(packageJson.releaseMetadata.apkVersion, metadata.apkVersion);
-assert.equal(packageJson.valorae.monitorVersion, 'v367');
+assert.equal(packageJson.valorae.monitorVersion, 'static-no-api-v399');
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');
@@ -47,7 +47,6 @@ assert.deepEqual(VALORAE_MOBILE_CACHE_POLICY_SECONDS, {
   marketIndices: 120,
   marketRankings: 900,
   news: 900,
-  analysis: 60,
   portfolioHistory: 300,
   portfolioEquilibrium: 20,
   portfolioReturns: 300,
@@ -93,9 +92,9 @@ const apkCache = readSiblingApkFile('app/src/main/java/com/example/data/cache/Va
 const apkProtocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 const apkHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const apkSync = readSiblingApkFile('app/src/main/java/com/example/data/sync/ValoraeSyncClient.kt');
-const apkCatalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
+const apkDiagnostics = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyDiagnosticsService.kt');
 const apkParser = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalParsers.kt');
-if (apkCache && apkProtocol && apkHttp && apkSync && apkCatalog && apkParser) {
+if (apkCache && apkProtocol && apkHttp && apkSync && apkDiagnostics && apkParser) {
   assert.ok(apkProtocol.includes(`const val Version = "${VALORAE_MOBILE_PROTOCOL_VERSION}"`));
   assert.ok(apkProtocol.includes(`const val AssetModalDeliverySchemaVersion = "${VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION}"`));
   const ttlMarkers = {
@@ -103,7 +102,6 @@ if (apkCache && apkProtocol && apkHttp && apkSync && apkCatalog && apkParser) {
     QuoteIntradayHistoryTtlMs: VALORAE_MOBILE_CACHE_POLICY_SECONDS.assetHistory * 1000,
     RankingTtlMs: VALORAE_MOBILE_CACHE_POLICY_SECONDS.marketRankings * 1000,
     NewsTtlMs: VALORAE_MOBILE_CACHE_POLICY_SECONDS.news * 1000,
-    AnalysisTtlMs: VALORAE_MOBILE_CACHE_POLICY_SECONDS.analysis * 1000,
     PortfolioHistoryTtlMs: VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioHistory * 1000,
     PortfolioEquilibriumTtlMs: VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioEquilibrium * 1000,
     PortfolioReturnsTtlMs: VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioReturns * 1000,
@@ -130,8 +128,8 @@ if (apkCache && apkProtocol && apkHttp && apkSync && apkCatalog && apkParser) {
   assert.ok((apkPublicFeed?.match(/MarketRankingCacheTtlMs/g) || []).length >= 2);
   assert.ok(apkSync.includes('ValoraeMobileProtocol.HeaderRequestId'));
   assert.ok(apkSync.includes('ValoraeMobileProtocol.HeaderAppVersion'));
-  const syncGetMarkers = apkCatalog.match(/ProxyEndpointStatus\("\/api\/sync"[^\n]+method = "GET"\)/g) || [];
-  assert.equal(syncGetMarkers.length, 2, 'health e diagnostics do sync devem refletir o GET real usado pelo APK');
+  assert.equal((apkDiagnostics.match(/executeJsonGet\("\/api\/v1\/ready"\)/g) || []).length, 1);
+  assert.ok(apkSync.includes('executeGet(mapOf("action" to "diagnostics")'));
   assert.ok(apkParser.includes('schemaVersion = optStringOrNull("schemaVersion")'));
   assert.ok(apkParser.includes('else inferredFinal'));
   assert.ok(apkParser.includes('"1-compat"'));
@@ -173,7 +171,7 @@ assert.ok(coreHttp.includes('responseRequestId'));
 assert.ok(perfHttp.includes('responseRequestId'));
 assert.ok(perfHttp.includes("X-Valorae-Contract-Version"));
 assert.ok(perfHttp.includes("X-Valorae-Delivery-Schema"));
-assert.ok(router.includes('mobileCachePolicySeconds: VALORAE_MOBILE_CACHE_POLICY_SECONDS'));
-assert.ok(router.includes('methods: routeMethods(path)'));
+assert.ok(router.includes('function routeMethods(path ='));
+assert.doesNotMatch(router, /integration\/(?:sdk|prompts|manifest)/);
 
 console.log('apk-proxy-protocol-cache-harmony-v311 ok');

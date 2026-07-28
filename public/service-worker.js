@@ -1,54 +1,10 @@
-const CACHE = 'valorae-proxy-monitor-v21-12-398-ui-v367-demand-only';
-const SHELL = [
-  '/server.html',
-  '/monitor',
-  '/monitor-valorae.css',
-  '/monitor-valorae.js',
-  '/manifest.webmanifest',
-  '/assets/valorae-logo.svg',
-  '/assets/valorae-icon-192.png',
-  '/assets/valorae-icon-512.png',
-  '/assets/valorae-icon-1024.png',
-  '/assets/valorae-favicon-48.png',
-  '/assets/valorae-monitor-benchmarks.json',
-];
-
-self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
-});
-
+// Migração única: remove o cache do monitor antigo e encerra o service worker.
+self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE && key.startsWith('valorae-proxy-monitor-')).map(key => caches.delete(key))))
-      .then(() => self.clients.claim()),
-  );
-});
-
-self.addEventListener('fetch', event => {
-  const request = event.request;
-  if (request.method !== 'GET') return;
-  const url = new URL(request.url);
-  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
-
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      caches.match('/server.html').then(async cached => {
-        if (cached) return cached;
-        const response = await fetch(request);
-        if (response.ok) caches.open(CACHE).then(cache => cache.put('/server.html', response.clone()));
-        return response;
-      }),
-    );
-    return;
-  }
-
-  event.respondWith(
-    caches.match(request).then(async cached => {
-      if (cached) return cached;
-      const response = await fetch(request);
-      if (response.ok) caches.open(CACHE).then(cache => cache.put(request, response.clone()));
-      return response;
-    }),
+      .then(keys => Promise.all(keys.filter(key => key.startsWith('valorae-proxy-monitor-')).map(key => caches.delete(key))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.claim())
   );
 });

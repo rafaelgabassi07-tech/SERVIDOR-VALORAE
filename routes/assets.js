@@ -178,7 +178,7 @@ export default async function handler(req, res) {
           minQueryLength: 2,
           debounceRecommendedMs: 320,
           suggestionOnly,
-          analysisEndpoint: '/api/v1/analysis',
+          detailsEndpoint: '/api/v1/asset/modal',
           message: suggestions.length ? 'Sugestões de ticker retornadas sem simular cotação.' : 'Nenhum ticker sugerido para a busca informada.',
         }, { status: 200, engineVersion: ValoraeEngine.version, profile: 'assets-suggestions', cacheControl: 'private, max-age=300, stale-while-revalidate=900' });
       }

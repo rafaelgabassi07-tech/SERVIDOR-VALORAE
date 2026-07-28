@@ -165,14 +165,12 @@ assert.ok(fs.existsSync(path.join(root, 'contracts/checkpoint116/final-decomposi
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeFinalDecomposition.kt');
 const clientHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-const endpointCatalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
-if (protocol !== null || clientContract !== null || clientHttp !== null || endpointCatalog !== null) {
+if (protocol !== null || clientContract !== null || clientHttp !== null) {
   assert.ok(protocol?.includes('HeaderFinalDecomposition'));
   assert.ok(protocol?.includes('HeaderFinalDecompositionAccept'));
   assert.ok(clientContract?.includes(VALORAE_FINAL_DECOMPOSITION_VERSION));
   assert.ok(clientContract?.includes('facadeImportPathsPreserved'));
   assert.ok(clientHttp?.includes('ValoraeFinalDecompositionContract.PolicyVersion'));
-  assert.ok(endpointCatalog?.includes('/api/v1/contract/final-decomposition'));
 }
 
 process.env = previous;

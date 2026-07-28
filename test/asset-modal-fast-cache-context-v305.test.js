@@ -125,12 +125,12 @@ assert.equal(second.delivery.requestId, 'request-b', 'consumidor coalescido não
 assert.equal(first.requestId, 'request-a');
 assert.equal(second.requestId, 'request-b');
 
-const apkCatalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
+const apkModalService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
 const apkUniversal = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
 const apkHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const apkQuality = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
-if (apkCatalog && apkUniversal && apkHttp && apkQuality) {
-  assert.ok(apkCatalog.includes('ProxyEndpointStatus("/api/v1/asset/modal"'), 'diagnóstico do APK deve testar o gateway realmente consumido');
+if (apkModalService && apkUniversal && apkHttp && apkQuality) {
+  assert.ok(apkModalService.includes('"/api/v1/asset/modal"'), 'APK deve consumir o gateway universal ativo');
   assert.ok(apkUniversal.includes('APK_MEMORY_HIT') && apkUniversal.includes('requestId = requestId'), 'cache universal do APK deve recontextualizar cada solicitação');
   assert.ok(apkUniversal.includes('.firstOrNull()') && !apkUniversal.includes('.maxByOrNull { it.storedAtMs }'), 'APK deve priorizar full útil sobre preview fast mais recente');
   assert.ok(apkHttp.includes('call.timeout().timeout(requestTimeoutMs, TimeUnit.MILLISECONDS)'), 'APK deve aplicar timeout na Call compartilhando o OkHttpClient');

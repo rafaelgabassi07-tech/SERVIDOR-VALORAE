@@ -5,7 +5,8 @@ const requiredFiles = [
   'routes/_router.js',
   'server.js',
   'public/server.html',
-  'public/manifest.webmanifest'
+  'public/monitor-valorae.css',
+  'public/service-worker.js'
 ];
 
 const ignoredDirectories = new Set(['node_modules', '.git', '.vercel']);

@@ -101,14 +101,12 @@ assert.equal(routed.headers.get('x-valorae-scraping-engine'), VALORAE_HYBRID_DOC
 const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 const clientContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeScrapingEngine.kt');
 const clientHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-const endpointCatalog = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeProxyEndpointCatalog.kt');
-if (protocol !== null || clientContract !== null || clientHttp !== null || endpointCatalog !== null) {
+if (protocol !== null || clientContract !== null || clientHttp !== null) {
   assert.ok(protocol?.includes('HeaderScrapingEngineAccept'));
   assert.ok(clientContract?.includes(VALORAE_HYBRID_DOCUMENT_VERSION));
   assert.ok(clientContract?.includes('serverVersion.isNullOrBlank()'));
   assert.ok(clientHttp?.includes('scrapingEngineVersion'));
   assert.ok(clientHttp?.includes('ValoraeScrapingEngineContract.PolicyVersion'));
-  assert.ok(endpointCatalog?.includes('/api/v1/contract/scraping-engine'));
 }
 
 console.log('scraping-engine-checkpoint117-v347 ok');

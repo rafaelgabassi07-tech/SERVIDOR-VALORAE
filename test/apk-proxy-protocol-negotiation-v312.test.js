@@ -18,7 +18,7 @@ assert.equal(packageJson.valorae.publicVersion, '21.12.396');
 assert.equal(packageJson.valorae.releasePatch, '21.12.396-asset-modal-completeness-v364');
 assert.equal(metadata.apkVersion, packageJson.valorae.apkVersion);
 assert.ok(metadata.contractVersion.includes(`APK ${metadata.apkCheckpoint.match(/^v\d+/)?.[0]} / Proxy ${packageJson.valorae.publicVersion}`));
-assert.equal(packageJson.valorae.monitorVersion, 'v367');
+assert.equal(packageJson.valorae.monitorVersion, 'static-no-api-v399');
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');
@@ -84,8 +84,8 @@ assert.equal(perfRes.getHeader('X-Valorae-Mobile-Protocol'), VALORAE_MOBILE_PROT
 assert.equal(perfRes.getHeader('X-Valorae-Delivery-Schema'), VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION);
 
 const routerSource = fs.readFileSync(new URL('../routes/_router.js', import.meta.url), 'utf8');
-assert.ok(routerSource.includes("cachePolicySemantics: { freshness: 'seconds', staleGrace: 'seconds-after-freshness' }"));
-assert.ok(routerSource.includes('analysisRouteCache.set(cacheKey, built, VALORAE_MOBILE_CACHE_POLICY_SECONDS.analysis * 1000)'));
+assert.doesNotMatch(routerSource, /integration\/(?:sdk|prompts|manifest)/);
+assert.doesNotMatch(routerSource, /analysisRouteCache|\/asset\/analysis|['"]\/analysis['"]/);
 
 const apkProtocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 const apkCache = readSiblingApkFile('app/src/main/java/com/example/data/cache/ValoraeCachePolicy.kt');
