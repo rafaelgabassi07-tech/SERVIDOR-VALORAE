@@ -23,9 +23,9 @@ const checklist = _test.ensureFiiBuyHoldChecklist({
   },
   vacancyHistory: {
     points: [
-      { vacancyPercent: 7.1 },
-      { vacancyPercent: 8.2 },
-      { vacancyPercent: 6.9 }
+      { physicalVacancyPercent: 7.1, financialVacancyPercent: 6.4 },
+      { physicalVacancyPercent: 8.2, financialVacancyPercent: 7.0 },
+      { physicalVacancyPercent: 6.9, financialVacancyPercent: 5.8 }
     ]
   },
   dividendCharts: {
@@ -42,13 +42,14 @@ const checklist = _test.ensureFiiBuyHoldChecklist({
 
 assert.equal(checklist.status, 'OK');
 assert.equal(checklist.items.length, 8);
-assert.equal(checklist.passed, 7);
+assert.equal(checklist.passed, 8);
 assert.equal(checklist.failed, 0);
-assert.equal(checklist.unknown, 1);
-assert.equal(checklist.items.find(item => item.id === 'financial_vacancy_below_10').status, 'UNKNOWN');
+assert.equal(checklist.unknown, 0);
+assert.equal(checklist.items.find(item => item.id === 'financial_vacancy_below_10').status, 'PASSED');
 assert.equal(checklist.diagnostics.portfolioIndependent, true);
 assert.equal(checklist.diagnostics.derivation, 'calculated_by_valorae_from_investidor10_metrics');
-assert.ok(checklist.subtitle.includes('métricas reais'));
+assert.ok(checklist.subtitle.includes('Todos os 8 critérios canônicos'));
+assert.deepEqual(checklist.diagnostics.missingCriterionIds, []);
 assert.equal(checklist.diagnostics.hasAverageDy24m, true);
 assert.equal(checklist.diagnostics.averageDy24mSampleCount, 24);
 

@@ -28,7 +28,7 @@ if (apkAvailable) {
   assert.ok(proxyMetadata.contractVersion.includes(`APK ${apkMetadata.checkpoint.match(/^v\d+/)?.[0]}`));
   assert.match(proxyMetadata.contractVersion, /asset modal delivery v4/i);
   assert.match(proxyMetadata.contractVersion, /monitor v367 memory-only/i);
-  assert.match(apkMetadata.contractVersion, /Proxy 21\.12\.395/);
+  assert.match(apkMetadata.contractVersion, new RegExp(`Proxy ${String(proxyMetadata.publicVersion).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
   assert.match(apkMetadata.contractVersion, /monitor v367 memory-only/i);
 
   for (const [apkPattern, proxyPattern] of [

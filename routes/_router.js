@@ -5,13 +5,7 @@ import { cacheStats, clearCache } from '../lib/core/cache.js';
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
 import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../lib/portfolio/history.js';
 import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.js';
-import { buildAssetsPayload, buildIndicesPayload, buildMarketMovers, getQuote } from '../lib/sources/quotes.js';
-import { fetchInvestidor10Rankings, getIpcaSeries, getConfirmedDividendsByTicker, buildSourceAdapterManifest, VALORAE_SOURCE_ADAPTER_VERSION } from '../lib/sources/adapters/index.js';
-import { getNews } from '../lib/sources/news.js';
-import { fetchAllowedScrapeText } from '../lib/scrape/safe-target-fetch.js';
 import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tickers.js';
-import { getAgendaDividends } from '../lib/sources/agenda-dividends.js';
-import { buildAnalysisPageResponse } from '../lib/analysis/analysis-page-response.js';
 import { OFFICIAL_ASSET_LOGO_VERSION, fetchOfficialAssetLogo } from '../lib/market/official-logo.js';
 import { buildContractBaselineManifest } from '../lib/contract/baseline.js';
 import { contractContinuityStats, stabilizeContractPayloadShared } from '../lib/contract/continuity-store.js';
@@ -33,7 +27,6 @@ import {
   sanitizeError,
 } from '../lib/security/guard.js';
 import { resolveClientAuth, shouldRequireClientAuth } from '../lib/security/client-auth.js';
-import { attachProxyMetricsInterceptor } from '../lib/observability/server-metrics.js';
 import { coalesce } from '../lib/resilience/inflight.js';
 import { withRouteDeadline } from '../lib/http/route.js';
 import {
@@ -60,6 +53,16 @@ function loadFeatureModule(key, loader) {
   return promise;
 }
 
+
+const requestMetricsEnabled = String(process.env.VALORAE_METRICS_ENABLED || '').trim() === '1';
+
+async function attachProxyMetricsIfEnabled(req, res) {
+  if (!requestMetricsEnabled) return false;
+  const module = await loadFeatureModule('server-metrics-core', () => import('../lib/observability/server-metrics.js'));
+  module.attachProxyMetricsInterceptor(req, res);
+  return true;
+}
+
 async function buildLazyFeatureManifest(key, loader, exportName, options) {
   const module = await loadFeatureModule(key, loader);
   return module[exportName](options);
@@ -73,6 +76,61 @@ async function runLazyDefaultHandler(key, loader, req, res) {
 async function buildMobilePortfolioSync(...args) {
   const module = await loadFeatureModule('contracts-mobile', () => import('../lib/contracts/mobile.js'));
   return module.buildMobilePortfolioSync(...args);
+}
+
+async function buildAssetsPayload(...args) {
+  const module = await loadFeatureModule('source-quotes', () => import('../lib/sources/quotes.js'));
+  return module.buildAssetsPayload(...args);
+}
+
+async function buildMarketMovers(...args) {
+  const module = await loadFeatureModule('source-quotes', () => import('../lib/sources/quotes.js'));
+  return module.buildMarketMovers(...args);
+}
+
+async function getQuote(...args) {
+  const module = await loadFeatureModule('source-quotes', () => import('../lib/sources/quotes.js'));
+  return module.getQuote(...args);
+}
+
+async function fetchInvestidor10Rankings(...args) {
+  const module = await loadFeatureModule('source-adapters', () => import('../lib/sources/adapters/index.js'));
+  return module.fetchInvestidor10Rankings(...args);
+}
+
+async function getIpcaSeries(...args) {
+  const module = await loadFeatureModule('source-adapters', () => import('../lib/sources/adapters/index.js'));
+  return module.getIpcaSeries(...args);
+}
+
+async function getConfirmedDividendsByTicker(...args) {
+  const module = await loadFeatureModule('source-adapters', () => import('../lib/sources/adapters/index.js'));
+  return module.getConfirmedDividendsByTicker(...args);
+}
+
+async function buildSourceAdapterManifest(...args) {
+  const module = await loadFeatureModule('source-adapters', () => import('../lib/sources/adapters/index.js'));
+  return module.buildSourceAdapterManifest(...args);
+}
+
+async function getNews(...args) {
+  const module = await loadFeatureModule('source-news', () => import('../lib/sources/news.js'));
+  return module.getNews(...args);
+}
+
+async function fetchAllowedScrapeText(...args) {
+  const module = await loadFeatureModule('safe-target-fetch', () => import('../lib/scrape/safe-target-fetch.js'));
+  return module.fetchAllowedScrapeText(...args);
+}
+
+async function getAgendaDividends(...args) {
+  const module = await loadFeatureModule('agenda-dividends', () => import('../lib/sources/agenda-dividends.js'));
+  return module.getAgendaDividends(...args);
+}
+
+async function buildAnalysisPageResponse(...args) {
+  const module = await loadFeatureModule('analysis-page-response', () => import('../lib/analysis/analysis-page-response.js'));
+  return module.buildAnalysisPageResponse(...args);
 }
 
 async function buildPortfolioAnalysis(...args) {
@@ -172,11 +230,32 @@ function contractIdentity(endpoint, payload = {}) {
   return `${endpoint}:${ticker || 'portfolio'}:${createHash('sha256').update(rawIdentity).digest('hex')}`;
 }
 
+const REMOVED_ASSET_MODAL_FIELDS = new Set([
+  'analysisChanges',
+  'analysisChange',
+  'whatChanged',
+  'changesSinceLastAnalysis',
+  'changesSincePreviousAnalysis',
+]);
+
+function stripRemovedAssetModalFields(value, depth = 0) {
+  if (depth > 14 || value == null || typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map(item => stripRemovedAssetModalFields(item, depth + 1));
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !REMOVED_ASSET_MODAL_FIELDS.has(key))
+      .map(([key, item]) => [key, stripRemovedAssetModalFields(item, depth + 1)])
+  );
+}
+
 async function withContractBaseline(endpoint, payload, requestPayload = {}) {
-  const stable = await stabilizeContractPayloadShared(endpoint, contractIdentity(endpoint, requestPayload), payload);
-  return attachFieldObservability(endpoint, stable, {
+  const assetModalEndpoint = endpoint === 'assetModal' || endpoint === 'stockModal' || endpoint === 'fiiModal';
+  const contractPayload = assetModalEndpoint ? stripRemovedAssetModalFields(payload) : payload;
+  const stable = await stabilizeContractPayloadShared(endpoint, contractIdentity(endpoint, requestPayload), contractPayload);
+  const observed = attachFieldObservability(endpoint, stable, {
     traceId: requestPayload.requestId || stable?.requestId,
   });
+  return assetModalEndpoint ? stripRemovedAssetModalFields(observed) : observed;
 }
 
 function safeRequestId(value = '') {
@@ -269,6 +348,7 @@ function routeMethods(path = '') {
     '/mobile/bootstrap', '/app/bootstrap',
     '/mobile/practical-sync', '/app/practical-sync',
     '/mobile/portfolio-sync', '/app/portfolio-sync', '/portfolio/insights-bundle',
+    '/mobile/alerts', '/app/alerts',
     '/dividends/batch',
     '/portfolio/dividends', '/portfolio/next-dividends', '/portfolio/events',
     '/portfolio/returns', '/portfolio/analyze', '/portfolio/allocation', '/portfolio/equilibrium',
@@ -537,7 +617,7 @@ function rootPayload() {
     version: RELEASE.version,
     status: 'online',
     contract: RELEASE.contract,
-    routes: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/dividends/batch', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/analysis', '/api/v1/monitor/summary', '/api/v1/monitor/self-test', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health', '/api/v1/contract/baseline', '/api/v1/contract/observability', '/api/v1/contract/source-adapters', '/api/v1/contract/html-parser-shadow', '/api/v1/contract/structured-data', '/api/v1/contract/dynamic-render', '/api/v1/contract/extraction-intelligence', '/api/v1/contract/formal-schemas', '/api/v1/contract/http-transport', '/api/v1/contract/shared-state', '/api/v1/contract/real-canaries', '/api/v1/contract/final-decomposition', '/api/v1/contract/scraping-engine'],
+    routes: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/mobile/alerts', '/api/v1/dividends/batch', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/analysis', '/api/v1/monitor/summary', '/api/v1/monitor/self-test', '/api/v1/asset', '/api/v1/market/ipca', '/api/v1/health', '/api/v1/contract/baseline', '/api/v1/contract/observability', '/api/v1/contract/source-adapters', '/api/v1/contract/html-parser-shadow', '/api/v1/contract/structured-data', '/api/v1/contract/dynamic-render', '/api/v1/contract/extraction-intelligence', '/api/v1/contract/formal-schemas', '/api/v1/contract/http-transport', '/api/v1/contract/shared-state', '/api/v1/contract/real-canaries', '/api/v1/contract/final-decomposition', '/api/v1/contract/scraping-engine'],
     router: routeManifest(),
     monitor: '/server.html'
   };
@@ -565,7 +645,7 @@ function monitorSummary() {
     cache,
     routes: {
       total: routes.length,
-      primary: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/market/ipca', '/api/v1/dividends/batch', '/api/v1/health'],
+      primary: ['/api/v1/mobile/practical-sync', '/api/v1/mobile/portfolio-sync', '/api/v1/mobile/bootstrap', '/api/v1/mobile/alerts', '/api/v1/portfolio/equilibrium', '/api/v1/portfolio/returns', '/api/v1/assets', '/api/v1/news', '/api/v1/market/rankings', '/api/v1/market/ipca', '/api/v1/dividends/batch', '/api/v1/health'],
       compatibility: routes.filter(r => r.includes('/portfolio/') || r.includes('/asset/')).length
     },
     checks: {
@@ -769,6 +849,122 @@ async function mobileBootstrap(payload = {}) {
   };
 }
 
+
+async function buildMobileAlerts(payload = {}) {
+  const includeQuotes = boolParamLocal(payload.includeQuotes, false);
+  const includeDividends = boolParamLocal(payload.includeDividends, false);
+  const includeNews = boolParamLocal(payload.includeNews, false);
+  const requestedBlocks = { quotes: includeQuotes, dividends: includeDividends, news: includeNews };
+  const requestSource = String(payload.source || 'apk-notifications').trim().slice(0, 48) || 'apk-notifications';
+  const symbols = uniqueTickers([
+    ...(Array.isArray(payload.symbols) ? payload.symbols : String(payload.symbols || '').split(/[,;\s]+/)),
+    ...(Array.isArray(payload.tickers) ? payload.tickers : String(payload.tickers || '').split(/[,;\s]+/)),
+    ...(Array.isArray(payload.positions) ? payload.positions : []),
+  ]).slice(0, 180);
+
+  if (!includeQuotes && !includeDividends && !includeNews) {
+    return {
+      status: 'EMPTY',
+      endpoint: 'mobile-alerts',
+      version: RELEASE.version,
+      requestedBlocks,
+      blockStatus: { quotes: 'SKIPPED', dividends: 'SKIPPED', news: 'SKIPPED' },
+      quotes: [],
+      dividends: null,
+      news: [],
+      partial: false,
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  const jobs = {
+    quotes: includeQuotes
+      ? buildAssetsPayload({
+          symbols,
+          tickers: symbols,
+          max: Math.min(180, Math.max(1, Number(payload.max || symbols.length || 80))),
+          mode: 'background_alerts_fast',
+          source: requestSource,
+          includeFundamentals: false,
+          refresh: false,
+          nocache: false,
+          forceRefresh: false,
+          cache: true,
+          timeoutMs: Math.min(8000, Math.max(2500, Number(payload.quotesTimeoutMs || 6000))),
+        })
+      : Promise.resolve({ status: 'SKIPPED', assets: [] }),
+    dividends: includeDividends
+      ? buildDividendsContract({
+          positions: Array.isArray(payload.positions) ? payload.positions : [],
+          transactions: Array.isArray(payload.transactions) ? payload.transactions : [],
+          mode: 'mobile-notification-alerts',
+          source: requestSource,
+          tickers: symbols,
+          symbols,
+          includeCalendar: true,
+          includeAgenda: true,
+          futureMonths: Math.min(24, Math.max(1, Number(payload.futureMonths ?? 18))),
+          historyMonths: Math.min(180, Math.max(0, Number(payload.historyMonths ?? 120))),
+          timeoutMs: Math.min(14000, Math.max(4500, Number(payload.dividendsTimeoutMs || payload.timeoutMs || 11000))),
+          agendaTimeoutMs: Math.min(10000, Math.max(3500, Number(payload.agendaTimeoutMs || 8000))),
+        })
+      : Promise.resolve({ status: 'SKIPPED' }),
+    news: includeNews
+      ? getNews({
+          symbols: symbols.slice(0, 16),
+          tickers: symbols.slice(0, 16),
+          limit: Math.min(32, Math.max(1, Number(payload.newsLimit || 24))),
+          source: requestSource,
+          includeArticleBody: false,
+          assetOnly: true,
+          includeGeneral: false,
+          refresh: false,
+          nocache: false,
+          bypassCache: false,
+          timeoutMs: Math.min(7000, Math.max(2500, Number(payload.newsTimeoutMs || 5200))),
+        })
+      : Promise.resolve({ status: 'SKIPPED', items: [] }),
+  };
+
+  const names = ['quotes', 'dividends', 'news'];
+  const settled = await Promise.allSettled(names.map(name => jobs[name]));
+  const values = {};
+  const blockStatus = {};
+  const errors = [];
+  names.forEach((name, index) => {
+    const result = settled[index];
+    if (result.status === 'fulfilled') {
+      values[name] = result.value || {};
+      blockStatus[name] = String(result.value?.status || 'EMPTY').toUpperCase();
+    } else {
+      values[name] = {};
+      blockStatus[name] = 'ERROR';
+      errors.push({ block: name, code: result.reason?.code || 'BLOCK_ERROR', error: String(result.reason?.message || result.reason || 'Falha no bloco solicitado.').slice(0, 240) });
+    }
+  });
+
+  const quotes = Array.isArray(values.quotes?.assets) ? values.quotes.assets : [];
+  const news = Array.isArray(values.news?.items) ? values.news.items : (Array.isArray(values.news?.news) ? values.news.news : []);
+  const produced = quotes.length + news.length + (includeDividends && values.dividends && blockStatus.dividends !== 'ERROR' ? 1 : 0);
+  const requestedCount = Object.values(requestedBlocks).filter(Boolean).length;
+  const failedCount = Object.entries(blockStatus).filter(([name, status]) => requestedBlocks[name] && status === 'ERROR').length;
+
+  return {
+    status: failedCount === requestedCount ? 'ERROR' : (produced > 0 ? (failedCount > 0 ? 'PARTIAL' : 'OK') : (failedCount > 0 ? 'PARTIAL' : 'EMPTY')),
+    endpoint: 'mobile-alerts',
+    version: RELEASE.version,
+    requestedBlocks,
+    blockStatus,
+    quotes,
+    dividends: includeDividends && blockStatus.dividends !== 'ERROR' ? values.dividends : null,
+    news,
+    partial: failedCount > 0 || Boolean(values.quotes?.partial) || Boolean(values.dividends?.partial),
+    errors,
+    diagnostics: { requestedSymbols: symbols.length, quoteCount: quotes.length, newsCount: news.length, requestedCount, failedCount },
+    generatedAt: new Date().toISOString(),
+  };
+}
+
 function comparisonPointsFromHistory(history = {}) {
   const rows = history.points || history.history || history.series || [];
   const clean = Array.isArray(rows) ? rows.filter(point => Number(point?.close || point?.price || point?.value || 0) > 0) : [];
@@ -891,10 +1087,9 @@ function isPublicAssetLogoRoute(path = '', method = 'GET') {
 }
 
 export async function dispatchRoute(req, res) {
-  // Instala a captura antes de CORS, preflight, leitura de body e qualquer handler.
-  // Isso garante que JSON, texto, binário, redirect, streaming, HEAD, OPTIONS e erros
-  // sejam observados pelo mesmo interceptador central, sem depender de cada rota.
-  attachProxyMetricsInterceptor(req, res);
+  // Telemetria detalhada é opt-in. No modo padrão, o Proxy não importa nem executa
+  // o coletor de métricas em cada chamada do APK.
+  await attachProxyMetricsIfEnabled(req, res);
   let path = '/';
   let requestId = '';
   try {
@@ -988,7 +1183,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/integration/sdk') return sendJson(req, res, buildIntegrationSdkPayload(), { cacheControl: 'private, max-age=120' });
     if (path === '/integration/prompts') return sendJson(req, res, buildIntegrationPromptsPayload(), { cacheControl: 'private, max-age=120' });
     if (path === '/contract/baseline') return sendJson(req, res, { ...buildContractBaselineManifest(), release: RELEASE.patch, continuityStore: contractContinuityStats() }, { cacheControl: 'private, max-age=120' });
-    if (path === '/contract/source-adapters') return sendJson(req, res, { ...buildSourceAdapterManifest(), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
+    if (path === '/contract/source-adapters') return sendJson(req, res, { ...(await buildSourceAdapterManifest()), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
     if (path === '/contract/html-parser-shadow') return sendJson(req, res, { ...(await buildLazyFeatureManifest('html-parser-shadow', () => import('../lib/scrape/standard-html-parser.js'), 'buildHtmlParserShadowManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
     if (path === '/contract/structured-data') return sendJson(req, res, { ...(await buildLazyFeatureManifest('structured-data', () => import('../lib/scrape/structured-data-discovery.js'), 'buildStructuredDataManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
     if (path === '/contract/dynamic-render') return sendJson(req, res, { ...(await buildLazyFeatureManifest('dynamic-render', () => import('../lib/scrape/dynamic-render-fallback.js'), 'buildDynamicRenderManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=15' });
@@ -1026,6 +1221,8 @@ export async function dispatchRoute(req, res) {
     if (path === '/mobile/bootstrap' || path === '/app/bootstrap') return sendJson(req, res, await withContractBaseline('mobileSync', await mobileBootstrap(payload), payload), { cacheControl: 'private, max-age=45' });
     if (path === '/mobile/practical-sync' || path === '/app/practical-sync') return sendJson(req, res, await withContractBaseline('mobileSync', await buildMobilePortfolioSync({ ...payload, practicalMode: true, includeDividendsInBundle: payload.includeDividendsInBundle ?? false, includeRankings: payload.includeRankings ?? false }), payload), { cacheControl: 'private, max-age=20' });
     if (path === '/mobile/portfolio-sync' || path === '/app/portfolio-sync' || path === '/portfolio/insights-bundle') return sendJson(req, res, await withContractBaseline('mobileSync', await buildMobilePortfolioSync(payload), payload), { cacheControl: 'private, max-age=20' });
+
+    if (path === '/mobile/alerts' || path === '/app/alerts') return sendJson(req, res, await buildMobileAlerts(payload), { cacheControl: 'no-store' });
 
     if (path === '/dividends/batch') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
     if (path === '/portfolio/dividends' || path === '/portfolio/next-dividends' || path === '/portfolio/events') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
@@ -1094,7 +1291,7 @@ export async function dispatchRoute(req, res) {
           dividendTimeoutMs: payload.dividendTimeoutMs || (modalFast ? 3200 : 5000),
           range: payload.range || (modalFast ? '6M' : '1Y')
         });
-        const built = buildAnalysisPageResponse(enriched, payload);
+        const built = await buildAnalysisPageResponse(enriched, payload);
         analysisRouteCache.set(cacheKey, built, VALORAE_MOBILE_CACHE_POLICY_SECONDS.analysis * 1000);
         return { ...built, cache: { ...(built.cache || {}), routeCache: 'miss' } };
       });
@@ -1198,8 +1395,8 @@ export function routeManifest() {
     physicalFunctions: ['api/router.js'],
     legacyAliases: { '/ativo': '/asset', '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
     routes: [
-    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/extraction-intelligence','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/contract/scraping-engine','/source/status','/release/readiness','/personal/readiness','/cache/stats','/cache/clear','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/asset/logo','/asset/yahoo-logo','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/modal','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
+    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/extraction-intelligence','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/contract/scraping-engine','/source/status','/release/readiness','/personal/readiness','/cache/stats','/cache/clear','/monitor/summary','/monitor/self-test','/server/summary','/server/self-test','/server/metrics','/server/tests','/observability','/engine/maturity','/engine/performance','/deploy/status','/fields','/errors','/openapi','/sync','/integration/sdk','/integration/prompts','/integration/manifest','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/mobile/alerts','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/analysis','/asset/analysis','/asset','/asset/quote','/quote','/quotes','/asset/history','/asset/dividends','/asset/next-dividend','/asset/coverage','/asset/fundamentals','/asset/profile','/asset/valuation','/asset/profitability','/asset/debt','/asset/statements','/asset/peers','/asset/source-map','/asset/indicators','/asset/quality','/asset/action-plan','/asset/logo','/asset/yahoo-logo','/fii/profile','/fii/income','/fii/patrimonial','/fii/portfolio','/fii/vacancy','/fii/communications','/fii/checklist','/fii/indicators','/asset/modal','/asset/fii-modal','/fii/modal','/asset/stock-modal','/asset/action-modal','/acao/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
   ].sort() };
 }
 
-export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetPayload, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity };
+export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetPayload, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts };

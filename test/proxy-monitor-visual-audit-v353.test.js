@@ -17,7 +17,8 @@ assert.equal(new Set(ids).size, ids.length, 'IDs HTML devem ser únicos');
 assert.match(index, /valorae-monitor-material3-polish-v367/);
 assert.match(index, /id="appSidebar"[^>]*aria-label="Navegação principal"/);
 assert.match(index, /id="monitorMain"[^>]*aria-busy="false"/);
-assert.match(index, /id="pauseButton"[^>]*aria-pressed="false"/);
+assert.doesNotMatch(index, /id="pauseButton"/);
+assert.match(index, /id="refreshButton"[^>]*aria-label="Atualizar agora"/);
 for (const view of ['overview','traffic','request','routes','sources','health','diagnostics','architecture','benchmark','settings']) {
   assert.match(index, new RegExp(`id="view-${view}"[^>]*tabindex="-1"`), `página ${view} sem foco programático`);
 }
@@ -42,7 +43,7 @@ assert.match(worker, /url\.pathname\.startsWith\('\/api\/'\)/);
 assert.match(worker, /caches\.match\('\/server\.html'\)/);
 assert.equal(manifest.start_url, '/monitor');
 assert.equal(manifest.id, '/monitor');
-assert.equal(manifest.version, '21.12.395');
+assert.equal(manifest.version, '21.12.396');
 assert.equal(manifest.monitor_version, 'v367');
 
 console.log('proxy-monitor-visual-audit-v366 ok');

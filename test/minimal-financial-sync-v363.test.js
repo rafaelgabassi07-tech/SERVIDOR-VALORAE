@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import syncHandler from '../routes/sync.js';
+import { readMinimalFinancialSql } from './helpers/minimal-financial-sql.js';
 
 class MockRes {
   constructor() { this.headers = {}; this.statusCode = 200; this.body = ''; this.finished = false; }
@@ -122,7 +123,7 @@ try {
   assert.equal(snapshot.body.featureDisabled, true);
   assert.equal(snapshotCalls.length, 1, 'snapshot legado deve apenas validar a sessão e não acessar tabelas/RPCs do banco');
 
-  const sql = fs.readFileSync(new URL('../supabase/013_valorae_minimal_financial_sync_v2.sql', import.meta.url), 'utf8');
+  const sql = readMinimalFinancialSql();
   const createdTables = [...sql.matchAll(/create table if not exists public\.([a-z0-9_]+)/gi)].map(match => match[1]);
   assert.deepEqual(createdTables, ['valorae_financial_transactions', 'valorae_financial_dividends']);
   assert.match(sql, /user_id uuid not null references auth\.users\(id\)/i);

@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { readMinimalFinancialSql } from './helpers/minimal-financial-sql.js';
 const route=fs.readFileSync(new URL('../routes/sync.js',import.meta.url),'utf8');
 const shared=fs.readFileSync(new URL('../lib/state/shared-state-foundation.js',import.meta.url),'utf8');
 const monitor=fs.readFileSync(new URL('../lib/observability/monitor-persistence.js',import.meta.url),'utf8');
-const sql=fs.readFileSync(new URL('../supabase/013_valorae_minimal_financial_sync_v2.sql',import.meta.url),'utf8');
+const sql = readMinimalFinancialSql();
 assert.match(route,/snapshotsEnabled:\s*false/);
 assert.match(route,/backupsEnabled:\s*false/);
 assert.match(route,/monitorPersistenceEnabled:\s*false/);

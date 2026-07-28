@@ -18,12 +18,12 @@ const server = read('public/server.html');
 const css = read('public/monitor-valorae.css');
 const runtime = read('public/monitor-valorae.js');
 
-assert.equal(pkg.valorae.publicVersion, '21.12.395');
-assert.equal(pkg.valorae.releasePatch, '21.12.395-minimal-financial-sync-v363');
-assert.equal(pkg.valorae.checkpoint, 'minimal-financial-sync-v363');
+assert.equal(pkg.valorae.publicVersion, '21.12.396');
+assert.equal(pkg.valorae.releasePatch, '21.12.396-asset-modal-completeness-v364');
+assert.equal(pkg.valorae.checkpoint, 'asset-modal-completeness-v364');
 assert.equal(metadata.monitorObservabilityVersion, '2026.07.26-v367');
 assert.equal(metadata.monitorPersistenceMode, 'memory-only');
-assert.equal(manifest.version, '21.12.395');
+assert.equal(manifest.version, '21.12.396');
 assert.equal(manifest.monitor_version, 'v367');
 assert.equal(manifest.start_url, '/monitor');
 assert.equal(contract.contractVersionUnchanged, true);
@@ -93,7 +93,7 @@ if (apkMetadataText || apkProtocol) {
   const apkMetadata = JSON.parse(apkMetadataText || '{}');
   assert.match(apkProtocol || '', /Version = \"2026\.07\.10\.10\"/);
   assert.ok(Number.isInteger(apkMetadata.versionCode) && apkMetadata.versionCode > 0);
-  assert.equal(apkMetadata.proxyPatch, '21.12.395-minimal-financial-sync-v363');
+  assert.equal(apkMetadata.proxyPatch, '21.12.396-asset-modal-completeness-v364');
 
 }
 

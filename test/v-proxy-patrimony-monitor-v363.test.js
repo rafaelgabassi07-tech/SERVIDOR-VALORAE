@@ -20,11 +20,11 @@ assert.equal(manifest.name, 'V-Proxy');
 assert.equal(manifest.start_url, '/monitor');
 assert.match(logo, /<title id="title">V-Proxy<\/title>/);
 assert.match(persistence, /const enabled = false/);
-assert.match(metrics, /pollingHintMs:\s*30000/);
+assert.match(metrics, /realtimeTransport: 'manual-http-request'/);
+assert.match(metrics, /pollingHintMs:\s*null/);
 assert.match(metrics, /mode: 'memory-observability'/);
 assert.match(metrics, /persistent: false/);
-assert.match(monitorUi, /storage\.get\(STORAGE\.poll, '30000'\)/);
-assert.match(monitorUi, /bounded\(storage\.get\(STORAGE\.poll, '30000'\), 30000, 15000, 120000\)/);
+assert.doesNotMatch(monitorUi, /STORAGE\.poll|pollMs|function schedule\(/);
 
 const checklistUi = readApk('app/src/main/java/com/example/ui/AssetModalChecklistUi.kt');
 if (checklistUi) {
@@ -42,7 +42,7 @@ const patrimony = readApk('app/src/main/java/com/example/ui/PatrimonyTotalModalC
 const dashboard = readApk('app/src/main/java/com/example/ui/PortfolioDashboardModalUi.kt');
 const cachePolicy = readApk('app/src/main/java/com/example/data/cache/ValoraeCachePolicy.kt');
 if (patrimony && dashboard && cachePolicy) {
-  assert.match(patrimony, /mutableStateOf\("Linha"\)/);
+  assert.match(dashboard, /mutableStateOf\("Linha"\)/);
   assert.match(patrimony, /"Barras" to Icons\.Rounded\.BarChart/);
   assert.doesNotMatch(patrimony, /Alocação por classe/);
   assert.match(dashboard, /returnsContract\s*=\s*modalReturnsContract/);

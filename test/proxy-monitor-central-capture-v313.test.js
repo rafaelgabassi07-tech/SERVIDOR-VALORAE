@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { dispatchRoute } from '../routes/_router.js';
+process.env.VALORAE_METRICS_ENABLED = '1';
+const { dispatchRoute } = await import('../routes/_router.js');
 import {
   attachProxyMetricsInterceptor,
   getServerMetricsSnapshot,
@@ -63,8 +64,8 @@ const streamed = snapshot.proxyOutputMonitor.outputFeed.find(event => event.rout
 assert.ok(streamed, 'resposta streaming não apareceu no feed');
 assert.equal(streamed.interceptor, 'res.write+end');
 assert.ok(streamed.bytesOut > 0);
-assert.ok(streamed.payloadRoots.includes('stream'));
-assert.match(String(streamed.payloadPreview), /\"stream\":true/);
+assert.deepEqual(streamed.payloadRoots, [], 'diagnóstico profundo deve permanecer desativado por padrão');
+assert.equal(streamed.payloadPreview, undefined, 'corpo não deve ser copiado para telemetria leve');
 
 // Entrada em processamento precisa aparecer sem expor valores de query arbitrários.
 const activeReq = {
@@ -121,7 +122,7 @@ assert.equal(optionsEvent.method, 'OPTIONS');
 assert.equal(optionsEvent.interceptor, 'res.end');
 assert.equal(snapshot.summary.optionsPreflight, 1);
 
-// Polling administrativo continua isolado para não gerar recursão no próprio painel.
+// Consulta administrativa manual continua isolada para não gerar recursão no próprio painel.
 const beforeExternal = snapshot.summary.requests;
 const internalReq = { method: 'GET', url: '/api/server/metrics', headers: {} };
 const internalRes = mockResponse();

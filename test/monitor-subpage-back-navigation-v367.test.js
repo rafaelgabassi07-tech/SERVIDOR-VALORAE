@@ -34,6 +34,6 @@ assert.doesNotMatch(index.slice(overview.start, overview.end), /class="back-link
 assert.match(css, /\.back-link\{[^}]*min-height:44px/s, 'alvo de toque do botão voltar deve ter pelo menos 44 px');
 assert.match(runtime, /tests: 'diagnostics'/);
 assert.match(runtime, /'\/inspector\.html': 'diagnostics'/);
-assert.match(worker, /ui-v367-backnav1/);
+assert.match(worker, /ui-v367-demand-only/);
 
 console.log('monitor subpage back navigation v367 OK');

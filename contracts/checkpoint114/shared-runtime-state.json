@@ -20,30 +20,80 @@
     "metrics"
   ],
   "properties": {
-    "status": { "const": "OK" },
-    "endpoint": { "const": "contract/shared-state" },
-    "version": { "const": "2026.07.15-checkpoint114-v1" },
-    "policyVersion": { "const": "supabase-shared-runtime-state-memory-fallback-v1" },
-    "implementation": { "const": "supabase-rest-memory-mirror-leases-v1" },
-    "enabled": { "type": "boolean" },
-    "mode": { "type": "string" },
-    "driver": { "enum": ["off", "memory", "memory-fallback", "supabase"] },
-    "hiddenFromUi": { "const": true },
-    "contractImpact": { "const": "none-financial-contract-preserved" },
+    "status": {
+      "const": "OK"
+    },
+    "endpoint": {
+      "const": "contract/shared-state"
+    },
+    "version": {
+      "const": "2026.07.15-checkpoint114-v1"
+    },
+    "policyVersion": {
+      "const": "memory-only-instance-state-v2"
+    },
+    "implementation": {
+      "const": "memory-only-instance-state-v2"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "driver": {
+      "enum": [
+        "off",
+        "memory"
+      ]
+    },
+    "hiddenFromUi": {
+      "const": true
+    },
+    "contractImpact": {
+      "const": "none-financial-contract-preserved"
+    },
     "storage": {
       "type": "object",
-      "required": ["remote", "localMirror", "scope", "table", "remoteConfigured", "migration"],
+      "required": [
+        "remote",
+        "localMirror",
+        "scope",
+        "table",
+        "remoteConfigured",
+        "migration"
+      ],
       "properties": {
-        "remoteConfigured": { "type": "boolean" },
-        "scope": { "type": "string", "minLength": 1 },
-        "table": { "const": "valorae_runtime_shared_state" },
-        "migration": { "const": "supabase/004_valorae_runtime_shared_state_checkpoint114.sql" }
+        "remoteConfigured": {
+          "type": "boolean"
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "table": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "migration": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
       },
       "additionalProperties": true
     },
     "sharedNamespaces": {
       "type": "object",
-      "required": ["contractContinuity", "providerHealth", "negativeFailureCache", "leases"]
+      "required": [
+        "contractContinuity",
+        "providerHealth",
+        "negativeFailureCache",
+        "leases"
+      ]
     },
     "guarantees": {
       "type": "object",
@@ -60,13 +110,21 @@
         "financialPayloadShapeUnchanged",
         "supabaseUserSyncTablesUntouched"
       ],
-      "additionalProperties": { "type": "boolean" }
+      "additionalProperties": {
+        "type": "boolean"
+      }
     },
     "rollback": {
       "type": "object",
-      "required": ["disable", "memoryOnly", "automatic"]
+      "required": [
+        "disable",
+        "memoryOnly",
+        "automatic"
+      ]
     },
-    "metrics": { "type": "object" }
+    "metrics": {
+      "type": "object"
+    }
   },
   "additionalProperties": true
 }

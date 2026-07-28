@@ -21,13 +21,13 @@ for (const id of [
 for (const fn of ['renderTraffic', 'renderRequest', 'renderRoutes', 'renderSources', 'renderHealth', 'renderDiagnostics', 'routeFromLocation', 'navigate']) {
   assert.match(runtime, new RegExp(`function ${fn}\\(`), `função ausente: ${fn}`);
 }
-assert.match(runtime, /apiUrl\('\/api\/server\/metrics'\)/);
+assert.match(runtime, /fetch\(apiUrl\('\/api\/server\/metrics\?fresh=1'\), \{ cache: 'no-store'/);
 assert.match(runtime, /event\.safeQuery/);
 assert.match(runtime, /exportEvents\('json'\)/);
 assert.match(runtime, /exportEvents\('csv'\)/);
 assert.match(runtime, /'syncAction','status','errorCode','retryable'/, 'CSV deve identificar ação e código do sync');
-assert.match(runtime, /storage\.get\(STORAGE\.poll, '30000'\)/);
-assert.match(runtime, /bounded\(storage\.get\(STORAGE\.poll, '30000'\), 30000, 15000, 120000\)/);
+assert.doesNotMatch(runtime, /STORAGE\.poll|pollMs|function schedule\(/);
+assert.doesNotMatch(runtime, /visibilitychange'.*refresh\(\)|online'.*refresh\(\)/s);
 assert.match(css, /@media\(max-width:900px\)/);
 assert.match(css, /@media\(max-width:620px\)/);
 assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);

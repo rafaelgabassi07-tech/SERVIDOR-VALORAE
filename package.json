@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy v363 com restauração integral do Histórico, monitor v367 e sincronização financeira mínima, preparado para deploy Vercel com npm lockfile único.",
+  "description": "Proxy VALORAE 21.12.396 sob demanda, alinhado ao APK v555, com notificações consolidadas e runtime Vercel enxuto.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,11 +11,12 @@
     "check:syntax": "node scripts/check-syntax.js",
     "test": "node scripts/run-tests.js",
     "audit:version": "node scripts/audit-version-consistency.js && node scripts/audit-version.js",
-    "verify": "npm run build && npm run check:syntax && npm run audit:dead-code && npm test && npm run audit:version",
+    "verify": "npm run build && npm run check:syntax && npm run audit:dead-code && npm run audit:sql && npm test && npm run audit:version",
     "test:cross-stack": "node scripts/run-cross-stack-tests.js",
     "benchmark:cold-start": "node scripts/benchmark-cold-start.js",
     "benchmark:scraping": "node --expose-gc scripts/benchmark-scraping-engines.js --quick",
-    "audit:dead-code": "node scripts/audit-runtime-reachability.js"
+    "audit:dead-code": "node scripts/audit-runtime-reachability.js",
+    "audit:sql": "node scripts/validate-minimal-sql.js"
   },
   "engines": {
     "node": "24.x"
@@ -27,28 +28,28 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.395-minimal-financial-sync-v363",
+    "releasePatch": "21.12.396-asset-modal-completeness-v364",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.395",
-    "checkpoint": "minimal-financial-sync-v363",
-    "releaseLabel": "minimal-financial-sync-v363",
-    "apkVersion": "2026.07.26.05",
+    "publicVersion": "21.12.396",
+    "checkpoint": "asset-modal-completeness-v364",
+    "releaseLabel": "asset-modal-completeness-v364",
+    "apkVersion": "2026.07.27.02",
     "monitorVersion": "v367"
   },
-  "releasePatch": "21.12.395-minimal-financial-sync-v363",
+  "releasePatch": "21.12.396-asset-modal-completeness-v364",
   "config": {
-    "releasePatch": "21.12.395-minimal-financial-sync-v363",
-    "publicVersion": "21.12.395",
-    "checkpoint": "minimal-financial-sync-v363",
-    "releaseLabel": "minimal-financial-sync-v363"
+    "releasePatch": "21.12.396-asset-modal-completeness-v364",
+    "publicVersion": "21.12.396",
+    "checkpoint": "asset-modal-completeness-v364",
+    "releaseLabel": "asset-modal-completeness-v364"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.395-minimal-financial-sync-v363",
-    "publicVersion": "21.12.395",
-    "checkpoint": "minimal-financial-sync-v363",
-    "releaseLabel": "minimal-financial-sync-v363",
-    "apkVersion": "2026.07.26.05",
+    "releasePatch": "21.12.396-asset-modal-completeness-v364",
+    "publicVersion": "21.12.396",
+    "checkpoint": "asset-modal-completeness-v364",
+    "releaseLabel": "asset-modal-completeness-v364",
+    "apkVersion": "2026.07.27.02",
     "monitorVersion": "memory-only"
   },
   "optionalDependencies": {

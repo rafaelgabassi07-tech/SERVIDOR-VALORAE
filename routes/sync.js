@@ -4,7 +4,7 @@ import { beginRoute, getInput } from '../lib/http/route.js';
 import { VALORAE_ENGINE_VERSION, VALORAE_RELEASE_PATCH } from '../lib/release/current.js';
 import { normalizeTicker } from '../lib/core/tickers.js';
 
-// Release patch: 21.12.395-minimal-financial-sync-v363
+// Release patch: 21.12.396-asset-modal-completeness-v364
 const CORE_VERSION = VALORAE_RELEASE_PATCH;
 const SYNC_CONTRACT = 'valorae-financial-sync-v2';
 const TRANSACTIONS_TABLE = 'valorae_financial_transactions';
@@ -36,7 +36,7 @@ const runtime = globalThis.__VALORAE_MINIMAL_FINANCIAL_SYNC__ || {
     transactionUploads: 0,
     dividendUploads: 0,
     deletions: 0,
-    snapshotWritesSuppressed: 0,
+    legacyWriteBlocks: 0,
   },
 };
 globalThis.__VALORAE_MINIMAL_FINANCIAL_SYNC__ = runtime;
@@ -295,7 +295,7 @@ async function callRpc(name, args) {
       error.status = 503;
       error.code = 'MINIMAL_SYNC_MIGRATION_REQUIRED';
       error.retryable = false;
-      error.message = 'Execute supabase/013_valorae_minimal_financial_sync_v2.sql antes de usar esta versão do Proxy.';
+      error.message = 'Execute, em ordem, supabase/01_transactions.sql, 02_dividends.sql e 03_legacy_block_and_verification.sql antes de usar esta versão do Proxy.';
     }
     throw error;
   }
@@ -803,7 +803,7 @@ export default async function handler(req, res) {
     } else if (['get_financial_status', 'get_sync_state'].includes(action)) {
       result = await financialStatus(user.id);
     } else if (['upsert_snapshot', 'upsert_snapshots'].includes(action)) {
-      runtime.metrics.snapshotWritesSuppressed += 1;
+      runtime.metrics.legacyWriteBlocks += 1;
       result = {
         ok: true,
         contract: SYNC_CONTRACT,

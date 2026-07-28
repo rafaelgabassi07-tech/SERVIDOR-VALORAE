@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
+import { readMinimalFinancialSql } from './helpers/minimal-financial-sql.js';
 
 const route = fs.readFileSync(new URL('../routes/sync.js', import.meta.url), 'utf8');
-const sql = fs.readFileSync(new URL('../supabase/013_valorae_minimal_financial_sync_v2.sql', import.meta.url), 'utf8');
+const sql = readMinimalFinancialSql();
 const apk = readSiblingApkFile('app/src/main/java/com/example/data/sync/ValoraeSyncClient.kt');
 assert.match(route, /valorae-financial-sync-v2/);
 assert.match(route, /download_financial_data/);

@@ -28,9 +28,10 @@ capture({route:'/api/v1/recovered-partial',sourceStatus:'partial_timeout_fallbac
 snapshot=capture({route:'/api/v1/critical-partial',sourceStatus:'partial',payload:{partial:true,appResponseIntegrity:{renderSafe:false,cacheSafe:false}}});
 assert.equal(snapshot.summary.partialResponses,2);
 assert.equal(snapshot.summary.partialRecovered,1);
-assert.equal(snapshot.summary.partialCritical,1);
+assert.equal(snapshot.summary.partialCritical,0);
+assert.equal(snapshot.summary.partialDegraded,1);
 assert.equal(snapshot.proxyOutputMonitor.outputFeed.find(e=>e.route==='/api/v1/recovered-partial').partial.classification,'recovered');
-assert.equal(snapshot.proxyOutputMonitor.outputFeed.find(e=>e.route==='/api/v1/critical-partial').partial.classification,'critical');
+assert.equal(snapshot.proxyOutputMonitor.outputFeed.find(e=>e.route==='/api/v1/critical-partial').partial.classification,'degraded');
 
 resetServerMetricsForTests();
 snapshot=getServerMetricsSnapshot({
@@ -44,10 +45,10 @@ assert.equal(snapshot.summary.persistentEventsStored,0);
 assert.equal(snapshot.summary.historyPersistenceActive,false);
 assert.equal(snapshot.monitorPersistence.operational,false);
 assert.equal(snapshot.monitorAnalytics.eventCount,0, 'histórico remoto legado deve ser ignorado');
-assert.match(snapshot.serverless.note,/nenhuma telemetria é lida ou gravada no Supabase/i);
+assert.match(snapshot.serverless.note,/não há polling, cron ou persistência de telemetria no Supabase/i);
 
 const frontend=fs.readFileSync(new URL('../public/monitor-valorae.js',import.meta.url),'utf8');
-assert.match(frontend,/Monitor somente em memória/);
+assert.match(frontend,/Consulta estritamente sob demanda/);
 assert.match(frontend,/nenhuma telemetria gravada no Supabase/);
 assert.match(frontend,/Heap \/ limite V8/);
 

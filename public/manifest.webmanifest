@@ -9,7 +9,7 @@
   "description": "Central operacional Material 3 do V-Proxy com os mesmos modos e paletas do APK Valorae.",
   "scope": "/",
   "orientation": "any",
-  "version": "21.12.395",
+  "version": "21.12.396",
   "icons": [
     {
       "src": "/assets/valorae-icon-192.png",

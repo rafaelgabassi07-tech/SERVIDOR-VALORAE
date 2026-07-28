@@ -5,7 +5,7 @@
   const MONITOR_VERSION = 'v367';
   const BENCHMARK_URL = '/assets/valorae-monitor-benchmarks.json';
   const STORAGE = {
-    theme: 'valorae:monitor:theme', themeMode: 'valorae:monitor:themeMode', colorTheme: 'valorae:monitor:colorTheme', density: 'valorae:monitor:density', reducedMotion: 'valorae:monitor:reducedMotion', apiBase: 'valorae:monitor:apiBase', poll: 'valorae:monitor:pollMs',
+    theme: 'valorae:monitor:theme', themeMode: 'valorae:monitor:themeMode', colorTheme: 'valorae:monitor:colorTheme', density: 'valorae:monitor:density', reducedMotion: 'valorae:monitor:reducedMotion', apiBase: 'valorae:monitor:apiBase',
     feedLimit: 'valorae:monitor:feedLimit', view: 'valorae:monitor:view',
   };
 
@@ -46,10 +46,10 @@
     remove(key) { try { localStorage.removeItem(key); } catch {} },
   };
   const state = {
-    data: null, events: [], filtered: [], selectedId: null, view: 'overview', paused: false, loading: false,
-    timer: null, controller: null, pollMs: bounded(storage.get(STORAGE.poll, '30000'), 30000, 15000, 120000),
+    data: null, events: [], filtered: [], selectedId: null, view: 'overview', loading: false,
+    controller: null,
     feedLimit: bounded(storage.get(STORAGE.feedLimit, '60'), 60, 30, 100), lastSuccessAt: 0, error: '',
-    benchmark: null, benchmarkError: '', benchmarkScenario: 'complex', menuOpen: false,
+    benchmark: null, benchmarkError: '', benchmarkLoading: false, benchmarkScenario: 'complex', menuOpen: false,
   };
   let toastTimer;
 
@@ -77,32 +77,28 @@
 
   function toast(message) { const node = $('toast'); if (!node) return; node.textContent = message; node.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => node.classList.remove('show'), 2600); }
   function setConnection(kind, label) { const node = $('connectionState'); if (!node) return; node.className = `connection ${kind || ''}`; const text = node.querySelector('span'); if (text) text.textContent = label; }
-  function schedule() { clearTimeout(state.timer); if (!state.paused) state.timer = setTimeout(() => refresh(), state.pollMs); }
-
-  async function refresh({ manual = false } = {}) {
-    if (state.loading) { if (manual) toast('Uma atualização já está em andamento.'); return; }
-    if (state.paused && !manual) return;
-    if (document.hidden && !manual) { schedule(); return; }
+  async function refresh() {
+    if (state.loading) { toast('Uma atualização já está em andamento.'); return; }
     state.loading = true;
     $('refreshButton')?.classList.add('is-loading'); $('refreshButton')?.setAttribute('aria-busy', 'true'); $('monitorMain')?.setAttribute('aria-busy', 'true');
     state.controller?.abort(); const controller = new AbortController(); state.controller = controller; let timedOut = false;
     const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, 12000);
     if (!state.data) setConnection('', 'Conectando');
     try {
-      const response = await fetch(apiUrl('/api/server/metrics'), { cache: 'no-store', signal: controller.signal, headers: { Accept: 'application/json', 'X-Valorae-App': 'VALORAE Proxy Monitor', 'X-Valorae-Channel': 'dashboard', 'X-Valorae-Telemetry': 'dashboard' } });
+      const response = await fetch(apiUrl('/api/server/metrics?fresh=1'), { cache: 'no-store', signal: controller.signal, headers: { Accept: 'application/json', 'X-Valorae-App': 'VALORAE Proxy Monitor', 'X-Valorae-Channel': 'dashboard', 'X-Valorae-Telemetry': 'dashboard' } });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json(); if (!data || data.ok === false) throw new Error(data?.error || 'Snapshot inválido');
+      const data = await response.json(); if (!data || data.ok === false) throw new Error(data?.error || 'Captura inválida');
       state.data = data;
       state.events = Array.isArray(data.proxyOutputMonitor?.outputFeed) ? data.proxyOutputMonitor.outputFeed : Array.isArray(data.recentEvents) ? data.recentEvents : [];
       state.lastSuccessAt = Date.now(); state.error = '';
       if (!state.selectedId && new URL(location.href).searchParams.get('event')) state.selectedId = new URL(location.href).searchParams.get('event');
       if (state.selectedId && !state.events.some(event => eventId(event) === state.selectedId) && state.view !== 'request') state.selectedId = null;
-      setConnection(state.paused ? 'stale' : 'online', state.paused ? 'Pausado' : 'Atualizado'); renderAll();
+      setConnection('online', 'Atualizado manualmente'); renderAll();
     } catch (error) {
-      if (timedOut) state.error = 'Tempo limite de 12 s'; else if (error?.name !== 'AbortError' || manual) state.error = error?.message || 'Falha de conexão';
+      if (timedOut) state.error = 'Tempo limite de 12 s'; else if (error?.name !== 'AbortError') state.error = error?.message || 'Falha de conexão';
       setConnection(state.data ? 'stale' : 'offline', state.data ? 'Dados anteriores' : 'Sem conexão'); renderHeader();
     } finally {
-      clearTimeout(timeout); state.loading = false; $('refreshButton')?.classList.remove('is-loading'); $('refreshButton')?.setAttribute('aria-busy', 'false'); $('monitorMain')?.setAttribute('aria-busy', 'false'); if (state.controller === controller) state.controller = null; schedule();
+      clearTimeout(timeout); state.loading = false; $('refreshButton')?.classList.remove('is-loading'); $('refreshButton')?.setAttribute('aria-busy', 'false'); $('monitorMain')?.setAttribute('aria-busy', 'false'); if (state.controller === controller) state.controller = null;
     }
   }
 
@@ -228,7 +224,7 @@
 
   function renderDiagnostics() {
     const s=summary(); const p=state.data?.monitorPersistence||{}; const serverless=state.data?.serverless||{}; $('captureFacts').innerHTML=facts([['Interceptor central',s.centralInterceptorInstalled?'instalado':'ausente',s.centralInterceptorInstalled?'success':'danger'],['Completude',`${num(s.captureCompletenessPercent??100)}%`,Number(s.captureGap||0)>0?'warning':'success'],['Lacunas',num(s.captureGap||0)],['Leituras internas isoladas',num(s.internalTelemetryRequests||0)],['Eventos disponíveis',num(s.eventsAvailable??state.events.length)],['Último tráfego externo',s.lastExternalEventAt?dateTime(s.lastExternalEventAt):'não observado']]);
-    $('persistenceFacts').innerHTML=facts([['Modo','memory','success'],['Persistência remota','desativada','success'],['Supabase do monitor','não utilizado','success'],['Retenção','por instância serverless'],['Polling sugerido',`${num((serverless.pollingHintMs||30000)/1000)} s`],['Fila de persistência',num(p.queueDepth||0)]]);
+    $('persistenceFacts').innerHTML=facts([['Modo','memory','success'],['Persistência remota','desativada','success'],['Supabase do monitor','não utilizado','success'],['Retenção','por instância serverless'],['Atualização automática','desativada','success'],['Fila de persistência',num(p.queueDepth||0)]]);
     const raw=state.data?JSON.stringify(state.data,null,2):'Aguardando dados.'; $('rawSnapshot').textContent=raw; $('snapshotSize').textContent=state.data?bytes(new Blob([raw]).size):'—';
   }
 
@@ -239,7 +235,7 @@
     const contracts=bp.contracts||[]; $('architectureContracts').innerHTML=contracts.length?contracts.map(item=>`<div class="contract-item"><strong>${esc(item.name||'Contrato')}</strong><code>${esc(item.route||'—')}</code><span>${esc(`${item.input||'entrada'} → ${item.output||'saída'}`)}</span></div>`).join(''):empty('Contratos não disponíveis no snapshot.');
   }
 
-  async function loadBenchmark() { try { const response=await fetch(BENCHMARK_URL,{cache:'no-store'}); if(!response.ok)throw new Error(`HTTP ${response.status}`); state.benchmark=await response.json(); state.benchmarkError=''; } catch(error){state.benchmarkError=error?.message||'falha';} renderBenchmark(); }
+  async function loadBenchmark() { if(state.benchmarkLoading)return; state.benchmarkLoading=true; try { const response=await fetch(BENCHMARK_URL,{cache:'force-cache'}); if(!response.ok)throw new Error(`HTTP ${response.status}`); state.benchmark=await response.json(); state.benchmarkError=''; } catch(error){state.benchmarkError=error?.message||'falha';} finally{state.benchmarkLoading=false;} renderBenchmark(); }
   function benchmarkRows() { const run=state.benchmark?.currentRun||{}; if(state.benchmarkScenario==='browser')return Array.isArray(run.browser?.results)?run.browser.results:[]; return Array.isArray(run[state.benchmarkScenario])?run[state.benchmarkScenario]:[]; }
   function renderBenchmark() {
     const data=state.benchmark; if(!data){$('benchmarkStatus').textContent=state.benchmarkError?`falha: ${state.benchmarkError}`:'carregando medições';$('benchmarkLeaderboard').innerHTML=empty('Benchmark ainda não disponível.');return;}
@@ -251,14 +247,14 @@
   }
 
   function renderSettings() {
-    $('pollInterval').value=String(state.pollMs); $('feedLimit').value=String(state.feedLimit); $('apiBaseInput').value=apiBase();
+    $('feedLimit').value=String(state.feedLimit); $('apiBaseInput').value=apiBase();
     const mode=themeMode(); const palette=colorTheme(); const density=densityMode(); const motion=reducedMotionMode();
     $$('[data-theme-mode]').forEach(button=>{const active=button.dataset.themeMode===mode;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
     $$('button[data-color-theme]').forEach(button=>{const active=button.dataset.colorTheme===palette;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
     $$('[data-density]').forEach(button=>{const active=button.dataset.density===density;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
     $$('[data-motion]').forEach(button=>{const active=button.dataset.motion===motion;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
     const theme=COLOR_THEMES[palette]||COLOR_THEMES.gold; $('themePreviewTitle').textContent=`${theme.label} · ${THEME_MODES[mode]||THEME_MODES.system}`; $('themePreviewDescription').textContent=`Material 3 ${density==='compact'?'compacto':'confortável'} · movimento ${motion==='reduced'?'reduzido':'padrão'} · preferência salva somente neste navegador.`;
-    const node=$('settingsState'); node.className='status-banner neutral'; node.innerHTML=`<span class="status-dot"></span><div><strong>Monitor somente em memória</strong><small>${esc(`${apiBase()||location.origin} · ${state.paused?'polling pausado':`atualização a cada ${state.pollMs/1000}s`} · nenhuma telemetria gravada no Supabase`)}</small></div>`;
+    const node=$('settingsState'); node.className='status-banner neutral'; node.innerHTML=`<span class="status-dot"></span><div><strong>Consulta estritamente sob demanda</strong><small>${esc(`${apiBase()||location.origin} · nenhuma atualização automática · nenhuma telemetria gravada no Supabase`)}</small></div>`;
   }
 
   function themeMode(){const current=storage.get(STORAGE.themeMode,'')||storage.get(STORAGE.theme,'system');return Object.hasOwn(THEME_MODES,current)?current:'system';}
@@ -282,19 +278,10 @@
   function routeFromLocation(){const hash=location.hash.replace(/^#/,'');if(hash)return HASH_ALIASES[hash]||hash;const path=location.pathname.replace(/\/+$/,'')||'/';if(PATH_ALIASES[path])return PATH_ALIASES[path];if(path==='/monitor'||path==='/'||path==='/server'||path==='/server.html')return'overview';const item=Object.entries(ROUTES).find(([,route])=>route===path); if (item) return item[0]; return path.startsWith('/monitor/requests') ? 'request' : 'overview';}
   function urlFor(view, options={}){const base=ROUTES[view]||ROUTES.overview;if(view==='request'&&options.event)return`${base}?event=${encodeURIComponent(options.event)}`;return base;}
   function navigate(view,{replace=false,event=null,focus=true}={}){if(!ROUTES[view])view='overview';if(event)state.selectedId=event;state.view=view;storage.set(STORAGE.view,view);const target=urlFor(view,{event:state.selectedId});if(location.pathname+location.search!==target)history[replace?'replaceState':'pushState']({view},'',target);renderView(focus);}
-  function renderView(focus=true){$$('[data-view-panel]').forEach(panel=>{const active=panel.dataset.viewPanel===state.view;panel.hidden=!active;panel.classList.toggle('active',active);});$$('[data-nav]').forEach(link=>{const active=link.dataset.nav===state.view||(state.view==='request'&&link.dataset.nav==='traffic');link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});renderHeader();if(state.view==='request')renderRequest();if(state.view==='health')requestAnimationFrame(drawChart);closeMenu();if(focus)$(`[data-view-panel="${state.view}"]`)?.focus({preventScroll:true});}
+  function renderView(focus=true){$$('[data-view-panel]').forEach(panel=>{const active=panel.dataset.viewPanel===state.view;panel.hidden=!active;panel.classList.toggle('active',active);});$$('[data-nav]').forEach(link=>{const active=link.dataset.nav===state.view||(state.view==='request'&&link.dataset.nav==='traffic');link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});renderHeader();if(state.view==='request')renderRequest();if(state.view==='health')requestAnimationFrame(drawChart);if(state.view==='benchmark'&&!state.benchmark&&!state.benchmarkLoading)loadBenchmark();closeMenu();if(focus)$(`[data-view-panel="${state.view}"]`)?.focus({preventScroll:true});}
 
   function openMenu(){state.menuOpen=true;$('appSidebar')?.classList.add('open');$('menuBackdrop')?.classList.add('open');$('menuButton')?.setAttribute('aria-expanded','true');}
   function closeMenu(){state.menuOpen=false;$('appSidebar')?.classList.remove('open');$('menuBackdrop')?.classList.remove('open');$('menuButton')?.setAttribute('aria-expanded','false');}
-  function setPause(){
-    const button=$('pauseButton');
-    if(!button) return;
-    button.classList.toggle('is-paused',state.paused);
-    button.setAttribute('aria-pressed',String(state.paused));
-    const span = button.querySelector('span');
-    if (span) span.textContent=state.paused?'Retomar':'Pausar';
-    button.setAttribute('aria-label',state.paused?'Retomar atualização automática':'Pausar atualização automática');
-  }
   function download(name,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download=name;document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   function csvValue(value){let text=String(value??'');if(/^[\s]*[=+\-@]/.test(text))text=`'${text}`;return`"${text.replaceAll('"','""')}"`;}
   function exportEvents(format){const events=state.filtered.length?state.filtered:state.events.slice(0,state.feedLimit);const stamp=new Date().toISOString().replace(/[:.]/g,'-');if(format==='json')download(`valorae-proxy-events-${stamp}.json`,JSON.stringify({releasePatch:state.data?.releasePatch||RELEASE_PATCH,generatedAt:new Date().toISOString(),events},null,2),'application/json');else{const columns=['at','method','route','syncAction','status','errorCode','retryable','latencyMs','bytesIn','bytesOut','appName','appChannel','ticker','view','cacheStatus','sourceStatus','requestId'];download(`valorae-proxy-events-${stamp}.csv`,[columns.join(','),...events.map(event=>columns.map(column=>csvValue(event[column])).join(','))].join('\n'),'text/csv;charset=utf-8');}}
@@ -306,22 +293,20 @@
       const eventButton=event.target.closest('[data-event-id]');if(eventButton){navigate('request',{event:eventButton.dataset.eventId});return;}
       const eventLink=event.target.closest('[data-event-link]');if(eventLink){event.preventDefault();navigate('request',{event:eventLink.dataset.eventLink});}
     });
-    on('menuButton','click',openMenu);on('menuCloseButton','click',closeMenu);on('menuBackdrop','click',closeMenu);on('refreshButton','click',()=>refresh({manual:true}));
-    on('pauseButton','click',()=>{state.paused=!state.paused;setPause();if(state.paused){clearTimeout(state.timer);state.controller?.abort();setConnection('stale','Pausado');}else refresh({manual:true});renderSettings();});
+    on('menuButton','click',openMenu);on('menuCloseButton','click',closeMenu);on('menuBackdrop','click',closeMenu);on('refreshButton','click',refresh);
     on('themeToggle','click',quickToggleTheme);$$('[data-theme-mode]').forEach(button=>on(button,'click',()=>applyAppearance({mode:button.dataset.themeMode})));$$('button[data-color-theme]').forEach(button=>on(button,'click',()=>applyAppearance({palette:button.dataset.colorTheme})));$$('[data-density]').forEach(button=>on(button,'click',()=>applyAppearance({density:button.dataset.density})));$$('[data-motion]').forEach(button=>on(button,'click',()=>applyAppearance({motion:button.dataset.motion})));
     for(const id of['feedSearch','statusFilter','methodFilter','appFilter']) on(id, id==='feedSearch'?'input':'change', renderTraffic);
     on('clearFilters','click',()=>{if($('feedSearch'))$('feedSearch').value='';if($('statusFilter'))$('statusFilter').value='all';if($('methodFilter'))$('methodFilter').value='all';if($('appFilter'))$('appFilter').value='all';renderTraffic();});
     on('routeSearch','input',renderRoutes);
-    on('copyEventButton','click',()=>{const event=selectedEvent();if(event)copyText(JSON.stringify(event,null,2),'Evento copiado.');});on('copySnapshotButton','click',()=>state.data&&copyText(JSON.stringify(state.data,null,2),'Snapshot copiado.'));on('exportJsonButton','click',()=>exportEvents('json'));on('exportCsvButton','click',()=>exportEvents('csv'));
+    on('copyEventButton','click',()=>{const event=selectedEvent();if(event)copyText(JSON.stringify(event,null,2),'Evento copiado.');});on('copySnapshotButton','click',()=>state.data&&copyText(JSON.stringify(state.data,null,2),'Captura copiada.'));on('exportJsonButton','click',()=>exportEvents('json'));on('exportCsvButton','click',()=>exportEvents('csv'));
     $$('#benchmarkScenarioTabs [data-benchmark-scenario]').forEach(button=>on(button,'click',()=>{state.benchmarkScenario=button.dataset.benchmarkScenario;renderBenchmark();}));on('copyBenchmarkCommand','click',()=>copyText(state.benchmark?.command||'npm run benchmark:scraping','Comando copiado.'));
-    on('pollInterval','change',()=>{const val = $('pollInterval')?.value; if(val != null){state.pollMs=bounded(val,30000,15000,120000);storage.set(STORAGE.poll,String(state.pollMs));schedule();renderSettings();}});
     on('feedLimit','change',()=>{const val = $('feedLimit')?.value; if(val != null){state.feedLimit=bounded(val,60,30,100);storage.set(STORAGE.feedLimit,String(state.feedLimit));renderTraffic();renderSettings();}});
-    on('saveApiBase','click',()=>{try{const val = $('apiBaseInput')?.value || ''; const raw=normalizeApiBase(val);storage.set(STORAGE.apiBase,raw);state.data=null;state.events=[];toast('Origem atualizada.');refresh({manual:true});}catch(error){toast(error?.message||'Origem inválida.');}});
-    on('clearApiBase','click',()=>{storage.remove(STORAGE.apiBase);if($('apiBaseInput'))$('apiBaseInput').value='';state.data=null;state.events=[];toast('Monitorando a origem atual.');refresh({manual:true});});
-    on('resetPreferences','click',()=>{Object.values(STORAGE).forEach(key=>storage.remove(key));state.pollMs=30000;state.feedLimit=60;state.paused=false;setPause();applyAppearance({mode:'system',palette:'gold',density:'comfortable',motion:'standard'});navigate('overview');renderSettings();toast('Preferências restauradas.');refresh({manual:true});});
-    window.addEventListener('popstate',()=>{state.selectedId=new URL(location.href).searchParams.get('event');state.view=routeFromLocation();renderView(false);});window.addEventListener('keydown',event=>{if(event.key==='Escape'&&state.menuOpen)closeMenu();});window.addEventListener('resize',()=>{if(state.view==='health')requestAnimationFrame(drawChart);});window.addEventListener('online',()=>refresh({manual:true}));window.addEventListener('offline',()=>setConnection('offline','Sem rede'));document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!state.paused)refresh({manual:true});});matchMediaDark()?.addEventListener?.('change',()=>{if(themeMode()==='system')applyAppearance({mode:'system'});});
+    on('saveApiBase','click',()=>{try{const val = $('apiBaseInput')?.value || ''; const raw=normalizeApiBase(val);storage.set(STORAGE.apiBase,raw);state.data=null;state.events=[];toast('Origem atualizada. Clique em Atualizar para consultar.');renderAll();}catch(error){toast(error?.message||'Origem inválida.');}});
+    on('clearApiBase','click',()=>{storage.remove(STORAGE.apiBase);if($('apiBaseInput'))$('apiBaseInput').value='';state.data=null;state.events=[];toast('Origem atual restaurada. Clique em Atualizar para consultar.');renderAll();});
+    on('resetPreferences','click',()=>{Object.values(STORAGE).forEach(key=>storage.remove(key));state.feedLimit=60;applyAppearance({mode:'system',palette:'gold',density:'comfortable',motion:'standard'});navigate('overview');renderSettings();toast('Preferências restauradas. Clique em Atualizar para consultar.');});
+    window.addEventListener('popstate',()=>{state.selectedId=new URL(location.href).searchParams.get('event');state.view=routeFromLocation();renderView(false);});window.addEventListener('keydown',event=>{if(event.key==='Escape'&&state.menuOpen)closeMenu();});window.addEventListener('resize',()=>{if(state.view==='health')requestAnimationFrame(drawChart);});window.addEventListener('online',()=>setConnection('stale','Rede disponível · atualização manual'));window.addEventListener('offline',()=>setConnection('offline','Sem rede'));matchMediaDark()?.addEventListener?.('change',()=>{if(themeMode()==='system')applyAppearance({mode:'system'});});
   }
 
-  function init(){applyAppearance();bindEvents();setPause();if($('pollInterval'))$('pollInterval').value=String(state.pollMs);if($('feedLimit'))$('feedLimit').value=String(state.feedLimit);state.selectedId=new URL(location.href).searchParams.get('event');state.view=routeFromLocation();if(!ROUTES[state.view])state.view=storage.get(STORAGE.view,'overview');navigate(state.view,{replace:true,event:state.selectedId,focus:false});renderSettings();loadBenchmark();refresh({manual:true});if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('/service-worker.js').catch(()=>{});}
+  function init(){applyAppearance();bindEvents();if($('feedLimit'))$('feedLimit').value=String(state.feedLimit);state.selectedId=new URL(location.href).searchParams.get('event');state.view=routeFromLocation();if(!ROUTES[state.view])state.view=storage.get(STORAGE.view,'overview');navigate(state.view,{replace:true,event:state.selectedId,focus:false});renderSettings();setConnection('stale','Sob demanda · clique em Atualizar');renderAll();if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('/service-worker.js').catch(()=>{});}
   init();
 })();

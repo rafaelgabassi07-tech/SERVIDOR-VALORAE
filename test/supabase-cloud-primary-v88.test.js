@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { readMinimalFinancialSql } from './helpers/minimal-financial-sql.js';
 const route=fs.readFileSync(new URL('../routes/sync.js',import.meta.url),'utf8');
-const sql=fs.readFileSync(new URL('../supabase/013_valorae_minimal_financial_sync_v2.sql',import.meta.url),'utf8');
+const sql = readMinimalFinancialSql();
 assert.match(route,/auth\/v1\/user/);
 assert.match(route,/valorae_financial_download_v2/);
 assert.match(route,/valorae_financial_upload_transactions_v2/);

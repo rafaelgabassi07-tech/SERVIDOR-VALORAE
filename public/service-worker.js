@@ -1,4 +1,4 @@
-const CACHE = 'valorae-proxy-monitor-v21-12-395-ui-v367-backnav1';
+const CACHE = 'valorae-proxy-monitor-v21-12-398-ui-v367-demand-only';
 const SHELL = [
   '/server.html',
   '/monitor',
@@ -33,24 +33,22 @@ self.addEventListener('fetch', event => {
 
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE).then(cache => cache.put('/server.html', copy));
-          return response;
-        })
-        .catch(() => caches.match('/server.html')),
+      caches.match('/server.html').then(async cached => {
+        if (cached) return cached;
+        const response = await fetch(request);
+        if (response.ok) caches.open(CACHE).then(cache => cache.put('/server.html', response.clone()));
+        return response;
+      }),
     );
     return;
   }
 
   event.respondWith(
-    caches.match(request).then(cached => {
-      const network = fetch(request).then(response => {
-        if (response.ok) caches.open(CACHE).then(cache => cache.put(request, response.clone()));
-        return response;
-      });
-      return cached || network;
+    caches.match(request).then(async cached => {
+      if (cached) return cached;
+      const response = await fetch(request);
+      if (response.ok) caches.open(CACHE).then(cache => cache.put(request, response.clone()));
+      return response;
     }),
   );
 });

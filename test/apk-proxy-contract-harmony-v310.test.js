@@ -12,6 +12,7 @@ const requiredRoutes = new Map([
   ['/source/status', 'GET'],
   ['/mobile/bootstrap', 'POST'],
   ['/mobile/portfolio-sync', 'POST'],
+  ['/mobile/alerts', 'POST'],
   ['/assets', 'GET'],
   ['/asset/quote', 'GET'],
   ['/quotes', 'GET'],
@@ -147,6 +148,10 @@ const qualityKt = readSiblingApkFile('app/src/main/java/com/example/domain/model
 const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
 const runtimeKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyRuntime.kt');
 const mobileProtocolKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
+const alertsServiceKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyBackgroundAlertsService.kt');
+const notificationUiKt = readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioNotificationCenterScreenUi.kt');
+const notificationWorkerKt = readSiblingApkFile('app/src/main/java/com/example/data/notifications/ValoraeNotificationWorker.kt');
+const dailyCloseWorkerKt = readSiblingApkFile('app/src/main/java/com/example/data/notifications/ValoraeDailyCloseWorker.kt');
 if (endpointCatalog && httpKt && deliveryKt && parserKt && qualityKt && loaderKt && runtimeKt && mobileProtocolKt) {
   const syncGetMarkers = endpointCatalog.match(/ProxyEndpointStatus\("\/api\/sync"[^\n]+method = "GET"\)/g) || [];
   assert.equal(syncGetMarkers.length, 2, 'diagnóstico /api/sync deve usar GET em ambas as ações de leitura');
@@ -164,6 +169,15 @@ if (endpointCatalog && httpKt && deliveryKt && parserKt && qualityKt && loaderKt
   assert.ok(loaderKt.includes('shouldRetryFiiModalContract("full")'));
   assert.ok(runtimeKt.includes('SingleAssetModalFastCacheTtlMs = ValoraeCachePolicy.AssetModalFastTtlMs'));
   assert.ok(runtimeKt.includes('SingleAssetModalFullCacheTtlMs = ValoraeCachePolicy.AssetModalFullTtlMs'));
+}
+
+if (alertsServiceKt && notificationUiKt && notificationWorkerKt && dailyCloseWorkerKt) {
+  assert.ok(alertsServiceKt.includes('executeJsonPost("/api/v1/mobile/alerts", body)'), 'APK deve usar o bundle de alertas sob demanda');
+  assert.equal((notificationUiKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 1, 'Central de Notificações deve usar uma invocação consolidada');
+  assert.ok(!notificationUiKt.includes('remoteRepository.getDividendAgenda('), 'Central de Notificações não deve duplicar chamada de dividendos');
+  assert.ok(!notificationUiKt.includes('remoteRepository.getNews('), 'Central de Notificações não deve duplicar chamada de notícias');
+  assert.equal((notificationWorkerKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 1, 'worker periódico deve usar uma invocação consolidada');
+  assert.equal((dailyCloseWorkerKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 1, 'fechamento diário deve usar uma invocação consolidada');
 }
 
 console.log('apk-proxy-contract-harmony-v310 ok');
