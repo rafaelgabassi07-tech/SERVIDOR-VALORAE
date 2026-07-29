@@ -25,10 +25,11 @@ const result = __testBuildDividendResult({
 });
 
 assert.equal(result.status, 'OK');
-assert.equal(result.portfolioUpcoming.length, 1, 'Evento sem data-com real deve continuar visível como A confirmar');
-assert.equal(result.portfolioUpcoming[0].eligibilityKnown, false);
-assert.equal(result.portfolioUpcoming[0].eligible, false);
-assert.equal(result.portfolioUpcoming[0].comDate, undefined);
+assert.equal(result.portfolioUpcoming.length, 0, 'Evento sem data-com real não deve entrar na agenda pessoal');
+assert.equal(result.officialUpcomingEvents.length, 1, 'Evento oficial permanece disponível para auditoria');
+assert.equal(result.officialUpcomingEvents[0].eligibilityKnown, false);
+assert.equal(result.officialUpcomingEvents[0].eligible, false);
+assert.equal(result.officialUpcomingEvents[0].comDate, undefined);
 
 const knownIneligible = __testBuildDividendResult({
   payload: {
