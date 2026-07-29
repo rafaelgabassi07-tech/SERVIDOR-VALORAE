@@ -43,11 +43,14 @@ if ([details, patrimony, returnsUi, confetti, chartUi, models, checklistReadines
   assert.match(chartUi, /stockFinancialAxisTickIndices/);
   assert.match(chartUi, /val monthNames = listOf\("jan", "fev", "mar"/);
 
-  assert.match(patrimony, /text\s*=\s*"Patrimônio Total"[\s\S]*textAlign\s*=\s*TextAlign\.Center/);
+  assert.match(patrimony, /text\s*=\s*"Patrimônio total"/);
+  assert.match(patrimony, /Icons\.Rounded\.AccountBalanceWallet/);
   const filterBlock = between(patrimony, 'fun WealthEvolutionFilterRow', 'private fun WealthPeriodSelector');
-  assert.match(filterBlock, /Row\([\s\S]*Todos os ativos[\s\S]*WealthDisplayModeToggle[\s\S]*WealthChartStyleToggle/);
+  assert.match(filterBlock, /text\s*=\s*"Período"[\s\S]*Todos os ativos[\s\S]*WealthDisplayModeToggle[\s\S]*text\s*=\s*"Visualização"[\s\S]*WealthChartStyleToggle/);
+  assert.match(filterBlock, /Modifier\.width\(96\.dp\)[\s\S]*Modifier\.width\(176\.dp\)/);
   const cardBlock = between(patrimony, 'fun WealthEvolutionCard', 'private fun WealthChartStyleToggle');
-  assert.doesNotMatch(cardBlock, /Surface\s*\(/, 'O gráfico consolidado não deve voltar a receber um container Surface externo');
+  assert.match(cardBlock, /Surface\s*\(/, 'O gráfico consolidado deve usar uma superfície estável e alinhada ao APK');
+  assert.doesNotMatch(cardBlock, /animateContentSize/, 'O gráfico não deve animar todo o container durante atualizações');
   const chartBlock = between(patrimony, 'private fun WealthModernChart', 'private fun WealthChartLegend');
   assert.match(chartBlock, /padding\(horizontal\s*=\s*0\.dp/);
 
