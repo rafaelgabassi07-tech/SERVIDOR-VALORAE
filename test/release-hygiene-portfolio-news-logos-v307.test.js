@@ -8,7 +8,9 @@ const root = path.resolve(here, '..');
 const read = rel => fs.readFileSync(path.join(root, rel), 'utf8');
 
 const history = read('lib/portfolio/history.js');
-assert.match(history, /function alignIntradaySeriesToCurrentPortfolioValue\(series = \[\]\) \{\s*return series;\s*\}/);
+assert.match(history, /function alignIntradaySeriesToCurrentPortfolioValue\(series = \[\], normalized = \[\], \{ range = '1Y', interval, enabled = false \} = \{\}\)/);
+assert.match(history, /if \(!enabled \|\| !isIntradayPortfolioHistory\(range, interval\) \|\| !Array\.isArray\(series\) \|\| series\.length < 2\) return series;/);
+assert.match(history, /enabled: \['1', 'true', 'yes', 'sim', 'on'\]\.includes/);
 assert.match(history, /adaptiveEdgeLimit = Math\.min\(0\.18, Math\.max\(0\.035, typicalGap \* 7\)\)/);
 assert.match(history, /completeValuation === true/);
 assert.ok(history.indexOf('alignIntradaySeriesToCurrentPortfolioValue') < history.indexOf('appendCurrentPortfolioPoint'));
