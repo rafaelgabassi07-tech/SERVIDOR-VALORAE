@@ -43,18 +43,38 @@ as $$
 declare
   v_upserted integer := 0;
   v_deleted integer := 0;
+  v_received integer := 0;
+  v_valid integer := 0;
 begin
   if p_user_id is null then raise exception using errcode = '22023', message = 'INVALID_USER_ID'; end if;
   if jsonb_typeof(coalesce(p_rows, '[]'::jsonb)) <> 'array' then
     raise exception using errcode = '22023', message = 'INVALID_DIVIDENDS_PAYLOAD';
   end if;
 
+  select count(*), count(*) filter (
+    where upper(coalesce(nullif(trim(r->>'ticker'), ''), nullif(trim(r->>'symbol'), ''))) <> ''
+      and coalesce(
+        public.valorae_financial_safe_date_v2(coalesce(r->>'dateCom', r->>'date_com')),
+        public.valorae_financial_safe_date_v2(coalesce(r->>'exDate', r->>'ex_date')),
+        public.valorae_financial_safe_date_v2(coalesce(r->>'inferredComDate', r->>'inferred_com_date')),
+        public.valorae_financial_safe_date_v2(coalesce(r->>'paymentDate', r->>'payment_date'))
+      ) is not null
+  )
+  into v_received, v_valid
+  from jsonb_array_elements(coalesce(p_rows, '[]'::jsonb)) r;
+
+  if v_received <> v_valid then
+    raise exception using
+      errcode = '22023',
+      message = 'INVALID_DIVIDEND_ROWS',
+      detail = format('received=%s valid=%s rejected=%s', v_received, v_valid, v_received - v_valid);
+  end if;
 
   if p_replace_all then
     with incoming as (
       select public.valorae_financial_normalize_id_v2(
                coalesce(r->>'eventId', r->>'event_id', r->>'eventKey', r->>'event_key', r->>'id'),
-               concat_ws('|', p_user_id::text, r->>'ticker', r->>'symbol', r->>'dateCom', r->>'date_com', r->>'exDate', r->>'paymentDate', r->>'source')
+               concat_ws('|', p_user_id::text, coalesce(nullif(trim(r->>'ticker'), ''), nullif(trim(r->>'symbol'), '')), coalesce(nullif(trim(r->>'dateCom'), ''), nullif(trim(r->>'date_com'), ''), nullif(trim(r->>'inferredComDate'), ''), nullif(trim(r->>'inferred_com_date'), ''), nullif(trim(r->>'exDate'), ''), nullif(trim(r->>'ex_date'), ''), nullif(trim(r->>'paymentDate'), ''), nullif(trim(r->>'payment_date'), '')), upper(coalesce(r->>'kind', r->>'dividendType', r->>'status', 'PROVENTO')))
              ) as event_id
       from jsonb_array_elements(coalesce(p_rows, '[]'::jsonb)) r
     )
@@ -68,7 +88,7 @@ begin
     select
       public.valorae_financial_normalize_id_v2(
         coalesce(r->>'eventId', r->>'event_id', r->>'eventKey', r->>'event_key', r->>'id'),
-        concat_ws('|', p_user_id::text, r->>'ticker', r->>'symbol', r->>'dateCom', r->>'date_com', r->>'exDate', r->>'paymentDate', r->>'source')
+        concat_ws('|', p_user_id::text, coalesce(nullif(trim(r->>'ticker'), ''), nullif(trim(r->>'symbol'), '')), coalesce(nullif(trim(r->>'dateCom'), ''), nullif(trim(r->>'date_com'), ''), nullif(trim(r->>'inferredComDate'), ''), nullif(trim(r->>'inferred_com_date'), ''), nullif(trim(r->>'exDate'), ''), nullif(trim(r->>'ex_date'), ''), nullif(trim(r->>'paymentDate'), ''), nullif(trim(r->>'payment_date'), '')), upper(coalesce(r->>'kind', r->>'dividendType', r->>'status', 'PROVENTO')))
       ) as event_id,
       upper(coalesce(nullif(trim(r->>'ticker'), ''), nullif(trim(r->>'symbol'), ''))) as ticker,
       public.valorae_financial_safe_date_v2(coalesce(r->>'dateCom', r->>'date_com')) as date_com,

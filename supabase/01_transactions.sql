@@ -54,17 +54,52 @@ as $$
 declare
   v text := trim(coalesce(p_value, ''));
   n numeric;
+  d date;
+  parts text[];
 begin
   if v = '' then return null; end if;
+
   if v ~ '^[0-9]{10,13}$' then
     n := v::numeric;
     if length(v) >= 13 then n := n / 1000.0; end if;
     return (to_timestamp(n) at time zone 'UTC')::date;
   end if;
-  begin return v::date; exception when others then null; end;
-  return (v::timestamptz at time zone 'UTC')::date;
-exception when others then
-  return null;
+
+  if v ~ '^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$' then
+    parts := string_to_array(v, '/');
+    begin
+      d := make_date(parts[3]::integer, parts[2]::integer, parts[1]::integer);
+      return d;
+    exception when others then
+      return null;
+    end;
+  end if;
+
+  if v ~ '^[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}$' then
+    parts := string_to_array(v, '-');
+    begin
+      d := make_date(parts[3]::integer, parts[2]::integer, parts[1]::integer);
+      return d;
+    exception when others then
+      return null;
+    end;
+  end if;
+
+  if v ~ '^[0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2}$' then
+    parts := string_to_array(replace(v, '/', '-'), '-');
+    begin
+      d := make_date(parts[1]::integer, parts[2]::integer, parts[3]::integer);
+      return d;
+    exception when others then
+      return null;
+    end;
+  end if;
+
+  begin
+    return (v::timestamptz at time zone 'UTC')::date;
+  exception when others then
+    return null;
+  end;
 end;
 $$;
 
@@ -119,12 +154,31 @@ as $$
 declare
   v_upserted integer := 0;
   v_deleted integer := 0;
+  v_received integer := 0;
+  v_valid integer := 0;
 begin
   if p_user_id is null then raise exception using errcode = '22023', message = 'INVALID_USER_ID'; end if;
   if jsonb_typeof(coalesce(p_rows, '[]'::jsonb)) <> 'array' then
     raise exception using errcode = '22023', message = 'INVALID_TRANSACTIONS_PAYLOAD';
   end if;
 
+  select count(*), count(*) filter (
+    where public.valorae_financial_safe_date_v2(coalesce(r->>'date', r->>'transaction_date')) is not null
+      and upper(coalesce(nullif(trim(r->>'symbol'), ''), nullif(trim(r->>'ticker'), ''))) <> ''
+      and (
+        greatest(public.valorae_financial_safe_numeric_v2(r->>'quantity', 0), 0) > 0
+        or greatest(public.valorae_financial_safe_numeric_v2(coalesce(r->>'grossValue', r->>'gross_value'), 0), 0) > 0
+      )
+  )
+  into v_received, v_valid
+  from jsonb_array_elements(coalesce(p_rows, '[]'::jsonb)) r;
+
+  if v_received <> v_valid then
+    raise exception using
+      errcode = '22023',
+      message = 'INVALID_TRANSACTION_ROWS',
+      detail = format('received=%s valid=%s rejected=%s', v_received, v_valid, v_received - v_valid);
+  end if;
 
   if coalesce(array_length(p_replace_symbols, 1), 0) > 0 then
     with incoming as (

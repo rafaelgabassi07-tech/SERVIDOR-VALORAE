@@ -8,6 +8,11 @@ const evolution = readSiblingApkFile('app/src/main/java/com/example/domain/Divid
 const home = readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioHomeUi.kt');
 const model = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraePortfolioContracts.kt');
 
+if (!parser || !agenda || !evolution || !home || !model) {
+  console.log('dividend lifecycle cross-stack v405 skipped: APK pareado não configurado');
+  process.exit(0);
+}
+
 assert.match(parser, /if \(onlyEligible && !event\.eligible\)/, 'APK deve filtrar aliases pessoais por elegibilidade');
 assert.doesNotMatch(parser, /optBoolean\("eligible", true\)/, 'APK não pode presumir elegibilidade ausente');
 assert.match(agenda, /isProvenPortfolioDividendEventForAgenda/, 'Minha Agenda exige posição comprovada na Data COM');

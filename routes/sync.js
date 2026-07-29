@@ -291,7 +291,17 @@ async function callRpc(name, args) {
     });
   } catch (error) {
     const details = `${error?.message || ''} ${JSON.stringify(error?.details || '')}`;
-    if (error?.code === 'PGRST202' || /could not find the function|schema cache/i.test(details)) {
+    if (/\b(?:(?:INVALID|IVALID)_TRANSACTION_ROWS|INVALID_TRANSACTIONS_PAYLOAD)\b/i.test(details)) {
+      error.status = 422;
+      error.code = 'SYNC_TRANSACTION_ROWS_REJECTED';
+      error.retryable = false;
+      error.message = 'Uma ou mais transações possuem data, ticker ou valores inválidos; o Histórico anterior foi preservado.';
+    } else if (/\b(?:INVALID_DIVIDEND_ROWS|INVALID_DIVIDENDS_PAYLOAD)\b/i.test(details)) {
+      error.status = 422;
+      error.code = 'SYNC_DIVIDEND_ROWS_REJECTED';
+      error.retryable = false;
+      error.message = 'Um ou mais proventos possuem ticker ou datas inválidas; o histórico anterior foi preservado.';
+    } else if (error?.code === 'PGRST202' || /could not find the function|schema cache/i.test(details)) {
       error.status = 503;
       error.code = 'MINIMAL_SYNC_MIGRATION_REQUIRED';
       error.retryable = false;
@@ -342,6 +352,30 @@ function dedupeRows(rows, keyName) {
   for (const row of rows) {
     const key = cleanText(row?.[keyName], 96);
     if (key) byId.set(key, row);
+  }
+  return [...byId.values()];
+}
+
+function dividendRowQuality(row = {}) {
+  let score = 0;
+  if (normalizeSyncDate(row.paymentDate || row.payment_date)) score += 16;
+  if (normalizeSyncDate(row.dateCom || row.date_com)) score += 12;
+  if (normalizeSyncDate(row.inferredComDate || row.inferred_com_date) || normalizeSyncDate(row.exDate || row.ex_date)) score += 6;
+  if (finiteNumber(row.valuePerShare ?? row.value_per_share) > 0) score += 4;
+  if (finiteNumber(row.quantity) > 0) score += 4;
+  if (finiteNumber(row.estimatedAmount ?? row.estimated_amount) > 0) score += 4;
+  const state = cleanText(row.status, 80).toUpperCase();
+  if (state.includes('RECEB') || state.includes('PAGO')) score += 2;
+  return score;
+}
+
+function dedupeDividendRows(rows = []) {
+  const byId = new Map();
+  for (const row of rows) {
+    const key = cleanText(row?.eventId, 96);
+    if (!key) continue;
+    const existing = byId.get(key);
+    if (!existing || dividendRowQuality(row) >= dividendRowQuality(existing)) byId.set(key, row);
   }
   return [...byId.values()];
 }
@@ -397,6 +431,38 @@ function finiteNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function normalizeSyncDate(value) {
+  const raw = cleanText(value, 64);
+  if (!raw || /^(?:a confirmar|—|-)$/i.test(raw)) return '';
+  const iso = raw.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  const br = raw.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
+  const compact = raw.match(/^(\d{4})(\d{2})(\d{2})$/);
+  const parts = iso ? [Number(iso[1]), Number(iso[2]), Number(iso[3])]
+    : br ? [Number(br[3]), Number(br[2]), Number(br[1])]
+    : compact ? [Number(compact[1]), Number(compact[2]), Number(compact[3])]
+    : null;
+  if (parts) {
+    const [year, month, day] = parts;
+    const probe = new Date(Date.UTC(year, month - 1, day));
+    if (probe.getUTCFullYear() === year && probe.getUTCMonth() === month - 1 && probe.getUTCDate() === day) {
+      return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    return '';
+  }
+  const timestamp = Date.parse(raw);
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString().slice(0, 10) : '';
+}
+
+function dividendKindFamily(row = {}) {
+  const raw = cleanText(row.kind || row.dividendType || row.type || row.status || '', 120)
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+  if (/\b(?:JCP|JSCP)\b|JUROS/.test(raw)) return 'JCP';
+  if (raw.includes('REND')) return 'RENDIMENTO';
+  if (raw.includes('AMORT')) return 'AMORTIZACAO';
+  if (raw.includes('DIV')) return 'DIVIDENDO';
+  return 'PROVENTO';
+}
+
 function normalizedClientId(row = {}) {
   const supplied = cleanText(row.clientTxId || row.client_tx_id || row.id, 96).replace(/[^A-Za-z0-9:_-]/g, '');
   if (supplied) return supplied;
@@ -420,7 +486,7 @@ function normalizeTransaction(row = {}) {
   const operation = rawOperation || ((signedQuantity < 0 || signedGross < 0 || row.isSell === true || row.is_sell === true) ? 'VENDA' : 'MOVIMENTAÇÃO');
   return {
     clientTxId: normalizedClientId(row),
-    date: cleanText(row.date || row.transaction_date, 40),
+    date: normalizeSyncDate(row.date || row.transaction_date),
     operation,
     symbol,
     assetType: cleanText(row.assetType || row.asset_type || 'Outro', 80),
@@ -435,13 +501,17 @@ function normalizeTransaction(row = {}) {
 function normalizedEventId(row = {}) {
   const supplied = cleanText(row.eventId || row.event_id || row.eventKey || row.event_key || row.id, 96).replace(/[^A-Za-z0-9:_-]/g, '');
   if (supplied) return supplied;
+  const eligibilityDate = normalizeSyncDate(row.dateCom || row.date_com)
+    || normalizeSyncDate(row.inferredComDate || row.inferred_com_date)
+    || normalizeSyncDate(row.exDate || row.ex_date);
+  const paymentDate = normalizeSyncDate(row.paymentDate || row.payment_date);
+  // A Data COM/Data EX identifica o direito econômico. A data de pagamento é um
+  // enriquecimento posterior e não pode criar uma segunda linha para o mesmo evento.
+  const anchorDate = eligibilityDate || paymentDate;
   const seed = [
     normalizeTicker(row.ticker || row.symbol || ''),
-    row.dateCom || row.date_com || '',
-    row.exDate || row.ex_date || '',
-    row.inferredComDate || row.inferred_com_date || '',
-    row.paymentDate || row.payment_date || '',
-    cleanText(row.source || 'VALORAE', 120).toUpperCase(),
+    anchorDate,
+    dividendKindFamily(row),
   ].join('|');
   return `div-${crypto.createHash('sha256').update(seed).digest('hex')}`.slice(0, 96);
 }
@@ -450,11 +520,11 @@ function normalizeDividend(row = {}) {
   return {
     eventId: normalizedEventId(row),
     ticker: normalizeTicker(row.ticker || row.symbol || '').slice(0, 24),
-    dateCom: cleanText(row.dateCom || row.date_com, 40),
-    exDate: cleanText(row.exDate || row.ex_date, 40),
-    inferredComDate: cleanText(row.inferredComDate || row.inferred_com_date, 40),
+    dateCom: normalizeSyncDate(row.dateCom || row.date_com),
+    exDate: normalizeSyncDate(row.exDate || row.ex_date),
+    inferredComDate: normalizeSyncDate(row.inferredComDate || row.inferred_com_date),
     eligibilityDateSource: cleanText(row.eligibilityDateSource || row.eligibility_date_source, 80),
-    paymentDate: cleanText(row.paymentDate || row.payment_date, 40),
+    paymentDate: normalizeSyncDate(row.paymentDate || row.payment_date),
     valuePerShare: Math.max(0, finiteNumber(row.valuePerShare ?? row.value_per_share)),
     quantity: Math.max(0, finiteNumber(row.quantity)),
     estimatedAmount: Math.max(0, finiteNumber(row.estimatedAmount ?? row.estimated_amount)),
@@ -583,10 +653,18 @@ async function uploadTransactions(userId, input, action) {
 
 async function uploadDividends(userId, input) {
   const sourceRows = Array.isArray(input.events) ? input.events : Array.isArray(input.dividends) ? input.dividends : [];
-  const rows = dedupeRows(
-    sourceRows.map(normalizeDividend).filter(row => row.ticker && (row.dateCom || row.exDate || row.inferredComDate || row.paymentDate)),
-    'eventId',
-  );
+  const normalizedRows = sourceRows.map(normalizeDividend);
+  const invalidRows = normalizedRows.filter(row => !row.eventId || !row.ticker || !(row.dateCom || row.exDate || row.inferredComDate || row.paymentDate) ||
+    !Number.isFinite(row.valuePerShare) || !Number.isFinite(row.quantity) || !Number.isFinite(row.estimatedAmount));
+  if (invalidRows.length > 0) {
+    const error = new Error(`${invalidRows.length} evento(s) de proventos não puderam ser normalizados; a nuvem anterior foi preservada.`);
+    error.status = 422;
+    error.code = 'SYNC_DIVIDEND_ROWS_REJECTED';
+    error.retryable = false;
+    error.details = { received: sourceRows.length, rejected: invalidRows.length };
+    throw error;
+  }
+  const rows = dedupeDividendRows(normalizedRows);
   runtime.metrics.dividendUploads += 1;
   const result = assertRpcContract(
     normalizeRpcObject(await callRpc(UPLOAD_DIVIDENDS_RPC, {
@@ -601,6 +679,8 @@ async function uploadDividends(userId, input) {
     contract: SYNC_CONTRACT,
     count: Number(result.count || 0),
     deleted: Number(result.deleted || 0),
+    receivedCount: sourceRows.length,
+    normalizedCount: rows.length,
     message: `Dividendos sincronizados: ${Number(result.count || 0)} alteração(ões), ${Number(result.deleted || 0)} remoção(ões).`,
     syncState: syncStateFrom(result),
   };
@@ -870,4 +950,6 @@ export const _test = {
   assertRequestContract,
   assertRpcContract,
   dedupeRows,
+  dedupeDividendRows,
+  dividendRowQuality,
 };
