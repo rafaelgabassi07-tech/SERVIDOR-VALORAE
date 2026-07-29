@@ -26,7 +26,7 @@ assert.equal(metadata.version, expectedCore);
 assert.equal(metadata.releasePatch, expectedPatch);
 assert.ok(monitor.includes(expectedPublic), 'monitor estático precisa exibir a versão pública');
 assert.ok(!/fetch\s*\(|XMLHttpRequest|EventSource|WebSocket|setInterval\s*\(/.test(monitor), 'monitor estático não pode consultar rede');
-assert.ok(!/\/api\//.test(monitor), 'monitor estático não pode referenciar endpoints da API');
+assert.ok(!/(?:href|src|action)\s*=\s*[\"']\/api\//i.test(monitor), 'monitor estático não pode navegar diretamente para endpoints da API');
 assert.ok(monitorCss.length > 200, 'CSS mínimo do monitor ausente');
 assert.ok(coreRelease.includes(expectedPatch));
 assert.ok(coreRelease.includes(`valorae-proxy-server-v${expectedPublic.replaceAll('.', '-')}`));

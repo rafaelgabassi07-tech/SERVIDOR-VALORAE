@@ -5,6 +5,7 @@ import { cacheStats, clearCache, getCache, setCache, stableKey } from '../lib/co
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
 import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../lib/portfolio/history.js';
 import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.js';
+import { mobileAlertDividendSymbols } from '../lib/portfolio/mobile-history-contracts.js';
 import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tickers.js';
 import { OFFICIAL_ASSET_LOGO_VERSION, fetchOfficialAssetLogo } from '../lib/market/official-logo.js';
 import { buildContractBaselineManifest } from '../lib/contract/baseline.js';
@@ -647,9 +648,14 @@ async function buildMobileAlerts(payload = {}) {
   ]).slice(0, 180);
   const positions = Array.isArray(payload.positions) ? payload.positions : [];
   const transactions = Array.isArray(payload.transactions) ? payload.transactions : [];
+  const dividendSymbols = mobileAlertDividendSymbols(
+    positions,
+    transactions,
+    Array.isArray(payload.dividendTickers) ? payload.dividendTickers : []
+  );
   const effectiveBlocks = {
     quotes: includeQuotes && symbols.length > 0,
-    dividends: includeDividends && positions.length > 0,
+    dividends: includeDividends && dividendSymbols.length > 0,
     news: includeNews && symbols.length > 0,
     rankings: includeRankings,
   };
@@ -693,8 +699,8 @@ async function buildMobileAlerts(payload = {}) {
           transactions,
           mode: 'mobile-notification-alerts',
           source: requestSource,
-          tickers: symbols,
-          symbols,
+          tickers: dividendSymbols,
+          symbols: dividendSymbols,
           includeCalendar: true,
           includeAgenda: true,
           futureMonths: Math.min(24, Math.max(1, Number(payload.futureMonths ?? 6))),
@@ -782,7 +788,7 @@ async function buildMobileAlerts(payload = {}) {
     rankings: effectiveBlocks.rankings && blockStatus.rankings !== 'ERROR' ? rankings : null,
     partial: failedCount > 0 || transactionHistoryPartial || Boolean(values.quotes?.partial) || Boolean(values.dividends?.partial) || Boolean(values.news?.partial) || Boolean(values.rankings?.partial),
     errors,
-    diagnostics: { requestedSymbols: symbols.length, quoteCount: quotes.length, dividendItemCount, newsCount: news.length, rankingItemCount, requestedCount, effectiveCount, failedCount, transactionHistoryPartial, requestedHistoryMonths, effectiveHistoryMonths },
+    diagnostics: { requestedSymbols: symbols.length, dividendSymbols: dividendSymbols.length, quoteCount: quotes.length, dividendItemCount, newsCount: news.length, rankingItemCount, requestedCount, effectiveCount, failedCount, transactionHistoryPartial, requestedHistoryMonths, effectiveHistoryMonths },
     generatedAt: new Date().toISOString(),
   };
 }
@@ -1209,4 +1215,4 @@ export function routeManifest() {
   ].sort() };
 }
 
-export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, uniqueDividendItemCount, routeAllowedInCurrentRuntime, PRODUCTION_ROUTE_ALLOWLIST };
+export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, mobileAlertDividendSymbols, uniqueDividendItemCount, routeAllowedInCurrentRuntime, PRODUCTION_ROUTE_ALLOWLIST };
