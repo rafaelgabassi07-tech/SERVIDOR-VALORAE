@@ -6,6 +6,7 @@ import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
 import { buildPortfolioHistory, normalizePortfolioPositions, normalizePortfolioTransactions } from '../lib/portfolio/history.js';
 import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.js';
 import { mobileAlertDividendSymbols } from '../lib/portfolio/mobile-history-contracts.js';
+import { normalizePositions, normalizeTransactions } from '../lib/portfolio/positions.js';
 import { normalizeTicker, classifyTicker, uniqueTickers } from '../lib/core/tickers.js';
 import { OFFICIAL_ASSET_LOGO_VERSION, fetchOfficialAssetLogo } from '../lib/market/official-logo.js';
 import { buildContractBaselineManifest } from '../lib/contract/baseline.js';
@@ -793,29 +794,70 @@ async function buildMobileAlerts(payload = {}) {
   };
 }
 
+function mobileAlertsBlockHasData(value = {}, block = '') {
+  if (block === 'quotes') return Array.isArray(value.quotes) && value.quotes.length > 0;
+  if (block === 'news') return Array.isArray(value.news) && value.news.length > 0;
+  if (block === 'dividends') return Boolean(value.dividends && uniqueDividendItemCount(value.dividends) > 0);
+  if (block === 'rankings') {
+    const rows = rankingArraysFrom(value.rankings || {});
+    return rows.highs.length + rows.lows.length > 0;
+  }
+  return false;
+}
+
+function mergeMobileAlertsWithStale(value = {}, staleValue = null) {
+  if (!staleValue || typeof staleValue !== 'object') return value;
+  const merged = { ...value, blockStatus: { ...(value.blockStatus || {}) } };
+  let reused = false;
+  for (const block of ['quotes', 'dividends', 'news', 'rankings']) {
+    const status = String(merged.blockStatus?.[block] || 'SKIPPED').toUpperCase();
+    const shouldReuse = status === 'ERROR' || (status === 'PARTIAL' && !mobileAlertsBlockHasData(merged, block));
+    if (!shouldReuse || !mobileAlertsBlockHasData(staleValue, block)) continue;
+    if (block === 'quotes') merged.quotes = staleValue.quotes;
+    if (block === 'dividends') merged.dividends = staleValue.dividends;
+    if (block === 'news') merged.news = staleValue.news;
+    if (block === 'rankings') merged.rankings = staleValue.rankings;
+    merged.blockStatus[block] = 'STALE';
+    reused = true;
+  }
+  if (!reused) return value;
+  const quoteCount = Array.isArray(merged.quotes) ? merged.quotes.length : 0;
+  const newsCount = Array.isArray(merged.news) ? merged.news.length : 0;
+  const dividendItemCount = merged.dividends ? uniqueDividendItemCount(merged.dividends) : 0;
+  const rankingRows = rankingArraysFrom(merged.rankings || {});
+  const rankingItemCount = rankingRows.highs.length + rankingRows.lows.length;
+  return {
+    ...merged,
+    status: quoteCount + newsCount + dividendItemCount + rankingItemCount > 0 ? 'PARTIAL' : merged.status,
+    partial: true,
+    diagnostics: {
+      ...(merged.diagnostics || {}),
+      quoteCount,
+      dividendItemCount,
+      newsCount,
+      rankingItemCount,
+      staleBlocks: Object.entries(merged.blockStatus).filter(([, status]) => status === 'STALE').map(([block]) => block),
+    },
+  };
+}
+
 async function buildMobileAlertsCached(payload = {}) {
-  const canonicalPositions = (Array.isArray(payload.positions) ? payload.positions : [])
+  const canonicalPositions = normalizePositions(payload.positions || [])
+    .filter(position => position.quantity > 0)
     .map(position => ({
-      ticker: String(position?.ticker || position?.symbol || '').trim().toUpperCase(),
-      quantity: Number(position?.quantity || 0),
-      avgPrice: Number(position?.avgPrice || 0),
-      currentPrice: Number(position?.currentPrice || 0),
-      firstPurchaseDate: String(position?.firstPurchaseDate || ''),
-      assetClass: String(position?.assetClass || position?.type || ''),
+      ticker: position.ticker,
+      quantity: Number(position.quantity || 0),
+      firstPurchaseDate: String(position.firstPurchaseDate || ''),
+      assetClass: String(position.assetClass || ''),
     }))
-    .filter(position => position.ticker && Number.isFinite(position.quantity) && position.quantity > 0)
     .sort((a, b) => a.ticker.localeCompare(b.ticker));
-  const canonicalTransactions = (Array.isArray(payload.transactions) ? payload.transactions : [])
+  const canonicalTransactions = normalizeTransactions(payload.transactions || [])
     .map(transaction => ({
-      ticker: String(transaction?.ticker || transaction?.symbol || '').trim().toUpperCase(),
-      date: String(transaction?.date || ''),
-      side: String(transaction?.side || 'BUY').trim().toUpperCase(),
-      quantity: Number(transaction?.quantity || 0),
-      price: Number(transaction?.price || 0),
-      operation: String(transaction?.operation || ''),
+      ticker: transaction.ticker,
+      date: String(transaction.date || ''),
+      quantity: Number(transaction.quantity || 0),
     }))
-    .filter(transaction => transaction.ticker && transaction.date && Number.isFinite(transaction.quantity) && transaction.quantity !== 0)
-    .sort((a, b) => `${a.ticker}|${a.date}|${a.side}|${a.quantity}|${a.price}|${a.operation}`.localeCompare(`${b.ticker}|${b.date}|${b.side}|${b.quantity}|${b.price}|${b.operation}`));
+    .sort((a, b) => `${a.ticker}|${a.date}|${a.quantity}`.localeCompare(`${b.ticker}|${b.date}|${b.quantity}`));
   const keyPayload = {
     includeQuotes: boolParamLocal(payload.includeQuotes, false),
     includeDividends: boolParamLocal(payload.includeDividends, false),
@@ -837,7 +879,9 @@ async function buildMobileAlertsCached(payload = {}) {
     return await coalesce(cacheKey, async () => {
       const joined = getCache(cacheKey, { allowStale: true });
       if (joined?.status === 'HIT') return { ...joined.value, cache: 'HIT' };
-      const value = await buildMobileAlerts(payload);
+      const freshValue = await buildMobileAlerts(payload);
+      const staleEntry = joined?.status === 'STALE' ? joined : stale;
+      const value = mergeMobileAlertsWithStale(freshValue, staleEntry?.value || null);
       if (value.status !== 'ERROR') {
         const freshTtlMs = value.status === 'PARTIAL' ? 15_000 : 90_000;
         const staleMaxAgeMs = value.status === 'PARTIAL' ? 3 * 60_000 : 12 * 60_000;
@@ -1215,4 +1259,4 @@ export function routeManifest() {
   ].sort() };
 }
 
-export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, mobileAlertDividendSymbols, uniqueDividendItemCount, routeAllowedInCurrentRuntime, PRODUCTION_ROUTE_ALLOWLIST };
+export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, mergeMobileAlertsWithStale, mobileAlertDividendSymbols, uniqueDividendItemCount, routeAllowedInCurrentRuntime, PRODUCTION_ROUTE_ALLOWLIST };
