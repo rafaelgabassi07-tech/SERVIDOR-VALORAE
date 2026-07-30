@@ -15,6 +15,8 @@ Não existem SQLs de snapshot, monitor, cache, dispositivo ou estado operacional
 ## Runtime
 
 - `POST /api/v1/mobile/alerts`: consolida cotações, dividendos e notícias da Central de Notificações e dos workers em uma única invocação, executando somente os blocos explicitamente solicitados pelo APK.
+- `POST /api/v1/mobile/daily-close`: devolve cotações, contribuições e a série consolidada 1D/5 min em uma resposta idempotente por carteira e data de negociação.
+- `POST /api/v1/news/article`: busca e sanitiza matérias com HTTPS obrigatório, validação DNS/redirecionamentos, teto de resposta e cache centralizado.
 - `GET /api/v1/quotes`: cotações de primeiro plano solicitadas pelo APK.
 - `GET /api/v1/news`: notícias de primeiro plano solicitadas pelo APK.
 - `POST /api/v1/dividends/batch`: agenda de dividendos solicitada pelo APK.
@@ -47,3 +49,27 @@ npm run audit:dead-code
 npm run audit:sql
 npm run test:cross-stack
 ```
+
+
+## Compatibilidade do APK
+
+- APK pareado: `2026.07.30.03` (v571).
+- APK mínimo aceito: `2026.07.30.02`.
+- APK máximo homologado: `2026.07.30.03`.
+- Política: `valorae-apk-compatibility-v1`; versões abaixo do mínimo, versões inválidas e versões futuras não homologadas em produção recebem HTTP 426.
+- `VALORAE_REJECT_UNTESTED_FUTURE_APK=0` é um override operacional explícito; não deve ser usado rotineiramente em produção.
+- `npm run verify:release` exige Node 24, dependências instaladas, APK real, suíte integral, testes cross-stack e auditoria estrita.
+
+## Melhorias v398
+
+- Endpoint único `POST /api/v1/mobile/daily-close` para cotações, série 1D/5 min, contribuições e qualidade.
+- Cache limitado por entradas e bytes, com eviction previsível e stale-if-error.
+- Rate limit em memória com teto rígido e escopo de instância explicitado.
+- Métricas por rota amostradas e limitadas; endpoint interno `/metrics/runtime`.
+- Leitura de matérias centralizada no Proxy; o APK não acessa diretamente hosts editoriais.
+- Identidade diária de fechamento ignora cotações transitórias enviadas pelo cliente e muda somente com data ou posição econômica.
+- Cabeçalhos de compatibilidade e modo de identidade coerentes com o gate do APK.
+
+## Limites operacionais
+
+Cache, coalescência, métricas e rate limit permanecem deliberadamente em memória e limitados por instância serverless. Eles evitam crescimento ilimitado, mas não substituem rate limiting distribuído na borda da Vercel. O release de produção deve manter a proteção de borda habilitada e acompanhar `X-Valorae-Cache`, latência, códigos 426/429/5xx e tamanho das respostas.

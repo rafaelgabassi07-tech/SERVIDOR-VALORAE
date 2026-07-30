@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import { cacheStats, clearCache, setCache, _test as cacheTest } from '../lib/core/cache.js';
+import { checkRateLimit, securityRuntimeStats } from '../lib/security/guard.js';
+import { requestMetricsSnapshot } from '../lib/observability/request-metrics.js';
+
+clearCache();
+for (let i=0;i<cacheTest.limits.MAX_ENTRIES+40;i+=1) setCache(`bound-${i}`, { payload:'x'.repeat(256) }, 60_000, 0);
+const cache=cacheStats();
+assert.ok(cache.entries <= cache.maxEntries);
+assert.ok(cache.bytes <= cache.maxBytes);
+assert.ok(cache.evictions > 0);
+for (let i=0;i<200;i+=1) checkRateLimit({ url:`/r/${i}`, headers:{'x-real-ip':`198.51.100.${i%200}`}, socket:{} }, { route:`r-${i}`, max:2 });
+const security=securityRuntimeStats();
+assert.equal(security.rateLimit.scope, 'instance');
+assert.ok(security.rateLimit.buckets <= security.rateLimit.maxBuckets);
+const metrics=requestMetricsSnapshot();
+assert.equal(metrics.version, 'valorae-request-metrics-v1');
+assert.ok(metrics.routeCount >= 0);
+clearCache();
+console.log('runtime bounds and observability v398 OK');

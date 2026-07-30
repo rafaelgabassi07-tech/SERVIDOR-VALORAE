@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { readSiblingApkFile, resolveSiblingApkRoot } from './helpers/cross-stack-apk.js';
 
 function between(source, startNeedle, endNeedle) {
@@ -43,16 +44,17 @@ if ([details, patrimony, returnsUi, confetti, chartUi, models, checklistReadines
   assert.match(chartUi, /stockFinancialAxisTickIndices/);
   assert.match(chartUi, /val monthNames = listOf\("jan", "fev", "mar"/);
 
-  assert.match(patrimony, /text\s*=\s*"Patrimônio total"/);
-  assert.match(patrimony, /Icons\.Rounded\.AccountBalanceWallet/);
-  const filterBlock = between(patrimony, 'fun WealthEvolutionFilterRow', 'private fun WealthPeriodSelector');
-  assert.match(filterBlock, /text\s*=\s*"Período"[\s\S]*Todos os ativos[\s\S]*WealthDisplayModeToggle[\s\S]*text\s*=\s*"Visualização"[\s\S]*WealthChartStyleToggle/);
-  assert.match(filterBlock, /Modifier\.width\(96\.dp\)[\s\S]*Modifier\.width\(176\.dp\)/);
-  const cardBlock = between(patrimony, 'fun WealthEvolutionCard', 'private fun WealthChartStyleToggle');
-  assert.match(cardBlock, /Surface\s*\(/, 'O gráfico consolidado deve usar uma superfície estável e alinhada ao APK');
-  assert.doesNotMatch(cardBlock, /animateContentSize/, 'O gráfico não deve animar todo o container durante atualizações');
-  const chartBlock = between(patrimony, 'private fun WealthModernChart', 'private fun WealthChartLegend');
-  assert.match(chartBlock, /padding\(horizontal\s*=\s*0\.dp/);
+  const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
+  assert.equal(
+    sha256(patrimony),
+    '58e0b050a56cb56f25e2b7626cd8fe357f7c296c8879fbc16b795a16d5a8efb3',
+    'O visual atual de Patrimônio enviado pelo usuário deve permanecer inalterado.'
+  );
+  assert.equal(
+    sha256(returnsUi),
+    'b14319314450c3fb0ead9530be0587b5aed717fc69affea9d6108c03dbca23a0',
+    'O visual atual de Retorno enviado pelo usuário deve permanecer inalterado.'
+  );
 
   assert.match(returnsUi, /ReturnSimulatedComparisonCard/);
   assert.match(returnsUi, /1_000\.0 \* \(1\.0 \+ returnPercent \/ 100\.0\)/);

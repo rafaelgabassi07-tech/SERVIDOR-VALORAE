@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 import { RELEASE } from '../lib/core/release.js';
+import { APK_COMPATIBILITY, apkVersionFromRequest, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
+import { beginRequestObservation, requestMetricsSnapshot } from '../lib/observability/request-metrics.js';
 import { sendJson, queryObject, readJsonBody } from '../lib/core/http.js';
 import { cacheStats, clearCache, getCache, setCache, stableKey } from '../lib/core/cache.js';
 import { buildDividendsContract } from '../lib/portfolio/dividends-contract.js';
@@ -28,6 +30,7 @@ import {
 } from '../lib/security/guard.js';
 import {
   isCanonicalValoraeApkRequest,
+  isValoraeApkIdentityAttempt,
   resolveClientAuth,
   shouldRequireClientAuth,
   shouldRequireValoraeApkRequest,
@@ -44,10 +47,10 @@ const lazyFeatureModules = globalThis.__VALORAE_ROUTER_LAZY_FEATURE_MODULES__ ||
 globalThis.__VALORAE_ROUTER_LAZY_FEATURE_MODULES__ = lazyFeatureModules;
 
 const PRODUCTION_ROUTE_ALLOWLIST = new Set([
-  '/ready', '/sync', '/mobile/alerts', '/dividends/batch',
+  '/ready', '/sync', '/mobile/alerts', '/mobile/daily-close', '/dividends/batch',
   '/assets', '/asset/quote', '/quotes', '/asset/history',
   '/asset/modal', '/asset/logo',
-  '/market/indices', '/market/rankings', '/news',
+  '/market/indices', '/market/rankings', '/news', '/news/article',
   '/portfolio/equilibrium', '/portfolio/history', '/portfolio/returns',
 ]);
 
@@ -123,6 +126,11 @@ async function buildSourceAdapterManifest(...args) {
 async function getNews(...args) {
   const module = await loadFeatureModule('source-news', () => import('../lib/sources/news.js'));
   return module.getNews(...args);
+}
+
+async function getArticleContent(...args) {
+  const module = await loadFeatureModule('source-news', () => import('../lib/sources/news.js'));
+  return module.getArticleContent(...args);
 }
 
 async function fetchAllowedScrapeText(...args) {
@@ -260,13 +268,13 @@ function routeMethods(path = '') {
     '/mobile/bootstrap', '/app/bootstrap',
     '/mobile/practical-sync', '/app/practical-sync',
     '/mobile/portfolio-sync', '/app/portfolio-sync', '/portfolio/insights-bundle',
-    '/mobile/alerts', '/app/alerts',
+    '/mobile/alerts', '/app/alerts', '/mobile/daily-close', '/app/daily-close',
     '/dividends/batch',
     '/portfolio/dividends', '/portfolio/next-dividends', '/portfolio/events',
     '/portfolio/returns', '/portfolio/analyze', '/portfolio/allocation', '/portfolio/equilibrium',
     '/portfolio/balance', '/portfolio/history', '/portfolio/income', '/portfolio/rebalance',
     '/portfolio/risk', '/portfolio/summary', '/portfolio/transactions',
-    '/watchlist/analyze', '/batch-scrape'
+    '/watchlist/analyze', '/batch-scrape', '/news/article'
   ]);
   return postRoutes.has(normalized) ? ['POST'] : ['GET'];
 }
@@ -498,17 +506,29 @@ function rootPayload() {
     version: RELEASE.version,
     status: 'online',
     contract: RELEASE.contract,
+    apkCompatibility: APK_COMPATIBILITY,
     routes: [...PRODUCTION_ROUTE_ALLOWLIST].sort().map(route => `/api/v1${route}`),
     router: routeManifest()
   };
 }
 
 function health() {
-  return { ok: true, status: 'OK', online: true, version: RELEASE.version, release: RELEASE.patch, now: new Date().toISOString() };
+  return {
+    ok: true,
+    status: 'OK',
+    online: true,
+    version: RELEASE.version,
+    publicVersion: RELEASE.publicVersion,
+    release: RELEASE.patch,
+    mobileProtocol: VALORAE_MOBILE_PROTOCOL_VERSION,
+    apkCompatibility: APK_COMPATIBILITY,
+    runtimeMetrics: (() => { const snapshot = requestMetricsSnapshot(); return { version: snapshot.version, routeCount: snapshot.routeCount, recentCount: snapshot.recentCount }; })(),
+    now: new Date().toISOString(),
+  };
 }
 
 function manifest() {
-  return { status: 'OK', name: RELEASE.name, version: RELEASE.version, release: RELEASE.patch, contract: RELEASE.contract, endpoints: routeManifest().routes };
+  return { status: 'OK', name: RELEASE.name, version: RELEASE.version, publicVersion: RELEASE.publicVersion, release: RELEASE.patch, contract: RELEASE.contract, apkCompatibility: APK_COMPATIBILITY, endpoints: routeManifest().routes };
 }
 
 async function assetLogoHandler(req, res, payload = {}) {
@@ -895,6 +915,181 @@ async function buildMobileAlertsCached(payload = {}) {
   }
 }
 
+
+function finiteNumber(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function dailyCloseQuoteMap(quotes = []) {
+  return new Map((Array.isArray(quotes) ? quotes : []).map(quote => [normalizeTicker(quote?.ticker || quote?.symbol), quote]).filter(([ticker]) => ticker));
+}
+
+function dailyCloseContributionRows(positions = [], quoteMap = new Map()) {
+  const rows = [];
+  for (const position of positions) {
+    const ticker = normalizeTicker(position?.ticker || position?.symbol);
+    const quantity = finiteNumber(position?.quantity, 0);
+    const quote = quoteMap.get(ticker) || {};
+    const price = finiteNumber(quote?.price ?? quote?.currentPrice ?? position?.currentPrice, 0);
+    const variationPercent = finiteNumber(quote?.variationPercent ?? quote?.changePercent, Number.NaN);
+    if (!ticker || !(quantity > 0) || !(price > 0) || !Number.isFinite(variationPercent) || variationPercent <= -99.99) continue;
+    const previousPrice = price / (1 + variationPercent / 100);
+    if (!(previousPrice > 0) || !Number.isFinite(previousPrice)) continue;
+    const currentValue = price * quantity;
+    const previousValue = previousPrice * quantity;
+    rows.push({
+      ticker,
+      quantity,
+      price: Number(price.toFixed(6)),
+      previousClose: Number(previousPrice.toFixed(6)),
+      variationPercent: Number(variationPercent.toFixed(4)),
+      currentValue: Number(currentValue.toFixed(2)),
+      previousValue: Number(previousValue.toFixed(2)),
+      contributionValue: Number((currentValue - previousValue).toFixed(2)),
+      source: quote?.source || 'VALORAE Quotes',
+      updatedAt: quote?.updatedAt || undefined,
+    });
+  }
+  return rows.sort((left, right) => Math.abs(right.contributionValue) - Math.abs(left.contributionValue) || left.ticker.localeCompare(right.ticker));
+}
+
+function brazilTradingDate(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function dailyClosePortfolioIdentity(positions = [], tradingDate = brazilTradingDate()) {
+  const canonical = positions.map(position => ({
+    ticker: normalizeTicker(position?.ticker || position?.symbol),
+    quantity: Number(finiteNumber(position?.quantity, 0).toFixed(8)),
+    averagePrice: Number(finiteNumber(position?.averagePrice, 0).toFixed(8)),
+  })).filter(position => position.ticker && position.quantity > 0)
+    .sort((left, right) => left.ticker.localeCompare(right.ticker));
+  const digest = createHash('sha256').update(stableKey({ tradingDate, positions: canonical })).digest('hex');
+  return {
+    tradingDate,
+    cacheKey: `mobile-daily-close:${digest}`,
+    idempotencyKey: `daily-close:${tradingDate}:${digest.slice(0, 24)}`,
+  };
+}
+
+function elapsedMs(started) {
+  return Number((Number(process.hrtime.bigint() - started) / 1_000_000).toFixed(2));
+}
+
+async function buildDailyClose(payload = {}) {
+  const totalStarted = process.hrtime.bigint();
+  const positions = normalizePortfolioPositions(payload).slice(0, 45);
+  const identity = dailyClosePortfolioIdentity(positions);
+  if (!positions.length) {
+    return {
+      status: 'EMPTY',
+      endpoint: 'mobile-daily-close',
+      contractVersion: 'valorae-mobile-daily-close-v1',
+      tradingDate: identity.tradingDate,
+      idempotencyKey: identity.idempotencyKey,
+      quotes: [], history: [], contributions: [],
+      timings: { totalMs: elapsedMs(totalStarted) },
+      generatedAt: new Date().toISOString(),
+    };
+  }
+  const symbols = uniqueTickers(positions.map(position => position.ticker)).slice(0, 45);
+  const quotesStarted = process.hrtime.bigint();
+  const alerts = await buildMobileAlertsCached({
+    ...payload,
+    source: payload.source || 'apk-daily-close',
+    symbols,
+    tickers: symbols,
+    positions,
+    includeQuotes: true,
+    includeDividends: false,
+    includeNews: false,
+    includeRankings: false,
+    timeoutMs: Math.min(Number(payload.timeoutMs || 15000), 20000),
+  });
+  const quotesMs = elapsedMs(quotesStarted);
+  const quotes = Array.isArray(alerts?.quotes) ? alerts.quotes : [];
+  const quoteMap = dailyCloseQuoteMap(quotes);
+  const effectivePositions = positions.map(position => ({
+    ...position,
+    currentPrice: finiteNumber(quoteMap.get(position.ticker)?.price, 0) || finiteNumber(position.currentPrice, 0),
+    currentPriceSource: quoteMap.has(position.ticker) ? 'daily-close-quotes' : 'payload',
+  }));
+  const historyStarted = process.hrtime.bigint();
+  const history = await buildPortfolioHistory(effectivePositions, {
+    ...payload,
+    range: '1D',
+    interval: '5m',
+    liveAlignment: true,
+    timeoutMs: Math.min(Number(payload.historyTimeoutMs || payload.timeoutMs || 12000), 18000),
+    maxConcurrency: Math.min(Number(payload.maxConcurrency || 4), 6),
+  });
+  const historyMs = elapsedMs(historyStarted);
+  const contributions = dailyCloseContributionRows(effectivePositions, quoteMap);
+  const totalTodayValue = Number(contributions.reduce((sum, row) => sum + row.currentValue, 0).toFixed(2));
+  const totalPreviousValue = Number(contributions.reduce((sum, row) => sum + row.previousValue, 0).toFixed(2));
+  const totalChangeValue = Number((totalTodayValue - totalPreviousValue).toFixed(2));
+  const totalPercent = totalPreviousValue > 0 ? Number(((totalChangeValue / totalPreviousValue) * 100).toFixed(4)) : 0;
+  const historyRows = (history?.series || []).map(point => ({
+    timestamp: finiteNumber(point?.timestamp, 0),
+    date: point?.date || undefined,
+    totalValue: finiteNumber(point?.totalValue, 0),
+    source: point?.source || history?.source || undefined,
+    completeValuation: point?.completeValuation === true,
+  })).filter(point => point.timestamp > 0 && point.totalValue > 0);
+  const quoteCoveragePercent = positions.length ? Number(((contributions.length / positions.length) * 100).toFixed(2)) : 0;
+  return {
+    status: contributions.length ? (contributions.length === positions.length && historyRows.length >= 2 ? 'OK' : 'PARTIAL') : 'ERROR',
+    endpoint: 'mobile-daily-close',
+    contractVersion: 'valorae-mobile-daily-close-v1',
+    tradingDate: identity.tradingDate,
+    idempotencyKey: identity.idempotencyKey,
+    summary: { totalTodayValue, totalPreviousValue, totalChangeValue, totalPercent, quotedAssets: contributions.length, positionCount: positions.length },
+    quotes,
+    contributions,
+    history: historyRows,
+    quality: {
+      quoteCoveragePercent,
+      historyCoveragePercent: finiteNumber(history?.historyCoveragePercent, 0),
+      historyPointCount: historyRows.length,
+      fallbackUsed: Boolean(history?.fallbackUsed),
+      partial: contributions.length !== positions.length || historyRows.length < 2,
+      alertsCache: alerts?.cache,
+      source: history?.source || 'Unavailable',
+    },
+    timings: { quotesMs, historyMs, totalMs: elapsedMs(totalStarted) },
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+async function buildDailyCloseCached(payload = {}) {
+  const positions = normalizePortfolioPositions(payload).slice(0, 45);
+  const identity = dailyClosePortfolioIdentity(positions);
+  const cacheKey = identity.cacheKey;
+  const cached = getCache(cacheKey, { allowStale: true });
+  if (cached?.status === 'HIT') return { ...cached.value, cache: 'HIT' };
+  const stale = cached?.status === 'STALE' ? cached : null;
+  try {
+    return await coalesce(cacheKey, async () => {
+      const joined = getCache(cacheKey, { allowStale: true });
+      if (joined?.status === 'HIT') return { ...joined.value, cache: 'HIT' };
+      const value = await buildDailyClose(payload);
+      if (value.status !== 'ERROR') setCache(cacheKey, value, value.status === 'OK' ? 5 * 60_000 : 45_000, 30 * 60_000);
+      return { ...value, cache: 'MISS' };
+    });
+  } catch (error) {
+    if (stale) return { ...stale.value, status: 'PARTIAL', cache: 'STALE', staleReason: String(error?.message || error).slice(0, 180) };
+    throw error;
+  }
+}
+
 function comparisonPointsFromHistory(history = {}) {
   const rows = history.points || history.history || history.series || [];
   const clean = Array.isArray(rows) ? rows.filter(point => Number(point?.close || point?.price || point?.value || 0) > 0) : [];
@@ -991,7 +1186,31 @@ export async function dispatchRoute(req, res) {
     res.setHeader('X-Request-Id', requestId);
     req.query = { ...(req.query || {}), ...queryObject(parsed.searchParams) };
 
+    const appVersion = apkVersionFromRequest(req);
+    const apkCompatibility = evaluateApkCompatibility(appVersion);
+    req.valoraeApkCompatibility = apkCompatibility;
+    beginRequestObservation(req, res, { route: path, requestId, appVersion });
+
     const canonicalApkRequest = isCanonicalValoraeApkRequest(req);
+    const apkIdentityAttempt = isValoraeApkIdentityAttempt(req);
+    if (apkIdentityAttempt && apkCompatibility.reject) {
+      return sendJson(req, res, {
+        version: RELEASE.version,
+        status: 'UPDATE_REQUIRED',
+        requestId,
+        code: apkCompatibility.reason === 'below_minimum_supported'
+          ? 'APK_VERSION_UNSUPPORTED'
+          : apkCompatibility.reason === 'invalid_or_missing_version'
+            ? 'APK_VERSION_INVALID'
+            : 'APK_VERSION_NOT_TESTED',
+        error: apkCompatibility.reason === 'below_minimum_supported'
+          ? 'Esta versão do VALORAE precisa ser atualizada para continuar usando o serviço.'
+          : apkCompatibility.reason === 'invalid_or_missing_version'
+            ? 'A versão informada pelo APK é inválida e não pode negociar este contrato.'
+            : 'Esta versão do VALORAE ainda não foi homologada com o Proxy publicado.',
+        apkCompatibility,
+      }, { status: 426, cacheControl: 'no-store' });
+    }
     if (shouldRequireValoraeApkRequest() && !canonicalApkRequest) {
       return sendJson(req, res, {
         version: RELEASE.version,
@@ -1054,6 +1273,7 @@ export async function dispatchRoute(req, res) {
     res.setHeader('X-Request-Id', requestId);
 
     const clientAuth = resolveClientAuth(req, {
+      requireClientAuth: shouldRequireValoraeApkRequest(),
       path,
       query: req.query,
       payload: ['GET', 'HEAD'].includes(method) ? '' : payload,
@@ -1115,7 +1335,8 @@ export async function dispatchRoute(req, res) {
     }
     if (path === '/release/readiness' || path === '/personal/readiness') return runLazyDefaultHandler('route-release-readiness', () => import('./release/readiness.js'), req, res);
     if (path === '/manifest' || path === '/schema' || path === '/source/status' || path === '/deploy/status') return sendJson(req, res, manifest());
-    if (path === '/cache/stats') return sendJson(req, res, { status: 'OK', cache: cacheStats() });
+    if (path === '/cache/stats') return sendJson(req, res, { status: 'OK', cache: cacheStats(), requests: requestMetricsSnapshot() });
+    if (path === '/metrics/runtime') return sendJson(req, res, { status: 'OK', cache: cacheStats(), requests: requestMetricsSnapshot() }, { cacheControl: 'no-store' });
     if (path === '/fields') return sendJson(req, res, { status: 'OK', endpoint: 'fields', fields: ['positions','dividendPositions','transactions','tickers','includeAnalysis','includeHistory','includeIpca','includeDividends','includeRankings'] });
     if (path === '/errors') return sendJson(req, res, { status: 'OK', endpoint: 'errors', errors: ['INVALID_JSON','PAYLOAD_TOO_LARGE','ROUTE_ERROR','NOT_FOUND'] });
     if (path === '/openapi') return sendJson(req, res, { status: 'OK', openapi: '3.0.0', info: { title: 'VALORAE Proxy API', version: RELEASE.version }, paths: Object.fromEntries(routeManifest().routes.map(r => [`/api/v1${r}`, openApiOperationForRoute(r)])) });
@@ -1133,6 +1354,7 @@ export async function dispatchRoute(req, res) {
     if (path === '/mobile/portfolio-sync' || path === '/app/portfolio-sync' || path === '/portfolio/insights-bundle') return sendJson(req, res, await withContractBaseline('mobileSync', await buildMobilePortfolioSync(payload), payload), { cacheControl: 'private, max-age=20' });
 
     if (path === '/mobile/alerts' || path === '/app/alerts') return sendJson(req, res, await buildMobileAlertsCached(payload), { cacheControl: 'no-store' });
+    if (path === '/mobile/daily-close' || path === '/app/daily-close') return sendJson(req, res, await buildDailyCloseCached(payload), { cacheControl: 'private, max-age=300, stale-while-revalidate=1800' });
 
     if (path === '/dividends/batch') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
     if (path === '/portfolio/dividends' || path === '/portfolio/next-dividends' || path === '/portfolio/events') return sendJson(req, res, await buildDividendsContract(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.portfolioDividends}` });
@@ -1209,6 +1431,7 @@ export async function dispatchRoute(req, res) {
       return sendJson(req, res, await buildComparisonPayload(payload), { cacheControl: 'private, max-age=60' });
     }
     if (path === '/news') return sendJson(req, res, await getNews(payload), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.news}, stale-while-revalidate=120` });
+    if (path === '/news/article') return sendJson(req, res, await getArticleContent(payload), { cacheControl: 'private, max-age=600, stale-while-revalidate=86400' });
     if (path === '/watchlist/analyze') return sendJson(req, res, emptyCompatible('OK'));
     if (path === '/scrape') {
       const url = String(payload.url || '').trim();
@@ -1255,8 +1478,8 @@ export function routeManifest() {
     physicalFunctions: ['api/router.js'],
     legacyAliases: { '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
     routes: [
-    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/extraction-intelligence','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/contract/scraping-engine','/source/status','/release/readiness','/personal/readiness','/cache/stats','/cache/clear','/deploy/status','/fields','/errors','/openapi','/sync','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/mobile/alerts','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/asset/quote','/quote','/quotes','/asset/history','/asset/logo','/asset/yahoo-logo','/asset/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
+    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/extraction-intelligence','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/contract/scraping-engine','/source/status','/release/readiness','/personal/readiness','/cache/stats','/metrics/runtime','/cache/clear','/deploy/status','/fields','/errors','/openapi','/sync','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/mobile/alerts','/mobile/daily-close','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/news/article','/asset/quote','/quote','/quotes','/asset/history','/asset/logo','/asset/yahoo-logo','/asset/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
   ].sort() };
 }
 
-export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, mergeMobileAlertsWithStale, mobileAlertDividendSymbols, uniqueDividendItemCount, routeAllowedInCurrentRuntime, PRODUCTION_ROUTE_ALLOWLIST };
+export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, mergeMobileAlertsWithStale, buildDailyClose, buildDailyCloseCached, dailyClosePortfolioIdentity, brazilTradingDate, dailyCloseContributionRows, mobileAlertDividendSymbols, uniqueDividendItemCount, routeAllowedInCurrentRuntime, PRODUCTION_ROUTE_ALLOWLIST };

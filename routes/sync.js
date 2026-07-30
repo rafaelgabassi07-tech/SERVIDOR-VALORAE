@@ -4,7 +4,7 @@ import { beginRoute, getInput } from '../lib/http/route.js';
 import { VALORAE_ENGINE_VERSION, VALORAE_RELEASE_PATCH } from '../lib/release/current.js';
 import { normalizeTicker } from '../lib/core/tickers.js';
 
-// Release patch: 21.12.396-asset-modal-completeness-v364
+// Release patch: 21.12.398-ecosystem-performance-hardening-v366
 const CORE_VERSION = VALORAE_RELEASE_PATCH;
 const SYNC_CONTRACT = 'valorae-financial-sync-v2';
 const TRANSACTIONS_TABLE = 'valorae_financial_transactions';
@@ -369,15 +369,52 @@ function dividendRowQuality(row = {}) {
   return score;
 }
 
+function dividendAmountToken(row = {}) {
+  const amount = finiteNumber(row.valuePerShare ?? row.value_per_share);
+  if (!(amount > 0)) return null;
+  return amount.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
+}
+
+function dividendEconomicBaseKey(row = {}) {
+  const eligibilityDate = normalizeSyncDate(row.dateCom || row.date_com)
+    || normalizeSyncDate(row.inferredComDate || row.inferred_com_date)
+    || normalizeSyncDate(row.exDate || row.ex_date);
+  const paymentDate = normalizeSyncDate(row.paymentDate || row.payment_date);
+  return [
+    normalizeTicker(row.ticker || row.symbol || ''),
+    eligibilityDate || paymentDate,
+    dividendKindFamily(row),
+  ].join('|');
+}
+
 function dedupeDividendRows(rows = []) {
-  const byId = new Map();
+  const buckets = new Map();
   for (const row of rows) {
-    const key = cleanText(row?.eventId, 96);
-    if (!key) continue;
-    const existing = byId.get(key);
-    if (!existing || dividendRowQuality(row) >= dividendRowQuality(existing)) byId.set(key, row);
+    const baseKey = dividendEconomicBaseKey(row);
+    if (!baseKey || baseKey.startsWith('|')) continue;
+    const bucket = buckets.get(baseKey) || { known: new Map(), unknown: null };
+    const amountToken = dividendAmountToken(row);
+    if (amountToken) {
+      const existing = bucket.known.get(amountToken);
+      if (!existing || dividendRowQuality(row) >= dividendRowQuality(existing)) bucket.known.set(amountToken, row);
+    } else if (!bucket.unknown || dividendRowQuality(row) >= dividendRowQuality(bucket.unknown)) {
+      bucket.unknown = row;
+    }
+    buckets.set(baseKey, bucket);
   }
-  return [...byId.values()];
+
+  const result = [];
+  for (const bucket of buckets.values()) {
+    if (bucket.known.size === 0) {
+      if (bucket.unknown) result.push(bucket.unknown);
+    } else if (bucket.known.size === 1) {
+      result.push(bucket.known.values().next().value);
+    } else {
+      result.push(...bucket.known.values());
+      if (bucket.unknown) result.push(bucket.unknown);
+    }
+  }
+  return result;
 }
 
 function transactionFingerprint(row = {}) {
@@ -499,19 +536,11 @@ function normalizeTransaction(row = {}) {
 }
 
 function normalizedEventId(row = {}) {
-  const supplied = cleanText(row.eventId || row.event_id || row.eventKey || row.event_key || row.id, 96).replace(/[^A-Za-z0-9:_-]/g, '');
-  if (supplied) return supplied;
-  const eligibilityDate = normalizeSyncDate(row.dateCom || row.date_com)
-    || normalizeSyncDate(row.inferredComDate || row.inferred_com_date)
-    || normalizeSyncDate(row.exDate || row.ex_date);
-  const paymentDate = normalizeSyncDate(row.paymentDate || row.payment_date);
-  // A Data COM/Data EX identifica o direito econômico. A data de pagamento é um
-  // enriquecimento posterior e não pode criar uma segunda linha para o mesmo evento.
-  const anchorDate = eligibilityDate || paymentDate;
+  // A identidade é sempre recalculada. IDs fornecidos por clientes antigos podiam
+  // incorporar a fonte e criar duplicatas ao restaurar o mesmo evento da nuvem.
   const seed = [
-    normalizeTicker(row.ticker || row.symbol || ''),
-    anchorDate,
-    dividendKindFamily(row),
+    dividendEconomicBaseKey(row),
+    dividendAmountToken(row) || '?',
   ].join('|');
   return `div-${crypto.createHash('sha256').update(seed).digest('hex')}`.slice(0, 96);
 }
@@ -952,4 +981,6 @@ export const _test = {
   dedupeRows,
   dedupeDividendRows,
   dividendRowQuality,
+  dividendAmountToken,
+  dividendEconomicBaseKey,
 };

@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.396 sob demanda, alinhado ao APK v555, com notificações consolidadas e runtime Vercel enxuto.",
+  "description": "Proxy VALORAE 21.12.398 sob demanda, pareado ao APK v571, com compatibilidade explícita, fechamento consolidado e runtime observável.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,7 +17,8 @@
     "benchmark:scraping": "node --expose-gc scripts/benchmark-scraping-engines.js --quick",
     "audit:dead-code": "node scripts/audit-runtime-reachability.js",
     "audit:sql": "node scripts/validate-minimal-sql.js",
-    "audit:on-demand": "node scripts/audit-on-demand-import.js"
+    "audit:on-demand": "node scripts/audit-on-demand-import.js",
+    "verify:release": "node scripts/verify-release.js"
   },
   "engines": {
     "node": "24.x"
@@ -29,29 +30,34 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.396-asset-modal-completeness-v364",
+    "releasePatch": "21.12.398-ecosystem-performance-hardening-v366",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.396",
-    "checkpoint": "asset-modal-completeness-v364",
-    "releaseLabel": "asset-modal-completeness-v364",
-    "apkVersion": "2026.07.27.02",
-    "monitorVersion": "static-no-api-v399"
+    "publicVersion": "21.12.398",
+    "checkpoint": "ecosystem-performance-hardening-v366",
+    "releaseLabel": "ecosystem-performance-hardening-v366",
+    "apkVersion": "2026.07.30.03",
+    "monitorVersion": "static-no-api-v400",
+    "minSupportedApkVersion": "2026.07.30.02",
+    "maxTestedApkVersion": "2026.07.30.03",
+    "compatibilityPolicy": "valorae-apk-compatibility-v1"
   },
-  "releasePatch": "21.12.396-asset-modal-completeness-v364",
+  "releasePatch": "21.12.398-ecosystem-performance-hardening-v366",
   "config": {
-    "releasePatch": "21.12.396-asset-modal-completeness-v364",
-    "publicVersion": "21.12.396",
-    "checkpoint": "asset-modal-completeness-v364",
-    "releaseLabel": "asset-modal-completeness-v364"
+    "releasePatch": "21.12.398-ecosystem-performance-hardening-v366",
+    "publicVersion": "21.12.398",
+    "checkpoint": "ecosystem-performance-hardening-v366",
+    "releaseLabel": "ecosystem-performance-hardening-v366"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.396-asset-modal-completeness-v364",
-    "publicVersion": "21.12.396",
-    "checkpoint": "asset-modal-completeness-v364",
-    "releaseLabel": "asset-modal-completeness-v364",
-    "apkVersion": "2026.07.27.02",
-    "monitorVersion": "static-no-api-v399"
+    "releasePatch": "21.12.398-ecosystem-performance-hardening-v366",
+    "publicVersion": "21.12.398",
+    "checkpoint": "ecosystem-performance-hardening-v366",
+    "releaseLabel": "ecosystem-performance-hardening-v366",
+    "apkVersion": "2026.07.30.03",
+    "monitorVersion": "static-no-api-v400",
+    "minSupportedApkVersion": "2026.07.30.02",
+    "maxTestedApkVersion": "2026.07.30.03"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

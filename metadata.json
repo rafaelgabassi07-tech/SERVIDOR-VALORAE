@@ -1,18 +1,32 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.396 pareado ao APK v555, com remoção de campos legados, checklists canônicos com recuperação de fonte e Radar de Dividendos robusto.",
+  "description": "Proxy 21.12.398 pareado ao APK v571, com fechamento diário consolidado, negociação de compatibilidade e observabilidade operacional limitada por memória.",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ],
+  "majorCapabilities": [],
   "version": "21.12.0",
-  "releasePatch": "21.12.396-asset-modal-completeness-v364",
-  "publicVersion": "21.12.396",
-  "checkpoint": "asset-modal-completeness-v364",
-  "label": "asset-modal-completeness-v364",
-  "apkVersion": "2026.07.27.02",
-  "apkCheckpoint": "v555-modal-checklist-radar-patrimony-polish",
-  "contractVersion": "APK v555 / Proxy 21.12.396 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / monitor estático sem API v399",
-  "monitorObservabilityVersion": "2026.07.26-v367",
-  "monitorPersistenceMode": "disabled"
+  "releasePatch": "21.12.398-ecosystem-performance-hardening-v366",
+  "publicVersion": "21.12.398",
+  "checkpoint": "ecosystem-performance-hardening-v366",
+  "label": "ecosystem-performance-hardening-v366",
+  "apkVersion": "2026.07.30.03",
+  "apkCheckpoint": "v571-ecosystem-performance-hardening",
+  "contractVersion": "APK v571 / Proxy 21.12.398 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / daily close v1 / compatibility v1 / monitor static-no-api-v400",
+  "monitorObservabilityVersion": "2026.07.30-v398",
+  "monitorPersistenceMode": "disabled",
+  "releaseLabel": "ecosystem-performance-hardening-v366",
+  "title": "Proxy v398 — Endurecimento de performance e integração do ecossistema",
+  "summary": "Alinha o Proxy ao APK v571, consolida o fechamento diário em uma chamada idempotente, negocia versões com HTTP 426, centraliza a leitura segura de matérias, limita cache/rate-limit por bytes e cardinalidade e adiciona métricas operacionais amostradas.",
+  "minSupportedApkVersion": "2026.07.30.02",
+  "maxTestedApkVersion": "2026.07.30.03",
+  "compatibilityPolicy": "valorae-apk-compatibility-v1",
+  "validation": [
+    "Build Vercel, sintaxe de 410 arquivos, auditoria de imports sob demanda, alcance de 150 módulos, SQL mínimo e consistência de versão aprovados.",
+    "257 testes catalogados: 157 executados com sucesso, 100 bloqueados no ambiente por ausência de cheerio/undici e nenhuma falha entre os executados.",
+    "43 testes cross-stack catalogados: 26 executados com sucesso, 17 bloqueados pelas mesmas dependências e nenhuma falha entre os executados.",
+    "O gate estrito exige Node 24, npm ci completo, build Android release e evidência do gate de dispositivo; ele recusou corretamente o ambiente Node 22 atual."
+  ],
+  "operationalLimits": [
+    "Cache, coalescência, métricas e rate limit são limitados e locais por instância serverless; proteção distribuída deve ser configurada na borda da plataforma.",
+    "O runtime não persiste dados financeiros ou telemetria operacional em banco."
+  ]
 }

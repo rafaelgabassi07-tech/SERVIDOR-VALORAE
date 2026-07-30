@@ -36,7 +36,7 @@ function authenticatedHeaders(url, method = 'GET', extras = {}) {
   return {
     'x-valorae-app': 'VALORAE Android',
     'x-valorae-channel': 'android',
-    'x-valorae-app-version': '2026.07.27.02',
+    'x-valorae-app-version': '2026.07.30.03',
     'x-valorae-build': 'release',
     'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
     'x-valorae-mobile-protocol': '2026.07.10.10',

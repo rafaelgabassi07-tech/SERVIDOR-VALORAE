@@ -15,8 +15,8 @@ walk('test');
 tests.sort((left, right) => left.localeCompare(right));
 
 const allowMissingDependencies = process.env.VALORAE_ALLOW_MISSING_TEST_DEPS === '1';
-const concurrency = Math.max(1, Math.min(8, Number.parseInt(process.env.VALORAE_TEST_CONCURRENCY || '1', 10) || 1));
-const timeoutMs = Math.max(10_000, Math.min(300_000, Number.parseInt(process.env.VALORAE_TEST_TIMEOUT_MS || '180000', 10) || 180_000));
+const concurrency = Math.max(1, Math.min(8, Number.parseInt(process.env.VALORAE_TEST_CONCURRENCY || '8', 10) || 1));
+const timeoutMs = Math.max(10_000, Math.min(300_000, Number.parseInt(process.env.VALORAE_TEST_TIMEOUT_MS || '30000', 10) || 180_000));
 const maxOutputBytes = 16 * 1024 * 1024;
 const missingDependencyPatterns = [
   /Cannot find package ['"](cheerio|undici|ajv[^'"]*)['"]/i,

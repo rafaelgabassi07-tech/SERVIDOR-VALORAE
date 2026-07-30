@@ -11,6 +11,7 @@ const requiredRoutes = new Map([
   ['/ready', 'GET'],
   ['/sync', 'POST'],
   ['/mobile/alerts', 'POST'],
+  ['/mobile/daily-close', 'POST'],
   ['/dividends/batch', 'POST'],
   ['/assets', 'GET'],
   ['/asset/quote', 'GET'],
@@ -21,6 +22,7 @@ const requiredRoutes = new Map([
   ['/market/indices', 'GET'],
   ['/market/rankings', 'GET'],
   ['/news', 'GET'],
+  ['/news/article', 'POST'],
   ['/portfolio/history', 'POST'],
   ['/portfolio/equilibrium', 'POST'],
   ['/portfolio/returns', 'POST']
@@ -175,7 +177,8 @@ if (alertsServiceKt && notificationUiKt && notificationWorkerKt && dailyCloseWor
   assert.ok(!notificationUiKt.includes('remoteRepository.getDividendAgenda('), 'Central de Notificações não deve duplicar chamada de dividendos');
   assert.ok(!notificationUiKt.includes('remoteRepository.getNews('), 'Central de Notificações não deve duplicar chamada de notícias');
   assert.equal((notificationWorkerKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 1, 'worker periódico deve usar uma invocação consolidada');
-  assert.equal((dailyCloseWorkerKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 1, 'fechamento diário deve usar uma invocação consolidada');
+  assert.equal((dailyCloseWorkerKt.match(/ValoraeProxyClient\.getDailyClose\(/g) || []).length, 1, 'fechamento diário deve usar uma invocação consolidada');
+  assert.equal((dailyCloseWorkerKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 0, 'fechamento diário não deve manter a chamada antiga de alertas');
 }
 
 console.log('apk-proxy-contract-harmony-v310 ok');

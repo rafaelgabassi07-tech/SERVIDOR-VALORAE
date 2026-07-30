@@ -84,7 +84,8 @@ await withMinimalSupabase(async (url, init = {}) => {
   assert.equal(restore.payload.dividendsCount, 1);
   assert.equal(restore.payload.transactions[0].clientTxId, 'b3-petr4-2026-07-26');
   assert.equal(restore.payload.transactions[0].symbol, 'PETR4');
-  assert.equal(restore.payload.dividends[0].eventId, 'petro-div-2026-08');
+  assert.match(restore.payload.dividends[0].eventId, /^div-[a-f0-9]{64}$/);
+  assert.notEqual(restore.payload.dividends[0].eventId, 'petro-div-2026-08', 'ID legado deve ser substituído pela identidade econômica canônica');
   assert.equal(restore.payload.verifiedEmpty, false);
 });
 

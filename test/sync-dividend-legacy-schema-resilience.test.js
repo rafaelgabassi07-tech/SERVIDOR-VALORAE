@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { _test } from '../routes/sync.js';
 const event=_test.normalizeDividend({event_key:'legacy-div',symbol:'BVMF:BBAS3F',date_com:'2026-01-10',payment_date:'2026-02-10',value_per_share:'0.75',estimated_amount:'7.5',quantity:'10',status:'pago',source:'LEGACY'});
-assert.equal(event.eventId,'legacy-div');
+assert.match(event.eventId,/^div-[a-f0-9]{64}$/);
+assert.notEqual(event.eventId,'legacy-div');
 assert.equal(event.ticker,'BBAS3');
 assert.equal(event.dateCom,'2026-01-10');
 assert.equal(event.paymentDate,'2026-02-10');
