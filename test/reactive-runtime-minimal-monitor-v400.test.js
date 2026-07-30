@@ -18,8 +18,10 @@ assert.ok(index.includes('/api/v1/asset/modal'));
 assert.ok(index.includes('Notificações e segundo plano'));
 assert.ok(index.includes('Autenticação e dados financeiros em nuvem'));
 assert.ok(index.includes('monitor.css'));
-for (const forbidden of ['<script', 'fetch(', 'XMLHttpRequest', 'EventSource', 'WebSocket', 'setInterval', 'setTimeout', '<form', '<button', 'onclick=', 'onload=']) {
-  assert.ok(!index.includes(forbidden), `monitor estático contém ${forbidden}`);
+assert.ok(index.includes('<script src="/ecosystem-flow-map.js" defer></script>'), 'mapa interativo deve usar somente script local');
+assert.ok(index.includes("connect-src 'none'"), 'CSP deve impedir chamadas de rede pela documentação');
+for (const forbidden of ['fetch(', 'XMLHttpRequest', 'EventSource', 'WebSocket', 'setInterval', 'onclick=', 'onload=', '<script>']) {
+  assert.ok(!index.includes(forbidden), `documentação não deve conter comunicação ou script inline: ${forbidden}`);
 }
 assert.ok(css.length < 12_000, 'CSS do monitor deve permanecer pequeno');
 for (const cardPattern of ['box-shadow:', '.card{', '.panel{', 'section{background:', 'section{border-radius:']) {

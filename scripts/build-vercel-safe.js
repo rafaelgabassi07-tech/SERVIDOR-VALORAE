@@ -6,6 +6,8 @@ const requiredFiles = [
   'server.js',
   'public/index.html',
   'public/monitor.css',
+  'public/ecosystem-map.css',
+  'public/ecosystem-flow-map.js',
 ];
 
 const ignoredDirectories = new Set(['node_modules', '.git', '.vercel']);

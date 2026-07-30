@@ -116,9 +116,9 @@ try {
     assert.match(logo?.sourceUrl || '', new RegExp(ticker, 'i'));
   }
 
-  const rejectedLogo = await invoke('/api/v1/asset/logo?ticker=VALE3&cache=false&v=5', 'GET', {});
-  assert.equal(rejectedLogo.statusCode, 403);
-  assert.equal(JSON.parse(rejectedLogo.body).code, 'VALORAE_APK_REQUEST_REQUIRED');
+  const publicLogo = await invoke('/api/v1/asset/logo?ticker=VALE3&cache=false&v=5', 'GET', {});
+  assert.equal(publicLogo.statusCode, 200, 'Coil e outros carregadores de imagem não enviam headers canônicos do APK');
+  assert.equal(publicLogo.getHeader('X-Valorae-Logo-Ticker'), 'VALE3');
 
   const routeLogo = await invoke('/api/v1/asset/logo?ticker=VALE3&cache=false&v=5');
   assert.equal(routeLogo.statusCode, 200);

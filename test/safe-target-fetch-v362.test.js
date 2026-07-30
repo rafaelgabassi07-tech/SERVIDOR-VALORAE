@@ -43,6 +43,21 @@ await assert.rejects(
   error => error.code === 'SCRAPE_HOST_NOT_ALLOWED',
 );
 
+
+const crossHostResult = await fetchAllowedScrapeText('https://news.google.com/start', {
+  allowedHosts: ['news.google.com'],
+  allowPublicRedirectHosts: true,
+  resolver: async host => {
+    assert.ok(['news.google.com', 'publisher.example.com'].includes(host));
+    return [{ address: '93.184.216.34', family: 4 }];
+  },
+  fetcher: async url => url.includes('news.google.com')
+    ? { status: 302, location: 'https://publisher.example.com/story', text: '' }
+    : { status: 200, text: '<article>conteúdo</article>', finalUrl: url },
+});
+assert.equal(crossHostResult.status, 200);
+assert.equal(crossHostResult.finalUrl, 'https://publisher.example.com/story');
+
 let fetchedAfterDnsFailure = false;
 await assert.rejects(
   fetchAllowedScrapeText('https://example.com/start', {

@@ -3,11 +3,11 @@ import { APK_COMPATIBILITY, compareApkVersions, evaluateApkCompatibility, normal
 import { VALORAE_EXPOSE_HEADERS } from '../lib/core/mobile-protocol.js';
 
 assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.07.30.03');
-assert.equal(APK_COMPATIBILITY.minSupportedVersion, '2026.07.30.02');
+assert.equal(APK_COMPATIBILITY.minSupportedVersion, '2026.07.30.01');
 assert.equal(normalizeApkVersion('abc'), '');
 assert.equal(compareApkVersions('2026.07.30.02', '2026.07.30.03'), -1);
-assert.equal(evaluateApkCompatibility('2026.07.30.01').reject, true);
-assert.equal(evaluateApkCompatibility('2026.07.30.01').status, 'UPDATE_REQUIRED');
+assert.equal(evaluateApkCompatibility('2026.07.30.01').reject, false);
+assert.equal(evaluateApkCompatibility('2026.07.30.01').status, 'SUPPORTED');
 assert.equal(evaluateApkCompatibility('2026.07.30.02').status, 'SUPPORTED');
 assert.equal(evaluateApkCompatibility('2026.07.30.03').status, 'PAIRED');
 assert.equal(evaluateApkCompatibility('2026.07.30.04', { allowFuture: false }).reject, true);
@@ -29,4 +29,4 @@ try {
 }
 
 for (const header of ['X-Valorae-Apk-Compatibility','X-Valorae-Paired-Apk-Version','X-Valorae-Min-Apk-Version','X-Valorae-Max-Tested-Apk-Version']) assert.ok(VALORAE_EXPOSE_HEADERS.includes(header));
-console.log('apk compatibility v398 OK');
+console.log('apk compatibility v399 backward-compatible OK');

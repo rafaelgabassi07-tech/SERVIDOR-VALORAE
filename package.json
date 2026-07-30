@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.398 sob demanda, pareado ao APK v571, com compatibilidade explícita, fechamento consolidado e runtime observável.",
+  "description": "Proxy VALORAE 21.12.399 com hotfix de comunicação, retrocompatibilidade v569-v571 e leitor de notícias corrigido.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -30,33 +30,33 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.398-ecosystem-performance-hardening-v366",
+    "releasePatch": "21.12.399-transport-regression-hotfix-v367",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.398",
-    "checkpoint": "ecosystem-performance-hardening-v366",
-    "releaseLabel": "ecosystem-performance-hardening-v366",
+    "publicVersion": "21.12.399",
+    "checkpoint": "transport-regression-hotfix-v367",
+    "releaseLabel": "transport-regression-hotfix-v367",
     "apkVersion": "2026.07.30.03",
-    "monitorVersion": "static-no-api-v400",
-    "minSupportedApkVersion": "2026.07.30.02",
+    "monitorVersion": "interactive-flow-v401",
+    "minSupportedApkVersion": "2026.07.30.01",
     "maxTestedApkVersion": "2026.07.30.03",
-    "compatibilityPolicy": "valorae-apk-compatibility-v1"
+    "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible"
   },
-  "releasePatch": "21.12.398-ecosystem-performance-hardening-v366",
+  "releasePatch": "21.12.399-transport-regression-hotfix-v367",
   "config": {
-    "releasePatch": "21.12.398-ecosystem-performance-hardening-v366",
-    "publicVersion": "21.12.398",
-    "checkpoint": "ecosystem-performance-hardening-v366",
-    "releaseLabel": "ecosystem-performance-hardening-v366"
+    "releasePatch": "21.12.399-transport-regression-hotfix-v367",
+    "publicVersion": "21.12.399",
+    "checkpoint": "transport-regression-hotfix-v367",
+    "releaseLabel": "transport-regression-hotfix-v367"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.398-ecosystem-performance-hardening-v366",
-    "publicVersion": "21.12.398",
-    "checkpoint": "ecosystem-performance-hardening-v366",
-    "releaseLabel": "ecosystem-performance-hardening-v366",
+    "releasePatch": "21.12.399-transport-regression-hotfix-v367",
+    "publicVersion": "21.12.399",
+    "checkpoint": "transport-regression-hotfix-v367",
+    "releaseLabel": "transport-regression-hotfix-v367",
     "apkVersion": "2026.07.30.03",
-    "monitorVersion": "static-no-api-v400",
-    "minSupportedApkVersion": "2026.07.30.02",
+    "monitorVersion": "interactive-flow-v401",
+    "minSupportedApkVersion": "2026.07.30.01",
     "maxTestedApkVersion": "2026.07.30.03"
   },
   "optionalDependencies": {

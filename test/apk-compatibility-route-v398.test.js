@@ -36,13 +36,12 @@ async function invoke(url, { method = 'GET', headers = {}, body } = {}) {
 }
 
 const invalid = await invoke('/api/v1/ready', { headers: apkHeaders('abc') });
-assert.equal(invalid.statusCode, 426);
-assert.equal(JSON.parse(invalid.body).code, 'APK_VERSION_INVALID');
+assert.equal(invalid.statusCode, 200);
 assert.equal(invalid.getHeader('X-Valorae-Apk-Compatibility'), 'INVALID');
 
 const old = await invoke('/api/v1/ready', { headers: apkHeaders('2026.07.30.01') });
-assert.equal(old.statusCode, 426);
-assert.equal(JSON.parse(old.body).code, 'APK_VERSION_UNSUPPORTED');
+assert.equal(old.statusCode, 200);
+assert.equal(old.getHeader('X-Valorae-Apk-Compatibility'), 'SUPPORTED');
 
 const supported = await invoke('/api/v1/ready', { headers: apkHeaders('2026.07.30.03') });
 assert.equal(supported.statusCode, 200);
@@ -60,4 +59,11 @@ const dailyPayload = JSON.parse(daily.body);
 assert.equal(dailyPayload.status, 'EMPTY');
 assert.match(dailyPayload.idempotencyKey, /^daily-close:/);
 
-console.log('APK compatibility route and daily-close headers v398 OK');
+const invalidSync = await invoke('/api/v1/sync', { method: 'POST', headers: { ...apkHeaders('abc'), 'content-type': 'application/json' }, body: {} });
+assert.equal(invalidSync.statusCode, 426);
+assert.equal(JSON.parse(invalidSync.body).code, 'APK_VERSION_INVALID');
+
+const logoWithoutHeaders = await invoke('/api/v1/asset/logo?ticker=PETR4');
+assert.notEqual(logoWithoutHeaders.statusCode, 403);
+
+console.log('APK compatibility route and daily-close headers v399 OK');

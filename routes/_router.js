@@ -54,6 +54,20 @@ const PRODUCTION_ROUTE_ALLOWLIST = new Set([
   '/portfolio/equilibrium', '/portfolio/history', '/portfolio/returns',
 ]);
 
+// Public resources that cannot carry the APK header set (for example Coil image requests)
+// must remain readable. Version negotiation is advisory for read-only market data and
+// blocking only for financial synchronization, where contract drift can mutate user data.
+const PUBLIC_HEADERLESS_ROUTES = new Set(['/ready', '/asset/logo']);
+const APK_COMPATIBILITY_BLOCKING_ROUTES = new Set(['/sync']);
+
+function shouldBlockApkCompatibility(path = '', evaluation = {}) {
+  return Boolean(evaluation?.reject) && APK_COMPATIBILITY_BLOCKING_ROUTES.has(String(path || ''));
+}
+
+function acceptsLegacyApkIdentity(path = '', apkIdentityAttempt = false) {
+  return Boolean(apkIdentityAttempt) && PRODUCTION_ROUTE_ALLOWLIST.has(String(path || ''));
+}
+
 function productionRuntime() {
   return process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
 }
@@ -1193,7 +1207,7 @@ export async function dispatchRoute(req, res) {
 
     const canonicalApkRequest = isCanonicalValoraeApkRequest(req);
     const apkIdentityAttempt = isValoraeApkIdentityAttempt(req);
-    if (apkIdentityAttempt && apkCompatibility.reject) {
+    if (apkIdentityAttempt && shouldBlockApkCompatibility(path, apkCompatibility)) {
       return sendJson(req, res, {
         version: RELEASE.version,
         status: 'UPDATE_REQUIRED',
@@ -1204,14 +1218,16 @@ export async function dispatchRoute(req, res) {
             ? 'APK_VERSION_INVALID'
             : 'APK_VERSION_NOT_TESTED',
         error: apkCompatibility.reason === 'below_minimum_supported'
-          ? 'Esta versão do VALORAE precisa ser atualizada para continuar usando o serviço.'
+          ? 'Esta versão do VALORAE precisa ser atualizada antes de sincronizar dados financeiros.'
           : apkCompatibility.reason === 'invalid_or_missing_version'
-            ? 'A versão informada pelo APK é inválida e não pode negociar este contrato.'
-            : 'Esta versão do VALORAE ainda não foi homologada com o Proxy publicado.',
+            ? 'A versão informada pelo APK é inválida para sincronização financeira.'
+            : 'Esta versão do VALORAE ainda não foi homologada para sincronização com o Proxy publicado.',
         apkCompatibility,
       }, { status: 426, cacheControl: 'no-store' });
     }
-    if (shouldRequireValoraeApkRequest() && !canonicalApkRequest) {
+    const headerlessPublicRoute = PUBLIC_HEADERLESS_ROUTES.has(path);
+    const acceptedLegacyIdentity = acceptsLegacyApkIdentity(path, apkIdentityAttempt);
+    if (shouldRequireValoraeApkRequest() && !canonicalApkRequest && !acceptedLegacyIdentity && !headerlessPublicRoute) {
       return sendJson(req, res, {
         version: RELEASE.version,
         status: 'FORBIDDEN',
@@ -1273,7 +1289,7 @@ export async function dispatchRoute(req, res) {
     res.setHeader('X-Request-Id', requestId);
 
     const clientAuth = resolveClientAuth(req, {
-      requireClientAuth: shouldRequireValoraeApkRequest(),
+      requireClientAuth: shouldRequireValoraeApkRequest() && APK_COMPATIBILITY_BLOCKING_ROUTES.has(path),
       path,
       query: req.query,
       payload: ['GET', 'HEAD'].includes(method) ? '' : payload,
@@ -1482,4 +1498,4 @@ export function routeManifest() {
   ].sort() };
 }
 
-export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, mergeMobileAlertsWithStale, buildDailyClose, buildDailyCloseCached, dailyClosePortfolioIdentity, brazilTradingDate, dailyCloseContributionRows, mobileAlertDividendSymbols, uniqueDividendItemCount, routeAllowedInCurrentRuntime, PRODUCTION_ROUTE_ALLOWLIST };
+export const _test = { stripApi, stripApiPrefix, safeRequestId, routeMethod, routeMethods, openApiOperationForRoute, assetLogoHandler, comparisonTickers, buildComparisonPayload, contractIdentity, buildMobileAlerts, mergeMobileAlertsWithStale, buildDailyClose, buildDailyCloseCached, dailyClosePortfolioIdentity, brazilTradingDate, dailyCloseContributionRows, mobileAlertDividendSymbols, uniqueDividendItemCount, routeAllowedInCurrentRuntime, shouldBlockApkCompatibility, acceptsLegacyApkIdentity, PUBLIC_HEADERLESS_ROUTES, APK_COMPATIBILITY_BLOCKING_ROUTES, PRODUCTION_ROUTE_ALLOWLIST };

@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
   <title>VALORAE Proxy — Integração privada com o APK</title>
   <link rel="icon" href="/assets/valorae-favicon-48.png" sizes="48x48">
   <link rel="stylesheet" href="/monitor.css">
+  <link rel="stylesheet" href="/ecosystem-map.css">
 </head>
 <body>
   <header>
@@ -16,9 +17,196 @@
     <p class="eyebrow">Infraestrutura privada do aplicativo Android</p>
     <h1>Proxy de dados do APK VALORAE</h1>
     <p class="lead">Serviço intermediário, reativo e executado somente quando o aplicativo solicita uma operação. Esta página é documentação estática: não lê métricas da Vercel, não consulta fontes financeiras, não acessa o Supabase e não inicia funções serverless.</p>
+    <nav class="site-nav" aria-label="Navegação da documentação">
+      <a href="#ecosystem-map">Mapa do ecossistema</a>
+      <a href="#journeys">Jornadas principais</a>
+      <a href="#routes">Rotas publicadas</a>
+      <a href="#failures">Falhas e recuperação</a>
+      <a href="#security">Segurança</a>
+    </nav>
   </header>
 
   <main>
+    <section id="ecosystem-map" class="architecture architecture-flow" aria-labelledby="ecosystem-map-title">
+      <p class="section-kicker">Arquitetura operacional interativa</p>
+      <h2 id="ecosystem-map-title">Árvore completa do fluxo APK ↔ Proxy</h2>
+      <p class="map-intro">Acompanhe uma operação desde o toque do usuário até a resposta renderizada no Android. O mapa separa responsabilidades por swimlanes, mostra decisões, cache, segurança, fontes, retries e fallbacks, e permite inspecionar cada etapa técnica.</p>
+
+      <div class="map-status" aria-label="Compatibilidade atual">
+        <span><strong>APK suportado</strong> 2026.07.30.01–03</span>
+        <span><strong>Proxy</strong> 21.12.399</span>
+        <span><strong>Protocolo móvel</strong> 2026.07.10.10</span>
+        <span><strong>Contrato</strong> valorae-api-v1</span>
+      </div>
+
+      <div class="flow-map-shell" data-flow-map>
+        <div class="flow-map-toolbar" aria-label="Controles do mapa">
+          <div class="flow-toolbar-group flow-journey-filter" aria-label="Filtrar jornada" role="group">
+            <span class="flow-toolbar-label">Jornada</span>
+            <div id="flowJourneyButtons" class="flow-chip-row"></div>
+          </div>
+
+          <div class="flow-toolbar-group flow-search-group">
+            <label for="flowMapSearch">Buscar etapa, endpoint ou componente</label>
+            <div class="flow-search-box">
+              <input id="flowMapSearch" type="search" autocomplete="off" placeholder="Ex.: /asset/modal, Room, cache...">
+              <button id="flowClearSearch" type="button" aria-label="Limpar busca">×</button>
+            </div>
+          </div>
+
+          <div class="flow-toolbar-group flow-view-actions" role="group" aria-label="Controles de visualização">
+            <button id="flowZoomOut" type="button" title="Reduzir zoom" aria-label="Reduzir zoom">−</button>
+            <output id="flowZoomValue" aria-live="polite">100%</output>
+            <button id="flowZoomIn" type="button" title="Aumentar zoom" aria-label="Aumentar zoom">+</button>
+            <button id="flowFit" type="button">Ajustar</button>
+            <button id="flowReset" type="button">Restaurar</button>
+            <button id="flowHistoryToggle" type="button" aria-pressed="false">Histórico v398→v399</button>
+          </div>
+        </div>
+
+        <div class="flow-map-context" aria-live="polite">
+          <div id="flowBreadcrumb" class="flow-breadcrumb">Visão completa · todas as camadas</div>
+          <div id="flowMapSummary" class="flow-map-summary"></div>
+        </div>
+
+        <div id="flowMapViewport" class="flow-map-viewport" tabindex="0" role="application" aria-label="Mapa interativo do fluxo entre APK e Proxy. Arraste para mover, use os botões para zoom e selecione um bloco para abrir detalhes.">
+          <div id="flowMapSpace" class="flow-map-space">
+            <div id="flowMapCanvas" class="flow-map-canvas">
+              <svg id="flowMapEdges" class="flow-map-edges" aria-hidden="true"></svg>
+              <div id="flowMapLanes" class="flow-map-lanes"></div>
+              <div id="flowMapNodes" class="flow-map-nodes"></div>
+            </div>
+          </div>
+          <div class="flow-pan-hint" aria-hidden="true">Arraste para navegar</div>
+        </div>
+
+        <div class="flow-map-legend" aria-label="Legenda do fluxograma">
+          <span><i class="legend-shape legend-start"></i>Início</span>
+          <span><i class="legend-shape legend-action"></i>Ação</span>
+          <span><i class="legend-shape legend-decision"></i>Decisão</span>
+          <span><i class="legend-shape legend-cache"></i>Cache / resiliência</span>
+          <span><i class="legend-shape legend-success"></i>Sucesso</span>
+          <span><i class="legend-shape legend-failure"></i>Falha</span>
+          <span><i class="legend-line legend-line-main"></i>Fluxo principal</span>
+          <span><i class="legend-line legend-line-alt"></i>Fallback / retry</span>
+        </div>
+
+        <noscript>
+          <div class="flow-noscript">
+            <strong>Fluxo resumido</strong>
+            <ol>
+              <li>Usuário interage com uma tela Compose.</li>
+              <li>ViewModel e Repository verificam Room e cache local.</li>
+              <li>Quando necessário, o cliente OkHttp envia HTTPS com versão, protocolo e request ID.</li>
+              <li>O Proxy valida rota, compatibilidade, autenticação, limites e schema.</li>
+              <li>Cache HIT retorna imediatamente; MISS consulta fontes autorizadas com deadline e single-flight.</li>
+              <li>O Proxy normaliza e devolve contrato JSON; o APK valida, persiste e atualiza a interface.</li>
+            </ol>
+          </div>
+        </noscript>
+      </div>
+
+      <dialog id="flowNodeDialog" class="flow-node-dialog" aria-labelledby="flowNodeDialogTitle">
+        <div class="flow-dialog-header">
+          <div>
+            <p id="flowNodeDialogLane" class="flow-dialog-kicker"></p>
+            <h3 id="flowNodeDialogTitle"></h3>
+          </div>
+          <button id="flowNodeDialogClose" type="button" aria-label="Fechar detalhes">×</button>
+        </div>
+        <div id="flowNodeDialogBody" class="flow-dialog-body"></div>
+      </dialog>
+
+      <aside class="architecture-note" aria-label="Regra operacional essencial">
+        <strong>Regra essencial</strong>
+        <p>O Proxy não empurra dados espontaneamente. Cada execução nasce de uma ação, abertura de tela, atualização autorizada, sincronização ou worker Android; ao finalizar a resposta, a função serverless encerra.</p>
+      </aside>
+    </section>
+
+
+    <section id="journeys" aria-labelledby="journeys-title">
+      <p class="section-kicker">Jornadas ponta a ponta</p>
+      <h2 id="journeys-title">Como cada área percorre o ecossistema</h2>
+      <p>Expanda uma jornada para acompanhar a rota, o processamento e o comportamento de recuperação sem gerar qualquer consulta de rede nesta página.</p>
+
+      <div class="journey-list">
+        <details open>
+          <summary><span>01</span><strong>Home, notícias e rankings</strong><small>conteúdo consolidado e cache independente</small></summary>
+          <div class="journey-content">
+            <ol class="journey-flow">
+              <li><strong>APK verifica validade local.</strong> Notícias, rankings e agenda vencem em janelas diferentes.</li>
+              <li><strong>Proxy recebe somente os blocos necessários.</strong> Rotas canônicas: <code>/api/v1/mobile/alerts</code>, <code>/api/v1/news</code> e <code>/api/v1/market/rankings</code>.</li>
+              <li><strong>Fontes são consultadas com limites.</strong> O resultado é deduplicado, ordenado e marcado com origem e qualidade.</li>
+              <li><strong>APK atualiza cada seção isoladamente.</strong> Uma fonte indisponível não precisa apagar as demais.</li>
+            </ol>
+            <p class="journey-fallback"><strong>Recuperação:</strong> cache anterior permanece visível; erro, vazio e parcial são estados diferentes.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary><span>02</span><strong>Modal de Ação ou FII</strong><small>uma rota universal por ativo</small></summary>
+          <div class="journey-content">
+            <ol class="journey-flow">
+              <li><strong>Usuário seleciona o ticker.</strong> O modal conserva conteúdo anterior até a nova resposta ficar pronta.</li>
+              <li><strong>APK chama <code>/api/v1/asset/modal</code>.</strong> Ticker, tipo conhecido e preferências de período são enviados.</li>
+              <li><strong>Proxy classifica e compõe o contrato.</strong> Cotação, gráfico, fundamentos, dividendos e comparações são resolvidos sob deadline.</li>
+              <li><strong>APK renderiza por seção.</strong> Blocos ausentes são indicados sem invalidar o modal inteiro.</li>
+            </ol>
+            <p class="journey-fallback"><strong>Recuperação:</strong> single-flight evita chamadas duplicadas; atualização manual pode ignorar cache de forma explícita.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary><span>03</span><strong>Análise de ativos</strong><small>busca, comparação e qualidade</small></summary>
+          <div class="journey-content">
+            <ol class="journey-flow">
+              <li><strong>Busca local primeiro.</strong> O APK reduz consultas enquanto o usuário digita.</li>
+              <li><strong>Consultas remotas são canceláveis.</strong> Debounce e request ID impedem resposta antiga de substituir a atual.</li>
+              <li><strong>Proxy normaliza indicadores.</strong> Escalas, datas, percentuais e disponibilidade são validados antes da entrega.</li>
+              <li><strong>A interface mostra confiança.</strong> Dados parciais ou suspeitos não são apresentados como definitivos.</li>
+            </ol>
+          </div>
+        </details>
+
+        <details>
+          <summary><span>04</span><strong>Carteira, retorno e histórico</strong><small>posições locais + mercado</small></summary>
+          <div class="journey-content">
+            <ol class="journey-flow">
+              <li><strong>APK consolida posições.</strong> Compras, vendas, dividendos e saldo por ativo partem do banco local.</li>
+              <li><strong>Proxy recebe somente a estrutura necessária.</strong> Rotas de equilíbrio, histórico e retorno combinam posições com séries oficiais.</li>
+              <li><strong>Cálculos preservam integridade.</strong> Datas sem pregão, ativos sem preço e índices incompletos são tratados explicitamente.</li>
+              <li><strong>APK apresenta resultado e comparação.</strong> Cache e estado anterior evitam tela vazia durante atualização.</li>
+            </ol>
+          </div>
+        </details>
+
+        <details>
+          <summary><span>05</span><strong>Sincronização privada</strong><small>Supabase e contrato autenticado</small></summary>
+          <div class="journey-content">
+            <ol class="journey-flow">
+              <li><strong>Usuário autentica no Supabase.</strong> O APK recebe uma sessão pública válida.</li>
+              <li><strong><code>/api/v1/sync</code> valida sessão e versão.</strong> A barreira de compatibilidade é restrita à operação que pode alterar dados financeiros.</li>
+              <li><strong>Proxy reconcilia transações e dividendos.</strong> Paginação, idempotência e exclusões evitam duplicidade.</li>
+              <li><strong>APK confirma e persiste.</strong> Fila offline retém operações até uma tentativa válida.</li>
+            </ol>
+            <p class="journey-fallback"><strong>Proteção:</strong> credencial <em>service role</em> nunca é enviada ao Android.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary><span>06</span><strong>Fechamento diário e notificações</strong><small>worker autorizado, execução idempotente</small></summary>
+          <div class="journey-content">
+            <ol class="journey-flow">
+              <li><strong>WorkManager inicia dentro da janela válida.</strong> Rede, permissões e preferências do usuário são verificadas.</li>
+              <li><strong>Uma chamada consolidada envia as posições.</strong> Cotações e série 1D/5 min retornam no mesmo contrato.</li>
+              <li><strong>APK calcula o impacto real.</strong> A notificação usa patrimônio, contribuição dos ativos e linha verde ou vermelha conforme a referência.</li>
+              <li><strong>Publicação é idempotente.</strong> Retries são limitados e não duplicam o fechamento já entregue.</li>
+            </ol>
+          </div>
+        </details>
+      </div>
+    </section>
+
     <section aria-labelledby="purpose">
       <h2 id="purpose">Responsabilidade do serviço</h2>
       <p>O Proxy separa o aplicativo Android das particularidades de cada fonte externa. O APK envia uma solicitação com os parâmetros necessários; o Proxy valida a rota e o contrato, carrega apenas os módulos relacionados à operação, obtém ou reutiliza os dados permitidos, normaliza formatos diferentes e devolve uma resposta estável para a interface.</p>
@@ -106,7 +294,7 @@
       <p>O runtime de produção publica somente as rotas consumidas pelo aplicativo atual:</p>
       <ul class="routes">
         <li><code>/api/v1/ready</code> — disponibilidade mínima.</li>
-        <li><code>/api/sync</code> — sincronização autenticada de transações e dividendos.</li>
+        <li><code>/api/v1/sync</code> — sincronização autenticada de transações e dividendos.</li>
         <li><code>/api/v1/assets</code>, <code>/asset/quote</code> e <code>/quotes</code> — descoberta e cotações.</li>
         <li><code>/api/v1/asset/history</code> e <code>/asset/logo</code> — gráficos e identidade visual.</li>
         <li><code>/api/v1/asset/modal</code> — contrato universal de Ação e FII.</li>
@@ -189,8 +377,9 @@
   </main>
 
   <footer>
-    <p><strong>VALORAE Proxy 21.12.398</strong></p>
+    <p><strong>VALORAE Proxy 21.12.399</strong></p>
     <p>Integração privada do aplicativo Android VALORAE · processamento somente por solicitação</p>
   </footer>
+  <script src="/ecosystem-flow-map.js" defer></script>
 </body>
 </html>

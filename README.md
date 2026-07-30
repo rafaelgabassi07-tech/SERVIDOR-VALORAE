@@ -26,6 +26,8 @@ As rotas não executam pré-busca. Cada produtor de informação só é carregad
 
 ## Monitor
 
+A página estática inclui um **Mapa do ecossistema APK ↔ Proxy**, responsivo e explorável sem JavaScript, cobrindo jornadas, contratos, fontes, cache, sincronização e recuperação de falhas.
+
 `public/index.html` é a única página estática do monitor. O monitor não chama a API, não consulta métricas do Vercel, não possui polling, JavaScript de rede, WebSocket, EventSource. Ele apenas informa o estado arquitetural do Proxy.
 
 A telemetria detalhada do runtime foi removida do fluxo operacional. Para confirmar que a importação da função não inicia trabalho autônomo, execute `npm run audit:on-demand`.
@@ -54,22 +56,28 @@ npm run test:cross-stack
 ## Compatibilidade do APK
 
 - APK pareado: `2026.07.30.03` (v571).
-- APK mínimo aceito: `2026.07.30.02`.
+- APK mínimo aceito: `2026.07.30.01` (v569, versão instalada anterior ao hotfix).
 - APK máximo homologado: `2026.07.30.03`.
-- Política: `valorae-apk-compatibility-v1`; versões abaixo do mínimo, versões inválidas e versões futuras não homologadas em produção recebem HTTP 426.
+- Política: `valorae-apk-compatibility-v2-backward-compatible`; rotas de leitura permanecem disponíveis para APKs com o protocolo móvel compatível. HTTP 426 fica restrito à sincronização financeira, onde incompatibilidade pode alterar dados do usuário.
 - `VALORAE_REJECT_UNTESTED_FUTURE_APK=0` é um override operacional explícito; não deve ser usado rotineiramente em produção.
 - `npm run verify:release` exige Node 24, dependências instaladas, APK real, suíte integral, testes cross-stack e auditoria estrita.
 
-## Melhorias v398
+## Correções v399
 
-- Endpoint único `POST /api/v1/mobile/daily-close` para cotações, série 1D/5 min, contribuições e qualidade.
-- Cache limitado por entradas e bytes, com eviction previsível e stale-if-error.
-- Rate limit em memória com teto rígido e escopo de instância explicitado.
-- Métricas por rota amostradas e limitadas; endpoint interno `/metrics/runtime`.
-- Leitura de matérias centralizada no Proxy; o APK não acessa diretamente hosts editoriais.
-- Identidade diária de fechamento ignora cotações transitórias enviadas pelo cliente e muda somente com data ou posição econômica.
-- Cabeçalhos de compatibilidade e modo de identidade coerentes com o gate do APK.
+- Restaura compatibilidade integral com o APK v569 (`2026.07.30.01`), que o Proxy v398 bloqueava com HTTP 426 antes de executar qualquer rota.
+- Impede que divergências de versão derrubem análise, notícias, modais, rankings, cotações e retornos simultaneamente.
+- Mantém o bloqueio de incompatibilidade apenas em `/api/sync`, protegendo gravações financeiras.
+- Libera `/api/v1/asset/logo` sem headers customizados, requisito de carregadores de imagem como Coil.
+- Corrige a função ausente de identificação da fonte no leitor de notícias.
+- Permite redirecionamentos HTTPS entre Google News e o site público da matéria, com validação DNS e bloqueio de redes privadas em cada salto.
+- Preserva o fechamento diário consolidado, cache limitado, rate limit e métricas introduzidos na v398.
 
 ## Limites operacionais
 
 Cache, coalescência, métricas e rate limit permanecem deliberadamente em memória e limitados por instância serverless. Eles evitam crescimento ilimitado, mas não substituem rate limiting distribuído na borda da Vercel. O release de produção deve manter a proteção de borda habilitada e acompanhar `X-Valorae-Cache`, latência, códigos 426/429/5xx e tamanho das respostas.
+
+## Mapa interativo APK ↔ Proxy
+
+A página pública inclui a árvore operacional `interactive-flow-v401`, implementada em `public/ecosystem-flow-map.js` e `public/ecosystem-map.css`.
+
+O componente documenta 44 etapas e 63 conexões reais entre o Android, transporte HTTPS, roteador, segurança, cache, fontes externas, Supabase e retorno ao estado Compose. Ele oferece filtros por jornada, busca, zoom, arraste, recolhimento de swimlanes, painel técnico por nó e histórico opcional da regressão v398 → v399. A CSP mantém `connect-src 'none'`; o mapa não consulta APIs, não inicia polling e não altera o runtime do Proxy.
