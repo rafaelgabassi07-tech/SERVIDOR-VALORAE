@@ -13,27 +13,87 @@
 </head>
 <body>
   <header>
-    <img src="/assets/valorae-logo.svg" alt="VALORAE">
+    <div class="brand-lockup">
+      <img src="/assets/valorae-logo.svg" alt="VALORAE">
+      <span>Proxy 21.12.400</span>
+    </div>
     <p class="eyebrow">Infraestrutura privada do aplicativo Android</p>
-    <h1>Proxy de dados do APK VALORAE</h1>
-    <p class="lead">Serviço intermediário, reativo e executado somente quando o aplicativo solicita uma operação. Esta página é documentação estática: não lê métricas da Vercel, não consulta fontes financeiras, não acessa o Supabase e não inicia funções serverless.</p>
+    <h1>Integração clara entre o APK e suas fontes de dados</h1>
+    <p class="lead">O VALORAE Proxy é um serviço intermediário e reativo, executado somente quando o aplicativo solicita uma operação. Este monitor explica arquitetura, contratos e recuperação sem consultar Vercel, fontes financeiras, Supabase ou dados do usuário.</p>
+    <div class="header-signals" aria-label="Características operacionais">
+      <span><b>Execução</b> sob demanda</span>
+      <span><b>Telemetria nesta página</b> nenhuma</span>
+      <span><b>Dados pessoais exibidos</b> nenhum</span>
+    </div>
     <nav class="site-nav" aria-label="Navegação da documentação">
+      <a href="#overview">Visão geral</a>
       <a href="#ecosystem-map">Mapa do ecossistema</a>
-      <a href="#journeys">Jornadas principais</a>
-      <a href="#routes">Rotas publicadas</a>
-      <a href="#failures">Falhas e recuperação</a>
+      <a href="#journeys">Jornadas</a>
+      <a href="#routes">Rotas</a>
+      <a href="#failures">Recuperação</a>
       <a href="#security">Segurança</a>
     </nav>
   </header>
 
   <main>
+    <section id="overview" class="monitor-overview" aria-labelledby="overview-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Leitura operacional</p>
+          <h2 id="overview-title">O que este serviço faz — e o que ele não faz</h2>
+        </div>
+        <p>Uma visão resumida para entender o estado arquitetural antes de abrir o mapa técnico.</p>
+      </div>
+
+      <div class="overview-grid">
+        <article class="summary-tile" data-tone="gold">
+          <span class="summary-index">01</span>
+          <p>Modelo de execução</p>
+          <strong>Reativo</strong>
+          <small>Uma função nasce de uma solicitação válida do APK e encerra após responder.</small>
+        </article>
+        <article class="summary-tile" data-tone="green">
+          <span class="summary-index">02</span>
+          <p>Contrato móvel</p>
+          <strong>valorae-api-v1</strong>
+          <small>Versão, protocolo, schema e request ID protegem a continuidade entre APK e Proxy.</small>
+        </article>
+        <article class="summary-tile" data-tone="blue">
+          <span class="summary-index">03</span>
+          <p>Proventos pessoais</p>
+          <strong>Data COM + carteira</strong>
+          <small>Recebimentos exigem posição comprovada e respeitam a primeira aquisição registrada.</small>
+        </article>
+        <article class="summary-tile" data-tone="neutral">
+          <span class="summary-index">04</span>
+          <p>Monitor</p>
+          <strong>Estático e privado</strong>
+          <small>O navegador não abre conexão com API, banco, Vercel ou provedores financeiros.</small>
+        </article>
+      </div>
+
+      <div class="operation-strip" aria-label="Fluxo resumido da operação">
+        <div><span>1</span><p><b>Solicitação</b><small>O APK envia somente o necessário.</small></p></div>
+        <i aria-hidden="true">→</i>
+        <div><span>2</span><p><b>Validação</b><small>Compatibilidade, sessão, limites e schema.</small></p></div>
+        <i aria-hidden="true">→</i>
+        <div><span>3</span><p><b>Composição</b><small>Cache, fontes e regras de qualidade.</small></p></div>
+        <i aria-hidden="true">→</i>
+        <div><span>4</span><p><b>Entrega</b><small>JSON normalizado, parcialidade e rastreabilidade.</small></p></div>
+      </div>
+
+      <aside class="scope-note">
+        <strong>Estado de compatibilidade</strong>
+        <p>APK homologado <b>2026.08.04.01</b> · Proxy <b>21.12.400</b> · protocolo <b>2026.07.10.10</b>. A faixa 2026.07.30.01–03 permanece como baseline anterior documentada.</p>
+      </aside>
+    </section>
     <section id="ecosystem-map" class="architecture architecture-flow" aria-labelledby="ecosystem-map-title">
       <p class="section-kicker">Arquitetura operacional interativa</p>
       <h2 id="ecosystem-map-title">Árvore completa do fluxo APK ↔ Proxy</h2>
       <p class="map-intro">Acompanhe uma operação desde o toque do usuário até a resposta renderizada no Android. O mapa separa responsabilidades por swimlanes, mostra decisões, cache, segurança, fontes, retries e fallbacks, e permite inspecionar cada etapa técnica.</p>
 
       <div class="map-status" aria-label="Compatibilidade atual">
-        <span><strong>APK suportado</strong> 2026.07.30.01–03</span>
+        <span><strong>APK homologado</strong> 2026.08.04.01</span>
         <span><strong>Proxy</strong> 21.12.400</span>
         <span><strong>Protocolo móvel</strong> 2026.07.10.10</span>
         <span><strong>Contrato</strong> valorae-api-v1</span>
