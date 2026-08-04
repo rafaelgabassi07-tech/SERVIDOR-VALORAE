@@ -1,7 +1,7 @@
 -- VALORAE — RECUPERAÇÃO COMPLETA DA SINCRONIZAÇÃO FINANCEIRA v2
 -- Execute este arquivo uma única vez no SQL Editor do Supabase.
 -- É idempotente e reúne, na ordem correta, tabelas, RPCs, migração do legado e verificações.
--- Gerado para Proxy 21.12.400 / APK 2026.07.30.04.
+-- Gerado para Proxy 21.12.400 / APK 2026.08.04.01.
 
 -- Todas as alterações estruturais são aplicadas atomicamente; qualquer erro desfaz o lote.
 begin;
