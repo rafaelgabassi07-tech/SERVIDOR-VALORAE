@@ -15,7 +15,7 @@ for (const expected of [
   'ecosystem-flow-map.js',
   '/api/v1/sync',
   '2026.07.30.01–03',
-  '21.12.399',
+  '21.12.400',
 ]) assert.ok(html.includes(expected), `HTML do mapa precisa conter: ${expected}`);
 
 for (const expected of [

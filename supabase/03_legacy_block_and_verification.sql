@@ -11,6 +11,8 @@ as $$
 declare
   v_transactions jsonb;
   v_dividends jsonb;
+  v_transactions_updated timestamptz;
+  v_dividends_updated timestamptz;
 begin
   if p_user_id is null then raise exception using errcode = '22023', message = 'INVALID_USER_ID'; end if;
 
@@ -25,8 +27,8 @@ begin
       'grossValue', t.gross_value,
       'source', t.source,
       'importedAt', case when t.imported_at is null then null else floor(extract(epoch from t.imported_at) * 1000)::bigint end
-    ) order by t.transaction_date, t.client_tx_id), '[]'::jsonb)
-    into v_transactions
+    ) order by t.transaction_date, t.client_tx_id), '[]'::jsonb), max(t.updated_at)
+    into v_transactions, v_transactions_updated
     from public.valorae_financial_transactions t
    where t.user_id = p_user_id;
 
@@ -43,11 +45,10 @@ begin
       'estimatedAmount', d.estimated_amount,
       'status', d.status,
       'source', d.source
-    ) order by d.payment_date nulls last, d.ticker, d.event_id), '[]'::jsonb)
-    into v_dividends
+    ) order by d.payment_date nulls last, d.ticker, d.event_id), '[]'::jsonb), max(d.updated_at)
+    into v_dividends, v_dividends_updated
     from public.valorae_financial_dividends d
    where d.user_id = p_user_id;
-
 
   return jsonb_build_object(
     'ok', true,
@@ -56,12 +57,9 @@ begin
     'dividends', v_dividends,
     'transactions_count', jsonb_array_length(v_transactions),
     'dividends_count', jsonb_array_length(v_dividends),
-    'transactions_version', 0,
-    'dividends_version', 0,
-    'updated_at', greatest(
-      (select max(updated_at) from public.valorae_financial_transactions where user_id = p_user_id),
-      (select max(updated_at) from public.valorae_financial_dividends where user_id = p_user_id)
-    )
+    'transactions_version', coalesce(floor(extract(epoch from v_transactions_updated) * 1000)::bigint, 0),
+    'dividends_version', coalesce(floor(extract(epoch from v_dividends_updated) * 1000)::bigint, 0),
+    'updated_at', greatest(v_transactions_updated, v_dividends_updated)
   );
 end;
 $$;
@@ -73,18 +71,24 @@ stable
 security definer
 set search_path = public, pg_temp
 as $$
+  with tx as (
+    select count(*)::bigint n, max(updated_at) u
+      from public.valorae_financial_transactions
+     where user_id = p_user_id
+  ), dv as (
+    select count(*)::bigint n, max(updated_at) u
+      from public.valorae_financial_dividends
+     where user_id = p_user_id
+  )
   select jsonb_build_object(
     'ok', true,
     'contract', 'valorae-financial-sync-v2',
-    'transactions_count', (select count(*) from public.valorae_financial_transactions where user_id = p_user_id),
-    'dividends_count', (select count(*) from public.valorae_financial_dividends where user_id = p_user_id),
-    'transactions_version', 0,
-    'dividends_version', 0,
-    'updated_at', greatest(
-      (select max(updated_at) from public.valorae_financial_transactions where user_id = p_user_id),
-      (select max(updated_at) from public.valorae_financial_dividends where user_id = p_user_id)
-    )
-  );
+    'transactions_count', tx.n,
+    'dividends_count', dv.n,
+    'transactions_version', coalesce(floor(extract(epoch from tx.u) * 1000)::bigint, 0),
+    'dividends_version', coalesce(floor(extract(epoch from dv.u) * 1000)::bigint, 0),
+    'updated_at', greatest(tx.u, dv.u)
+  ) from tx cross join dv;
 $$;
 
 create or replace function public.valorae_financial_delete_v2(p_user_id uuid)
@@ -97,14 +101,23 @@ declare
   v_transactions integer := 0;
   v_dividends integer := 0;
 begin
+  if p_user_id is null then raise exception using errcode = '22023', message = 'INVALID_USER_ID'; end if;
   delete from public.valorae_financial_transactions where user_id = p_user_id;
   get diagnostics v_transactions = row_count;
   delete from public.valorae_financial_dividends where user_id = p_user_id;
   get diagnostics v_dividends = row_count;
-  return jsonb_build_object('ok', true, 'contract', 'valorae-financial-sync-v2', 'transactions_deleted', v_transactions, 'dividends_deleted', v_dividends, 'count', v_transactions + v_dividends);
+  return jsonb_build_object(
+    'ok', true,
+    'contract', 'valorae-financial-sync-v2',
+    'transactions_deleted', v_transactions,
+    'dividends_deleted', v_dividends,
+    'count', v_transactions + v_dividends,
+    'transactions_version', 0,
+    'dividends_version', 0,
+    'updated_at', now()
+  );
 end;
 $$;
-
 
 revoke all on function public.valorae_financial_download_v2(uuid) from public, anon, authenticated;
 revoke all on function public.valorae_financial_status_v2(uuid) from public, anon, authenticated;
@@ -312,6 +325,7 @@ comment on table public.valorae_financial_transactions is 'Histórico financeiro
 comment on table public.valorae_financial_dividends is 'Histórico e agenda mínima de dividendos do VALORAE.';
 comment on function public.valorae_financial_download_v2(uuid) is 'Baixa transações e dividendos em uma única consulta indexada, sem paginação entre APK e Proxy.';
 
+notify pgrst, 'reload schema';
 
 -- Confirmação visível no SQL Editor.
 select

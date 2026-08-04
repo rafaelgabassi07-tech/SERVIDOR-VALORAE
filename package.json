@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.399 com hotfix de comunicação, retrocompatibilidade v569-v571 e leitor de notícias corrigido.",
+  "description": "Proxy VALORAE 21.12.400 com recuperação da sincronização de transações, fallback PostgREST e compatibilidade v569–v572.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -18,7 +18,8 @@
     "audit:dead-code": "node scripts/audit-runtime-reachability.js",
     "audit:sql": "node scripts/validate-minimal-sql.js",
     "audit:on-demand": "node scripts/audit-on-demand-import.js",
-    "verify:release": "node scripts/verify-release.js"
+    "verify:release": "node scripts/verify-release.js",
+    "verify:cloud-sync": "node scripts/verify-cloud-sync-deployment.js"
   },
   "engines": {
     "node": "24.x"
@@ -30,34 +31,34 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.399-transport-regression-hotfix-v367",
+    "releasePatch": "21.12.400-cloud-transaction-recovery-v368",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.399",
-    "checkpoint": "transport-regression-hotfix-v367",
-    "releaseLabel": "transport-regression-hotfix-v367",
-    "apkVersion": "2026.07.30.03",
+    "publicVersion": "21.12.400",
+    "checkpoint": "cloud-transaction-recovery-v368",
+    "releaseLabel": "cloud-transaction-recovery-v368",
+    "apkVersion": "2026.07.30.04",
     "monitorVersion": "interactive-flow-v401",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.07.30.03",
+    "maxTestedApkVersion": "2026.07.30.04",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible"
   },
-  "releasePatch": "21.12.399-transport-regression-hotfix-v367",
+  "releasePatch": "21.12.400-cloud-transaction-recovery-v368",
   "config": {
-    "releasePatch": "21.12.399-transport-regression-hotfix-v367",
-    "publicVersion": "21.12.399",
-    "checkpoint": "transport-regression-hotfix-v367",
-    "releaseLabel": "transport-regression-hotfix-v367"
+    "releasePatch": "21.12.400-cloud-transaction-recovery-v368",
+    "publicVersion": "21.12.400",
+    "checkpoint": "cloud-transaction-recovery-v368",
+    "releaseLabel": "cloud-transaction-recovery-v368"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.399-transport-regression-hotfix-v367",
-    "publicVersion": "21.12.399",
-    "checkpoint": "transport-regression-hotfix-v367",
-    "releaseLabel": "transport-regression-hotfix-v367",
-    "apkVersion": "2026.07.30.03",
+    "releasePatch": "21.12.400-cloud-transaction-recovery-v368",
+    "publicVersion": "21.12.400",
+    "checkpoint": "cloud-transaction-recovery-v368",
+    "releaseLabel": "cloud-transaction-recovery-v368",
+    "apkVersion": "2026.07.30.04",
     "monitorVersion": "interactive-flow-v401",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.07.30.03"
+    "maxTestedApkVersion": "2026.07.30.04"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

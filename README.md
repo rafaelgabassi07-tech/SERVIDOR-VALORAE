@@ -4,11 +4,20 @@ Proxy Vercel estritamente sob demanda para o APK VALORAE. O runtime possui uma �
 
 ## Banco mínimo
 
-Execute no Supabase, nesta ordem:
+Para instalação ou recuperação, execute **uma única vez** `supabase/00_cloud_transaction_recovery.sql` no SQL Editor. O instalador é atômico e reúne, na ordem correta:
 
 1. `supabase/01_transactions.sql`
 2. `supabase/02_dividends.sql`
 3. `supabase/03_legacy_block_and_verification.sql`
+
+Os mesmos contratos também estão disponíveis no formato operacional de **dois arquivos completos**, compatível com a instalação já usada no Supabase:
+
+1. `supabase/complete/01_transactions_COMPLETO.sql`
+2. `supabase/complete/02_dividends_COMPLETO.sql`
+
+Não misture os formatos na mesma execução: use o instalador único `00` ou execute os dois arquivos completos na ordem acima.
+
+Depois de configurar as variáveis do Supabase no ambiente de deploy, execute `npm run verify:cloud-sync`. O gate verifica as duas tabelas e a RPC de status sem gravar transações.
 
 Não existem SQLs de snapshot, monitor, cache, dispositivo ou estado operacional. Circuit breaker, cache negativo, coalescência e continuidade usam somente memória efêmera da instância.
 
@@ -49,15 +58,16 @@ npm run check:syntax
 npm run audit:on-demand
 npm run audit:dead-code
 npm run audit:sql
+npm run verify:cloud-sync  # no ambiente com credenciais Supabase
 npm run test:cross-stack
 ```
 
 
 ## Compatibilidade do APK
 
-- APK pareado: `2026.07.30.03` (v571).
+- APK pareado: `2026.07.30.04` (v572).
 - APK mínimo aceito: `2026.07.30.01` (v569, versão instalada anterior ao hotfix).
-- APK máximo homologado: `2026.07.30.03`.
+- APK máximo homologado: `2026.07.30.04`.
 - Política: `valorae-apk-compatibility-v2-backward-compatible`; rotas de leitura permanecem disponíveis para APKs com o protocolo móvel compatível. HTTP 426 fica restrito à sincronização financeira, onde incompatibilidade pode alterar dados do usuário.
 - `VALORAE_REJECT_UNTESTED_FUTURE_APK=0` é um override operacional explícito; não deve ser usado rotineiramente em produção.
 - `npm run verify:release` exige Node 24, dependências instaladas, APK real, suíte integral, testes cross-stack e auditoria estrita.
@@ -81,3 +91,8 @@ Cache, coalescência, métricas e rate limit permanecem deliberadamente em memó
 A página pública inclui a árvore operacional `interactive-flow-v401`, implementada em `public/ecosystem-flow-map.js` e `public/ecosystem-map.css`.
 
 O componente documenta 44 etapas e 63 conexões reais entre o Android, transporte HTTPS, roteador, segurança, cache, fontes externas, Supabase e retorno ao estado Compose. Ele oferece filtros por jornada, busca, zoom, arraste, recolhimento de swimlanes, painel técnico por nó e histórico opcional da regressão v398 → v399. A CSP mantém `connect-src 'none'`; o mapa não consulta APIs, não inicia polling e não altera o runtime do Proxy.
+
+
+## Recuperação da sincronização financeira
+
+Execute `supabase/00_cloud_transaction_recovery.sql` no SQL Editor do Supabase, confirme o resultado, publique este Proxy e rode `npm run verify:cloud-sync` no ambiente configurado. O runtime tenta RPC v2 primeiro e usa PostgREST service-role como fallback quando a tabela já existe, mas a RPC ainda não entrou no schema cache.

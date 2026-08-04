@@ -15,11 +15,11 @@ assert.equal(manifest.storage.migration, null);
 assert.equal(manifest.guarantees.crossInstanceContractContinuity, false);
 assert.equal(manifest.guarantees.atomicLeaseSupport, false);
 assert.equal(manifest.guarantees.serviceRoleNeverExposedToApk, true);
-assert.equal(fs.readdirSync(new URL('../supabase/', import.meta.url)).filter(name => name.endsWith('.sql')).length, 3);
+assert.equal(fs.readdirSync(new URL('../supabase/', import.meta.url)).filter(name => name.endsWith('.sql')).length, 4);
 
 if (protocol !== null || http !== null || contract !== null) {
   assert.ok(!protocol?.includes('HeaderSharedState'));
   assert.ok(!http?.includes('sharedStateVersion'));
   assert.equal(contract, null);
 }
-console.log('cross-stack-shared-state memory-only v344 OK');
+console.log('cross-stack-shared-state memory-only v344 with recovery installer OK');

@@ -45,12 +45,16 @@ assert.equal(old.getHeader('X-Valorae-Apk-Compatibility'), 'SUPPORTED');
 
 const supported = await invoke('/api/v1/ready', { headers: apkHeaders('2026.07.30.03') });
 assert.equal(supported.statusCode, 200);
-assert.equal(supported.getHeader('X-Valorae-Apk-Compatibility'), 'PAIRED');
+assert.equal(supported.getHeader('X-Valorae-Apk-Compatibility'), 'SUPPORTED');
+
+const paired = await invoke('/api/v1/ready', { headers: apkHeaders('2026.07.30.04') });
+assert.equal(paired.statusCode, 200);
+assert.equal(paired.getHeader('X-Valorae-Apk-Compatibility'), 'PAIRED');
 
 clearCache();
 const daily = await invoke('/api/v1/mobile/daily-close', {
   method: 'POST',
-  headers: { ...apkHeaders('2026.07.30.03'), 'content-type': 'application/json' },
+  headers: { ...apkHeaders('2026.07.30.04'), 'content-type': 'application/json' },
   body: { positions: [] },
 });
 assert.equal(daily.statusCode, 200);
@@ -66,4 +70,4 @@ assert.equal(JSON.parse(invalidSync.body).code, 'APK_VERSION_INVALID');
 const logoWithoutHeaders = await invoke('/api/v1/asset/logo?ticker=PETR4');
 assert.notEqual(logoWithoutHeaders.statusCode, 403);
 
-console.log('APK compatibility route and daily-close headers v399 OK');
+console.log('APK compatibility route and daily-close headers v400 OK');

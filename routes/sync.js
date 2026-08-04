@@ -4,7 +4,7 @@ import { beginRoute, getInput } from '../lib/http/route.js';
 import { VALORAE_ENGINE_VERSION, VALORAE_RELEASE_PATCH } from '../lib/release/current.js';
 import { normalizeTicker } from '../lib/core/tickers.js';
 
-// Release patch: 21.12.399-transport-regression-hotfix-v367
+// Release patch: 21.12.400-cloud-transaction-recovery-v368
 const CORE_VERSION = VALORAE_RELEASE_PATCH;
 const SYNC_CONTRACT = 'valorae-financial-sync-v2';
 const TRANSACTIONS_TABLE = 'valorae_financial_transactions';
@@ -37,6 +37,8 @@ const runtime = globalThis.__VALORAE_MINIMAL_FINANCIAL_SYNC__ || {
     dividendUploads: 0,
     deletions: 0,
     legacyWriteBlocks: 0,
+    rpcFallbacks: 0,
+    rpcFallbackFailures: 0,
   },
 };
 globalThis.__VALORAE_MINIMAL_FINANCIAL_SYNC__ = runtime;
@@ -194,7 +196,8 @@ async function supabaseFetch(path, init = {}) {
     const error = new Error('Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Proxy.');
     error.status = 503;
     error.code = 'SUPABASE_NOT_CONFIGURED';
-    error.retryable = false;
+    error.retryable = true;
+    error.retryAfterMs = 15 * 60 * 1000;
     throw error;
   }
   const response = await fetchWithDeadline(`${config.url}${path}`, {
@@ -282,6 +285,34 @@ function bodyError(message, status, code) {
   return error;
 }
 
+function errorDetails(error) {
+  return `${error?.message || ''} ${JSON.stringify(error?.details || '')}`;
+}
+
+function isMissingRpcError(error) {
+  const details = errorDetails(error);
+  return error?.code === 'PGRST202' || /could not find the function|schema cache.*function/i.test(details);
+}
+
+function isMissingRelationError(error) {
+  const details = errorDetails(error);
+  return error?.code === 'PGRST205' || error?.code === '42P01' ||
+    /could not find the table|relation .* does not exist|schema cache.*table/i.test(details);
+}
+
+function migrationRequiredError(cause = null) {
+  const error = new Error('A estrutura financeira v2 ainda não está disponível no Supabase. Execute supabase/00_cloud_transaction_recovery.sql e publique novamente o Proxy.');
+  error.status = 503;
+  error.code = 'MINIMAL_SYNC_MIGRATION_REQUIRED';
+  // A infraestrutura pode ser corrigida sem atualizar o APK. A fila local deve voltar a tentar
+  // automaticamente depois do deploy, em vez de permanecer bloqueada como uma falha de login.
+  error.retryable = true;
+  error.retryAfterMs = 15 * 60 * 1000;
+  error.cause = cause || undefined;
+  error.details = cause?.details || cause?.message || undefined;
+  return error;
+}
+
 async function callRpc(name, args) {
   try {
     return await supabaseFetch(`/rest/v1/rpc/${name}`, {
@@ -290,7 +321,7 @@ async function callRpc(name, args) {
       body: JSON.stringify(args),
     });
   } catch (error) {
-    const details = `${error?.message || ''} ${JSON.stringify(error?.details || '')}`;
+    const details = errorDetails(error);
     if (/\b(?:(?:INVALID|IVALID)_TRANSACTION_ROWS|INVALID_TRANSACTIONS_PAYLOAD)\b/i.test(details)) {
       error.status = 422;
       error.code = 'SYNC_TRANSACTION_ROWS_REJECTED';
@@ -301,14 +332,280 @@ async function callRpc(name, args) {
       error.code = 'SYNC_DIVIDEND_ROWS_REJECTED';
       error.retryable = false;
       error.message = 'Um ou mais proventos possuem ticker ou datas inválidas; o histórico anterior foi preservado.';
-    } else if (error?.code === 'PGRST202' || /could not find the function|schema cache/i.test(details)) {
+    } else if (isMissingRpcError(error)) {
       error.status = 503;
-      error.code = 'MINIMAL_SYNC_MIGRATION_REQUIRED';
-      error.retryable = false;
-      error.message = 'Execute, em ordem, supabase/01_transactions.sql, 02_dividends.sql e 03_legacy_block_and_verification.sql antes de usar esta versão do Proxy.';
+      error.code = 'SYNC_RPC_MISSING';
+      error.retryable = true;
+      error.retryAfterMs = 15 * 60 * 1000;
+      error.message = `A RPC ${name} não está no schema cache; tentando o caminho REST seguro.`;
     }
     throw error;
   }
+}
+
+async function callRpcWithRestFallback(name, args, fallback) {
+  try {
+    return await callRpc(name, args);
+  } catch (error) {
+    if (error?.code !== 'SYNC_RPC_MISSING') throw error;
+    runtime.metrics.rpcFallbacks += 1;
+    try {
+      return await fallback();
+    } catch (fallbackError) {
+      runtime.metrics.rpcFallbackFailures += 1;
+      if (isMissingRelationError(fallbackError) || fallbackError?.code === 'SYNC_RPC_MISSING') {
+        throw migrationRequiredError(fallbackError);
+      }
+      throw fallbackError;
+    }
+  }
+}
+
+function restQuery(table, params = {}) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') query.set(key, String(value));
+  }
+  const suffix = query.toString();
+  return `/rest/v1/${table}${suffix ? `?${suffix}` : ''}`;
+}
+
+function tableTransactionRow(userId, row) {
+  return {
+    user_id: userId,
+    client_tx_id: row.clientTxId,
+    transaction_date: row.date,
+    operation: row.operation,
+    symbol: row.symbol,
+    asset_type: row.assetType || 'Outro',
+    quantity: finiteNumber(row.quantity),
+    price: finiteNumber(row.price),
+    gross_value: finiteNumber(row.grossValue),
+    source: row.source || 'VALORAE',
+    imported_at: row.importedAt || null,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function clientTransactionRow(row = {}) {
+  return {
+    clientTxId: cleanText(row.client_tx_id, 96),
+    date: cleanText(row.transaction_date, 40),
+    operation: cleanText(row.operation, 48),
+    symbol: normalizeTicker(row.symbol),
+    assetType: cleanText(row.asset_type || 'Outro', 80),
+    quantity: finiteNumber(row.quantity),
+    price: finiteNumber(row.price),
+    grossValue: finiteNumber(row.gross_value),
+    source: cleanText(row.source || 'VALORAE', 120),
+    importedAt: row.imported_at || null,
+    updatedAt: row.updated_at || null,
+  };
+}
+
+function tableDividendRow(userId, row) {
+  return {
+    user_id: userId,
+    event_id: row.eventId,
+    ticker: row.ticker,
+    date_com: row.dateCom || null,
+    ex_date: row.exDate || null,
+    inferred_com_date: row.inferredComDate || null,
+    eligibility_date_source: row.eligibilityDateSource || null,
+    payment_date: row.paymentDate || null,
+    value_per_share: finiteNumber(row.valuePerShare),
+    quantity: finiteNumber(row.quantity),
+    estimated_amount: finiteNumber(row.estimatedAmount),
+    status: row.status || 'oficial',
+    source: row.source || 'VALORAE',
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function clientDividendRow(row = {}) {
+  return {
+    eventId: cleanText(row.event_id, 96),
+    ticker: normalizeTicker(row.ticker),
+    dateCom: cleanText(row.date_com, 40),
+    exDate: cleanText(row.ex_date, 40),
+    inferredComDate: cleanText(row.inferred_com_date, 40),
+    eligibilityDateSource: cleanText(row.eligibility_date_source, 80),
+    paymentDate: cleanText(row.payment_date, 40),
+    valuePerShare: finiteNumber(row.value_per_share),
+    quantity: finiteNumber(row.quantity),
+    estimatedAmount: finiteNumber(row.estimated_amount),
+    status: cleanText(row.status || 'oficial', 48),
+    source: cleanText(row.source || 'VALORAE', 120),
+    updatedAt: row.updated_at || null,
+  };
+}
+
+function latestTimestamp(rows = []) {
+  return rows.reduce((latest, row) => {
+    const candidate = Date.parse(row?.updated_at || row?.updatedAt || '');
+    return Number.isFinite(candidate) ? Math.max(latest, candidate) : latest;
+  }, 0);
+}
+
+function directSyncState(transactions = [], dividends = []) {
+  const transactionsVersion = latestTimestamp(transactions);
+  const dividendsVersion = latestTimestamp(dividends);
+  return {
+    ok: true,
+    contract: SYNC_CONTRACT,
+    transactions_version: transactionsVersion,
+    dividends_version: dividendsVersion,
+    updated_at: new Date(Math.max(transactionsVersion, dividendsVersion, Date.now())).toISOString(),
+  };
+}
+
+async function directDownloadFinancialData(userId) {
+  const [transactions, dividends] = await Promise.all([
+    supabaseFetch(restQuery(TRANSACTIONS_TABLE, {
+      select: 'client_tx_id,transaction_date,operation,symbol,asset_type,quantity,price,gross_value,source,imported_at,updated_at',
+      user_id: `eq.${userId}`,
+      order: 'transaction_date.asc,client_tx_id.asc',
+    })),
+    supabaseFetch(restQuery(DIVIDENDS_TABLE, {
+      select: 'event_id,ticker,date_com,ex_date,inferred_com_date,eligibility_date_source,payment_date,value_per_share,quantity,estimated_amount,status,source,updated_at',
+      user_id: `eq.${userId}`,
+      order: 'payment_date.asc,event_id.asc',
+    })),
+  ]);
+  const txRows = Array.isArray(transactions) ? transactions : [];
+  const dividendRows = Array.isArray(dividends) ? dividends : [];
+  return {
+    ...directSyncState(txRows, dividendRows),
+    transactions: txRows.map(clientTransactionRow),
+    dividends: dividendRows.map(clientDividendRow),
+    transactions_count: txRows.length,
+    dividends_count: dividendRows.length,
+    transport: 'postgrest-fallback',
+  };
+}
+
+async function directFinancialStatus(userId) {
+  const data = await directDownloadFinancialData(userId);
+  return {
+    ...directSyncState(data.transactions, data.dividends),
+    transactions_count: data.transactions_count,
+    dividends_count: data.dividends_count,
+    transport: 'postgrest-fallback',
+  };
+}
+
+function chunk(values = [], size = 50) {
+  const output = [];
+  for (let index = 0; index < values.length; index += size) output.push(values.slice(index, index + size));
+  return output;
+}
+
+async function deleteRowsByIds(table, userId, key, ids = []) {
+  let deleted = 0;
+  for (const group of chunk([...new Set(ids.filter(Boolean))])) {
+    if (!group.length) continue;
+    const removed = await supabaseFetch(restQuery(table, {
+      select: key,
+      user_id: `eq.${userId}`,
+      [key]: `in.(${group.join(',')})`,
+    }), {
+      method: 'DELETE',
+      headers: { prefer: 'return=representation' },
+    });
+    deleted += Array.isArray(removed) ? removed.length : group.length;
+  }
+  return deleted;
+}
+
+async function directUploadTransactions(userId, rows, replaceSymbols = []) {
+  let deleted = 0;
+  if (replaceSymbols.length) {
+    for (const symbol of replaceSymbols) {
+      const existing = await supabaseFetch(restQuery(TRANSACTIONS_TABLE, {
+        select: 'client_tx_id',
+        user_id: `eq.${userId}`,
+        symbol: `eq.${symbol}`,
+      }));
+      const keep = new Set(rows.filter(row => row.symbol === symbol).map(row => row.clientTxId));
+      const stale = (Array.isArray(existing) ? existing : [])
+        .map(row => cleanText(row?.client_tx_id, 96))
+        .filter(id => id && !keep.has(id));
+      deleted += await deleteRowsByIds(TRANSACTIONS_TABLE, userId, 'client_tx_id', stale);
+    }
+  }
+  let stored = [];
+  if (rows.length) {
+    stored = await supabaseFetch(restQuery(TRANSACTIONS_TABLE, {
+      on_conflict: 'user_id,client_tx_id',
+      select: 'client_tx_id,updated_at',
+    }), {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        prefer: 'resolution=merge-duplicates,return=representation',
+      },
+      body: JSON.stringify(rows.map(row => tableTransactionRow(userId, row))),
+    });
+  }
+  const returned = Array.isArray(stored) ? stored : [];
+  return {
+    ...directSyncState(returned, []),
+    count: rows.length,
+    deleted,
+    transport: 'postgrest-fallback',
+  };
+}
+
+async function directUploadDividends(userId, rows, replaceAll) {
+  let deleted = 0;
+  if (replaceAll) {
+    const existing = await supabaseFetch(restQuery(DIVIDENDS_TABLE, {
+      select: 'event_id',
+      user_id: `eq.${userId}`,
+    }));
+    const keep = new Set(rows.map(row => row.eventId));
+    const stale = (Array.isArray(existing) ? existing : [])
+      .map(row => cleanText(row?.event_id, 96))
+      .filter(id => id && !keep.has(id));
+    deleted = await deleteRowsByIds(DIVIDENDS_TABLE, userId, 'event_id', stale);
+  }
+  let stored = [];
+  if (rows.length) {
+    stored = await supabaseFetch(restQuery(DIVIDENDS_TABLE, {
+      on_conflict: 'user_id,event_id',
+      select: 'event_id,updated_at',
+    }), {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        prefer: 'resolution=merge-duplicates,return=representation',
+      },
+      body: JSON.stringify(rows.map(row => tableDividendRow(userId, row))),
+    });
+  }
+  const returned = Array.isArray(stored) ? stored : [];
+  return {
+    ...directSyncState([], returned),
+    count: rows.length,
+    deleted,
+    transport: 'postgrest-fallback',
+  };
+}
+
+async function directDeleteFinancialData(userId) {
+  const [transactions, dividends] = await Promise.all([
+    supabaseFetch(restQuery(TRANSACTIONS_TABLE, { select: 'client_tx_id', user_id: `eq.${userId}` }), {
+      method: 'DELETE', headers: { prefer: 'return=representation' },
+    }),
+    supabaseFetch(restQuery(DIVIDENDS_TABLE, { select: 'event_id', user_id: `eq.${userId}` }), {
+      method: 'DELETE', headers: { prefer: 'return=representation' },
+    }),
+  ]);
+  return {
+    ...directSyncState([], []),
+    count: (Array.isArray(transactions) ? transactions.length : 0) + (Array.isArray(dividends) ? dividends.length : 0),
+    transport: 'postgrest-fallback',
+  };
 }
 
 function cleanText(value, max = 160) {
@@ -585,7 +882,7 @@ function syncStateFrom(result = {}) {
 async function downloadFinancialData(userId) {
   runtime.metrics.downloads += 1;
   const result = assertRpcContract(
-    normalizeRpcObject(await callRpc(DOWNLOAD_RPC, { p_user_id: userId })),
+    normalizeRpcObject(await callRpcWithRestFallback(DOWNLOAD_RPC, { p_user_id: userId }, () => directDownloadFinancialData(userId))),
     DOWNLOAD_RPC,
   );
   const transactions = Array.isArray(result.transactions) ? result.transactions : [];
@@ -618,8 +915,8 @@ async function downloadFinancialData(userId) {
     contract: SYNC_CONTRACT,
     restoreContract: SYNC_CONTRACT,
     restore_contract: SYNC_CONTRACT,
-    restoreSource: DOWNLOAD_RPC,
-    restore_source: DOWNLOAD_RPC,
+    restoreSource: result.transport === 'postgrest-fallback' ? 'postgrest-tables' : DOWNLOAD_RPC,
+    restore_source: result.transport === 'postgrest-fallback' ? 'postgrest-tables' : DOWNLOAD_RPC,
     identitySource: 'supabase_user_id',
     identity_source: 'supabase_user_id',
     transactions,
@@ -638,6 +935,7 @@ async function downloadFinancialData(userId) {
     dividendsVersion: Number(result.dividends_version || 0),
     dividends_version: Number(result.dividends_version || 0),
     syncState: syncStateFrom(result),
+    transport: result.transport || 'rpc',
   };
 }
 
@@ -645,7 +943,8 @@ async function uploadTransactions(userId, input, action) {
   const sourceRows = Array.isArray(input.transactions) ? input.transactions : Array.isArray(input.rows) ? input.rows : [];
   const normalizedRows = sourceRows.map(normalizeTransaction);
   const invalidRows = normalizedRows.filter(row => !row.clientTxId || !row.symbol || !row.date || !row.operation ||
-    !Number.isFinite(row.quantity) || !Number.isFinite(row.price) || !Number.isFinite(row.grossValue));
+    !Number.isFinite(row.quantity) || !Number.isFinite(row.price) || !Number.isFinite(row.grossValue) ||
+    !(row.quantity > 0 || row.grossValue > 0));
   if (invalidRows.length > 0) {
     const error = new Error(`${invalidRows.length} transação(ões) não puderam ser normalizadas; o lote inteiro foi recusado para evitar Histórico parcial.`);
     error.status = 422;
@@ -661,11 +960,11 @@ async function uploadTransactions(userId, input, action) {
     : [];
   runtime.metrics.transactionUploads += 1;
   const result = assertRpcContract(
-    normalizeRpcObject(await callRpc(UPLOAD_TRANSACTIONS_RPC, {
+    normalizeRpcObject(await callRpcWithRestFallback(UPLOAD_TRANSACTIONS_RPC, {
       p_user_id: userId,
       p_rows: rows,
       p_replace_symbols: symbols.length ? symbols : null,
-    })),
+    }, () => directUploadTransactions(userId, rows, symbols))),
     UPLOAD_TRANSACTIONS_RPC,
   );
   return {
@@ -677,6 +976,7 @@ async function uploadTransactions(userId, input, action) {
     normalizedCount: rows.length,
     message: `Histórico sincronizado: ${Number(result.count || 0)} alteração(ões), ${Number(result.deleted || 0)} remoção(ões).`,
     syncState: syncStateFrom(result),
+    transport: result.transport || 'rpc',
   };
 }
 
@@ -696,11 +996,11 @@ async function uploadDividends(userId, input) {
   const rows = dedupeDividendRows(normalizedRows);
   runtime.metrics.dividendUploads += 1;
   const result = assertRpcContract(
-    normalizeRpcObject(await callRpc(UPLOAD_DIVIDENDS_RPC, {
+    normalizeRpcObject(await callRpcWithRestFallback(UPLOAD_DIVIDENDS_RPC, {
       p_user_id: userId,
       p_rows: rows,
       p_replace_all: input.replaceAll !== false && input.replace_all !== false,
-    })),
+    }, () => directUploadDividends(userId, rows, input.replaceAll !== false && input.replace_all !== false))),
     UPLOAD_DIVIDENDS_RPC,
   );
   return {
@@ -712,12 +1012,13 @@ async function uploadDividends(userId, input) {
     normalizedCount: rows.length,
     message: `Dividendos sincronizados: ${Number(result.count || 0)} alteração(ões), ${Number(result.deleted || 0)} remoção(ões).`,
     syncState: syncStateFrom(result),
+    transport: result.transport || 'rpc',
   };
 }
 
 async function financialStatus(userId) {
   const result = assertRpcContract(
-    normalizeRpcObject(await callRpc(STATUS_RPC, { p_user_id: userId })),
+    normalizeRpcObject(await callRpcWithRestFallback(STATUS_RPC, { p_user_id: userId }, () => directFinancialStatus(userId))),
     STATUS_RPC,
   );
   return {
@@ -726,13 +1027,14 @@ async function financialStatus(userId) {
     transactionsCount: Number(result.transactions_count || 0),
     dividendsCount: Number(result.dividends_count || 0),
     syncState: syncStateFrom(result),
+    transport: result.transport || 'rpc',
   };
 }
 
 async function deleteFinancialData(userId) {
   runtime.metrics.deletions += 1;
   const result = assertRpcContract(
-    normalizeRpcObject(await callRpc(DELETE_RPC, { p_user_id: userId })),
+    normalizeRpcObject(await callRpcWithRestFallback(DELETE_RPC, { p_user_id: userId }, () => directDeleteFinancialData(userId))),
     DELETE_RPC,
   );
   return {
@@ -741,6 +1043,7 @@ async function deleteFinancialData(userId) {
     count: Number(result.count || 0),
     message: 'Histórico de transações e dividendos removido da nuvem.',
     syncState: syncStateFrom(result),
+    transport: result.transport || 'rpc',
   };
 }
 
@@ -836,8 +1139,8 @@ export default async function handler(req, res) {
       const meta = {
         status: ok ? 200 : 503,
         code: ok ? (migrationReady ? 'MINIMAL_SYNC_READY' : 'MINIMAL_SYNC_CONFIG_OK') : 'SUPABASE_NOT_CONFIGURED',
-        retryable: false,
-        retryAfterMs: null,
+        retryable: !ok,
+        retryAfterMs: ok ? null : 15 * 60 * 1000,
       };
       applyResponseHeaders(res, meta);
       return send(req, res, {
@@ -883,7 +1186,8 @@ export default async function handler(req, res) {
       const error = new Error('Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Proxy.');
       error.status = 503;
       error.code = 'SUPABASE_NOT_CONFIGURED';
-      error.retryable = false;
+      error.retryable = true;
+      error.retryAfterMs = 15 * 60 * 1000;
       throw error;
     }
 
@@ -980,6 +1284,13 @@ export const _test = {
   assertRpcContract,
   dedupeRows,
   dedupeDividendRows,
+  isMissingRpcError,
+  isMissingRelationError,
+  migrationRequiredError,
+  restQuery,
+  tableTransactionRow,
+  clientTransactionRow,
+  directUploadTransactions,
   dividendRowQuality,
   dividendAmountToken,
   dividendEconomicBaseKey,

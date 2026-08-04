@@ -1,6 +1,17 @@
--- VALORAE — 02/03 DIVIDENDOS
--- Execute depois de 01_transactions.sql. Cria somente a tabela/RPC de dividendos.
+-- VALORAE — SQL CANÔNICA 02/02 — DIVIDENDOS E RESTAURAÇÃO COMPLETA
+-- Envio/restauração de dividendos e RPCs unificadas. Execute depois do arquivo 1.
+-- Contrato valorae-financial-sync-v2 — Proxy 21.12.400+ / APK 2026.07.30.04+.
 
+begin;
+
+do $$
+begin
+  if to_regclass('public.valorae_financial_transactions') is null
+     or to_regprocedure('public.valorae_financial_download_transactions_v2(uuid)') is null then
+    raise exception using errcode = '55000', message = 'VALORAE_SQL_01_REQUIRED',
+      detail = 'Execute primeiro o arquivo 01_transactions.sql completo.';
+  end if;
+end $$;
 create table if not exists public.valorae_financial_dividends (
   user_id uuid not null references auth.users(id) on delete cascade,
   event_id text not null,
@@ -30,6 +41,7 @@ alter table public.valorae_financial_dividends enable row level security;
 revoke all on table public.valorae_financial_dividends from public, anon, authenticated;
 grant select, insert, update, delete on table public.valorae_financial_dividends to service_role;
 
+drop function if exists public.valorae_financial_upload_dividends_v2(uuid, jsonb, boolean);
 create or replace function public.valorae_financial_upload_dividends_v2(
   p_user_id uuid,
   p_rows jsonb,
@@ -164,3 +176,150 @@ $$;
 revoke all on function public.valorae_financial_upload_dividends_v2(uuid, jsonb, boolean) from public, anon, authenticated;
 grant execute on function public.valorae_financial_upload_dividends_v2(uuid, jsonb, boolean) to service_role;
 comment on table public.valorae_financial_dividends is 'Histórico e agenda mínima de dividendos do VALORAE.';
+
+
+-- Restauração de dividendos em formato aceito pelo APK.
+drop function if exists public.valorae_financial_download_dividends_v2(uuid);
+create function public.valorae_financial_download_dividends_v2(p_user_id uuid)
+returns jsonb
+language plpgsql stable security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_rows jsonb;
+  v_updated timestamptz;
+begin
+  if p_user_id is null then
+    raise exception using errcode = '22023', message = 'INVALID_USER_ID';
+  end if;
+  select coalesce(jsonb_agg(jsonb_build_object(
+      'eventId', event_id,
+      'ticker', ticker,
+      'dateCom', coalesce(to_char(date_com, 'YYYY-MM-DD'), ''),
+      'exDate', coalesce(to_char(ex_date, 'YYYY-MM-DD'), ''),
+      'inferredComDate', coalesce(to_char(inferred_com_date, 'YYYY-MM-DD'), ''),
+      'eligibilityDateSource', coalesce(eligibility_date_source, ''),
+      'paymentDate', coalesce(to_char(payment_date, 'YYYY-MM-DD'), ''),
+      'valuePerShare', value_per_share,
+      'quantity', quantity,
+      'estimatedAmount', estimated_amount,
+      'status', status,
+      'source', source
+    ) order by payment_date nulls last, ticker, event_id), '[]'::jsonb), max(updated_at)
+    into v_rows, v_updated
+    from public.valorae_financial_dividends
+   where user_id = p_user_id;
+  return jsonb_build_object(
+    'ok', true,
+    'contract', 'valorae-financial-sync-v2',
+    'dividends', v_rows,
+    'events', v_rows,
+    'dividends_count', jsonb_array_length(v_rows),
+    'dividends_version', coalesce(floor(extract(epoch from v_updated) * 1000)::bigint, 0),
+    'updated_at', v_updated
+  );
+end;
+$$;
+
+-- Restauração única usada pelo Proxy e pelo APK.
+drop function if exists public.valorae_financial_download_v2(uuid);
+create function public.valorae_financial_download_v2(p_user_id uuid)
+returns jsonb
+language plpgsql stable security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_tx jsonb := public.valorae_financial_download_transactions_v2(p_user_id);
+  v_div jsonb := public.valorae_financial_download_dividends_v2(p_user_id);
+begin
+  return jsonb_build_object(
+    'ok', true,
+    'contract', 'valorae-financial-sync-v2',
+    'transactions', coalesce(v_tx->'transactions', '[]'::jsonb),
+    'dividends', coalesce(v_div->'dividends', '[]'::jsonb),
+    'transactions_count', coalesce((v_tx->>'transactions_count')::integer, 0),
+    'dividends_count', coalesce((v_div->>'dividends_count')::integer, 0),
+    'transactions_version', coalesce((v_tx->>'transactions_version')::bigint, 0),
+    'dividends_version', coalesce((v_div->>'dividends_version')::bigint, 0),
+    'updated_at', greatest(
+      nullif(v_tx->>'updated_at', '')::timestamptz,
+      nullif(v_div->>'updated_at', '')::timestamptz
+    )
+  );
+end;
+$$;
+
+-- Status sem transferir os históricos completos.
+drop function if exists public.valorae_financial_status_v2(uuid);
+create function public.valorae_financial_status_v2(p_user_id uuid)
+returns jsonb
+language sql stable security definer
+set search_path = public, pg_temp
+as $$
+  with tx as (
+    select count(*)::bigint n, max(updated_at) u from public.valorae_financial_transactions where user_id = p_user_id
+  ), dv as (
+    select count(*)::bigint n, max(updated_at) u from public.valorae_financial_dividends where user_id = p_user_id
+  )
+  select jsonb_build_object(
+    'ok', true,
+    'contract', 'valorae-financial-sync-v2',
+    'transactions_count', tx.n,
+    'dividends_count', dv.n,
+    'transactions_version', coalesce(floor(extract(epoch from tx.u) * 1000)::bigint, 0),
+    'dividends_version', coalesce(floor(extract(epoch from dv.u) * 1000)::bigint, 0),
+    'updated_at', greatest(tx.u, dv.u)
+  ) from tx cross join dv;
+$$;
+
+-- Exclusão completa solicitada pelo APK.
+drop function if exists public.valorae_financial_delete_v2(uuid);
+create function public.valorae_financial_delete_v2(p_user_id uuid)
+returns jsonb
+language plpgsql security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_tx integer := 0;
+  v_div integer := 0;
+begin
+  if p_user_id is null then
+    raise exception using errcode = '22023', message = 'INVALID_USER_ID';
+  end if;
+  delete from public.valorae_financial_transactions where user_id = p_user_id;
+  get diagnostics v_tx = row_count;
+  delete from public.valorae_financial_dividends where user_id = p_user_id;
+  get diagnostics v_div = row_count;
+  return jsonb_build_object(
+    'ok', true,
+    'contract', 'valorae-financial-sync-v2',
+    'transactions_deleted', v_tx,
+    'dividends_deleted', v_div,
+    'count', v_tx + v_div,
+    'transactions_version', 0,
+    'dividends_version', 0,
+    'updated_at', now()
+  );
+end;
+$$;
+
+revoke all on function public.valorae_financial_download_dividends_v2(uuid) from public, anon, authenticated;
+revoke all on function public.valorae_financial_download_v2(uuid) from public, anon, authenticated;
+revoke all on function public.valorae_financial_status_v2(uuid) from public, anon, authenticated;
+revoke all on function public.valorae_financial_delete_v2(uuid) from public, anon, authenticated;
+grant execute on function public.valorae_financial_download_dividends_v2(uuid) to service_role;
+grant execute on function public.valorae_financial_download_v2(uuid) to service_role;
+grant execute on function public.valorae_financial_status_v2(uuid) to service_role;
+grant execute on function public.valorae_financial_delete_v2(uuid) to service_role;
+notify pgrst, 'reload schema';
+
+commit;
+
+select
+  'valorae-financial-sync-v2' as contract,
+  to_regclass('public.valorae_financial_dividends') is not null as tabela_dividendos,
+  to_regprocedure('public.valorae_financial_upload_dividends_v2(uuid,jsonb,boolean)') is not null as envio_dividendos,
+  to_regprocedure('public.valorae_financial_download_v2(uuid)') is not null as restauracao_completa,
+  to_regprocedure('public.valorae_financial_status_v2(uuid)') is not null as status_completo,
+  to_regprocedure('public.valorae_financial_delete_v2(uuid)') is not null as exclusao_completa,
+  true as postgrest_schema_reload_requested;

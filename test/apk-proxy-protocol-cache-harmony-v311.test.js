@@ -13,8 +13,8 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
-assert.equal(packageJson.valorae.publicVersion, '21.12.399');
-assert.equal(packageJson.valorae.releasePatch, '21.12.399-transport-regression-hotfix-v367');
+assert.equal(packageJson.valorae.publicVersion, '21.12.400');
+assert.equal(packageJson.valorae.releasePatch, '21.12.400-cloud-transaction-recovery-v368');
 assert.equal(metadata.apkVersion, packageJson.valorae.apkVersion);
 assert.ok(metadata.contractVersion.includes(`APK ${metadata.apkCheckpoint.match(/^v\d+/)?.[0]} / Proxy ${packageJson.valorae.publicVersion}`));
 assert.equal(packageJson.releaseMetadata.apkVersion, metadata.apkVersion);

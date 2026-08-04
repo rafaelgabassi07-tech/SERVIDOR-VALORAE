@@ -1,7 +1,8 @@
--- VALORAE — 01/03 TRANSAÇÕES
--- Execute primeiro. Cria somente a tabela/RPC de transações e helpers compartilhados.
+-- VALORAE — SQL CANÔNICA 01/02 — TRANSAÇÕES
+-- Envio e restauração de transações. Execute primeiro.
+-- Contrato valorae-financial-sync-v2 — Proxy 21.12.400+ / APK 2026.07.30.04+.
 
-
+begin;
 create extension if not exists pgcrypto;
 
 create table if not exists public.valorae_financial_transactions (
@@ -141,6 +142,7 @@ begin
 end;
 $$;
 
+drop function if exists public.valorae_financial_upload_transactions_v2(uuid, jsonb, text[]);
 create or replace function public.valorae_financial_upload_transactions_v2(
   p_user_id uuid,
   p_rows jsonb,
@@ -273,3 +275,57 @@ $$;
 revoke all on function public.valorae_financial_upload_transactions_v2(uuid, jsonb, text[]) from public, anon, authenticated;
 grant execute on function public.valorae_financial_upload_transactions_v2(uuid, jsonb, text[]) to service_role;
 comment on table public.valorae_financial_transactions is 'Histórico financeiro mínimo do VALORAE. Sem payload JSON duplicado.';
+
+
+-- Restauração de transações em formato aceito pelo APK.
+drop function if exists public.valorae_financial_download_transactions_v2(uuid);
+create function public.valorae_financial_download_transactions_v2(p_user_id uuid)
+returns jsonb
+language plpgsql stable security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_rows jsonb;
+  v_updated timestamptz;
+begin
+  if p_user_id is null then
+    raise exception using errcode = '22023', message = 'INVALID_USER_ID';
+  end if;
+  select coalesce(jsonb_agg(jsonb_build_object(
+      'clientTxId', client_tx_id,
+      'date', to_char(transaction_date, 'YYYY-MM-DD'),
+      'operation', operation,
+      'symbol', symbol,
+      'assetType', asset_type,
+      'quantity', quantity,
+      'price', price,
+      'grossValue', gross_value,
+      'source', source,
+      'importedAt', case when imported_at is null then null
+        else floor(extract(epoch from imported_at) * 1000)::bigint end
+    ) order by transaction_date, client_tx_id), '[]'::jsonb), max(updated_at)
+    into v_rows, v_updated
+    from public.valorae_financial_transactions
+   where user_id = p_user_id;
+  return jsonb_build_object(
+    'ok', true,
+    'contract', 'valorae-financial-sync-v2',
+    'transactions', v_rows,
+    'transactions_count', jsonb_array_length(v_rows),
+    'transactions_version', coalesce(floor(extract(epoch from v_updated) * 1000)::bigint, 0),
+    'updated_at', v_updated
+  );
+end;
+$$;
+
+revoke all on function public.valorae_financial_download_transactions_v2(uuid) from public, anon, authenticated;
+grant execute on function public.valorae_financial_download_transactions_v2(uuid) to service_role;
+notify pgrst, 'reload schema';
+
+commit;
+
+select
+  'valorae-financial-sync-v2' as contract,
+  to_regclass('public.valorae_financial_transactions') is not null as tabela_transacoes,
+  to_regprocedure('public.valorae_financial_upload_transactions_v2(uuid,jsonb,text[])') is not null as envio_transacoes,
+  to_regprocedure('public.valorae_financial_download_transactions_v2(uuid)') is not null as restauracao_transacoes;
