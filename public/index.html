@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'none'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
   <title>VALORAE Proxy — Integração privada com o APK</title>
   <link rel="icon" href="/assets/valorae-favicon-48.png" sizes="48x48">
   <link rel="stylesheet" href="/monitor.css">
@@ -88,101 +88,220 @@
       </aside>
     </section>
     <section id="ecosystem-map" class="architecture architecture-flow" aria-labelledby="ecosystem-map-title">
-      <p class="section-kicker">Arquitetura operacional interativa</p>
-      <h2 id="ecosystem-map-title">Árvore completa do fluxo APK ↔ Proxy</h2>
-      <p class="map-intro">Acompanhe uma operação desde o toque do usuário até a resposta renderizada no Android. O mapa separa responsabilidades por swimlanes, mostra decisões, cache, segurança, fontes, retries e fallbacks, e permite inspecionar cada etapa técnica.</p>
+      <p class="section-kicker">Arquitetura operacional estática</p>
+      <h2 id="ecosystem-map-title">Árvore completa do fluxo APK → Proxy → APK</h2>
+      <p class="map-intro">Esta árvore é parte fixa do HTML: não depende de JavaScript, telemetria, zoom, filtros ou conexão com a API. Todas as etapas do caminho permanecem visíveis, desde a ação no Android até a resposta renderizada, incluindo atalhos locais, módulos do Proxy, fontes, cache e recuperação.</p>
 
-      <div class="map-status" aria-label="Compatibilidade atual">
+      <div class="map-status" aria-label="Compatibilidade documentada">
         <span><strong>APK homologado</strong> 2026.08.04.01</span>
         <span><strong>Proxy</strong> 21.12.400</span>
         <span><strong>Protocolo móvel</strong> 2026.07.10.10</span>
         <span><strong>Contrato</strong> valorae-api-v1</span>
+        <span><strong>Modo do mapa</strong> estático, sem rede</span>
       </div>
 
-      <div class="flow-map-shell" data-flow-map>
-        <div class="flow-map-toolbar" aria-label="Controles do mapa">
-          <div class="flow-toolbar-group flow-journey-filter" aria-label="Filtrar jornada" role="group">
-            <span class="flow-toolbar-label">Jornada</span>
-            <div id="flowJourneyButtons" class="flow-chip-row"></div>
+      <div class="static-flow-shell" aria-label="Fluxo estático completo entre o aplicativo Android, o Proxy e as fontes de dados">
+        <div class="static-flow-section">
+          <div class="static-flow-heading">
+            <span>01</span>
+            <div><strong>Origem no Android</strong><small>A jornada nasce no usuário ou em um worker autorizado.</small></div>
           </div>
-
-          <div class="flow-toolbar-group flow-search-group">
-            <label for="flowMapSearch">Buscar etapa, endpoint ou componente</label>
-            <div class="flow-search-box">
-              <input id="flowMapSearch" type="search" autocomplete="off" placeholder="Ex.: /asset/modal, Room, cache...">
-              <button id="flowClearSearch" type="button" aria-label="Limpar busca">×</button>
-            </div>
-          </div>
-
-          <div class="flow-toolbar-group flow-view-actions" role="group" aria-label="Controles de visualização">
-            <button id="flowZoomOut" type="button" title="Reduzir zoom" aria-label="Reduzir zoom">−</button>
-            <output id="flowZoomValue" aria-live="polite">100%</output>
-            <button id="flowZoomIn" type="button" title="Aumentar zoom" aria-label="Aumentar zoom">+</button>
-            <button id="flowFit" type="button">Ajustar</button>
-            <button id="flowReset" type="button">Restaurar</button>
-            <button id="flowHistoryToggle" type="button" aria-pressed="false">Histórico v398→v399</button>
+          <div class="static-flow-chain static-flow-chain-three">
+            <article class="static-flow-node" data-kind="start">
+              <b>Usuário ou WorkManager</b>
+              <p>Abertura de tela, seleção de ativo, atualização manual, sincronização ou fechamento diário.</p>
+            </article>
+            <span class="static-flow-arrow" aria-hidden="true">→</span>
+            <article class="static-flow-node">
+              <b>Compose UI + ViewModel</b>
+              <p>A interface emite uma intenção; o ViewModel coordena estado, cancelamento e continuidade visual.</p>
+            </article>
+            <span class="static-flow-arrow" aria-hidden="true">→</span>
+            <article class="static-flow-node">
+              <b>Repository</b>
+              <p>Decide entre memória, Room, cache local e solicitação remota conforme validade e jornada.</p>
+            </article>
           </div>
         </div>
 
-        <div class="flow-map-context" aria-live="polite">
-          <div id="flowBreadcrumb" class="flow-breadcrumb">Visão completa · todas as camadas</div>
-          <div id="flowMapSummary" class="flow-map-summary"></div>
-        </div>
-
-        <div id="flowMapViewport" class="flow-map-viewport" tabindex="0" role="application" aria-label="Mapa interativo do fluxo entre APK e Proxy. Arraste para mover, use os botões para zoom e selecione um bloco para abrir detalhes.">
-          <div id="flowMapSpace" class="flow-map-space">
-            <div id="flowMapCanvas" class="flow-map-canvas">
-              <svg id="flowMapEdges" class="flow-map-edges" aria-hidden="true"></svg>
-              <div id="flowMapLanes" class="flow-map-lanes"></div>
-              <div id="flowMapNodes" class="flow-map-nodes"></div>
-            </div>
-          </div>
-          <div class="flow-pan-hint" aria-hidden="true">Arraste para navegar</div>
-        </div>
-
-        <div class="flow-map-legend" aria-label="Legenda do fluxograma">
-          <span><i class="legend-shape legend-start"></i>Início</span>
-          <span><i class="legend-shape legend-action"></i>Ação</span>
-          <span><i class="legend-shape legend-decision"></i>Decisão</span>
-          <span><i class="legend-shape legend-cache"></i>Cache / resiliência</span>
-          <span><i class="legend-shape legend-success"></i>Sucesso</span>
-          <span><i class="legend-shape legend-failure"></i>Falha</span>
-          <span><i class="legend-line legend-line-main"></i>Fluxo principal</span>
-          <span><i class="legend-line legend-line-alt"></i>Fallback / retry</span>
-        </div>
-
-        <noscript>
-          <div class="flow-noscript">
-            <strong>Fluxo resumido</strong>
+        <div class="static-flow-split" aria-label="Decisão entre dados locais e consulta remota">
+          <article class="static-flow-branch" data-tone="success">
+            <span class="branch-label">Atalho local</span>
+            <h3>Conteúdo local ainda é utilizável</h3>
             <ol>
-              <li>Usuário interage com uma tela Compose.</li>
-              <li>ViewModel e Repository verificam Room e cache local.</li>
-              <li>Quando necessário, o cliente OkHttp envia HTTPS com versão, protocolo e request ID.</li>
-              <li>O Proxy valida rota, compatibilidade, autenticação, limites e schema.</li>
-              <li>Cache HIT retorna imediatamente; MISS consulta fontes autorizadas com deadline e single-flight.</li>
-              <li>O Proxy normaliza e devolve contrato JSON; o APK valida, persiste e atualiza a interface.</li>
+              <li>Room ou memória entrega o último contrato íntegro.</li>
+              <li>ViewModel publica o estado sem abrir conexão.</li>
+              <li>A interface renderiza imediatamente.</li>
             </ol>
-          </div>
-        </noscript>
-      </div>
-
-      <dialog id="flowNodeDialog" class="flow-node-dialog" aria-labelledby="flowNodeDialogTitle">
-        <div class="flow-dialog-header">
-          <div>
-            <p id="flowNodeDialogLane" class="flow-dialog-kicker"></p>
-            <h3 id="flowNodeDialogTitle"></h3>
-          </div>
-          <button id="flowNodeDialogClose" type="button" aria-label="Fechar detalhes">×</button>
+          </article>
+          <article class="static-flow-branch" data-tone="network">
+            <span class="branch-label">Caminho remoto</span>
+            <h3>Conteúdo ausente, vencido ou atualização explícita</h3>
+            <ol>
+              <li>Serviço normaliza ticker, período, posições e payload mínimo.</li>
+              <li>OkHttp aplica timeout, cancelamento e cabeçalhos do protocolo.</li>
+              <li>HTTPS envia JSON ao Proxy com request ID e versão do APK.</li>
+            </ol>
+          </article>
         </div>
-        <div id="flowNodeDialogBody" class="flow-dialog-body"></div>
-      </dialog>
+
+        <div class="static-flow-connector" aria-hidden="true"><span>↓</span></div>
+
+        <div class="static-flow-section">
+          <div class="static-flow-heading">
+            <span>02</span>
+            <div><strong>Entrada e barreiras do Proxy</strong><small>O roteador só libera uma rota após validar o contrato.</small></div>
+          </div>
+          <ol class="gateway-flow">
+            <li><b>Router recebe a requisição</b><small>Método, URL, tamanho, origem, request ID e identificação do aplicativo.</small></li>
+            <li><b>Compatibilidade</b><small>Protocolo e versão são conferidos; HTTP 426 fica restrito à sincronização financeira incompatível.</small></li>
+            <li><b>Autenticação quando necessária</b><small>Apenas rotas privadas exigem sessão válida; credenciais privilegiadas nunca chegam ao APK.</small></li>
+            <li><b>Rate limit e budgets</b><small>Limites de frequência, concorrência, bytes e duração protegem a função.</small></li>
+            <li><b>Schema e parâmetros</b><small>Ticker, datas, posições, paginação e corpo são normalizados e validados.</small></li>
+            <li><b>Seleção do módulo</b><small>Somente o código da jornada solicitada é carregado.</small></li>
+          </ol>
+        </div>
+
+        <div class="static-flow-connector" aria-hidden="true"><span>↓</span></div>
+
+        <div class="static-flow-section">
+          <div class="static-flow-heading">
+            <span>03</span>
+            <div><strong>Árvore de rotas homologadas</strong><small>Os 17 endpoints documentados aparecem abaixo, agrupados pela jornada que os utiliza.</small></div>
+          </div>
+          <div class="route-tree">
+            <article class="route-branch">
+              <div class="route-branch-head"><span>Home</span><strong>Notícias, alertas e rankings</strong></div>
+              <code>/api/v1/news</code>
+              <code>/api/v1/news/article</code>
+              <code>/api/v1/market/rankings</code>
+              <code>/api/v1/mobile/alerts</code>
+              <p>Feeds e rankings usam TTL independente, deduplicação e qualidade por fonte.</p>
+            </article>
+            <article class="route-branch">
+              <div class="route-branch-head"><span>Modal</span><strong>Ação ou FII</strong></div>
+              <code>/api/v1/asset/modal</code>
+              <code>/api/v1/asset/history</code>
+              <code>/api/v1/asset/quote</code>
+              <p>Compõe cotação, gráfico, fundamentos, dividendos e seções específicas do ativo.</p>
+            </article>
+            <article class="route-branch">
+              <div class="route-branch-head"><span>Análise</span><strong>Busca, índices e retornos</strong></div>
+              <code>/api/v1/assets</code>
+              <code>/api/v1/quotes</code>
+              <code>/api/v1/market/indices</code>
+              <code>/api/v1/portfolio/returns</code>
+              <p>Combina catálogo, cotações, benchmarks e retornos com escalas normalizadas.</p>
+            </article>
+            <article class="route-branch">
+              <div class="route-branch-head"><span>Mercado</span><strong>Cotação e histórico</strong></div>
+              <code>/api/v1/asset/quote</code>
+              <code>/api/v1/quotes</code>
+              <code>/api/v1/asset/history</code>
+              <p>Resolve preço individual, lotes e candles por ticker, período e intervalo.</p>
+            </article>
+            <article class="route-branch">
+              <div class="route-branch-head"><span>Carteira</span><strong>Patrimônio, retorno e proventos</strong></div>
+              <code>/api/v1/portfolio/equilibrium</code>
+              <code>/api/v1/portfolio/history</code>
+              <code>/api/v1/portfolio/returns</code>
+              <code>/api/v1/dividends/batch</code>
+              <p>Usa posições e transações do APK para compor séries, equilíbrio e elegibilidade temporal.</p>
+            </article>
+            <article class="route-branch" data-private="true">
+              <div class="route-branch-head"><span>Privado</span><strong>Sincronização Supabase</strong></div>
+              <code>/api/v1/sync</code>
+              <p>GET, POST e DELETE autenticados reconciliam snapshot, outbox, tombstones e integridade financeira.</p>
+            </article>
+            <article class="route-branch">
+              <div class="route-branch-head"><span>Worker</span><strong>Fechamento diário</strong></div>
+              <code>/api/v1/mobile/daily-close</code>
+              <p>Entrega cotações, contribuições e série intradiária em uma chamada idempotente.</p>
+            </article>
+            <article class="route-branch">
+              <div class="route-branch-head"><span>Mídia</span><strong>Logotipos oficiais</strong></div>
+              <code>/api/v1/asset/logo</code>
+              <p>Resolve imagem oficial com fast path, cache e fallback local por classe de ativo.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="static-flow-connector" aria-hidden="true"><span>↓</span></div>
+
+        <div class="static-flow-section">
+          <div class="static-flow-heading">
+            <span>04</span>
+            <div><strong>Cache, fontes e composição</strong><small>O Proxy tenta responder com o menor custo sem esconder parcialidade.</small></div>
+          </div>
+          <div class="processing-tree">
+            <article class="processing-node" data-tone="cache">
+              <b>Cache válido?</b>
+              <p><strong>HIT:</strong> devolve o contrato íntegro sem consultar fonte externa.</p>
+              <p><strong>MISS:</strong> single-flight reúne requisições equivalentes e segue para a fonte.</p>
+            </article>
+            <article class="processing-node" data-tone="source">
+              <b>Fontes autorizadas</b>
+              <ul>
+                <li>B3, Yahoo Finance, CVM, Banco Central, Investidor10 e adaptadores homologados.</li>
+                <li>Google News e documentos editoriais públicos com proteção SSRF.</li>
+                <li>Supabase apenas na sincronização autenticada.</li>
+              </ul>
+            </article>
+            <article class="processing-node" data-tone="quality">
+              <b>Deadline e qualidade</b>
+              <p>A origem, timestamp, cobertura e consistência são avaliados. Resposta parcial não aquece cache como completa.</p>
+            </article>
+            <article class="processing-node" data-tone="fallback">
+              <b>Fallback controlado</b>
+              <p>Quando a fonte falha, usa o último contrato íntegro permitido ou devolve erro tipado; nunca fabrica cotação, série ou provento.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="static-flow-connector" aria-hidden="true"><span>↓</span></div>
+
+        <div class="static-flow-section">
+          <div class="static-flow-heading">
+            <span>05</span>
+            <div><strong>Retorno ao aplicativo</strong><small>A resposta volta pelo mesmo contrato e só substitui dados locais após validação.</small></div>
+          </div>
+          <div class="static-flow-chain static-flow-chain-return">
+            <article class="static-flow-node"><b>Normalização no Proxy</b><p>Campos, datas, moedas, percentuais, qualidade e parcialidade recebem formato estável.</p></article>
+            <span class="static-flow-arrow" aria-hidden="true">→</span>
+            <article class="static-flow-node"><b>JSON + cabeçalhos</b><p>Contrato, protocolo, schema, cache e request ID acompanham a resposta HTTPS.</p></article>
+            <span class="static-flow-arrow" aria-hidden="true">→</span>
+            <article class="static-flow-node"><b>Parser do APK</b><p>O Android valida status, schema, tipo e seções antes de aceitar o conteúdo.</p></article>
+            <span class="static-flow-arrow" aria-hidden="true">→</span>
+            <article class="static-flow-node" data-kind="success"><b>Room + estado + Compose</b><p>Conteúdo íntegro é persistido, publicado pelo ViewModel e renderizado na tela.</p></article>
+          </div>
+        </div>
+
+        <div class="static-flow-section failure-flow">
+          <div class="static-flow-heading">
+            <span>06</span>
+            <div><strong>Caminhos de falha e preservação</strong><small>O fluxo nunca depende de apagar o que já estava correto para comunicar um erro.</small></div>
+          </div>
+          <div class="failure-grid">
+            <article><b>Contrato inválido</b><p>APK rejeita a nova resposta e preserva o conteúdo anterior.</p></article>
+            <article><b>Fonte lenta ou indisponível</b><p>Deadline encerra a espera; cache íntegro ou resultado parcial identificado pode ser usado.</p></article>
+            <article><b>Sessão expirada</b><p>Somente a sincronização privada solicita nova autenticação.</p></article>
+            <article><b>Versão incompatível no sync</b><p>HTTP 426 bloqueia a mutação financeira; demais rotas públicas continuam operacionais.</p></article>
+            <article><b>Rede interrompida</b><p>OkHttp e coroutine são cancelados; Room permanece como fonte operacional.</p></article>
+            <article><b>Sem dados válidos</b><p>A interface diferencia vazio, parcial, preservado e erro, sem números sintéticos.</p></article>
+          </div>
+        </div>
+
+        <div class="static-history-note">
+          <strong>Histórico de compatibilidade v398 → v399</strong>
+          <p>No v398, um gate global podia bloquear jornadas públicas. No v399, o bloqueio por versão foi restrito à sincronização financeira, mantendo leitura pública e recuperação disponíveis.</p>
+        </div>
+      </div>
 
       <aside class="architecture-note" aria-label="Regra operacional essencial">
         <strong>Regra essencial</strong>
         <p>O Proxy não empurra dados espontaneamente. Cada execução nasce de uma ação, abertura de tela, atualização autorizada, sincronização ou worker Android; ao finalizar a resposta, a função serverless encerra.</p>
       </aside>
     </section>
-
 
     <section id="journeys" aria-labelledby="journeys-title">
       <p class="section-kicker">Jornadas ponta a ponta</p>
@@ -440,6 +559,5 @@
     <p><strong>VALORAE Proxy 21.12.400</strong></p>
     <p>Integração privada do aplicativo Android VALORAE · processamento somente por solicitação</p>
   </footer>
-  <script src="/ecosystem-flow-map.js" defer></script>
 </body>
 </html>

@@ -86,11 +86,11 @@ npm run test:cross-stack
 
 Cache, coalescência, métricas e rate limit permanecem deliberadamente em memória e limitados por instância serverless. Eles evitam crescimento ilimitado, mas não substituem rate limiting distribuído na borda da Vercel. O release de produção deve manter a proteção de borda habilitada e acompanhar `X-Valorae-Cache`, latência, códigos 426/429/5xx e tamanho das respostas.
 
-## Mapa interativo APK ↔ Proxy
+## Árvore estática APK → Proxy → APK
 
-A página pública inclui a árvore operacional `interactive-flow-v401`, implementada em `public/ecosystem-flow-map.js` e `public/ecosystem-map.css`.
+A página pública inclui a árvore operacional `static-flow-v402`, implementada diretamente em `public/index.html` e estilizada por `public/ecosystem-map.css`.
 
-O componente documenta 44 etapas e 63 conexões reais entre o Android, transporte HTTPS, roteador, segurança, cache, fontes externas, Supabase e retorno ao estado Compose. Ele oferece filtros por jornada, busca, zoom, arraste, recolhimento de swimlanes, painel técnico por nó e histórico opcional da regressão v398 → v399. A CSP mantém `connect-src 'none'`; o mapa não consulta APIs, não inicia polling e não altera o runtime do Proxy.
+O documento apresenta permanentemente a origem no Android, decisão entre Room e rede, transporte HTTPS, barreiras do roteador, os 17 endpoints homologados, fontes, cache, deadlines, fallbacks, normalização, retorno ao APK e caminhos de falha. Não há filtros, zoom, canvas, modal ou JavaScript. A CSP mantém `script-src 'none'` e `connect-src 'none'`; o monitor não consulta APIs, não inicia polling e não altera o runtime do Proxy.
 
 
 ## Recuperação da sincronização financeira

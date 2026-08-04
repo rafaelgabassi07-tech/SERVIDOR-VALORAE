@@ -38,7 +38,7 @@
     "checkpoint": "cloud-transaction-recovery-v368",
     "releaseLabel": "cloud-transaction-recovery-v368",
     "apkVersion": "2026.08.04.01",
-    "monitorVersion": "interactive-flow-v401",
+    "monitorVersion": "static-flow-v402",
     "minSupportedApkVersion": "2026.07.30.01",
     "maxTestedApkVersion": "2026.08.04.01",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible"
@@ -56,7 +56,7 @@
     "checkpoint": "cloud-transaction-recovery-v368",
     "releaseLabel": "cloud-transaction-recovery-v368",
     "apkVersion": "2026.08.04.01",
-    "monitorVersion": "interactive-flow-v401",
+    "monitorVersion": "static-flow-v402",
     "minSupportedApkVersion": "2026.07.30.01",
     "maxTestedApkVersion": "2026.08.04.01"
   },

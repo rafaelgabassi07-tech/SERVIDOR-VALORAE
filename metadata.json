@@ -10,8 +10,8 @@
   "label": "cloud-transaction-recovery-v368",
   "apkVersion": "2026.08.04.01",
   "apkCheckpoint": "v573-settings-tax-sync-patrimony-visual-refinement",
-  "contractVersion": "APK v573 / Proxy 21.12.400 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / cloud recovery v1 / compatibility v2 backward-compatible / monitor interactive-flow-v401",
-  "monitorObservabilityVersion": "2026.07.30-v401",
+  "contractVersion": "APK v573 / Proxy 21.12.400 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / cloud recovery v1 / compatibility v2 backward-compatible / monitor static-flow-v402",
+  "monitorObservabilityVersion": "2026.08.04-v402",
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "cloud-transaction-recovery-v368",
   "title": "Proxy v400 — Compatibilidade pareada ao APK v573",
@@ -20,8 +20,10 @@
   "maxTestedApkVersion": "2026.08.04.01",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
+    "Monitor convertido para árvore HTML estática completa, sem JavaScript, filtros, zoom, telemetria ou chamadas de rede.",
+    "Os 17 endpoints homologados e os caminhos de cache, fontes, retorno e falha permanecem visíveis no documento.",
+    "Suíte integral: 166 testes aprovados, 100 bloqueados apenas pelas dependências ausentes cheerio/undici e 0 falhas.",
     "Build Vercel e checagem de sintaxe aprovados após o alinhamento do APK v573.",
-    "163 testes executados sem falhas; 100 testes ficaram bloqueados porque cheerio/undici não estão instalados no ambiente de validação.",
     "Auditoria de consistência de versão aprovada para Proxy 21.12.400 e APK 2026.08.04.01.",
     "Nenhuma rota, tabela, contrato financeiro ou lógica de processamento foi alterada."
   ],
