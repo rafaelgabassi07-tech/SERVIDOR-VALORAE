@@ -52,5 +52,11 @@
       "source": "/monitor/:path*",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "api/router.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  }
 }
