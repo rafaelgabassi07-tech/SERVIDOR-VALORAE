@@ -88,7 +88,7 @@ Cache, coalescência, métricas e rate limit permanecem deliberadamente em memó
 
 ## Árvore estática APK → Proxy → APK
 
-A página pública inclui a árvore operacional `static-flow-v402`, implementada diretamente em `public/index.html` e estilizada por `public/ecosystem-map.css`.
+A página pública inclui a árvore operacional `vertical-flow-v403`, implementada diretamente em `public/index.html` e estilizada por `public/ecosystem-map.css`.
 
 O documento apresenta permanentemente a origem no Android, decisão entre Room e rede, transporte HTTPS, barreiras do roteador, os 17 endpoints homologados, fontes, cache, deadlines, fallbacks, normalização, retorno ao APK e caminhos de falha. Não há filtros, zoom, canvas, modal ou JavaScript. A CSP mantém `script-src 'none'` e `connect-src 'none'`; o monitor não consulta APIs, não inicia polling e não altera o runtime do Proxy.
 

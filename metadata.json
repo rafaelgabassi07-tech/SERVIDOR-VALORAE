@@ -10,7 +10,7 @@
   "label": "cloud-transaction-recovery-v368",
   "apkVersion": "2026.08.04.01",
   "apkCheckpoint": "v573-settings-tax-sync-patrimony-visual-refinement",
-  "contractVersion": "APK v573 / Proxy 21.12.400 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / cloud recovery v1 / compatibility v2 backward-compatible / monitor static-flow-v402",
+  "contractVersion": "APK v573 / Proxy 21.12.400 / mobile protocol 2026.07.10.10 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / cloud recovery v1 / compatibility v2 backward-compatible / monitor vertical-flow-v403",
   "monitorObservabilityVersion": "2026.08.04-v402",
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "cloud-transaction-recovery-v368",
