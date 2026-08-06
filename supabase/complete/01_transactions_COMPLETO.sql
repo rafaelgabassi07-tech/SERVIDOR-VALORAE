@@ -1,6 +1,6 @@
 -- VALORAE — SQL CANÔNICA 01/02 — TRANSAÇÕES
 -- Envio e restauração de transações. Execute primeiro.
--- Contrato valorae-financial-sync-v2 — Proxy 21.12.400+ / APK 2026.08.04.01+.
+-- Contrato valorae-financial-sync-v2 — Proxy 21.12.401+ / APK 2026.08.05.01+.
 
 begin;
 create extension if not exists pgcrypto;

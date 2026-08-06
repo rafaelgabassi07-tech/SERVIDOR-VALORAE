@@ -1,6 +1,6 @@
 -- VALORAE — SQL CANÔNICA 02/02 — DIVIDENDOS E RESTAURAÇÃO COMPLETA
 -- Envio/restauração de dividendos e RPCs unificadas. Execute depois do arquivo 1.
--- Contrato valorae-financial-sync-v2 — Proxy 21.12.400+ / APK 2026.08.04.01+.
+-- Contrato valorae-financial-sync-v2 — Proxy 21.12.401+ / APK 2026.08.05.01+.
 
 begin;
 

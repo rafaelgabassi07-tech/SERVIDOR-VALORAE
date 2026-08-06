@@ -68,6 +68,23 @@ function acceptsLegacyApkIdentity(path = '', apkIdentityAttempt = false) {
   return Boolean(apkIdentityAttempt) && PRODUCTION_ROUTE_ALLOWLIST.has(String(path || ''));
 }
 
+
+function ecosystemContractFromRequest(req = {}) {
+  return String(req?.headers?.['x-valorae-ecosystem-contract'] || '').trim();
+}
+
+function evaluateEcosystemContract(req = {}) {
+  const received = ecosystemContractFromRequest(req);
+  const compatible = RELEASE.compatibleEcosystemContracts || [RELEASE.ecosystemContract];
+  return {
+    received,
+    expected: RELEASE.ecosystemContract,
+    compatible: [...compatible],
+    explicit: Boolean(received),
+    ok: !received || compatible.includes(received),
+  };
+}
+
 function productionRuntime() {
   return process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
 }
@@ -517,9 +534,12 @@ async function bodyOrQuery(req, parsed) {
 function rootPayload() {
   return {
     name: RELEASE.name,
-    version: RELEASE.version,
+    version: RELEASE.publicVersion,
+    coreVersion: RELEASE.version,
     status: 'online',
     contract: RELEASE.contract,
+    ecosystemContract: RELEASE.ecosystemContract,
+    compatibleEcosystemContracts: RELEASE.compatibleEcosystemContracts,
     apkCompatibility: APK_COMPATIBILITY,
     routes: [...PRODUCTION_ROUTE_ALLOWLIST].sort().map(route => `/api/v1${route}`),
     router: routeManifest()
@@ -531,10 +551,13 @@ function health() {
     ok: true,
     status: 'OK',
     online: true,
-    version: RELEASE.version,
+    version: RELEASE.publicVersion,
+    coreVersion: RELEASE.version,
     publicVersion: RELEASE.publicVersion,
     release: RELEASE.patch,
     mobileProtocol: VALORAE_MOBILE_PROTOCOL_VERSION,
+    ecosystemContract: RELEASE.ecosystemContract,
+    compatibleEcosystemContracts: RELEASE.compatibleEcosystemContracts,
     apkCompatibility: APK_COMPATIBILITY,
     runtimeMetrics: (() => { const snapshot = requestMetricsSnapshot(); return { version: snapshot.version, routeCount: snapshot.routeCount, recentCount: snapshot.recentCount }; })(),
     now: new Date().toISOString(),
@@ -542,7 +565,7 @@ function health() {
 }
 
 function manifest() {
-  return { status: 'OK', name: RELEASE.name, version: RELEASE.version, publicVersion: RELEASE.publicVersion, release: RELEASE.patch, contract: RELEASE.contract, apkCompatibility: APK_COMPATIBILITY, endpoints: routeManifest().routes };
+  return { status: 'OK', name: RELEASE.name, version: RELEASE.publicVersion, coreVersion: RELEASE.version, publicVersion: RELEASE.publicVersion, release: RELEASE.patch, contract: RELEASE.contract, ecosystemContract: RELEASE.ecosystemContract, compatibleEcosystemContracts: RELEASE.compatibleEcosystemContracts, apkCompatibility: APK_COMPATIBILITY, endpoints: routeManifest().routes };
 }
 
 async function assetLogoHandler(req, res, payload = {}) {
@@ -1203,7 +1226,22 @@ export async function dispatchRoute(req, res) {
     const appVersion = apkVersionFromRequest(req);
     const apkCompatibility = evaluateApkCompatibility(appVersion);
     req.valoraeApkCompatibility = apkCompatibility;
+    const ecosystemCompatibility = evaluateEcosystemContract(req);
+    req.valoraeEcosystemCompatibility = ecosystemCompatibility;
     beginRequestObservation(req, res, { route: path, requestId, appVersion });
+
+    if (!ecosystemCompatibility.ok && !PUBLIC_HEADERLESS_ROUTES.has(path)) {
+      return sendJson(req, res, {
+        version: RELEASE.publicVersion,
+        coreVersion: RELEASE.version,
+        status: 'UPDATE_REQUIRED',
+        requestId,
+        code: 'ECOSYSTEM_CONTRACT_MISMATCH',
+        error: 'O APK e o Proxy informaram contratos de ecossistema incompatíveis.',
+        ecosystemCompatibility,
+        apkCompatibility,
+      }, { status: 426, cacheControl: 'no-store' });
+    }
 
     const canonicalApkRequest = isCanonicalValoraeApkRequest(req);
     const apkIdentityAttempt = isValoraeApkIdentityAttempt(req);
@@ -1325,7 +1363,7 @@ export async function dispatchRoute(req, res) {
 
     if (path === '/') return sendJson(req, res, rootPayload());
     if (path === '/health' || path === '/ready') return sendJson(req, res, health(), { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.ready}` });
-    if (path === '/env') return sendJson(req, res, { status: 'OK', env: { node: process.version, runtime: 'node' }, version: RELEASE.version });
+    if (path === '/env') return sendJson(req, res, { status: 'OK', env: { node: process.version, runtime: 'node' }, version: RELEASE.publicVersion, coreVersion: RELEASE.version });
     if (path === '/contract/baseline') return sendJson(req, res, { ...buildContractBaselineManifest(), release: RELEASE.patch, continuityStore: contractContinuityStats() }, { cacheControl: 'private, max-age=120' });
     if (path === '/contract/source-adapters') return sendJson(req, res, { ...(await buildSourceAdapterManifest()), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
     if (path === '/contract/html-parser-shadow') return sendJson(req, res, { ...(await buildLazyFeatureManifest('html-parser-shadow', () => import('../lib/scrape/standard-html-parser.js'), 'buildHtmlParserShadowManifest')), release: RELEASE.patch }, { cacheControl: 'private, max-age=30' });
@@ -1355,9 +1393,9 @@ export async function dispatchRoute(req, res) {
     if (path === '/metrics/runtime') return sendJson(req, res, { status: 'OK', cache: cacheStats(), requests: requestMetricsSnapshot() }, { cacheControl: 'no-store' });
     if (path === '/fields') return sendJson(req, res, { status: 'OK', endpoint: 'fields', fields: ['positions','dividendPositions','transactions','tickers','includeAnalysis','includeHistory','includeIpca','includeDividends','includeRankings'] });
     if (path === '/errors') return sendJson(req, res, { status: 'OK', endpoint: 'errors', errors: ['INVALID_JSON','PAYLOAD_TOO_LARGE','ROUTE_ERROR','NOT_FOUND'] });
-    if (path === '/openapi') return sendJson(req, res, { status: 'OK', openapi: '3.0.0', info: { title: 'VALORAE Proxy API', version: RELEASE.version }, paths: Object.fromEntries(routeManifest().routes.map(r => [`/api/v1${r}`, openApiOperationForRoute(r)])) });
+    if (path === '/openapi') return sendJson(req, res, { status: 'OK', openapi: '3.0.0', info: { title: 'VALORAE Proxy API', version: RELEASE.publicVersion, 'x-core-version': RELEASE.version }, paths: Object.fromEntries(routeManifest().routes.map(r => [`/api/v1${r}`, openApiOperationForRoute(r)])) });
     if (path === '/sync') return runLazyDefaultHandler('route-sync', () => import('./sync.js'), req, res);
-    if (path === '/admin/status') return sendJson(req, res, { status: 'OK', admin: false, version: RELEASE.version, cache: cacheStats() });
+    if (path === '/admin/status') return sendJson(req, res, { status: 'OK', admin: false, version: RELEASE.publicVersion, coreVersion: RELEASE.version, cache: cacheStats() });
     if (path === '/compat/scraper4' || path === '/scraper4' || path === '/scraper') return runLazyDefaultHandler('route-compat-scraper4', () => import('./compat/scraper4.js'), req, res);
     if (path === '/cache/clear' || path === '/admin/cache') {
       requireAdmin(req);

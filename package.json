@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.400 com recuperação da sincronização de transações, fallback PostgREST e compatibilidade v569–v573.",
+  "description": "Proxy VALORAE 21.12.403 com limites de resposta, circuit breaker limitado, sincronização resiliente e compatibilidade APK v584.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -31,34 +31,36 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.400-cloud-transaction-recovery-v368",
+    "releasePatch": "21.12.403-ecosystem-resilience-v412",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.400",
-    "checkpoint": "cloud-transaction-recovery-v368",
-    "releaseLabel": "cloud-transaction-recovery-v368",
-    "apkVersion": "2026.08.04.01",
-    "monitorVersion": "vertical-flow-v403",
+    "publicVersion": "21.12.403",
+    "checkpoint": "ecosystem-resilience-v412",
+    "releaseLabel": "ecosystem-resilience-v412",
+    "apkVersion": "2026.08.05.03",
+    "monitorVersion": "vertical-flow-v406",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.04.01",
-    "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible"
+    "maxTestedApkVersion": "2026.08.05.03",
+    "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
+    "ecosystemContract": "valorae-ecosystem-2026.08.05.03-p403"
   },
-  "releasePatch": "21.12.400-cloud-transaction-recovery-v368",
+  "releasePatch": "21.12.403-ecosystem-resilience-v412",
   "config": {
-    "releasePatch": "21.12.400-cloud-transaction-recovery-v368",
-    "publicVersion": "21.12.400",
-    "checkpoint": "cloud-transaction-recovery-v368",
-    "releaseLabel": "cloud-transaction-recovery-v368"
+    "releasePatch": "21.12.403-ecosystem-resilience-v412",
+    "publicVersion": "21.12.403",
+    "checkpoint": "ecosystem-resilience-v412",
+    "releaseLabel": "ecosystem-resilience-v412"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.400-cloud-transaction-recovery-v368",
-    "publicVersion": "21.12.400",
-    "checkpoint": "cloud-transaction-recovery-v368",
-    "releaseLabel": "cloud-transaction-recovery-v368",
-    "apkVersion": "2026.08.04.01",
-    "monitorVersion": "vertical-flow-v403",
+    "releasePatch": "21.12.403-ecosystem-resilience-v412",
+    "publicVersion": "21.12.403",
+    "checkpoint": "ecosystem-resilience-v412",
+    "releaseLabel": "ecosystem-resilience-v412",
+    "apkVersion": "2026.08.05.03",
+    "monitorVersion": "vertical-flow-v406",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.04.01"
+    "maxTestedApkVersion": "2026.08.05.03",
+    "ecosystemContract": "valorae-ecosystem-2026.08.05.03-p403"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

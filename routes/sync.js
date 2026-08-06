@@ -2,9 +2,10 @@ import crypto from 'node:crypto';
 import { sendJson } from '../lib/performance/http.js';
 import { beginRoute, getInput } from '../lib/http/route.js';
 import { VALORAE_ENGINE_VERSION, VALORAE_RELEASE_PATCH } from '../lib/release/current.js';
+import { RELEASE } from '../lib/core/release.js';
 import { normalizeTicker } from '../lib/core/tickers.js';
 
-// Release patch: 21.12.400-cloud-transaction-recovery-v368
+// Release patch: 21.12.403-ecosystem-resilience-v412
 const CORE_VERSION = VALORAE_RELEASE_PATCH;
 const SYNC_CONTRACT = 'valorae-financial-sync-v2';
 const TRANSACTIONS_TABLE = 'valorae_financial_transactions';
@@ -84,6 +85,26 @@ function authorizationBearer(req) {
   return match ? match[1].trim() : '';
 }
 
+function assertCompatibleEcosystemContract(req) {
+  const received = header(req, 'x-valorae-ecosystem-contract');
+  if (!received) return;
+  const compatible = new Set([
+    RELEASE.ecosystemContract,
+    ...(Array.isArray(RELEASE.compatibleEcosystemContracts) ? RELEASE.compatibleEcosystemContracts : []),
+  ].filter(Boolean));
+  if (compatible.has(received)) return;
+  const error = new Error('O APK e o Proxy pertencem a contratos de ecossistema incompatíveis.');
+  error.status = 426;
+  error.code = 'ECOSYSTEM_CONTRACT_MISMATCH';
+  error.retryable = false;
+  error.details = {
+    received,
+    expected: RELEASE.ecosystemContract,
+    compatible: [...compatible],
+  };
+  throw error;
+}
+
 function authCacheTtlMs() {
   return Math.min(Math.max(Number(process.env.VALORAE_SYNC_AUTH_CACHE_MS || 300_000), 30_000), 900_000);
 }
@@ -136,8 +157,64 @@ function supabaseTimeoutMs() {
 }
 
 function retryAfterMs(response) {
-  const seconds = Number(response?.headers?.get?.('retry-after'));
-  return Number.isFinite(seconds) && seconds >= 0 ? Math.round(seconds * 1000) : null;
+  const raw = String(response?.headers?.get?.('retry-after') || '').trim();
+  if (!raw) return null;
+  const seconds = Number(raw);
+  if (Number.isFinite(seconds) && seconds >= 0) return Math.round(seconds * 1000);
+  const target = Date.parse(raw);
+  return Number.isFinite(target) ? Math.max(0, target - Date.now()) : null;
+}
+
+function syncMaxResponseBytes() {
+  return Math.min(
+    Math.max(Number(process.env.VALORAE_SYNC_MAX_RESPONSE_BYTES || 8 * 1024 * 1024), 64 * 1024),
+    32 * 1024 * 1024
+  );
+}
+
+function supabaseResponseError(message, code, retryable = false) {
+  const error = new Error(message);
+  error.status = 502;
+  error.code = code;
+  error.retryable = retryable;
+  return error;
+}
+
+async function readBoundedResponseText(response) {
+  const maxBytes = syncMaxResponseBytes();
+  const declared = Number(response?.headers?.get?.('content-length'));
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    throw supabaseResponseError('O Supabase retornou dados acima do limite seguro.', 'SUPABASE_RESPONSE_TOO_LARGE');
+  }
+  try {
+    if (response?.body?.getReader) {
+      const reader = response.body.getReader();
+      const chunks = [];
+      let total = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = Buffer.from(value || []);
+        total += chunk.length;
+        if (total > maxBytes) {
+          await reader.cancel().catch(() => {});
+          throw supabaseResponseError('O Supabase retornou dados acima do limite seguro.', 'SUPABASE_RESPONSE_TOO_LARGE');
+        }
+        chunks.push(chunk);
+      }
+      return Buffer.concat(chunks, total).toString('utf8');
+    }
+    const text = await response.text();
+    if (Buffer.byteLength(text, 'utf8') > maxBytes) {
+      throw supabaseResponseError('O Supabase retornou dados acima do limite seguro.', 'SUPABASE_RESPONSE_TOO_LARGE');
+    }
+    return text;
+  } catch (error) {
+    if (error?.code === 'SUPABASE_RESPONSE_TOO_LARGE') throw error;
+    const wrapped = supabaseResponseError('Não foi possível ler a resposta do Supabase.', 'SUPABASE_BODY_READ_FAILED', true);
+    wrapped.cause = error;
+    throw wrapped;
+  }
 }
 
 function isRetryableStatus(status) {
@@ -151,11 +228,14 @@ async function fetchWithDeadline(url, init = {}) {
   try {
     return await fetch(url, { ...init, signal: controller.signal });
   } catch (cause) {
-    const error = new Error('O Supabase não respondeu dentro do tempo limite.');
+    const timedOut = controller.signal.aborted || cause?.name === 'AbortError';
+    const error = new Error(timedOut
+      ? 'O Supabase não respondeu dentro do tempo limite.'
+      : 'Não foi possível conectar ao Supabase.');
     error.status = 503;
-    error.code = 'SUPABASE_TIMEOUT';
+    error.code = timedOut ? 'SUPABASE_TIMEOUT' : 'SUPABASE_NETWORK_ERROR';
     error.retryable = true;
-    error.retryAfterMs = 15_000;
+    error.retryAfterMs = timedOut ? 15_000 : 5_000;
     error.cause = cause;
     throw error;
   } finally {
@@ -164,8 +244,7 @@ async function fetchWithDeadline(url, init = {}) {
 }
 
 async function parseJsonResponse(response, fallbackCode) {
-  let text = '';
-  try { text = await response.text(); } catch {}
+  const text = await readBoundedResponseText(response);
   let json = null;
   if (text) {
     try { json = JSON.parse(text); } catch {
@@ -1083,6 +1162,7 @@ export default async function handler(req, res) {
     route: 'sync',
     rateMax: Number(process.env.VALORAE_RATE_LIMIT_SYNC_MAX || 60),
     maxBodyBytes: Number(process.env.VALORAE_SYNC_MAX_BODY_BYTES || 2 * 1024 * 1024),
+    maxResponseBytes: syncMaxResponseBytes(),
     profile: 'minimal-financial-sync',
     cacheControl: 'no-store',
   });
@@ -1097,6 +1177,7 @@ export default async function handler(req, res) {
     const body = req.method === 'POST' || req.method === 'DELETE' ? await parseJsonBody(req) : {};
     const input = { ...query, ...body };
     action = String(input.action || action).trim().toLowerCase();
+    assertCompatibleEcosystemContract(req);
     assertRequestContract(req, action);
 
     if (action === 'health') {
@@ -1276,11 +1357,15 @@ export const _test = {
   errorMeta,
   isRetryableStatus,
   isRetryableSyncStatus: isRetryableStatus,
+  retryAfterMs,
+  syncMaxResponseBytes,
+  readBoundedResponseText,
   normalizeSingleTransactionSymbol: normalizeTicker,
   normalizeTransactionSymbols,
   storedTransactionToClient: normalizeTransaction,
   requestSyncContract,
   assertRequestContract,
+  assertCompatibleEcosystemContract,
   assertRpcContract,
   dedupeRows,
   dedupeDividendRows,
