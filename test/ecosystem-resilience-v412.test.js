@@ -8,7 +8,7 @@ import {
 import { _test as syncTest } from '../routes/sync.js';
 import { RELEASE } from '../lib/core/release.js';
 
-assert.equal(RELEASE.ecosystemContract, 'valorae-ecosystem-2026.08.05.03-p403');
+assert.equal(RELEASE.ecosystemContract, 'valorae-ecosystem-2026.08.05.04-p404');
 assert.ok(RELEASE.compatibleEcosystemContracts.includes('valorae-ecosystem-2026.08.05.02-p402'));
 resetProviderHealth();
 for (let index = 0; index < 120; index += 1) {

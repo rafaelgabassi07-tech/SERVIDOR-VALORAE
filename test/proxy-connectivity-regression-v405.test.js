@@ -17,7 +17,7 @@ function response() {
   };
 }
 
-function apkHeaders(version = '2026.08.05.03') {
+function apkHeaders(version = '2026.08.05.04') {
   return {
     'x-valorae-app': 'VALORAE Android',
     'x-valorae-channel': 'android',

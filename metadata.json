@@ -1,34 +1,33 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.403 pareado ao APK v584, com limites seguros de resposta, circuit breaker limitado e sincronização endurecida.",
+  "description": "Proxy 21.12.404 pareado ao APK v585, homologando perfil, senha e troca de conta sem alterar rotas financeiras.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
-  "releasePatch": "21.12.403-ecosystem-resilience-v412",
-  "publicVersion": "21.12.403",
-  "checkpoint": "ecosystem-resilience-v412",
-  "label": "ecosystem-resilience-v412",
-  "apkVersion": "2026.08.05.03",
-  "apkCheckpoint": "v584-ecosystem-resilience-hardening",
-  "contractVersion": "APK v584 / Proxy 21.12.403 / APK version 2026.08.05.03 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.03-p403 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / monitor vertical-flow-v406",
-  "monitorObservabilityVersion": "2026.08.05-v406",
+  "releasePatch": "21.12.404-account-profile-v413",
+  "publicVersion": "21.12.404",
+  "checkpoint": "account-profile-v413",
+  "label": "account-profile-v413",
+  "apkVersion": "2026.08.05.04",
+  "apkCheckpoint": "v585-account-profile-security",
+  "contractVersion": "APK v585 / Proxy 21.12.404 / APK version 2026.08.05.04 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / monitor vertical-flow-v407",
+  "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
-  "releaseLabel": "ecosystem-resilience-v412",
-  "title": "Proxy v403 — Resiliência de transporte e limites seguros",
-  "summary": "Limita respostas, corrige o reset do circuit breaker, diferencia falhas do Supabase e pareia o Proxy ao APK v584.",
+  "releaseLabel": "account-profile-v413",
+  "title": "Proxy v404 — Compatibilidade da Conta Valorae",
+  "summary": "Homologa o APK v585 e o contrato p404, mantendo compatibilidade com p403, p402 e p401.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.05.03",
+  "maxTestedApkVersion": "2026.08.05.04",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
     "Build Vercel, sintaxe, imports sob demanda, alcance de runtime e SQL mínimo revalidados.",
-    "171 testes executados com sucesso, 100 bloqueados somente pelas dependências ausentes cheerio/undici e zero falhas.",
-    "Circuit breaker limitado e reset validado; resposta Supabase limitada e Retry-After HTTP-date validado.",
-    "Contrato p402 e p401 anteriores permanecem aceitos durante a janela de implantação."
+    "Compatibilidade do APK 2026.08.05.04 e contrato p404 validada sem alterar rotas financeiras.",
+    "Contratos p403, p402 e p401 anteriores permanecem aceitos durante a janela de implantação."
   ],
   "operationalLimits": [
     "Cache, coalescência, métricas e rate limit são limitados e locais por instância serverless; proteção distribuída deve ser configurada na borda da plataforma.",
     "O runtime não persiste dados financeiros ou telemetria operacional em banco."
   ],
-  "ecosystemContract": "valorae-ecosystem-2026.08.05.03-p403",
-  "monitorVersion": "vertical-flow-v406"
+  "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
+  "monitorVersion": "vertical-flow-v407"
 }

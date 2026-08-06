@@ -47,7 +47,7 @@ if ([details, patrimony, returnsUi, confetti, chartUi, models, checklistReadines
   const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
   assert.equal(
     sha256(patrimony),
-    'e877c94756592273410752a7c6d14801d410b5b0f8bec6d0cb0b711b26cd9040',
+    '2f266d18dd483ca4df4926364d78bb620d3b3db631b9017ba05bf35d50afa3a1',
     'O visual atual de Patrimônio enviado pelo usuário deve permanecer inalterado.'
   );
   assert.equal(

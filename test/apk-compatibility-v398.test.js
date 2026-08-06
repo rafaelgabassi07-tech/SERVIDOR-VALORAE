@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import { APK_COMPATIBILITY, compareApkVersions, evaluateApkCompatibility, normalizeApkVersion } from '../lib/core/apk-compatibility.js';
 import { VALORAE_EXPOSE_HEADERS } from '../lib/core/mobile-protocol.js';
 
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.05.03');
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.05.04');
 assert.equal(APK_COMPATIBILITY.minSupportedVersion, '2026.07.30.01');
 assert.equal(normalizeApkVersion('abc'), '');
 assert.equal(compareApkVersions('2026.07.30.02', '2026.07.30.03'), -1);
 assert.equal(evaluateApkCompatibility('2026.07.30.01').reject, false);
 assert.equal(evaluateApkCompatibility('2026.07.30.01').status, 'SUPPORTED');
 assert.equal(evaluateApkCompatibility('2026.07.30.02').status, 'SUPPORTED');
-assert.equal(evaluateApkCompatibility('2026.08.05.03').status, 'PAIRED');
+assert.equal(evaluateApkCompatibility('2026.08.05.04').status, 'PAIRED');
 assert.equal(evaluateApkCompatibility('2026.08.06.01', { allowFuture: false }).reject, true);
 
 const previousNodeEnv = process.env.NODE_ENV;

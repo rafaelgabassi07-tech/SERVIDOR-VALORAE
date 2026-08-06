@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.403 com limites de resposta, circuit breaker limitado, sincronização resiliente e compatibilidade APK v584.",
+  "description": "Proxy VALORAE 21.12.404 homologado para o perfil e a segurança da Conta Valorae no APK v585.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -31,36 +31,36 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.403-ecosystem-resilience-v412",
+    "releasePatch": "21.12.404-account-profile-v413",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.403",
-    "checkpoint": "ecosystem-resilience-v412",
-    "releaseLabel": "ecosystem-resilience-v412",
-    "apkVersion": "2026.08.05.03",
-    "monitorVersion": "vertical-flow-v406",
+    "publicVersion": "21.12.404",
+    "checkpoint": "account-profile-v413",
+    "releaseLabel": "account-profile-v413",
+    "apkVersion": "2026.08.05.04",
+    "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.05.03",
+    "maxTestedApkVersion": "2026.08.05.04",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
-    "ecosystemContract": "valorae-ecosystem-2026.08.05.03-p403"
+    "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404"
   },
-  "releasePatch": "21.12.403-ecosystem-resilience-v412",
+  "releasePatch": "21.12.404-account-profile-v413",
   "config": {
-    "releasePatch": "21.12.403-ecosystem-resilience-v412",
-    "publicVersion": "21.12.403",
-    "checkpoint": "ecosystem-resilience-v412",
-    "releaseLabel": "ecosystem-resilience-v412"
+    "releasePatch": "21.12.404-account-profile-v413",
+    "publicVersion": "21.12.404",
+    "checkpoint": "account-profile-v413",
+    "releaseLabel": "account-profile-v413"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.403-ecosystem-resilience-v412",
-    "publicVersion": "21.12.403",
-    "checkpoint": "ecosystem-resilience-v412",
-    "releaseLabel": "ecosystem-resilience-v412",
-    "apkVersion": "2026.08.05.03",
-    "monitorVersion": "vertical-flow-v406",
+    "releasePatch": "21.12.404-account-profile-v413",
+    "publicVersion": "21.12.404",
+    "checkpoint": "account-profile-v413",
+    "releaseLabel": "account-profile-v413",
+    "apkVersion": "2026.08.05.04",
+    "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.05.03",
-    "ecosystemContract": "valorae-ecosystem-2026.08.05.03-p403"
+    "maxTestedApkVersion": "2026.08.05.04",
+    "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"
