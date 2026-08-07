@@ -93,12 +93,12 @@ assert.ok(stockSource.includes("'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.7'"), 
 
 const colorKt = readSiblingApkFile('app/src/main/java/com/example/ui/theme/Color.kt');
 const themeKt = readSiblingApkFile('app/src/main/java/com/example/ui/theme/Theme.kt');
-const settingsKt = readSiblingApkFile('app/src/main/java/com/example/ui/SettingsPages.kt');
-const agendaKt = readSiblingApkFile('app/src/main/java/com/example/ui/DividendAgendaModalComponents.kt');
-const dividendsKt = readSiblingApkFile('app/src/main/java/com/example/ui/DividendsEvolutionModalComponents.kt');
-const hapticKt = readSiblingApkFile('app/src/main/java/com/example/ui/ValoraeHapticFeedback.kt');
+const settingsKt = readSiblingApkFile('app/src/main/java/com/example/feature/settings/preferences/SettingsAppearanceUi.kt');
+const agendaKt = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/DividendAgendaModalComponents.kt');
+const dividendsKt = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/DividendsEvolutionModalComponents.kt');
+const hapticKt = readSiblingApkFile('app/src/main/java/com/example/ui/shared/ValoraeHapticFeedback.kt');
 const manifest = readSiblingApkFile('app/src/main/AndroidManifest.xml');
-const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
+const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalProgressiveLoader.kt');
 const qualityKt = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
 
 if (colorKt && themeKt && settingsKt && agendaKt && dividendsKt && hapticKt && manifest && loaderKt && qualityKt) {

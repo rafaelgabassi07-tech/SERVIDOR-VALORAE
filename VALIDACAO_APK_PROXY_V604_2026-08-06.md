@@ -1,0 +1,26 @@
+# Validação APK v604 ↔ Proxy 21.12.404
+
+## Par homologado
+
+- APK: `2026.08.06.18` — checkpoint `v604-refactor-cp6-shared`;
+- Proxy: `21.12.404`;
+- protocolo móvel: `2026.07.10.10`;
+- contrato financeiro: `valorae-financial-sync-v2`;
+- ecossistema: `valorae-ecosystem-2026.08.05.04-p404`.
+
+## Escopo de compatibilidade
+
+A homologação confirma que a consolidação dos componentes compartilhados não altera `/api/sync`, `/api/v1/mobile/alerts`, payloads financeiros, SQL, autenticação, `clientTxId`, tombstones, claims, idempotência, conflitos `409` ou retries. Os guardrails que leem fontes do APK passam a inspecionar os caminhos canônicos de `com.example.ui.shared` e da camada de aplicação.
+
+## Gates executados
+
+- build Vercel-safe: aprovado;
+- sintaxe: 427 arquivos JavaScript;
+- importação sob demanda: `fetch=0`, `interval=0`, `timeout=0`;
+- alcance do runtime: 152/152 módulos;
+- SQL mínimo: aprovado;
+- consistência de versões: aprovada;
+- suíte geral: 172 aprovados, 100 bloqueados, 0 falhas;
+- contratos cross-stack: 26 aprovados, 17 bloqueados, 0 falhas.
+
+Os bloqueios decorrem exclusivamente de dependências ausentes: `cheerio` (99 gerais e 16 cruzados) e `undici` (1 geral e 1 cruzado).

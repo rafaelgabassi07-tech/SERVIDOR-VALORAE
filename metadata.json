@@ -1,6 +1,6 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.404 pareado ao APK v585, homologando perfil, senha e troca de conta sem alterar rotas financeiras.",
+  "description": "Proxy 21.12.404 pareado ao APK v621 após desacoplamento de navegação das notificações, sem alterar rotas, payloads ou protocolo financeiro.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
@@ -8,26 +8,27 @@
   "publicVersion": "21.12.404",
   "checkpoint": "account-profile-v413",
   "label": "account-profile-v413",
-  "apkVersion": "2026.08.05.04",
-  "apkCheckpoint": "v585-account-profile-security",
-  "contractVersion": "APK v585 / Proxy 21.12.404 / APK version 2026.08.05.04 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / monitor vertical-flow-v407",
+  "apkVersion": "2026.08.07.12",
+  "apkCheckpoint": "v621-refactor-cp20-notification-navigation-boundary",
+  "contractVersion": "APK v621 / Proxy 21.12.404 / APK version 2026.08.07.12 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / monitor vertical-flow-v407 / routes /api/sync + /api/v1/mobile/alerts",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "account-profile-v413",
-  "title": "Proxy v404 — Compatibilidade da Conta Valorae",
-  "summary": "Homologa o APK v585 e o contrato p404, mantendo compatibilidade com p403, p402 e p401.",
+  "title": "Proxy v404 — CP20 notification navigation v621",
+  "summary": "Homologa o APK v621 após desacoplar data/notifications da Activity concreta, mantendo o contrato p404 e os payloads financeiros existentes.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.05.04",
+  "maxTestedApkVersion": "2026.08.07.12",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "Build Vercel, sintaxe, imports sob demanda, alcance de runtime e SQL mínimo revalidados.",
-    "Compatibilidade do APK 2026.08.05.04 e contrato p404 validada sem alterar rotas financeiras.",
-    "Contratos p403, p402 e p401 anteriores permanecem aceitos durante a janela de implantação."
+    "Build, sintaxe, imports sob demanda, alcance de runtime, SQL e versionamento revalidados.",
+    "APK v620 mantém /api/sync, /api/v1/mobile/alerts, protocolo e payloads congelados.",
+    "Contratos p404, p403, p402 e p401 anteriores permanecem aceitos durante a janela de implantação."
   ],
   "operationalLimits": [
     "Cache, coalescência, métricas e rate limit são limitados e locais por instância serverless; proteção distribuída deve ser configurada na borda da plataforma.",
     "O runtime não persiste dados financeiros ou telemetria operacional em banco."
   ],
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-  "monitorVersion": "vertical-flow-v407"
+  "monitorVersion": "vertical-flow-v407",
+  "changes": []
 }

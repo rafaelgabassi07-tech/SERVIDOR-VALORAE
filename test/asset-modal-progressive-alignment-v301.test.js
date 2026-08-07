@@ -5,8 +5,8 @@ import { _test as fiiTest } from '../lib/analysis/fii-modal-contract.js';
 import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 
 const apkService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalService.kt');
-const apkLoader = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
-const apkUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetDetailsModalUi.kt');
+const apkLoader = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalProgressiveLoader.kt');
+const apkUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetDetailsModalUi.kt');
 
 assert.equal(runtimeTest.normalizeModalCacheMode({ stage: 'fast' }), 'fast');
 assert.equal(runtimeTest.normalizeModalCacheMode({ stage: 'full' }), 'full');

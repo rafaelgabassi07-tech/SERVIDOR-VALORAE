@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.404 homologado para o perfil e a segurança da Conta Valorae no APK v585.",
+  "description": "Proxy VALORAE 21.12.404 homologado para o CP20 do APK v621, mantendo rotas, payloads e protocolo financeiro.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -37,10 +37,10 @@
     "publicVersion": "21.12.404",
     "checkpoint": "account-profile-v413",
     "releaseLabel": "account-profile-v413",
-    "apkVersion": "2026.08.05.04",
+    "apkVersion": "2026.08.07.12",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.05.04",
+    "maxTestedApkVersion": "2026.08.07.12",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404"
   },
@@ -56,10 +56,10 @@
     "publicVersion": "21.12.404",
     "checkpoint": "account-profile-v413",
     "releaseLabel": "account-profile-v413",
-    "apkVersion": "2026.08.05.04",
+    "apkVersion": "2026.08.07.12",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.05.04",
+    "maxTestedApkVersion": "2026.08.07.12",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404"
   },
   "optionalDependencies": {

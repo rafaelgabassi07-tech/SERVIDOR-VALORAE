@@ -18,9 +18,10 @@ function assertOrder(source, markers, label) {
   assert.deepEqual(positions, [...positions].sort((a, b) => a - b), `${label}: ordem divergente`);
 }
 
-const modalUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetDetailsModalUi.kt');
-const newsUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalNewsUi.kt');
+const modalUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetDetailsModalUi.kt');
+const newsUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalNewsUi.kt');
 const feedService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyPublicFeedService.kt');
+const remoteState = readSiblingApkFile('app/src/main/java/com/example/ui/state/asset/AssetModalRemoteStateHolders.kt');
 
 if (modalUi && newsUi && feedService) {
   const stock = extract(modalUi, 'private fun StockAssetModalReadyContent(', '@Composable\nprivate fun FiiAssetModalReadyContent(');
@@ -34,22 +35,22 @@ if (modalUi && newsUi && feedService) {
   'label = "stock_company_data"', 'label = "stock_company_information"', 'label = "stock_revenue_region"',
   'label = "stock_revenue_business"', 'label = "stock_revenue_profit"', 'label = "stock_profit_quote"',
   'label = "stock_results_statement"', 'label = "stock_equity_evolution"', 'label = "stock_balance_sheet"',
-  'label = "stock_announcements"', 'AssetModalNewsSection(ticker = cleanTicker, assetName = newsAssetName)'
+  'label = "stock_announcements"', 'AssetModalNewsSection(ticker = cleanTicker, assetName = newsAssetName'
 ], 'Ação');
 
 assertOrder(fii, [
   '"fii_metrics"', '"fii_chart"', '"fii_returns"', '"fii_information"', '"fii_historical_indicators"',
   '"fii_indices"', '"fii_peers"', '"fii_checklist"', '"fii_distributions"', '"fii_dividend_charts"',
   '"fii_about"', '"fii_properties"', '"fii_vacancy"', '"fii_announcements"', '"fii_patrimonial"',
-  '"fii_type_segment_average"', 'AssetModalNewsSection(ticker = cleanTicker, assetName = newsAssetName)'
+  '"fii_type_segment_average"', 'AssetModalNewsSection(ticker = cleanTicker, assetName = newsAssetName'
 ], 'FII');
 
   assert.ok(newsUi.includes('LaunchedEffect(cleanTicker, assetName, refreshNonce)'), 'notícias do modal devem carregar automaticamente');
   assert.ok(!newsUi.includes('loadRequested'), 'notícias não podem depender de solicitação manual');
   assert.ok(newsUi.includes('onClick = { refreshNonce += 1 }'), 'atualização manual deve continuar disponível');
   assert.ok(newsUi.includes('Text("Atualizar"'), 'ação secundária deve atualizar, não iniciar a primeira carga');
-  assert.ok(newsUi.includes('query = assetName.takeIf'), 'APK deve enviar o nome do ativo como contexto de busca');
-  assert.ok(newsUi.includes('assetOnly = true'), 'APK deve solicitar notícias estritas');
+  assert.ok(remoteState?.includes('query = assetName.takeIf'), 'state holder deve enviar o nome do ativo como contexto de busca');
+  assert.ok(remoteState?.includes('assetOnly = true'), 'state holder deve solicitar notícias estritas');
   assert.ok(feedService.includes('put("assetOnly", "true")'));
   assert.ok(feedService.includes('put("strictAsset", "true")'));
   assert.ok(feedService.includes('assetOnly=$assetOnly'), 'cache do APK deve segregar modo estrito');

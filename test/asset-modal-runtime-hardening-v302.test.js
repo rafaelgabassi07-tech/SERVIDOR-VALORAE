@@ -5,7 +5,7 @@ import { _test as runtimeTest } from '../lib/analysis/asset-modal-runtime.js';
 import { setCache, clearCache } from '../lib/core/cache.js';
 
 const apkHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
-const apkUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetDetailsModalUi.kt');
+const apkUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetDetailsModalUi.kt');
 const stockContract = fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8');
 const fiiContract = fs.readFileSync(new URL('../lib/analysis/fii-modal-contract.js', import.meta.url), 'utf8');
 

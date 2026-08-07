@@ -142,7 +142,7 @@ assert.equal(getCache(key, { allowStale: true }).value.quoteSummary.price, 50.0)
 
 const apkUniversal = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
 const apkQuality = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
-const apkMerge = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalMergePolicy.kt');
+const apkMerge = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalMergePolicy.kt');
 if (apkUniversal && apkQuality && apkMerge) {
   assert.ok(apkUniversal.includes('APK_MEMORY_RECOVERY_STALE_UPGRADE'));
   assert.ok(apkUniversal.includes('val latestFallback = findUniversalModalCache'));

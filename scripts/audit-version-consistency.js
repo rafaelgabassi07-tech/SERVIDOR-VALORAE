@@ -64,6 +64,10 @@ if (explicitApkRoot || strictApkPairing) {
   }
 }
 if (!monitorHtml.includes(publicVersion)) failures.push('public/index.html não exibe a versão pública atual.');
+if (!monitorHtml.includes(metadata.apkVersion)) failures.push('public/index.html não exibe o APK pareado atual.');
+if (!monitorHtml.includes(String(pkg.valorae?.contract || ''))) failures.push('public/index.html não exibe o contrato móvel atual.');
+if (!monitorHtml.includes('/api/sync')) failures.push('public/index.html não documenta /api/sync como rota canônica de sincronização.');
+if (monitorHtml.includes('/api/v1/sync')) failures.push('public/index.html ainda documenta o alias /api/v1/sync em vez da rota canônica /api/sync.');
 if (/fetch\s*\(|XMLHttpRequest|EventSource|WebSocket|setInterval\s*\(/.test(monitorHtml)) failures.push('public/index.html não pode iniciar consultas de rede.');
 const forbiddenControl = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/;
 for (const directory of ['api', 'routes', 'lib', 'scripts']) {

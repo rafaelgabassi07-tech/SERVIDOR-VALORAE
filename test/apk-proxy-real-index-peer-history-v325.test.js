@@ -9,9 +9,9 @@ assert.ok(['21.12.357-real-indices-peer-patrimony-history-v325', '21.12.358-moda
 assert.equal(metadata.apkVersion, pkg.valorae.apkVersion);
 assert.ok(metadata.contractVersion.includes(`APK ${metadata.apkCheckpoint.match(/^v\d+/)?.[0]} / Proxy ${pkg.valorae.publicVersion}`));
 
-const returnsUi = readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioDashboardReturnsUi.kt');
-const readiness = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalSectionReadiness.kt');
-const merge = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalMergePolicy.kt');
+const returnsUi = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/PortfolioDashboardReturnsUi.kt');
+const readiness = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalSectionReadiness.kt');
+const merge = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalMergePolicy.kt');
 const quality = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
 const build = readSiblingApkFile('app/build.gradle.kts');
 const apkMetadataText = readSiblingApkFile('metadata.json');

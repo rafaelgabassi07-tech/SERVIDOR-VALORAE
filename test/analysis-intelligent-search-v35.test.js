@@ -15,7 +15,7 @@ assert.ok(bySegment.some(item => item.match === 'segment'), 'busca por segmento 
 const tooShort = buildAssetSuggestions('b', 10);
 assert.deepEqual(tooShort, [], 'Proxy não deve sugerir com menos de 2 caracteres');
 
-const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/ui/AnalysisScreen.kt');
+const screen = readOptionalApkFile('../apk/app/src/main/java/com/example/feature/analysis/AnalysisScreen.kt');
 const client = readOptionalApkFile('../apk/app/src/main/java/com/example/data/proxy/ValoraeProxyQuotesService.kt');
 assertOptionalMatch(screen, /submittedTicker/, 'APK deve separar texto digitado do ticker efetivamente consultado');
 assertOptionalMatch(screen, /recent_tickers/, 'APK deve persistir últimos pesquisados da Análise');

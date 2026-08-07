@@ -90,10 +90,10 @@ assert.doesNotMatch(runtimeSource, /\.\.\.parseSectionList\(payload\.missingSect
 
 const classifier = readSiblingApkFile('app/src/main/java/com/example/domain/MarketAssetClassifier.kt');
 const service = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
-const modalRuntime = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalRuntime.kt');
-const returnsUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalAnnouncementsReturnsInfoUi.kt');
+const modalRuntime = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalRuntime.kt');
+const returnsUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalAnnouncementsReturnsInfoUi.kt');
 const settings = readSiblingApkFile('app/src/main/java/com/example/ui/state/AppSettings.kt');
-const fallback = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalFallbackPolicy.kt');
+const fallback = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalFallbackPolicy.kt');
 if (classifier && service && modalRuntime && returnsUi && settings && fallback) {
   assert.match(classifier, /fun inferAssetModalFamily/);
   assert.match(classifier, /fun canonicalAssetModalType/);

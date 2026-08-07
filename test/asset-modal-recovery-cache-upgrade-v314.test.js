@@ -200,8 +200,8 @@ assert.equal(noContextCalls, 1, 'clientes antigos sem contexto mantêm a revalid
 assert.equal(refreshed.quoteSummary.price, 34.2);
 
 const apkUniversal = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
-const apkLoader = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
-const apkUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetDetailsModalUi.kt');
+const apkLoader = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalProgressiveLoader.kt');
+const apkUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetDetailsModalUi.kt');
 if (apkUniversal && apkLoader && apkUi) {
   assert.ok(apkUniversal.includes('put("knownCompletenessPercent"'));
   assert.ok(apkUniversal.includes('put("knownDeepSectionCount"'));

@@ -30,7 +30,7 @@
     <div class="header-signals" aria-label="Características operacionais">
       <span><b>Sob demanda</b><small>sem polling</small></span>
       <span><b>Sem telemetria</b><small>nesta página</small></span>
-      <span><b>Contrato</b><small>valorae-api-v1</small></span>
+      <span><b>Contrato</b><small>valorae-mobile-portfolio-sync</small></span>
     </div>
     <nav class="site-nav" aria-label="Navegação da documentação">
       <a href="#overview">Resumo</a>
@@ -83,7 +83,7 @@
 
       <aside class="scope-note">
         <strong>Compatibilidade documentada</strong>
-        <p>APK <b>2026.08.05.04</b> · Proxy <b>21.12.404</b> · protocolo <b>2026.07.10.10</b> · baseline anterior 2026.07.30.01–03.</p>
+        <p>APK <b>2026.08.07.12</b> · Proxy <b>21.12.404</b> · protocolo <b>2026.07.10.10</b> · baseline anterior 2026.07.30.01–03.</p>
       </aside>
     </section>
     <section id="ecosystem-map" class="architecture architecture-flow" aria-labelledby="ecosystem-map-title">
@@ -96,10 +96,10 @@
       </div>
 
       <div class="map-status" aria-label="Compatibilidade documentada">
-        <span><strong>APK</strong> 2026.08.05.04</span>
+        <span><strong>APK</strong> 2026.08.07.12</span>
         <span><strong>Proxy</strong> 21.12.404</span>
         <span><strong>Protocolo</strong> 2026.07.10.10</span>
-        <span><strong>Contrato</strong> valorae-api-v1</span>
+        <span><strong>Contrato</strong> valorae-mobile-portfolio-sync</span>
         <span><strong>Mapa</strong> HTML + CSS local</span>
       </div>
 
@@ -194,7 +194,7 @@
                 <article class="route-branch"><div class="route-branch-head"><span>Carteira</span><strong>Trajetória e retorno</strong></div><code>/api/v1/portfolio/equilibrium</code><code>/api/v1/portfolio/history</code><code>/api/v1/portfolio/returns</code></article>
                 <article class="route-branch"><div class="route-branch-head"><span>Proventos</span><strong>Agenda consolidada</strong></div><code>/api/v1/dividends/batch</code></article>
                 <article class="route-branch"><div class="route-branch-head"><span>Mercado</span><strong>Índices oficiais</strong></div><code>/api/v1/market/indices</code></article>
-                <article class="route-branch" data-private="true"><div class="route-branch-head"><span>Nuvem</span><strong>Sincronização privada</strong></div><code>/api/v1/sync</code></article>
+                <article class="route-branch" data-private="true"><div class="route-branch-head"><span>Nuvem</span><strong>Sincronização privada</strong></div><code>/api/sync</code></article>
                 <article class="route-branch"><div class="route-branch-head"><span>Entrega</span><strong>Fechamento e identidade</strong></div><code>/api/v1/mobile/daily-close</code><code>/api/v1/asset/logo</code></article>
               </div>
             </div>
@@ -361,7 +361,7 @@
           <div class="journey-content">
             <ol class="journey-flow">
               <li><strong>Usuário autentica no Supabase.</strong> O APK recebe uma sessão pública válida.</li>
-              <li><strong><code>/api/v1/sync</code> valida sessão e versão.</strong> A barreira de compatibilidade é restrita à operação que pode alterar dados financeiros.</li>
+              <li><strong><code>/api/sync</code> valida sessão e versão.</strong> A barreira de compatibilidade é restrita à operação que pode alterar dados financeiros.</li>
               <li><strong>Proxy reconcilia transações e dividendos.</strong> Paginação, idempotência e exclusões evitam duplicidade.</li>
               <li><strong>APK confirma e persiste.</strong> Fila offline retém operações até uma tentativa válida.</li>
             </ol>
@@ -470,7 +470,7 @@
       <p>O runtime de produção publica somente as rotas consumidas pelo aplicativo atual:</p>
       <ul class="routes">
         <li><code>/api/v1/ready</code> — disponibilidade mínima.</li>
-        <li><code>/api/v1/sync</code> — sincronização autenticada de transações e dividendos.</li>
+        <li><code>/api/sync</code> — sincronização autenticada de transações e dividendos.</li>
         <li><code>/api/v1/assets</code>, <code>/asset/quote</code> e <code>/quotes</code> — descoberta e cotações.</li>
         <li><code>/api/v1/asset/history</code> e <code>/asset/logo</code> — gráficos e identidade visual.</li>
         <li><code>/api/v1/asset/modal</code> — contrato universal de Ação e FII.</li>

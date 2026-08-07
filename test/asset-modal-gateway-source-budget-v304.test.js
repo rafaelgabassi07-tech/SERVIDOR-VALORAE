@@ -6,11 +6,11 @@ import { readSiblingApkFile } from './helpers/cross-stack-apk.js';
 const router = fs.readFileSync(new URL('../routes/_router.js', import.meta.url), 'utf8');
 const stockContract = fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8');
 const fiiContract = fs.readFileSync(new URL('../lib/analysis/fii-modal-contract.js', import.meta.url), 'utf8');
-const apkRuntime = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalRuntime.kt');
+const apkRuntime = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalRuntime.kt');
 const apkService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalService.kt');
 const apkUniversalService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
-const apkFallback = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalFallbackPolicy.kt');
-const apkMerge = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalMergePolicy.kt');
+const apkFallback = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalFallbackPolicy.kt');
+const apkMerge = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalMergePolicy.kt');
 const apkRuntimeCache = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyRuntime.kt');
 
 assert.equal(ASSET_MODAL_GATEWAY_VERSION, '26.asset-modal.gateway.v2-protocol-harmony');

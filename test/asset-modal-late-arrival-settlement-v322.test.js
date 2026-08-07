@@ -172,9 +172,9 @@ assert.equal(recoveredFii.delivery.settlementPending, false);
 
 const model = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalDelivery.kt');
 const parser = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalParsers.kt');
-const loader = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
+const loader = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalProgressiveLoader.kt');
 const service = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
-const merge = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalMergePolicy.kt');
+const merge = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalMergePolicy.kt');
 if (model && parser && loader && service && merge) {
   assert.match(model, /val settlementPending: Boolean = false/);
   assert.match(model, /val settlementSections: List<String> = emptyList\(\)/);

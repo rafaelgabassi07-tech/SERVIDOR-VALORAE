@@ -22,15 +22,22 @@ assert.match(stock, /buildStockDividendRadarPayload/);
 assert.match(fii, /expectedCriteria:\s*FII_BUY_HOLD_CHECKLIST_CRITERIA\.length/);
 assert.match(fii, /short_dividend_history_is_not_failure/);
 
-const details = readSiblingApkFile('app/src/main/java/com/example/ui/AssetDetailsModalUi.kt');
-const patrimony = readSiblingApkFile('app/src/main/java/com/example/ui/PatrimonyTotalModalComponents.kt');
-const returnsUi = readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioDashboardReturnsUi.kt');
-const confetti = readSiblingApkFile('app/src/main/java/com/example/ui/ConfettiAnimation.kt');
-const chartUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalStockDividendChartsUi.kt');
+const details = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetDetailsModalUi.kt');
+const patrimony = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/PatrimonyTotalModalComponents.kt');
+const patrimonyEvolution = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/PatrimonyWealthEvolutionUi.kt');
+const returnsUi = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/PortfolioDashboardReturnsUi.kt');
+const confetti = readSiblingApkFile('app/src/main/java/com/example/ui/shared/ConfettiAnimation.kt');
+const chartUi = [
+  'AssetModalStockDividendChartsUi.kt',
+  'AssetModalStockDividendHistoryUi.kt',
+  'AssetModalStockDividendRadarUi.kt',
+  'AssetModalStockPayoutChartUi.kt',
+  'AssetModalStockFinancialChartUi.kt',
+].map(name => readSiblingApkFile(`app/src/main/java/com/example/ui/shared/asset/${name}`)).filter(Boolean).join('\n');
 const models = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeStockModalModels.kt');
-const checklistReadiness = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalSectionReadiness.kt');
+const checklistReadiness = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalSectionReadiness.kt');
 
-if ([details, patrimony, returnsUi, confetti, chartUi, models, checklistReadiness].every(Boolean)) {
+if ([details, patrimony, patrimonyEvolution, returnsUi, confetti, chartUi, models, checklistReadiness].every(Boolean)) {
   assert.doesNotMatch(details, /StockAssetAnalysisChangesSection|FiiAssetAnalysisChangesSection/);
   const apkRoot = resolveSiblingApkRoot();
   assert.equal(fs.existsSync(path.join(apkRoot, 'app/src/main/java/com/example/ui/AssetAnalysisChangesUi.kt')), false);
@@ -47,12 +54,17 @@ if ([details, patrimony, returnsUi, confetti, chartUi, models, checklistReadines
   const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
   assert.equal(
     sha256(patrimony),
-    '2f266d18dd483ca4df4926364d78bb620d3b3db631b9017ba05bf35d50afa3a1',
-    'O visual atual de Patrimônio enviado pelo usuário deve permanecer inalterado.'
+    'cdad442b1b5df446fae23cac78c011998cedb80286caac0dd8f7e00eef53d79a',
+    'A fachada e os componentes gerais de Patrimônio devem permanecer inalterados.'
+  );
+  assert.equal(
+    sha256(patrimonyEvolution),
+    'e78c01bc5901f7a195ff4ee4473018332cf4606ebb05496d399c7170df851a47',
+    'O gráfico e a evolução patrimonial devem permanecer inalterados após o split.'
   );
   assert.equal(
     sha256(returnsUi),
-    '7820765411dffac394eb3f80ed51330ab9afe61224c0b142a1074688b8d5148d',
+    '54ab972b858fd6065ca9f344c3a751c301ff23221de33a6f608c49342ea949e8',
     'O visual atual de Retorno enviado pelo usuário deve permanecer inalterado.'
   );
 

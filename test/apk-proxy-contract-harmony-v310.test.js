@@ -145,12 +145,16 @@ const httpKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/Valo
 const deliveryKt = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalDelivery.kt');
 const parserKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalParsers.kt');
 const qualityKt = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
-const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
+const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalProgressiveLoader.kt');
 const runtimeKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyRuntime.kt');
 const mobileProtocolKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
 const alertsServiceKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyBackgroundAlertsService.kt');
-const notificationUiKt = readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioNotificationCenterScreenUi.kt');
-const notificationWorkerKt = readSiblingApkFile('app/src/main/java/com/example/data/notifications/ValoraeNotificationWorker.kt');
+const notificationUiKt = readSiblingApkFile('app/src/main/java/com/example/feature/alerts/PortfolioNotificationCenterScreenUi.kt');
+const notificationViewModelKt = readSiblingApkFile('app/src/main/java/com/example/feature/alerts/PortfolioNotificationCenterViewModel.kt');
+const notificationWorkerKt = [
+  readSiblingApkFile('app/src/main/java/com/example/data/notifications/ValoraeNotificationWorker.kt'),
+  readSiblingApkFile('app/src/main/java/com/example/data/notifications/ValoraeNotificationRefreshService.kt'),
+].filter(Boolean).join('\n');
 const dailyCloseWorkerKt = readSiblingApkFile('app/src/main/java/com/example/data/notifications/ValoraeDailyCloseWorker.kt');
 if (diagnosticsKt && httpKt && deliveryKt && parserKt && qualityKt && loaderKt && runtimeKt && mobileProtocolKt) {
   assert.equal((diagnosticsKt.match(/executeJsonGet\("\/api\/v1\/ready"\)/g) || []).length, 1, 'diagnóstico deve executar uma única chamada leve de readiness');
@@ -171,11 +175,12 @@ if (diagnosticsKt && httpKt && deliveryKt && parserKt && qualityKt && loaderKt &
   assert.ok(runtimeKt.includes('SingleAssetModalFullCacheTtlMs = ValoraeCachePolicy.AssetModalFullTtlMs'));
 }
 
-if (alertsServiceKt && notificationUiKt && notificationWorkerKt && dailyCloseWorkerKt) {
+if (alertsServiceKt && notificationUiKt && notificationViewModelKt && notificationWorkerKt && dailyCloseWorkerKt) {
   assert.ok(alertsServiceKt.includes('executeJsonPostCancellable("/api/v1/mobile/alerts", body)'), 'APK deve usar o bundle de alertas sob demanda');
-  assert.equal((notificationUiKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 1, 'Central de Notificações deve usar uma invocação consolidada');
-  assert.ok(!notificationUiKt.includes('remoteRepository.getDividendAgenda('), 'Central de Notificações não deve duplicar chamada de dividendos');
-  assert.ok(!notificationUiKt.includes('remoteRepository.getNews('), 'Central de Notificações não deve duplicar chamada de notícias');
+  assert.equal((notificationUiKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 0, 'UI da Central não deve executar transporte diretamente');
+  assert.equal((notificationViewModelKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 1, 'ViewModel da Central deve usar uma invocação consolidada');
+  assert.ok(!notificationUiKt.includes('remoteRepository.getDividendAgenda(') && !notificationViewModelKt.includes('remoteRepository.getDividendAgenda('), 'Central de Notificações não deve duplicar chamada de dividendos');
+  assert.ok(!notificationUiKt.includes('remoteRepository.getNews(') && !notificationViewModelKt.includes('remoteRepository.getNews('), 'Central de Notificações não deve duplicar chamada de notícias');
   assert.equal((notificationWorkerKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 1, 'worker periódico deve usar uma invocação consolidada');
   assert.equal((dailyCloseWorkerKt.match(/ValoraeProxyClient\.getDailyClose\(/g) || []).length, 1, 'fechamento diário deve usar uma invocação consolidada');
   assert.equal((dailyCloseWorkerKt.match(/ValoraeProxyClient\.getBackgroundAlerts\(/g) || []).length, 0, 'fechamento diário não deve manter a chamada antiga de alertas');

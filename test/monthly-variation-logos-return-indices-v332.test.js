@@ -123,8 +123,8 @@ try {
   assert.equal(returns.series.some(row => row.idivReturnPercent != null), true);
   assert.equal(returns.series.some(row => row.ivvb11ReturnPercent != null), true);
 
-  const avatar = readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioAssetsCardsUi.kt');
-  const discovery = readSiblingApkFile('app/src/main/java/com/example/ui/AnalysisDiscoveryUi.kt');
+  const avatar = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/PortfolioAssetsCardsUi.kt');
+  const discovery = readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisDiscoveryUi.kt');
   const service = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyPortfolioContractsService.kt');
   const calculator = readSiblingApkFile('app/src/main/java/com/example/domain/PatrimonyEvolutionCalculator.kt');
   if ([avatar, discovery, service, calculator].every(Boolean)) {

@@ -87,17 +87,17 @@ try {
 
 
 const apkFiles = {
-  indicators: readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalIndicatorsHistoryUi.kt'),
-  stockPeers: readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalStockPeerRevenueUi.kt'),
-  comparison: readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalDividendsChartsComparisonUi.kt'),
-  checklist: readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalChecklistUi.kt'),
-  cards: readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioAssetsCardsUi.kt'),
+  indicators: readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalIndicatorsHistoryUi.kt'),
+  stockPeers: readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalStockPeerRevenueUi.kt'),
+  comparison: readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalDividendsChartsComparisonUi.kt'),
+  checklist: readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalChecklistUi.kt'),
+  cards: readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/PortfolioAssetsCardsUi.kt'),
   parser: readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyAssetParsers.kt'),
   historyParser: readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyJsonHelpers.kt'),
   historyService: readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyPortfolioContractsService.kt'),
-  dashboard: readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioDashboardReturnsUi.kt'),
-  dashboardModal: readSiblingApkFile('app/src/main/java/com/example/ui/PortfolioDashboardModalUi.kt'),
-  discovery: readSiblingApkFile('app/src/main/java/com/example/ui/AnalysisDiscoveryUi.kt')
+  dashboard: readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/PortfolioDashboardReturnsUi.kt'),
+  dashboardModal: readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/PortfolioDashboardModalUi.kt'),
+  discovery: readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisDiscoveryUi.kt')
 };
 if (Object.values(apkFiles).every(Boolean)) {
   assert.match(apkFiles.indicators, /Arrangement\.spacedBy\(1\.dp\)/);

@@ -109,7 +109,7 @@ assert.equal(indexHistory.INDEX_IDS.IBOV, 1);
 const apkHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const apkService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
 const apkQuality = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
-const apkReadiness = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalSectionReadiness.kt');
+const apkReadiness = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalSectionReadiness.kt');
 const apkBuild = readSiblingApkFile('app/build.gradle.kts');
 if ([apkHttp, apkService, apkQuality, apkReadiness, apkBuild].every(Boolean)) {
   assert.match(apkHttp, /\.readTimeout\(32, TimeUnit\.SECONDS\)/);

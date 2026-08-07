@@ -65,9 +65,9 @@ npm run test:cross-stack
 
 ## Compatibilidade do APK
 
-- APK pareado: `2026.08.04.01` (v572).
+- APK pareado: `2026.08.07.12` (v621, CP20 — navegação de notificações desacoplada).
 - APK mínimo aceito: `2026.07.30.01` (v569, versão instalada anterior ao hotfix).
-- APK máximo homologado: `2026.08.04.01`.
+- APK máximo homologado: `2026.08.07.12`.
 - Política: `valorae-apk-compatibility-v2-backward-compatible`; rotas de leitura permanecem disponíveis para APKs com o protocolo móvel compatível. HTTP 426 fica restrito à sincronização financeira, onde incompatibilidade pode alterar dados do usuário.
 - `VALORAE_REJECT_UNTESTED_FUTURE_APK=0` é um override operacional explícito; não deve ser usado rotineiramente em produção.
 - `npm run verify:release` exige Node 24, dependências instaladas, APK real, suíte integral, testes cross-stack e auditoria estrita.

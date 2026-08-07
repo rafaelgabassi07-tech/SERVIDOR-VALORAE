@@ -35,10 +35,10 @@ assert.deepEqual(shareholdingOnlyQuality, emptyQuality);
 assert.equal(runtimeSource.includes("['shareholdingPosition'"), false);
 assert.equal(runtimeSource.includes("shareholdingPosition: ['shareholdingPosition']"), false);
 
-const modalUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetDetailsModalUi.kt');
-const fiiPortfolioUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalFiiPortfolioUi.kt');
-const comparisonUi = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalDividendsChartsComparisonUi.kt');
-const mergePolicy = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalMergePolicy.kt');
+const modalUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetDetailsModalUi.kt');
+const fiiPortfolioUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalFiiPortfolioUi.kt');
+const comparisonUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalDividendsChartsComparisonUi.kt');
+const mergePolicy = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalMergePolicy.kt');
 if (modalUi && fiiPortfolioUi && comparisonUi && mergePolicy) {
   assert.equal(/\bStockShareholdingPositionSection\s*\(/.test(modalUi), false);
   assert.equal(fiiPortfolioUi.includes('Lista de imóveis ainda não disponível para este FII'), false);

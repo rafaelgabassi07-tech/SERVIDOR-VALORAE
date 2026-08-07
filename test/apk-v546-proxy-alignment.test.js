@@ -19,7 +19,7 @@ const jsonPayload = readSiblingApkFile('app/src/main/java/com/example/data/proxy
 const http = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
 const sync = readSiblingApkFile('app/src/main/java/com/example/data/sync/ValoraeSyncClient.kt');
 const modalService = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
-const modalRuntime = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalRuntime.kt');
+const modalRuntime = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalRuntime.kt');
 if ([apkMetadataText, protocol, jsonPayload, http, sync, modalService, modalRuntime].every(Boolean)) {
   const apkMetadata = JSON.parse(apkMetadataText);
   assert.equal(apkMetadata.versionName, metadata.apkVersion);

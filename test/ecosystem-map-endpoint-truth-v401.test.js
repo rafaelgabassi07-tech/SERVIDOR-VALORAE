@@ -7,7 +7,7 @@ const sectionEnd = page.indexOf('<section id="journeys"', sectionStart);
 const html = page.slice(sectionStart, sectionEnd);
 const router = fs.readFileSync('routes/_router.js', 'utf8');
 
-const documented = [...new Set(html.match(/\/api\/v1\/[a-z0-9_/-]+/gi) || [])].sort();
+const documented = [...new Set(html.match(/\/api\/(?:sync|v1\/[a-z0-9_/-]+)/gi) || [])].sort();
 const allowed = new Set([
   '/api/v1/assets',
   '/api/v1/quotes',
@@ -25,12 +25,12 @@ const allowed = new Set([
   '/api/v1/portfolio/equilibrium',
   '/api/v1/portfolio/history',
   '/api/v1/portfolio/returns',
-  '/api/v1/sync',
+  '/api/sync',
 ]);
 
 for (const endpoint of documented) {
   assert.ok(allowed.has(endpoint), `endpoint não homologado foi documentado: ${endpoint}`);
-  const internal = endpoint.replace('/api/v1', '');
+  const internal = endpoint === '/api/sync' ? '/sync' : endpoint.replace('/api/v1', '');
   assert.ok(router.includes(`'${internal}'`) || router.includes(`"${internal}"`), `endpoint não localizado no router: ${endpoint}`);
 }
 

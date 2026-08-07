@@ -102,11 +102,17 @@ const stockSource = fs.readFileSync(new URL('../lib/analysis/stock-modal-contrac
 assert.ok(stockSource.includes('const stockIndexComparisonTask = fastMode'));
 assert.ok(stockSource.includes('recoveryTarget.targeted') && stockSource.includes('settleFastModalSource('), 'comparação deve aguardar recuperação dirigida e manter deadline no full inicial');
 
-const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/AssetModalProgressiveLoader.kt');
+const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalProgressiveLoader.kt');
 const qualityKt = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
 const universalKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeUniversalAssetModalService.kt');
-const analysisKt = readSiblingApkFile('app/src/main/java/com/example/ui/AnalysisDiscoveryUi.kt');
-const dividendsKt = readSiblingApkFile('app/src/main/java/com/example/ui/DividendsEvolutionModalComponents.kt');
+const analysisKt = [
+  readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisDiscoveryUi.kt'),
+  readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisDiscoveryContentUi.kt'),
+].filter(Boolean).join('\n');
+const dividendsKt = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/DividendsEvolutionModalComponents.kt');
+const designTokensKt = readSiblingApkFile('app/src/main/java/com/example/ui/shared/ValoraeDesignTokens.kt');
+const selectorKt = readSiblingApkFile('app/src/main/java/com/example/ui/shared/ValoraeSelectorUi.kt');
+const stringsXml = readSiblingApkFile('app/src/main/res/values/strings.xml');
 if (loaderKt && qualityKt && universalKt && analysisKt && dividendsKt) {
   assert.ok(loaderKt.includes('internal suspend fun loadSingleAssetModalOnDemand'));
   assert.ok(loaderKt.includes('previousReady?.recoveryContextOrNull()'));
@@ -119,8 +125,16 @@ if (loaderKt && qualityKt && universalKt && analysisKt && dividendsKt) {
   assert.ok(analysisKt.includes('LaunchedEffect(filteredItems.size)'));
   assert.ok(analysisKt.includes('contentType = { _, _ -> "analysis_discovery_asset_row" }'));
   assert.ok(dividendsKt.includes('Modifier.weight(1.18f)'));
-  assert.ok(dividendsKt.includes('padding(start = 4.dp, end = 20.dp)'));
-  assert.ok(dividendsKt.includes('"Classes"'));
+  const legacyPadding = dividendsKt.includes('padding(start = 4.dp, end = 20.dp)');
+  const cp8Padding = dividendsKt.includes('centeredText = true')
+    && selectorKt?.includes('padding(start = ValoraeSpacing.Xs, end = ValoraeSpacing.Xxxl)')
+    && designTokensKt?.includes('val Xs = 4.dp')
+    && designTokensKt?.includes('val Xxxl = 20.dp');
+  assert.ok(legacyPadding || cp8Padding, 'padding 4dp/20dp deve permanecer equivalente após CP8');
+  const legacyClasses = dividendsKt.includes('"Classes"');
+  const cp8Classes = dividendsKt.includes('R.string.portfolio_filter_classes')
+    && stringsXml?.includes('<string name="portfolio_filter_classes">Classes</string>');
+  assert.ok(legacyClasses || cp8Classes, 'copy Classes deve permanecer idêntica após migração para resources');
 }
 
 console.log('asset-modal-stability-analysis-filter-v309 ok');
