@@ -1,6 +1,6 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.404 pareado ao APK v629; adiciona rankings semânticos e adaptativos para a página de Análise.",
+  "description": "Proxy 21.12.404 pareado ao APK v633; ticker de mercado reutiliza as fontes reais já usadas nos comparadores.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
@@ -8,21 +8,22 @@
   "publicVersion": "21.12.404",
   "checkpoint": "account-profile-v413",
   "label": "account-profile-v413",
-  "apkVersion": "2026.08.08.07",
-  "apkCheckpoint": "v629-analysis-rankings-adaptive",
-  "contractVersion": "APK v629 / Proxy 21.12.404 / APK version 2026.08.08.07 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / monitor vertical-flow-v407 / routes /api/sync + /api/v1/mobile/alerts + /api/v1/analysis/rankings / analysis rankings semantic-v1",
+  "apkVersion": "2026.08.08.11",
+  "apkCheckpoint": "v633-analysis-market-ticker-source-parity",
+  "contractVersion": "APK v633 / Proxy 21.12.404 / APK version 2026.08.08.11 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v1 / analysis market ticker-v1",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "account-profile-v413",
-  "title": "Proxy v404 — rankings adaptativos / APK v629",
-  "summary": "Adiciona /api/v1/analysis/rankings com 10 rankings normalizados, parser semântico por cabeçalho, cache, coalescência e stale-if-error.",
+  "title": "Proxy v404 — ticker com paridade dos comparadores / APK v633",
+  "summary": "Mantém /api/v1/analysis/rankings e estende /api/v1/market/indices com Dólar, IFIX, IDIV, SMLL, CDI, IPCA+, IBOV e IVVB11 usando fontes reais existentes.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.08.07",
+  "maxTestedApkVersion": "2026.08.08.11",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "Parser semântico v629 validado com fixtures de Ações e FIIs e reordenação de colunas.",
-    "Sintaxe integral do Proxy e rota /analysis/rankings validadas.",
-    "Pareamento v629 reconhecido como PAIRED dentro da política backward-compatible."
+    "Os oito itens do ticker foram validados em teste funcional isolado com suas fontes/contingências, retornando status OK e valor numérico.",
+    "IBOV, IFIX, IDIV e SMLL reutilizam a contingência direta do mesmo provedor usado pelos comparadores.",
+    "USD/IVVB11 usam Yahoo com fallback histórico real; CDI/IPCA usam séries reais/oficiais do ecossistema.",
+    "Compatibilidade APK v633 reconhecida como PAIRED sem alterar a versão pública 21.12.404."
   ],
   "operationalLimits": [
     "Cache, coalescência, métricas e rate limit são limitados e locais por instância serverless; proteção distribuída deve ser configurada na borda da plataforma.",
@@ -31,15 +32,14 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "Novo endpoint /api/v1/analysis/rankings para catálogo e ranking por ID estável.",
-    "Parser identifica colunas pelo significado do cabeçalho e continua válido quando a ordem da tabela muda.",
-    "Normaliza percentuais, reais e unidades K/M/B/T para contrato estável consumido pelo APK.",
-    "Valida identidade da página, quantidade mínima e completude da métrica principal antes de publicar.",
-    "Preserva último snapshot válido quando a fonte fica indisponível ou estruturalmente incompatível."
+    "IFIX, IDIV, SMLL e IBOV ganham contingência pela mesma API direta de índices usada nos gráficos de comparação.",
+    "USD e IVVB11 preservam cotação real e ganham fallback pelo histórico real do mesmo provedor.",
+    "CDI/IPCA usam as mesmas séries reais do ecossistema; nenhum valor sintético é produzido.",
+    "Compatibilidade APK v633 reconhecida como PAIRED sem alterar a versão pública 21.12.404."
   ],
   "notes": [
-    "Mudanças normais de valores e posições são capturadas automaticamente na próxima atualização do cache.",
-    "O contrato do APK não depende de índices de coluna nem de classes CSS da página.",
-    "Rotas financeiras existentes permanecem inalteradas."
+    "Mudanças normais de valores são refletidas automaticamente pelas fontes e pelo cache; não exigem nova versão.",
+    "Quando uma fonte está temporariamente indisponível, o item fica parcial e o stale-if-error existente pode preservar o último snapshot válido.",
+    "Rankings e demais rotas financeiras permanecem inalterados."
   ]
 }
