@@ -8,11 +8,13 @@ assert.equal(_test.statusInvestPublicPagePaths('RECR11')[0], 'fundos-imobiliario
 const stockHtml = `
 <section><h2>DIVIDENDOS DO PETR4</h2><table><tbody>
 <tr><td>JCP</td><td>01/06/2026</td><td>20/08/2026</td><td>0,35048636</td></tr>
+<tr><td>JCP</td><td>15/06/2026</td><td>20/08/2026</td><td>0,12000000</td></tr>
 <tr><td>Rend. Tributado</td><td>22/04/2026</td><td>20/05/2026</td><td>0,01649003</td></tr>
 <tr><td>Dividendo</td><td>22/12/2025</td><td>20/03/2026</td><td>0,29642144</td></tr>
 </tbody></table><h2>COMUNICADOS DO PETR4</h2></section>`;
 const stockEvents = _test.parseStatusInvestVisibleTableEvents('PETR4', stockHtml);
-assert.equal(stockEvents.length, 3);
+assert.equal(stockEvents.length, 4);
+assert.equal(stockEvents.filter(e => e.dividendType === 'JCP' && e.paymentDate === '2026-08-20').length, 2, 'duas parcelas futuras anunciadas para a mesma data de pagamento devem ser preservadas');
 const futureJcp = stockEvents.find(e => e.dividendType === 'JCP' && e.paymentDate === '2026-08-20');
 assert.ok(futureJcp, 'JCP futuro da tabela visível precisa sobreviver ao parser');
 assert.equal(futureJcp.dateCom, '2026-06-01');

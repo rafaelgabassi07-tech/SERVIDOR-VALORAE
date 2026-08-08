@@ -12,7 +12,7 @@ const expectedContract = 'valorae-ecosystem-2026.08.05.04-p404';
 assert.equal(pkg.valorae.publicVersion, '21.12.404');
 assert.equal(pkg.valorae.releasePatch, '21.12.404-account-profile-v413');
 assert.equal(RELEASE.ecosystemContract, expectedContract);
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.08.04');
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.08.07');
 assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Public-Version'));
 assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Core-Version'));
 
@@ -44,7 +44,7 @@ await dispatchRoute({
   headers: {
     'x-valorae-app': 'VALORAE Android',
     'x-valorae-channel': 'android',
-    'x-valorae-app-version': '2026.08.08.04',
+    'x-valorae-app-version': '2026.08.08.07',
     'x-valorae-build': 'release',
     'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
     'x-valorae-mobile-protocol': '2026.07.10.10',
@@ -70,7 +70,7 @@ await dispatchRoute({
   headers: {
     'x-valorae-app': 'VALORAE Android',
     'x-valorae-channel': 'android',
-    'x-valorae-app-version': '2026.08.08.04',
+    'x-valorae-app-version': '2026.08.08.07',
     'x-valorae-build': 'release',
     'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
     'x-valorae-mobile-protocol': '2026.07.10.10',
@@ -109,7 +109,7 @@ await syncHandler({
   headers: {
     'x-valorae-app': 'VALORAE Android',
     'x-valorae-channel': 'android',
-    'x-valorae-app-version': '2026.08.08.04',
+    'x-valorae-app-version': '2026.08.08.07',
     'x-valorae-build': 'release',
     'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
     'x-valorae-mobile-protocol': '2026.07.10.10',

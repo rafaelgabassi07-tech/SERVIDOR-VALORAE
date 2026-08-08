@@ -50,7 +50,7 @@ const PRODUCTION_ROUTE_ALLOWLIST = new Set([
   '/ready', '/sync', '/mobile/alerts', '/mobile/daily-close', '/dividends/batch',
   '/assets', '/asset/quote', '/quotes', '/asset/history',
   '/asset/modal', '/asset/logo',
-  '/market/indices', '/market/rankings', '/news', '/news/article',
+  '/market/indices', '/market/rankings', '/analysis/rankings', '/news', '/news/article',
   '/portfolio/equilibrium', '/portfolio/history', '/portfolio/returns',
 ]);
 
@@ -142,6 +142,16 @@ async function getQuote(...args) {
 async function fetchInvestidor10Rankings(...args) {
   const module = await loadFeatureModule('source-adapters', () => import('../lib/sources/adapters/index.js'));
   return module.fetchInvestidor10Rankings(...args);
+}
+
+async function fetchInvestidor10AnalysisRanking(...args) {
+  const module = await loadFeatureModule('source-adapters', () => import('../lib/sources/adapters/index.js'));
+  return module.fetchInvestidor10AnalysisRanking(...args);
+}
+
+async function getInvestidor10AnalysisRankingCatalog(...args) {
+  const module = await loadFeatureModule('source-adapters', () => import('../lib/sources/adapters/index.js'));
+  return module.getInvestidor10AnalysisRankingCatalog(...args);
 }
 
 async function getIpcaSeries(...args) {
@@ -1457,6 +1467,18 @@ export async function dispatchRoute(req, res) {
     }
     if (path === '/market/ipca') return sendJson(req, res, await getIpcaSeries(payload.historyMonths || payload.months || 12), { cacheControl: 'private, max-age=300' });
     if (path === '/market/rankings') return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, ...(await buildCanonicalMarketRankings(payload)) }, { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.marketRankings}, stale-while-revalidate=300` });
+    if (path === '/analysis/rankings') {
+      const rankingId = String(payload.rankingId || payload.ranking || payload.id || '').trim();
+      const result = rankingId
+        ? await fetchInvestidor10AnalysisRanking({
+            rankingId,
+            limit: clampInt(payload.limit || payload.max || payload.maxItems, 40, 1, 60),
+            timeoutMs: clampInt(payload.timeoutMs, 7000, 1200, 20000),
+            bypassCache: boolParamLocal(payload.refresh || payload.nocache),
+          })
+        : await getInvestidor10AnalysisRankingCatalog();
+      return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, endpoint: 'analysis-rankings', ...result }, { cacheControl: 'private, max-age=120, stale-while-revalidate=900' });
+    }
     if (path === '/market/indices') return runLazyDefaultHandler('route-market-indices', () => import('./market/indices.js'), req, res);
 
     if (path === '/asset/quote' || path === '/quote') {
@@ -1532,7 +1554,7 @@ export function routeManifest() {
     physicalFunctions: ['api/router.js'],
     legacyAliases: { '/scraper': '/compat/scraper4', '/api/router?path=...': '/api/v1/{path}' },
     routes: [
-    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/extraction-intelligence','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/contract/scraping-engine','/source/status','/release/readiness','/personal/readiness','/cache/stats','/metrics/runtime','/cache/clear','/deploy/status','/fields','/errors','/openapi','/sync','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/mobile/alerts','/mobile/daily-close','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/market/indices','/news/article','/asset/quote','/quote','/quotes','/asset/history','/asset/logo','/asset/yahoo-logo','/asset/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
+    '/health','/ready','/manifest','/env','/schema','/contract/baseline','/contract/observability','/contract/source-adapters','/contract/html-parser-shadow','/contract/structured-data','/contract/dynamic-render','/contract/extraction-intelligence','/contract/formal-schemas','/contract/http-transport','/contract/shared-state','/contract/real-canaries','/contract/final-decomposition','/contract/scraping-engine','/source/status','/release/readiness','/personal/readiness','/cache/stats','/metrics/runtime','/cache/clear','/deploy/status','/fields','/errors','/openapi','/sync','/mobile/bootstrap','/mobile/practical-sync','/mobile/portfolio-sync','/mobile/alerts','/mobile/daily-close','/portfolio/insights-bundle','/dividends/batch','/portfolio/returns','/portfolio/analyze','/portfolio/allocation','/portfolio/equilibrium','/portfolio/balance','/portfolio/dividends','/portfolio/events','/portfolio/history','/portfolio/income','/portfolio/next-dividends','/portfolio/rebalance','/portfolio/risk','/portfolio/summary','/portfolio/transactions','/market/ipca','/market/rankings','/analysis/rankings','/market/indices','/news/article','/asset/quote','/quote','/quotes','/asset/history','/asset/logo','/asset/yahoo-logo','/asset/modal','/assets','/compare','/news','/watchlist/analyze','/scrape','/batch-scrape','/admin/status','/admin/cache','/scraper','/scraper4','/compat/scraper4'
   ].sort() };
 }
 

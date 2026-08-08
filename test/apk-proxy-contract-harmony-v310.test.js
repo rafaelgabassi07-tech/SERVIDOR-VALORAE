@@ -21,6 +21,7 @@ const requiredRoutes = new Map([
   ['/asset/logo', 'GET'],
   ['/market/indices', 'GET'],
   ['/market/rankings', 'GET'],
+  ['/analysis/rankings', 'GET'],
   ['/news', 'GET'],
   ['/news/article', 'POST'],
   ['/portfolio/history', 'POST'],
