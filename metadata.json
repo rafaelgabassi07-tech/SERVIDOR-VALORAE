@@ -1,6 +1,6 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.404 pareado ao APK v625 com recuperação leve da Agenda e isolamento de cache por política de fonte/calendário.",
+  "description": "Proxy 21.12.404 pareado ao APK v626 com reparo da fonte da Agenda, parser da tabela pública StatusInvest e recuperação v2.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
@@ -8,21 +8,21 @@
   "publicVersion": "21.12.404",
   "checkpoint": "account-profile-v413",
   "label": "account-profile-v413",
-  "apkVersion": "2026.08.08.03",
-  "apkCheckpoint": "v625-fix-ui-alerts-agenda-market-close",
-  "contractVersion": "APK v625 / Proxy 21.12.404 / APK version 2026.08.08.03 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / monitor vertical-flow-v407 / routes /api/sync + /api/v1/mobile/alerts",
+  "apkVersion": "2026.08.08.04",
+  "apkCheckpoint": "v626-fix-dividend-agenda-source-regression",
+  "contractVersion": "APK v626 / Proxy 21.12.404 / APK version 2026.08.08.04 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / monitor vertical-flow-v407 / routes /api/sync + /api/v1/mobile/alerts",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "account-profile-v413",
-  "title": "Proxy v404 — recuperação resiliente da Agenda v625",
-  "summary": "Mantém o contrato público 21.12.404 e adiciona um modo de recuperação mobile que prioriza StatusInvest quando a varredura pública da Agenda degrada ou excede o deadline.",
+  "title": "Proxy v404 — reparo da fonte da Agenda v626",
+  "summary": "Mantém o contrato público 21.12.404 e corrige a regressão da Agenda ao usar as páginas públicas corretas do StatusInvest, interpretar a tabela visível e priorizar posições atuais no recovery.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.08.03",
+  "maxTestedApkVersion": "2026.08.08.04",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "427 arquivos JS verificados por sintaxe.",
-    "Testes direcionados de dividendos/Agenda aprovados.",
-    "Pareamento validado com APK 2026.08.08.03 sem alteração de endpoint ou esquema financeiro."
+    "428 arquivos JS verificados por sintaxe.",
+    "Parser visível StatusInvest e recuperação v2 testados.",
+    "Pareamento validado com APK 2026.08.08.04 sem alteração do endpoint /api/v1/dividends/batch nem do esquema financeiro."
   ],
   "operationalLimits": [
     "Cache, coalescência, métricas e rate limit são limitados e locais por instância serverless; proteção distribuída deve ser configurada na borda da plataforma.",
@@ -31,7 +31,8 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "Cache de dividendos passa a diferenciar includeCalendar/source.",
-    "home-agenda-recovery desativa calendário público e amplia a janela da fonte primária."
+    "Corrige URLs públicas StatusInvest: ações em /acoes/{ticker} e FIIs em /fundos-imobiliarios/{ticker}.",
+    "Interpreta a tabela visível de proventos e mantém JSON interno/JSON embutido como contingência.",
+    "home-agenda-recovery-v2 usa cache separado, prioriza página pública e posições atuais e desativa calendário público pesado."
   ]
 }

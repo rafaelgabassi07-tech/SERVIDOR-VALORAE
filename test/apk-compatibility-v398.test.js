@@ -2,15 +2,15 @@ import assert from 'node:assert/strict';
 import { APK_COMPATIBILITY, compareApkVersions, evaluateApkCompatibility, normalizeApkVersion } from '../lib/core/apk-compatibility.js';
 import { VALORAE_EXPOSE_HEADERS } from '../lib/core/mobile-protocol.js';
 
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.08.03');
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.08.04');
 assert.equal(APK_COMPATIBILITY.minSupportedVersion, '2026.07.30.01');
 assert.equal(normalizeApkVersion('abc'), '');
 assert.equal(compareApkVersions('2026.07.30.02', '2026.07.30.03'), -1);
 assert.equal(evaluateApkCompatibility('2026.07.30.01').reject, false);
 assert.equal(evaluateApkCompatibility('2026.07.30.01').status, 'SUPPORTED');
 assert.equal(evaluateApkCompatibility('2026.07.30.02').status, 'SUPPORTED');
-assert.equal(evaluateApkCompatibility('2026.08.08.03').status, 'PAIRED');
-assert.equal(evaluateApkCompatibility('2026.08.08.04', { allowFuture: false }).reject, true);
+assert.equal(evaluateApkCompatibility('2026.08.08.04').status, 'PAIRED');
+assert.equal(evaluateApkCompatibility('2026.08.08.05', { allowFuture: false }).reject, true);
 
 const previousNodeEnv = process.env.NODE_ENV;
 const previousVercel = process.env.VERCEL;
@@ -19,9 +19,9 @@ try {
   process.env.NODE_ENV = 'production';
   delete process.env.VERCEL;
   delete process.env.VALORAE_REJECT_UNTESTED_FUTURE_APK;
-  assert.equal(evaluateApkCompatibility('2026.08.08.04').reject, true, 'produção deve rejeitar APK futuro não homologado por padrão');
+  assert.equal(evaluateApkCompatibility('2026.08.08.05').reject, true, 'produção deve rejeitar APK futuro não homologado por padrão');
   process.env.VALORAE_REJECT_UNTESTED_FUTURE_APK = '0';
-  assert.equal(evaluateApkCompatibility('2026.08.08.04').reject, false, 'override explícito pode abrir janela futura');
+  assert.equal(evaluateApkCompatibility('2026.08.08.05').reject, false, 'override explícito pode abrir janela futura');
 } finally {
   if (previousNodeEnv === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = previousNodeEnv;
   if (previousVercel === undefined) delete process.env.VERCEL; else process.env.VERCEL = previousVercel;
