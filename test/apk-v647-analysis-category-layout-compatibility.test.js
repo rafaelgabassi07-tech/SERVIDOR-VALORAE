@@ -4,5 +4,7 @@ import { APK_COMPATIBILITY, evaluateApkCompatibility } from '../lib/core/apk-com
 assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.09.10');
 assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.09.10');
 assert.equal(evaluateApkCompatibility('2026.08.09.10').status, 'PAIRED');
+assert.equal(evaluateApkCompatibility('2026.08.09.09').status, 'SUPPORTED');
 assert.equal(evaluateApkCompatibility('2026.08.09.11', { allowFuture: false }).reject, true);
-console.log('apk-v642-preview-stability-compatibility: ok');
+
+console.log('apk-v647-analysis-category-layout-compatibility: ok');

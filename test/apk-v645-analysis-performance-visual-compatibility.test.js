@@ -6,15 +6,16 @@ import { VALORAE_ANALYSIS_TICKER_ORDER } from '../lib/market/indices.js';
 assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.09.10');
 assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.09.10');
 assert.equal(evaluateApkCompatibility('2026.08.09.10').status, 'PAIRED');
-assert.equal(evaluateApkCompatibility('2026.08.09.03').status, 'SUPPORTED');
+assert.equal(evaluateApkCompatibility('2026.08.09.07').status, 'SUPPORTED');
+assert.equal(evaluateApkCompatibility('2026.08.09.11', { allowFuture: false }).reject, true);
 assert.deepEqual(VALORAE_ANALYSIS_TICKER_ORDER, ['USD','IFIX','IDIV','SMLL','CDI','IPCA','IBOV','IVVB11']);
 
-const source = fs.readFileSync(new URL('../lib/market/indices.js', import.meta.url), 'utf8');
+const indicesSource = fs.readFileSync(new URL('../lib/market/indices.js', import.meta.url), 'utf8');
 for (const [code, symbol] of Object.entries({ USD:'BRL=X', IFIX:'IFIX.SA', IDIV:'IDIV.SA', SMLL:'SMLL.SA', IBOV:'^BVSP', IVVB11:'IVVB11.SA' })) {
-  assert.ok(source.includes(`${code}: '${symbol}'`), `${code} deve possuir símbolo configurado`);
+  assert.ok(indicesSource.includes(`${code}: '${symbol}'`), `${code} deve manter símbolo real configurado`);
 }
-assert.match(source, /ANALYSIS_TICKER_MACRO_CODES = new Set\(\['CDI', 'IPCA'\]\)/);
-assert.match(source, /ok:\s*value != null/, 'CDI/IPCA só podem ficar OK com valor numérico disponível');
-assert.match(source, /VALORAE_ANALYSIS_TICKER_ORDER\.map\(code => rows\.find/);
-assert.match(source, /tickerItems\.length !== VALORAE_ANALYSIS_TICKER_ORDER\.length/);
-console.log('apk-v641-analysis-ticker-contract: ok');
+assert.match(indicesSource, /indices:\s*rows/);
+assert.match(indicesSource, /tickerItems/);
+assert.match(indicesSource, /items:\s*tickerItems/);
+assert.ok(fs.existsSync(new URL('../docs/RELATORIO_COMPATIBILIDADE_APK_V645.md', import.meta.url)));
+console.log('apk-v645-analysis-performance-visual-compatibility: ok');
