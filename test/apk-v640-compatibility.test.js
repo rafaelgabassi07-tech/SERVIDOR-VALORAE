@@ -5,11 +5,11 @@ import { fileURLToPath } from 'node:url';
 import { APK_COMPATIBILITY, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
 import { _test, getInvestidor10AnalysisRankingCatalog } from '../lib/market/analysis-rankings-i10.js';
 
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.09.05');
-assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.09.05');
-assert.equal(evaluateApkCompatibility('2026.08.09.05').status, 'PAIRED');
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.09.07');
+assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.09.07');
+assert.equal(evaluateApkCompatibility('2026.08.09.07').status, 'PAIRED');
 assert.equal(evaluateApkCompatibility('2026.08.09.02').status, 'SUPPORTED');
-assert.equal(evaluateApkCompatibility('2026.08.09.06', { allowFuture: false }).reject, true);
+assert.equal(evaluateApkCompatibility('2026.08.09.08', { allowFuture: false }).reject, true);
 
 const catalog = getInvestidor10AnalysisRankingCatalog();
 assert.equal(catalog.items.length, 19);

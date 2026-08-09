@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.404 pareado ao APK v642; macroCategorias da Análise e faixa de mercado auditada sem alterar rotas.",
+  "description": "Proxy VALORAE 21.12.404 pareado ao APK v644; corrige robustez semântica dos rankings sem alterar rotas públicas.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -37,10 +37,10 @@
     "publicVersion": "21.12.404",
     "checkpoint": "account-profile-v413",
     "releaseLabel": "account-profile-v413",
-    "apkVersion": "2026.08.09.05",
+    "apkVersion": "2026.08.09.07",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.09.05",
+    "maxTestedApkVersion": "2026.08.09.07",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404"
   },
@@ -56,10 +56,10 @@
     "publicVersion": "21.12.404",
     "checkpoint": "account-profile-v413",
     "releaseLabel": "account-profile-v413",
-    "apkVersion": "2026.08.09.05",
+    "apkVersion": "2026.08.09.07",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.09.05",
+    "maxTestedApkVersion": "2026.08.09.07",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404"
   },
   "optionalDependencies": {

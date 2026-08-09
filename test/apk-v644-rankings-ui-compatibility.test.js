@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
 import { APK_COMPATIBILITY, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
+import { INVESTIDOR10_ANALYSIS_RANKINGS_VERSION } from '../lib/market/analysis-rankings-i10.js';
 
 assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.09.07');
 assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.09.07');
 assert.equal(evaluateApkCompatibility('2026.08.09.07').status, 'PAIRED');
+assert.equal(evaluateApkCompatibility('2026.08.09.06').status, 'SUPPORTED');
 assert.equal(evaluateApkCompatibility('2026.08.09.08', { allowFuture: false }).reject, true);
-console.log('apk-v642-preview-stability-compatibility: ok');
+assert.equal(INVESTIDOR10_ANALYSIS_RANKINGS_VERSION, '21.12.404-analysis-rankings-semantic-v3');
+console.log('apk-v644-rankings-ui-compatibility: ok');

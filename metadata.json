@@ -1,6 +1,6 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.404 pareado ao APK v642; sem mudança funcional de mercado, apenas avanço da janela de compatibilidade para o hotfix de preview da Análise.",
+  "description": "Proxy 21.12.404 pareado ao APK v644; fortalece o parser semântico dos rankings para recuperar a métrica principal quando o cabeçalho responsivo da fonte varia.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
@@ -8,21 +8,22 @@
   "publicVersion": "21.12.404",
   "checkpoint": "account-profile-v413",
   "label": "account-profile-v413",
-  "apkVersion": "2026.08.09.05",
-  "apkCheckpoint": "v642-analysis-preview-stability",
-  "contractVersion": "APK v642 / Proxy 21.12.404 / APK version 2026.08.09.05 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v2 / analysis market ticker-v2",
+  "apkVersion": "2026.08.09.07",
+  "apkCheckpoint": "v644-analysis-rankings-ui-polish",
+  "contractVersion": "APK v644 / Proxy 21.12.404 / APK version 2026.08.09.07 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v2",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "account-profile-v413",
-  "title": "Proxy v404 — compatibilidade APK v642",
-  "summary": "Mantém todas as rotas e contratos da v642 e reconhece o APK v642 como versão pareada.",
+  "title": "Proxy v404 — compatibilidade APK v644",
+  "summary": "Mantém as rotas atuais, reconhece o APK v644 como versão pareada e corrige a extração resiliente das métricas principais dos rankings.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.09.05",
+  "maxTestedApkVersion": "2026.08.09.07",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "APK 2026.08.09.05 é reconhecido como PAIRED.",
-    "APK 2026.08.09.03 permanece SUPPORTED dentro da janela retrocompatível.",
-    "Os oito itens da faixa de mercado são validados em ordem canônica e com valores numéricos reais nos testes de contingência.",
+    "APK 2026.08.09.07 é reconhecido como PAIRED.",
+    "APK 2026.08.09.06 permanece SUPPORTED dentro da janela retrocompatível.",
+    "Os sete rankings reportados validam a métrica principal mesmo quando o texto do cabeçalho não é reconhecido.",
+    "Os contratos semânticos anteriores de rankings continuam passando.",
     "A versão pública do Proxy permanece 21.12.404."
   ],
   "operationalLimits": [
@@ -32,17 +33,16 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "APK 2026.08.09.05 é reconhecido como PAIRED.",
-    "Avança pairedVersion/maxTestedVersion para 2026.08.09.05.",
-    "Centraliza a ordem dos oito itens da faixa de Análise no contrato VALORAE_ANALYSIS_TICKER_ORDER.",
-    "Valida em inicialização que USD, IFIX, IDIV, SMLL, IBOV e IVVB11 possuem símbolos de mercado configurados.",
-    "CDI/IPCA só recebem status OK quando existe valor numérico real.",
-    "Mantém /api/v1/market/indices, /api/v1/analysis/rankings e demais contratos sem mudança de rota.",
-    "Toda documentação nova permanece dentro de docs/."
+    "APK 2026.08.09.07 é reconhecido como PAIRED.",
+    "Avança pairedVersion/maxTestedVersion para 2026.08.09.07.",
+    "O seletor de tabela aceita fallback estrutural controlado quando a métrica principal está imediatamente após a coluna Ativos.",
+    "O parser recupera apenas a métrica primária por posição; métricas secundárias continuam exigindo cabeçalhos semânticos para evitar mapeamentos indevidos.",
+    "Contrato interno de rankings avança de semantic-v2 para semantic-v3.",
+    "Mantém /api/v1/analysis/rankings e demais rotas públicas sem alteração."
   ],
   "notes": [
-    "Mudanças normais de valores continuam refletidas automaticamente pelas fontes e pelo cache.",
-    "Os rankings semânticos v2 da v640 são preservados sem alteração.",
-    "A versão pública 21.12.404 permanece inalterada; a faixa de mercado evolui para contract v2 apenas em validação interna."
+    "O fallback estrutural só entra quando a métrica principal não foi reconhecida semanticamente e existe uma coluna imediatamente após Ativos.",
+    "Cache continua com TTL de 5 minutos e stale de 24 horas; um novo deploy reinicia o cache em memória.",
+    "A versão pública 21.12.404 permanece inalterada."
   ]
 }
