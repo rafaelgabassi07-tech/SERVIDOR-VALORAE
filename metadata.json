@@ -1,6 +1,6 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.404 pareado ao APK v640 com expansão aditiva dos rankings semânticos de ações.",
+  "description": "Proxy 21.12.404 pareado ao APK v642; sem mudança funcional de mercado, apenas avanço da janela de compatibilidade para o hotfix de preview da Análise.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
@@ -8,21 +8,21 @@
   "publicVersion": "21.12.404",
   "checkpoint": "account-profile-v413",
   "label": "account-profile-v413",
-  "apkVersion": "2026.08.09.03",
-  "apkCheckpoint": "v640-analysis-stock-rankings-expansion",
-  "contractVersion": "APK v640 / Proxy 21.12.404 / APK version 2026.08.09.03 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v2 / analysis market ticker-v1",
+  "apkVersion": "2026.08.09.05",
+  "apkCheckpoint": "v642-analysis-preview-stability",
+  "contractVersion": "APK v642 / Proxy 21.12.404 / APK version 2026.08.09.05 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v2 / analysis market ticker-v2",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "account-profile-v413",
-  "title": "Proxy v404 — compatibilidade APK v640",
-  "summary": "Amplia de forma aditiva o adaptador /api/v1/analysis/rankings para os nove novos rankings de ações e avança a janela pareada para o APK v640.",
+  "title": "Proxy v404 — compatibilidade APK v642",
+  "summary": "Mantém todas as rotas e contratos da v642 e reconhece o APK v642 como versão pareada.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.09.03",
+  "maxTestedApkVersion": "2026.08.09.05",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "APK 2026.08.09.03 é reconhecido como PAIRED.",
-    "APK 2026.08.09.02 permanece SUPPORTED dentro da janela retrocompatível.",
-    "O catálogo /api/v1/analysis/rankings passa a expor 19 IDs semânticos, incluindo os nove novos rankings de ações.",
+    "APK 2026.08.09.05 é reconhecido como PAIRED.",
+    "APK 2026.08.09.03 permanece SUPPORTED dentro da janela retrocompatível.",
+    "Os oito itens da faixa de mercado são validados em ordem canônica e com valores numéricos reais nos testes de contingência.",
     "A versão pública do Proxy permanece 21.12.404."
   ],
   "operationalLimits": [
@@ -32,15 +32,17 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "APK 2026.08.09.03 é reconhecido como PAIRED.",
-    "Avança pairedVersion/maxTestedVersion para 2026.08.09.03.",
-    "Adiciona nove definições semânticas de rankings de ações e os aliases de Receita, Lucro, Caixas, Variação 30d e crescimentos em 5 anos.",
-    "Mantém a rota /api/v1/analysis/rankings e o envelope de resposta; a extensão é retrocompatível.",
+    "APK 2026.08.09.05 é reconhecido como PAIRED.",
+    "Avança pairedVersion/maxTestedVersion para 2026.08.09.05.",
+    "Centraliza a ordem dos oito itens da faixa de Análise no contrato VALORAE_ANALYSIS_TICKER_ORDER.",
+    "Valida em inicialização que USD, IFIX, IDIV, SMLL, IBOV e IVVB11 possuem símbolos de mercado configurados.",
+    "CDI/IPCA só recebem status OK quando existe valor numérico real.",
+    "Mantém /api/v1/market/indices, /api/v1/analysis/rankings e demais contratos sem mudança de rota.",
     "Toda documentação nova permanece dentro de docs/."
   ],
   "notes": [
     "Mudanças normais de valores continuam refletidas automaticamente pelas fontes e pelo cache.",
-    "O parser de rankings identifica colunas por semântica do cabeçalho e não por índice fixo.",
-    "A versão pública 21.12.404 permanece inalterada; apenas o contrato semântico de rankings evolui para v2."
+    "Os rankings semânticos v2 da v640 são preservados sem alteração.",
+    "A versão pública 21.12.404 permanece inalterada; a faixa de mercado evolui para contract v2 apenas em validação interna."
   ]
 }
