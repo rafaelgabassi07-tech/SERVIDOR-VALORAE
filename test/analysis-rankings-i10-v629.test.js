@@ -79,7 +79,7 @@ function fiiHtml(headers, rows, title) {
 
 {
   const catalog = getInvestidor10AnalysisRankingCatalog();
-  assert.equal(catalog.items.length, 10);
+  assert.ok(catalog.items.length >= 10);
   assert.ok(catalog.items.some(item => item.id === 'FII_12M_GAIN'));
   assert.ok(catalog.items.some(item => item.id === 'STOCK_NET_MARGIN'));
 }

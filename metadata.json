@@ -1,6 +1,6 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.404 pareado ao APK v633; ticker de mercado reutiliza as fontes reais já usadas nos comparadores.",
+  "description": "Proxy 21.12.404 pareado ao APK v640 com expansão aditiva dos rankings semânticos de ações.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
@@ -8,22 +8,22 @@
   "publicVersion": "21.12.404",
   "checkpoint": "account-profile-v413",
   "label": "account-profile-v413",
-  "apkVersion": "2026.08.08.11",
-  "apkCheckpoint": "v633-analysis-market-ticker-source-parity",
-  "contractVersion": "APK v633 / Proxy 21.12.404 / APK version 2026.08.08.11 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v1 / analysis market ticker-v1",
+  "apkVersion": "2026.08.09.03",
+  "apkCheckpoint": "v640-analysis-stock-rankings-expansion",
+  "contractVersion": "APK v640 / Proxy 21.12.404 / APK version 2026.08.09.03 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v2 / analysis market ticker-v1",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "account-profile-v413",
-  "title": "Proxy v404 — ticker com paridade dos comparadores / APK v633",
-  "summary": "Mantém /api/v1/analysis/rankings e estende /api/v1/market/indices com Dólar, IFIX, IDIV, SMLL, CDI, IPCA+, IBOV e IVVB11 usando fontes reais existentes.",
+  "title": "Proxy v404 — compatibilidade APK v640",
+  "summary": "Amplia de forma aditiva o adaptador /api/v1/analysis/rankings para os nove novos rankings de ações e avança a janela pareada para o APK v640.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.08.11",
+  "maxTestedApkVersion": "2026.08.09.03",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "Os oito itens do ticker foram validados em teste funcional isolado com suas fontes/contingências, retornando status OK e valor numérico.",
-    "IBOV, IFIX, IDIV e SMLL reutilizam a contingência direta do mesmo provedor usado pelos comparadores.",
-    "USD/IVVB11 usam Yahoo com fallback histórico real; CDI/IPCA usam séries reais/oficiais do ecossistema.",
-    "Compatibilidade APK v633 reconhecida como PAIRED sem alterar a versão pública 21.12.404."
+    "APK 2026.08.09.03 é reconhecido como PAIRED.",
+    "APK 2026.08.09.02 permanece SUPPORTED dentro da janela retrocompatível.",
+    "O catálogo /api/v1/analysis/rankings passa a expor 19 IDs semânticos, incluindo os nove novos rankings de ações.",
+    "A versão pública do Proxy permanece 21.12.404."
   ],
   "operationalLimits": [
     "Cache, coalescência, métricas e rate limit são limitados e locais por instância serverless; proteção distribuída deve ser configurada na borda da plataforma.",
@@ -32,14 +32,15 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "IFIX, IDIV, SMLL e IBOV ganham contingência pela mesma API direta de índices usada nos gráficos de comparação.",
-    "USD e IVVB11 preservam cotação real e ganham fallback pelo histórico real do mesmo provedor.",
-    "CDI/IPCA usam as mesmas séries reais do ecossistema; nenhum valor sintético é produzido.",
-    "Compatibilidade APK v633 reconhecida como PAIRED sem alterar a versão pública 21.12.404."
+    "APK 2026.08.09.03 é reconhecido como PAIRED.",
+    "Avança pairedVersion/maxTestedVersion para 2026.08.09.03.",
+    "Adiciona nove definições semânticas de rankings de ações e os aliases de Receita, Lucro, Caixas, Variação 30d e crescimentos em 5 anos.",
+    "Mantém a rota /api/v1/analysis/rankings e o envelope de resposta; a extensão é retrocompatível.",
+    "Toda documentação nova permanece dentro de docs/."
   ],
   "notes": [
-    "Mudanças normais de valores são refletidas automaticamente pelas fontes e pelo cache; não exigem nova versão.",
-    "Quando uma fonte está temporariamente indisponível, o item fica parcial e o stale-if-error existente pode preservar o último snapshot válido.",
-    "Rankings e demais rotas financeiras permanecem inalterados."
+    "Mudanças normais de valores continuam refletidas automaticamente pelas fontes e pelo cache.",
+    "O parser de rankings identifica colunas por semântica do cabeçalho e não por índice fixo.",
+    "A versão pública 21.12.404 permanece inalterada; apenas o contrato semântico de rankings evolui para v2."
   ]
 }
