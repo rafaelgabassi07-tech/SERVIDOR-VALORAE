@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict';
+import { APK_COMPATIBILITY, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
+
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.09.12');
+assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.09.12');
+assert.equal(evaluateApkCompatibility('2026.08.09.12', { allowFuture: false }).status, 'PAIRED');
+assert.equal(evaluateApkCompatibility('2026.08.09.12', { allowFuture: false }).reject, false);
+assert.equal(evaluateApkCompatibility('2026.08.09.10', { allowFuture: false }).status, 'SUPPORTED');
+assert.equal(evaluateApkCompatibility('2026.08.09.13', { allowFuture: false }).reject, true);
+console.log('APK v649 financial sync compatibility OK');
+
+import { dispatchRoute } from '../routes/_router.js';
+
+function response() {
+  const headers = new Map();
+  return {
+    statusCode: 200, body: '', writableEnded: false,
+    setHeader(name, value) { headers.set(String(name).toLowerCase(), String(value)); },
+    getHeader(name) { return headers.get(String(name).toLowerCase()); },
+    removeHeader(name) { headers.delete(String(name).toLowerCase()); },
+    end(value = '') { this.body = String(value); this.writableEnded = true; return this; },
+    status(code) { this.statusCode = code; return this; },
+    send(value) { return this.end(value); },
+  };
+}
+
+const res = response();
+await dispatchRoute({
+  method: 'POST',
+  url: '/api/v1/sync',
+  headers: {
+    'x-valorae-app': 'VALORAE Android',
+    'x-valorae-channel': 'android',
+    'x-valorae-app-version': '2026.08.09.12',
+    'x-valorae-build': 'release',
+    'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
+    'x-valorae-mobile-protocol': '2026.07.10.10',
+    'x-valorae-sync-contract': 'valorae-financial-sync-v2',
+    'content-type': 'application/json',
+  },
+  body: { action: 'download_financial_data' },
+  socket: { remoteAddress: '127.0.0.22' },
+}, res);
+const payload = JSON.parse(res.body || '{}');
+assert.notEqual(res.statusCode, 426, 'v649 não pode ser bloqueada pelo gate de compatibilidade');
+assert.notEqual(payload.code, 'APK_VERSION_NOT_TESTED');
+console.log('APK v649 /sync passes compatibility gate:', res.statusCode, payload.code || payload.status || 'OK');

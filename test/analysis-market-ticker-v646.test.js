@@ -3,10 +3,10 @@ import { clearCache } from '../lib/core/cache.js';
 import { APK_COMPATIBILITY, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
 
 clearCache();
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.09.10');
-assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.09.10');
-assert.equal(evaluateApkCompatibility('2026.08.09.10').status, 'PAIRED');
-assert.equal(evaluateApkCompatibility('2026.08.09.11', { allowFuture: false }).reject, true);
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.09.12');
+assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.09.12');
+assert.equal(evaluateApkCompatibility('2026.08.09.12').status, 'PAIRED');
+assert.equal(evaluateApkCompatibility('2026.08.09.13', { allowFuture: false }).reject, true);
 const requests = [];
 const originalFetch = global.fetch;
 const originalDisableExternal = process.env.VALORAE_DISABLE_EXTERNAL;
