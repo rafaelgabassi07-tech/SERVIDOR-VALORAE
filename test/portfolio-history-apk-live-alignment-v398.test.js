@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { buildPortfolioHistory } from '../lib/portfolio/history.js';
 
+// Deterministic Tuesday during B3 regular session (15:00 America/Sao_Paulo).
+// Intraday tests must not depend on the wall clock of the CI runner.
+const __realDateNow = Date.now;
+const __marketNowMs = Date.parse('2026-08-11T18:00:00.000Z');
+Date.now = () => __marketNowMs;
+
 const now = Math.floor(Date.now() / 1000);
 const timestamps = [now - 3600, now - 1800, now - 600];
 
@@ -28,4 +34,5 @@ const remote = aligned.series.filter(row => row.source === 'YahooChartIntraday')
 assert.deepEqual(remote.map(row => row.totalValue), [90.91, 94.55, 100]);
 assert.ok(remote.every(row => row.liveAligned === true));
 assert.equal(aligned.series.at(-1).totalValue, 100);
+Date.now = __realDateNow;
 console.log('portfolio-history-apk-live-alignment-v398 ok');

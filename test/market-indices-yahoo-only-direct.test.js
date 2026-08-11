@@ -4,9 +4,16 @@ const originalFetch = global.fetch;
 const originalDisableExternal = process.env.VALORAE_DISABLE_EXTERNAL;
 delete process.env.VALORAE_DISABLE_EXTERNAL;
 
-const indexIds = { IFIX: 22, IDIV: 8, SMLL: 6 };
-const indexById = Object.fromEntries(Object.entries(indexIds).map(([code, id]) => [String(id), code]));
-const base = { IFIX: 3800, IDIV: 12600, SMLL: 2130 };
+function b3Table(code) {
+  const base = { IFIX: 3800, IDIV: 12600, SMLL: 2130 }[code];
+  const previous = base - 10;
+  const current = base;
+  return `<table>
+    <tr><th>Dia</th><th>Jun</th><th>Jul</th><th>Ago</th></tr>
+    <tr><td>10</td><td></td><td>${String(previous).replace('.', ',')}</td><td></td></tr>
+    <tr><td>11</td><td></td><td></td><td>${String(current).replace('.', ',')}</td></tr>
+  </table>`;
+}
 
 global.fetch = async (url) => {
   const textUrl = String(url);
@@ -14,37 +21,32 @@ global.fetch = async (url) => {
   if (textUrl.includes('finance.yahoo.com')) {
     return new Response(JSON.stringify({ chart: { result: null, error: { description: 'rate-limited in test' } } }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
-  const direct = textUrl.match(/investidor10\.com\.br\/api\/indices\/cotacoes\/(\d+)\/3650/);
-  if (direct) {
-    const code = indexById[direct[1]];
-    const value = base[code];
-    return new Response(JSON.stringify([
-      { last_update: '01/06/2026', points: value - 50 },
-      { last_update: '01/07/2026', points: value }
-    ]), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  }
   if (textUrl.includes('sistemaswebb3-listados.b3.com.br')) {
-    throw new Error(`B3 fallback não deve ser chamado para IFIX/IDIV/SMLL quando a fonte do comparador responde: ${textUrl}`);
+    const code = textUrl.match(/daily-evolution\/([A-Z0-9]+)/)?.[1] || 'IFIX';
+    return new Response(b3Table(code), { status: 200, headers: { 'Content-Type': 'text/html' } });
   }
-  if (textUrl.includes('api.bcb.gov.br')) {
-    return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  }
+  if (textUrl.includes('investidor10.com.br')) throw new Error(`Investidor10 não deve ser necessário se a B3 oficial respondeu: ${textUrl}`);
+  if (textUrl.includes('api.bcb.gov.br')) return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
   return new Response('', { status: 404 });
 };
 
 try {
   const { fetchIndicesSnapshot } = await import('../lib/market/indices.js');
   const payload = await fetchIndicesSnapshot({ symbols: { IFIX: 'IFIX.SA', IDIV: 'IDIV.SA', SMLL: 'SMLL.SA' }, bypassCache: true });
-  assert.equal(payload.ok, true, 'fonte real do comparador deve recuperar o ticker quando Yahoo falha');
+  assert.equal(payload.ok, true, 'B3 oficial deve recuperar o ticker quando Yahoo direto falha');
   for (const name of ['IFIX', 'IDIV', 'SMLL']) {
     const row = payload.indices.find(item => item.name === name);
-    assert.equal(row?.ok, true, `${name} deve usar a mesma fonte real do comparador como contingência`);
-    assert.ok(Number(row?.price) > 0, `${name} deve expor valor real recuperado`);
-    assert.match(String(row?.source || ''), /Investidor10.*mesma fonte do comparador/i, `${name} deve registrar paridade de fonte`);
-    assert.equal(row?.staleFallback, false, `${name} não pode usar snapshot estático inventado`);
+    assert.equal(row?.ok, true, `${name} deve usar B3 oficial como contingência primária`);
+    assert.ok(Number(row?.price) > 0, `${name} deve expor fechamento real recuperado`);
+    assert.match(String(row?.source || ''), /B3 Oficial/i, `${name} deve registrar a fonte oficial B3`);
+    assert.equal(row?.official, true);
   }
-  assert.equal(requests.some(url => url.includes('sistemaswebb3-listados.b3.com.br')), false, 'B3 não deve ser necessário se a fonte do comparador respondeu');
-  console.log('Market indices comparison-source fallback test OK.');
+  assert.equal(requests.some(url => url.includes('sistemaswebb3-listados.b3.com.br')), true, 'B3 deve ser consultada em paralelo com Yahoo para índices brasileiros');
+  const firstB3 = requests.findIndex(url => url.includes('sistemaswebb3-listados.b3.com.br'));
+  const firstI10 = requests.findIndex(url => url.includes('investidor10.com.br'));
+  assert.ok(firstB3 >= 0, 'B3 deve ser tentada como contingência primária');
+  assert.ok(firstI10 < 0 || firstB3 < firstI10, 'Investidor10 só pode ocorrer depois da tentativa B3 oficial');
+  console.log('Market indices official-B3 primary fallback test OK.');
 } finally {
   global.fetch = originalFetch;
   if (originalDisableExternal === undefined) delete process.env.VALORAE_DISABLE_EXTERNAL;

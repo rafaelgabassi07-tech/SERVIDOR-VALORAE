@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { dispatchRoute } from '../routes/_router.js';
 
+// Deterministic Tuesday during B3 regular session (15:00 America/Sao_Paulo).
+// Intraday tests must not depend on the wall clock of the CI runner.
+const __realDateNow = Date.now;
+const __marketNowMs = Date.parse('2026-08-11T18:00:00.000Z');
+Date.now = () => __marketNowMs;
+
 const now = Math.floor(Date.now() / 1000);
 const timestamps = [now - 3600, now - 1800, now - 300];
 const originalFetch = globalThis.fetch;
@@ -47,4 +53,5 @@ assert.equal(payload.fallbackUsed, false);
 assert.ok(payload.series.length >= 3, `series.length=${payload.series?.length}`);
 assert.ok(payload.series.some(point => String(point.source || '').includes('Intraday')));
 globalThis.fetch = originalFetch;
+Date.now = __realDateNow;
 console.log('portfolio-history-router-realtime-v292 ok');

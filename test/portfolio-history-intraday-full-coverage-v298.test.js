@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { buildPortfolioHistory } from '../lib/portfolio/history.js';
 
+// Deterministic Tuesday during B3 regular session (15:00 America/Sao_Paulo).
+// Intraday tests must not depend on the wall clock of the CI runner.
+const __realDateNow = Date.now;
+const __marketNowMs = Date.parse('2026-08-11T18:00:00.000Z');
+Date.now = () => __marketNowMs;
+
 const now = Math.floor(Date.now() / 1000);
 const t1 = now - 3600;
 const t2 = now - 1800;
@@ -53,4 +59,5 @@ assert.ok(result.series.length >= 2, `series.length=${result.series.length}`);
 const min = Math.min(...result.series.map(point => point.totalValue));
 assert.ok(min >= 295, `intraday series must not expose partial single-asset portfolio values, min=${min}`);
 assert.ok(result.summary.firstValue >= 300, `firstValue=${result.summary.firstValue}`);
+Date.now = __realDateNow;
 console.log('portfolio-history-intraday-full-coverage-v298 ok');

@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { buildPortfolioHistory } from '../lib/portfolio/history.js';
 
+// Deterministic Tuesday during B3 regular session (15:00 America/Sao_Paulo).
+// Intraday tests must not depend on the wall clock of the CI runner.
+const __realDateNow = Date.now;
+const __marketNowMs = Date.parse('2026-08-11T18:00:00.000Z');
+Date.now = () => __marketNowMs;
+
 const now = Math.floor(Date.now() / 1000);
 const timestamps = [now - 3600, now - 2700, now - 1800, now - 900];
 
@@ -37,5 +43,6 @@ assert.equal(result.fallbackUsed, false);
 assert.ok(result.series.length >= 3, `series.length=${result.series.length}`);
 assert.ok(result.summary.firstValue >= 95, `isolated edge outlier must not drive firstValue: ${JSON.stringify(result.series)}`);
 assert.ok(Math.min(...result.series.map(point => point.totalValue)) >= 95, `edge outlier remained in series: ${JSON.stringify(result.series)}`);
-assert.equal(result.version, '21.12.394-runtime-safety-v362');
+assert.equal(result.version, '21.12.405-regular-session-calendar-v365');
+Date.now = __realDateNow;
 console.log('portfolio-history-intraday-edge-stability-v299 ok');

@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { buildPortfolioHistory } from '../lib/portfolio/history.js';
 
+// Deterministic Tuesday during B3 regular session (15:00 America/Sao_Paulo).
+// Intraday tests must not depend on the wall clock of the CI runner.
+const __realDateNow = Date.now;
+const __marketNowMs = Date.parse('2026-08-11T18:00:00.000Z');
+Date.now = () => __marketNowMs;
+
 const now = Math.floor(Date.now() / 1000);
 const timestamps = [now - 3600, now - 1800, now - 900];
 
@@ -40,4 +46,5 @@ assert.deepEqual(values.slice(0, 3), [100, 104, 110], 'remote intraday closes mu
 assert.equal(result.series.at(-1).source, 'currentPrice');
 assert.equal(result.series.at(-1).totalValue, 100);
 assert.ok(result.series.every(point => point.liveAligned !== true), 'historical points must not be synthetically rescaled');
+Date.now = __realDateNow;
 console.log('portfolio-history-intraday-live-alignment-v298 ok');

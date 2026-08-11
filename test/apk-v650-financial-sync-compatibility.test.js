@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import { APK_COMPATIBILITY, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
 import { dispatchRoute } from '../routes/_router.js';
 
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.02');
-assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.11.02');
-assert.equal(evaluateApkCompatibility('2026.08.11.02', { allowFuture: false }).status, 'PAIRED');
-assert.equal(evaluateApkCompatibility('2026.08.11.02', { allowFuture: false }).reject, false);
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.03');
+assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.11.03');
+assert.equal(evaluateApkCompatibility('2026.08.11.03', { allowFuture: false }).status, 'PAIRED');
+assert.equal(evaluateApkCompatibility('2026.08.11.03', { allowFuture: false }).reject, false);
 assert.equal(evaluateApkCompatibility('2026.08.09.12', { allowFuture: false }).status, 'SUPPORTED');
-assert.equal(evaluateApkCompatibility('2026.08.11.03', { allowFuture: false }).reject, true);
+assert.equal(evaluateApkCompatibility('2026.08.11.04', { allowFuture: false }).reject, true);
 
 function response() {
   const headers = new Map();
@@ -29,7 +29,7 @@ await dispatchRoute({
   headers: {
     'x-valorae-app': 'VALORAE Android',
     'x-valorae-channel': 'android',
-    'x-valorae-app-version': '2026.08.11.02',
+    'x-valorae-app-version': '2026.08.11.03',
     'x-valorae-build': 'release',
     'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
     'x-valorae-mobile-protocol': '2026.07.10.10',

@@ -9,10 +9,10 @@ import syncHandler from '../routes/sync.js';
 
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const expectedContract = 'valorae-ecosystem-2026.08.05.04-p404';
-assert.equal(pkg.valorae.publicVersion, '21.12.404');
-assert.equal(pkg.valorae.releasePatch, '21.12.404-account-profile-v413');
+assert.equal(pkg.valorae.publicVersion, '21.12.405');
+assert.equal(pkg.valorae.releasePatch, '21.12.405-market-session-hygiene-v414');
 assert.equal(RELEASE.ecosystemContract, expectedContract);
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.02');
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.03');
 assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Public-Version'));
 assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Core-Version'));
 
@@ -34,7 +34,7 @@ function response() {
 const direct = response();
 sendJson({ method: 'GET', url: '/api/v1/test', headers: {} }, direct, { status: 'OK' });
 assert.equal(direct.getHeader('X-Valorae-Ecosystem-Contract'), expectedContract);
-assert.equal(direct.getHeader('X-Valorae-Public-Version'), '21.12.404');
+assert.equal(direct.getHeader('X-Valorae-Public-Version'), '21.12.405');
 assert.equal(direct.getHeader('X-Valorae-Core-Version'), '21.12.0');
 
 const ready = response();
@@ -44,7 +44,7 @@ await dispatchRoute({
   headers: {
     'x-valorae-app': 'VALORAE Android',
     'x-valorae-channel': 'android',
-    'x-valorae-app-version': '2026.08.11.02',
+    'x-valorae-app-version': '2026.08.11.03',
     'x-valorae-build': 'release',
     'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
     'x-valorae-mobile-protocol': '2026.07.10.10',
@@ -55,11 +55,11 @@ await dispatchRoute({
 }, ready);
 assert.equal(ready.statusCode, 200);
 const payload = JSON.parse(ready.body);
-assert.equal(payload.version, '21.12.404');
-assert.equal(payload.publicVersion, '21.12.404');
+assert.equal(payload.version, '21.12.405');
+assert.equal(payload.publicVersion, '21.12.405');
 assert.equal(payload.coreVersion, '21.12.0');
 assert.equal(payload.ecosystemContract, expectedContract);
-assert.equal(ready.getHeader('X-Valorae-Public-Version'), '21.12.404');
+assert.equal(ready.getHeader('X-Valorae-Public-Version'), '21.12.405');
 assert.equal(ready.getHeader('X-Valorae-Core-Version'), '21.12.0');
 
 
@@ -70,7 +70,7 @@ await dispatchRoute({
   headers: {
     'x-valorae-app': 'VALORAE Android',
     'x-valorae-channel': 'android',
-    'x-valorae-app-version': '2026.08.11.02',
+    'x-valorae-app-version': '2026.08.11.03',
     'x-valorae-build': 'release',
     'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
     'x-valorae-mobile-protocol': '2026.07.10.10',
@@ -109,7 +109,7 @@ await syncHandler({
   headers: {
     'x-valorae-app': 'VALORAE Android',
     'x-valorae-channel': 'android',
-    'x-valorae-app-version': '2026.08.11.02',
+    'x-valorae-app-version': '2026.08.11.03',
     'x-valorae-build': 'release',
     'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
     'x-valorae-mobile-protocol': '2026.07.10.10',

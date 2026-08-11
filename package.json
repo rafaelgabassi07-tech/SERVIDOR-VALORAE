@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.404 pareado ao APK v654; preserva contratos financeiros/Supabase e avança a compatibilidade para a auditoria integral do runtime.",
+  "description": "Proxy VALORAE 21.12.405 pareado ao APK v655; ticker multisource B3/BCB, sessão regular da carteira e higiene estrutural auditada.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -31,39 +31,39 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.404-account-profile-v413",
+    "releasePatch": "21.12.405-market-session-hygiene-v414",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
-    "publicVersion": "21.12.404",
-    "checkpoint": "account-profile-v413",
-    "releaseLabel": "account-profile-v413",
-    "apkVersion": "2026.08.11.02",
+    "publicVersion": "21.12.405",
+    "checkpoint": "market-session-hygiene-v414",
+    "releaseLabel": "market-session-hygiene-v414",
+    "apkVersion": "2026.08.11.03",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.11.02",
+    "maxTestedApkVersion": "2026.08.11.03",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "8909c4445aaf5f53"
+    "apkSourceFingerprint": "0540de0f46e3d2b7"
   },
-  "releasePatch": "21.12.404-account-profile-v413",
+  "releasePatch": "21.12.405-market-session-hygiene-v414",
   "config": {
-    "releasePatch": "21.12.404-account-profile-v413",
-    "publicVersion": "21.12.404",
-    "checkpoint": "account-profile-v413",
-    "releaseLabel": "account-profile-v413",
-    "apkSourceFingerprint": "8909c4445aaf5f53"
+    "releasePatch": "21.12.405-market-session-hygiene-v414",
+    "publicVersion": "21.12.405",
+    "checkpoint": "market-session-hygiene-v414",
+    "releaseLabel": "market-session-hygiene-v414",
+    "apkSourceFingerprint": "0540de0f46e3d2b7"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.404-account-profile-v413",
-    "publicVersion": "21.12.404",
-    "checkpoint": "account-profile-v413",
-    "releaseLabel": "account-profile-v413",
-    "apkVersion": "2026.08.11.02",
+    "releasePatch": "21.12.405-market-session-hygiene-v414",
+    "publicVersion": "21.12.405",
+    "checkpoint": "market-session-hygiene-v414",
+    "releaseLabel": "market-session-hygiene-v414",
+    "apkVersion": "2026.08.11.03",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.11.02",
+    "maxTestedApkVersion": "2026.08.11.03",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "8909c4445aaf5f53"
+    "apkSourceFingerprint": "0540de0f46e3d2b7"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

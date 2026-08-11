@@ -21,8 +21,6 @@ docs/reference
 # Arquivos de desenvolvimento e histórico que não participam do runtime serverless.
 supabase/
 *.md
-build.gradle.kts
-settings.gradle.kts
 src/
 contracts/golden/
 

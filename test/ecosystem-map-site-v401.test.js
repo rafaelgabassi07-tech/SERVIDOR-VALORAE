@@ -17,7 +17,7 @@ for (const expected of [
   'Mapa</strong> HTML + CSS local',
   '/api/sync',
   '2026.07.30.01–03',
-  '21.12.404',
+  '21.12.405',
 ]) assert.ok(html.includes(expected), `HTML do fluxo vertical precisa conter: ${expected}`);
 
 for (const expected of [
