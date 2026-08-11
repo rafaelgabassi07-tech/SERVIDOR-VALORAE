@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.404 pareado ao APK v653; preserva contratos financeiros/Supabase e avança somente a compatibilidade da build consolidada.",
+  "description": "Proxy VALORAE 21.12.404 pareado ao APK v654; preserva contratos financeiros/Supabase e avança a compatibilidade para a auditoria integral do runtime.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -37,13 +37,13 @@
     "publicVersion": "21.12.404",
     "checkpoint": "account-profile-v413",
     "releaseLabel": "account-profile-v413",
-    "apkVersion": "2026.08.11.01",
+    "apkVersion": "2026.08.11.02",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.11.01",
+    "maxTestedApkVersion": "2026.08.11.02",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "c36c36b680f185ff"
+    "apkSourceFingerprint": "8909c4445aaf5f53"
   },
   "releasePatch": "21.12.404-account-profile-v413",
   "config": {
@@ -51,19 +51,19 @@
     "publicVersion": "21.12.404",
     "checkpoint": "account-profile-v413",
     "releaseLabel": "account-profile-v413",
-    "apkSourceFingerprint": "c36c36b680f185ff"
+    "apkSourceFingerprint": "8909c4445aaf5f53"
   },
   "releaseMetadata": {
     "releasePatch": "21.12.404-account-profile-v413",
     "publicVersion": "21.12.404",
     "checkpoint": "account-profile-v413",
     "releaseLabel": "account-profile-v413",
-    "apkVersion": "2026.08.11.01",
+    "apkVersion": "2026.08.11.02",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.11.01",
+    "maxTestedApkVersion": "2026.08.11.02",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "c36c36b680f185ff"
+    "apkSourceFingerprint": "8909c4445aaf5f53"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

@@ -10,8 +10,8 @@ const EXPECTED = 'valorae-ecosystem-2026.08.05.04-p404';
 assert.equal(RELEASE.ecosystemContract, EXPECTED);
 assert.equal(pkg.valorae.ecosystemContract, EXPECTED);
 assert.equal(pkg.valorae.publicVersion, '21.12.404');
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.01');
-assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.11.01');
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.02');
+assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.11.02');
 
 function response() {
   const headers = new Map();
@@ -39,7 +39,7 @@ await dispatchRoute({
   headers: {
     'x-valorae-app': 'VALORAE Android',
     'x-valorae-channel': 'android',
-    'x-valorae-app-version': '2026.08.11.01',
+    'x-valorae-app-version': '2026.08.11.02',
     'x-valorae-build': 'release',
     'x-valorae-app-id': 'com.aistudio.carteira.kxmpzq',
     'x-valorae-mobile-protocol': '2026.07.10.10',
@@ -54,6 +54,6 @@ assert.equal(ready.getHeader('X-Valorae-Apk-Compatibility'), 'PAIRED');
 const payload = JSON.parse(ready.body);
 assert.equal(payload.ecosystemContract, EXPECTED);
 assert.equal(payload.publicVersion, '21.12.404');
-assert.equal(payload.apkCompatibility.pairedVersion, '2026.08.11.01');
+assert.equal(payload.apkCompatibility.pairedVersion, '2026.08.11.02');
 
 console.log('ecosystem contract v410: ok');
