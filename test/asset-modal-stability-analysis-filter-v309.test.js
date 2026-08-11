@@ -108,6 +108,7 @@ const universalKt = readSiblingApkFile('app/src/main/java/com/example/data/proxy
 const analysisKt = [
   readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisDiscoveryUi.kt'),
   readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisDiscoveryContentUi.kt'),
+  readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisDiscoveryGroupDialogUi.kt'),
 ].filter(Boolean).join('\n');
 const dividendsKt = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/DividendsEvolutionModalComponents.kt');
 const designTokensKt = readSiblingApkFile('app/src/main/java/com/example/ui/shared/ValoraeDesignTokens.kt');

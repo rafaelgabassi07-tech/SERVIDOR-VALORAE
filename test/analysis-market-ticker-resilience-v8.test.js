@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const indices=fs.readFileSync(new URL('../lib/market/indices.js', import.meta.url),'utf8');
+const cdi=fs.readFileSync(new URL('../lib/sources/cdi.js', import.meta.url),'utf8');
+assert.match(indices, /B3_INDEXES = new Set\(\['IBOV', 'IFIX', 'IDIV', 'SMLL'\]\)/);
+assert.match(indices, /fetchB3FallbackQuote\(name\)/);
+assert.match(indices, /getCdiAccumulatedSeries\(12, 5200\)/);
+assert.match(cdi, /Promise\.all\(\[/);
+assert.match(cdi, /CDI_DAILY_SERIES_ID/);
+assert.match(cdi, /CDI_MONTHLY_SERIES_ID/);
+console.log('analysis-market-ticker-resilience-v8: ok');

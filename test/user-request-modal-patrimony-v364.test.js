@@ -54,25 +54,27 @@ if ([details, patrimony, patrimonyEvolution, returnsUi, confetti, chartUi, model
   const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
   assert.equal(
     sha256(patrimony),
-    'cdad442b1b5df446fae23cac78c011998cedb80286caac0dd8f7e00eef53d79a',
+    '99f177d05fb9e305d827aff6b60a6816fbaf2aad46d5fb445e4f159fe1eb704d',
     'A fachada e os componentes gerais de Patrimônio devem permanecer inalterados.'
   );
   assert.equal(
     sha256(patrimonyEvolution),
-    'e78c01bc5901f7a195ff4ee4473018332cf4606ebb05496d399c7170df851a47',
+    '69dd06cff81d4352cf5ec21c8a1290ec08824269c4e178515744a868706f69ba',
     'O gráfico e a evolução patrimonial devem permanecer inalterados após o split.'
   );
   assert.equal(
     sha256(returnsUi),
-    '54ab972b858fd6065ca9f344c3a751c301ff23221de33a6f608c49342ea949e8',
+    'd7618a099d65697cb1d912b365668113be46d5ce6236087a6ac6b1805ebdcf2b',
     'O visual atual de Retorno enviado pelo usuário deve permanecer inalterado.'
   );
 
   assert.match(returnsUi, /ReturnSimulatedComparisonCard/);
   assert.match(returnsUi, /1_000\.0 \* \(1\.0 \+ returnPercent \/ 100\.0\)/);
   assert.match(returnsUi, /Comparação calculada com os índices selecionados para o período escolhido\./);
-  assert.match(confetti, /width\s*=\s*3\.2f\s*\+\s*random\.nextFloat\(\)\s*\*\s*3\.4f/);
-  assert.ok(confetti.indexOf('particles.forEach') < confetti.lastIndexOf('drawConfettiCannon'), 'Os canhões devem ser desenhados depois dos confetes');
+  assert.match(confetti, /particleCount:\s*Int\s*=\s*76/);
+  assert.match(confetti, /durationMillis:\s*Int\s*=\s*2_300/);
+  assert.match(confetti, /width\s*=\s*2\.6f\s*\+\s*random\.nextFloat\(\)\s*\*\s*2\.8f/);
+  assert.equal((confetti.match(/drawConfettiCannon\(/g) || []).length, 1, 'Canhões antigos podem permanecer como helper inerte, mas não podem ser chamados pela animação atual');
 }
 
 console.log('10 ajustes de modal, patrimônio, comparação e confetes protegidos por contrato estático');

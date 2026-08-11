@@ -1,6 +1,6 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.404 pareado ao APK v647; mantém integralmente o runtime v646 do ticker e avança apenas a janela de compatibilidade para o refinamento visual/scroll da Análise.",
+  "description": "Proxy 21.12.404 pareado ao APK v653; preserva integralmente o financial sync v2 e avança a janela de compatibilidade para a consolidação compilável do AI Studio.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
@@ -8,22 +8,24 @@
   "publicVersion": "21.12.404",
   "checkpoint": "account-profile-v413",
   "label": "account-profile-v413",
-  "apkVersion": "2026.08.09.12",
-  "apkCheckpoint": "v649-financial-sync-compatibility",
-  "contractVersion": "APK v649 / Proxy 21.12.404 / APK version 2026.08.09.12 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v4",
+  "apkVersion": "2026.08.11.01",
+  "apkCheckpoint": "v653-ai-studio-build-consistency-consolidation",
+  "contractVersion": "APK v653 / Proxy 21.12.404 / APK version 2026.08.11.01 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v4",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "account-profile-v413",
-  "title": "Proxy v404 — compatibilidade financeira APK v649",
-  "summary": "Reconhece o APK v649 como pareado para permitir a rota /sync; contratos de transações e dividendos permanecem inalterados.",
+  "title": "Proxy v404 — compatibilidade financeira APK v653",
+  "summary": "Reconhece o APK v653 / 2026.08.11.01 como pareado para que /sync, Supabase, mercado e notificações usem a mesma identidade de build; nenhuma lógica financeira é alterada.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.09.12",
+  "maxTestedApkVersion": "2026.08.11.01",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "APK 2026.08.09.12 é reconhecido como PAIRED.",
-    "APK 2026.08.09.10 permanece SUPPORTED.",
-    "APK 2026.08.09.13 é rejeitado quando allowFuture=false.",
-    "Contratos de download_financial_data, transações e dividendos são reexecutados."
+    "APK 2026.08.11.01 é reconhecido como PAIRED.",
+    "APK 2026.08.09.13 permanece SUPPORTED.",
+    "APK 2026.08.11.02 é rejeitado quando allowFuture=false.",
+    "A rota /sync com a identidade v653 ultrapassa o gate de compatibilidade sem APK_VERSION_NOT_TESTED.",
+    "Contratos de transações, dividendos, ticker, liquidez e deduplicação financeira permanecem inalterados.",
+    "Fingerprint canônico do source APK pareado: c36c36b680f185ff."
   ],
   "operationalLimits": [
     "Cache, coalescência, métricas e rate limit são limitados e locais por instância serverless; proteção distribuída deve ser configurada na borda da plataforma.",
@@ -32,13 +34,15 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "Avança pairedVersion/maxTestedVersion para 2026.08.09.12.",
+    "Avança pairedVersion/maxTestedVersion para 2026.08.11.01.",
     "Mantém minSupportedVersion e financial sync valorae-financial-sync-v2.",
-    "Nenhuma alteração nas tabelas Supabase, download_financial_data, upload_transactions ou upload_dividends."
+    "Preserva o contrato de ecossistema valorae-ecosystem-2026.08.05.04-p404 e o protocolo móvel 2026.07.10.10.",
+    "Nenhuma alteração em tabelas Supabase, rotas ou payloads financeiros; o ajuste é exclusivamente de pareamento da build consolidada."
   ],
   "notes": [
-    "APK 2026.08.09.12 é reconhecido como PAIRED.",
+    "APK 2026.08.11.01 é reconhecido como PAIRED.",
     "APKs anteriores dentro da janela mínima continuam SUPPORTED.",
-    "A rota /sync deixa de rejeitar a v649 com APK_VERSION_NOT_TESTED; contratos de transações/dividendos permanecem inalterados."
-  ]
+    "A rota /sync não pode retornar APK_VERSION_NOT_TESTED para a v653 após este Proxy ser implantado."
+  ],
+  "apkSourceFingerprint": "c36c36b680f185ff"
 }

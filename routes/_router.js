@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { RELEASE } from '../lib/core/release.js';
-import { APK_COMPATIBILITY, apkVersionFromRequest, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
+import { APK_COMPATIBILITY, annotateSourceFingerprint, apkSourceFingerprintFromRequest, apkVersionFromRequest, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
 import { beginRequestObservation, requestMetricsSnapshot } from '../lib/observability/request-metrics.js';
 import { sendJson, queryObject, readJsonBody } from '../lib/core/http.js';
 import { cacheStats, clearCache, getCache, setCache, stableKey } from '../lib/core/cache.js';
@@ -1234,9 +1234,17 @@ export async function dispatchRoute(req, res) {
     req.query = { ...(req.query || {}), ...queryObject(parsed.searchParams) };
 
     const appVersion = apkVersionFromRequest(req);
-    const apkCompatibility = evaluateApkCompatibility(appVersion);
-    req.valoraeApkCompatibility = apkCompatibility;
+    const sourceFingerprint = apkSourceFingerprintFromRequest(req);
     const ecosystemCompatibility = evaluateEcosystemContract(req);
+    // A future APK is allowed through /sync only when it explicitly proves that it still
+    // speaks a compatible ecosystem contract. This prevents recurring APK_VERSION_NOT_TESTED
+    // blocks for UI-only APK revisions while preserving hard blocking for protocol drift.
+    const futureApkAllowedByContract = ecosystemCompatibility.explicit && ecosystemCompatibility.ok;
+    const apkCompatibility = annotateSourceFingerprint(
+      evaluateApkCompatibility(appVersion, { allowFuture: futureApkAllowedByContract }),
+      sourceFingerprint,
+    );
+    req.valoraeApkCompatibility = apkCompatibility;
     req.valoraeEcosystemCompatibility = ecosystemCompatibility;
     beginRequestObservation(req, res, { route: path, requestId, appVersion });
 

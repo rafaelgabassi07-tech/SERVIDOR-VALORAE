@@ -123,7 +123,7 @@ test('APK mantém caches por chave e consolida posições antes do transporte', 
   assert.match(runtimeSource, /DividendAgendaPartialCacheTtlMs = 45 \* 1000L/);
   assert.match(runtimeSource, /MarketRankingPartialCacheTtlMs = 30 \* 1000L/);
   assert.match(normalizerSource, /groupBy \{ it\.ticker \}/);
-  assert.match(contractsSource, /normalizeAndAggregateDividendPositions\(positions, maxEntries = 45\)/);
+  assert.match(alertsSource, /normalizeAndAggregateDividendPositions\(positions, maxEntries = 45\)/);
   assert.match(contractsSource, /normalizeAndAggregateDividendPositions\(positions, maxEntries = 80\)/);
   assert.match(contractsSource, /if \(cached\.value\.partial\) DividendAgendaPartialCacheTtlMs/);
   assert.match(contractsSource, /event\.eligible && event\.ticker in cleanTickers/);

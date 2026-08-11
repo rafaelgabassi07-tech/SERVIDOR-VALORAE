@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import { APK_COMPATIBILITY, annotateSourceFingerprint, apkSourceFingerprintFromRequest, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
+import pkg from '../package.json' with { type: 'json' };
+import { VALORAE_CANONICAL_REQUEST_HEADERS, VALORAE_EXPOSE_HEADERS } from '../lib/core/mobile-protocol.js';
+
+const current = '2026.08.11.01';
+const sourceFingerprint = 'c36c36b680f185ff';
+assert.equal(APK_COMPATIBILITY.pairedVersion, current);
+assert.equal(APK_COMPATIBILITY.maxTestedVersion, current);
+assert.equal(APK_COMPATIBILITY.pairedSourceFingerprint, sourceFingerprint);
+assert.equal(evaluateApkCompatibility(current, { allowFuture: false }).status, 'PAIRED');
+assert.equal(evaluateApkCompatibility(current, { allowFuture: false }).reject, false);
+assert.equal(pkg.valorae.apkVersion, current);
+assert.equal(pkg.valorae.maxTestedApkVersion, current);
+assert.equal(pkg.valorae.apkSourceFingerprint, sourceFingerprint);
+assert.equal(pkg.releaseMetadata.apkVersion, current);
+assert.equal(pkg.releaseMetadata.maxTestedApkVersion, current);
+assert.equal(pkg.valorae.ecosystemContract, 'valorae-ecosystem-2026.08.05.04-p404');
+const fromRequest = apkSourceFingerprintFromRequest({ headers: { 'x-valorae-source-fingerprint': sourceFingerprint } });
+assert.equal(fromRequest, sourceFingerprint);
+assert.equal(annotateSourceFingerprint(evaluateApkCompatibility(current), fromRequest).sourceFingerprintStatus, 'PAIRED');
+assert.equal(annotateSourceFingerprint(evaluateApkCompatibility(current), '0123456789abcdef').sourceFingerprintStatus, 'DIVERGENT');
+assert.ok(VALORAE_CANONICAL_REQUEST_HEADERS.includes('X-Valorae-Source-Fingerprint'));
+assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Paired-Source-Fingerprint'));
+assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Source-Fingerprint-Status'));
+console.log('APK v653 build-consistency compatibility OK');

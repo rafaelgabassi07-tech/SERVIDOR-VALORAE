@@ -4,10 +4,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { APK_COMPATIBILITY, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
 
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.09.12');
-assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.09.12');
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.01');
+assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.11.01');
 assert.equal(evaluateApkCompatibility('2026.08.09.02').status, 'SUPPORTED');
-assert.equal(evaluateApkCompatibility('2026.08.09.13', { allowFuture: false }).reject, true);
+assert.equal(evaluateApkCompatibility('2026.08.11.02', { allowFuture: false }).reject, true);
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');

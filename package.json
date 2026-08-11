@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.404 pareado ao APK v649; mantém contratos financeiros e avança somente compatibilidade para restaurar transações/dividendos.",
+  "description": "Proxy VALORAE 21.12.404 pareado ao APK v653; preserva contratos financeiros/Supabase e avança somente a compatibilidade da build consolidada.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -37,30 +37,33 @@
     "publicVersion": "21.12.404",
     "checkpoint": "account-profile-v413",
     "releaseLabel": "account-profile-v413",
-    "apkVersion": "2026.08.09.12",
+    "apkVersion": "2026.08.11.01",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.09.12",
+    "maxTestedApkVersion": "2026.08.11.01",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
-    "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404"
+    "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
+    "apkSourceFingerprint": "c36c36b680f185ff"
   },
   "releasePatch": "21.12.404-account-profile-v413",
   "config": {
     "releasePatch": "21.12.404-account-profile-v413",
     "publicVersion": "21.12.404",
     "checkpoint": "account-profile-v413",
-    "releaseLabel": "account-profile-v413"
+    "releaseLabel": "account-profile-v413",
+    "apkSourceFingerprint": "c36c36b680f185ff"
   },
   "releaseMetadata": {
     "releasePatch": "21.12.404-account-profile-v413",
     "publicVersion": "21.12.404",
     "checkpoint": "account-profile-v413",
     "releaseLabel": "account-profile-v413",
-    "apkVersion": "2026.08.09.12",
+    "apkVersion": "2026.08.11.01",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.09.12",
-    "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404"
+    "maxTestedApkVersion": "2026.08.11.01",
+    "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
+    "apkSourceFingerprint": "c36c36b680f185ff"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"
