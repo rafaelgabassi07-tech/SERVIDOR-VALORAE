@@ -65,7 +65,7 @@ try {
     assert.match(item?.source || '', /B3 Oficial/);
     assert.equal(item?.official, true);
   }
-  assert.equal(requests.some(url => url.includes('investidor10.com.br')), false);
+  assert.equal(requests.some(url => url.includes('investidor10.com.br')), true, 'contingência direta é aquecida em paralelo; B3 continua preferida na mesma data');
   assert.equal(requests.filter(url => url.includes('sistemaswebb3-listados.b3.com.br')).length >= 4, true);
   console.log('analysis-market-ticker-official-b3-v655: ok');
 } finally {

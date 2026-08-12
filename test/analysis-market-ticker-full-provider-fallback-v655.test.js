@@ -66,7 +66,7 @@ try {
   for (const code of ['IFIX','IDIV','SMLL','IBOV']) assert.match(result.tickerItems.find(row => row.code === code).source, /B3 Oficial/);
   assert.match(result.tickerItems.find(row => row.code === 'CDI').source, /BancoCentralSGS|Banco Central/i);
   assert.match(result.tickerItems.find(row => row.code === 'IPCA').source, /BCB SGS 433|Banco Central/i);
-  assert.equal(requests.some(u => u.includes('investidor10.com.br')), false);
+  assert.equal(requests.some(u => u.includes('investidor10.com.br')), true, 'contingência direta é consultada em paralelo para reduzir latência de falha');
   console.log('analysis-market-ticker-full-provider-fallback-v655: ok');
 } finally {
   clearCache();

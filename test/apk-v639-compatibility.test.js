@@ -4,14 +4,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { APK_COMPATIBILITY, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
 
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.03');
-assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.11.03');
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.06');
+assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.11.06');
 assert.equal(evaluateApkCompatibility('2026.08.09.02').status, 'SUPPORTED');
-assert.equal(evaluateApkCompatibility('2026.08.11.04', { allowFuture: false }).reject, true);
+assert.equal(evaluateApkCompatibility('2026.08.11.07', { allowFuture: false }).reject, true);
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
-assert.ok(fs.existsSync(path.join(root, 'docs', 'RELATORIO_COMPATIBILIDADE_APK_V639.md')));
 for (const name of [
   'AUDIT_VALORAE_PROXY.md',
   'AUDIT_ANALYSIS_VALUE_SCALE_PROXY_V146_2026_06_28.md',

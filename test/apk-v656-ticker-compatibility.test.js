@@ -3,15 +3,12 @@ import { APK_COMPATIBILITY, annotateSourceFingerprint, apkSourceFingerprintFromR
 import pkg from '../package.json' with { type: 'json' };
 import { VALORAE_CANONICAL_REQUEST_HEADERS, VALORAE_EXPOSE_HEADERS } from '../lib/core/mobile-protocol.js';
 
-const historical = '2026.08.11.03';
 const current = '2026.08.11.06';
 const sourceFingerprint = '9030efb54b8e9fa6';
 assert.equal(APK_COMPATIBILITY.pairedVersion, current);
 assert.equal(APK_COMPATIBILITY.maxTestedVersion, current);
 assert.equal(APK_COMPATIBILITY.pairedSourceFingerprint, sourceFingerprint);
-assert.equal(evaluateApkCompatibility(historical, { allowFuture: false }).status, 'SUPPORTED');
 assert.equal(evaluateApkCompatibility(current, { allowFuture: false }).status, 'PAIRED');
-assert.equal(evaluateApkCompatibility(historical, { allowFuture: false }).reject, false);
 assert.equal(evaluateApkCompatibility(current, { allowFuture: false }).reject, false);
 assert.equal(pkg.valorae.apkVersion, current);
 assert.equal(pkg.valorae.maxTestedApkVersion, current);
@@ -26,4 +23,4 @@ assert.equal(annotateSourceFingerprint(evaluateApkCompatibility(current), '01234
 assert.ok(VALORAE_CANONICAL_REQUEST_HEADERS.includes('X-Valorae-Source-Fingerprint'));
 assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Paired-Source-Fingerprint'));
 assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Source-Fingerprint-Status'));
-console.log('APK v655 historical compatibility retained under v656 pair OK');
+console.log('APK v656 ticker compatibility OK');

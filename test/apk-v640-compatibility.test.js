@@ -5,11 +5,11 @@ import { fileURLToPath } from 'node:url';
 import { APK_COMPATIBILITY, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
 import { _test, getInvestidor10AnalysisRankingCatalog } from '../lib/market/analysis-rankings-i10.js';
 
-assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.03');
-assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.11.03');
-assert.equal(evaluateApkCompatibility('2026.08.11.03').status, 'PAIRED');
+assert.equal(APK_COMPATIBILITY.pairedVersion, '2026.08.11.06');
+assert.equal(APK_COMPATIBILITY.maxTestedVersion, '2026.08.11.06');
+assert.equal(evaluateApkCompatibility('2026.08.11.06').status, 'PAIRED');
 assert.equal(evaluateApkCompatibility('2026.08.09.02').status, 'SUPPORTED');
-assert.equal(evaluateApkCompatibility('2026.08.11.04', { allowFuture: false }).reject, true);
+assert.equal(evaluateApkCompatibility('2026.08.11.07', { allowFuture: false }).reject, true);
 
 const catalog = getInvestidor10AnalysisRankingCatalog();
 assert.equal(catalog.items.length, 19);
@@ -20,5 +20,4 @@ for (const id of [
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
-assert.ok(fs.existsSync(path.join(root, 'docs', 'RELATORIO_COMPATIBILIDADE_APK_V640.md')));
 console.log('OK: APK v640 compatibility + analysis rankings semantic-v2');

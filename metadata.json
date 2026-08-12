@@ -1,34 +1,28 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.405 pareado ao APK v655; ticker resiliente, sessão regular de mercado e higiene estrutural auditada.",
+  "description": "Proxy 21.12.408 pareado ao APK v661; preserva a lógica da Agenda e consolida higiene documental/identidade visual sem alterar o contrato móvel.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
-  "releasePatch": "21.12.405-market-session-hygiene-v414",
-  "publicVersion": "21.12.405",
-  "checkpoint": "market-session-hygiene-v414",
-  "label": "market-session-hygiene-v414",
-  "apkVersion": "2026.08.11.03",
-  "apkCheckpoint": "v655-market-ticker-session-deep-audit",
-  "contractVersion": "APK v655 / Proxy 21.12.405 / APK version 2026.08.11.03 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v5 / portfolio regular-session-v2",
+  "releasePatch": "21.12.408-source-hygiene-solid-analysis-v419",
+  "publicVersion": "21.12.408",
+  "checkpoint": "source-hygiene-solid-analysis-v419",
+  "label": "source-hygiene-solid-analysis-v419",
+  "apkVersion": "2026.08.11.09",
+  "apkCheckpoint": "v661-source-hygiene-solid-analysis",
+  "contractVersion": "APK v661 / Proxy 21.12.408 / APK version 2026.08.11.09 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v6 / portfolio regular-session-v2",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
-  "releaseLabel": "market-session-hygiene-v414",
-  "title": "Proxy v405 — ticker, sessão regular e pareamento APK v655",
-  "summary": "Pareia APK v655 / 2026.08.11.03 e fingerprint 0540de0f46e3d2b7; reforça ticker B3/BCB, exclui after-market do Preço da carteira e remove artefatos sem runtime.",
+  "releaseLabel": "source-hygiene-solid-analysis-v419",
+  "title": "Proxy v419 — pareamento APK v661 e higiene de fonte",
+  "summary": "Pareia APK v661 / 2026.08.11.09 e fingerprint ae05c7a9295b557e; remove documentação histórica dispensável do pacote sem alterar rotas, contratos ou a reconciliação da Agenda.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.11.03",
+  "maxTestedApkVersion": "2026.08.11.09",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "APK 2026.08.11.03 é reconhecido como PAIRED.",
-    "APKs anteriores dentro da janela mínima permanecem SUPPORTED.",
-    "IBOV/IFIX/IDIV/SMLL preservam fallback oficial B3 quando Yahoo direto falha.",
-    "Preço da carteira filtra sessão regular 10:00–17:00 e não anexa currentPrice no after-market.",
-    "Fingerprint canônico do source APK pareado: 0540de0f46e3d2b7.",
-    "Runtime reachability e sintaxe JavaScript são auditados sem módulos órfãos.",
-    "USD possui contingência oficial BCB SGS 1 quando Yahoo falha.",
-    "IVVB11 possui contingência pela cotação pública oficial da B3 quando Yahoo falha.",
-    "Calendário de sessão considera 24/12 e 31/12 sem negociação e abertura às 13h na Quarta-feira de Cinzas de 2026."
+    "APK 2026.08.11.09 é reconhecido como PAIRED com fingerprint ae05c7a9295b557e.",
+    "Arquivos de relatório/checkpoint/auditoria removidos não são dependências de runtime, build nem contratos executáveis.",
+    "Testes de compatibilidade deixam de depender da presença física de relatórios históricos."
   ],
   "operationalLimits": [
     "Cache, coalescência, métricas e rate limit são limitados e locais por instância serverless; proteção distribuída deve ser configurada na borda da plataforma.",
@@ -37,19 +31,14 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "Avança pairedVersion/maxTestedVersion para 2026.08.11.03.",
-    "Pareia o fingerprint v655 0540de0f46e3d2b7.",
-    "Prioriza B3 oficial como contingência primária dos índices brasileiros do ticker.",
-    "Impede pontos pós-pregão e currentPrice after-market no histórico intradiário da carteira.",
-    "Remove Gradle simulado/cache local e assets/CSS órfãos do pacote Node.",
-    "Completa a contingência dos oito itens do ticker com BCB para USD e B3 pública para IVVB11.",
-    "Centraliza a sessão regular da carteira no calendário B3 e incorpora exceções oficiais de 2026.",
-    "Sincroniza README/package metadata com o pareamento efetivo v655, removendo descrição corrente obsoleta."
+    "Avança pairedVersion/maxTestedVersion para 2026.08.11.09 e fingerprint ae05c7a9295b557e.",
+    "Remove relatórios, checkpoints, auditorias, validações e notas de compatibilidade históricas sem consumo por runtime.",
+    "Mantém documentação operacional, arquitetura, ambiente, troubleshooting, referências técnicas e guias de integração."
   ],
   "notes": [
-    "O financial sync permanece valorae-financial-sync-v2.",
-    "O contrato de ecossistema permanece valorae-ecosystem-2026.08.05.04-p404.",
-    "O alias de downloads Kotlin duplicado é mantido intencionalmente como compatibilidade de URL pública."
+    "O contrato móvel, rotas, schemas e lógica financeira permanecem inalterados.",
+    "A remoção é física e será percebida por IDEs/AI Studio ao abrir ou sincronizar a árvore.",
+    "O financial sync permanece valorae-financial-sync-v2 e o contrato de ecossistema permanece inalterado."
   ],
-  "apkSourceFingerprint": "0540de0f46e3d2b7"
+  "apkSourceFingerprint": "ae05c7a9295b557e"
 }

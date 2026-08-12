@@ -17,6 +17,22 @@ for (const relative of [
   assert.equal(fs.existsSync(path.join(root, relative)), false, `artefato estático órfão reintroduzido: ${relative}`);
 }
 
+const forbiddenDocDirs = ['auditoria', 'benchmarks', 'checkpoints', 'compatibilidade', 'correcoes', 'relatorios', 'validacao', 'archive'];
+for (const name of forbiddenDocDirs) {
+  assert.equal(fs.existsSync(path.join(root, 'docs', name)), false, `arquivo histórico voltou para docs/${name}`);
+}
+const docFiles = [];
+function walkDocs(directory) {
+  if (!fs.existsSync(directory)) return;
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const candidate = path.join(directory, entry.name);
+    if (entry.isDirectory()) walkDocs(candidate);
+    else docFiles.push(candidate);
+  }
+}
+walkDocs(path.join(root, 'docs'));
+assert.equal(docFiles.some(file => /(RELATORIO|AUDITORIA|CHECKPOINT|\bAUDIT\b)/i.test(path.basename(file))), false, 'relatório/auditoria/checkpoint histórico reintroduzido em docs');
+
 const server = read('server.js');
 assert.doesNotMatch(server, /\bMAX_LOCAL_BODY_BYTES\b/, 'constante sem consumidor reintroduzida');
 assert.doesNotMatch(server, /\bINVALID_JSON\b/, 'constante sem consumidor reintroduzida');

@@ -6,8 +6,8 @@ import { VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION } from '../lib/core/mobile-
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const metadata = JSON.parse(fs.readFileSync(new URL('../metadata.json', import.meta.url), 'utf8'));
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');
-assert.equal(pkg.valorae.publicVersion, '21.12.405');
-assert.equal(pkg.valorae.releasePatch, '21.12.405-market-session-hygiene-v414');
+assert.equal(pkg.valorae.publicVersion, '21.12.408');
+assert.equal(pkg.valorae.releasePatch, '21.12.408-deep-runtime-audit-v417');
 assert.equal(metadata.apkVersion, pkg.valorae.apkVersion);
 assert.match(metadata.contractVersion, /asset modal delivery v4/i);
 
