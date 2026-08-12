@@ -789,6 +789,7 @@ async function buildMobileAlerts(payload = {}) {
           includeArticleBody: false,
           assetOnly: true,
           includeGeneral: false,
+          notificationMode: true,
           refresh: false,
           nocache: false,
           bypassCache: false,
