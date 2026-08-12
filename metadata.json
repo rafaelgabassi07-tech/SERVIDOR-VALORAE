@@ -15,12 +15,12 @@
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "source-hygiene-solid-analysis-v419",
   "title": "Proxy v419 — pareamento APK v661 e higiene de fonte",
-  "summary": "Pareia APK v661 / 2026.08.11.09 e fingerprint ae05c7a9295b557e; remove documentação histórica dispensável do pacote sem alterar rotas, contratos ou a reconciliação da Agenda.",
+  "summary": "Pareia APK v661 / 2026.08.11.09 e fingerprint 791893457bcc5c25; remove documentação histórica dispensável do pacote sem alterar rotas, contratos ou a reconciliação da Agenda.",
   "minSupportedApkVersion": "2026.07.30.01",
   "maxTestedApkVersion": "2026.08.11.09",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "APK 2026.08.11.09 é reconhecido como PAIRED com fingerprint ae05c7a9295b557e.",
+    "APK 2026.08.11.09 é reconhecido como PAIRED com fingerprint 791893457bcc5c25.",
     "Arquivos de relatório/checkpoint/auditoria removidos não são dependências de runtime, build nem contratos executáveis.",
     "Testes de compatibilidade deixam de depender da presença física de relatórios históricos."
   ],
@@ -31,7 +31,7 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "Avança pairedVersion/maxTestedVersion para 2026.08.11.09 e fingerprint ae05c7a9295b557e.",
+    "Avança pairedVersion/maxTestedVersion para 2026.08.11.09 e fingerprint 791893457bcc5c25.",
     "Remove relatórios, checkpoints, auditorias, validações e notas de compatibilidade históricas sem consumo por runtime.",
     "Mantém documentação operacional, arquitetura, ambiente, troubleshooting, referências técnicas e guias de integração."
   ],
@@ -40,5 +40,5 @@
     "A remoção é física e será percebida por IDEs/AI Studio ao abrir ou sincronizar a árvore.",
     "O financial sync permanece valorae-financial-sync-v2 e o contrato de ecossistema permanece inalterado."
   ],
-  "apkSourceFingerprint": "ae05c7a9295b557e"
+  "apkSourceFingerprint": "3d01b8c6a6134a95"
 }

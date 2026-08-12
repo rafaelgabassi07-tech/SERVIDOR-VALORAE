@@ -1,6 +1,6 @@
 # VALORAE Proxy
 
-Release público atual: **21.12.408**, pareado ao APK **v661 / 2026.08.11.09** (fingerprint `ae05c7a9295b557e`).
+Release público atual: **21.12.408**, pareado ao APK **v661 / 2026.08.11.09** (fingerprint `3d01b8c6a6134a95`).
 
 Proxy Vercel estritamente sob demanda para o APK VALORAE. O runtime possui uma única função física (`api/router.js`), não contém cron e não inicia consultas, timers ou coleta de dados ao ser importado. Em produção, as rotas da API aceitam somente requisições com a identidade canônica do APK.
 
