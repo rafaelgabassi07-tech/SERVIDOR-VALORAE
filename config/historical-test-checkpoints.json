@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "description": "Checkpoints imutáveis de releases anteriores. O gate atual não deve tratá-los como regressões da release corrente; use --include-historical para executá-los explicitamente.",
+  "tests": {
+    "test/account-profile-compatibility-v413.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/analysis-market-ticker-all-eight-v633.test.js": "Fixture com datas fixas anterior ao contrato atual de frescor; substituído pelos testes v655/v656 de sessão, B3/Yahoo, IFIX e IDIV.",
+    "test/analysis-market-ticker-v646.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-proxy-modal-data-truth-v326.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica.",
+    "test/apk-proxy-protocol-cache-harmony-v311.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica.",
+    "test/apk-proxy-protocol-negotiation-v312.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica.",
+    "test/apk-proxy-real-index-peer-history-v325.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica.",
+    "test/apk-proxy-source-arrival-v327.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica.",
+    "test/apk-v639-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v640-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v641-analysis-ticker-contract.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v642-preview-stability-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v643-analysis-ux-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v644-rankings-ui-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v645-analysis-performance-visual-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v647-analysis-category-layout-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v649-financial-sync-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v650-financial-sync-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v653-build-consistency-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v654-build-consistency-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v655-market-session-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/apk-v656-ticker-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/ecosystem-contract-v410.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
+    "test/ecosystem-transport-hardening-v411.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica.",
+    "test/quote-resilience-v350.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica."
+  },
+  "crossStackOnly": {
+    "test/user-request-modal-patrimony-v364.test.js": "Checkpoint visual cross-stack antigo que fixa a contagem histórica de confetes; a regressão visual atual é validada no quality gate canônico do APK."
+  }
+}

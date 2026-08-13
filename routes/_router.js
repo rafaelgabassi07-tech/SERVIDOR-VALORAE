@@ -1486,7 +1486,7 @@ export async function dispatchRoute(req, res) {
             bypassCache: boolParamLocal(payload.refresh || payload.nocache),
           })
         : await getInvestidor10AnalysisRankingCatalog();
-      return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, endpoint: 'analysis-rankings', ...result }, { cacheControl: 'private, max-age=120, stale-while-revalidate=900' });
+      return sendJson(req, res, { version: RELEASE.version, requestId: payload.requestId, endpoint: 'analysis-rankings', ...result }, { cacheControl: `private, max-age=${VALORAE_MOBILE_CACHE_POLICY_SECONDS.analysisRankings}, stale-while-revalidate=900` });
     }
     if (path === '/market/indices') return runLazyDefaultHandler('route-market-indices', () => import('./market/indices.js'), req, res);
 

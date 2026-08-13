@@ -6,13 +6,30 @@ import { assertSiblingApkAvailable, resolveSiblingApkRoot } from '../test/helper
 process.env.VALORAE_REQUIRE_APK = '1';
 const apkRoot = assertSiblingApkAvailable();
 const testRoot = path.resolve('test');
-const selected = fs.readdirSync(testRoot)
+const discovered = fs.readdirSync(testRoot)
   .filter(name => name.endsWith('.test.js'))
   .map(name => path.join(testRoot, name))
   .filter(file => fs.readFileSync(file, 'utf8').includes('./helpers/cross-stack-apk.js'))
   .sort((left, right) => left.localeCompare(right));
 
-if (!selected.length) throw new Error('Nenhum teste APK/Proxy foi localizado.');
+const includeHistorical = process.argv.includes('--include-historical') || process.env.VALORAE_INCLUDE_HISTORICAL_TESTS === '1';
+const historicalConfigPath = path.join('config', 'historical-test-checkpoints.json');
+let historicalTests = new Set();
+if (fs.existsSync(historicalConfigPath)) {
+  const parsed = JSON.parse(fs.readFileSync(historicalConfigPath, 'utf8'));
+  historicalTests = new Set([
+    ...Object.keys(parsed?.tests || {}),
+    ...Object.keys(parsed?.crossStackOnly || {}),
+  ]);
+}
+const skippedHistorical = includeHistorical
+  ? []
+  : discovered.filter(file => historicalTests.has(path.relative(process.cwd(), file).replaceAll('\\', '/')));
+const selected = includeHistorical
+  ? discovered
+  : discovered.filter(file => !historicalTests.has(path.relative(process.cwd(), file).replaceAll('\\', '/')));
+
+if (!selected.length) throw new Error('Nenhum teste APK/Proxy atual foi localizado.');
 const allowMissingDependencies = process.env.VALORAE_ALLOW_MISSING_TEST_DEPS === '1';
 const dependencyPatterns = [
   /Cannot find package ['\"](cheerio|undici|ajv[^'\"]*)['\"]/i,
@@ -62,6 +79,6 @@ for (const file of selected) {
 }
 
 const dependencySummary = [...blockedBy.entries()].sort().map(([name, count]) => `${name}:${count}`).join(', ');
-console.log(`${selected.length} testes cross-stack; passed=${passed}; blocked=${blocked}; failures=${failures}${dependencySummary ? `; blockedBy=${dependencySummary}` : ''}; apkRoot=${resolveSiblingApkRoot()}`);
+console.log(`${selected.length} testes cross-stack atuais; passed=${passed}; blocked=${blocked}; failures=${failures}; historicalSkipped=${skippedHistorical.length}${dependencySummary ? `; blockedBy=${dependencySummary}` : ''}; apkRoot=${resolveSiblingApkRoot()}`);
 if (failures) process.exit(1);
 if (blocked && !allowMissingDependencies) process.exit(2);

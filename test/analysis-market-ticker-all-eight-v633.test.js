@@ -28,9 +28,13 @@ global.fetch = async (url) => {
   const direct = textUrl.match(/investidor10\.com\.br\/api\/indices\/cotacoes\/(\d+)\/3650/);
   if (direct && indexById[direct[1]]) {
     const [, base] = indexById[direct[1]];
+    const now = new Date();
+    const fmt = (date) => `${String(date.getUTCDate()).padStart(2,'0')}/${String(date.getUTCMonth()+1).padStart(2,'0')}/${date.getUTCFullYear()}`;
+    const latest = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), Math.max(1, now.getUTCDate() - 1)));
+    const previous = new Date(latest.getTime() - 24 * 60 * 60 * 1000);
     return new Response(JSON.stringify([
-      { last_update: '01/07/2026', points: base * 0.99 },
-      { last_update: '01/08/2026', points: base }
+      { last_update: fmt(previous), points: base * 0.99 },
+      { last_update: fmt(latest), points: base }
     ]), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
   if (textUrl.includes('bcdata.sgs.12/dados')) {
@@ -61,6 +65,12 @@ try {
     const item = result.tickerItems.find(row => row.code === code);
     assert.equal(item?.ok, true, `${code} deve ficar OK com sua cadeia real/contingência`);
     assert.ok(Number.isFinite(Number(item?.value)) && Number(item.value) > 0, `${code} deve ter valor numérico válido`);
+  }
+  for (const code of ['USD','IFIX','IDIV','SMLL','IBOV','IVVB11']) {
+    const item = result.tickerItems.find(row => row.code === code);
+    assert.ok(Number.isFinite(Number(item?.variationPct)), `${code} deve expor variationPct calculável`);
+    assert.ok(Number.isFinite(Number(item?.variationPercent)), `${code} deve expor variationPercent compatível`);
+    assert.equal(Number(item.variationPercent), Number(item.variationPct), `${code} deve manter os aliases de variação coerentes`);
   }
   assert.equal(result.status, 'OK');
   assert.equal(result.partial, false);

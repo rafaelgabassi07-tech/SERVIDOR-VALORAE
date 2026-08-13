@@ -14,6 +14,19 @@ function walk(directory) {
 walk('test');
 tests.sort((left, right) => left.localeCompare(right));
 
+const includeHistorical = process.argv.includes('--include-historical') || process.env.VALORAE_INCLUDE_HISTORICAL_TESTS === '1';
+const historicalConfigPath = path.join('config', 'historical-test-checkpoints.json');
+let historicalTests = new Set();
+if (fs.existsSync(historicalConfigPath)) {
+  const parsed = JSON.parse(fs.readFileSync(historicalConfigPath, 'utf8'));
+  historicalTests = new Set(Object.keys(parsed?.tests || {}));
+}
+const skippedHistorical = includeHistorical ? [] : tests.filter(testFile => historicalTests.has(testFile.replaceAll('\\', '/')));
+if (!includeHistorical && skippedHistorical.length) {
+  const selected = tests.filter(testFile => !historicalTests.has(testFile.replaceAll('\\', '/')));
+  tests.splice(0, tests.length, ...selected);
+}
+
 const allowMissingDependencies = process.env.VALORAE_ALLOW_MISSING_TEST_DEPS === '1';
 const concurrency = Math.max(1, Math.min(8, Number.parseInt(process.env.VALORAE_TEST_CONCURRENCY || '8', 10) || 1));
 const timeoutMs = Math.max(10_000, Math.min(300_000, Number.parseInt(process.env.VALORAE_TEST_TIMEOUT_MS || '30000', 10) || 180_000));
@@ -118,7 +131,7 @@ const dependencySummary = [...blockedByDependency.entries()]
   .sort(([left], [right]) => left.localeCompare(right))
   .map(([name, count]) => `${name}:${count}`)
   .join(', ');
-console.log(`${tests.length} test files; passed=${passed}; blocked=${blocked}; failures=${failures}; concurrency=${concurrency}${dependencySummary ? `; blockedBy=${dependencySummary}` : ''}`);
+console.log(`${tests.length} current test files; passed=${passed}; blocked=${blocked}; failures=${failures}; historicalSkipped=${skippedHistorical.length}; concurrency=${concurrency}${dependencySummary ? `; blockedBy=${dependencySummary}` : ''}`);
 
 if (failures > 0) process.exit(1);
 if (blocked > 0 && !allowMissingDependencies) {

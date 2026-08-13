@@ -61,6 +61,10 @@ try {
     assert.equal(row.ok, true, `${row.code} deve permanecer operacional sem Yahoo`);
     assert.ok(Number(row.value ?? row.price) > 0, `${row.code} precisa ter valor real positivo`);
   }
+  for (const code of ['USD','IFIX','IDIV','SMLL','IBOV','IVVB11']) {
+    const row = result.tickerItems.find(item => item.code === code);
+    assert.ok(Number.isFinite(Number(row?.variationPct)), `${code} precisa expor variação diária real quando a fonte de contingência possui fechamento anterior`);
+  }
   assert.match(result.tickerItems.find(row => row.code === 'USD').source, /Banco Central.*SGS 1/i);
   assert.match(result.tickerItems.find(row => row.code === 'IVVB11').source, /B3 Oficial.*IVVB11/i);
   for (const code of ['IFIX','IDIV','SMLL','IBOV']) assert.match(result.tickerItems.find(row => row.code === code).source, /B3 Oficial/);

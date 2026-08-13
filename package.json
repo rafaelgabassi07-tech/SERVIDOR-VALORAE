@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.408 pareado ao APK v661; mantém contratos/runtime e consolida higiene de fonte para a identidade sólida da Análise.",
+  "description": "Proxy VALORAE 21.12.408 pareado ao APK v661; alinha cache de rankings, preserva integridade financeira v420 e reduz recargas redundantes sem alterar o protocolo móvel público.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,7 +19,9 @@
     "audit:sql": "node scripts/validate-minimal-sql.js",
     "audit:on-demand": "node scripts/audit-on-demand-import.js",
     "verify:release": "node scripts/verify-release.js",
-    "verify:cloud-sync": "node scripts/verify-cloud-sync-deployment.js"
+    "verify:cloud-sync": "node scripts/verify-cloud-sync-deployment.js",
+    "test:historical": "node scripts/run-tests.js --include-historical",
+    "test:cross-stack:historical": "node scripts/run-cross-stack-tests.js --include-historical"
   },
   "engines": {
     "node": "24.x"
@@ -31,39 +33,39 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.408-source-hygiene-solid-analysis-v419",
+    "releasePatch": "21.12.408-cache-runtime-alignment-v421",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
     "publicVersion": "21.12.408",
-    "checkpoint": "source-hygiene-solid-analysis-v419",
-    "releaseLabel": "source-hygiene-solid-analysis-v419",
+    "checkpoint": "cache-runtime-alignment-v421",
+    "releaseLabel": "cache-runtime-alignment-v421",
     "apkVersion": "2026.08.11.09",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
     "maxTestedApkVersion": "2026.08.11.09",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "3d01b8c6a6134a95"
+    "apkSourceFingerprint": "a1d14e55b56f862c"
   },
-  "releasePatch": "21.12.408-source-hygiene-solid-analysis-v419",
+  "releasePatch": "21.12.408-cache-runtime-alignment-v421",
   "config": {
-    "releasePatch": "21.12.408-source-hygiene-solid-analysis-v419",
+    "releasePatch": "21.12.408-cache-runtime-alignment-v421",
     "publicVersion": "21.12.408",
-    "checkpoint": "source-hygiene-solid-analysis-v419",
-    "releaseLabel": "source-hygiene-solid-analysis-v419",
-    "apkSourceFingerprint": "3d01b8c6a6134a95"
+    "checkpoint": "cache-runtime-alignment-v421",
+    "releaseLabel": "cache-runtime-alignment-v421",
+    "apkSourceFingerprint": "a1d14e55b56f862c"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.408-source-hygiene-solid-analysis-v419",
+    "releasePatch": "21.12.408-cache-runtime-alignment-v421",
     "publicVersion": "21.12.408",
-    "checkpoint": "source-hygiene-solid-analysis-v419",
-    "releaseLabel": "source-hygiene-solid-analysis-v419",
+    "checkpoint": "cache-runtime-alignment-v421",
+    "releaseLabel": "cache-runtime-alignment-v421",
     "apkVersion": "2026.08.11.09",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
     "maxTestedApkVersion": "2026.08.11.09",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "3d01b8c6a6134a95"
+    "apkSourceFingerprint": "a1d14e55b56f862c"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

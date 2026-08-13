@@ -5,7 +5,7 @@ import { VALORAE_ENGINE_VERSION, VALORAE_RELEASE_PATCH } from '../lib/release/cu
 import { RELEASE } from '../lib/core/release.js';
 import { normalizeTicker } from '../lib/core/tickers.js';
 
-// Release patch: 21.12.408-source-hygiene-solid-analysis-v419
+// Release patch: 21.12.408-cache-runtime-alignment-v421
 const CORE_VERSION = VALORAE_RELEASE_PATCH;
 const SYNC_CONTRACT = 'valorae-financial-sync-v2';
 const TRANSACTIONS_TABLE = 'valorae_financial_transactions';

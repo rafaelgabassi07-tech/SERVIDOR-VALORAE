@@ -1,6 +1,6 @@
 # VALORAE Proxy
 
-Release público atual: **21.12.408**, pareado ao APK **v661 / 2026.08.11.09** (fingerprint `3d01b8c6a6134a95`).
+Release público atual: **21.12.408**, pareado ao APK **v661 / 2026.08.11.09** (fingerprint `a633b4df6e7d1455`).
 
 Proxy Vercel estritamente sob demanda para o APK VALORAE. O runtime possui uma única função física (`api/router.js`), não contém cron e não inicia consultas, timers ou coleta de dados ao ser importado. Em produção, as rotas da API aceitam somente requisições com a identidade canônica do APK.
 
@@ -98,3 +98,7 @@ O documento apresenta permanentemente a origem no Android, decisão entre Room e
 ## Recuperação da sincronização financeira
 
 Execute `supabase/00_cloud_transaction_recovery.sql` no SQL Editor do Supabase, confirme o resultado, publique este Proxy e rode `npm run verify:cloud-sync` no ambiente configurado. O runtime tenta RPC v2 primeiro e usa PostgREST service-role como fallback quando a tabela já existe, mas a RPC ainda não entrou no schema cache.
+
+
+### Testes históricos
+`npm test` executa a suíte corrente. `npm run test:historical` inclui checkpoints imutáveis de releases anteriores que fixam versões antigas.
