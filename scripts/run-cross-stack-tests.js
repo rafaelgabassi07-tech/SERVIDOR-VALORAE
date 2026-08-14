@@ -32,6 +32,7 @@ const selected = includeHistorical
 if (!selected.length) throw new Error('Nenhum teste APK/Proxy atual foi localizado.');
 const allowMissingDependencies = process.env.VALORAE_ALLOW_MISSING_TEST_DEPS === '1';
 const dependencyPatterns = [
+  /Cannot find package ['"][^'"]*node_modules[\\/](cheerio|undici|ajv[^\\/'"]*)(?:[\\/][^'"]*)?['"]/i,
   /Cannot find package ['\"](cheerio|undici|ajv[^'\"]*)['\"]/i,
   /Cannot find module ['\"](cheerio|undici|ajv[^'\"]*)['\"]/i,
   /ERR_MODULE_NOT_FOUND[\s\S]{0,240}(cheerio|undici|ajv)/i,

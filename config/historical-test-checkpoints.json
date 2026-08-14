@@ -26,7 +26,10 @@
     "test/apk-v656-ticker-compatibility.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
     "test/ecosystem-contract-v410.test.js": "Checkpoint de compatibilidade que fixa literalmente uma versão antiga do APK; preservado apenas para auditoria histórica.",
     "test/ecosystem-transport-hardening-v411.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica.",
-    "test/quote-resilience-v350.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica."
+    "test/quote-resilience-v350.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica.",
+    "test/apk-v671-cache-alignment-v421.test.js": "Checkpoint v421 que fixa literalmente o fingerprint/releasePatch anterior; substituído pelo alinhamento v422.",
+    "test/apk-v670-financial-regressions-v420.test.js": "Checkpoint v420 da fórmula antiga de Retorno; supersedido pelo Modified Dietz v422 para fluxos ponderados.",
+    "test/apk-v674-return-peer-alignment-v422.test.js": "Checkpoint v422 fixa literalmente releasePatch/fingerprint do APK v674; supersedido pela auditoria cruzada v423/v676."
   },
   "crossStackOnly": {
     "test/user-request-modal-patrimony-v364.test.js": "Checkpoint visual cross-stack antigo que fixa a contagem histórica de confetes; a regressão visual atual é validada no quality gate canônico do APK."

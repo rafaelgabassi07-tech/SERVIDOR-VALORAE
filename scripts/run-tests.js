@@ -32,6 +32,7 @@ const concurrency = Math.max(1, Math.min(8, Number.parseInt(process.env.VALORAE_
 const timeoutMs = Math.max(10_000, Math.min(300_000, Number.parseInt(process.env.VALORAE_TEST_TIMEOUT_MS || '30000', 10) || 180_000));
 const maxOutputBytes = 16 * 1024 * 1024;
 const missingDependencyPatterns = [
+  /Cannot find package ['"][^'"]*node_modules[\\/](cheerio|undici|ajv[^\\/'"]*)(?:[\\/][^'"]*)?['"]/i,
   /Cannot find package ['"](cheerio|undici|ajv[^'"]*)['"]/i,
   /Cannot find module ['"](cheerio|undici|ajv[^'"]*)['"]/i,
   /ERR_MODULE_NOT_FOUND[\s\S]{0,240}(cheerio|undici|ajv)/i,

@@ -49,7 +49,7 @@ assertOrder(fii, [
   assert.ok(!newsUi.includes('loadRequested'), 'notícias não podem depender de solicitação manual');
   assert.ok(newsUi.includes('onClick = { refreshNonce += 1 }'), 'atualização manual deve continuar disponível');
   assert.ok(newsUi.includes('Text("Atualizar"'), 'ação secundária deve atualizar, não iniciar a primeira carga');
-  assert.ok(remoteState?.includes('query = assetName.takeIf'), 'state holder deve enviar o nome do ativo como contexto de busca');
+  assert.ok(remoteState?.includes('val primaryQuery = assetName.takeIf') && remoteState?.includes('query = primaryQuery'), 'state holder deve enviar o nome do ativo como contexto de busca');
   assert.ok(remoteState?.includes('assetOnly = true'), 'state holder deve solicitar notícias estritas');
   assert.ok(feedService.includes('put("assetOnly", "true")'));
   assert.ok(feedService.includes('put("strictAsset", "true")'));

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { clearCache } from '../lib/core/cache.js';
 import { dispatchRoute } from '../routes/_router.js';
+import { APK_COMPATIBILITY } from '../lib/core/apk-compatibility.js';
 
 function response() {
   const headers = new Map();
@@ -47,14 +48,14 @@ const supported = await invoke('/api/v1/ready', { headers: apkHeaders('2026.07.3
 assert.equal(supported.statusCode, 200);
 assert.equal(supported.getHeader('X-Valorae-Apk-Compatibility'), 'SUPPORTED');
 
-const paired = await invoke('/api/v1/ready', { headers: apkHeaders('2026.08.11.09') });
+const paired = await invoke('/api/v1/ready', { headers: apkHeaders(APK_COMPATIBILITY.pairedVersion) });
 assert.equal(paired.statusCode, 200);
 assert.equal(paired.getHeader('X-Valorae-Apk-Compatibility'), 'PAIRED');
 
 clearCache();
 const daily = await invoke('/api/v1/mobile/daily-close', {
   method: 'POST',
-  headers: { ...apkHeaders('2026.08.11.09'), 'content-type': 'application/json' },
+  headers: { ...apkHeaders(APK_COMPATIBILITY.pairedVersion), 'content-type': 'application/json' },
   body: { positions: [] },
 });
 assert.equal(daily.statusCode, 200);

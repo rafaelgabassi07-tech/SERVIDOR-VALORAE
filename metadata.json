@@ -1,28 +1,29 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.408 pareado ao APK v661; alinha cache/runtime da Análise e preserva as correções financeiras anteriores.",
+  "description": "Proxy 21.12.409 pareado ao APK v676; fecha a auditoria integral APK ↔ Proxy e homologa a identidade de fonte atual.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
-  "releasePatch": "21.12.408-cache-runtime-alignment-v421",
-  "publicVersion": "21.12.408",
-  "checkpoint": "cache-runtime-alignment-v421",
-  "label": "cache-runtime-alignment-v421",
-  "apkVersion": "2026.08.11.09",
-  "apkCheckpoint": "v661-source-hygiene-solid-analysis",
-  "contractVersion": "APK v661 / Proxy 21.12.408 / APK version 2026.08.11.09 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v6 / portfolio regular-session-v2",
+  "releasePatch": "21.12.409-cross-stack-integrity-v423",
+  "publicVersion": "21.12.409",
+  "checkpoint": "cross-stack-integrity-v423",
+  "label": "cross-stack-integrity-v423",
+  "apkVersion": "2026.08.13.01",
+  "apkCheckpoint": "v676-cross-stack-integrity-audit",
+  "contractVersion": "APK v676 / Proxy 21.12.409 / APK version 2026.08.13.01 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v6 / portfolio regular-session-v2",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
-  "releaseLabel": "cache-runtime-alignment-v421",
-  "title": "Proxy v421 — cache/runtime alinhado ao APK",
-  "summary": "Pareia APK v661 / 2026.08.11.09 e fingerprint a1d14e55b56f862c; alinha freshness de rankings e preserva Retorno, ticker e comparador corrigidos.",
+  "releaseLabel": "cross-stack-integrity-v423",
+  "title": "Proxy v423 — Integridade cruzada APK ↔ Proxy",
+  "summary": "Pareia APK v676 / 2026.08.13.01 e fingerprint 69a01fb17c800adf; homologa rotas, protocolos e recuperação de transporte após auditoria integral.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.11.09",
+  "maxTestedApkVersion": "2026.08.13.01",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "APK 2026.08.11.09 é reconhecido como PAIRED com fingerprint a1d14e55b56f862c.",
-    "Analysis rankings usa freshness canônica de 300 s no Proxy, cache HTTP do APK e cache em memória do cliente.",
-    "As rotas financeiras e políticas de cache críticas permanecem compatíveis com o contrato móvel 2026.07.10.10."
+    "APK 2026.08.13.01 é reconhecido como PAIRED com fingerprint 69a01fb17c800adf.",
+    "Todas as rotas canônicas consumidas pelo APK pertencem à allowlist de produção do roteador.",
+    "Protocolos móvel, ecossistema, schema de modal, contrato de resposta e sync financeiro permanecem semanticamente compatíveis.",
+    "Suite cross-stack verifica explicitamente a correção de failover HTTP 500, authMode de diagnóstico e contingência de logos."
   ],
   "operationalLimits": [
     "Cache, coalescência, métricas e rate limit são limitados e locais por instância serverless; proteção distribuída deve ser configurada na borda da plataforma.",
@@ -31,14 +32,15 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "Alinha o fingerprint ao APK v671 de trabalho sem alterar a versão pública do protocolo.",
-    "Analysis rankings passa a ter freshness explícita de 300 s em todas as camadas relevantes.",
-    "Preserva integralmente as correções v420 de Retorno, ticker de mercado e comparador."
+    "Atualiza pareamento para o APK v676 e seu fingerprint real de app/src/main.",
+    "Adiciona gate cruzado que compara rotas, protocolos, versão e fingerprint entre os dois projetos.",
+    "Corrige o classificador de testes bloqueados por dependência para o formato de erro de módulos usado pelo Node atual, sem ocultar falhas reais.",
+    "Preserva lógica financeira, fontes reais, política de compatibilidade e execução estritamente sob demanda."
   ],
   "notes": [
-    "O protocolo móvel e a janela de compatibilidade permanecem inalterados.",
-    "Nenhum dado sintético é introduzido nos gráficos financeiros.",
-    "Falhas de uma fonte continuam resultando em fallback real, PARTIAL ou EMPTY conforme o contrato."
+    "A versão core do contrato permanece 21.12.0; a versão pública da implementação avança para 21.12.409.",
+    "HTTP 426 continua restrito à sincronização financeira quando a política de compatibilidade exige bloqueio.",
+    "Não foram introduzidos dados sintéticos nem armazenamento operacional adicional."
   ],
-  "apkSourceFingerprint": "a1d14e55b56f862c"
+  "apkSourceFingerprint": "69a01fb17c800adf"
 }
