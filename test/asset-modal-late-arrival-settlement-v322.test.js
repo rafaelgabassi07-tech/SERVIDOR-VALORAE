@@ -180,7 +180,7 @@ if (model && parser && loader && service && merge) {
   assert.match(model, /val settlementSections: List<String> = emptyList\(\)/);
   assert.match(parser, /inferredSettlementSections/);
   assert.match(parser, /optBoolean\("settlementPending", false\)/);
-  assert.match(loader, /AssetModalLateArrivalSettlementDelaysMs = longArrayOf\(850L, 2_100L\)/);
+  assert.match(loader, /AssetModalLateArrivalSettlementDelaysMs = listOf\(850L, 2_100L\)/);
   assert.match(loader, /needsLateArrivalSettlement\(\)/);
   assert.match(loader, /criticalMissing \+ settlementMissing/);
   assert.doesNotMatch(service, /if \(delivery\.isFinal \|\| delivery\.completeForDelivery == true\) return true/);

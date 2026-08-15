@@ -101,8 +101,15 @@ assert.match(formalSchema, /Version = "2026\.07\.15-checkpoint112-v1"/);
 assert.match(proxyFeatureVersions, /VALORAE_FORMAL_SCHEMA_VERSION = '2026\.07\.15-checkpoint112-v1'/);
 assert.ok(VALORAE_CANONICAL_REQUEST_HEADERS.includes('X-Valorae-Source-Fingerprint'));
 assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Paired-Source-Fingerprint'));
+assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Source-Fingerprint-Status'));
+assert.match(protocol, /HeaderPairedSourceFingerprint = "X-Valorae-Paired-Source-Fingerprint"/);
+assert.match(protocol, /HeaderSourceFingerprintStatus = "X-Valorae-Source-Fingerprint-Status"/);
 assert.match(proxyHttp, /HeaderSourceFingerprint, BuildConfig\.SOURCE_FINGERPRINT/);
 assert.match(syncClient, /HeaderSourceFingerprint, BuildConfig\.SOURCE_FINGERPRINT/);
+assert.match(proxyHttp, /pairedSourceFingerprint = header\(ValoraeMobileProtocol\.HeaderPairedSourceFingerprint\)/);
+assert.match(proxyHttp, /sourceFingerprintStatus = header\(ValoraeMobileProtocol\.HeaderSourceFingerprintStatus\)/);
+assert.match(proxyHttp, /sourceFingerprintMismatch && fingerprintRetrySafe/);
+assert.match(syncClient, /sourceFingerprintMismatch && fingerprintRetrySafe/);
 
 const retrySet = syncClient.match(/retryableStatus\s*=\s*response\.code\s+in\s+setOf\(([^)]*)\)/)?.[1] || '';
 assert.ok(/\b500\b/.test(retrySet), 'sync precisa alternar host em HTTP 500');

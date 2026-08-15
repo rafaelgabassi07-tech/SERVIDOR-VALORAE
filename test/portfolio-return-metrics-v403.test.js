@@ -3,6 +3,7 @@ import {
   accumulatedReturnForMonths,
   benchmarkAccumulatedMonthMap,
   buildDisplayPortfolioRows,
+  selectPortfolioRowsForRange,
   compoundMonthlyReturns,
   summarizeReturnSeries
 } from '../lib/portfolio/return-metrics.js';
@@ -48,5 +49,23 @@ assert.equal(accumulatedReturnForMonths(flatBenchmark, 12), 0,
 
 const missingBenchmark = benchmarkAccumulatedMonthMap([{ month: '2026-01', accumulatedPercent: null }], 'accumulatedPercent', '2026-01');
 assert.equal(missingBenchmark.size, 0, 'null benchmark values must not become artificial zero series');
+
+const ytdSource = [
+  { month: '2025-12', monthlyReturnPercent: 5, portfolioReturnPercent: 5 },
+  { month: '2026-01', monthlyReturnPercent: 10, portfolioReturnPercent: 15.5 },
+  { month: '2026-02', monthlyReturnPercent: -5, portfolioReturnPercent: 9.725 }
+];
+const ytd = selectPortfolioRowsForRange(ytdSource, 'YTD', 8, new Date('2026-08-14T12:00:00Z'));
+assert.deepEqual(ytd.rows.map(point => point.month), ['2026-01', '2026-02'],
+  'YTD must never leak closing rows from the previous year');
+assert.ok(Math.abs(ytd.rows.at(-1).portfolioReturnPercent - 4.5) < 0.0001,
+  'YTD portfolio return must be recomputed from current-year monthly intervals');
+const staleYtd = selectPortfolioRowsForRange(
+  [{ month: '2025-11', monthlyReturnPercent: 1 }, { month: '2025-12', monthlyReturnPercent: 2 }],
+  'ANO_ATUAL',
+  8,
+  new Date('2026-08-14T12:00:00Z')
+);
+assert.equal(staleYtd.rows.length, 0, 'stale previous-year history must produce an empty YTD window');
 
 console.log('portfolio return metrics v403: ok');

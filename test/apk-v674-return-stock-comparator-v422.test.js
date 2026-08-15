@@ -22,20 +22,23 @@ assert.match(analysisSource, /weightedNetCashFlow/);
 assert.match(analysisSource, /modifiedDietzMonthlyReturnPercent/);
 assert.doesNotMatch(analysisSource, /adjustedEnd\s*=\s*point\.marketValue\s*\+\s*withdrawals\s*\+\s*dividends\s*-\s*contributions/);
 
-// Comparador usa pares reais do catálogo apenas para escolher símbolos; métricas vêm das páginas reais.
+// Comparador prioriza os pares reais expostos pelo Investidor10 e usa o catálogo somente como contingência; métricas vêm das páginas reais.
 const peerCatalog = buildPeerCatalogEntries('PETR4', { max: 6, includeBase: false });
 assert.equal(peerCatalog.base?.ticker, 'PETR4');
 assert.ok(peerCatalog.peers.length >= 2);
 assert.ok(peerCatalog.peers.every(item => item.peerGroup === peerCatalog.base.peerGroup));
 
 assert.match(stockSource, /recoverStockPeerComparisonFromRealPeers/);
-assert.match(stockSource, /Promise\.allSettled\(candidates\.map/);
+assert.match(stockSource, /Promise\.allSettled\(fetchTickers\.map/);
+assert.match(stockSource, /stockPeerTickerCandidatesFromHtml/);
+assert.match(stockSource, /referenceRefetched:\s*!initialReference/);
 assert.match(stockSource, /fetcher\(url/);
 assert.match(stockSource, /stockTickerIdentityOk/);
 assert.match(stockSource, /stockPeerRowFromRealPage/);
 assert.match(stockSource, /wantsPeerComparisonRecovery/);
 assert.match(stockSource, /recoveryTarget\.sections\.has\('peerComparison'\)/);
 assert.match(stockSource, /policy:\s*'html_comparator_then_live_peer_recovery'/);
-assert.match(stockSource, /source:\s*'VALORAE peer catalog \+ Investidor10 ações'/);
+assert.match(stockSource, /candidatePolicy:\s*livePeerTickers\.length \? 'live_table_then_catalog' : 'catalog_only'/);
+assert.match(stockSource, /source:\s*'Investidor10 ações'/);
 
 console.log('apk-v674-return-stock-comparator-v422 ok');

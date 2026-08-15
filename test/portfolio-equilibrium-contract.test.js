@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { buildEquilibriumContract } from '../lib/portfolio/equilibrium-metadata.js';
+import { buildEquilibriumContract, fiiTypeFor } from '../lib/portfolio/equilibrium-metadata.js';
 
 const positions = [
   { ticker: 'GARE11', quantity: 10, avgPrice: 9, currentPrice: 10, assetClass: 'FII' },
@@ -39,3 +39,15 @@ assert.ok(withClientMetadata.actions.bySegment.some(x => x.label === 'Software')
 assert.ok(withClientMetadata.actions.bySector.some(x => x.label === 'Tecnologia'));
 assert.ok(withClientMetadata.actions.byAsset.some(x => x.ticker === 'KLBN11'));
 assert.deepEqual(withClientMetadata.tabs, ['Consolidado', 'Ações']);
+
+assert.deepEqual(onlyStocks.capabilities.requiredCharts, [
+  'position_by_asset', 'position_by_asset_type', 'foreign_exposure',
+  'stocks_by_asset', 'stocks_by_segment', 'stocks_by_sector'
+]);
+assert.equal(onlyStocks.capabilities.requiredCharts.some(id => id.startsWith('fiis_')), false,
+  'disabled FII section must not be advertised as required');
+assert.deepEqual(onlyStocks.capabilities.missingCharts, []);
+assert.equal(fiiTypeFor('TEST11', { tipo: 'CRI' }), 'Fundo de Papel');
+assert.equal(fiiTypeFor('TEST11', { tipo: 'CRA' }), 'Fundo de Papel');
+assert.equal(fiiTypeFor('TEST11', { tipo: 'CR|' }), 'Tipo a classificar',
+  'invalid CR| token must not match the CRI/CRA classifier');
