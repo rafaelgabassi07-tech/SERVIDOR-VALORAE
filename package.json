@@ -45,7 +45,7 @@
     "maxTestedApkVersion": "2026.08.13.01",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "82b3bb51713f6b89"
+    "apkSourceFingerprint": "a1668d99792ab610"
   },
   "releasePatch": "21.12.409-cross-stack-integrity-v423",
   "config": {
@@ -53,7 +53,7 @@
     "publicVersion": "21.12.409",
     "checkpoint": "cross-stack-integrity-v423",
     "releaseLabel": "cross-stack-integrity-v423",
-    "apkSourceFingerprint": "82b3bb51713f6b89"
+    "apkSourceFingerprint": "a1668d99792ab610"
   },
   "releaseMetadata": {
     "releasePatch": "21.12.409-cross-stack-integrity-v423",
@@ -65,7 +65,7 @@
     "minSupportedApkVersion": "2026.07.30.01",
     "maxTestedApkVersion": "2026.08.13.01",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "82b3bb51713f6b89"
+    "apkSourceFingerprint": "a1668d99792ab610"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

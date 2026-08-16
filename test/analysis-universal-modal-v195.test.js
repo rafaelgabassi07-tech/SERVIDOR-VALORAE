@@ -15,7 +15,7 @@ assertOptionalMatch(screen, /openAssetAnalysisModal\(ticker, group\.analysisDisc
 assertOptionalMatch(screen, /AssetDetailsModal\(/, 'Modal compartilhado precisa ser o AssetDetailsModal');
 assertOptionalDoesNotMatch(screen, /ValoraeProxyClient\.getAnalysisPage/, 'Página Análise não pode buscar detalhes completos de ativo');
 assertOptionalDoesNotMatch(screen, /requestAnalysis/, 'Fluxo antigo requestAnalysis deve permanecer removido');
-assertOptionalMatch(home, /onTickerClick = \{ ticker -> activeAssetForSharedModal = ticker\.toHomeSharedAssetDetailsModalAsset\(assets\) \}/, 'Tickers em notícias da Home devem abrir modal único');
+assertOptionalMatch(home, /onTickerClick = \{ ticker -> activeAssetForSharedModal = ticker\.toHomeSharedAssetDetailsModalAsset\((?:assets|quotedAssets)\) \}/, 'Tickers em notícias da Home devem abrir modal único com o snapshot de ativos disponível');
 assertOptionalMatch(news, /onTickerClick = \{ ticker -> activeNewsAssetForModal = ticker\.toNewsModal(?:Asset|PortfolioAsset)\(assets\) \}/, 'Tickers da aba Notícias devem abrir modal único');
 assertOptionalMatch(news, /AssetDetailsModal\(/, 'Aba Notícias deve usar o modal único');
 

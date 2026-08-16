@@ -70,12 +70,12 @@ assert.equal(boughtAfterCom.officialEvents[0].eligible, false);
 assert.equal(boughtAfterCom.portfolioUpcoming.length, 0, 'compra posterior à Data COM não entra na Agenda');
 
 const unknownEligibility = __testBuildDividendResult({
-  payload: { positions: [{ ticker: 'MXRF11', quantity: 100, assetClass: 'FII' }], transactions: [] },
+  payload: { positions: [{ ticker: 'MXRF11', quantity: 100, assetClass: 'FII' }], transactions: [], includeAllFutureAnnounced: true },
   tickers: ['MXRF11'],
   officialEvents: [{
     ticker: 'MXRF11',
     assetClass: 'FII',
-    paymentDate: '2026-08-15',
+    paymentDate: '2099-08-15',
     dividendType: 'RENDIMENTO',
     grossValuePerShare: 0.1,
   }],

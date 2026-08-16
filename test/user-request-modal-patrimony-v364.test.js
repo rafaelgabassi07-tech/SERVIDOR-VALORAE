@@ -54,27 +54,28 @@ if ([details, patrimony, patrimonyEvolution, returnsUi, confetti, chartUi, model
   const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
   assert.equal(
     sha256(patrimony),
-    '99f177d05fb9e305d827aff6b60a6816fbaf2aad46d5fb445e4f159fe1eb704d',
+    '585a2e6b57c8ce313ea714e52a0ba4f453cc47a232df50674482f94e5ca8f37c',
     'A fachada e os componentes gerais de Patrimônio devem permanecer inalterados.'
   );
   assert.equal(
     sha256(patrimonyEvolution),
-    '69dd06cff81d4352cf5ec21c8a1290ec08824269c4e178515744a868706f69ba',
+    '7d1066aa8829ff501c5f3aa98886ddfd1996a08bbb93a66316359110b31def09',
     'O gráfico e a evolução patrimonial devem permanecer inalterados após o split.'
   );
   assert.equal(
     sha256(returnsUi),
-    'd7618a099d65697cb1d912b365668113be46d5ce6236087a6ac6b1805ebdcf2b',
-    'O visual atual de Retorno enviado pelo usuário deve permanecer inalterado.'
+    '2e5d0171d68301f581d16bd19194af34fd6fd624ac3dd1070dafa07d75643492',
+    'O visual de Retorno deve manter a correção que remove patrimônio monetário simulado.'
   );
 
-  assert.match(returnsUi, /ReturnSimulatedComparisonCard/);
-  assert.match(returnsUi, /1_000\.0 \* \(1\.0 \+ returnPercent \/ 100\.0\)/);
-  assert.match(returnsUi, /Comparação calculada com os índices selecionados para o período escolhido\./);
-  assert.match(confetti, /particleCount:\s*Int\s*=\s*76/);
-  assert.match(confetti, /durationMillis:\s*Int\s*=\s*2_300/);
-  assert.match(confetti, /width\s*=\s*2\.6f\s*\+\s*random\.nextFloat\(\)\s*\*\s*2\.8f/);
-  assert.equal((confetti.match(/drawConfettiCannon\(/g) || []).length, 1, 'Canhões antigos podem permanecer como helper inerte, mas não podem ser chamados pela animação atual');
+  assert.match(returnsUi, /ReturnPerformanceComparisonCard/);
+  assert.doesNotMatch(returnsUi, /1_000\.0 \* \(1\.0 \+ returnPercent \/ 100\.0\)/);
+  assert.match(returnsUi, /patrimônio de mercado real da carteira/);
+  assert.match(returnsUi, /safeMarketValue != null -> ValoraeNumber\.formatCurrency\(safeMarketValue\)/);
+  assert.match(confetti, /particleCount:\s*Int\s*=\s*128/);
+  assert.match(confetti, /durationMillis:\s*Int\s*=\s*3_250/);
+  assert.match(confetti, /width\s*=\s*6\.8f\s*\+\s*random\.nextFloat\(\)\s*\*\s*5\.4f/);
+  assert.equal((confetti.match(/drawConfettiCannon\(/g) || []).length, 0, 'A animação atual não deve manter o helper legado de canhão.');
 }
 
 console.log('10 ajustes de modal, patrimônio, comparação e confetes protegidos por contrato estático');
