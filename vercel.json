@@ -33,6 +33,22 @@
   ],
   "rewrites": [
     {
+      "source": "/api/v1",
+      "destination": "/api/router?path="
+    },
+    {
+      "source": "/api/v1/:path*",
+      "destination": "/api/router?path=:path*"
+    },
+    {
+      "source": "/api/v2",
+      "destination": "/api/router?path="
+    },
+    {
+      "source": "/api/v2/:path*",
+      "destination": "/api/router?path=:path*"
+    },
+    {
       "source": "/api",
       "destination": "/api/router?path="
     },
