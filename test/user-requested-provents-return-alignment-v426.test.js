@@ -17,15 +17,12 @@ const ytd = selectPortfolioRowsForRange([
 assert.deepEqual(ytd.rows.map(row => row.month), ['2026-01', '2026-02']);
 assert.equal(Math.round(ytd.rows.at(-1).portfolioReturnPercent * 100) / 100, 4.5);
 
-// A missing exact prior base month must preserve the first visible index return instead of forcing it to 0%.
+// Com base econômica explícita, ausência do fechamento-base invalida a comparação do índice.
 const benchmark = benchmarkAccumulatedMonthMap([
   { month: '2026-01', accumulatedPercent: 5 },
   { month: '2026-02', accumulatedPercent: 10 }
 ], 'accumulatedPercent', '2026-01', '2025-12');
-assert.equal(benchmark.has('2026-01'), true);
-assert.equal(benchmark.has('2026-02'), true);
-assert.equal(benchmark.get('2026-01'), 5);
-assert.ok(benchmark.get('2026-02') > 0);
+assert.equal(benchmark.size, 0);
 
 // Dividend contract provides explicit gross/net/tax data; APK should consume rather than re-tax it.
 const taxed = applyDividendTax({ ticker: 'TEST3', assetClass: 'ACAO', dividendType: 'JCP', paymentDate: '2026-06-15' }, {

@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  buildStrictPortfolioReturnSeries,
-  selectPortfolioReturnWindowV3,
-  summarizePortfolioReturnV3
-} from '../lib/portfolio/return-engine-v3.js';
+  buildExactPortfolioReturnSeriesV4,
+  selectPortfolioReturnWindowV4,
+  summarizePortfolioReturnV4
+} from '../lib/portfolio/return-engine-v4.js';
 
 const complete = (month, marketValue, extra = {}) => ({
   month,
@@ -14,8 +14,8 @@ const complete = (month, marketValue, extra = {}) => ({
   ...extra
 });
 
-test('Return v3 usa apenas valor de mercado + fluxos e não confunde aporte com performance', () => {
-  const result = buildStrictPortfolioReturnSeries([
+test('Return v4 usa apenas valor de mercado + fluxos e não confunde aporte com performance', () => {
+  const result = buildExactPortfolioReturnSeriesV4([
     complete('2026-01', 1050, { monthlyContributions: 1000, weightedNetCashFlow: 1000 }),
     complete('2026-02', 1100),
     complete('2026-03', 1200, { monthlyContributions: 100, weightedNetCashFlow: 50 })
@@ -25,11 +25,11 @@ test('Return v3 usa apenas valor de mercado + fluxos e não confunde aporte com 
   assert.equal(result.rows[0].monthlyReturnPercent, 5);
   assert.equal(result.rows[1].monthlyReturnPercent, 4.7619);
   assert.equal(result.rows[2].monthlyReturnPercent, 0, 'aporte de R$ 100 explica integralmente a alta do patrimônio');
-  assert.equal(result.diagnostics.engine, 'VALORAE_RETURN_V3_STRICT_LEDGER');
+  assert.equal(result.diagnostics.engine, 'VALORAE_RETURN_V4_EXACT_WINDOW');
 });
 
 test('valuation parcial interrompe a cadeia e nunca vira denominador do mês seguinte', () => {
-  const result = buildStrictPortfolioReturnSeries([
+  const result = buildExactPortfolioReturnSeriesV4([
     complete('2026-01', 1000, { monthlyContributions: 1000, weightedNetCashFlow: 1000 }),
     complete('2026-02', 1100),
     complete('2026-03', 900, { partialValuation: true, valuationCoveragePercent: 72 }),
@@ -45,7 +45,7 @@ test('valuation parcial interrompe a cadeia e nunca vira denominador do mês seg
 });
 
 test('mês sem valuation entre dois fechamentos faz o fechamento seguinte virar baseline', () => {
-  const result = buildStrictPortfolioReturnSeries([
+  const result = buildExactPortfolioReturnSeriesV4([
     complete('2026-01', 1000, { monthlyContributions: 1000, weightedNetCashFlow: 1000 }),
     complete('2026-02', 1050),
     complete('2026-04', 1200),
@@ -59,7 +59,7 @@ test('mês sem valuation entre dois fechamentos faz o fechamento seguinte virar 
 });
 
 test('liquidação total e nova entrada usam os fluxos reais sem retorno sobre custo', () => {
-  const result = buildStrictPortfolioReturnSeries([
+  const result = buildExactPortfolioReturnSeriesV4([
     complete('2026-01', 1000, { monthlyContributions: 1000, weightedNetCashFlow: 1000 }),
     complete('2026-02', 0, { monthlyWithdrawals: 1100, weightedNetCashFlow: -100 }),
     complete('2026-03', 1020, { monthlyContributions: 1000, weightedNetCashFlow: 1000 }),
@@ -69,11 +69,11 @@ test('liquidação total e nova entrada usam os fluxos reais sem retorno sobre c
   assert.equal(result.rows[1].monthlyReturnPercent, 11.1111);
   assert.equal(result.rows[2].monthlyReturnPercent, 2);
   assert.equal(result.rows[3].monthlyReturnPercent, 5);
-  assert.ok(result.rows.every(row => row.returnCalculationStatus === 'VALORAE_V3_MODIFIED_DIETZ'));
+  assert.ok(result.rows.every(row => row.returnCalculationStatus === 'VALORAE_V4_MODIFIED_DIETZ'));
 });
 
 test('seleção de período usa somente a cadeia contínua mais recente e preserva retorno mensal explícito', () => {
-  const built = buildStrictPortfolioReturnSeries([
+  const built = buildExactPortfolioReturnSeriesV4([
     complete('2026-01', 1000, { monthlyContributions: 1000, weightedNetCashFlow: 1000 }),
     complete('2026-02', 1100),
     complete('2026-03', 900, { partialValuation: true, valuationCoveragePercent: 80 }),
@@ -81,7 +81,7 @@ test('seleção de período usa somente a cadeia contínua mais recente e preser
     complete('2026-05', 1260),
     complete('2026-06', 1323)
   ]);
-  const selected = selectPortfolioReturnWindowV3(built.rows, 'SINCE_START', 120, new Date('2026-06-20T00:00:00Z'));
+  const selected = selectPortfolioReturnWindowV4(built.rows, 'SINCE_START', 120, new Date('2026-06-20T00:00:00Z'));
 
   assert.deepEqual(selected.rows.map(row => row.month), ['2026-05', '2026-06']);
   assert.deepEqual(selected.rows.map(row => row.monthlyReturnPercent), [5, 5]);
@@ -92,7 +92,7 @@ test('seleção de período usa somente a cadeia contínua mais recente e preser
 });
 
 test('resumo usa apenas meses comparáveis da série selecionada', () => {
-  const summary = summarizePortfolioReturnV3([
+  const summary = summarizePortfolioReturnV4([
     { month: '2026-01', monthlyReturnPercent: 10, portfolioReturnPercent: 10 },
     { month: '2026-02', monthlyReturnPercent: -5, portfolioReturnPercent: 4.5 }
   ]);
@@ -102,3 +102,18 @@ test('resumo usa apenas meses comparáveis da série selecionada', () => {
   assert.equal(summary.bestMonth.month, '2026-01');
   assert.equal(summary.worstMonth.month, '2026-02');
 });
+
+test('mês corrente participa da prévia, mas não contamina estatísticas de meses fechados', () => {
+  const summary = summarizePortfolioReturnV4([
+    { month: '2026-06', monthlyReturnPercent: 5, portfolioReturnPercent: 5, currentMonthPartial: false },
+    { month: '2026-07', monthlyReturnPercent: -2, portfolioReturnPercent: 2.9, currentMonthPartial: false },
+    { month: '2026-08', monthlyReturnPercent: 50, portfolioReturnPercent: 54.35, currentMonthPartial: true }
+  ]);
+  assert.equal(summary.totalReturnPercent, 54.35, 'retorno no período continua mostrando a prévia atual');
+  assert.equal(summary.lastMonthReturnPercent, 50, 'mês atual continua visível como prévia');
+  assert.equal(summary.bestMonth.month, '2026-06', 'prévia não pode virar melhor mês antes do fechamento');
+  assert.equal(summary.worstMonth.month, '2026-07');
+  assert.equal(summary.averageMonthlyReturnPercent, 1.5);
+  assert.equal(summary.volatilityMonthlyPercent, 3.5);
+});
+
