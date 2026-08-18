@@ -297,6 +297,14 @@ create table if not exists public.valorae_financial_dividends (
   value_per_share numeric(24,8) not null default 0,
   quantity numeric(24,8) not null default 0,
   estimated_amount numeric(24,8) not null default 0,
+  gross_value_per_share numeric(24,8) not null default 0,
+  net_value_per_share numeric(24,8) not null default 0,
+  tax_rate numeric(12,8) not null default 0,
+  tax_withheld_per_share numeric(24,8) not null default 0,
+  gross_amount numeric(24,8) not null default 0,
+  net_amount numeric(24,8) not null default 0,
+  tax_withheld_amount numeric(24,8) not null default 0,
+  tax_rule text not null default '',
   status text not null default 'oficial',
   source text not null default 'VALORAE',
   updated_at timestamptz not null default now(),
@@ -304,6 +312,16 @@ create table if not exists public.valorae_financial_dividends (
   constraint valorae_financial_dividends_event_id_chk check (length(event_id) between 1 and 96),
   constraint valorae_financial_dividends_ticker_chk check (length(ticker) between 1 and 24)
 );
+
+alter table public.valorae_financial_dividends
+  add column if not exists gross_value_per_share numeric(24,8) not null default 0,
+  add column if not exists net_value_per_share numeric(24,8) not null default 0,
+  add column if not exists tax_rate numeric(12,8) not null default 0,
+  add column if not exists tax_withheld_per_share numeric(24,8) not null default 0,
+  add column if not exists gross_amount numeric(24,8) not null default 0,
+  add column if not exists net_amount numeric(24,8) not null default 0,
+  add column if not exists tax_withheld_amount numeric(24,8) not null default 0,
+  add column if not exists tax_rule text not null default '';
 
 create index if not exists valorae_financial_dividends_user_payment_idx
   on public.valorae_financial_dividends (user_id, payment_date desc nulls last, event_id);
@@ -384,6 +402,14 @@ begin
       greatest(public.valorae_financial_safe_numeric_v2(coalesce(r->>'valuePerShare', r->>'value_per_share'), 0), 0) as value_per_share,
       greatest(public.valorae_financial_safe_numeric_v2(r->>'quantity', 0), 0) as quantity,
       greatest(public.valorae_financial_safe_numeric_v2(coalesce(r->>'estimatedAmount', r->>'estimated_amount'), 0), 0) as estimated_amount,
+      greatest(public.valorae_financial_safe_numeric_v2(coalesce(r->>'grossValuePerShare', r->>'gross_value_per_share'), 0), 0) as gross_value_per_share,
+      greatest(public.valorae_financial_safe_numeric_v2(coalesce(r->>'netValuePerShare', r->>'net_value_per_share'), 0), 0) as net_value_per_share,
+      greatest(public.valorae_financial_safe_numeric_v2(coalesce(r->>'taxRate', r->>'tax_rate'), 0), 0) as tax_rate,
+      greatest(public.valorae_financial_safe_numeric_v2(coalesce(r->>'taxWithheldPerShare', r->>'tax_withheld_per_share'), 0), 0) as tax_withheld_per_share,
+      greatest(public.valorae_financial_safe_numeric_v2(coalesce(r->>'grossAmount', r->>'gross_amount'), 0), 0) as gross_amount,
+      greatest(public.valorae_financial_safe_numeric_v2(coalesce(r->>'netAmount', r->>'net_amount'), 0), 0) as net_amount,
+      greatest(public.valorae_financial_safe_numeric_v2(coalesce(r->>'taxWithheldAmount', r->>'tax_withheld_amount'), 0), 0) as tax_withheld_amount,
+      coalesce(nullif(trim(coalesce(r->>'taxRule', r->>'tax_rule')), ''), '') as tax_rule,
       coalesce(nullif(trim(r->>'status'), ''), 'oficial') as status,
       coalesce(nullif(trim(r->>'source'), ''), 'VALORAE') as source
     from jsonb_array_elements(coalesce(p_rows, '[]'::jsonb)) r
@@ -395,11 +421,15 @@ begin
   insert into public.valorae_financial_dividends(
     user_id, event_id, ticker, date_com, ex_date, inferred_com_date,
     eligibility_date_source, payment_date, value_per_share, quantity,
-    estimated_amount, status, source, updated_at
+    estimated_amount, gross_value_per_share, net_value_per_share, tax_rate,
+    tax_withheld_per_share, gross_amount, net_amount, tax_withheld_amount, tax_rule,
+    status, source, updated_at
   )
   select p_user_id, event_id, ticker, date_com, ex_date, inferred_com_date,
          eligibility_date_source, payment_date, value_per_share, quantity,
-         estimated_amount, status, source, now()
+         estimated_amount, gross_value_per_share, net_value_per_share, tax_rate,
+         tax_withheld_per_share, gross_amount, net_amount, tax_withheld_amount, tax_rule,
+         status, source, now()
   from valid
   on conflict (user_id, event_id) do update set
     ticker = excluded.ticker,
@@ -411,6 +441,14 @@ begin
     value_per_share = excluded.value_per_share,
     quantity = excluded.quantity,
     estimated_amount = excluded.estimated_amount,
+    gross_value_per_share = excluded.gross_value_per_share,
+    net_value_per_share = excluded.net_value_per_share,
+    tax_rate = excluded.tax_rate,
+    tax_withheld_per_share = excluded.tax_withheld_per_share,
+    gross_amount = excluded.gross_amount,
+    net_amount = excluded.net_amount,
+    tax_withheld_amount = excluded.tax_withheld_amount,
+    tax_rule = excluded.tax_rule,
     status = excluded.status,
     source = excluded.source,
     updated_at = now()
@@ -423,12 +461,23 @@ begin
          public.valorae_financial_dividends.value_per_share,
          public.valorae_financial_dividends.quantity,
          public.valorae_financial_dividends.estimated_amount,
+         public.valorae_financial_dividends.gross_value_per_share,
+         public.valorae_financial_dividends.net_value_per_share,
+         public.valorae_financial_dividends.tax_rate,
+         public.valorae_financial_dividends.tax_withheld_per_share,
+         public.valorae_financial_dividends.gross_amount,
+         public.valorae_financial_dividends.net_amount,
+         public.valorae_financial_dividends.tax_withheld_amount,
+         public.valorae_financial_dividends.tax_rule,
          public.valorae_financial_dividends.status,
          public.valorae_financial_dividends.source)
         is distinct from
         (excluded.ticker, excluded.date_com, excluded.ex_date, excluded.inferred_com_date,
          excluded.eligibility_date_source, excluded.payment_date, excluded.value_per_share,
-         excluded.quantity, excluded.estimated_amount, excluded.status, excluded.source);
+         excluded.quantity, excluded.estimated_amount, excluded.gross_value_per_share,
+         excluded.net_value_per_share, excluded.tax_rate, excluded.tax_withheld_per_share,
+         excluded.gross_amount, excluded.net_amount, excluded.tax_withheld_amount, excluded.tax_rule,
+         excluded.status, excluded.source);
   get diagnostics v_upserted = row_count;
 
   select max(updated_at) into v_dividends_updated
@@ -494,6 +543,14 @@ begin
       'valuePerShare', d.value_per_share,
       'quantity', d.quantity,
       'estimatedAmount', d.estimated_amount,
+      'grossValuePerShare', d.gross_value_per_share,
+      'netValuePerShare', d.net_value_per_share,
+      'taxRate', d.tax_rate,
+      'taxWithheldPerShare', d.tax_withheld_per_share,
+      'grossAmount', d.gross_amount,
+      'netAmount', d.net_amount,
+      'taxWithheldAmount', d.tax_withheld_amount,
+      'taxRule', d.tax_rule,
       'status', d.status,
       'source', d.source
     ) order by d.payment_date nulls last, d.ticker, d.event_id), '[]'::jsonb), max(d.updated_at)
@@ -694,6 +751,14 @@ begin
           greatest(public.valorae_financial_safe_numeric_v2(coalesce((r->'payload')->>'valuePerShare', (r->'payload')->>'value_per_share', r->>'value_per_share'), 0), 0) as value_per_share,
           greatest(public.valorae_financial_safe_numeric_v2(coalesce((r->'payload')->>'quantity', r->>'quantity'), 0), 0) as quantity,
           greatest(public.valorae_financial_safe_numeric_v2(coalesce((r->'payload')->>'estimatedAmount', (r->'payload')->>'estimated_amount', r->>'estimated_amount'), 0), 0) as estimated_amount,
+          greatest(public.valorae_financial_safe_numeric_v2(coalesce((r->'payload')->>'grossValuePerShare', (r->'payload')->>'gross_value_per_share', r->>'gross_value_per_share'), 0), 0) as gross_value_per_share,
+          greatest(public.valorae_financial_safe_numeric_v2(coalesce((r->'payload')->>'netValuePerShare', (r->'payload')->>'net_value_per_share', r->>'net_value_per_share'), 0), 0) as net_value_per_share,
+          greatest(public.valorae_financial_safe_numeric_v2(coalesce((r->'payload')->>'taxRate', (r->'payload')->>'tax_rate', r->>'tax_rate'), 0), 0) as tax_rate,
+          greatest(public.valorae_financial_safe_numeric_v2(coalesce((r->'payload')->>'taxWithheldPerShare', (r->'payload')->>'tax_withheld_per_share', r->>'tax_withheld_per_share'), 0), 0) as tax_withheld_per_share,
+          greatest(public.valorae_financial_safe_numeric_v2(coalesce((r->'payload')->>'grossAmount', (r->'payload')->>'gross_amount', r->>'gross_amount'), 0), 0) as gross_amount,
+          greatest(public.valorae_financial_safe_numeric_v2(coalesce((r->'payload')->>'netAmount', (r->'payload')->>'net_amount', r->>'net_amount'), 0), 0) as net_amount,
+          greatest(public.valorae_financial_safe_numeric_v2(coalesce((r->'payload')->>'taxWithheldAmount', (r->'payload')->>'tax_withheld_amount', r->>'tax_withheld_amount'), 0), 0) as tax_withheld_amount,
+          coalesce(nullif((r->'payload')->>'taxRule', ''), nullif((r->'payload')->>'tax_rule', ''), nullif(r->>'tax_rule', ''), '') as tax_rule,
           coalesce(nullif((r->'payload')->>'status', ''), nullif(r->>'status', ''), 'oficial') as status,
           coalesce(nullif((r->'payload')->>'source', ''), nullif(r->>'source', ''), 'Migração legado') as source,
           coalesce(public.valorae_financial_safe_timestamp_v2(r->>'updated_at'), now()) as updated_at
@@ -703,12 +768,16 @@ begin
       insert into public.valorae_financial_dividends(
         user_id, event_id, ticker, date_com, ex_date, inferred_com_date,
         eligibility_date_source, payment_date, value_per_share, quantity,
-        estimated_amount, status, source, updated_at
+        estimated_amount, gross_value_per_share, net_value_per_share, tax_rate,
+        tax_withheld_per_share, gross_amount, net_amount, tax_withheld_amount, tax_rule,
+        status, source, updated_at
       )
       select
         user_id, event_id, ticker, date_com, ex_date, inferred_com_date,
         eligibility_date_source, payment_date, value_per_share, quantity,
-        estimated_amount, status, source, updated_at
+        estimated_amount, gross_value_per_share, net_value_per_share, tax_rate,
+        tax_withheld_per_share, gross_amount, net_amount, tax_withheld_amount, tax_rule,
+        status, source, updated_at
       from normalized
       where nullif(ticker, '') is not null
         and coalesce(date_com, ex_date, inferred_com_date, payment_date) is not null
@@ -722,6 +791,14 @@ begin
         value_per_share = excluded.value_per_share,
         quantity = excluded.quantity,
         estimated_amount = excluded.estimated_amount,
+        gross_value_per_share = excluded.gross_value_per_share,
+        net_value_per_share = excluded.net_value_per_share,
+        tax_rate = excluded.tax_rate,
+        tax_withheld_per_share = excluded.tax_withheld_per_share,
+        gross_amount = excluded.gross_amount,
+        net_amount = excluded.net_amount,
+        tax_withheld_amount = excluded.tax_withheld_amount,
+        tax_rule = excluded.tax_rule,
         status = excluded.status,
         source = excluded.source,
         updated_at = greatest(public.valorae_financial_dividends.updated_at, excluded.updated_at)

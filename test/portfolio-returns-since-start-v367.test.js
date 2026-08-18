@@ -6,7 +6,7 @@ const sources = fs.readFileSync(new URL('../lib/sources/asset-details.js', impor
 const cdi = fs.readFileSync(new URL('../lib/sources/cdi.js', import.meta.url), 'utf8');
 
 assert.match(analysis, /function returnRangeMonths\(range = 'SINCE_START', payload = \{\}, now = new Date\(\)\)/);
-assert.match(analysis, /const transactions = normalizeTransactions\(payload\.transactions \|\| \[\]\)/);
+assert.match(analysis, /const inception = portfolioStartDate\(payload, positions, transactions\)/);
 assert.match(analysis, /Math\.min\(600, ageMonths\)/);
 assert.match(analysis, /const displayMonths = returnRangeMonths\(range, payload, now\)/);
 assert.match(analysis, /Math\.min\(600, Math\.max\(displayMonths, requestedBenchmarkMonths\)\)/);

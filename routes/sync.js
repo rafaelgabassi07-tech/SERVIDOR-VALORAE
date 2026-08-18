@@ -495,6 +495,14 @@ function tableDividendRow(userId, row) {
     value_per_share: finiteNumber(row.valuePerShare),
     quantity: finiteNumber(row.quantity),
     estimated_amount: finiteNumber(row.estimatedAmount),
+    gross_value_per_share: finiteNumber(row.grossValuePerShare),
+    net_value_per_share: finiteNumber(row.netValuePerShare),
+    tax_rate: finiteNumber(row.taxRate),
+    tax_withheld_per_share: finiteNumber(row.taxWithheldPerShare),
+    gross_amount: finiteNumber(row.grossAmount),
+    net_amount: finiteNumber(row.netAmount),
+    tax_withheld_amount: finiteNumber(row.taxWithheldAmount),
+    tax_rule: cleanText(row.taxRule, 120),
     status: row.status || 'oficial',
     source: row.source || 'VALORAE',
     updated_at: new Date().toISOString(),
@@ -513,6 +521,14 @@ function clientDividendRow(row = {}) {
     valuePerShare: finiteNumber(row.value_per_share),
     quantity: finiteNumber(row.quantity),
     estimatedAmount: finiteNumber(row.estimated_amount),
+    grossValuePerShare: finiteNumber(row.gross_value_per_share),
+    netValuePerShare: finiteNumber(row.net_value_per_share),
+    taxRate: finiteNumber(row.tax_rate),
+    taxWithheldPerShare: finiteNumber(row.tax_withheld_per_share),
+    grossAmount: finiteNumber(row.gross_amount),
+    netAmount: finiteNumber(row.net_amount),
+    taxWithheldAmount: finiteNumber(row.tax_withheld_amount),
+    taxRule: cleanText(row.tax_rule, 120),
     status: cleanText(row.status || 'oficial', 48),
     source: cleanText(row.source || 'VALORAE', 120),
     updatedAt: row.updated_at || null,
@@ -546,7 +562,7 @@ async function directDownloadFinancialData(userId) {
       order: 'transaction_date.asc,client_tx_id.asc',
     })),
     supabaseFetch(restQuery(DIVIDENDS_TABLE, {
-      select: 'event_id,ticker,date_com,ex_date,inferred_com_date,eligibility_date_source,payment_date,value_per_share,quantity,estimated_amount,status,source,updated_at',
+      select: 'event_id,ticker,date_com,ex_date,inferred_com_date,eligibility_date_source,payment_date,value_per_share,quantity,estimated_amount,gross_value_per_share,net_value_per_share,tax_rate,tax_withheld_per_share,gross_amount,net_amount,tax_withheld_amount,tax_rule,status,source,updated_at',
       user_id: `eq.${userId}`,
       order: 'payment_date.asc,event_id.asc',
     })),
@@ -740,6 +756,9 @@ function dividendRowQuality(row = {}) {
   if (finiteNumber(row.valuePerShare ?? row.value_per_share) > 0) score += 4;
   if (finiteNumber(row.quantity) > 0) score += 4;
   if (finiteNumber(row.estimatedAmount ?? row.estimated_amount) > 0) score += 4;
+  if (finiteNumber(row.grossValuePerShare ?? row.gross_value_per_share) > 0) score += 2;
+  if (finiteNumber(row.netValuePerShare ?? row.net_value_per_share) > 0) score += 2;
+  if (finiteNumber(row.taxWithheldAmount ?? row.tax_withheld_amount) > 0) score += 2;
   const state = cleanText(row.status, 80).toUpperCase();
   if (state.includes('RECEB') || state.includes('PAGO')) score += 2;
   return score;
@@ -933,6 +952,14 @@ function normalizeDividend(row = {}) {
     valuePerShare: Math.max(0, finiteNumber(row.valuePerShare ?? row.value_per_share)),
     quantity: Math.max(0, finiteNumber(row.quantity)),
     estimatedAmount: Math.max(0, finiteNumber(row.estimatedAmount ?? row.estimated_amount)),
+    grossValuePerShare: Math.max(0, finiteNumber(row.grossValuePerShare ?? row.gross_value_per_share)),
+    netValuePerShare: Math.max(0, finiteNumber(row.netValuePerShare ?? row.net_value_per_share)),
+    taxRate: Math.max(0, finiteNumber(row.taxRate ?? row.tax_rate)),
+    taxWithheldPerShare: Math.max(0, finiteNumber(row.taxWithheldPerShare ?? row.tax_withheld_per_share)),
+    grossAmount: Math.max(0, finiteNumber(row.grossAmount ?? row.gross_amount)),
+    netAmount: Math.max(0, finiteNumber(row.netAmount ?? row.net_amount)),
+    taxWithheldAmount: Math.max(0, finiteNumber(row.taxWithheldAmount ?? row.tax_withheld_amount)),
+    taxRule: cleanText(row.taxRule || row.tax_rule, 120),
     status: cleanText(row.status || 'oficial', 48),
     source: cleanText(row.source || 'VALORAE', 120),
   };
@@ -1063,7 +1090,8 @@ async function uploadDividends(userId, input) {
   const sourceRows = Array.isArray(input.events) ? input.events : Array.isArray(input.dividends) ? input.dividends : [];
   const normalizedRows = sourceRows.map(normalizeDividend);
   const invalidRows = normalizedRows.filter(row => !row.eventId || !row.ticker || !(row.dateCom || row.exDate || row.inferredComDate || row.paymentDate) ||
-    !Number.isFinite(row.valuePerShare) || !Number.isFinite(row.quantity) || !Number.isFinite(row.estimatedAmount));
+    ![row.valuePerShare, row.quantity, row.estimatedAmount, row.grossValuePerShare, row.netValuePerShare,
+      row.taxRate, row.taxWithheldPerShare, row.grossAmount, row.netAmount, row.taxWithheldAmount].every(Number.isFinite));
   if (invalidRows.length > 0) {
     const error = new Error(`${invalidRows.length} evento(s) de proventos não puderam ser normalizados; a nuvem anterior foi preservada.`);
     error.status = 422;

@@ -55,7 +55,7 @@ function yahooResponse(timestamps, closes, regularMarketPrice = closes.at(-1)) {
 // linha importada. O estoque inicial deve ser inferido da posição atual e preservado.
 {
   const day = 24 * 60 * 60;
-  const todayUtc = Math.floor(Date.parse(new Date().toISOString().slice(0, 10) + 'T00:00:00Z') / 1000);
+  const todayUtc = Math.floor(Date.parse(new Date(__marketNowMs).toISOString().slice(0, 10) + 'T00:00:00Z') / 1000);
   const timestamps = [todayUtc - 10 * day, todayUtc - 8 * day, todayUtc - 6 * day];
   globalThis.fetch = async () => yahooResponse(timestamps, [100, 110, 115], 115);
 
@@ -92,7 +92,7 @@ function yahooResponse(timestamps, closes, regularMarketPrice = closes.at(-1)) {
 // O mesmo raciocínio precisa funcionar quando o arquivo parcial contém apenas uma venda.
 {
   const day = 24 * 60 * 60;
-  const todayUtc = Math.floor(Date.parse(new Date().toISOString().slice(0, 10) + 'T00:00:00Z') / 1000);
+  const todayUtc = Math.floor(Date.parse(new Date(__marketNowMs).toISOString().slice(0, 10) + 'T00:00:00Z') / 1000);
   const timestamps = [todayUtc - 12 * day, todayUtc - 9 * day, todayUtc - 5 * day];
   globalThis.fetch = async () => yahooResponse(timestamps, [50, 55, 58], 58);
 

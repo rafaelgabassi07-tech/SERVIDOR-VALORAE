@@ -16,10 +16,10 @@ const contract = await buildPortfolioReturns({
 
 const ifix = contract.benchmarks.find(item => item.ticker === 'IFIX');
 assert.ok(ifix, 'IFIX benchmark should exist');
-assert.match(ifix.source || '', /Yahoo Finance Chart API|B3 Oficial|B3/i);
-assert.ok(/IFIX\.SA|B3/i.test(ifix.source || '') || ifix.yahooSymbol === 'IFIX.SA', 'IFIX should prefer the direct Yahoo index symbol or B3 fallback');
+assert.match(ifix.source || '', /Investidor10 API de cotações do índice IFIX|Yahoo Finance Chart API|B3 Oficial|B3/i);
+assert.ok(/Investidor10 API de cotações do índice IFIX|IFIX\.SA|B3/i.test(ifix.source || '') || ifix.yahooSymbol === 'IFIX.SA', 'IFIX should use a direct real index series, never an ETF proxy');
 assert.notEqual(ifix.source, 'YahooChart');
 assert.notEqual(ifix.proxyTickerUsed, true);
 assert.notEqual(ifix.simulated, true);
-assert.ok(contract.diagnostics.warnings.some(w => /IFIX|Yahoo Finance|B3/i.test(w)), 'must warn instead of simulating IFIX when all external sources are unavailable');
+assert.ok(contract.diagnostics.warnings.some(w => /IFIX|Investidor10|Yahoo Finance|B3/i.test(w)), 'must warn instead of simulating IFIX when all external sources are unavailable');
 console.log('Portfolio returns IFIX direct-source test OK.');

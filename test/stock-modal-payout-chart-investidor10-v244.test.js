@@ -46,3 +46,22 @@ const rowsLike = [
 const normalizedRows = _test.normalizeStockPayoutDedicatedSource(rowsLike, { ticker: 'PETR4' });
 assert.equal(normalizedRows.length, 2);
 assert.equal(normalizedRows.find(point => point.label === '2024').netIncome, 36_700_000_000);
+
+// O ponto corrente do payout-chart pode ficar defasado em relação ao indicador Atual
+// da própria página. O gráfico deve usar o indicador Atual para Últ 12M e preservar
+// o endpoint dedicado como autoridade para anos históricos.
+const staleDedicatedCurrent = _test.buildStockPayoutChartPayload({
+  ticker: 'PETR4',
+  payoutRaw: payoutApiLike,
+  historicalIndicators: { rows: [
+    { label: 'Payout', values: { Atual: '31,03%', '2025': '43,02%' } },
+    { label: 'Dividend Yield', values: { Atual: '6,99%', '2025': '10,49%' } }
+  ] }
+});
+const staleLtm = staleDedicatedCurrent.points.find(point => point.label === 'Últ 12M');
+assert.equal(staleLtm.payoutPercent, 31.03, 'Últ 12M deve acompanhar o Payout Atual da página');
+assert.equal(staleLtm.dividendYieldPercent, 6.99, 'Últ 12M deve acompanhar o DY Atual da página');
+assert.equal(staleDedicatedCurrent.points.find(point => point.label === '2024').payoutPercent, 278.99, 'anos históricos continuam vindo do payout-chart dedicado');
+assert.equal(staleDedicatedCurrent.diagnostics.dedicatedCurrentPayoutPercent, 38.46);
+assert.equal(staleDedicatedCurrent.diagnostics.currentPayoutPercent, 31.03);
+assert.equal(staleDedicatedCurrent.diagnostics.currentPayoutAligned, false);

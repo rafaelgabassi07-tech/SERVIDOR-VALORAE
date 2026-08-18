@@ -9,7 +9,7 @@ function fail(message) {
 }
 
 const major = Number(process.versions.node.split('.')[0]);
-if (major !== 24) fail(`Node 24.x é obrigatório; encontrado ${process.version}.`);
+if (major !== 22) fail(`Node 22.x é obrigatório; encontrado ${process.version}.`);
 
 const root = process.cwd();
 const apkRoot = assertSiblingApkAvailable();

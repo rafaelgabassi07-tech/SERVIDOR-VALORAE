@@ -96,19 +96,21 @@ const themeKt = readSiblingApkFile('app/src/main/java/com/example/ui/theme/Theme
 const settingsKt = readSiblingApkFile('app/src/main/java/com/example/feature/settings/preferences/SettingsAppearanceUi.kt');
 const agendaKt = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/DividendAgendaModalComponents.kt');
 const dividendsKt = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/DividendsEvolutionModalComponents.kt');
+const paymentsKt = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/PortfolioDashboardBalanceDividendsUi.kt');
 const hapticKt = readSiblingApkFile('app/src/main/java/com/example/ui/shared/ValoraeHapticFeedback.kt');
 const manifest = readSiblingApkFile('app/src/main/AndroidManifest.xml');
 const loaderKt = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalProgressiveLoader.kt');
 const qualityKt = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeAssetModalQuality.kt');
 
-if (colorKt && themeKt && settingsKt && agendaKt && dividendsKt && hapticKt && manifest && loaderKt && qualityKt) {
+if (colorKt && themeKt && settingsKt && agendaKt && dividendsKt && paymentsKt && hapticKt && manifest && loaderKt && qualityKt) {
   assert.ok(colorKt.includes('GoldClassicPrimaryLight = Color(0xFF8A6100)'), 'Ouro Classic deve ter paleta própria');
   assert.ok(themeKt.includes('primaryLight = GoldClassicPrimaryLight'), 'tema Ouro Classic deve usar a paleta dourada');
   assert.ok(settingsKt.includes('ColorTheme.Gold to listOf(Color(0xFF8A6100)'), 'prévia do Ouro Classic deve corresponder ao tema real');
   assert.ok(!colorKt.includes('val ValoraeYellow = Color(0xFF64748B)'), 'amarelo semântico não pode regredir para cinza');
   assert.ok(colorKt.includes('Color(0xFFFFD166)') && colorKt.includes('Color(0xFFA76400)'), 'amarelo semântico deve preservar contraste claro/escuro');
-  assert.ok(agendaKt.includes('color = ValoraeYellow') && agendaKt.includes('tint = ValoraeYellow'), 'Data COM e Próximo devem manter cor semântica');
-  assert.ok(dividendsKt.includes('valueColor = ValoraeYellow'), 'métrica A receber deve manter amarelo semântico');
+  assert.ok(!agendaKt.includes('Próximo corte'), 'topo da Agenda não deve reintroduzir Próximo corte');
+  assert.ok(paymentsKt.includes('\"A receber\", \"Próximo\", \"Hoje\", \"Data COM futura\" -> ValoraeYellow') && paymentsKt.includes('dividendPalette.jcp'), 'Agenda deve manter amarelo semântico em estados futuros e JCP');
+  assert.ok(dividendsKt.includes('valueColor = MaterialTheme.colorScheme.primary') && !dividendsKt.includes('valueColor = ValoraeYellow'), 'métrica A receber deve seguir a cor primária do tema sem amarelo fixo');
   assert.ok(manifest.includes('android.permission.VIBRATE'), 'APK deve declarar permissão de vibração');
   assert.ok(hapticKt.includes('VibratorManager') && hapticKt.includes('VibrationEffect.createOneShot'), 'retorno tátil deve possuir execução física explícita');
   assert.ok(loaderKt.includes('internal suspend fun loadSingleAssetModalOnDemand') && loaderKt.includes('stage = SingleAssetModalLoadStage.Full') && !loaderKt.includes('delay(') && !loaderKt.includes('async('), 'APK deve consultar o modal uma vez e recuperar somente após ação manual');

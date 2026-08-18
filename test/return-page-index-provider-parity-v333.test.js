@@ -45,7 +45,7 @@ try {
     historyMonths: 3,
     benchmarkMonths: 3,
     indexTimeoutMs: 9000,
-    benchmarkSourcePolicy: 'asset-modal-direct-index-first',
+    benchmarkSourcePolicy: 'asset-modal-parallel-direct-plus-history',
     preferDirectIndexHistory: true,
     benchmarks: ['SMLL', 'IFIX', 'IDIV'],
     portfolioHistory: [
@@ -62,21 +62,21 @@ try {
     assert.ok(benchmark, `${code} precisa existir no contrato`);
     assert.equal(benchmark.status, 'OK', `${code} precisa sair de aguardando série`);
     assert.equal(benchmark.provider, 'Investidor10DirectIndexHistory');
-    assert.equal(benchmark.providerParity, 'asset-modal-direct-index-first');
+    assert.equal(benchmark.providerParity, 'asset-modal-parallel-direct-plus-history');
     assert.match(benchmark.source, new RegExp(`índice ${code}`, 'i'));
     assert.ok(benchmark.points.length >= 3, `${code} precisa ter série mensal real`);
   }
   assert.equal(result.series.some(point => point.smllReturnPercent != null && point.smal11ReturnPercent != null), true);
   assert.equal(result.series.some(point => point.ifixReturnPercent != null), true);
   assert.equal(result.series.some(point => point.idivReturnPercent != null), true);
-  assert.equal(requests.some(url => /finance\.yahoo\.com/.test(url)), false, 'Yahoo não deve ser chamado quando a mesma fonte direta dos modais respondeu');
+  assert.equal(requests.some(url => /finance\.yahoo\.com/.test(url)), true, 'a contingência de histórico deve iniciar em paralelo para não atrasar o Retorno se a fonte direta falhar');
   assert.equal(result.diagnostics.marketBenchmarkStatus.every(item => item.provider === 'Investidor10DirectIndexHistory'), true);
 
   const service = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyPortfolioContractsService.kt');
   const parser = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyMarketPortfolioParsers.kt');
   const merger = readSiblingApkFile('app/src/main/java/com/example/domain/model/ValoraeReturnBenchmarkMerger.kt');
   if ([service, parser, merger].every(Boolean)) {
-    assert.match(service, /benchmarkSourcePolicy", "asset-modal-direct-index-first"/);
+    assert.match(service, /benchmarkSourcePolicy", "asset-modal-parallel-direct-plus-history"/);
     assert.match(service, /preferDirectIndexHistory", true/);
     assert.match(service, /PortfolioReturnsBenchmarkContractVersion/);
     assert.match(parser, /mergeReturnBenchmarkSnapshots/);

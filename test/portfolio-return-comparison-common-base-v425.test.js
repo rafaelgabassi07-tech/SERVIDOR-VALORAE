@@ -14,11 +14,12 @@ assert.equal(withPreviousClosing.get('2026-02'), 10);
 assert.equal(withPreviousClosing.get('2026-03'), 21);
 
 const inceptionBase = benchmarkAccumulatedMonthMap(points, 'accumulatedPercent', '2026-02', '2026-02');
-assert.ok(Math.abs(inceptionBase.get('2026-02')) < 1e-9, 'o primeiro fechamento comum precisa ser 0% na origem');
-assert.ok(Math.abs(inceptionBase.get('2026-03') - 10) < 1e-9, 'o mês seguinte precisa ser relativo à mesma base de 2026-02');
+assert.ok(Math.abs(inceptionBase.get('2026-02') - 10) < 1e-9, 'o primeiro mês visível precisa preservar seu retorno econômico, não ser zerado');
+assert.ok(Math.abs(inceptionBase.get('2026-03') - 21) < 1e-9, 'a série seguinte precisa permanecer relativa ao início econômico real');
 
 const missingBase = benchmarkAccumulatedMonthMap(points.slice(1), 'accumulatedPercent', '2026-02', '2026-01');
-assert.equal(missingBase.size, 0, 'não deve iniciar o índice depois da carteira quando a base comum está ausente');
+assert.ok(Math.abs(missingBase.get('2026-02') - 10) < 1e-9, 'sem fechamento anterior disponível, o primeiro ponto precisa manter o retorno desde a base neutra');
+assert.ok(Math.abs(missingBase.get('2026-03') - 21) < 1e-9, 'a série real posterior deve permanecer inteira em vez de ser deslocada para zero');
 
 const thirteenMonthlyCloses = Array.from({ length: 13 }, (_, index) => ({
   month: `2025-${String(index + 1).padStart(2, '0')}`,

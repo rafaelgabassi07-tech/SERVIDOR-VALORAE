@@ -5,7 +5,8 @@ const analysis = fs.readFileSync(new URL('../lib/portfolio/analysis.js', import.
 const metrics = fs.readFileSync(new URL('../lib/portfolio/return-metrics.js', import.meta.url), 'utf8');
 const calc = fs.readFileSync(new URL('../lib/portfolio/return-calculation.js', import.meta.url), 'utf8');
 
-assert.match(analysis, /if \(!previous\) \{\s*monthlyReturnPercent = 0;/, 'O primeiro fechamento deve ser uma base neutra');
+assert.match(analysis, /MODIFIED_DIETZ_INCEPTION/, 'O primeiro fechamento deve medir retorno desde a primeira compra');
+assert.match(analysis, /weightedPortfolioCashFlows/, 'O mês inicial deve usar a janela efetiva de exposição, não o mês civil inteiro');
 assert.match(analysis, /const historicalMarketValue = round\(Number\(point\.marketValue \?\? point\.totalValue \?\? point\.value \?\? 0\), 2\)/, 'A série deve transportar marketValue real');
 assert.match(analysis, /const marketValue = round\(Number\(item\.marketValue \?\? item\.portfolioMarketValue \?\? item\.currentValue \?\? value\), 2\)/, 'Histórico fornecido deve preservar marketValue');
 assert.match(analysis, /const currentSnapshotMarketValue = currentSnapshotComplete[\s\S]*?round\(currentPositions\.reduce/, 'O valor atual precisa ser ancorado somente quando todas as posições têm cotação real');

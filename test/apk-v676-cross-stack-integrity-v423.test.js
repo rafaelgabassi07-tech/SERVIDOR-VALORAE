@@ -108,8 +108,10 @@ assert.match(proxyHttp, /HeaderSourceFingerprint, BuildConfig\.SOURCE_FINGERPRIN
 assert.match(syncClient, /HeaderSourceFingerprint, BuildConfig\.SOURCE_FINGERPRINT/);
 assert.match(proxyHttp, /pairedSourceFingerprint = header\(ValoraeMobileProtocol\.HeaderPairedSourceFingerprint\)/);
 assert.match(proxyHttp, /sourceFingerprintStatus = header\(ValoraeMobileProtocol\.HeaderSourceFingerprintStatus\)/);
-assert.match(proxyHttp, /sourceFingerprintMismatch && fingerprintRetrySafe/);
-assert.match(syncClient, /sourceFingerprintMismatch && fingerprintRetrySafe/);
+assert.doesNotMatch(proxyHttp, /sourceFingerprintMismatch|fingerprintRetrySafe/, 'fingerprint do deployment é diagnóstico, não saúde de transporte');
+assert.doesNotMatch(syncClient, /sourceFingerprintMismatch|fingerprintRetrySafe/, 'sync não deve rejeitar resposta válida por fingerprint divergente');
+assert.match(proxyHttp, /\((?:retryableStatus \|\| contractMismatch|contractMismatch \|\| retryableStatus)\)/);
+assert.match(syncClient, /\((?:retryableStatus \|\| contractMismatch|contractMismatch \|\| retryableStatus)\)/);
 
 const retrySet = syncClient.match(/retryableStatus\s*=\s*response\.code\s+in\s+setOf\(([^)]*)\)/)?.[1] || '';
 assert.ok(/\b500\b/.test(retrySet), 'sync precisa alternar host em HTTP 500');
