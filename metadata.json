@@ -15,12 +15,12 @@
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "cross-stack-integrity-v423",
   "title": "Proxy v423 — Integridade cruzada APK ↔ Proxy",
-  "summary": "Pareia APK v676 / 2026.08.13.01 e fingerprint 0a3ef373fcbd4fbf; homologa rotas, protocolos e recuperação de transporte após auditoria integral.",
+  "summary": "Pareia APK v676 / 2026.08.13.01 e fingerprint f03d83f4750f677e; homologa rotas, protocolos e recuperação de transporte após auditoria integral.",
   "minSupportedApkVersion": "2026.07.30.01",
   "maxTestedApkVersion": "2026.08.13.01",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "APK 2026.08.13.01 é reconhecido como PAIRED com fingerprint 0a3ef373fcbd4fbf.",
+    "APK 2026.08.13.01 é reconhecido como PAIRED com fingerprint f03d83f4750f677e.",
     "Todas as rotas canônicas consumidas pelo APK pertencem à allowlist de produção do roteador.",
     "Protocolos móvel, ecossistema, schema de modal, contrato de resposta e sync financeiro permanecem semanticamente compatíveis.",
     "Suite cross-stack verifica explicitamente a correção de failover HTTP 500, authMode de diagnóstico e contingência de logos."
@@ -42,5 +42,5 @@
     "HTTP 426 continua restrito à sincronização financeira quando a política de compatibilidade exige bloqueio.",
     "Não foram introduzidos dados sintéticos nem armazenamento operacional adicional."
   ],
-  "apkSourceFingerprint": "0a3ef373fcbd4fbf"
+  "apkSourceFingerprint": "f03d83f4750f677e"
 }
