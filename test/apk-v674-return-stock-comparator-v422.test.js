@@ -4,6 +4,7 @@ import { buildPeerCatalogEntries } from '../lib/catalogs/asset-peers.js';
 import { modifiedDietzMonthlyReturnPercent } from '../lib/portfolio/return-calculation.js';
 
 const analysisSource = fs.readFileSync(new URL('../lib/portfolio/analysis.js', import.meta.url), 'utf8');
+const returnEngineSource = fs.readFileSync(new URL('../lib/portfolio/return-engine-v5.js', import.meta.url), 'utf8');
 const stockSource = fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8');
 
 const almost = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
@@ -19,7 +20,8 @@ almost(cashFlowAware, 2000 / 55000 * 100);
 assert.ok(cashFlowAware < 5, 'aporte intermediário inflou o retorno');
 
 assert.match(analysisSource, /weightedNetCashFlow/);
-assert.match(analysisSource, /modifiedDietzMonthlyReturnPercent/);
+assert.match(returnEngineSource, /modifiedDietzMonthlyReturnPercent/);
+assert.match(returnEngineSource, /VALORAE_V5_EXPOSURE_ONLY_DIETZ/);
 assert.doesNotMatch(analysisSource, /adjustedEnd\s*=\s*point\.marketValue\s*\+\s*withdrawals\s*\+\s*dividends\s*-\s*contributions/);
 
 // Comparador prioriza os pares reais expostos pelo Investidor10 e usa o catálogo somente como contingência; métricas vêm das páginas reais.

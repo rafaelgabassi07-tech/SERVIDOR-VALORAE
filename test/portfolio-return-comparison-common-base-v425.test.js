@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { benchmarkAccumulatedMonthMap, buildDisplayPortfolioRows } from '../lib/portfolio/return-metrics.js';
+import { buildExposureOnlyReturnSeriesV5, selectExposureReturnWindowV5 } from '../lib/portfolio/return-engine-v5.js';
 import { modifiedDietzMonthlyReturnPercent } from '../lib/portfolio/return-calculation.js';
 
 const points = [
@@ -43,6 +44,7 @@ assert.ok(Math.abs(reentryReturn - 10) < 1e-9, 'reentrada após liquidação pre
 
 
 const analysis = fs.readFileSync(new URL('../lib/portfolio/analysis.js', import.meta.url), 'utf8');
+const returnV5 = fs.readFileSync(new URL('../lib/portfolio/return-engine-v5.js', import.meta.url), 'utf8');
 assert.match(analysis, /const benchmarkMonths = Math\.max\(1, Math\.min\(600, Math\.max\(displayMonths, requestedBenchmarkMonths\)\)\)/,
   'Máx precisa ampliar benchmarks para toda a janela visível da carteira');
 assert.match(analysis, /const boundary = isCurrentMonth \? Math\.min\(monthEnd, now\.getTime\(\)\) : monthEnd/,
@@ -55,12 +57,14 @@ assert.match(analysis, /saoPauloMonthKey\(now\)/,
   'competência corrente precisa seguir o calendário de São Paulo/B3');
 assert.match(analysis, /comparisonBaseMonth/,
   'contrato precisa declarar a base econômica comum da comparação');
-assert.match(analysis, /previous\.marketValue > 0 \|\| point\.monthlyContributions > 0/,
-  'reentrada após liquidação precisa realmente chegar ao Modified Dietz');
-assert.match(analysis, /returnCalculationStatus = 'NEUTRALIZED_INVALID'/,
-  'retorno mensal numericamente impossível precisa ser neutralizado antes da capitalização');
-assert.match(analysis, /neutralizedReturnMonths/,
-  'meses neutralizados precisam ficar explícitos no diagnóstico do contrato');
+assert.match(returnV5, /modifiedDietzMonthlyReturnPercent/,
+  'reentrada após liquidação precisa chegar ao Modified Dietz no motor v5');
+assert.doesNotMatch(analysis, /NEUTRALIZED_INVALID/,
+  'retorno impossível não pode mais virar 0% por neutralização legada');
+assert.match(analysis, /droppedReturnMonths/,
+  'meses não mensuráveis precisam ficar explícitos no diagnóstico do contrato');
+assert.match(returnV5, /inactiveMonths\.push\(point\.month\)/,
+  'mês sem capital precisa sair da série em vez de ser reconstruído como 0%');
 
 assert.match(analysis, /const portfolioFetchMonths = Math\.min\(600, portfolioMonths \+ 1\)/,
   'Retorno precisa pedir um fechamento extra para formar a base da janela visível');

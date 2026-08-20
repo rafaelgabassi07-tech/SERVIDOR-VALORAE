@@ -90,12 +90,14 @@ assert.equal(stocks.transactions.length, 3, 'filtro Ações deve preservar açõ
 assert.deepEqual([...new Set(normalizeTransactions(stocks.transactions).map(t => t.ticker))].sort(), ['NEW3', 'OLD3']);
 
 const source = fs.readFileSync(new URL('../lib/portfolio/analysis.js', import.meta.url), 'utf8');
+const engine = fs.readFileSync(new URL('../lib/portfolio/return-engine-v5.js', import.meta.url), 'utf8');
 assert.match(source, /transactions\.map\(t => t\.ticker\)/, 'universo de preço deve vir do ledger histórico, não só das posições atuais');
-assert.match(source, /allowHistoricalCostBasisCarry: false/, 'Retorno v3 deve desativar cost carry contábil para não fabricar rentabilidade sem cotação real');
+assert.match(source, /allowHistoricalCostBasisCarry: false/, 'Retorno v5 deve desativar cost carry contábil para não fabricar rentabilidade sem cotação real');
 assert.match(source, /partialValuationMonths/, 'meses parciais precisam ser diagnosticáveis');
 assert.match(source, /closedHistoricalTickers/, 'contrato precisa diagnosticar ativos históricos encerrados');
 assert.match(source, /portfolioStartDate/, 'Retorno deve declarar a data real de início da carteira');
-assert.match(source, /MODIFIED_DIETZ_INCEPTION/, 'primeiro mês participa da rentabilidade desde a primeira compra');
+assert.match(engine, /modifiedDietzMonthlyReturnPercent/, 'primeiro mês participa da rentabilidade desde a primeira compra no motor v5');
+assert.match(engine, /capitalExposed === false/, 'mês sem capital não pode ser emitido como retorno');
 assert.match(source, /weightedPortfolioCashFlows/, 'Retorno usa janela efetiva de exposição em aporte, reentrada e liquidação');
 assert.match(source, /cdiRequested && \(cdi\.status !== 'OK' \|\| !cdiUsableInChart\)/, 'CDI não solicitado não pode marcar o Retorno como parcial');
 assert.match(source, /ipcaRequested && ipca\.status !== 'OK'/, 'IPCA não solicitado não pode marcar o Retorno como parcial');
