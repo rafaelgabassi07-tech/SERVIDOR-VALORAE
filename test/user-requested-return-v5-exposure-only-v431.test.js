@@ -141,18 +141,23 @@ test('provento é atribuído à elegibilidade e não ao pagamento tardio', () =>
   assert.equal(march, 0);
 });
 
-test('benchmark não atravessa início parcial de um novo ciclo como se a carteira já estivesse investida', () => {
+test('benchmark omite somente o mês parcial e retoma no primeiro mês completo do ciclo', () => {
   const benchmark = [
     { month: '2025-10', accumulatedPercent: 0 },
     { month: '2025-11', accumulatedPercent: 1 },
-    { month: '2025-12', accumulatedPercent: 2.01 }
+    { month: '2025-12', accumulatedPercent: 2.01 },
+    { month: '2026-01', accumulatedPercent: 3.0301 }
   ];
   const portfolio = [
     { month: '2025-11', exposureCycleId: 1, chartSegmentId: 1, segmentStart: true, partialExposureMonth: true },
-    { month: '2025-12', exposureCycleId: 1, chartSegmentId: 1, segmentStart: false }
+    { month: '2025-12', exposureCycleId: 1, chartSegmentId: 1, segmentStart: false },
+    { month: '2026-01', exposureCycleId: 1, chartSegmentId: 1, segmentStart: false }
   ];
   const map = benchmarkExposureAlignedMonthMap(benchmark, 'accumulatedPercent', portfolio, '');
-  assert.equal(map.size, 0, 'sem base diária exata, o benchmark deve falhar fechado em vez de incluir dias anteriores à entrada');
+  assert.equal(map.has('2025-11'), false, 'o mês de entrada parcial não pode ganhar benchmark mensal artificial');
+  assert.ok(Math.abs(map.get('2025-12') - 1) < 0.0001, 'o primeiro mês completo deve comparar do fechamento do mês parcial ao fechamento seguinte');
+  assert.ok(Math.abs(map.get('2026-01') - 2.01) < 0.0001, 'o benchmark deve continuar acumulando após retomar a comparação');
+  assert.equal(map.size, 2, 'a falta de base exata do mês parcial não pode bloquear o restante do ciclo');
 });
 
 test('últimos 12 meses usam janela de calendário e não os últimos 12 meses investidos', () => {
