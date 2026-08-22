@@ -2,12 +2,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const analysis = fs.readFileSync(new URL('../lib/portfolio/analysis.js', import.meta.url), 'utf8');
+const ledger = fs.readFileSync(new URL('../lib/portfolio/return-ledger-engine.js', import.meta.url), 'utf8');
 const metrics = fs.readFileSync(new URL('../lib/portfolio/return-metrics.js', import.meta.url), 'utf8');
 const calc = fs.readFileSync(new URL('../lib/portfolio/return-calculation.js', import.meta.url), 'utf8');
 const engine = fs.readFileSync(new URL('../lib/portfolio/return-engine-v5.js', import.meta.url), 'utf8');
 
 assert.match(engine, /modifiedDietzMonthlyReturnPercent/, 'O primeiro fechamento deve medir retorno desde a primeira compra pelo motor v5');
-assert.match(analysis, /weightedPortfolioCashFlows/, 'O mês inicial deve usar a janela efetiva de exposição, não o mês civil inteiro');
+assert.match(analysis, /returnLedgerWeightedCashFlows/, 'O mês inicial deve delegar a janela efetiva de exposição ao Return Ledger Engine');
+assert.match(ledger, /export function returnLedgerWeightedCashFlows/, 'O ledger dedicado deve ser a autoridade dos fluxos do Retorno');
 assert.match(analysis, /const historicalMarketValue = round\(Number\(point\.marketValue \?\? point\.totalValue \?\? point\.value \?\? 0\), 2\)/, 'A série deve transportar marketValue real');
 assert.match(analysis, /const marketValue = round\(Number\(item\.marketValue \?\? item\.portfolioMarketValue \?\? item\.currentValue \?\? value\), 2\)/, 'Histórico fornecido deve preservar marketValue');
 assert.match(analysis, /const currentSnapshotMarketValue = currentSnapshotComplete[\s\S]*?round\(currentPositions\.reduce/, 'O valor atual precisa ser ancorado somente quando todas as posições têm cotação real');

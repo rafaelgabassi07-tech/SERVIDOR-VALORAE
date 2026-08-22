@@ -29,7 +29,11 @@
     "test/quote-resilience-v350.test.js": "Checkpoint de release que fixa literalmente um releasePatch antigo do Proxy; preservado apenas para auditoria histórica.",
     "test/apk-v671-cache-alignment-v421.test.js": "Checkpoint v421 que fixa literalmente o fingerprint/releasePatch anterior; substituído pelo alinhamento v422.",
     "test/apk-v670-financial-regressions-v420.test.js": "Checkpoint v420 da fórmula antiga de Retorno; supersedido pelo Modified Dietz v422 para fluxos ponderados.",
-    "test/apk-v674-return-peer-alignment-v422.test.js": "Checkpoint v422 fixa literalmente releasePatch/fingerprint do APK v674; supersedido pela auditoria cruzada v423/v676."
+    "test/apk-v674-return-peer-alignment-v422.test.js": "Checkpoint v422 fixa literalmente releasePatch/fingerprint do APK v674; supersedido pela auditoria cruzada v423/v676.",
+    "test/apk-v676-cross-stack-integrity-v423.test.js": "Checkpoint v423/v676 fixa identidade da release anterior; substituído pelo gate cruzado v697 de release engineering.",
+    "test/apk-v697-release-engineering-v424.test.js": "Checkpoint CP4/v697 fixa a identidade anterior; substituído pelo gate cruzado v698 do quality gate compilável.",
+    "test/apk-v698-quality-gate-v425.test.js": "Checkpoint CP5/v698 fixa a identidade anterior; substituído pelo gate cruzado v699 Android 16/API36.",
+    "test/apk-v699-android16-api36-v426.test.js": "Checkpoint CP6/v699 fixa a identidade Android 16 anterior; substituído pelo gate cruzado v700 de evidência de release reproduzível."
   },
   "crossStackOnly": {
     "test/user-request-modal-patrimony-v364.test.js": "Checkpoint visual cross-stack antigo que fixa a contagem histórica de confetes; a regressão visual atual é validada no quality gate canônico do APK."

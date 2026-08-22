@@ -100,31 +100,40 @@ test('bundle parcial preserva somente blocos antigos que falharam', () => {
 
 
 const proxyAnalysisSource = fs.readFileSync(new URL('../lib/portfolio/analysis.js', import.meta.url), 'utf8');
+const returnDividendSource = fs.readFileSync(new URL('../lib/portfolio/return-dividends.js', import.meta.url), 'utf8');
 
 test('retorno ignora provento explicitamente inelegível e deduplica eventos idênticos', () => {
-  assert.match(proxyAnalysisSource, /if \(event\.eligible === false\) return null/);
-  assert.match(proxyAnalysisSource, /const unique = new Map\(\)/);
-  assert.match(proxyAnalysisSource, /normalizeTicker\(event\.ticker/);
+  assert.match(proxyAnalysisSource, /normalizeReturnDividendEvents/);
+  assert.match(returnDividendSource, /if \(event\.eligible === false\) return null/);
+  assert.match(returnDividendSource, /const unique = new Map\(\)/);
+  assert.match(returnDividendSource, /normalizeTicker\(event\.ticker/);
 });
 
 const runtimeSource = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyRuntime.kt');
 const normalizerSource = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraePortfolioRequestNormalizer.kt');
 const contractsSource = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyPortfolioContractsService.kt');
 const alertsSource = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyBackgroundAlertsService.kt');
+const returnIdentitySource = readSiblingApkFile('app/src/main/java/com/example/domain/PortfolioReturnIdentityEngine.kt');
 
 test('APK mantém caches por chave e consolida posições antes do transporte', { skip: !runtimeSource }, () => {
   assert.match(runtimeSource, /ConcurrentHashMap<String, TimedCache<ValoraeDividendAgenda>>/);
   assert.match(runtimeSource, /ConcurrentHashMap<String, TimedCache<ValoraeEquilibriumContract>>/);
   assert.match(runtimeSource, /fun dividendPositionsKey/);
-  assert.match(runtimeSource, /transaction\.assetClass\.orEmpty\(\)/);
-  assert.match(runtimeSource, /event\.eligible\.toString\(\)/);
-  assert.match(runtimeSource, /event\.assetClass\.orEmpty\(\)/);
+  assert.match(runtimeSource, /PortfolioReturnIdentityEngine\.transactionsKey\(transactions\)/);
+  assert.match(runtimeSource, /PortfolioReturnIdentityEngine\.incomeKey\(events\)/);
+  assert.match(returnIdentitySource, /transaction\.operationCode\.orEmpty\(\)/);
+  assert.match(returnIdentitySource, /number\(transaction\.grossValue\)/);
+  assert.match(returnIdentitySource, /transaction\.source\.orEmpty\(\)/);
+  assert.match(returnIdentitySource, /event\.comDate\.orEmpty\(\)/);
+  assert.match(returnIdentitySource, /event\.exDate\.orEmpty\(\)/);
+  assert.match(returnIdentitySource, /number\(event\.netAmount\)/);
+  assert.match(returnIdentitySource, /number\(event\.grossAmount\)/);
   assert.match(runtimeSource, /BackgroundAlertsPartialCacheTtlMs = 30 \* 1000L/);
   assert.match(runtimeSource, /DividendAgendaPartialCacheTtlMs = 45 \* 1000L/);
   assert.match(runtimeSource, /MarketRankingPartialCacheTtlMs = 30 \* 1000L/);
   assert.match(normalizerSource, /groupBy \{ it\.ticker \}/);
   assert.match(alertsSource, /normalizeAndAggregateDividendPositions\(positions, maxEntries = 45\)/);
-  assert.match(contractsSource, /normalizeAndAggregateDividendPositions\(positions, maxEntries = 80\)/);
+  assert.match(contractsSource, /getPortfolioReturns[\s\S]*?val cleanPositions = normalizeAndAggregateDividendPositions\(positions\)/);
   assert.match(contractsSource, /if \(cached\.value\.partial\) DividendAgendaPartialCacheTtlMs/);
   assert.match(contractsSource, /event\.eligible && event\.ticker in cleanTickers/);
   assert.doesNotMatch(contractsSource, /distinctBy \{ it\.ticker \}/);

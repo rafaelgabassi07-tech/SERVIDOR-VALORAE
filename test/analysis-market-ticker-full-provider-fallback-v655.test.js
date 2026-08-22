@@ -12,17 +12,33 @@ function br(value) { return Number(value).toLocaleString('pt-BR', { minimumFract
 function b3IndexHtml(code) {
   const [previous, current] = b3Values[code];
   const year = new Date().getUTCFullYear();
+  const monthLabels = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const now = new Date();
+  const month = now.getUTCMonth();
+  const currentDay = now.getUTCDate();
+  const previousDay = currentDay > 1 ? currentDay - 1 : 1;
+  const effectiveCurrentDay = currentDay > 1 ? currentDay : 2;
+  const row = (day, value) => {
+    const cells = monthLabels.map((_, index) => index === month ? br(value) : '');
+    return `<tr><td>${day}</td>${cells.map(cell => `<td>${cell}</td>`).join('')}</tr>`;
+  };
   return `<html><body><h1>${code} - ${year}</h1><table>
-    <tr><th>Dia</th><th>Jun</th><th>Jul</th><th>Ago</th></tr>
-    <tr><td>10</td><td></td><td>${br(previous)}</td><td></td></tr>
-    <tr><td>11</td><td></td><td></td><td>${br(current)}</td></tr>
+    <tr><th>Dia</th>${monthLabels.map(label => `<th>${label}</th>`).join('')}</tr>
+    ${row(previousDay, previous)}
+    ${row(effectiveCurrentDay, current)}
   </table></body></html>`;
 }
 
 const monthDates = Array.from({ length: 12 }, (_, i) => {
-  const d = new Date(Date.UTC(2025, 8 + i, 1));
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11 + i, 1));
   return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`;
 });
+
+function recentBrDate(daysAgo) {
+  const d = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+  return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`;
+}
 
 global.fetch = async (url) => {
   const u = String(url);
@@ -36,7 +52,7 @@ global.fetch = async (url) => {
     return new Response(`<html><body><h1>IVVB11 ISHARES S&P 500</h1><section>Cotações <strong>426,09</strong> Valor atual (R$) <span>0,24%</span> Renta. dia</section></body></html>`, { status: 200, headers: { 'Content-Type': 'text/html' } });
   }
   if (u.includes('bcdata.sgs.1/dados/ultimos/3')) {
-    return new Response(JSON.stringify([{ data: '10/08/2026', valor: '5,42' }, { data: '11/08/2026', valor: '5,44' }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify([{ data: recentBrDate(2), valor: '5,42' }, { data: recentBrDate(1), valor: '5,44' }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
   if (u.includes('bcdata.sgs.12/dados')) {
     return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });

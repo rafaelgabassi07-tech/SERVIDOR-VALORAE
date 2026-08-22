@@ -8,10 +8,20 @@ function b3Table(code) {
   const base = { IFIX: 3800, IDIV: 12600, SMLL: 2130 }[code];
   const previous = base - 10;
   const current = base;
+  const monthLabels = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const now = new Date();
+  const month = now.getUTCMonth();
+  const currentDay = now.getUTCDate();
+  const previousDay = currentDay > 1 ? currentDay - 1 : 1;
+  const effectiveCurrentDay = currentDay > 1 ? currentDay : 2;
+  const row = (day, value) => {
+    const cells = monthLabels.map((_, index) => index === month ? String(value).replace('.', ',') : '');
+    return `<tr><td>${day}</td>${cells.map(cell => `<td>${cell}</td>`).join('')}</tr>`;
+  };
   return `<table>
-    <tr><th>Dia</th><th>Jun</th><th>Jul</th><th>Ago</th></tr>
-    <tr><td>10</td><td></td><td>${String(previous).replace('.', ',')}</td><td></td></tr>
-    <tr><td>11</td><td></td><td></td><td>${String(current).replace('.', ',')}</td></tr>
+    <tr><th>Dia</th>${monthLabels.map(label => `<th>${label}</th>`).join('')}</tr>
+    ${row(previousDay, previous)}
+    ${row(effectiveCurrentDay, current)}
   </table>`;
 }
 

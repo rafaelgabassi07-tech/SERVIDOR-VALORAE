@@ -15,10 +15,20 @@ const b3Values = { IFIX: [3890.00, 3901.20], IDIV: [12950.00, 13005.50], SMLL: [
 
 function b3Html(code) {
   const [previous, current] = b3Values[code];
+  const monthLabels = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const now = new Date();
+  const month = now.getUTCMonth();
+  const currentDay = now.getUTCDate();
+  const previousDay = currentDay > 1 ? currentDay - 1 : 1;
+  const effectiveCurrentDay = currentDay > 1 ? currentDay : 2;
+  const row = (day, value) => {
+    const cells = monthLabels.map((_, index) => index === month ? String(value).replace('.', ',') : '');
+    return `<tr><td>${day}</td>${cells.map(cell => `<td>${cell}</td>`).join('')}</tr>`;
+  };
   return `<table>
-    <tr><th>Dia</th><th>Jun</th><th>Jul</th><th>Ago</th></tr>
-    <tr><td>10</td><td></td><td>${String(previous).replace('.', ',')}</td><td></td></tr>
-    <tr><td>11</td><td></td><td></td><td>${String(current).replace('.', ',')}</td></tr>
+    <tr><th>Dia</th>${monthLabels.map(label => `<th>${label}</th>`).join('')}</tr>
+    ${row(previousDay, previous)}
+    ${row(effectiveCurrentDay, current)}
   </table>`;
 }
 

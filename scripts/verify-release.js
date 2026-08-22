@@ -46,15 +46,26 @@ for (const [label, args] of steps) {
   if (result.error || result.status !== 0) fail(`${label} terminou com código ${result.status ?? 'spawn-error'}.`);
 }
 
-const gradlew = path.join(apkRoot, process.platform === 'win32' ? 'gradlew.bat' : 'gradlew');
-if (!fs.existsSync(gradlew)) fail(`Gradle wrapper do APK não encontrado em ${gradlew}.`);
-const gradleArgs = ['--no-daemon', 'lintRelease', 'testReleaseUnitTest', 'assembleRelease'];
-console.log('\n[release] Android release build');
-const android = spawnSync(gradlew, gradleArgs, { cwd: apkRoot, env, stdio: 'inherit', windowsHide: true });
-if (android.error || android.status !== 0) fail(`build Android terminou com código ${android.status ?? 'spawn-error'}.`);
+const qualityGate = path.join(apkRoot, 'tools', 'quality_gate.sh');
+if (!fs.existsSync(qualityGate)) fail(`quality gate do APK não encontrado em ${qualityGate}.`);
+if (process.platform === 'win32') {
+  fail('o gate de distribuição Android exige ambiente POSIX/CI com sh; execute-o em Linux/WSL e preserve a evidência gerada.');
+}
 
-if (!['1', 'true', 'yes', 'on'].includes(String(process.env.VALORAE_DEVICE_GATE_COMPLETED || '').toLowerCase())) {
-  fail('o gate de dispositivo/macrobenchmark não foi comprovado; defina VALORAE_DEVICE_GATE_COMPLETED=1 somente após executar tools/run_performance_device_gate.sh em dispositivo homologado.');
+console.log('\n[release] Android distribution quality gate');
+const android = spawnSync('sh', [qualityGate, '--mode', 'distribution', '--with-static-analysis'], {
+  cwd: apkRoot,
+  env,
+  stdio: 'inherit',
+  windowsHide: true,
+});
+if (android.error || android.status !== 0) fail(`quality gate Android distribution terminou com código ${android.status ?? 'spawn-error'}.`);
+
+const evidencePath = path.join(apkRoot, 'build', 'reports', 'valorae', 'quality', 'release-evidence.json');
+if (!fs.existsSync(evidencePath)) fail(`evidência Android ausente após quality gate: ${evidencePath}.`);
+const evidence = JSON.parse(fs.readFileSync(evidencePath, 'utf8'));
+if (evidence.releaseApproved !== true || evidence.distributionArtifactVerified !== true || evidence.deviceGateVerified !== true) {
+  fail('evidência Android não comprova release distribuível + assinatura + gate de dispositivo da mesma geração.');
 }
 
 console.log(`release gate OK: Proxy ${JSON.parse(fs.readFileSync('package.json','utf8')).valorae.publicVersion}; APK ${JSON.parse(fs.readFileSync(path.join(apkRoot,'metadata.json'),'utf8')).versionName}.`);
