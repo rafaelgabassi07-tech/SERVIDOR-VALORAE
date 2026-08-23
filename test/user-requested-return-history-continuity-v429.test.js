@@ -7,7 +7,7 @@ const complete = (month, marketValue, extra = {}) => ({ month, marketValue, valu
 test('liquidação total, inatividade e reentrada preservam trajetória sem criar meses de retorno', () => {
   const result = buildExposureOnlyReturnSeriesV5([
     complete('2026-01', 1100, { monthlyContributions: 1000, weightedNetCashFlow: 1000, components: [{ ticker: 'OLD3' }] }),
-    complete('2026-02', 0, { monthlyWithdrawals: 1150, weightedNetCashFlow: -50, components: [] }),
+    complete('2026-02', 0, { capitalExposed: true, monthlyWithdrawals: 1150, weightedNetCashFlow: -50, components: [] }),
     complete('2026-03', 0, { capitalExposed: false, components: [] }),
     complete('2026-04', 1020, { monthlyContributions: 1000, weightedNetCashFlow: 1000, components: [{ ticker: 'NEW3' }] }),
     complete('2026-05', 1071, { components: [{ ticker: 'NEW3' }] })

@@ -12,7 +12,8 @@ assert.match(analysis, /returnLedgerWeightedCashFlows/, 'O mês inicial deve del
 assert.match(ledger, /export function returnLedgerWeightedCashFlows/, 'O ledger dedicado deve ser a autoridade dos fluxos do Retorno');
 assert.match(analysis, /const historicalMarketValue = round\(Number\(point\.marketValue \?\? point\.totalValue \?\? point\.value \?\? 0\), 2\)/, 'A série deve transportar marketValue real');
 assert.match(analysis, /const marketValue = round\(Number\(item\.marketValue \?\? item\.portfolioMarketValue \?\? item\.currentValue \?\? value\), 2\)/, 'Histórico fornecido deve preservar marketValue');
-assert.match(analysis, /const currentSnapshotMarketValue = currentSnapshotComplete[\s\S]*?round\(currentPositions\.reduce/, 'O valor atual precisa ser ancorado somente quando todas as posições têm cotação real');
+assert.match(analysis, /const currentSnapshotMarketValue = currentSnapshotPricingComplete[\s\S]*?round\(currentPositions\.reduce/, 'O valor atual só pode ser calculado quando todas as posições têm cotação real');
+assert.match(analysis, /const currentSnapshotComplete = currentSnapshotPricingComplete &&[\s\S]*?!\(history\.inventoryMismatchTickers \|\| \[\]\)\.length/, 'Snapshot atual também exige identidade de inventário compatível com o ledger');
 assert.match(analysis, /point\.month === currentMonth && currentSnapshotComplete && currentSnapshotMarketValue > 0/, 'Somente o mês corrente pode receber a âncora do snapshot atual');
 assert.match(analysis, /currentSnapshotMissingTickers/, 'Snapshot parcial precisa ser diagnosticado em vez de virar patrimônio incompleto');
 assert.match(engine, /modifiedDietzMonthlyReturnPercent\(/, 'Retorno mensal precisa descontar fluxos externos no motor v5');

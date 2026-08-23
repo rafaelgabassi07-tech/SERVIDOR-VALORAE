@@ -64,11 +64,12 @@ const openingLedger = reconcileReturnOpeningTransactions(
   [{ ticker: 'OPEN3', quantity: 10, avgPrice: 100, firstPurchaseDate: '2024-01-05' }],
   [{ ticker: 'OPEN3', quantity: 5, price: 110, date: '2024-02-10', millis: Date.UTC(2024, 1, 10), isSell: false }]
 );
-assert.equal(openingLedger.reconciliations.length, 1, 'ledger parcial precisa ganhar somente o estoque de abertura faltante');
-assert.equal(openingLedger.reconciliations[0].quantity, 5);
-assert.equal(openingLedger.reconciliations[0].price, 100);
-assert.equal(openingLedger.reconciliations[0].date, '2024-01-05');
-assert.equal(openingLedger.transactions.reduce((sum, tx) => sum + Number(tx.quantity || 0), 0), 10, 'ledger reconciliado precisa terminar na quantidade atual');
+assert.equal(openingLedger.reconciliations.length, 0, 'posição atual nunca pode materializar compra histórica ausente');
+assert.equal(openingLedger.historicalBackfillDisabled, true);
+assert.deepEqual(openingLedger.inventoryMismatchTickers, ['OPEN3']);
+assert.equal(openingLedger.inventoryMismatches[0].ledgerQuantity, 5);
+assert.equal(openingLedger.inventoryMismatches[0].currentQuantity, 10);
+assert.equal(openingLedger.transactions.length, 1, 'ledger histórico deve permanecer exatamente nas operações conhecidas');
 
 const completeLedger = reconcileReturnOpeningTransactions(
   [{ ticker: 'FULL3', quantity: 10, avgPrice: 100, firstPurchaseDate: '2024-01-05' }],

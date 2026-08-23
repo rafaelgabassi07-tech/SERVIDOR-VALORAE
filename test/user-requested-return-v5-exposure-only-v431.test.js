@@ -49,7 +49,7 @@ test('YTD começa no primeiro mês realmente investido, não em janeiro', () => 
 test('liquidação total e reentrada preservam resultado histórico sem preencher a inatividade', () => {
   const built = buildExposureOnlyReturnSeriesV5([
     complete('2026-01', 1100, { monthlyContributions: 1000, weightedNetCashFlow: 1000 }),
-    complete('2026-02', 0, { monthlyWithdrawals: 1150, weightedNetCashFlow: -50 }),
+    complete('2026-02', 0, { capitalExposed: true, monthlyWithdrawals: 1150, weightedNetCashFlow: -50 }),
     complete('2026-03', 0, { capitalExposed: false }),
     complete('2026-04', 0, { capitalExposed: false }),
     complete('2026-05', 1020, { monthlyContributions: 1000, weightedNetCashFlow: 900, partialExposureMonth: true, capitalExposureStartDate: '2026-05-20' }),
@@ -90,15 +90,22 @@ test('mês corrente participa da prévia mas não das estatísticas fechadas', (
 
 
 
-test('exposição é definida por posições ou negociação, nunca por renda isolada', () => {
+test('exposição é definida por posições ou negociação válida, nunca por renda ou venda órfã', () => {
   assert.equal(monthHasCapitalExposure({ beginningPositionCount: 0, endingPositionCount: 0, contributions: 0, withdrawals: 0 }), false);
   assert.equal(monthHasCapitalExposure({ beginningPositionCount: 1, endingPositionCount: 0, contributions: 0, withdrawals: 1000 }), true);
   assert.equal(monthHasCapitalExposure({ beginningPositionCount: 0, endingPositionCount: 1, contributions: 1000, withdrawals: 0 }), true);
   assert.equal(monthHasCapitalExposure({ beginningPositionCount: 0, endingPositionCount: 0, contributions: 1000, withdrawals: 1000 }), true);
+  assert.equal(monthHasCapitalExposure({ beginningPositionCount: 0, endingPositionCount: 0, contributions: 0, withdrawals: 1000 }), false);
 });
 
 test('provento pago depois da venda não cria exposição no mês do pagamento', () => {
   const built = buildExposureOnlyReturnSeriesV5([
+    complete('2025-12', 1000, {
+      capitalExposed: true,
+      monthlyContributions: 1000,
+      weightedNetCashFlow: 1000,
+      capitalExposureStartDate: '2025-12-01'
+    }),
     complete('2026-01', 0, {
       capitalExposed: true,
       monthlyWithdrawals: 1100,
@@ -122,7 +129,7 @@ test('provento pago depois da venda não cria exposição no mês do pagamento',
       partialExposureMonth: true
     })
   ]);
-  assert.deepEqual(built.rows.map(row => row.month), ['2026-01', '2026-05']);
+  assert.deepEqual(built.rows.map(row => row.month), ['2025-12', '2026-01', '2026-05']);
   assert.deepEqual(built.diagnostics.inactiveMonths, ['2026-02', '2026-03']);
 });
 

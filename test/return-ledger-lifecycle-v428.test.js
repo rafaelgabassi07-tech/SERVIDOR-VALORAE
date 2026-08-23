@@ -43,13 +43,16 @@ try {
     // predate the available B3 history and must be reconciled as opening inventory.
     transactions: [{ ticker: 'OPEN3', quantity: 5, price: 100, date: '2026-06-10', side: 'BUY', assetClass: 'ACAO' }]
   });
-  assert.ok(partialLedger.series.length >= 4, 'carteira parcial precisa manter a trajetória desde a primeira compra explícita');
-  assert.equal(partialLedger.diagnostics.portfolioStartDate, '2026-05-05');
-  assert.deepEqual(partialLedger.diagnostics.openingInventoryReconciledTickers, ['OPEN3']);
-  assert.equal(partialLedger.series[0].month, '2026-05');
-  assert.ok(Math.abs(partialLedger.series[0].monthlyReturnPercent - 10) < 0.05,
-    'primeiro mês deve medir 500 -> 550, sem tratar estoque preexistente como ganho gratuito');
-  assert.equal(partialLedger.series.at(-1).marketValue, 1200, 'mês atual deve respeitar 10 unidades da posição real');
+  assert.ok(partialLedger.series.length >= 3, 'ledger parcial deve preservar somente os meses sustentados pelas operações conhecidas');
+  assert.equal(partialLedger.diagnostics.portfolioStartDate, '2026-06-10');
+  assert.equal(partialLedger.diagnostics.openingInventoryReconciled, false);
+  assert.deepEqual(partialLedger.diagnostics.openingInventoryReconciledTickers, []);
+  assert.deepEqual(partialLedger.diagnostics.inventoryMismatchTickers, ['OPEN3']);
+  assert.equal(partialLedger.series[0].month, '2026-06');
+  assert.equal(partialLedger.series.at(-1).marketValue, 600,
+    'posição atual divergente não pode ser retropropagada nem sobrescrever as 5 unidades sustentadas pelo ledger');
+  assert.equal(partialLedger.diagnostics.currentSnapshotComplete, false,
+    'snapshot atual deve falhar fechado enquanto posição e ledger divergirem');
 
   clearCache();
   const closedAsset = await buildPortfolioReturns({

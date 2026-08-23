@@ -61,7 +61,7 @@ test('mês sem valuation entre dois fechamentos faz o fechamento seguinte virar 
 test('liquidação total e nova entrada usam os fluxos reais sem retorno sobre custo', () => {
   const result = buildExposureOnlyReturnSeriesV5([
     complete('2026-01', 1000, { monthlyContributions: 1000, weightedNetCashFlow: 1000 }),
-    complete('2026-02', 0, { monthlyWithdrawals: 1100, weightedNetCashFlow: -100 }),
+    complete('2026-02', 0, { capitalExposed: true, monthlyWithdrawals: 1100, weightedNetCashFlow: -100 }),
     complete('2026-03', 1020, { monthlyContributions: 1000, weightedNetCashFlow: 1000 }),
     complete('2026-04', 1071)
   ]);
