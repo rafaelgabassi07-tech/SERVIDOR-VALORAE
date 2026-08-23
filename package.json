@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.409 pareado ao APK v701; contratos cruzados e identidade de release verificável.",
+  "description": "Proxy VALORAE 21.12.409 pareado ao APK v702; contratos cruzados e identidade de release verificável.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -39,14 +39,14 @@
     "publicVersion": "21.12.409",
     "checkpoint": "cross-stack-integrity-v423",
     "releaseLabel": "cross-stack-integrity-v423",
-    "apkVersion": "2026.08.22.02",
+    "apkVersion": "2026.08.23.01",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.22.02",
+    "maxTestedApkVersion": "2026.08.23.01",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "eaedd3305f21b7d4",
-    "apkBuildFingerprint": "84dcfb5f6beb7753"
+    "apkSourceFingerprint": "b1a4460a143eeae2",
+    "apkBuildFingerprint": "d3640492194dcad4"
   },
   "releasePatch": "21.12.409-cross-stack-integrity-v423",
   "config": {
@@ -54,21 +54,21 @@
     "publicVersion": "21.12.409",
     "checkpoint": "cross-stack-integrity-v423",
     "releaseLabel": "cross-stack-integrity-v423",
-    "apkSourceFingerprint": "eaedd3305f21b7d4",
-    "apkBuildFingerprint": "84dcfb5f6beb7753"
+    "apkSourceFingerprint": "b1a4460a143eeae2",
+    "apkBuildFingerprint": "d3640492194dcad4"
   },
   "releaseMetadata": {
     "releasePatch": "21.12.409-cross-stack-integrity-v423",
     "publicVersion": "21.12.409",
     "checkpoint": "cross-stack-integrity-v423",
     "releaseLabel": "cross-stack-integrity-v423",
-    "apkVersion": "2026.08.22.02",
+    "apkVersion": "2026.08.23.01",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.22.02",
+    "maxTestedApkVersion": "2026.08.23.01",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "eaedd3305f21b7d4",
-    "apkBuildFingerprint": "84dcfb5f6beb7753"
+    "apkSourceFingerprint": "b1a4460a143eeae2",
+    "apkBuildFingerprint": "d3640492194dcad4"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

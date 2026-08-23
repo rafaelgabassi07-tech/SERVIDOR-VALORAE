@@ -34,7 +34,8 @@
     "test/apk-v697-release-engineering-v424.test.js": "Checkpoint CP4/v697 fixa a identidade anterior; substituído pelo gate cruzado v698 do quality gate compilável.",
     "test/apk-v698-quality-gate-v425.test.js": "Checkpoint CP5/v698 fixa a identidade anterior; substituído pelo gate cruzado v699 Android 16/API36.",
     "test/apk-v699-android16-api36-v426.test.js": "Checkpoint CP6/v699 fixa a identidade Android 16 anterior; substituído pelo gate cruzado v700 de evidência de release reproduzível.",
-    "test/apk-v700-release-evidence-v427.test.js": "Checkpoint CP7/v700 fixa a identidade anterior; substituído pelo gate cruzado v701 de integridade dos ciclos reais de exposição."
+    "test/apk-v700-release-evidence-v427.test.js": "Checkpoint CP7/v700 fixa a identidade anterior; substituído pelo gate cruzado v701 de integridade dos ciclos reais de exposição.",
+    "test/apk-v701-return-exposure-ledger-v428.test.js": "Checkpoint CP8/v701 fixa a identidade anterior; substituído pelo gate cruzado v702 de compilação do Studio e integração visual."
   },
   "crossStackOnly": {
     "test/user-request-modal-patrimony-v364.test.js": "Checkpoint visual cross-stack antigo que fixa a contagem histórica de confetes; a regressão visual atual é validada no quality gate canônico do APK."

@@ -1,6 +1,6 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.409 pareado ao APK v701; identidade de fonte e build atualizada.",
+  "description": "Proxy 21.12.409 pareado ao APK v702; identidade de fonte e build atualizada.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
@@ -8,20 +8,20 @@
   "publicVersion": "21.12.409",
   "checkpoint": "cross-stack-integrity-v423",
   "label": "cross-stack-integrity-v423",
-  "apkVersion": "2026.08.22.02",
-  "apkCheckpoint": "v701-return-exposure-ledger-integrity",
-  "contractVersion": "APK v701 / Proxy 21.12.409 / APK version 2026.08.22.02 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v6 / portfolio regular-session-v2",
+  "apkVersion": "2026.08.23.01",
+  "apkCheckpoint": "v702-studio-compile-ui-integration",
+  "contractVersion": "APK v702 / Proxy 21.12.409 / APK version 2026.08.23.01 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v6 / portfolio regular-session-v2",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
   "releaseLabel": "cross-stack-integrity-v423",
   "title": "Proxy v423 — Integridade cruzada APK ↔ Proxy",
-  "summary": "Pareia APK v701 / 2026.08.22.02 com SOURCE_FINGERPRINT eaedd3305f21b7d4 e BUILD_FINGERPRINT 84dcfb5f6beb7753.",
+  "summary": "Pareia APK v702 / 2026.08.23.01 com SOURCE_FINGERPRINT b1a4460a143eeae2 e BUILD_FINGERPRINT d3640492194dcad4.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.22.02",
+  "maxTestedApkVersion": "2026.08.23.01",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "APK 2026.08.22.02 é reconhecido como PAIRED com SOURCE_FINGERPRINT eaedd3305f21b7d4.",
-    "BUILD_FINGERPRINT 84dcfb5f6beb7753 é exposto para diagnóstico do artefato sem alterar o contrato móvel.",
+    "APK 2026.08.23.01 é reconhecido como PAIRED com SOURCE_FINGERPRINT b1a4460a143eeae2.",
+    "BUILD_FINGERPRINT d3640492194dcad4 é exposto para diagnóstico do artefato sem alterar o contrato móvel.",
     "Rotas, protocolo móvel, contrato financeiro e política de compatibilidade permanecem preservados."
   ],
   "operationalLimits": [
@@ -31,14 +31,14 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "Atualiza o pareamento para APK v701 / 2026.08.22.02 e SOURCE_FINGERPRINT eaedd3305f21b7d4.",
-    "Registra BUILD_FINGERPRINT 84dcfb5f6beb7753 para diagnóstico do artefato sem transformá-lo em requisito de transporte.",
+    "Atualiza o pareamento para APK v702 / 2026.08.23.01 e SOURCE_FINGERPRINT b1a4460a143eeae2.",
+    "Registra BUILD_FINGERPRINT d3640492194dcad4 para diagnóstico do artefato sem transformá-lo em requisito de transporte.",
     "Mantém a política de compatibilidade backward-compatible, protocolos e rotas públicas sem alteração funcional."
   ],
   "notes": [
     "A versão pública do Proxy permanece 21.12.409; esta atualização promove somente a identidade do APK pareado.",
     "O teste cruzado da release anterior permanece preservado como checkpoint histórico."
   ],
-  "apkSourceFingerprint": "eaedd3305f21b7d4",
-  "apkBuildFingerprint": "84dcfb5f6beb7753"
+  "apkSourceFingerprint": "b1a4460a143eeae2",
+  "apkBuildFingerprint": "d3640492194dcad4"
 }

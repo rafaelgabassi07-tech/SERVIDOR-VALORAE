@@ -1,6 +1,6 @@
 # VALORAE Proxy
 
-Release público atual: **21.12.409**, pareado ao APK **v701 / 2026.08.22.02** (SOURCE `eaedd3305f21b7d4`, BUILD `84dcfb5f6beb7753`).
+Release público atual: **21.12.409**, pareado ao APK **v702 / 2026.08.23.01** (SOURCE `b1a4460a143eeae2`, BUILD `d3640492194dcad4`).
 
 Proxy Vercel estritamente sob demanda para o APK VALORAE. O runtime possui uma única função física (`api/router.js`), não contém cron e não inicia consultas, timers ou coleta de dados ao ser importado. Em produção, as rotas da API aceitam somente requisições com a identidade canônica do APK.
 
@@ -67,9 +67,9 @@ npm run test:cross-stack
 
 ## Compatibilidade do APK
 
-- APK pareado: `2026.08.22.02` (v701 — v701 — Retorno por exposição real e UX refinada).
+- APK pareado: `2026.08.23.01` (v702 — Compilação do Studio e refinamentos visuais integrados).
 - APK mínimo aceito: `2026.07.30.01` (v569, versão instalada anterior ao hotfix).
-- APK máximo homologado: `2026.08.22.02`.
+- APK máximo homologado: `2026.08.23.01`.
 - Política: `valorae-apk-compatibility-v2-backward-compatible`; rotas de leitura permanecem disponíveis para APKs com o protocolo móvel compatível. HTTP 426 fica restrito à sincronização financeira, onde incompatibilidade pode alterar dados do usuário.
 - `VALORAE_REJECT_UNTESTED_FUTURE_APK=0` é um override operacional explícito; não deve ser usado rotineiramente em produção.
 - `npm run verify:release` exige Node 24, dependências instaladas, APK real, suíte integral, testes cross-stack e auditoria estrita.
