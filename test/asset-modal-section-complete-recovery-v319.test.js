@@ -113,7 +113,7 @@ assert.deepEqual([...fiiTarget.sections], ['historicalIndicators']);
 
 const stockSource = fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8');
 const fiiSource = fs.readFileSync(new URL('../lib/analysis/fii-modal-contract.js', import.meta.url), 'utf8');
-assert.ok(stockSource.includes("strategy: target.targeted ? 'requested_sections_only_v319'"));
+assert.ok(stockSource.includes("strategy: target.targeted ? 'requested_sections_fair_fanout_v426'"));
 assert.ok(stockSource.includes('Investidor10 resultados + Yahoo Finance histórico'));
 assert.ok(fiiSource.includes('resolveInvestidor10FiiId'));
 assert.ok(fiiSource.includes('historical_indicators_empty'));

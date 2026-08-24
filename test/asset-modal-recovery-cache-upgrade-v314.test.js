@@ -206,8 +206,9 @@ if (apkUniversal && apkLoader && apkUi) {
   assert.ok(apkUniversal.includes('put("knownCompletenessPercent"'));
   assert.ok(apkUniversal.includes('put("knownDeepSectionCount"'));
   assert.ok(apkUniversal.includes('put("knownAvailableSections"'));
-  assert.ok(apkUniversal.includes('recovery -> "15000"'));
-  assert.ok(apkUniversal.includes('fundamentalTimeoutMs') && apkUniversal.includes('recovery) "13000"'));
+  assert.ok(apkUniversal.includes('else -> "22000"'));
+  assert.ok(apkUniversal.includes('fundamentalTimeoutMs') && apkUniversal.includes('if (fast) "3200" else "18000"'));
+  assert.ok(apkUniversal.includes('quoteTimeoutMs') && apkUniversal.includes('if (fast) "2600" else "4200"'));
   assert.ok(apkUniversal.includes('put("requiredSections"'));
   assert.ok(apkUniversal.includes('put("knownMissingSections"'));
   assert.ok(apkUniversal.includes('put("sectionRecovery", "true")'));

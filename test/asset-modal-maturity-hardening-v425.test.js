@@ -36,7 +36,9 @@ const details = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asse
 const readiness = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetModalSectionReadiness.kt', { optional: true });
 if (loader && details && readiness) {
   assert.match(loader, /AssetModalLateArrivalSettlementDelaysMs = listOf\(850L, 2_100L\)/);
-  assert.match(loader, /criticalMissing \+ settlementMissing/);
+  assert.match(loader, /clientObservedMissing \+ metadataMissing \+ settlementMissing/);
+  assert.match(loader, /FiiModalRecoverableSectionIds/);
+  assert.match(loader, /missingRecoverableFiiModalSections/);
   assert.match(details, /recoveryContextOverride = settlementContext/);
   assert.match(readiness, /FiiAssetModalSection\.PeerComparison -> peerComparison\.hasUsefulPeerComparison\(\)/);
 }

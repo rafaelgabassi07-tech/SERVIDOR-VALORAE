@@ -94,7 +94,7 @@ assert.deepEqual([...stockTargets.sections], ['peerComparison', 'company', 'fina
 const stockBaseTargets = stockModal.stockSectionRecoveryTargets({ recovery: true, knownMissingSections: 'quote,chart,metrics' });
 assert.deepEqual([...stockBaseTargets.sections], ['quote', 'chart', 'metrics']);
 assert.equal(stockModal.stockApiKeyNeededForTargets('balanceSheetTable', stockTargets), true);
-assert.equal(stockModal.stockApiKeyNeededForTargets('payoutHistorico', stockTargets), true);
+assert.equal(stockModal.stockApiKeyNeededForTargets('payoutHistorico', stockTargets), false, 'dividendos e payout são recuperações independentes');
 assert.equal(stockModal.stockApiKeyNeededForTargets('historicoIndicadores', stockTargets), false);
 
 const fiiTargets = fiiModal.fiiSectionRecoveryTargets({
