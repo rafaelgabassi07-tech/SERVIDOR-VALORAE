@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.409 pareado ao APK v706; contratos cruzados e identidade de release verificável.",
+  "description": "Proxy VALORAE 21.12.409 pareado ao APK v707; contratos cruzados e identidade de release verificável.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -33,42 +33,42 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.409-runtime-memory-hardening-v424",
+    "releasePatch": "21.12.409-portfolio-modal-return-v425",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
     "publicVersion": "21.12.409",
-    "checkpoint": "runtime-memory-hardening-v424",
-    "releaseLabel": "runtime-memory-hardening-v424",
-    "apkVersion": "2026.08.23.05",
+    "checkpoint": "portfolio-modal-return-v425",
+    "releaseLabel": "portfolio-modal-return-v425",
+    "apkVersion": "2026.08.23.06",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.23.05",
+    "maxTestedApkVersion": "2026.08.23.06",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "457e492a83a424af",
-    "apkBuildFingerprint": "d8e6e00a90f47fa8"
+    "apkSourceFingerprint": "9382f527fb8cc883",
+    "apkBuildFingerprint": "adf6bbabdfb9a5e9"
   },
-  "releasePatch": "21.12.409-runtime-memory-hardening-v424",
+  "releasePatch": "21.12.409-portfolio-modal-return-v425",
   "config": {
-    "releasePatch": "21.12.409-runtime-memory-hardening-v424",
+    "releasePatch": "21.12.409-portfolio-modal-return-v425",
     "publicVersion": "21.12.409",
-    "checkpoint": "runtime-memory-hardening-v424",
-    "releaseLabel": "runtime-memory-hardening-v424",
-    "apkSourceFingerprint": "457e492a83a424af",
-    "apkBuildFingerprint": "d8e6e00a90f47fa8"
+    "checkpoint": "portfolio-modal-return-v425",
+    "releaseLabel": "portfolio-modal-return-v425",
+    "apkSourceFingerprint": "9382f527fb8cc883",
+    "apkBuildFingerprint": "adf6bbabdfb9a5e9"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.409-runtime-memory-hardening-v424",
+    "releasePatch": "21.12.409-portfolio-modal-return-v425",
     "publicVersion": "21.12.409",
-    "checkpoint": "runtime-memory-hardening-v424",
-    "releaseLabel": "runtime-memory-hardening-v424",
-    "apkVersion": "2026.08.23.05",
+    "checkpoint": "portfolio-modal-return-v425",
+    "releaseLabel": "portfolio-modal-return-v425",
+    "apkVersion": "2026.08.23.06",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.23.05",
+    "maxTestedApkVersion": "2026.08.23.06",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "457e492a83a424af",
-    "apkBuildFingerprint": "d8e6e00a90f47fa8"
+    "apkSourceFingerprint": "9382f527fb8cc883",
+    "apkBuildFingerprint": "adf6bbabdfb9a5e9"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

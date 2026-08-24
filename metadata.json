@@ -1,27 +1,27 @@
 {
   "name": "VALORAE Proxy",
-  "description": "Proxy 21.12.409 pareado ao APK v706; identidade de fonte e build atualizada.",
+  "description": "Proxy 21.12.409 pareado ao APK v707; identidade de fonte e build atualizada.",
   "requestFramePermissions": [],
   "majorCapabilities": [],
   "version": "21.12.0",
-  "releasePatch": "21.12.409-runtime-memory-hardening-v424",
+  "releasePatch": "21.12.409-portfolio-modal-return-v425",
   "publicVersion": "21.12.409",
-  "checkpoint": "runtime-memory-hardening-v424",
-  "label": "runtime-memory-hardening-v424",
-  "apkVersion": "2026.08.23.05",
-  "apkCheckpoint": "v706-analysis-modal-layering-quote-variation",
-  "contractVersion": "APK v706 / Proxy 21.12.409 / APK version 2026.08.23.05 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v6 / portfolio regular-session-v2",
+  "checkpoint": "portfolio-modal-return-v425",
+  "label": "portfolio-modal-return-v425",
+  "apkVersion": "2026.08.23.06",
+  "apkCheckpoint": "v707-portfolio-modal-return-alignment",
+  "contractVersion": "APK v707 / Proxy 21.12.409 / APK version 2026.08.23.06 / mobile protocol 2026.07.10.10 / ecosystem contract valorae-ecosystem-2026.08.05.04-p404 / asset modal delivery v4 / financial sync valorae-financial-sync-v2 / compatibility v2 backward-compatible / analysis rankings semantic-v3 / analysis market ticker-v6 / portfolio regular-session-v2",
   "monitorObservabilityVersion": "2026.08.05-v407",
   "monitorPersistenceMode": "disabled",
-  "releaseLabel": "runtime-memory-hardening-v424",
-  "title": "Proxy v424 — Camadas de Análise e variação monetária da cotação",
-  "summary": "Pareia APK v706 / 2026.08.23.05 com SOURCE_FINGERPRINT 457e492a83a424af e BUILD_FINGERPRINT d8e6e00a90f47fa8.",
+  "releaseLabel": "portfolio-modal-return-v425",
+  "title": "Proxy v425 — Compactação da carteira, restauração do modal e alinhamento do Retorno",
+  "summary": "Pareia APK v707 / 2026.08.23.06 com SOURCE_FINGERPRINT 9382f527fb8cc883 e BUILD_FINGERPRINT adf6bbabdfb9a5e9.",
   "minSupportedApkVersion": "2026.07.30.01",
-  "maxTestedApkVersion": "2026.08.23.05",
+  "maxTestedApkVersion": "2026.08.23.06",
   "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
   "validation": [
-    "APK 2026.08.23.05 é reconhecido como PAIRED com SOURCE_FINGERPRINT 457e492a83a424af.",
-    "BUILD_FINGERPRINT d8e6e00a90f47fa8 é exposto para diagnóstico do artefato sem alterar o contrato móvel.",
+    "APK 2026.08.23.06 é reconhecido como PAIRED com SOURCE_FINGERPRINT 9382f527fb8cc883.",
+    "BUILD_FINGERPRINT adf6bbabdfb9a5e9 é exposto para diagnóstico do artefato sem alterar o contrato móvel.",
     "Rotas, protocolo móvel, contrato financeiro e política de compatibilidade permanecem preservados."
   ],
   "operationalLimits": [
@@ -31,14 +31,14 @@
   "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
   "monitorVersion": "vertical-flow-v407",
   "changes": [
-    "Atualiza o pareamento para APK v706 / 2026.08.23.05 e SOURCE_FINGERPRINT 457e492a83a424af.",
-    "Registra BUILD_FINGERPRINT d8e6e00a90f47fa8 para diagnóstico do artefato sem transformá-lo em requisito de transporte.",
+    "Atualiza o pareamento para APK v707 / 2026.08.23.06 e SOURCE_FINGERPRINT 9382f527fb8cc883.",
+    "Registra BUILD_FINGERPRINT adf6bbabdfb9a5e9 para diagnóstico do artefato sem transformá-lo em requisito de transporte.",
     "Mantém a política de compatibilidade backward-compatible, protocolos e rotas públicas sem alteração funcional."
   ],
   "notes": [
-    "A versão pública do Proxy permanece 21.12.409; o patch interno atual é 21.12.409-runtime-memory-hardening-v424.",
+    "A versão pública do Proxy permanece 21.12.409; o patch interno atual é 21.12.409-portfolio-modal-return-v425.",
     "O teste cruzado da release anterior permanece preservado como checkpoint histórico."
   ],
-  "apkSourceFingerprint": "457e492a83a424af",
-  "apkBuildFingerprint": "d8e6e00a90f47fa8"
+  "apkSourceFingerprint": "9382f527fb8cc883",
+  "apkBuildFingerprint": "adf6bbabdfb9a5e9"
 }

@@ -38,7 +38,8 @@
     "test/apk-v701-return-exposure-ledger-v428.test.js": "Checkpoint CP8/v701 fixa a identidade anterior; substituído pelo gate cruzado v702 de compilação do Studio e integração visual.",
     "test/apk-v702-studio-compile-ui-v429.test.js": "Checkpoint CP9/v702 fixa identidade e patch anteriores; substituído pelo gate cruzado v704 de auditoria de runtime/memória/acessibilidade.",
     "test/apk-v704-audit-resilience-v430.test.js": "Checkpoint CP11/v704 fixa a identidade anterior; substituído pelo gate cruzado v705 da auditoria completa do APK.",
-    "test/apk-v705-full-apk-audit-v431.test.js": "Checkpoint CP12/v705 fixa a identidade anterior; substituído pelo gate cruzado v706 de layering de Análise e variação monetária da cotação."
+    "test/apk-v705-full-apk-audit-v431.test.js": "Checkpoint CP12/v705 fixa a identidade anterior; substituído pelo gate cruzado v706 de layering de Análise e variação monetária da cotação.",
+    "test/apk-v706-analysis-modal-quote-v432.test.js": "Checkpoint CP13/v706 fixa a identidade anterior; substituído pelo gate cruzado v707 de compactação da carteira, restauração do modal e alinhamento do Retorno."
   },
   "crossStackOnly": {
     "test/user-request-modal-patrimony-v364.test.js": "Checkpoint visual cross-stack antigo que fixa a contagem histórica de confetes; a regressão visual atual é validada no quality gate canônico do APK."
