@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.409 pareado ao APK v702; contratos cruzados e identidade de release verificável.",
+  "description": "Proxy VALORAE 21.12.409 pareado ao APK v706; contratos cruzados e identidade de release verificável.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -33,42 +33,42 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.409-cross-stack-integrity-v423",
+    "releasePatch": "21.12.409-runtime-memory-hardening-v424",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
     "publicVersion": "21.12.409",
-    "checkpoint": "cross-stack-integrity-v423",
-    "releaseLabel": "cross-stack-integrity-v423",
-    "apkVersion": "2026.08.23.01",
+    "checkpoint": "runtime-memory-hardening-v424",
+    "releaseLabel": "runtime-memory-hardening-v424",
+    "apkVersion": "2026.08.23.05",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.23.01",
+    "maxTestedApkVersion": "2026.08.23.05",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "b1a4460a143eeae2",
-    "apkBuildFingerprint": "d3640492194dcad4"
+    "apkSourceFingerprint": "457e492a83a424af",
+    "apkBuildFingerprint": "d8e6e00a90f47fa8"
   },
-  "releasePatch": "21.12.409-cross-stack-integrity-v423",
+  "releasePatch": "21.12.409-runtime-memory-hardening-v424",
   "config": {
-    "releasePatch": "21.12.409-cross-stack-integrity-v423",
+    "releasePatch": "21.12.409-runtime-memory-hardening-v424",
     "publicVersion": "21.12.409",
-    "checkpoint": "cross-stack-integrity-v423",
-    "releaseLabel": "cross-stack-integrity-v423",
-    "apkSourceFingerprint": "b1a4460a143eeae2",
-    "apkBuildFingerprint": "d3640492194dcad4"
+    "checkpoint": "runtime-memory-hardening-v424",
+    "releaseLabel": "runtime-memory-hardening-v424",
+    "apkSourceFingerprint": "457e492a83a424af",
+    "apkBuildFingerprint": "d8e6e00a90f47fa8"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.409-cross-stack-integrity-v423",
+    "releasePatch": "21.12.409-runtime-memory-hardening-v424",
     "publicVersion": "21.12.409",
-    "checkpoint": "cross-stack-integrity-v423",
-    "releaseLabel": "cross-stack-integrity-v423",
-    "apkVersion": "2026.08.23.01",
+    "checkpoint": "runtime-memory-hardening-v424",
+    "releaseLabel": "runtime-memory-hardening-v424",
+    "apkVersion": "2026.08.23.05",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.23.01",
+    "maxTestedApkVersion": "2026.08.23.05",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "b1a4460a143eeae2",
-    "apkBuildFingerprint": "d3640492194dcad4"
+    "apkSourceFingerprint": "457e492a83a424af",
+    "apkBuildFingerprint": "d8e6e00a90f47fa8"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"

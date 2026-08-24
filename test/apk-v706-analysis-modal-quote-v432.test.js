@@ -1,0 +1,269 @@
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { readSiblingApkFile, resolveSiblingApkRoot } from './helpers/cross-stack-apk.js';
+import { APK_COMPATIBILITY, annotateSourceFingerprint, evaluateApkCompatibility } from '../lib/core/apk-compatibility.js';
+import { RELEASE } from '../lib/core/release.js';
+import {
+  VALORAE_MOBILE_PROTOCOL_VERSION,
+  VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION,
+  VALORAE_CANONICAL_REQUEST_HEADERS,
+  VALORAE_EXPOSE_HEADERS,
+} from '../lib/core/mobile-protocol.js';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const apkRoot = resolveSiblingApkRoot();
+const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+const proxyMetadata = JSON.parse(fs.readFileSync(path.join(root, 'metadata.json'), 'utf8'));
+const apkMetadata = JSON.parse(readSiblingApkFile('metadata.json'));
+const build = readSiblingApkFile('app/build.gradle.kts');
+if (!build) {
+  console.log('apk-v706-analysis-modal-quote-v432 skipped: execute npm run test:cross-stack para validar o APK pareado');
+  process.exit(0);
+}
+const protocol = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeMobileProtocol.kt');
+const baselineContract = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeContractContinuityGuard.kt');
+const formalSchema = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeFormalSchema.kt');
+const proxyBaseline = fs.readFileSync(path.join(root, 'lib/contract/baseline.js'), 'utf8');
+const proxyFeatureVersions = fs.readFileSync(path.join(root, 'lib/core/feature-versions.js'), 'utf8');
+const proxyHttp = readSiblingApkFile('app/src/main/java/com/example/data/proxy/ValoraeProxyHttp.kt');
+const syncClient = readSiblingApkFile('app/src/main/java/com/example/data/sync/ValoraeSyncClient.kt');
+const logoUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/PortfolioAssetsCardsUi.kt');
+const router = fs.readFileSync(path.join(root, 'routes/_router.js'), 'utf8');
+const syncRoute = fs.readFileSync(path.join(root, 'routes/sync.js'), 'utf8');
+
+const versionCode = Number(build.match(/versionCode\s*=\s*(\d+)/)?.[1] || 0);
+const versionName = build.match(/versionName\s*=\s*"([^"]+)"/)?.[1] || '';
+const checkpoint = build.match(/buildConfigField\("String",\s*"RELEASE_CHECKPOINT",\s*"\\"([^"]+)\\""\)/)?.[1] || '';
+const sourceFingerprint = build.match(/buildConfigField\("String",\s*"SOURCE_FINGERPRINT",\s*"\\"([0-9a-f]{16})\\""\)/)?.[1] || '';
+const buildFingerprint = build.match(/buildConfigField\("String",\s*"BUILD_FINGERPRINT",\s*"\\"([0-9a-f]{16})\\""\)/)?.[1] || '';
+assert.equal(versionCode, 26082305);
+assert.equal(versionName, '2026.08.23.05');
+assert.equal(checkpoint, 'v706-analysis-modal-layering-quote-variation');
+
+const hash = crypto.createHash('sha256');
+const main = path.join(apkRoot, 'app/src/main');
+const sourceFiles = [];
+const walk = directory => {
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) walk(full);
+    else if (entry.isFile()) sourceFiles.push(full);
+  }
+};
+walk(main);
+sourceFiles.sort((a, b) => {
+  const left = path.relative(apkRoot, a).replaceAll('\\', '/').split('/');
+  const right = path.relative(apkRoot, b).replaceAll('\\', '/').split('/');
+  for (let index = 0; index < Math.min(left.length, right.length); index += 1) {
+    if (left[index] < right[index]) return -1;
+    if (left[index] > right[index]) return 1;
+  }
+  return left.length - right.length;
+});
+for (const file of sourceFiles) {
+  const relative = path.relative(apkRoot, file).replaceAll('\\', '/');
+  hash.update(relative); hash.update('\0'); hash.update(fs.readFileSync(file)); hash.update('\0');
+}
+assert.equal(hash.digest('hex').slice(0, 16), sourceFingerprint, 'fingerprint do APK precisa representar app/src/main real');
+
+for (const [label, actual] of [
+  ['APK metadata.versionName', apkMetadata.versionName],
+  ['Proxy package apkVersion', pkg.valorae.apkVersion],
+  ['Proxy metadata apkVersion', proxyMetadata.apkVersion],
+  ['Proxy compatibility pairedVersion', APK_COMPATIBILITY.pairedVersion],
+  ['Proxy compatibility maxTestedVersion', APK_COMPATIBILITY.maxTestedVersion],
+]) assert.equal(actual, versionName, label);
+for (const [label, actual] of [
+  ['APK metadata sourceFingerprint', apkMetadata.sourceFingerprint],
+  ['Proxy package sourceFingerprint', pkg.valorae.apkSourceFingerprint],
+  ['Proxy metadata sourceFingerprint', proxyMetadata.apkSourceFingerprint],
+  ['Proxy compatibility sourceFingerprint', APK_COMPATIBILITY.pairedSourceFingerprint],
+]) assert.equal(actual, sourceFingerprint, label);
+for (const [label, actual] of [
+  ['APK metadata buildFingerprint', apkMetadata.buildFingerprint],
+  ['Proxy package buildFingerprint', pkg.valorae.apkBuildFingerprint],
+  ['Proxy metadata buildFingerprint', proxyMetadata.apkBuildFingerprint],
+  ['Proxy compatibility buildFingerprint', APK_COMPATIBILITY.pairedBuildFingerprint],
+]) assert.equal(actual, buildFingerprint, label);
+assert.equal(proxyMetadata.apkCheckpoint, checkpoint);
+assert.equal(RELEASE.publicVersion, '21.12.409');
+assert.equal(RELEASE.patch, '21.12.409-runtime-memory-hardening-v424');
+assert.equal(evaluateApkCompatibility(versionName, { allowFuture: false }).status, 'PAIRED');
+assert.equal(annotateSourceFingerprint(evaluateApkCompatibility(versionName), sourceFingerprint).sourceFingerprintStatus, 'PAIRED');
+
+assert.match(protocol, /const val Version = "2026\.07\.10\.10"/);
+assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
+assert.match(protocol, /AssetModalDeliverySchemaVersion = "4"/);
+assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');
+assert.match(protocol, /ResponseContractVersion = "valorae-api-v1"/);
+assert.match(protocol, /EcosystemContractVersion = "valorae-ecosystem-2026\.08\.05\.04-p404"/);
+assert.match(protocol, /BaselineContractVersion = ValoraeContractContinuityGuard\.BaselineVersion/);
+assert.match(baselineContract, /BaselineVersion = "2026\.07\.14-checkpoint106-v1"/);
+assert.match(proxyBaseline, /VALORAE_BASELINE_CONTRACT_VERSION = '2026\.07\.14-checkpoint106-v1'/);
+assert.match(protocol, /FormalSchemaVersion = ValoraeFormalSchemaContract\.Version/);
+assert.match(formalSchema, /Version = "2026\.07\.15-checkpoint112-v1"/);
+assert.match(proxyFeatureVersions, /VALORAE_FORMAL_SCHEMA_VERSION = '2026\.07\.15-checkpoint112-v1'/);
+assert.ok(VALORAE_CANONICAL_REQUEST_HEADERS.includes('X-Valorae-Source-Fingerprint'));
+assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Paired-Source-Fingerprint'));
+assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Source-Fingerprint-Status'));
+assert.match(protocol, /HeaderPairedSourceFingerprint = "X-Valorae-Paired-Source-Fingerprint"/);
+assert.match(protocol, /HeaderSourceFingerprintStatus = "X-Valorae-Source-Fingerprint-Status"/);
+assert.match(proxyHttp, /HeaderSourceFingerprint, BuildConfig\.SOURCE_FINGERPRINT/);
+assert.match(syncClient, /HeaderSourceFingerprint, BuildConfig\.SOURCE_FINGERPRINT/);
+assert.match(proxyHttp, /pairedSourceFingerprint = header\(ValoraeMobileProtocol\.HeaderPairedSourceFingerprint\)/);
+assert.match(proxyHttp, /sourceFingerprintStatus = header\(ValoraeMobileProtocol\.HeaderSourceFingerprintStatus\)/);
+assert.doesNotMatch(proxyHttp, /sourceFingerprintMismatch|fingerprintRetrySafe/, 'fingerprint do deployment é diagnóstico, não saúde de transporte');
+assert.doesNotMatch(syncClient, /sourceFingerprintMismatch|fingerprintRetrySafe/, 'sync não deve rejeitar resposta válida por fingerprint divergente');
+assert.match(proxyHttp, /\((?:retryableStatus \|\| contractMismatch|contractMismatch \|\| retryableStatus)\)/);
+assert.match(syncClient, /\((?:retryableStatus \|\| contractMismatch|contractMismatch \|\| retryableStatus)\)/);
+
+const retrySet = syncClient.match(/retryableStatus\s*=\s*response\.code\s+in\s+setOf\(([^)]*)\)/)?.[1] || '';
+assert.ok(/\b500\b/.test(retrySet), 'sync precisa alternar host em HTTP 500');
+const diagnostics = syncClient.slice(syncClient.indexOf('private fun JSONObject.toDiagnostics'), syncClient.indexOf('private fun JSONObject.toAuthCheck'));
+assert.match(diagnostics, /ifBlank \{ optString\("authMode"\) \}/, 'authMode top-level do Proxy precisa ser interpretado');
+assert.match(logoUi, /BuildConfig\.VALORAE_PROXY_FALLBACK_BASE_URL/, 'logos precisam ter host de contingência');
+
+assert.match(syncClient, /valorae-financial-sync-v2/);
+assert.match(syncRoute, /valorae-financial-sync-v2/);
+const syncActions = ['diagnostics','auth_check','get_financial_status','upload_transactions','download_financial_data','upload_dividends','delete_financial_data'];
+for (const action of syncActions) {
+  assert.ok(syncClient.includes(`"${action}"`), `APK não declara ação sync ${action}`);
+  assert.ok(syncRoute.includes(`'${action}'`) || syncRoute.includes(`"${action}"`), `Proxy não declara ação sync ${action}`);
+}
+
+const expectedRoutes = [
+  '/ready','/assets','/asset/quote','/quotes','/asset/history','/asset/modal','/asset/logo',
+  '/market/indices','/market/rankings','/analysis/rankings','/news','/portfolio/equilibrium',
+  '/portfolio/history','/portfolio/returns','/dividends/batch','/mobile/alerts','/mobile/daily-close','/sync',
+];
+for (const route of expectedRoutes) {
+  if (route === '/sync') assert.ok(syncClient.includes('/api/sync'), 'APK não usa /api/sync');
+  else {
+    assert.ok(router.includes(`'${route}'`) || router.includes(`"${route}"`), `Proxy allowlist sem ${route}`);
+    const apkLiteral = `/api/v1${route}`;
+    const allApk = [proxyHttp, syncClient, logoUi,
+      ...['app/src/main/java/com/example/data/proxy/ValoraeProxyAssetModalService.kt','app/src/main/java/com/example/data/proxy/ValoraeProxyDiagnosticsService.kt']
+        .map(file => readSiblingApkFile(file, { optional: true }) || '')].join('\n');
+    if (['/ready','/assets','/asset/quote','/quotes','/asset/history','/asset/modal','/asset/logo'].includes(route)) {
+      assert.ok(allApk.includes(apkLiteral) || router.includes(`'${route}'`));
+    }
+  }
+}
+
+
+const returnLedger = fs.readFileSync(path.join(root, 'lib/portfolio/return-ledger-engine.js'), 'utf8');
+const returnValuation = fs.readFileSync(path.join(root, 'lib/portfolio/return-valuation.js'), 'utf8');
+const returnCalculation = fs.readFileSync(path.join(root, 'lib/portfolio/return-calculation.js'), 'utf8');
+const returnEngine = fs.readFileSync(path.join(root, 'lib/portfolio/return-engine-v5.js'), 'utf8');
+const returnAnalysis = fs.readFileSync(path.join(root, 'lib/portfolio/analysis.js'), 'utf8');
+const monthlyEngine = readSiblingApkFile('app/src/main/java/com/example/domain/ReturnMonthlyTableEngine.kt');
+assert.match(returnLedger, /export function returnLedgerEffectiveTransactions/);
+assert.match(returnLedger, /effectiveQuantity = Math\.min\(tx\.quantity, beforeTicker\)/, 'saída é limitada ao estoque real');
+assert.match(returnLedger, /unmatchedQuantity = Math\.max\(0, tx\.quantity - effectiveQuantity\)/, 'saída órfã permanece diagnóstico');
+assert.match(returnLedger, /export function returnLedgerExposureIntervals/);
+assert.match(returnLedger, /function sameDayLedgerPriority/);
+assert.match(returnLedger, /sameDayLedgerPriority\(a\.operationCode\) - sameDayLedgerPriority\(b\.operationCode\)/, 'ordem diária precisa resolver entradas antes de saídas sem horário');
+assert.match(returnLedger, /Once an economic ledger[\s\S]*?sole inception clock/, 'ledger precisa ser a única autoridade da data inicial quando existe histórico econômico');
+assert.match(returnValuation, /historicalBackfillDisabled: true/, 'posição atual não pode retropropagar compra histórica');
+assert.match(returnValuation, /inventoryMismatchTickers/, 'divergência atual x ledger é auditada');
+assert.match(returnCalculation, /if \(contributed <= 0\) return fallback;/, 'Dietz falha fechado sem base de capital');
+assert.match(returnEngine, /if \(flows\.contributions > 0\) return true;/, 'retirada isolada não estabelece exposição');
+assert.doesNotMatch(returnEngine, /flows\.contributions > 0 \|\| flows\.withdrawals > 0/, 'venda órfã não pode ressuscitar mês investido');
+assert.match(returnAnalysis, /monthFlows\.hadCapitalExposure === true && intervalHasExposure/, 'mês exige ledger e intervalo canônico simultaneamente');
+assert.match(returnAnalysis, /currentSnapshotPricingComplete &&[\s\S]*?!\(history\.inventoryMismatchTickers \|\| \[\]\)\.length/, 'snapshot atual exige inventário compatível');
+assert.match(monthlyEngine, /point\.exposureCycleId > 0/);
+assert.match(monthlyEngine, /point\.chartSegmentId > 0/);
+
+const qualityGate = readSiblingApkFile('tools/quality_gate.py');
+const preflight = readSiblingApkFile('tools/release_preflight.py');
+const deviceGate = readSiblingApkFile('tools/run_performance_device_gate.sh');
+const artifactVerifier = readSiblingApkFile('tools/verify_release_artifacts.py');
+const proxyReleaseGate = fs.readFileSync(path.join(root, 'scripts/verify-release.js'), 'utf8');
+assert.match(qualityGate, /choices=\["static", "full", "distribution"\]/);
+assert.match(qualityGate, /release_approved = mode == "distribution"/);
+assert.match(qualityGate, /verify_device_gate_evidence/);
+assert.match(preflight, /android-platform-36/);
+assert.match(preflight, /release-signing-env/);
+assert.match(deviceGate, /REPORT_DIR="\$ROOT\/tools\/reports\/device-performance"/);
+assert.match(deviceGate, /sourceFingerprint.*source_fingerprint/s);
+assert.match(artifactVerifier, /--print-certs/);
+assert.match(artifactVerifier, /jarsigner/);
+assert.match(proxyReleaseGate, /--mode', 'distribution', '--with-static-analysis'/);
+assert.match(proxyReleaseGate, /releaseApproved !== true/);
+assert.doesNotMatch(proxyReleaseGate, /VALORAE_DEVICE_GATE_COMPLETED/);
+
+const appGradle = readSiblingApkFile('app/build.gradle.kts');
+const returnsUi = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/PortfolioDashboardReturnsUi.kt');
+const summaryUi = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/PortfolioDashboardReturnSummaryUi.kt');
+const newsUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/news/PortfolioNewsUi.kt');
+const analysisPrimitives = readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisVisualPrimitives.kt');
+const analysisRanking = readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisRankingUi.kt');
+const confettiUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/ConfettiAnimation.kt');
+const portfolioDialogs = readSiblingApkFile('app/src/main/java/com/example/app/portfolio/PortfolioDialogHosts.kt');
+const syncIdentityTool = readSiblingApkFile('tools/sync_release_identity.py');
+const settingsGradle = readSiblingApkFile('settings.gradle.kts');
+const wrapperProperties = readSiblingApkFile('gradle/wrapper/gradle-wrapper.properties');
+const authUi = readSiblingApkFile('app/src/main/java/com/example/ui/auth/AuthScreens.kt');
+const newsScreen = readSiblingApkFile('app/src/main/java/com/example/feature/news/PortfolioNewsScreenUi.kt');
+const networkUi = readSiblingApkFile('app/src/main/java/com/example/ui/shared/ValoraeNetworkReconnectUi.kt');
+const returnUseCases = readSiblingApkFile('app/src/main/java/com/example/app/portfolio/PortfolioDashboardUseCases.kt');
+const quoteSource = fs.readFileSync(path.join(root, 'lib/sources/quotes.js'), 'utf8');
+const rankingSource = fs.readFileSync(path.join(root, 'lib/market/rankings-i10.js'), 'utf8');
+assert.match(appGradle, /basePath\.set\(rootDir\)/, 'Detekt precisa usar Property.set para basePath');
+assert.match(appGradle, /jvmTarget\.set\("17"\)/, 'Detekt precisa usar Property.set para JVM 17');
+assert.match(appGradle, /compilerOptions[\s\S]*JvmTarget\.JVM_17/, 'Kotlin precisa usar compilerOptions JVM 17');
+assert.match(settingsGradle, /rootProject\.name = "VALORAE"/, 'Studio precisa usar nome estável do projeto');
+assert.match(wrapperProperties, /networkTimeout=60000/, 'Wrapper precisa tolerar rede lenta durante import');
+assert.match(authUi, /minimumInteractiveComponentSize\(\)[\s\S]*Esqueci minha senha/, 'recuperação de senha precisa manter alvo acessível');
+assert.match(newsScreen, /items\(filtered, key = \{ it\.favoriteKey\(\) \}/, 'Notícias precisa usar identidade estável de card');
+assert.match(newsScreen, /enter = if \(reducedMotion\) EnterTransition\.None/, 'sticky de Notícias precisa respeitar movimento reduzido');
+assert.match(analysisRanking, /if \(reducedMotion\)[\s\S]*rankingListState\.scrollToItem\(0\)/, 'Topo de ranking precisa respeitar movimento reduzido');
+assert.match(networkUi, /enter = if \(reducedMotion\) EnterTransition\.None/, 'status de rede precisa respeitar movimento reduzido');
+assert.match(returnUseCases, /returns-v5-exposure-ledger-v701/, 'v706 não pode trocar a geração financeira consolidada');
+assert.match(returnsUi, /LazyRow[\s\S]*return_chart_benchmark_filter[\s\S]*return_chart_accumulated_mode[\s\S]*return_chart_rolling12_mode/, 'controles do desempenho acumulado precisam permanecer lado a lado');
+assert.match(summaryUi, /sortedByDescending \{ it\.year \}/, 'retorno mês a mês precisa priorizar ano mais recente');
+assert.match(newsUi, /private fun NewsActionButton[\s\S]*Row\(/, 'ações de notícias precisam permanecer clean');
+const newsActionStart = newsUi.indexOf('private fun NewsActionButton');
+const newsActionEnd = newsUi.indexOf('@Composable\nfun NewsCard', newsActionStart);
+const newsActionBlock = newsUi.slice(newsActionStart, newsActionEnd);
+assert.doesNotMatch(newsActionBlock, /Surface\(/, 'ação Salvar/Enviar não pode recuperar container Surface');
+assert.match(analysisPrimitives, /accent\.copy\(alpha = 0\.14f\)/, 'Topo precisa derivar fundo do accent');
+assert.match(analysisRanking, /AnalysisBackToTopButton\([\s\S]*accent = accent/, 'ranking precisa encaminhar accent ao Topo');
+assert.match(confettiUi, /if \((?:com\.example\.ui\.state\.)?AppSettings\.reducedMotion\.value\) return/, 'confete deve desligar em movimento reduzido');
+assert.match(portfolioDialogs, /val reducedMotion = com\.example\.ui\.state\.AppSettings\.reducedMotion\.value/);
+assert.match(portfolioDialogs, /if \(reducedMotion\)[\s\S]*coinScale = 1f[\s\S]*coinLift = 0f/, 'animação contínua de sucesso deve desligar em movimento reduzido');
+assert.match(quoteSource, /QUOTE_MEMORY_MAX_ENTRIES/);
+assert.match(quoteSource, /trimOldest\(liveQuoteMemory, QUOTE_MEMORY_MAX_ENTRIES\)/, 'cache de cotações deve ser limitado');
+assert.match(quoteSource, /QUOTE_BACKOFF_MAX_ENTRIES/);
+assert.match(rankingSource, /CACHE_MAX_ENTRIES/);
+assert.match(rankingSource, /while \(cache\.size > CACHE_MAX_ENTRIES\)/, 'cache de rankings deve expulsar chaves antigas');
+assert.match(syncIdentityTool, /package\["releasePatch"\] = proxy_patch/);
+assert.match(syncIdentityTool, /VALORAE_RELEASE_PATCH/);
+
+
+const analysisHost = readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisScreenContent.kt');
+const discoveryDialog = readSiblingApkFile('app/src/main/java/com/example/feature/analysis/AnalysisDiscoveryGroupDialogUi.kt');
+const quoteCard = readSiblingApkFile('app/src/main/java/com/example/ui/shared/chart/QuoteChartCard.kt');
+const assetDetails = readSiblingApkFile('app/src/main/java/com/example/ui/shared/asset/AssetDetailsModalUi.kt');
+const portfolioPrice = readSiblingApkFile('app/src/main/java/com/example/feature/portfolio/PortfolioSparklineChartsUi.kt');
+const quoteVariationEngine = readSiblingApkFile('app/src/main/java/com/example/domain/QuoteVariationEngine.kt');
+assert.ok((analysisHost.match(/visible = true/g) || []).length >= 2, 'categoria e ranking devem permanecer renderizados atrás do modal');
+assert.ok((analysisHost.match(/active = activeSharedAssetModal == null/g) || []).length >= 2, 'trabalho remoto das subpáginas deve pausar sob o modal do ativo');
+assert.match(discoveryDialog, /active: Boolean = visible/);
+assert.match(analysisRanking, /active: Boolean = visible/);
+assert.match(quoteCard, /clip\(RoundedCornerShape\(16\.dp\)\)[\s\S]*surfaceVariant\.copy\(alpha = 0\.34f\)/, 'cotação deve ser card fechado nas extremidades');
+assert.match(quoteCard, /currentChangeValueText/);
+assert.match(quoteCard, /currentChangePercentText/);
+assert.match(quoteCard, /"Variação R\$"/);
+assert.match(quoteCard, /"Variação %"/);
+assert.ok((assetDetails.match(/currentPrice = contract\.quoteSummary\?\.price/g) || []).length >= 2, 'Ação e FII devem enviar preço corrente ao acordeão');
+assert.ok((assetDetails.match(/dailyChangePercent = contract\.quoteSummary\?\.changePercent/g) || []).length >= 2, 'Ação e FII devem enviar variação percentual ao acordeão');
+assert.match(quoteVariationEngine, /object QuoteVariationEngine/);
+assert.match(quoteVariationEngine, /previousCloseFactor/);
+assert.match(portfolioPrice, /collapsedChangeValueText/);
+assert.match(portfolioPrice, /collapsedChangePercentText/);
+
+console.log(`apk-v706-analysis-modal-quote-v432 ok: APK ${versionName}/${sourceFingerprint}/${buildFingerprint} ↔ Proxy ${RELEASE.publicVersion}/${RELEASE.patch}; ${expectedRoutes.length} rotas auditadas`);
