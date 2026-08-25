@@ -70,7 +70,7 @@ function fullFii(ticker = 'LATE11', includeVacancy = true) {
   };
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v19-modal-source-repair');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v20-contract-batching');
 
 const firstStock = fullStock('LATE3', false);
 const firstStockDelivery = runtime.buildModalDelivery(firstStock, { family: 'stock', requestedMode: 'full', mode: 'full', requestId: 'late-stock-first' });

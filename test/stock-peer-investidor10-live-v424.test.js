@@ -56,6 +56,7 @@ assert.equal(missingRows[1].pvpDisplay, '-');
 
 const stockSource = fs.readFileSync(new URL('../lib/analysis/stock-modal-contract.js', import.meta.url), 'utf8');
 const runtimeSource = fs.readFileSync(new URL('../lib/analysis/asset-modal-runtime.js', import.meta.url), 'utf8');
+const modalSectionsSource = fs.readFileSync(new URL('../lib/analysis/asset-modal-sections.js', import.meta.url), 'utf8');
 assert.match(stockSource, /COMPARANDO\\s\+\[A-Z0-9\]\{4,12\}\\s\+COM\\s\+OUTRAS/);
 assert.match(stockSource, /currentTableDetected/);
 assert.match(stockSource, /columns:\s*stockPeerColumnsForRows\(rows, \{ layout: currentTableDetected \? 'current' : 'auto' \}\)/);
@@ -63,8 +64,8 @@ assert.match(stockSource, /stockPeerColumnsForRows\(rows, \{ layout: 'current' \
 assert.match(stockSource, /layout === 'current'\) return currentDefinitions/, 'layout atual deve preservar colunas mesmo quando a fonte usa placeholder');
 assert.match(stockSource, /const wantsPeerComparisonRecovery = !targetedRecovery \|\| recoveryTarget\.sections\.has\('peerComparison'\)/);
 assert.match(stockSource, /referenceRefetched:\s*!initialReference/);
-const recoverableBlock = stockSource.slice(stockSource.indexOf('const STOCK_RECOVERABLE_SECTIONS'), stockSource.indexOf('function parseStockSectionList'));
-assert.match(recoverableBlock, /'peerComparison'/, 'peerComparison precisa aceitar recovery direcionado');
+assert.match(modalSectionsSource, /STOCK_MODAL_RECOVERABLE_SECTIONS[\s\S]*'peerComparison'/, 'peerComparison precisa aceitar recovery direcionado no catálogo canônico compartilhado');
+assert.match(stockSource, /const STOCK_RECOVERABLE_SECTIONS = STOCK_MODAL_RECOVERABLE_SECTIONS/, 'contrato stock deve consumir o catálogo compartilhado');
 const criticalBlock = runtimeSource.slice(runtimeSource.indexOf('const STOCK_CRITICAL_SECTIONS'), runtimeSource.indexOf('const FII_CRITICAL_SECTIONS'));
 assert.doesNotMatch(criticalBlock, /'peerComparison'/, 'comparador não deve bloquear cache global; APK solicita recovery da seção');
 assert.match(runtimeSource, /status === 'EMPTY'\) return 'EMPTY_UNCONFIRMED'/);

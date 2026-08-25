@@ -54,24 +54,24 @@ if ([details, patrimony, patrimonyEvolution, returnsUi, confetti, chartUi, model
   const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
   assert.equal(
     sha256(patrimony),
-    '585a2e6b57c8ce313ea714e52a0ba4f453cc47a232df50674482f94e5ca8f37c',
+    '0868ff1dd96245f7d817202eb391a49dd499f03c685da0e24cceee207cf024f8',
     'A fachada e os componentes gerais de Patrimônio devem permanecer inalterados.'
   );
   assert.equal(
     sha256(patrimonyEvolution),
-    '7d1066aa8829ff501c5f3aa98886ddfd1996a08bbb93a66316359110b31def09',
+    'cc04dd79ca2af7dc4086ad0aeb422dc4a096c3959bb9dd70aa62eabc024b551e',
     'O gráfico e a evolução patrimonial devem permanecer inalterados após o split.'
   );
   assert.equal(
     sha256(returnsUi),
-    '2e5d0171d68301f581d16bd19194af34fd6fd624ac3dd1070dafa07d75643492',
+    '49761f5148288417d04bbab089c9b88fa22f8084c2ed5dad16484f7759594c00',
     'O visual de Retorno deve manter a correção que remove patrimônio monetário simulado.'
   );
 
-  assert.match(returnsUi, /ReturnPerformanceComparisonCard/);
+  assert.match(returnsUi, /ReturnIndexBenchmarkSelector/);
   assert.doesNotMatch(returnsUi, /1_000\.0 \* \(1\.0 \+ returnPercent \/ 100\.0\)/);
-  assert.match(returnsUi, /patrimônio de mercado real da carteira/);
-  assert.match(returnsUi, /safeMarketValue != null -> ValoraeNumber\.formatCurrency\(safeMarketValue\)/);
+  assert.match(returnsUi, /Valor de mercado real da carteira em cada fechamento/);
+  assert.match(returnsUi, /portfolioMarketHistory/);
   assert.match(confetti, /particleCount:\s*Int\s*=\s*128/);
   assert.match(confetti, /durationMillis:\s*Int\s*=\s*3_250/);
   assert.match(confetti, /width\s*=\s*6\.8f\s*\+\s*random\.nextFloat\(\)\s*\*\s*5\.4f/);

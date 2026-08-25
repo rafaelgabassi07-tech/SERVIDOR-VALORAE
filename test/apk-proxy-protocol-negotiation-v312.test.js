@@ -22,7 +22,7 @@ assert.equal(packageJson.valorae.monitorVersion, 'vertical-flow-v407');
 
 assert.equal(VALORAE_MOBILE_PROTOCOL_VERSION, '2026.07.10.10');
 assert.equal(VALORAE_ASSET_MODAL_DELIVERY_SCHEMA_VERSION, '4');
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v19-modal-source-repair');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v20-contract-batching');
 assert.ok(VALORAE_REQUEST_HEADERS.includes('X-Valorae-Mobile-Protocol'));
 assert.ok(VALORAE_EXPOSE_HEADERS.includes('X-Valorae-Mobile-Protocol'));
 assert.equal(VALORAE_MOBILE_CACHE_POLICY_SECONDS.assetModalFast, 35);

@@ -18,7 +18,7 @@ function fakeResponse() {
 
 for (const endpointContract of [
   'valorae-portfolio-returns-v2-index-provider-parity',
-  '26.asset-modal.stock.v58-modal-source-repair',
+  '26.asset-modal.stock.v59-contract-batching',
   '26.asset-modal.fii.v25-modal-source-repair'
 ]) {
   const req = { method: 'POST', url: '/api/v1/test', headers: {} };

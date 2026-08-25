@@ -171,7 +171,8 @@ if (diagnosticsKt && httpKt && deliveryKt && parserKt && qualityKt && loaderKt &
   assert.ok(qualityKt.includes('delivery.stableForCache'));
   assert.ok(loaderKt.includes('internal suspend fun loadSingleAssetModalOnDemand'));
   assert.ok(loaderKt.includes('stage = SingleAssetModalLoadStage.Full'));
-  assert.ok(!loaderKt.includes('async(') && !loaderKt.includes('delay(') && !loaderKt.includes('select<Pair<'), 'modal do APK não deve abrir fan-out ou retry temporizado');
+  assert.ok(!loaderKt.includes('async(') && !loaderKt.includes('select<Pair<'), 'modal do APK não deve abrir fan-out paralelo');
+  assert.ok(loaderKt.includes('delay(current.recoveryRetryDelayMs())') && (loaderKt.match(/delay\(/g) || []).length === 1, 'retry temporizado deve existir somente como hint contratual entre batches com progresso');
   assert.ok(runtimeKt.includes('SingleAssetModalFastCacheTtlMs = ValoraeCachePolicy.AssetModalFastTtlMs'));
   assert.ok(runtimeKt.includes('SingleAssetModalFullCacheTtlMs = ValoraeCachePolicy.AssetModalFullTtlMs'));
 }

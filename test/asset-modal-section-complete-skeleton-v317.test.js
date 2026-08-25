@@ -34,7 +34,9 @@ const partialSections = new Map(_test.stockModalSections(baseStock));
 assert.equal(partialSections.get('dividends'), false, 'meses default do radar não podem fingir que dividendos completos chegaram');
 assert.equal(partialSections.get('company'), false, 'um perfil isolado não conclui os três cards da empresa');
 assert.equal(partialSections.get('revenueBreakdown'), false, 'região sem negócios mantém o grupo deferred');
-assert.equal(partialSections.get('financialCharts'), false, 'um gráfico isolado não conclui os três gráficos financeiros');
+assert.equal(partialSections.get('revenueProfitChart'), true, 'receita/lucro deve ser avaliado individualmente');
+assert.equal(partialSections.get('profitQuoteChart'), false, 'lucro/cotação vazio permanece pendente');
+assert.equal(partialSections.get('equityEvolutionChart'), false, 'evolução patrimonial vazia permanece pendente');
 assert.equal(partialSections.get('financialStatements'), false, 'DRE sem balanço mantém demonstrações deferred');
 
 
@@ -59,7 +61,7 @@ completeStock.announcements = { items: [{ title: 'Comunicado' }] };
 completeStock.returns = { rows: [{ label: '12M' }] };
 
 const completeSections = new Map(_test.stockModalSections(completeStock));
-for (const id of ['dividends', 'company', 'revenueBreakdown', 'financialCharts', 'financialStatements']) {
+for (const id of ['dividends', 'company', 'revenueBreakdown', 'revenueProfitChart', 'profitQuoteChart', 'equityEvolutionChart', 'financialStatements']) {
   assert.equal(completeSections.get(id), true, `${id} deve ficar disponível quando todas as subseções renderizadas chegaram`);
 }
 

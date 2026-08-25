@@ -11,7 +11,7 @@ assert.equal(pkg.valorae.publicVersion, '21.12.394');
 assert.equal(pkg.valorae.releasePatch, '21.12.394-runtime-safety-v362');
 assert.equal(metadata.apkVersion, pkg.valorae.apkVersion);
 assert.equal(fii.FII_MODAL_VERSION, '26.asset-modal.fii.v25-modal-source-repair');
-assert.equal(stock.STOCK_MODAL_VERSION, '26.asset-modal.stock.v58-modal-source-repair');
+assert.equal(stock.STOCK_MODAL_VERSION, '26.asset-modal.stock.v59-contract-batching');
 
 const fiiChecklistHtml = `
   <section id="checklist">

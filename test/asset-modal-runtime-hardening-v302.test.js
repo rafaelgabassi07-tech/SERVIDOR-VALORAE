@@ -16,7 +16,7 @@ if (apkHttp && apkUi) {
   assert.ok(
     apkUi.includes('loadSingleAssetModalOnDemand') &&
       apkUi.includes('previousReady.copy(isRefreshingDetails = true)') &&
-      apkUi.includes('previousState = previousReady'),
+      apkUi.includes('initialReady = previousReady'),
     'retry manual deve preservar dados visíveis enquanto recupera o contrato full'
   );
   assert.ok(

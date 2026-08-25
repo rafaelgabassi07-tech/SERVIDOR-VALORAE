@@ -33,7 +33,7 @@ if (modalUi && newsUi && feedService) {
   assert.ok(modalUi.includes('hasMetricsContent = contract.hasSectionContent(FiiAssetModalSection.Metrics)'), 'FII deve preservar estado de entrega das métricas no cabeçalho');
 
   assertOrder(stock, [
-  'label = "stock_quote_chart"', 'label = "stock_returns"',
+  'AssetYahooQuoteChart(', 'label = "stock_returns"',
   'label = "stock_fundamentals"', 'label = "stock_historical_indicators"', 'label = "stock_checklist"',
   'label = "stock_dividend_history"', 'label = "stock_dividend_radar"', 'label = "stock_payout"',
   'label = "stock_peers"', 'label = "stock_indices"', 'label = "stock_company_profile"',
@@ -44,7 +44,7 @@ if (modalUi && newsUi && feedService) {
 ], 'Ação');
 
 assertOrder(fii, [
-  '"fii_chart"', '"fii_returns"', '"fii_information"', '"fii_historical_indicators"',
+  'AssetYahooQuoteChart(', '"fii_returns"', '"fii_information"', '"fii_historical_indicators"',
   '"fii_indices"', '"fii_peers"', '"fii_checklist"', '"fii_distributions"', '"fii_dividend_charts"',
   '"fii_about"', '"fii_properties"', '"fii_vacancy"', '"fii_announcements"', '"fii_patrimonial"',
   '"fii_type_segment_average"', 'AssetModalNewsSection(ticker = cleanTicker, assetName = newsAssetName'

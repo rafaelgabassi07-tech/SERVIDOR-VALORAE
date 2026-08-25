@@ -19,15 +19,21 @@ function completeStockPayload(ticker = 'PETR4', price = 31.5) {
     historicalIndicators: { rows: [{ label: 'P/L', values: { Atual: '8,0', 2025: '9,0' } }], tablesByPeriod: {} },
     checklist: { items: [{ id: 'dy', passed: true, status: 'PASSED' }] },
     dividendHistory: { events: [{ date: '2026-06-01', value: 1 }], yieldSeriesByFrequency: {}, dividendSeriesByFrequency: {} },
+    dividendRadar: { status: 'OK', months: [{ activeDateCom: true, dateComCount: 1 }] },
+    payoutChart: { points: [{ period: '2025', value: 45 }] },
     peerComparison: { rows: [{ ticker: 'PRIO3' }] },
     indexComparison: { items: [{ id: 'ibov' }], series: [{ code: ticker, points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 1 }] }, { code: 'IBOV', points: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 2 }] }], seriesByPeriod: {} },
     companyProfile: { facts: [{ id: 'segment', value: 'Petróleo' }], sections: [] },
+    companyData: { facts: [{ id: 'setor', value: 'Energia' }], companyPapers: [], fractionalPapers: [], sections: [] },
+    companyInformation: { facts: [{ id: 'atividade', value: 'Exploração' }], groups: [] },
     revenueByRegion: { items: [{ label: 'Brasil', value: 100 }] },
+    revenueByBusiness: { items: [{ label: 'Exploração', value: 100 }] },
     shareholdingPosition: { rows: [{ shareholder: 'Controlador' }] },
     revenueProfitChart: { points: [{ period: '2025', primaryValue: 100 }] },
     profitQuoteChart: { points: [{ period: '2025', primaryValue: 100, secondaryValue: price }] },
     equityEvolutionChart: { points: [{ period: '2025', primaryValue: 100 }] },
     resultsStatement: { rows: [{ label: 'Receita', value: '100' }], tablesByPeriod: {} },
+    balanceSheetStatement: { rows: [{ label: 'Patrimônio', value: '200' }], tablesByPeriod: {} },
     returns: { rows: [{ label: '12M', value: '10%' }] },
     announcements: { items: [{ title: 'Comunicado' }] }
   };
@@ -61,7 +67,7 @@ function completeFiiPayload(ticker = 'HGLG11', price = 160.2) {
   };
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v19-modal-source-repair');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v20-contract-batching');
 
 const family = 'stock';
 const ticker = 'PETR4';
@@ -207,8 +213,8 @@ if (apkUniversal && apkLoader && apkUi) {
   assert.ok(apkUniversal.includes('put("knownDeepSectionCount"'));
   assert.ok(apkUniversal.includes('put("knownAvailableSections"'));
   assert.ok(apkUniversal.includes('else -> "22000"'));
-  assert.ok(apkUniversal.includes('fundamentalTimeoutMs') && apkUniversal.includes('if (fast) "3200" else "18000"'));
-  assert.ok(apkUniversal.includes('quoteTimeoutMs') && apkUniversal.includes('if (fast) "2600" else "4200"'));
+  assert.ok(apkUniversal.includes('fundamentalTimeoutMs') && apkUniversal.includes('if (fast) "2800" else "18000"'));
+  assert.ok(apkUniversal.includes('quoteTimeoutMs') && apkUniversal.includes('if (fast) "2200" else "4200"'));
   assert.ok(apkUniversal.includes('put("requiredSections"'));
   assert.ok(apkUniversal.includes('put("knownMissingSections"'));
   assert.ok(apkUniversal.includes('put("sectionRecovery", "true")'));
@@ -219,7 +225,8 @@ if (apkUniversal && apkLoader && apkUi) {
   assert.ok(apkUniversal.includes('contract.hasUsefulFiiModalData()'));
   assert.ok(apkLoader.includes('previousReady?.recoveryContextOrNull()'));
   assert.ok(apkLoader.includes('internal suspend fun loadSingleAssetModalOnDemand'));
-  assert.ok(!apkLoader.includes('delay(') && !apkLoader.includes('async('));
+  assert.ok(!apkLoader.includes('async('));
+  assert.ok(apkLoader.includes('delay(current.recoveryRetryDelayMs())') && (apkLoader.match(/delay\(/g) || []).length === 1);
   assert.ok(apkUi.includes('AssetModalRetryDetailsPill'));
   assert.equal(apkUi.includes('StockShareholdingPositionSection(position = contract.shareholdingPosition)'), false);
 }

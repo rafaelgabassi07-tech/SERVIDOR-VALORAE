@@ -113,7 +113,7 @@ if (colorKt && themeKt && settingsKt && agendaKt && dividendsKt && paymentsKt &&
   assert.ok(dividendsKt.includes('valueColor = MaterialTheme.colorScheme.primary') && !dividendsKt.includes('valueColor = ValoraeYellow'), 'métrica A receber deve seguir a cor primária do tema sem amarelo fixo');
   assert.ok(manifest.includes('android.permission.VIBRATE'), 'APK deve declarar permissão de vibração');
   assert.ok(hapticKt.includes('VibratorManager') && hapticKt.includes('VibrationEffect.createOneShot'), 'retorno tátil deve possuir execução física explícita');
-  assert.ok(loaderKt.includes('internal suspend fun loadSingleAssetModalOnDemand') && loaderKt.includes('stage = SingleAssetModalLoadStage.Full') && !loaderKt.includes('delay(') && !loaderKt.includes('async('), 'APK deve consultar o modal uma vez e recuperar somente após ação manual');
+  assert.ok(loaderKt.includes('internal suspend fun loadSingleAssetModalOnDemand') && loaderKt.includes('stage = SingleAssetModalLoadStage.Full') && loaderKt.includes('recoverSingleAssetModalInBatches') && loaderKt.includes('delay(current.recoveryRetryDelayMs())') && !loaderKt.includes('async('), 'APK deve manter uma chamada por batch e temporização somente pelo hint contratual');
   assert.ok(qualityKt.includes('StockModalStableCachePercent = 62') && qualityKt.includes('FiiModalStableCachePercent = 58'), 'full básico não pode entrar no cache estável do APK');
 }
 

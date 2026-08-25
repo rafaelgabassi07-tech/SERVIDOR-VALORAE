@@ -32,7 +32,7 @@ function richStockPayload(ticker = 'PETR4', price = 31.5) {
   };
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v19-modal-source-repair');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v20-contract-batching');
 
 const basicFull = {
   ok: true,
@@ -117,7 +117,8 @@ const stringsXml = readSiblingApkFile('app/src/main/res/values/strings.xml');
 if (loaderKt && qualityKt && universalKt && analysisKt && dividendsKt) {
   assert.ok(loaderKt.includes('internal suspend fun loadSingleAssetModalOnDemand'));
   assert.ok(loaderKt.includes('previousReady?.recoveryContextOrNull()'));
-  assert.ok(!loaderKt.includes('longArrayOf(') && !loaderKt.includes('delay(') && !loaderKt.includes('async('));
+  assert.ok(!loaderKt.includes('longArrayOf(') && !loaderKt.includes('async('));
+  assert.ok(loaderKt.includes('delay(current.recoveryRetryDelayMs())') && (loaderKt.match(/delay\(/g) || []).length === 1, 'delay deve existir apenas entre batches que avançaram, conforme hint do contrato');
   assert.ok(qualityKt.includes('completeness < StockModalStableCachePercent'));
   assert.ok(qualityKt.includes('StockModalStableCachePercent = 62'));
   assert.ok(!qualityKt.includes('(delivery.isFinal && !delivery.retryable)'), 'proxy antigo não pode promover full pobre por isFinal isolado');

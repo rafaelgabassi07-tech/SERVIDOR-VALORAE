@@ -43,7 +43,7 @@ function stablePartialStockPayload(ticker = 'PETR4', price = 30.1) {
   return payload;
 }
 
-assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v19-modal-source-repair');
+assert.equal(ASSET_MODAL_RUNTIME_VERSION, '27.asset-modal.runtime.v20-contract-batching');
 
 const family = 'stock';
 const ticker = 'PETR4';
