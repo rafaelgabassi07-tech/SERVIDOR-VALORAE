@@ -46,6 +46,6 @@ test('reentrada parcial não faz benchmark acumular durante meses sem capital', 
   assert.ok(Math.abs(values.get('2026-02') - 1) < 0.0001);
   assert.ok(Math.abs(values.get('2026-03') - 2.01) < 0.0001);
   assert.equal(values.has('2026-05'), false);
-  // O novo ciclo usa maio apenas como base e incorpora somente junho ao fator já acumulado.
-  assert.ok(Math.abs(values.get('2026-06') - 3.0301) < 0.0001);
+  // O novo ciclo usa maio apenas como base e reinicia a acumulação; junho representa só o retorno do novo ciclo.
+  assert.ok(Math.abs(values.get('2026-06') - 1) < 0.0001);
 });

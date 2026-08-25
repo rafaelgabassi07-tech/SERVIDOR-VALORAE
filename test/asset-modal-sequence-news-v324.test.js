@@ -46,9 +46,10 @@ if (modalUi && newsUi && feedService) {
 assertOrder(fii, [
   'AssetYahooQuoteChart(', '"fii_returns"', '"fii_information"', '"fii_historical_indicators"',
   '"fii_indices"', '"fii_peers"', '"fii_checklist"', '"fii_distributions"', '"fii_dividend_charts"',
-  '"fii_about"', '"fii_properties"', '"fii_vacancy"', '"fii_announcements"', '"fii_patrimonial"',
+  '"fii_about"', '"fii_properties"', '"fii_announcements"', '"fii_patrimonial"',
   '"fii_type_segment_average"', 'AssetModalNewsSection(ticker = cleanTicker, assetName = newsAssetName'
 ], 'FII');
+  assert.ok(!fii.includes('fii_vacancy') && !fii.includes('VacancyHistory'), 'FII não deve reintroduzir histórico de vacância no modal');
 
   assert.ok(newsUi.includes('LaunchedEffect(cleanTicker, assetName, refreshNonce)'), 'notícias do modal devem carregar automaticamente');
   assert.ok(!newsUi.includes('loadRequested'), 'notícias não podem depender de solicitação manual');

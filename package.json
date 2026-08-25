@@ -1,7 +1,7 @@
 {
   "name": "valorae-proxy",
   "version": "21.12.0",
-  "description": "Proxy VALORAE 21.12.409 pareado ao APK v728; contratos cruzados e identidade de release verificável.",
+  "description": "Proxy VALORAE 21.12.409 pareado ao APK v729; contratos cruzados e identidade de release verificável.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -33,42 +33,42 @@
   },
   "valorae": {
     "coreVersion": "21.12.0",
-    "releasePatch": "21.12.409-asset-modal-contract-alignment-v428",
+    "releasePatch": "21.12.409-asset-modal-return-dividend-v429",
     "contract": "valorae-mobile-portfolio-sync",
     "freeOnly": true,
     "publicVersion": "21.12.409",
-    "checkpoint": "asset-modal-contract-alignment-v428",
-    "releaseLabel": "asset-modal-contract-alignment-v428",
-    "apkVersion": "2026.08.24.18",
+    "checkpoint": "asset-modal-return-dividend-v429",
+    "releaseLabel": "asset-modal-return-dividend-v429",
+    "apkVersion": "2026.08.24.19",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.24.18",
+    "maxTestedApkVersion": "2026.08.24.19",
     "compatibilityPolicy": "valorae-apk-compatibility-v2-backward-compatible",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "576db81f4e069c03",
-    "apkBuildFingerprint": "933c7a8ac004954f"
+    "apkSourceFingerprint": "99de51c775e87a99",
+    "apkBuildFingerprint": "73d42483a055db42"
   },
-  "releasePatch": "21.12.409-asset-modal-contract-alignment-v428",
+  "releasePatch": "21.12.409-asset-modal-return-dividend-v429",
   "config": {
-    "releasePatch": "21.12.409-asset-modal-contract-alignment-v428",
+    "releasePatch": "21.12.409-asset-modal-return-dividend-v429",
     "publicVersion": "21.12.409",
-    "checkpoint": "asset-modal-contract-alignment-v428",
-    "releaseLabel": "asset-modal-contract-alignment-v428",
-    "apkSourceFingerprint": "576db81f4e069c03",
-    "apkBuildFingerprint": "933c7a8ac004954f"
+    "checkpoint": "asset-modal-return-dividend-v429",
+    "releaseLabel": "asset-modal-return-dividend-v429",
+    "apkSourceFingerprint": "99de51c775e87a99",
+    "apkBuildFingerprint": "73d42483a055db42"
   },
   "releaseMetadata": {
-    "releasePatch": "21.12.409-asset-modal-contract-alignment-v428",
+    "releasePatch": "21.12.409-asset-modal-return-dividend-v429",
     "publicVersion": "21.12.409",
-    "checkpoint": "asset-modal-contract-alignment-v428",
-    "releaseLabel": "asset-modal-contract-alignment-v428",
-    "apkVersion": "2026.08.24.18",
+    "checkpoint": "asset-modal-return-dividend-v429",
+    "releaseLabel": "asset-modal-return-dividend-v429",
+    "apkVersion": "2026.08.24.19",
     "monitorVersion": "vertical-flow-v407",
     "minSupportedApkVersion": "2026.07.30.01",
-    "maxTestedApkVersion": "2026.08.24.18",
+    "maxTestedApkVersion": "2026.08.24.19",
     "ecosystemContract": "valorae-ecosystem-2026.08.05.04-p404",
-    "apkSourceFingerprint": "576db81f4e069c03",
-    "apkBuildFingerprint": "933c7a8ac004954f"
+    "apkSourceFingerprint": "99de51c775e87a99",
+    "apkBuildFingerprint": "73d42483a055db42"
   },
   "optionalDependencies": {
     "playwright-core": "^1.61.1"
